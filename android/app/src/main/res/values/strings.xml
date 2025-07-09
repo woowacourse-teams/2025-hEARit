@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">hEARit</string>
+    <string name="all_logo">hEARit</string>
+
+    <!-- CreateHearitActivity-->
+    <string name="create_hearit_main_title"><font color="#B677F3">생성하고자 하는 텍스트</font><font color="#EFF1F2">를 입력해주세요.</font></string>
+    <string name="create_hearit_sub_title">AI가 자동으로 텍스트를 요약해서 히어릿을 생성해 드립니다.</string>
+    <string name="create_hearit_hearit_source">HTTP와 HTTPS는 보안에서 차이가 있습니다.</string>
+    <string name="create_hearit_source_count">0 자</string>
+    <string name="create_hearit_button">hEARit 생성하기</string>
 </resources>

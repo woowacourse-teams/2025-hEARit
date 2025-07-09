@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hearit_black1"
+    tools:context=".CreateHearitActivity">
+
+    <TextView
+        android:id="@+id/tv_create_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/promptextrabold"
+        android:text="@string/all_logo"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="28sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_create_main_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/pretendardbold"
+        android:text="@string/create_hearit_main_title"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_create_logo" />
+
+    <TextView
+        android:id="@+id/tv_create_sub_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:fontFamily="@font/pretendardbold"
+        android:text="@string/create_hearit_sub_title"
+        android:textColor="@color/hearit_gray2"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_create_main_title" />
+
+    <EditText
+        android:id="@+id/et_create_hearit_source"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_gray1_radius_8dp"
+        android:fontFamily="@font/pretendardmedium"
+        android:gravity="top"
+        android:hint="@string/create_hearit_hearit_source"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:minHeight="320dp"
+        android:padding="12dp"
+        android:textColor="@color/hearit_gray4"
+        android:textColorHint="@color/hearit_gray2"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/tv_create_sub_title" />
+
+    <TextView
+        android:id="@+id/tv_create_hearit_source_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/pretendardmedium"
+        android:text="@string/create_hearit_source_count"
+        android:textColor="@color/hearit_gray2"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@id/et_create_hearit_source"
+        app:layout_constraintTop_toBottomOf="@id/et_create_hearit_source" />
+
+    <TextView
+        android:id="@+id/btn_create_hearit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_purple3_radius_8dp"
+        android:fontFamily="@font/pretendardbold"
+        android:paddingVertical="12dp"
+        android:text="@string/create_hearit_button"
+        android:textAlignment="center"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/tv_create_hearit_source_count" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
