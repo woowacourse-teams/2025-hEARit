@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hearit_black1"
+    tools:context=".CompleteHearitActivity">
+
+    <ImageButton
+        android:id="@+id/ib_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/hearit_black1"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_complete_hearit_player"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_gray1_radius_8dp"
+        app:layout_constraintTop_toBottomOf="@id/ib_back">
+
+        <TextView
+            android:id="@+id/tv_complete_hearit_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="16dp"
+            android:elevation="2dp"
+            android:fontFamily="@font/pretendardbold"
+            android:text="HTTP와 HTTPS의 차이"
+            android:textColor="@color/hearit_gray4"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_complete_hearit_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:elevation="2dp"
+            android:fontFamily="@font/pretendardmedium"
+            android:text="2025.07.01"
+            android:textColor="@color/hearit_gray2"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@id/tv_complete_hearit_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_complete_hearit_title" />
+
+        <androidx.media3.ui.PlayerControlView
+            android:id="@+id/player_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:controller_layout_id="@layout/layout_controller"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:show_timeout="0"
+            app:use_controller="true" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tv_complete_hearit_script_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/pretendardbold"
+        android:text="@string/complete_hearit_script"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cl_complete_hearit_player" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_complete_script"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_gray1_radius_8dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@id/tv_complete_hearit_regenerate"
+        app:layout_constraintTop_toBottomOf="@id/tv_complete_hearit_script_title"
+        tools:itemCount="12"
+        tools:listitem="@layout/item_script" />
+
+    <TextView
+        android:id="@+id/tv_complete_hearit_regenerate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="24dp"
+        android:fontFamily="@font/pretendardmedium"
+        android:gravity="center"
+        android:text="@string/complete_hearit_regenerate"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@id/btn_complete_hearit_save" />
+
+    <TextView
+        android:id="@+id/btn_complete_hearit_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/bg_purple3_radius_8dp"
+        android:fontFamily="@font/pretendardbold"
+        android:paddingVertical="12dp"
+        android:text="@string/complete_hearit_save"
+        android:textAlignment="center"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
