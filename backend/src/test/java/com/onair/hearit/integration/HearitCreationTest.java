@@ -27,8 +27,6 @@ public class HearitCreationTest {
     @Test
     void createHearit() {
         HearitCreationRequest request = new HearitCreationRequest("""
-                     자바 30주년 - 기술을 바꾼 코드의 천재, 제임스 고슬링 인터뷰 (thenewstack.io)
-                28P by GN⁺ 2달전 | ★ favorite | 댓글 13개
                 제임스 고슬링은 자바의 창시자이자, 30년간 현대 컴퓨팅에 영향을 끼친 실용적 천재로 평가됨
                 가난한 환경에서 쓰레기 더미 속 부품으로 컴퓨터를 조립하며 프로그래밍을 배웠고, 이 자기주도적 학습은 이후 언어 설계 철학에도 반영
                 Sun Microsystems에서 장난과 혁신이 공존했던 시절은 고슬링 특유의 창의성과 기술 문화 조성의 기반이 됨
@@ -56,16 +54,13 @@ public class HearitCreationTest {
                 이러한 초기 경험들은 이후 Sun Microsystems에서의 활동 방식에 영향을 준 현실 중심의 조직문화 이해 기반이 됨
                 """);
 
-        HearitCreationResponse response = RestAssured.given()
+        HearitCreationResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
                 .post("/hearit")
-                .then()
+                .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract().as(HearitCreationResponse.class);
-
-        System.out.println(response.title());
-        System.out.println(response.script());
     }
 }
