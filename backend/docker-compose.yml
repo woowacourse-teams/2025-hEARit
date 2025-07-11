@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  hearit-prod-db:
+    image: mysql:8.0
+    container_name: hearit-prod-mysql
+    ports:
+      - "${MYSQL_PORT}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+    volumes:
+      - mysql-prod-data:/var/lib/mysql
+    restart: always
+    platform: linux/x86_64
+
+  hearit-test-db:
+    image: mysql:8.0
+    container_name: hearit-test-mysql
+    ports:
+      - "${TEST_MYSQL_PORT}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+    volumes:
+      - mysql-test-data:/var/lib/mysql
+    restart: unless-stopped
+    platform: linux/x86_64
+
+volumes:
+  mysql-prod-data:
+  mysql-test-data:
