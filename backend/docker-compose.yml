@@ -15,7 +15,7 @@ services:
     volumes:
       - mysql-prod-data:/var/lib/mysql
     restart: always
-    platform: linux/x86_64
+    platform: linux/amd64
 
   hearit-test-db:
     image: mysql:8.0
@@ -31,7 +31,7 @@ services:
     volumes:
       - mysql-test-data:/var/lib/mysql
     restart: unless-stopped
-    platform: linux/x86_64
+    platform: linux/amd64
 
 volumes:
   mysql-prod-data:
