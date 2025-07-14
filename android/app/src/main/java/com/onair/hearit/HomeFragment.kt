@@ -6,13 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.onair.hearit.databinding.FragmentHomeBinding
+import java.time.LocalDateTime
 
 class HomeFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = CategoryAdapter()
+    private val recommendAdapter = RecommendHearitAdapter()
+    private val categoryAdapter = CategoryAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,9 +31,41 @@ class HomeFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.rvHomeCategory.adapter = adapter
+        binding.recentHearit =
+            HearitItem(
+                id = 1L,
+                title = "최근 들은 히어릿 제목",
+                summary = "summary",
+                audioUrl = "a",
+                scriptUrl = "a",
+                playTime = 123,
+                categoryId = 12,
+                createdAt = LocalDateTime.now(),
+            )
 
-        val sampleItems =
+        binding.rvHomeRecommendHearit.adapter = recommendAdapter
+        val sampleRecommends =
+            listOf(
+                RecommendHearitItem(
+                    1L,
+                    "추천 제목 1",
+                    getString(R.string.home_example_recommend_description),
+                ),
+                RecommendHearitItem(
+                    2L,
+                    "추천 제목 2",
+                    getString(R.string.home_example_recommend_description),
+                ),
+                RecommendHearitItem(
+                    3L,
+                    "추천 제목 3",
+                    getString(R.string.home_example_recommend_description),
+                ),
+            )
+        recommendAdapter.submitList(sampleRecommends)
+
+        binding.rvHomeCategory.adapter = categoryAdapter
+        val sampleCategories =
             List(8) { i ->
                 val colors = if (i % 2 == 0) "#9533F5" else "#B2B4B6"
                 CategoryItem(
@@ -40,7 +74,7 @@ class HomeFragment : Fragment() {
                     category = "카테고리 $i",
                 )
             }
-        adapter.submitList(sampleItems)
+        categoryAdapter.submitList(sampleCategories)
     }
 
     override fun onDestroyView() {

@@ -1,41 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="256dp"
-    android:layout_height="256dp"
-    android:layout_marginHorizontal="12dp"
-    android:background="@drawable/bg_gray1_radius_8dp"
-    android:paddingVertical="32dp">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:id="@+id/tv_recommend_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:ellipsize="end"
-        android:fontFamily="@font/pretendardbold"
-        android:gravity="center"
-        android:maxLines="1"
-        android:text="Intent란 무엇인가? 제목이 길어지면"
-        android:textColor="@color/hearit_gray4"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <data>
 
-    <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="28dp"
-        android:ellipsize="end"
-        android:fontFamily="@font/pretendardmedium"
-        android:maxLines="6"
-        android:text="Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나...Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나"
-        android:textColor="@color/hearit_gray2"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_recommend_title" />
+        <variable
+            name="item"
+            type="com.onair.hearit.RecommendHearitItem" />
+    </data>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:layout_marginHorizontal="10dp"
+        android:background="@drawable/bg_gray1_radius_8dp"
+        android:paddingVertical="32dp">
+
+        <TextView
+            android:id="@+id/tv_recommend_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/pretendardbold"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="@{item.title}"
+            android:textColor="@color/hearit_gray4"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Intent란 무엇인가? 제목이 길어지면" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="28dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/pretendardmedium"
+            android:maxLines="6"
+            android:text="@{item.desc}"
+            android:textColor="@color/hearit_gray2"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_recommend_title"
+            tools:text="Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나...Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
