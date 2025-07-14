@@ -23,5 +23,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.layoutBottomNavigation.itemIconTintList = null
+
+        if (savedInstanceState == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container_view, HomeFragment())
+                .commit()
+        }
     }
 }
