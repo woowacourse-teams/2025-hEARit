@@ -13,4 +13,8 @@
     <string name="complete_hearit_regenerate"><font color="#EFF1F2">내 히어릿이 마음에 안들어요? </font><font color="#B677F3"> 히어릿 다시 생성하기</font></string>
     <string name="complete_hearit_save">hEARit 저장하기</string>
     <string name="complete_hearit_script">스크립트</string>
+    <string name="menu_home">홈</string>
+    <string name="menu_search">검색</string>
+    <string name="menu_explore">탐색</string>
+    <string name="menu_library">라이브러리</string>
 </resources>
