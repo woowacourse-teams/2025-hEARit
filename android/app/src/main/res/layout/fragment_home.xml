@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hearit_black1">
+
+    <TextView
+        android:id="@+id/tv_home_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/promptextrabold"
+        android:text="@string/app_name"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_home_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/pretendardmedium"
+        android:text="@string/home_logo_description"
+        android:textColor="@color/hearit_gray2"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/tv_home_logo"
+        app:layout_constraintTop_toBottomOf="@id/tv_home_logo" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:contentDescription="@null"
+        android:src="@mipmap/ic_launcher"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage" />
+
+    <ImageView
+        android:id="@+id/iv_home_recent_hearit"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_gradient_radius_8dp"
+        android:contentDescription="@null"
+        app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
+
+    <TextView
+        android:id="@+id/tv_home_recent_hearit_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/pretendardmedium"
+        android:text="@string/home_recent_hearit_text"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/iv_home_recent_hearit"
+        app:layout_constraintTop_toTopOf="@id/iv_home_recent_hearit" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/pretendardbold"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@id/tv_home_recent_hearit_text"
+        app:layout_constraintTop_toBottomOf="@id/tv_home_recent_hearit_text"
+        tools:text="HTTP와 HTTPS의 차이" />
+
+    <ImageView
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_play"
+        app:layout_constraintBottom_toBottomOf="@id/iv_home_recent_hearit"
+        app:layout_constraintEnd_toEndOf="@id/iv_home_recent_hearit"
+        app:layout_constraintTop_toTopOf="@id/iv_home_recent_hearit" />
+
+    <TextView
+        android:id="@+id/tv_home_nickname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/pretendardbold"
+        android:text="@string/home_recommend_hearit_text"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@id/iv_home_recent_hearit"
+        app:layout_constraintTop_toBottomOf="@id/iv_home_recent_hearit" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_home_recommend_hearit"
+        android:layout_width="0dp"
+        android:layout_height="256dp"
+        android:layout_marginTop="28dp"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_home_nickname"
+        tools:itemCount="3"
+        tools:listitem="@layout/item_recommend_hearit" />
+
+    <TextView
+        android:id="@+id/tv_home_category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/pretendardbold"
+        android:text="@string/home_category_text"
+        android:textColor="@color/hearit_gray4"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@id/tv_home_logo"
+        app:layout_constraintTop_toBottomOf="@id/rv_home_recommend_hearit" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_home_category"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_home_category"
+        app:spanCount="2"
+        tools:itemCount="8"
+        tools:listitem="@layout/item_category" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

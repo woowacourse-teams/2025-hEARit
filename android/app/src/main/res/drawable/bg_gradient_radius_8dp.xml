@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="0"
+        android:endColor="@color/hearit_gray1"
+        android:startColor="@color/hearit_purple3" /> <!-- 0도: 좌 → 우 방향 -->
+
+    <corners android:radius="8dp" />
+</shape>

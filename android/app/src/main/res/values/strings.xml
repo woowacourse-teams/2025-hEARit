@@ -2,6 +2,12 @@
     <string name="app_name">hEARit</string>
     <string name="all_logo">hEARit</string>
 
+    <!-- HomeFragment-->
+    <string name="home_logo_description">궁금했던 내용들을, 히어릿을 통해 빠르게 들어보세요!</string>
+    <string name="home_recent_hearit_text">최근에 들은 히어릿</string>
+    <string name="home_recommend_hearit_text">오늘의 히어릿</string>
+    <string name="home_category_text">카테고리</string>
+
     <!-- CreateHearitActivity-->
     <string name="create_hearit_main_title"><font color="#B677F3">생성하고자 하는 텍스트</font><font color="#EFF1F2">를 입력해주세요.</font></string>
     <string name="create_hearit_sub_title">AI가 자동으로 텍스트를 요약해서 히어릿을 생성해 드립니다.</string>
@@ -13,6 +19,8 @@
     <string name="complete_hearit_regenerate"><font color="#EFF1F2">내 히어릿이 마음에 안들어요? </font><font color="#B677F3"> 히어릿 다시 생성하기</font></string>
     <string name="complete_hearit_save">hEARit 저장하기</string>
     <string name="complete_hearit_script">스크립트</string>
+
+    <!-- BottomNavigation menu-->
     <string name="menu_home">홈</string>
     <string name="menu_search">검색</string>
     <string name="menu_explore">탐색</string>
