@@ -20,12 +20,10 @@
         tools:background="@drawable/bg_purple3_radius_8dp">
 
         <TextView
+            style="@style/pretendard_category"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/pretendardbold"
             android:text="@{item.category}"
-            android:textColor="@color/hearit_gray4"
-            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -19,31 +19,28 @@
 
         <TextView
             android:id="@+id/tv_recommend_title"
+            style="@style/pretendard_main_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="24dp"
             android:ellipsize="end"
-            android:fontFamily="@font/pretendardbold"
             android:gravity="center"
-            android:maxLines="1"
+            android:maxLines="2"
             android:text="@{item.title}"
-            android:textColor="@color/hearit_gray4"
-            android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Intent란 무엇인가? 제목이 길어지면" />
+            tools:text="HTTP와 HTTPS의 차이 + 제목이 길어지면 어떻게 될까????" />
 
         <TextView
+            style="@style/pretendard_body"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="28dp"
             android:ellipsize="end"
-            android:fontFamily="@font/pretendardmedium"
             android:maxLines="6"
             android:text="@{item.desc}"
             android:textColor="@color/hearit_gray2"
-            android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

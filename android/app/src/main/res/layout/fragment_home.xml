@@ -17,26 +17,23 @@
 
         <TextView
             android:id="@+id/tv_home_logo"
+            style="@style/pretendard_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="16dp"
-            android:fontFamily="@font/promptextrabold"
             android:text="@string/app_name"
-            android:textColor="@color/hearit_gray4"
-            android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tv_home_description"
+            style="@style/pretendard_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:fontFamily="@font/pretendardmedium"
             android:text="@string/home_logo_description"
             android:textColor="@color/hearit_gray2"
-            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@id/tv_home_logo"
             app:layout_constraintTop_toBottomOf="@id/tv_home_logo" />
 
@@ -63,31 +60,31 @@
 
         <TextView
             android:id="@+id/tv_home_recent_hearit_text"
+            style="@style/pretendard_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:fontFamily="@font/pretendardmedium"
             android:text="@string/home_recent_hearit_text"
             android:textColor="@color/hearit_gray4"
-            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@id/iv_home_recent_hearit"
             app:layout_constraintTop_toTopOf="@id/iv_home_recent_hearit" />
 
         <TextView
             android:id="@+id/tv_home_recent_hearit_title"
-            android:layout_width="wrap_content"
+            style="@style/pretendard_sub_title"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:fontFamily="@font/pretendardbold"
+            android:layout_marginEnd="16dp"
             android:text="@{recentHearit.title}"
-            android:textColor="@color/hearit_gray4"
-            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@id/iv_home_recent_play"
             app:layout_constraintStart_toStartOf="@id/tv_home_recent_hearit_text"
             app:layout_constraintTop_toBottomOf="@id/tv_home_recent_hearit_text"
             tools:text="HTTP와 HTTPS의 차이" />
 
         <ImageView
+            android:id="@+id/iv_home_recent_play"
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:layout_marginEnd="16dp"
@@ -99,13 +96,12 @@
 
         <TextView
             android:id="@+id/tv_home_nickname"
+            style="@style/pretendard_main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
-            android:fontFamily="@font/pretendardbold"
             android:text="@string/home_recommend_hearit_text"
             android:textColor="@color/hearit_gray4"
-            android:textSize="20sp"
             app:layout_constraintStart_toStartOf="@id/iv_home_recent_hearit"
             app:layout_constraintTop_toBottomOf="@id/iv_home_recent_hearit" />
 
@@ -125,13 +121,11 @@
 
         <TextView
             android:id="@+id/tv_home_category"
+            style="@style/pretendard_main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:fontFamily="@font/pretendardbold"
             android:text="@string/home_category_text"
-            android:textColor="@color/hearit_gray4"
-            android:textSize="20sp"
             app:layout_constraintStart_toStartOf="@id/tv_home_logo"
             app:layout_constraintTop_toBottomOf="@id/rv_home_recommend_hearit" />
 
