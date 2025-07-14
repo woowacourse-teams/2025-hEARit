@@ -75,6 +75,14 @@ class HomeFragment : Fragment() {
                 )
             }
         categoryAdapter.submitList(sampleCategories)
+
+        binding.ivHomeAllCategory.setOnClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container_view, CategoryFragment())
+                .addToBackStack(null)
+                .commit()
+        }
     }
 
     override fun onDestroyView() {
