@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/hearit")
+@RequestMapping("/api/v1/hearits")
 public class HearitController {
 
     private final HearitService hearitService;
