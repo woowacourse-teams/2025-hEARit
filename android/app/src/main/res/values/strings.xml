@@ -35,4 +35,7 @@
     <string name="menu_search">검색</string>
     <string name="menu_explore">탐색</string>
     <string name="menu_library">라이브러리</string>
+
+    <!-- PlayerDetailActivity-->
+    <string name="player_detail_script_title">스크립트</string>
 </resources>
