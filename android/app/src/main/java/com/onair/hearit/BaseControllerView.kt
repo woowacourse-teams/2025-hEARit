@@ -114,9 +114,9 @@ class BaseControllerView
 
         private fun updatePlayPauseButton() {
             if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-                playButton.setImageResource(R.drawable.ic_pause)
+                playButton.setImageResource(R.drawable.ic_pause1)
             } else {
-                playButton.setImageResource(R.drawable.ic_play)
+                playButton.setImageResource(R.drawable.ic_play1)
             }
         }
 
