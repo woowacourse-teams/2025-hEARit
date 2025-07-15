@@ -37,11 +37,17 @@ public class Hearit {
     @Column(name = "play_time", nullable = false)
     private Integer playTime;
 
-    @Column(name = "audio_url", nullable = false)
-    private String audioUrl;
+    @Column(name = "original_audio_url", nullable = false)
+    private String originalAudioUrl;
+
+    @Column(name = "short_audio_url", nullable = false)
+    private String shortAudioUrl;
 
     @Column(name = "script_url", nullable = false)
     private String scriptUrl;
+
+    @Column(name = "source")
+    private String source;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
