@@ -14,6 +14,7 @@ import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.search.SearchFragment
+import com.onair.hearit.presentation.setting.SettingFragment
 
 class MainActivity :
     AppCompatActivity(),
@@ -39,6 +40,15 @@ class MainActivity :
                 .beginTransaction()
                 .add(R.id.fragment_container_view, HomeFragment())
                 .commit()
+        }
+
+        binding.layoutDrawer.tvDrawerAccountInfo.setOnClickListener {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container_view, SettingFragment())
+                .addToBackStack(null)
+                .commit()
+            binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
 
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
