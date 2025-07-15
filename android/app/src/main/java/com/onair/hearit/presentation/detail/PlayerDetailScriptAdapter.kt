@@ -1,10 +1,12 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.detail
 
 import android.graphics.Color
 import android.graphics.Typeface
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.R
+import com.onair.hearit.domain.ScriptLine
 
 class PlayerDetailScriptAdapter(
     private val items: List<ScriptLine>,

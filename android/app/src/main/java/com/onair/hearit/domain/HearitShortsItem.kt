@@ -1,13 +1,14 @@
-package com.onair.hearit
+package com.onair.hearit.domain
 
+import android.net.Uri
 import java.time.LocalDateTime
 
-data class HearitItem(
+data class HearitShortsItem(
     val id: Long,
     val title: String,
     val summary: String,
-    val audioUrl: String,
-    val scriptUrl: String,
+    val audioUri: Uri,
+    val script: List<SubtitleLine>,
     val playTime: Int,
     val categoryId: Int,
     val createdAt: LocalDateTime,

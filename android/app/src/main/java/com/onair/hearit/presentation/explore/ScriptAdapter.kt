@@ -1,8 +1,9 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.explore
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.onair.hearit.domain.SubtitleLine
 
 class ScriptAdapter : ListAdapter<SubtitleLine, ScriptViewHolder>((ScriptDiffUtil)) {
     private var highlightedId: Long? = null

@@ -1,9 +1,10 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.explore
 
 import android.view.ViewGroup
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.onair.hearit.domain.HearitShortsItem
 
 class ShortsAdapter(
     private val player: ExoPlayer,

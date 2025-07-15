@@ -1,6 +1,9 @@
-package com.onair.hearit
+package com.onair.hearit.data
 
 import android.net.Uri
+import com.onair.hearit.R
+import com.onair.hearit.domain.HearitShortsItem
+import com.onair.hearit.domain.SubtitleLine
 import java.time.LocalDateTime
 
 object HearitDummyData {

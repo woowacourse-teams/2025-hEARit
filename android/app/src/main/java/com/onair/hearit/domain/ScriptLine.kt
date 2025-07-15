@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.domain
 
 data class ScriptLine(
     val startTimeMs: Long,

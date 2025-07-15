@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.explore
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,6 +12,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.data.HearitDummyData
 import com.onair.hearit.databinding.FragmentExploreBinding
 
 class ExploreFragment : Fragment() {

@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.detail
 
 import android.os.Bundle
 import android.os.Handler
@@ -15,7 +15,9 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
+import com.onair.hearit.domain.ScriptLine
 
 class PlayerDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerDetailBinding
