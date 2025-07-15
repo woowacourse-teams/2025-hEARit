@@ -1,8 +1,10 @@
 package com.onair.hearit.presentation
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -51,6 +53,16 @@ class MainActivity :
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
 
+        binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, PRIVACY_POLICY_URL.toUri())
+            startActivity(intent)
+        }
+
+        binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, TERMS_OF_USE_URL.toUri())
+            startActivity(intent)
+        }
+
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_explore -> {
@@ -92,5 +104,12 @@ class MainActivity :
 
     override fun openDrawer() {
         binding.drawerLayout.openDrawer(GravityCompat.END)
+    }
+
+    companion object {
+        private const val PRIVACY_POLICY_URL =
+            "https://glistening-eclipse-58b.notion.site/231d39b9c3c3809b9f92ec3e812ea24b?source=copy_link"
+        private const val TERMS_OF_USE_URL =
+            "https://glistening-eclipse-58b.notion.site/231d39b9c3c3800eb03cc7e1fc00f6f1?source=copy_link"
     }
 }

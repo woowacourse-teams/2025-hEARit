@@ -6,6 +6,7 @@
     <string name="all_logout">로그아웃</string>
     <string name="all_setting">설정</string>
     <string name="all_privacy_policy">개인정보처리방침</string>
+    <string name="all_terms_of_use">이용 약관</string>
     <string name="all_account_info">설정 및 계정 정보</string>
 
     <!-- HomeFragment-->
