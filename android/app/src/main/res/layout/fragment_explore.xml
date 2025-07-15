@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/hearit_black1">
+
+        <TextView
+            android:id="@+id/tv_explore_logo"
+            style="@style/prompt_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="16dp"
+            android:elevation="2dp"
+            android:text="@string/all_logo"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@null"
+            android:elevation="2dp"
+            android:src="@drawable/ic_explore_down"
+            app:layout_constraintBottom_toBottomOf="@id/tv_explore_logo"
+            app:layout_constraintStart_toEndOf="@id/tv_explore_logo"
+            app:layout_constraintTop_toTopOf="@id/tv_explore_logo" />
+
+        <TextView
+            style="@style/pretendard_body"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_gray1_radius_8dp"
+            android:elevation="2dp"
+            android:gravity="center"
+            android:text="@string/explore_hearit_guide"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_explore_logo" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_explore"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:listitem="@layout/item_explore" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

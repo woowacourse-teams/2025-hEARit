@@ -38,4 +38,7 @@
 
     <!-- PlayerDetailActivity-->
     <string name="player_detail_script_title">스크립트</string>
+
+    <!-- ExploreFragment-->
+    <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 골라 들으세요!</string>
 </resources>
