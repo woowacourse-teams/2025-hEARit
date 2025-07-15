@@ -1,0 +1,38 @@
+name: Backend Build & Dependency Submission
+
+on:
+  push:
+    branches: [ "main", "develop-be" ]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [ "main", "develop-be" ]
+    paths:
+      - 'backend/**'
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend  # backend 디렉토리 기준으로 명령 실행
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: current
+          build-root-directory: backend
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build
+
+
