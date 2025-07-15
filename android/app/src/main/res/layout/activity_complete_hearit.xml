@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/hearit_black1"
-    tools:context=".CompleteHearitActivity">
+    tools:context=".presentation.CompleteHearitActivity">
 
     <ImageButton
         android:id="@+id/ib_back"

@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.onair.hearit.databinding.FragmentCategoryBinding
+import com.onair.hearit.domain.CategoryItem
 
 class CategoryFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")

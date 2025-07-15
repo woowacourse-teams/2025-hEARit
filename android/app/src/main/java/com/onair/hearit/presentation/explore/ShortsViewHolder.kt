@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.explore
 
 import android.os.Handler
 import android.os.Looper
@@ -10,7 +10,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.R
 import com.onair.hearit.databinding.ItemExploreBinding
+import com.onair.hearit.domain.HearitShortsItem
 
 class ShortsViewHolder(
     parent: ViewGroup,

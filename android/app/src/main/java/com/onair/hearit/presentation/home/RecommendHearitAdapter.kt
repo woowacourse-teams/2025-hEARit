@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.home
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemRecommendHearitBinding
+import com.onair.hearit.domain.RecommendHearitItem
 
 class RecommendHearitAdapter : ListAdapter<RecommendHearitItem, RecommendHearitAdapter.RecommendViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(

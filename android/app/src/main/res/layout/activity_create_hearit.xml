@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/hearit_black1"
-    tools:context=".CreateHearitActivity">
+    tools:context=".presentation.CreateHearitActivity">
 
     <TextView
         android:id="@+id/tv_create_logo"

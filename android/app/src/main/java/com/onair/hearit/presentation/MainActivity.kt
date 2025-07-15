@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.presentation
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -8,7 +8,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
+import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
+import com.onair.hearit.presentation.home.HomeFragment
 
 class MainActivity :
     AppCompatActivity(),

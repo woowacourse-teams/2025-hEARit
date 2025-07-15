@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.home
 
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
@@ -8,7 +8,9 @@ import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.R
 import com.onair.hearit.databinding.ItemCategoryBinding
+import com.onair.hearit.domain.CategoryItem
 
 class CategoryAdapter : ListAdapter<CategoryItem, CategoryAdapter.CategoryViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(

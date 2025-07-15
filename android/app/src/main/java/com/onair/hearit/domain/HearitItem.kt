@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.domain
 
 import java.time.LocalDateTime
 

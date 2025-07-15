@@ -41,7 +41,7 @@
             app:layout_constraintTop_toBottomOf="@id/tv_hearit_player_date"
             app:use_controller="false" />
 
-        <com.onair.hearit.BaseControllerView
+        <com.onair.hearit.presentation.detail.BaseControllerView
             android:id="@+id/base_controller"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

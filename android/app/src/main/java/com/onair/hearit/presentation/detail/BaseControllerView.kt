@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.detail
 
 import android.content.Context
 import android.util.AttributeSet
@@ -13,6 +13,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.TimeBar
+import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutControllerBinding
 import java.util.Formatter
 import java.util.Locale

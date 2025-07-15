@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.presentation.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,7 +7,13 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentHomeBinding
+import com.onair.hearit.domain.CategoryItem
+import com.onair.hearit.domain.HearitItem
+import com.onair.hearit.domain.RecommendHearitItem
+import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.home.RecommendHearitAdapter
 import java.time.LocalDateTime
 
 class HomeFragment : Fragment() {
