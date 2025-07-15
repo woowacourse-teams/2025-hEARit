@@ -10,7 +10,10 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
+import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
+import com.onair.hearit.presentation.library.LibraryFragment
+import com.onair.hearit.presentation.search.SearchFragment
 
 class MainActivity :
     AppCompatActivity(),
@@ -34,8 +37,46 @@ class MainActivity :
         if (savedInstanceState == null) {
             supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container_view, HomeFragment())
+                .add(R.id.fragment_container_view, HomeFragment())
                 .commit()
+        }
+
+        binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_explore -> {
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.fragment_container_view, ExploreFragment())
+                        .commit()
+                    true
+                }
+
+                R.id.nav_home -> {
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.fragment_container_view, HomeFragment())
+                        .commit()
+                    true
+                }
+
+                R.id.nav_search -> {
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.fragment_container_view, SearchFragment())
+                        .commit()
+                    true
+                }
+
+                R.id.nav_library -> {
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.fragment_container_view, LibraryFragment())
+                        .commit()
+                    true
+                }
+
+                else -> false
+            }
         }
     }
 

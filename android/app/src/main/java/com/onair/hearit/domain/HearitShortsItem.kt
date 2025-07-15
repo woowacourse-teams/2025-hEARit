@@ -1,7 +1,6 @@
 package com.onair.hearit.domain
 
 import android.net.Uri
-import com.onair.hearit.domain.SubtitleLine
 import java.time.LocalDateTime
 
 data class HearitShortsItem(

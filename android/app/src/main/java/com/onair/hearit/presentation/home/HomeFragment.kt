@@ -13,7 +13,6 @@ import com.onair.hearit.domain.CategoryItem
 import com.onair.hearit.domain.HearitItem
 import com.onair.hearit.domain.RecommendHearitItem
 import com.onair.hearit.presentation.DrawerClickListener
-import com.onair.hearit.presentation.home.RecommendHearitAdapter
 import java.time.LocalDateTime
 
 class HomeFragment : Fragment() {
