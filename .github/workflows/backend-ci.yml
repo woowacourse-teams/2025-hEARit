@@ -3,8 +3,9 @@ name: Backend Build & Dependency Submission
 on:
   push:
     branches: [ "main", "develop-be","chore/#19-ci-cd" ] # 테스트용 브랜치
-    paths:
-      - 'backend/**'
+  # 테스트를 위한 path 제거
+  #    paths:
+  #      - 'backend/**'
   pull_request:
     branches: [ "main", "develop-be","chore/#19-ci-cd" ]
     paths:
