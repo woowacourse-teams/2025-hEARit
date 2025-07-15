@@ -57,4 +57,7 @@ dependencies {
 
     // lottie
     implementation(libs.lottie)
+
+    // flexbox
+    implementation(libs.flexbox)
 }
