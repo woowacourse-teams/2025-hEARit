@@ -1,6 +1,12 @@
 <resources>
     <string name="app_name">hEARit</string>
     <string name="all_logo">hEARit</string>
+    <string name="all_hearit_email">hearit2025@gmail.com</string>
+    <string name="all_withdrawal">회원탈퇴</string>
+    <string name="all_logout">로그아웃</string>
+    <string name="all_setting">설정</string>
+    <string name="all_privacy_policy">개인정보처리방침</string>
+    <string name="all_account_info">계정 정보</string>
 
     <!-- HomeFragment-->
     <string name="home_logo_description">궁금했던 내용들을, 히어릿을 통해 빠르게 들어보세요!</string>

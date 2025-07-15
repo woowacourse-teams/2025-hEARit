@@ -3,12 +3,15 @@ package com.onair.hearit
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.databinding.DataBindingUtil
 import com.onair.hearit.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity :
+    AppCompatActivity(),
+    DrawerClickListener {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,5 +33,9 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.fragment_container_view, HomeFragment())
                 .commit()
         }
+    }
+
+    override fun openDrawer() {
+        binding.drawerLayout.openDrawer(GravityCompat.END)
     }
 }

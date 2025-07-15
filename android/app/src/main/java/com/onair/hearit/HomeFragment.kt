@@ -31,6 +31,10 @@ class HomeFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.ivProfile.setOnClickListener {
+            (activity as? DrawerClickListener)?.openDrawer()
+        }
+
         binding.recentHearit =
             HearitItem(
                 id = 1L,
