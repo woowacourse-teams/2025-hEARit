@@ -66,7 +66,7 @@ class HomeFragment : Fragment() {
 
         binding.rvHomeCategory.adapter = categoryAdapter
         val sampleCategories =
-            List(8) { i ->
+            List(6) { i ->
                 val colors = if (i % 2 == 0) "#9533F5" else "#B2B4B6"
                 CategoryItem(
                     id = i.toLong(),
