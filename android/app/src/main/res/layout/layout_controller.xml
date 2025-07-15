@@ -85,7 +85,7 @@
                 android:contentDescription="재생 / 일시정지"
                 android:padding="4dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_play1"
+                android:src="@drawable/ic_play"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
