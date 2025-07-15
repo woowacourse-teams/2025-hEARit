@@ -17,4 +17,7 @@
     <string name="menu_search">검색</string>
     <string name="menu_explore">탐색</string>
     <string name="menu_library">라이브러리</string>
+
+    <!-- ExploreFragment-->
+    <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 골라 들으세요!</string>
 </resources>
