@@ -31,7 +31,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: current
-          build-root-directory: backend
 
       - name: Build with Gradle Wrapper
         run: ./gradlew build
