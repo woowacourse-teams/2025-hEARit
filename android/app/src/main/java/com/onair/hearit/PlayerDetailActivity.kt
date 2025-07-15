@@ -37,6 +37,25 @@ class PlayerDetailActivity : AppCompatActivity() {
             ScriptLine(18000, 21000, "내 Fresh new 립스틱 Pick해, 오늘의 color"),
             ScriptLine(21000, 25000, "Oh my, 새로 고침 거울 속 느낌 공기도 달라"),
             ScriptLine(25000, 29000, "밉지 않지 All I gotta do is blow a kiss"),
+            ScriptLine(29000, 34000, "Even salt tastes sweet, 이건 Z to A, And never felt like this"),
+            ScriptLine(
+                34000,
+                38000,
+                "Cuz I get what I want, and I want what I get, like every time",
+            ),
+            ScriptLine(
+                38000,
+                42000,
+                "Cuz I glow when I roll out of bed, No regrets I'm living my life",
+            ),
+            ScriptLine(42000, 46000, "지루한 걱정 따윈 no more"),
+            ScriptLine(46000, 50000, "이제는 어쩜 love sick and we know it"),
+            ScriptLine(
+                50000,
+                54000,
+                "I'm your pookie in the morning, I'm your pookie in the night",
+            ),
+            ScriptLine(54000, 58000, "너만 보면 super crazy, 두근두근, gets the vibe"),
         )
 
     private lateinit var playerDetailScriptAdapter: PlayerDetailScriptAdapter
