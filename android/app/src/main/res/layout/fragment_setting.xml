@@ -126,10 +126,12 @@
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switch_notification"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:thumb="@drawable/check_switch_thumb"
             app:layout_constraintBottom_toBottomOf="@id/tv_setting_notification_text"
             app:layout_constraintEnd_toEndOf="@id/divider2"
-            app:layout_constraintTop_toTopOf="@id/tv_setting_notification_text" />
+            app:layout_constraintTop_toTopOf="@id/tv_setting_notification_text"
+            app:track="@drawable/check_switch_track" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
