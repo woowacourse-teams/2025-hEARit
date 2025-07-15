@@ -1,0 +1,78 @@
+name: Backend CD to EC2
+
+on:
+  push:
+    branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
+  pull_request:
+    branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  build:
+    name: Build and Upload
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build bootJar
+        working-directory: backend
+        run: ./gradlew bootJar
+
+      - name: Rename jar to app.jar
+        working-directory: backend/build/libs
+        run: |
+          JAR_NAME=$(ls *.jar | head -n 1)
+          mv "$JAR_NAME" app.jar
+
+      - name: Upload jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/build/libs/app.jar
+
+  deploy:
+    name: Deploy to EC2
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download jar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jar
+          path: ./deploy
+
+      - name: Check app.jar exists
+        run: ls -al ./deploy/app.jar
+
+      - name: Copy jar to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "deploy/app.jar"
+          target: ${{ secrets.EC2_APP_DIR }}
+
+      - name: Run jar on EC2
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ${{ secrets.EC2_APP_DIR }}
+            chmod +x app.jar
+            echo "Stopping existing app..."
+            pkill -f 'java -jar' || true
+            echo "Starting new app..."
+            nohup java -jar app.jar > app.log 2>&1 &

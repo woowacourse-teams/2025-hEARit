@@ -1,4 +1,4 @@
-name: Backend Build & Dependency Submission
+name: Backend CI
 
 on:
   push:
