@@ -2,7 +2,7 @@ name: Backend Build & Dependency Submission
 
 on:
   push:
-    branches: [ "main", "develop-be","chore/#19-ci-cd" ]
+    branches: [ "main", "develop-be","chore/#19-ci-cd" ] # 테스트용 브랜치
     paths:
       - 'backend/**'
   pull_request:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend  # backend 디렉토리 기준으로 명령 실행
+        working-directory: backend  # backend  기준으로 명령 실행
     steps:
       - uses: actions/checkout@v4
 
