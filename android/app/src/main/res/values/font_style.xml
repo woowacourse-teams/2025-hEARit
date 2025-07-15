@@ -41,4 +41,11 @@
         <item name="android:includeFontPadding">false</item>
         <item name="android:textSize">14sp</item>
     </style>
+
+    <style name="pretendard_setting_body">
+        <item name="fontFamily">@font/pretendardmedium</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textColor">@color/hearit_gray4</item>
+        <item name="android:textSize">16sp</item>
+    </style>
 </resources>

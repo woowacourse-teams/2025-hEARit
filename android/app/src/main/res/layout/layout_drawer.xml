@@ -62,23 +62,13 @@
             app:layout_constraintStart_toStartOf="@id/iv_profile"
             app:layout_constraintTop_toBottomOf="@id/tv_drawer_account_info" />
 
-        <TextView
-            android:id="@+id/tv_drawer_setting"
-            style="@style/pretendard_drawer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/all_setting"
-            app:layout_constraintStart_toStartOf="@id/iv_profile"
-            app:layout_constraintTop_toBottomOf="@id/tv_drawer_privacy_policy" />
-
         <com.google.android.material.divider.MaterialDivider
             android:id="@+id/divider2"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="24dp"
             app:dividerColor="@color/hearit_gray4"
-            app:layout_constraintTop_toBottomOf="@id/tv_drawer_setting" />
+            app:layout_constraintTop_toBottomOf="@id/tv_drawer_privacy_policy" />
 
         <TextView
             android:id="@+id/tv_drawer_logout"
