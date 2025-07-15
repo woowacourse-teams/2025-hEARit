@@ -32,6 +32,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    //TODO : 이거 어떰요
+    implementation 'jakarta.validation:jakarta.validation-api'
 }
 
 tasks.named('test') {
