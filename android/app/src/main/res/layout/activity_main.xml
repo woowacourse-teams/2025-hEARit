@@ -9,17 +9,18 @@
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="false">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true">
+            android:layout_height="match_parent">
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/fragment_container_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:background="@color/hearit_black1"
                 app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -32,14 +33,13 @@
                 android:background="@color/hearit_gray1"
                 app:itemActiveIndicatorStyle="@null"
                 app:itemBackground="@color/hearit_gray1"
-                app:itemIconSize="24dp"
+                app:itemIconSize="20dp"
                 app:itemIconTint="@null"
-                app:itemPaddingTop="20dp"
+                app:itemTextAppearanceActive="@style/BottomNavText"
+                app:itemTextAppearanceInactive="@style/BottomNavText"
                 app:itemTextColor="@color/nav_item_color"
                 app:labelVisibilityMode="labeled"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:menu="@menu/menu_navigation_item" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 

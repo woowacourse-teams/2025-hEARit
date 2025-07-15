@@ -1,118 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/hearit_gray1">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/iv_profile"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="20dp"
-        android:src="@mipmap/ic_launcher"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage" />
+    <data>
 
-    <TextView
-        style="@style/pretendard_sub_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="김조이"
-        android:textColor="@color/hearit_gray4"
-        app:layout_constraintBottom_toBottomOf="@id/iv_profile"
-        app:layout_constraintStart_toEndOf="@id/iv_profile"
-        app:layout_constraintTop_toTopOf="@id/iv_profile" />
+    </data>
 
-    <com.google.android.material.divider.MaterialDivider
-        android:id="@+id/divider1"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="20dp"
-        app:dividerColor="@color/hearit_gray4"
-        app:layout_constraintTop_toBottomOf="@id/iv_profile" />
+        android:layout_height="match_parent"
+        android:background="@color/hearit_gray1"
+        android:fitsSystemWindows="false">
 
-    <TextView
-        android:id="@+id/tv_drawer_account_info"
-        style="@style/pretendard_drawer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/all_account_info"
-        app:layout_constraintStart_toStartOf="@id/iv_profile"
-        app:layout_constraintTop_toBottomOf="@id/divider1" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_profile"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="20dp"
+            android:src="@mipmap/ic_launcher"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage" />
 
-    <TextView
-        android:id="@+id/tv_drawer_privacy_policy"
-        style="@style/pretendard_drawer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/all_privacy_policy"
-        app:layout_constraintStart_toStartOf="@id/iv_profile"
-        app:layout_constraintTop_toBottomOf="@id/tv_drawer_account_info" />
+        <TextView
+            style="@style/pretendard_sub_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="김조이"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintBottom_toBottomOf="@id/iv_profile"
+            app:layout_constraintStart_toEndOf="@id/iv_profile"
+            app:layout_constraintTop_toTopOf="@id/iv_profile" />
 
-    <TextView
-        android:id="@+id/tv_drawer_setting"
-        style="@style/pretendard_drawer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/all_setting"
-        app:layout_constraintStart_toStartOf="@id/iv_profile"
-        app:layout_constraintTop_toBottomOf="@id/tv_drawer_privacy_policy" />
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            app:dividerColor="@color/hearit_gray4"
+            app:layout_constraintTop_toBottomOf="@id/iv_profile" />
 
-    <com.google.android.material.divider.MaterialDivider
-        android:id="@+id/divider2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="24dp"
-        app:dividerColor="@color/hearit_gray4"
-        app:layout_constraintTop_toBottomOf="@id/tv_drawer_setting" />
+        <TextView
+            android:id="@+id/tv_drawer_account_info"
+            style="@style/pretendard_drawer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/all_account_info"
+            app:layout_constraintStart_toStartOf="@id/iv_profile"
+            app:layout_constraintTop_toBottomOf="@id/divider1" />
 
-    <TextView
-        android:id="@+id/tv_drawer_logout"
-        style="@style/pretendard_drawer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/all_logout"
-        app:layout_constraintStart_toStartOf="@id/iv_profile"
-        app:layout_constraintTop_toBottomOf="@id/divider2" />
+        <TextView
+            android:id="@+id/tv_drawer_privacy_policy"
+            style="@style/pretendard_drawer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/all_privacy_policy"
+            app:layout_constraintStart_toStartOf="@id/iv_profile"
+            app:layout_constraintTop_toBottomOf="@id/tv_drawer_account_info" />
 
-    <TextView
-        android:id="@+id/tv_drawer_withdrawal"
-        style="@style/pretendard_drawer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/all_withdrawal"
-        android:textColor="@color/hearit_red1"
-        app:layout_constraintStart_toStartOf="@id/iv_profile"
-        app:layout_constraintTop_toBottomOf="@id/tv_drawer_logout" />
+        <TextView
+            android:id="@+id/tv_drawer_setting"
+            style="@style/pretendard_drawer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/all_setting"
+            app:layout_constraintStart_toStartOf="@id/iv_profile"
+            app:layout_constraintTop_toBottomOf="@id/tv_drawer_privacy_policy" />
 
-    <TextView
-        android:id="@+id/tv_footer_app_version"
-        style="@style/pretendard_body"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:text="앱 버전 v1.0.0"
-        android:textColor="@color/hearit_gray4"
-        app:layout_constraintBottom_toTopOf="@id/tv_footer_app_email"
-        app:layout_constraintStart_toStartOf="@id/iv_profile" />
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            app:dividerColor="@color/hearit_gray4"
+            app:layout_constraintTop_toBottomOf="@id/tv_drawer_setting" />
 
-    <TextView
-        android:id="@+id/tv_footer_app_email"
-        style="@style/pretendard_body"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        android:text="@string/all_hearit_email"
-        android:textColor="@color/hearit_gray4"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@id/iv_profile" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/tv_drawer_logout"
+            style="@style/pretendard_drawer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/all_logout"
+            app:layout_constraintStart_toStartOf="@id/iv_profile"
+            app:layout_constraintTop_toBottomOf="@id/divider2" />
+
+        <TextView
+            android:id="@+id/tv_drawer_withdrawal"
+            style="@style/pretendard_drawer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/all_withdrawal"
+            android:textColor="@color/hearit_red1"
+            app:layout_constraintStart_toStartOf="@id/iv_profile"
+            app:layout_constraintTop_toBottomOf="@id/tv_drawer_logout" />
+
+        <TextView
+            android:id="@+id/tv_footer_app_version"
+            style="@style/pretendard_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="앱 버전 v1.0.0"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintBottom_toTopOf="@id/tv_footer_app_email"
+            app:layout_constraintStart_toStartOf="@id/iv_profile" />
+
+        <TextView
+            android:id="@+id/tv_footer_app_email"
+            style="@style/pretendard_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="40dp"
+            android:text="@string/all_hearit_email"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/iv_profile" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

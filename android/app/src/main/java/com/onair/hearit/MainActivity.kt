@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import com.onair.hearit.databinding.ActivityMainBinding
 
@@ -19,11 +20,12 @@ class MainActivity :
         enableEdgeToEdge()
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.customDrawer) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            v.setPadding(0, systemBars.top, 0, systemBars.bottom)
             insets
         }
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
 
         binding.layoutBottomNavigation.itemIconTintList = null
 

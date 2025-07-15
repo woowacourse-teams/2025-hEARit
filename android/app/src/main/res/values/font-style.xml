@@ -4,7 +4,7 @@
     <style name="pretendard_logo">
         <item name="fontFamily">@font/promptextrabold</item>
         <item name="android:includeFontPadding">false</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">24sp</item>
         <item name="android:textColor">@color/hearit_gray4</item>
     </style>
 
