@@ -8,6 +8,10 @@
         <variable
             name="item"
             type="com.onair.hearit.domain.BookmarkItem" />
+
+        <variable
+            name="bookmarkListener"
+            type="com.onair.hearit.presentation.library.BookmarkViewHolder.OnBookmarkListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -50,15 +54,17 @@
             android:text='@{String.valueOf(item.playTime)}'
             android:textColor="@color/hearit_gray4"
             app:layout_constraintBottom_toBottomOf="@id/tv_bookmark_title"
-            app:layout_constraintEnd_toStartOf="@id/iv_options"
+            app:layout_constraintEnd_toStartOf="@id/iv_bookmark_options"
             app:layout_constraintTop_toTopOf="@id/tv_bookmark_title"
             tools:text="00:00" />
 
         <ImageView
-            android:id="@+id/iv_options"
+            android:id="@+id/iv_bookmark_options"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="10dp"
+            android:contentDescription="@null"
+            android:onClick="@{() -> bookmarkListener.onClickOption()}"
             android:src="@drawable/img_options_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

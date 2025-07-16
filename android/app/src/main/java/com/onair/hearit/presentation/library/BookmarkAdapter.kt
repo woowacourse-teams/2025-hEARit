@@ -5,11 +5,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.BookmarkItem
 
-class BookmarkAdapter : ListAdapter<BookmarkItem, BookmarkViewHolder>(DIFF_CALLBACK) {
+class BookmarkAdapter(
+    private val bookmarkListener: BookmarkViewHolder.OnBookmarkListener,
+) : ListAdapter<BookmarkItem, BookmarkViewHolder>(DIFF_CALLBACK) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): BookmarkViewHolder = BookmarkViewHolder.create(parent)
+    ): BookmarkViewHolder = BookmarkViewHolder.create(parent, bookmarkListener)
 
     override fun onBindViewHolder(
         holder: BookmarkViewHolder,

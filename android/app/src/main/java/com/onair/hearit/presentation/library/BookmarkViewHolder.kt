@@ -7,17 +7,29 @@ import com.onair.hearit.databinding.ItemBookmarkBinding
 import com.onair.hearit.domain.BookmarkItem
 
 class BookmarkViewHolder(
-    val binding: ItemBookmarkBinding,
+    private val binding: ItemBookmarkBinding,
+    private val bookmarkListener: OnBookmarkListener,
 ) : RecyclerView.ViewHolder(binding.root) {
+    init {
+        binding.bookmarkListener = bookmarkListener
+    }
+
     fun bind(bookmark: BookmarkItem) {
         binding.item = bookmark
     }
 
     companion object {
-        fun create(parent: ViewGroup): BookmarkViewHolder {
+        fun create(
+            parent: ViewGroup,
+            bookmarkListener: OnBookmarkListener,
+        ): BookmarkViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemBookmarkBinding.inflate(inflater, parent, false)
-            return BookmarkViewHolder(binding)
+            return BookmarkViewHolder(binding, bookmarkListener)
         }
+    }
+
+    interface OnBookmarkListener {
+        fun onClickOption()
     }
 }

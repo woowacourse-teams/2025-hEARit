@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:paddingBottom="72dp">
+
+        <TextView
+            android:id="@+id/tv_bookmark_option_title"
+            style="@style/pretendard_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:text="HTTP와 HTTPS의 차이"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_bookmark_option_time"
+            style="@style/pretendard_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="@color/hearit_gray2"
+            app:layout_constraintStart_toStartOf="@id/tv_bookmark_option_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_bookmark_option_title" />
+
+        <ImageView
+            android:id="@+id/iv_bookmark_option_delete_bookmark"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="26dp"
+            android:contentDescription="@null"
+            android:src="@drawable/img_delete_bookmark"
+            app:layout_constraintStart_toStartOf="@id/tv_bookmark_option_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_bookmark_option_time" />
+
+        <TextView
+            android:id="@+id/tv_bookmark_option_delete_bookmark"
+            style="@style/pretendard_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="4dp"
+            android:text="북마크에서 삭제하기"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintStart_toEndOf="@id/iv_bookmark_option_delete_bookmark"
+            app:layout_constraintTop_toTopOf="@id/iv_bookmark_option_delete_bookmark" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

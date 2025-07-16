@@ -15,7 +15,7 @@ class LibraryFragment : Fragment() {
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter by lazy { BookmarkAdapter() }
+    private lateinit var adapter: BookmarkAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +28,7 @@ class LibraryFragment : Fragment() {
     ): View? {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
+        setupAdapter()
         binding.rvBookmark.adapter = adapter
         return binding.root
     }
@@ -46,5 +47,17 @@ class LibraryFragment : Fragment() {
 
         // 테스트용으로 더미 데이터 넣어 놓음
         adapter.submitList(BookmarkDummyData.getBookmarks())
+    }
+
+    private fun setupAdapter() {
+        adapter =
+            BookmarkAdapter(
+                object : BookmarkViewHolder.OnBookmarkListener {
+                    override fun onClickOption() {
+                        val sheet = BookmarkOptionBottomSheet()
+                        sheet.show(parentFragmentManager, sheet.tag)
+                    }
+                },
+            )
     }
 }
