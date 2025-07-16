@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
     id("com.google.gms.google-services")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 android {
@@ -37,6 +38,9 @@ android {
     buildFeatures {
         buildConfig = true
         dataBinding = true
+    }
+    ktlint {
+        debug = true
     }
 }
 
