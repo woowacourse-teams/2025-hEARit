@@ -42,7 +42,7 @@ jobs:
   deploy:
     name: Deploy on EC2
     needs: build
-    runs-on: [ self-hosted, backend, Linux, Arm64 ]  # EC2에 설치한 runner의 라벨
+    runs-on: [ self-hosted, backend, Linux, ARM64 ]  # EC2에 설치한 runner의 라벨
 
     steps:
       - name: Download jar artifact
