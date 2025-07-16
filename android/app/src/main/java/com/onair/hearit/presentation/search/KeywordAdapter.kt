@@ -5,11 +5,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.KeywordItem
 
-class KeywordAdapter : ListAdapter<KeywordItem, KeywordViewHolder>(KeywordDiffUtil) {
+class KeywordAdapter : ListAdapter<KeywordItem, KeywordViewHolder>(DiffUtil) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): KeywordViewHolder = KeywordViewHolder(parent)
+    ): KeywordViewHolder = KeywordViewHolder.create(parent)
 
     override fun onBindViewHolder(
         holder: KeywordViewHolder,
@@ -17,16 +17,19 @@ class KeywordAdapter : ListAdapter<KeywordItem, KeywordViewHolder>(KeywordDiffUt
     ) {
         holder.bind(getItem(position))
     }
-}
 
-object KeywordDiffUtil : DiffUtil.ItemCallback<KeywordItem>() {
-    override fun areItemsTheSame(
-        oldItem: KeywordItem,
-        newItem: KeywordItem,
-    ): Boolean = oldItem.keyword == newItem.keyword
+    companion object {
+        val DiffUtil =
+            object : DiffUtil.ItemCallback<KeywordItem>() {
+                override fun areItemsTheSame(
+                    oldItem: KeywordItem,
+                    newItem: KeywordItem,
+                ): Boolean = oldItem.keyword == newItem.keyword
 
-    override fun areContentsTheSame(
-        oldItem: KeywordItem,
-        newItem: KeywordItem,
-    ): Boolean = oldItem == newItem
+                override fun areContentsTheSame(
+                    oldItem: KeywordItem,
+                    newItem: KeywordItem,
+                ): Boolean = oldItem == newItem
+            }
+    }
 }

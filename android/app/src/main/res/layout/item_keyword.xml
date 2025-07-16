@@ -5,6 +5,10 @@
 
     <data>
 
+        <variable
+            name="keywordItem"
+            type="com.onair.hearit.domain.KeywordItem" />
+
     </data>
 
     <TextView
@@ -22,6 +26,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="#Kotlin" />
+        tools:text="@{keywordItem.keyword}" />
 
 </layout>
