@@ -7,12 +7,15 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import com.onair.hearit.data.BookmarkDummyData
 import com.onair.hearit.databinding.FragmentLibraryBinding
 
 class LibraryFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
+
+    private val adapter by lazy { BookmarkAdapter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +27,8 @@ class LibraryFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.rvBookmark.adapter = adapter
         return binding.root
     }
 
@@ -38,5 +43,8 @@ class LibraryFragment : Fragment() {
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
+
+        // 테스트용으로 더미 데이터 넣어 놓음
+        adapter.submitList(BookmarkDummyData.getBookmarks())
     }
 }
