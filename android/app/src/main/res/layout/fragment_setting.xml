@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -9,5 +10,128 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ImageButton
+            android:id="@+id/ib_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@color/hearit_gray1"
+            android:contentDescription="@null"
+            android:elevation="1dp"
+            android:src="@drawable/ic_back"
+            app:layout_constraintBottom_toBottomOf="@id/tv_setting_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_setting_title" />
+
+        <TextView
+            android:id="@+id/tv_setting_title"
+            style="@style/pretendard_main_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/hearit_gray1"
+            android:gravity="center"
+            android:paddingVertical="16dp"
+            android:text="@string/setting_title"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_setting_profile"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:src="@mipmap/ic_launcher"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_setting_title"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage" />
+
+        <TextView
+            style="@style/pretendard_main_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="김조이"
+            app:layout_constraintBottom_toBottomOf="@id/iv_setting_profile"
+            app:layout_constraintStart_toEndOf="@id/iv_setting_profile"
+            app:layout_constraintTop_toTopOf="@id/iv_setting_profile" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider1"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="24dp"
+            app:dividerColor="@color/hearit_gray2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/iv_setting_profile" />
+
+        <TextView
+            android:id="@+id/tv_setting_detail_info"
+            style="@style/pretendard_main_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="@string/setting_detail_info"
+            app:layout_constraintStart_toStartOf="@id/iv_setting_profile"
+            app:layout_constraintTop_toBottomOf="@id/divider1" />
+
+        <TextView
+            android:id="@+id/tv_setting_email_text"
+            style="@style/pretendard_setting_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/setting_email"
+            app:layout_constraintStart_toStartOf="@id/iv_setting_profile"
+            app:layout_constraintTop_toBottomOf="@id/tv_setting_detail_info" />
+
+        <TextView
+            style="@style/pretendard_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="gkaqjawns@gmail.com"
+            android:textColor="@color/hearit_gray2"
+            app:layout_constraintBottom_toBottomOf="@id/tv_setting_email_text"
+            app:layout_constraintEnd_toEndOf="@id/divider1"
+            app:layout_constraintTop_toTopOf="@id/tv_setting_email_text" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="28dp"
+            app:dividerColor="@color/hearit_gray2"
+            app:layout_constraintEnd_toEndOf="@id/divider1"
+            app:layout_constraintStart_toStartOf="@id/divider1"
+            app:layout_constraintTop_toBottomOf="@id/tv_setting_email_text" />
+
+        <TextView
+            style="@style/pretendard_main_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="@string/setting_notification"
+            app:layout_constraintStart_toStartOf="@id/iv_setting_profile"
+            app:layout_constraintTop_toBottomOf="@id/divider2" />
+
+        <TextView
+            android:id="@+id/tv_setting_notification_text"
+            style="@style/pretendard_setting_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="72dp"
+            android:text="@string/setting_recommend_notification"
+            app:layout_constraintStart_toStartOf="@id/iv_setting_profile"
+            app:layout_constraintTop_toBottomOf="@id/divider2" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_notification"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:thumb="@drawable/check_switch_thumb"
+            app:layout_constraintBottom_toBottomOf="@id/tv_setting_notification_text"
+            app:layout_constraintEnd_toEndOf="@id/divider2"
+            app:layout_constraintTop_toTopOf="@id/tv_setting_notification_text"
+            app:track="@drawable/check_switch_track" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

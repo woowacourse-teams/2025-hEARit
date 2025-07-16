@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 android {
@@ -13,8 +15,7 @@ android {
         minSdk = 29
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
-
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -35,7 +36,11 @@ android {
         jvmTarget = "21"
     }
     buildFeatures {
+        buildConfig = true
         dataBinding = true
+    }
+    ktlint {
+        debug = true
     }
 }
 
@@ -60,4 +65,8 @@ dependencies {
 
     // flexbox
     implementation(libs.flexbox)
+
+    // firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 }
