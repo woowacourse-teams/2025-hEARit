@@ -1,13 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tv_search_logo"
+                style="@style/prompt_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/all_logo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/et_search"
+                style="@style/pretendard_body"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="20dp"
+                android:autofillHints="@null"
+                android:background="@drawable/bg_gray4_radius_8dp"
+                android:drawableEnd="@drawable/ic_search"
+                android:drawablePadding="10dp"
+                android:drawableTint="@color/hearit_gray1"
+                android:hint="검색어를 입력해주세요"
+                android:inputType="text|textNoSuggestions"
+                android:maxLines="1"
+                android:paddingHorizontal="12dp"
+                android:textColor="@color/hearit_gray1"
+                android:textColorHint="@color/hearit_gray2"
+                app:layout_constraintTop_toBottomOf="@id/tv_search_logo" />
+
+            <TextView
+                android:id="@+id/tv_search_keyword"
+                style="@style/pretendard_main_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="28dp"
+                android:text="오늘의 추천 키워드"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/et_search" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_keyword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="14dp"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="com.google.android.flexbox.FlexboxLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_search_keyword"
+                tools:listitem="@layout/item_keyword" />
+
+            <TextView
+                android:id="@+id/tv_search_categories"
+                style="@style/pretendard_main_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="26dp"
+                android:text="카테고리 둘러보기"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/rv_keyword" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_search_categories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="20dp"
+                android:nestedScrollingEnabled="false"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_search_categories"
+                app:spanCount="2"
+                tools:itemCount="20"
+                tools:listitem="@layout/item_category" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 </layout>

@@ -14,15 +14,11 @@ class SettingFragment : Fragment() {
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = FragmentSettingBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -37,6 +33,13 @@ class SettingFragment : Fragment() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
+        }
+
+        binding.ibBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        binding.switchNotification.setOnClickListener {
         }
     }
 }
