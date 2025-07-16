@@ -2,22 +2,22 @@ name: Backend CI
 
 on:
   push:
-    branches: [ "main", "develop-be","chore/#19-ci-cd" ] # 테스트용 브랜치
-  # 테스트를 위한 path 제거
-  #    paths:
-  #      - 'backend/**'
+    branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
   pull_request:
-    branches: [ "main", "develop-be","chore/#19-ci-cd" ]
-    paths:
-      - 'backend/**'
-
+    branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
+# 테스트를 위한 path 제거
+#    paths:
+#      - 'backend/**'
 
 jobs:
   build:
+    name: CI Build
     runs-on: ubuntu-latest
+
     defaults:
       run:
-        working-directory: backend  # backend  기준으로 명령 실행
+        working-directory: backend
+
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +32,5 @@ jobs:
         with:
           gradle-version: current
 
-      - name: Build with Gradle Wrapper
+      - name: Build with Gradle
         run: ./gradlew build
-
-
