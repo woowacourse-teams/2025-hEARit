@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build and Upload
+    name: Build and Upload Artifact
     runs-on: ubuntu-latest
 
     steps:
@@ -40,39 +40,24 @@ jobs:
           path: backend/build/libs/app.jar
 
   deploy:
-    name: Deploy to EC2
+    name: Deploy on EC2
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: [ self-hosted, backend, Linux, Arm64 ]  # EC2에 설치한 runner의 라벨
 
     steps:
       - name: Download jar artifact
         uses: actions/download-artifact@v4
         with:
           name: backend-jar
-          path: ./deploy
-
-      - name: Check app.jar exists
-        run: ls -al ./deploy/app.jar
-
-      - name: Copy jar to EC2
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "deploy/app.jar"
-          target: ${{ secrets.EC2_APP_DIR }}
+          path: ~/hearit
 
       - name: Run jar on EC2
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd ${{ secrets.EC2_APP_DIR }}
-            chmod +x app.jar
-            echo "Stopping existing app..."
-            pkill -f 'java -jar' || true
-            echo "Starting new app..."
-            nohup java -jar app.jar > app.log 2>&1 &
+        run: |
+          cd ~/hearit
+          chmod +x app.jar
+
+          echo "[INFO] Stop existing process..."
+          pkill -f 'java -jar' || true
+
+          echo "[INFO] Start new app..."
+          nohup java -jar app.jar > app.log 2>&1 &
