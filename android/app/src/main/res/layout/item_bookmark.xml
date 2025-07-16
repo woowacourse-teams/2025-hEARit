@@ -52,11 +52,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text='@{String.valueOf(item.playTime)}'
             android:textColor="@color/hearit_gray4"
             app:layout_constraintBottom_toBottomOf="@id/tv_bookmark_title"
             app:layout_constraintEnd_toStartOf="@id/iv_bookmark_options"
             app:layout_constraintTop_toTopOf="@id/tv_bookmark_title"
+            app:playTimeFormatted='@{item.playTime}'
             tools:text="00:00" />
 
         <ImageView

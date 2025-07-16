@@ -19,6 +19,9 @@
             android:name=".presentation.CreateHearitActivity"
             android:exported="false" />
         <activity
+            android:name=".presentation.detail.PlayerDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".presentation.MainActivity"
             android:exported="true">
             <intent-filter>
