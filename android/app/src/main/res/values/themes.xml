@@ -4,6 +4,7 @@
         <item name="android:statusBarColor">@color/hearit_gray4</item>
         <item name="android:navigationBarColor">@color/hearit_gray1</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="bottomSheetDialogTheme">@style/CustomBottomSheetDialogTheme</item>
     </style>
 
     <style name="Theme.HEARit" parent="Base.Theme.HEARit" />
