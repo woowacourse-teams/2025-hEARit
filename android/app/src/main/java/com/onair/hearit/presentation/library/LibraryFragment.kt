@@ -9,6 +9,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.onair.hearit.data.BookmarkDummyData
 import com.onair.hearit.databinding.FragmentLibraryBinding
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
 class LibraryFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -52,10 +53,15 @@ class LibraryFragment : Fragment() {
     private fun setupAdapter() {
         adapter =
             BookmarkAdapter(
-                object : BookmarkViewHolder.OnBookmarkListener {
+                object : BookmarkViewHolder.BookmarkClickListener {
                     override fun onClickOption() {
                         val sheet = BookmarkOptionBottomSheet()
                         sheet.show(parentFragmentManager, sheet.tag)
+                    }
+
+                    override fun onClickBookmarkedHearit() {
+                        val intent = PlayerDetailActivity.newIntent(requireActivity())
+                        startActivity(intent)
                     }
                 },
             )

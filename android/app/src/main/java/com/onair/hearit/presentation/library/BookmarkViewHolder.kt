@@ -8,7 +8,7 @@ import com.onair.hearit.domain.BookmarkItem
 
 class BookmarkViewHolder(
     private val binding: ItemBookmarkBinding,
-    private val bookmarkListener: OnBookmarkListener,
+    private val bookmarkListener: BookmarkClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     init {
         binding.bookmarkListener = bookmarkListener
@@ -21,7 +21,7 @@ class BookmarkViewHolder(
     companion object {
         fun create(
             parent: ViewGroup,
-            bookmarkListener: OnBookmarkListener,
+            bookmarkListener: BookmarkClickListener,
         ): BookmarkViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemBookmarkBinding.inflate(inflater, parent, false)
@@ -29,7 +29,9 @@ class BookmarkViewHolder(
         }
     }
 
-    interface OnBookmarkListener {
+    interface BookmarkClickListener {
         fun onClickOption()
+
+        fun onClickBookmarkedHearit()
     }
 }

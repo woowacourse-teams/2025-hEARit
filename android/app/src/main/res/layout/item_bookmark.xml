@@ -11,14 +11,15 @@
 
         <variable
             name="bookmarkListener"
-            type="com.onair.hearit.presentation.library.BookmarkViewHolder.OnBookmarkListener" />
+            type="com.onair.hearit.presentation.library.BookmarkViewHolder.BookmarkClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="20dp"
+        android:onClick="@{() -> bookmarkListener.onClickBookmarkedHearit()}">
 
         <View
             android:layout_width="match_parent"

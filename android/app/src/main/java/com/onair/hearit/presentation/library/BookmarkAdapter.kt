@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.BookmarkItem
 
 class BookmarkAdapter(
-    private val bookmarkListener: BookmarkViewHolder.OnBookmarkListener,
+    private val bookmarkListener: BookmarkViewHolder.BookmarkClickListener,
 ) : ListAdapter<BookmarkItem, BookmarkViewHolder>(DIFF_CALLBACK) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
