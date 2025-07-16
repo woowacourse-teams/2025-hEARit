@@ -9,10 +9,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integration-test")
 @Sql("/dbclean.sql")
-public abstract class IntegrationTest {
+@ActiveProfiles("integration-test")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+abstract class IntegrationTest {
 
     @LocalServerPort
     int port;

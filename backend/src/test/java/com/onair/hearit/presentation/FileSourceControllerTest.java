@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-public class FileSourceControllerTest extends IntegrationTest {
+class FileSourceControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("원본 오디오 url 요청 시, 200 OK 및 id와 url을 반환한다.")
