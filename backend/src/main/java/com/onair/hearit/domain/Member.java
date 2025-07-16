@@ -21,12 +21,18 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
+    public Member(String memberId, String nickname, String password) {
+        this.memberId = memberId;
+        this.nickname = nickname;
+        this.password = password;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    private String memberId;
 
     @Column(name = "nickname", nullable = false)
     private String nickname;
@@ -35,7 +41,7 @@ public class Member {
     private String password;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "deleted_at")
