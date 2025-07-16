@@ -31,7 +31,6 @@ services:
     volumes:
       - mysql-test-data:/var/lib/mysql
     restart: unless-stopped
-    platform: linux/amd64
 
 volumes:
   mysql-prod-data:
