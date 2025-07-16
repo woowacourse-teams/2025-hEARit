@@ -31,6 +31,7 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'jakarta.validation:jakarta.validation-api'
