@@ -5,6 +5,13 @@
 
     <data>
 
+        <variable
+            name="subtitleLine"
+            type="com.onair.hearit.domain.SubtitleLine" />
+
+        <variable
+            name="isHighlighted"
+            type="Boolean" />
     </data>
 
     <TextView
@@ -14,8 +21,10 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="60dp"
         android:paddingVertical="20dp"
+        android:text="@{subtitleLine.sentence}"
         android:textAlignment="center"
-        android:textColor="@color/hearit_gray2"
+        android:textColor="@{isHighlighted ? @color/white : @color/hearit_gray2}"
+        app:highlightedTextSize="@{isHighlighted}"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
