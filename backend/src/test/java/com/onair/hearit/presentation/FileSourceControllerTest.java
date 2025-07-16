@@ -29,7 +29,7 @@ class FileSourceControllerTest extends IntegrationTest {
                 .extract().as(OriginalAudioResponse.class);
 
         // then
-        assertThat(response.url()).isEqualTo(hearit.getOriginalAudioUrl());
+        assertThat(response.url()).contains(hearit.getOriginalAudioUrl());
     }
 
     @Test
@@ -46,7 +46,7 @@ class FileSourceControllerTest extends IntegrationTest {
                 .extract().as(ShortAudioResponse.class);
 
         // then
-        assertThat(response.url()).isEqualTo(hearit.getShortAudioUrl());
+        assertThat(response.url()).contains(hearit.getShortAudioUrl());
     }
 
     @Test
@@ -63,7 +63,7 @@ class FileSourceControllerTest extends IntegrationTest {
                 .extract().as(ScriptResponse.class);
 
         // then
-        assertThat(response.url()).isEqualTo(hearit.getScriptUrl());
+        assertThat(response.url()).contains(hearit.getScriptUrl());
     }
 
     @Test

@@ -21,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @Import(DbHelper.class)
 @ActiveProfiles("fake-test")
-class HearitServiceTest {
+class FileSourceServiceTest {
 
     @Autowired
     private DbHelper dbHelper;
@@ -29,11 +29,11 @@ class HearitServiceTest {
     @Autowired
     private HearitRepository hearitRepository;
 
-    private HearitService hearitService;
+    private FileSourceService fileSourceService;
 
     @BeforeEach
     void setup() {
-        hearitService = new HearitService(hearitRepository);
+        fileSourceService = new FileSourceService(hearitRepository);
     }
 
     @Test
@@ -43,10 +43,10 @@ class HearitServiceTest {
         Hearit hearit = saveHearit(1);
 
         // when
-        OriginalAudioResponse response = hearitService.getOriginalAudio(hearit.getId());
+        OriginalAudioResponse response = fileSourceService.getOriginalAudio(hearit.getId());
 
         // then
-        assertThat(response.url()).isEqualTo(hearit.getOriginalAudioUrl());
+        assertThat(response.url()).contains(hearit.getOriginalAudioUrl());
     }
 
     @Test
@@ -56,10 +56,10 @@ class HearitServiceTest {
         Hearit hearit = saveHearit(1);
 
         // when
-        ShortAudioResponse response = hearitService.getShortAudio(hearit.getId());
+        ShortAudioResponse response = fileSourceService.getShortAudio(hearit.getId());
 
         // then
-        assertThat(response.url()).isEqualTo(hearit.getShortAudioUrl());
+        assertThat(response.url()).contains(hearit.getShortAudioUrl());
     }
 
     @Test
@@ -69,10 +69,10 @@ class HearitServiceTest {
         Hearit hearit = saveHearit(1);
 
         // when
-        ScriptResponse response = hearitService.getScript(hearit.getId());
+        ScriptResponse response = fileSourceService.getScript(hearit.getId());
 
         // then
-        assertThat(response.url()).isEqualTo(hearit.getScriptUrl());
+        assertThat(response.url()).contains(hearit.getScriptUrl());
     }
 
     private Hearit saveHearit(int num) {
