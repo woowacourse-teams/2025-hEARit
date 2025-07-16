@@ -1,5 +1,7 @@
 package com.onair.hearit.presentation.detail
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -132,5 +134,12 @@ class PlayerDetailActivity : AppCompatActivity() {
         super.onDestroy()
         player.release()
         handler.removeCallbacks(updateRunnable)
+    }
+
+    companion object {
+        fun newIntent(context: Context): Intent =
+            Intent(context, PlayerDetailActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
     }
 }

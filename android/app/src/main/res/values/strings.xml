@@ -50,4 +50,9 @@
     <string name="setting_email">이메일</string>
     <string name="setting_notification">알림</string>
     <string name="setting_recommend_notification">히어릿 추천 알림</string>
+
+    <!-- LibraryFragment-->
+    <string name="library_nickname"><font color="#B677F3">닉네임제한은9글자</font>님,</string>
+    <string name="library_guide">오늘은 어떤 <font color="#B677F3">히어릿</font>을 들어볼까요?</string>
+    <string name="library_bookmarked_hearit_title">내가 북마크한 히어릿</string>
 </resources>
