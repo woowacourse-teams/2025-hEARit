@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.BookmarkItem
 
 class BookmarkAdapter(
-    private val bookmarkListener: BookmarkViewHolder.BookmarkClickListener,
-) : ListAdapter<BookmarkItem, BookmarkViewHolder>(DIFF_CALLBACK) {
+    private val bookmarkListener: BookmarkClickListener,
+) : ListAdapter<BookmarkItem, BookmarkViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
@@ -22,7 +22,7 @@ class BookmarkAdapter(
     }
 
     companion object {
-        private val DIFF_CALLBACK =
+        private val DiffCallback =
             object : DiffUtil.ItemCallback<BookmarkItem>() {
                 override fun areItemsTheSame(
                     oldItem: BookmarkItem,

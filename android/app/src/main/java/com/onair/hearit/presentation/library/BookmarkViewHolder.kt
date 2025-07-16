@@ -28,10 +28,4 @@ class BookmarkViewHolder(
             return BookmarkViewHolder(binding, bookmarkListener)
         }
     }
-
-    interface BookmarkClickListener {
-        fun onClickOption()
-
-        fun onClickBookmarkedHearit()
-    }
 }

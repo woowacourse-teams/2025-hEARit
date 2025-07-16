@@ -11,7 +11,7 @@
 
         <variable
             name="bookmarkListener"
-            type="com.onair.hearit.presentation.library.BookmarkViewHolder.BookmarkClickListener" />
+            type="com.onair.hearit.presentation.library.BookmarkClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

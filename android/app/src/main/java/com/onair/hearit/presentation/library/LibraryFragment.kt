@@ -11,12 +11,14 @@ import com.onair.hearit.data.BookmarkDummyData
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
-class LibraryFragment : Fragment() {
+class LibraryFragment :
+    Fragment(),
+    BookmarkClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var adapter: BookmarkAdapter
+    private val adapter by lazy { BookmarkAdapter(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +31,6 @@ class LibraryFragment : Fragment() {
     ): View? {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
-        setupAdapter()
         binding.rvBookmark.adapter = adapter
         return binding.root
     }
@@ -50,20 +51,13 @@ class LibraryFragment : Fragment() {
         adapter.submitList(BookmarkDummyData.getBookmarks())
     }
 
-    private fun setupAdapter() {
-        adapter =
-            BookmarkAdapter(
-                object : BookmarkViewHolder.BookmarkClickListener {
-                    override fun onClickOption() {
-                        val sheet = BookmarkOptionBottomSheet()
-                        sheet.show(parentFragmentManager, sheet.tag)
-                    }
+    override fun onClickOption() {
+        val sheet = BookmarkOptionBottomSheet()
+        sheet.show(parentFragmentManager, sheet.tag)
+    }
 
-                    override fun onClickBookmarkedHearit() {
-                        val intent = PlayerDetailActivity.newIntent(requireActivity())
-                        startActivity(intent)
-                    }
-                },
-            )
+    override fun onClickBookmarkedHearit() {
+        val intent = PlayerDetailActivity.newIntent(requireActivity())
+        startActivity(intent)
     }
 }
