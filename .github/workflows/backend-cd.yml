@@ -1,13 +1,14 @@
 name: Backend CD to EC2
 
-# 테스트용 커밋
 on:
   push:
     branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
   pull_request:
     branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
-    paths:
-      - 'backend/**'
+  workflow_dispatch:
+# 테스트를 위한 path 제거
+#    paths:
+#      - 'backend/**'
 
 jobs:
   build:
@@ -23,6 +24,15 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+
+      - name: Generate application-secret.properties
+        run: |
+          mkdir -p src/main/resources
+          cat <<EOF > src/main/resources/application-secret.properties
+          mysql.root.password=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          jwt.secret=${{ secrets.JWT_SECRET }}
+          jwt.expiration=${{ secrets.JWT_EXPIRATION }}
+          EOF
 
       - name: Build bootJar
         working-directory: backend
@@ -43,7 +53,7 @@ jobs:
   deploy:
     name: Deploy on EC2
     needs: build
-    runs-on: [ self-hosted, backend, Linux, ARM64 ]  # EC2에 설치한 runner의 라벨
+    runs-on: [ self-hosted, backend, Linux, ARM64 ]
 
     steps:
       - name: Download jar artifact

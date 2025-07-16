@@ -1,13 +1,11 @@
 name: Backend CI
 
 on:
-  push:
-    branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
   pull_request:
-    branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
-# 테스트를 위한 path 제거
-#    paths:
-#      - 'backend/**'
+    branches: [ "develop-be" ]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -32,5 +30,17 @@ jobs:
         with:
           gradle-version: current
 
+      - name: Generate application-secret.properties
+        run: |
+          mkdir -p src/main/resources
+          cat <<EOF > src/main/resources/application-secret.properties
+          mysql.root.password=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          jwt.secret=${{ secrets.JWT_SECRET }}
+          jwt.expiration=${{ secrets.JWT_EXPIRATION }}
+          EOF
+
+      - name: Run Tests
+        run: ./gradlew test
+
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build -x test
