@@ -94,7 +94,7 @@
                 android:layout_height="52dp"
                 android:layout_marginEnd="16dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_play"
+                android:src="@drawable/img_play"
                 app:layout_constraintBottom_toBottomOf="@id/iv_home_recent_hearit"
                 app:layout_constraintEnd_toEndOf="@id/iv_home_recent_hearit"
                 app:layout_constraintTop_toTopOf="@id/iv_home_recent_hearit" />
