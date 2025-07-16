@@ -63,6 +63,9 @@ dependencies {
     // lottie
     implementation(libs.lottie)
 
+    // flexbox
+    implementation(libs.flexbox)
+
     // firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
