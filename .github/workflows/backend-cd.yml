@@ -52,13 +52,8 @@ jobs:
           name: backend-jar
           path: ~/hearit
 
-      - name: Run jar on EC2
-        run: |
-          cd ~/hearit
-          chmod +x app.jar
+      - name: Make deploy script executable
+        run: chmod +x ~/hearit/deploy.sh
 
-          echo "[INFO] Stop existing process..."
-          pkill -f 'java -jar' || true
-
-          echo "[INFO] Start new app..."
-          nohup java -jar app.jar > app.log 2>&1 &
+      - name: Run deploy script
+        run: bash ~/hearit/deploy.sh
