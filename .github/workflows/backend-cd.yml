@@ -1,6 +1,6 @@
 name: Backend CD to EC2
 
-#테스트용 커밋
+# 테스트용 커밋
 on:
   push:
     branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
