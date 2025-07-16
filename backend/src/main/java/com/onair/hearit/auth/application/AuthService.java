@@ -28,7 +28,7 @@ public class AuthService {
             throw new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다.");
         }
 
-        String token = jwtTokenProvider.createToken(member.getId());
+        String token = jwtTokenProvider.createToken(member.getId(), member.getMemberRole());
         return new TokenResponse(token);
     }
 
@@ -37,6 +37,6 @@ public class AuthService {
             throw new InvalidInputException("이미 존재하는 아이디입니다.");
         }
         String hash = passwordEncoder.encode(request.password());
-        memberRepository.save(new Member(request.memberId(), request.nickname(), hash));
+        memberRepository.save(Member.createUser(request.memberId(), request.nickname(), hash));
     }
 }

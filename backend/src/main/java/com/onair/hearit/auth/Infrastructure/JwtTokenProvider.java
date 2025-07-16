@@ -1,8 +1,12 @@
 package com.onair.hearit.auth.Infrastructure;
 
+import com.onair.hearit.domain.MemberRole;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,30 +25,41 @@ public class JwtTokenProvider {
         this.expiration = expiration;
     }
 
-    public String createToken(Long userId) {
+    public String createToken(Long userId, MemberRole role) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
+                .claim("role", role.name())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public Long getUserId(String token) {
-        return Long.parseLong(Jwts.parserBuilder()
-                .setSigningKey(secretKey.getBytes())
+    public Long getMemberId(String token) {
+        return Long.parseLong(parseClaims(token).getSubject());
+    }
+
+    public MemberRole getRole(String token) {
+        String role = parseClaims(token).get("role", String.class);
+        return MemberRole.valueOf(role);
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject());
+                .getBody();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build()
+            Jwts.parserBuilder()
+                    .setSigningKey(secretKey.getBytes())
+                    .build()
                     .parseClaimsJws(token);
             return true;
         } catch (JwtException e) {

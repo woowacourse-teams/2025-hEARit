@@ -21,10 +21,19 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
-    public Member(String memberId, String nickname, String password) {
+    private Member(String memberId, String nickname, String password, MemberRole memberRole) {
         this.memberId = memberId;
         this.nickname = nickname;
         this.password = password;
+        this.memberRole = memberRole;
+    }
+
+    public static Member createAdmin(String memberId, String nickname, String password) {
+        return new Member(memberId, nickname, password, MemberRole.ADMIN);
+    }
+
+    public static Member createUser(String memberId, String nickname, String password) {
+        return new Member(memberId, nickname, password, MemberRole.USER);
     }
 
     @Id
@@ -39,6 +48,9 @@ public class Member {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name = "member_role", nullable = false)
+    private MemberRole memberRole;
 
     @CreatedDate
     @Column(name = "created_at")
