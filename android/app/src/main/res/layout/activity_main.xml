@@ -35,7 +35,7 @@
                 app:itemActiveIndicatorStyle="@null"
                 app:itemBackground="@color/hearit_gray1"
                 app:itemIconSize="20dp"
-                app:itemIconTint="@null"
+                app:itemIconTint="@color/nav_item_color"
                 app:itemTextAppearanceActive="@style/BottomNavText"
                 app:itemTextAppearanceInactive="@style/BottomNavText"
                 app:itemTextColor="@color/nav_item_color"
