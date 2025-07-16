@@ -3,8 +3,8 @@ name: Android CI
 on:
   push:
     branches: [ "main", "develop-an", "chore/#32-android-ci" ]
-    paths:
-      - 'android/**'
+    # paths:
+    #   - 'android/**'
   pull_request:
     branches: [ "main", "develop-an", "chore/#32-android-ci" ]
     paths:
