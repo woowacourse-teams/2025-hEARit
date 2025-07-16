@@ -1,14 +1,11 @@
 name: Backend CD to EC2
 
 on:
-  push:
-    branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
   pull_request:
-    branches: [ "main", "develop-be", "chore/#19-ci-cd" ]
+    branches: [ "develop-be" ]
+    paths:
+      - 'backend/**'
   workflow_dispatch:
-# 테스트를 위한 path 제거
-#    paths:
-#      - 'backend/**'
 
 jobs:
   build:
