@@ -4,11 +4,11 @@ package com.onair.hearit.auth.presentation;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.onair.hearit.DbHelper;
 import com.onair.hearit.IntegrationTest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
 import com.onair.hearit.domain.Member;
-import com.onair.hearit.infrastructure.MemberRepository;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 class AuthControllerTest extends IntegrationTest {
 
     @Autowired
-    MemberRepository memberRepository;
+    DbHelper dbHelper;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -27,21 +27,21 @@ class AuthControllerTest extends IntegrationTest {
     @Test
     @DisplayName("로그인 성공 시 200 OK 및 accessToken 반환")
     void login_success() {
-        Member member = new Member(
+        Member member = Member.createUser(
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234")
         );
-        memberRepository.save(member);
+        dbHelper.insertMember(member);
 
         LoginRequest request = new LoginRequest("test123", "pass1234");
 
-        TokenResponse tokenResponse = given()
+        TokenResponse tokenResponse = given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
                 .post("/api/v1/auth/login")
-                .then()
+                .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(TokenResponse.class);
 
@@ -51,12 +51,12 @@ class AuthControllerTest extends IntegrationTest {
     @Test
     @DisplayName("비밀번호 틀리면 401 Unauthorized")
     void login_invalidPassword() {
-        Member member = new Member(
+        Member member = Member.createUser(
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234")
         );
-        memberRepository.save(member);
+        dbHelper.insertMember(member);
 
         LoginRequest request = new LoginRequest("test123", "wrong-pass");
 

@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
-public class DBHelper {
+public class DbHelper {
 
     @PersistenceContext
     private EntityManager em;
@@ -52,5 +52,18 @@ public class DBHelper {
         em.persist(hearitKeyword);
         em.flush();
         return hearitKeyword;
+    }
+
+    public void truncateAll() {
+        em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 0").executeUpdate();
+
+        em.createNativeQuery("TRUNCATE TABLE member").executeUpdate();
+        em.createNativeQuery("TRUNCATE TABLE hearit").executeUpdate();
+        em.createNativeQuery("TRUNCATE TABLE bookmark").executeUpdate();
+        em.createNativeQuery("TRUNCATE TABLE category").executeUpdate();
+        em.createNativeQuery("TRUNCATE TABLE hearit_keyword").executeUpdate();
+        em.createNativeQuery("TRUNCATE TABLE keyword").executeUpdate();
+
+        em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 1").executeUpdate();
     }
 }

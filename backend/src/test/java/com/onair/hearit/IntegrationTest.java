@@ -17,7 +17,7 @@ public abstract class IntegrationTest {
     int port;
 
     @Autowired
-    DBHelper dbHelper;
+    DbHelper dbHelper;
 
     @BeforeEach
     void setupPort() {
