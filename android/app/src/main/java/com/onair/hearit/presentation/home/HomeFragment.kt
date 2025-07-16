@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
+import com.onair.hearit.data.RecommendDummyData
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.domain.CategoryItem
 import com.onair.hearit.domain.HearitItem
-import com.onair.hearit.domain.RecommendHearitItem
 import com.onair.hearit.presentation.DrawerClickListener
 import java.time.LocalDateTime
 import kotlin.math.abs
@@ -26,36 +26,6 @@ class HomeFragment : Fragment() {
 
     private val recommendAdapter = RecommendHearitAdapter()
     private val categoryAdapter = CategoryAdapter()
-
-    private val sampleRecommends by lazy {
-        listOf(
-            RecommendHearitItem(
-                1L,
-                "추천 제목 1",
-                getString(R.string.home_example_recommend_description),
-            ),
-            RecommendHearitItem(
-                2L,
-                "추천 제목 2",
-                getString(R.string.home_example_recommend_description),
-            ),
-            RecommendHearitItem(
-                3L,
-                "추천 제목 3",
-                getString(R.string.home_example_recommend_description),
-            ),
-            RecommendHearitItem(
-                4L,
-                "추천 제목 4",
-                getString(R.string.home_example_recommend_description),
-            ),
-            RecommendHearitItem(
-                5L,
-                "추천 제목 5",
-                getString(R.string.home_example_recommend_description),
-            ),
-        )
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -97,7 +67,9 @@ class HomeFragment : Fragment() {
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(binding.rvHomeRecommendHearit)
 
-        val repeatedItems = List(1000) { index -> sampleRecommends[index % sampleRecommends.size] }
+        val sampleRecommendData = RecommendDummyData.getRecommendData(requireContext())
+        val repeatedItems =
+            List(20) { index -> sampleRecommendData[index % sampleRecommendData.size] }
         recommendAdapter.submitList(repeatedItems)
         binding.rvHomeRecommendHearit.adapter = recommendAdapter
 
