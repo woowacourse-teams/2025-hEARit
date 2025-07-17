@@ -68,7 +68,7 @@ jobs:
           done
 
       - name: Run Tests
-        run: ./gradlew test -Dspring.profiles.active=dev
+        run: ./gradlew test
 
       - name: Build with Gradle
         run: ./gradlew build -x test
