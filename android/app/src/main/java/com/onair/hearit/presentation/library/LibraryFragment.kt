@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import com.onair.hearit.data.BookmarkDummyData
+import com.onair.hearit.data.dummy.BookmarkDummyData
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 

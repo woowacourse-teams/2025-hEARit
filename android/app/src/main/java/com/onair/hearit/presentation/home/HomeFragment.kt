@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
-import com.onair.hearit.data.RecommendDummyData
+import com.onair.hearit.data.dummy.RecommendDummyData
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.domain.CategoryItem
 import com.onair.hearit.domain.HearitItem

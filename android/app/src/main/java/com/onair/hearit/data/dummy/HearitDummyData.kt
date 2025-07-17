@@ -1,4 +1,4 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.dummy
 
 import android.net.Uri
 import com.onair.hearit.R
