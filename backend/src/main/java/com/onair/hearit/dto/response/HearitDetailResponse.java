@@ -7,6 +7,7 @@ public record HearitDetailResponse(
         Long id,
         String title,
         String summary,
+        String source,
         Integer playTime,
         LocalDateTime createdAt
 ) {
@@ -16,6 +17,7 @@ public record HearitDetailResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
+                hearit.getSource(),
                 hearit.getPlayTime(),
                 hearit.getCreatedAt());
     }
