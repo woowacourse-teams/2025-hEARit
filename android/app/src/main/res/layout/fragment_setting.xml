@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -30,80 +31,46 @@
             android:background="@color/hearit_gray1"
             android:gravity="center"
             android:paddingVertical="16dp"
-            android:text="@string/setting_title"
+            android:text="@string/all_account_info"
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/iv_setting_profile"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
-            android:src="@mipmap/ic_launcher"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/img_default_profile"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_setting_title"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage" />
 
         <TextView
+            android:id="@+id/tv_setting_nickname"
             style="@style/pretendard_main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="김조이"
-            app:layout_constraintBottom_toBottomOf="@id/iv_setting_profile"
-            app:layout_constraintStart_toEndOf="@id/iv_setting_profile"
-            app:layout_constraintTop_toTopOf="@id/iv_setting_profile" />
+            android:layout_marginTop="32dp"
+            android:background="@drawable/bg_purple3_radius_24dp"
+            android:gravity="center"
+            android:paddingHorizontal="60dp"
+            android:paddingVertical="20dp"
+            android:text="@string/app_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/iv_setting_profile"
+            tools:text="닉네임은최대9글자" />
 
         <com.google.android.material.divider.MaterialDivider
             android:id="@+id/divider1"
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="32dp"
             app:dividerColor="@color/hearit_gray2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/iv_setting_profile" />
-
-        <TextView
-            android:id="@+id/tv_setting_detail_info"
-            style="@style/pretendard_main_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:text="@string/setting_detail_info"
-            app:layout_constraintStart_toStartOf="@id/iv_setting_profile"
-            app:layout_constraintTop_toBottomOf="@id/divider1" />
-
-        <TextView
-            android:id="@+id/tv_setting_email_text"
-            style="@style/pretendard_setting_body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/setting_email"
-            app:layout_constraintStart_toStartOf="@id/iv_setting_profile"
-            app:layout_constraintTop_toBottomOf="@id/tv_setting_detail_info" />
-
-        <TextView
-            style="@style/pretendard_body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="gkaqjawns@gmail.com"
-            android:textColor="@color/hearit_gray2"
-            app:layout_constraintBottom_toBottomOf="@id/tv_setting_email_text"
-            app:layout_constraintEnd_toEndOf="@id/divider1"
-            app:layout_constraintTop_toTopOf="@id/tv_setting_email_text" />
-
-        <com.google.android.material.divider.MaterialDivider
-            android:id="@+id/divider2"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginTop="28dp"
-            app:dividerColor="@color/hearit_gray2"
-            app:layout_constraintEnd_toEndOf="@id/divider1"
-            app:layout_constraintStart_toStartOf="@id/divider1"
-            app:layout_constraintTop_toBottomOf="@id/tv_setting_email_text" />
+            app:layout_constraintTop_toBottomOf="@id/tv_setting_nickname" />
 
         <TextView
             style="@style/pretendard_main_title"
@@ -111,8 +78,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
             android:text="@string/setting_notification"
-            app:layout_constraintStart_toStartOf="@id/iv_setting_profile"
-            app:layout_constraintTop_toBottomOf="@id/divider2" />
+            app:layout_constraintStart_toStartOf="@id/divider1"
+            app:layout_constraintTop_toBottomOf="@id/divider1" />
 
         <TextView
             android:id="@+id/tv_setting_notification_text"
@@ -121,8 +88,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="72dp"
             android:text="@string/setting_recommend_notification"
-            app:layout_constraintStart_toStartOf="@id/iv_setting_profile"
-            app:layout_constraintTop_toBottomOf="@id/divider2" />
+            app:layout_constraintStart_toStartOf="@id/divider1"
+            app:layout_constraintTop_toBottomOf="@id/divider1" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switch_notification"
@@ -130,7 +97,7 @@
             android:layout_height="48dp"
             android:thumb="@drawable/check_switch_thumb"
             app:layout_constraintBottom_toBottomOf="@id/tv_setting_notification_text"
-            app:layout_constraintEnd_toEndOf="@id/divider2"
+            app:layout_constraintEnd_toEndOf="@id/divider1"
             app:layout_constraintTop_toTopOf="@id/tv_setting_notification_text"
             app:track="@drawable/check_switch_track" />
     </androidx.constraintlayout.widget.ConstraintLayout>
