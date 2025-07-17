@@ -50,7 +50,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="20dp"
                 android:contentDescription="@null"
-                android:src="@mipmap/ic_launcher"
+                android:src="@drawable/img_default_profile"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage" />
