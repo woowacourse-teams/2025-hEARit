@@ -6,18 +6,20 @@ import com.onair.hearit.dto.response.OriginalAudioResponse;
 import com.onair.hearit.dto.response.ScriptResponse;
 import com.onair.hearit.dto.response.ShortAudioResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class FileSourceService {
 
-    @Value("${amazon.s3.bucket}")
-    private static String SOURCE_BASE_URL;
+    private final String sourceBaseUrl;
 
     private final HearitRepository hearitRepository;
+
+    public FileSourceService(@Value("${amazon.s3.bucket}") String sourceBaseUrl, HearitRepository hearitRepository) {
+        this.sourceBaseUrl = sourceBaseUrl;
+        this.hearitRepository = hearitRepository;
+    }
 
     public OriginalAudioResponse getOriginalAudio(Long hearitId) {
         Hearit hearit = findHearit(hearitId);
@@ -40,6 +42,6 @@ public class FileSourceService {
     }
 
     private String createFullUrl(String path) {
-        return SOURCE_BASE_URL + path;
+        return sourceBaseUrl + path;
     }
 }
