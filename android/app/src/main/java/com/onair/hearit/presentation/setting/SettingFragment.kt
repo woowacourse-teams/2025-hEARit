@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import com.onair.hearit.BuildConfig
+import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSettingBinding
 
 class SettingFragment : Fragment() {
@@ -41,5 +43,8 @@ class SettingFragment : Fragment() {
 
         binding.switchNotification.setOnClickListener {
         }
+
+        binding.tvSettingAppVersion.text =
+            getString(R.string.setting_app_version, BuildConfig.VERSION_NAME)
     }
 }
