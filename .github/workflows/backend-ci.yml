@@ -25,11 +25,11 @@ jobs:
           TZ: Asia/Seoul
         ports:
           - "13307:3306"
-        options: >-
-          --health-cmd="mysqladmin ping -h127.0.0.1 -P3306 -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }}"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+    #        options: >-
+    #          --health-cmd="mysqladmin ping -h127.0.0.1 -P3306 -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }}"
+    #          --health-interval=10s
+    #          --health-timeout=5s
+    #          --health-retries=5
 
     defaults:
       run:
