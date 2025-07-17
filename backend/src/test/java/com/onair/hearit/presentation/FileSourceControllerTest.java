@@ -23,7 +23,7 @@ class FileSourceControllerTest extends IntegrationTest {
 
         // when
         OriginalAudioResponse response = RestAssured.when()
-                .get("api/v1/hearits/" + hearit.getId() + "/original-audio-url")
+                .get("/api/v1/hearits/" + hearit.getId() + "/original-audio-url")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(OriginalAudioResponse.class);
@@ -40,7 +40,7 @@ class FileSourceControllerTest extends IntegrationTest {
 
         // when
         ShortAudioResponse response = RestAssured.when()
-                .get("api/v1/hearits/" + hearit.getId() + "/short-audio-url")
+                .get("/api/v1/hearits/" + hearit.getId() + "/short-audio-url")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(ShortAudioResponse.class);
@@ -57,7 +57,7 @@ class FileSourceControllerTest extends IntegrationTest {
 
         // when
         ScriptResponse response = RestAssured.when()
-                .get("api/v1/hearits/" + hearit.getId() + "/script-url")
+                .get("/api/v1/hearits/" + hearit.getId() + "/script-url")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(ScriptResponse.class);
@@ -74,7 +74,7 @@ class FileSourceControllerTest extends IntegrationTest {
 
         // when & then
         RestAssured.when()
-                .get("api/v1/hearits/" + notSavedHearitId + "/script-url")
+                .get("/api/v1/hearits/" + notSavedHearitId + "/script-url")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }

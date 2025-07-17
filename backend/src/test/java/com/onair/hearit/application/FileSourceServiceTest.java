@@ -1,8 +1,10 @@
 package com.onair.hearit.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onair.hearit.DbHelper;
+import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.OriginalAudioResponse;
@@ -23,6 +25,8 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("fake-test")
 class FileSourceServiceTest {
 
+    private static final String TEST_BASE_URL = "https://test.com";
+
     @Autowired
     private DbHelper dbHelper;
 
@@ -33,7 +37,7 @@ class FileSourceServiceTest {
 
     @BeforeEach
     void setup() {
-        fileSourceService = new FileSourceService(hearitRepository);
+        fileSourceService = new FileSourceService(TEST_BASE_URL, hearitRepository);
     }
 
     @Test
@@ -46,7 +50,7 @@ class FileSourceServiceTest {
         OriginalAudioResponse response = fileSourceService.getOriginalAudio(hearit.getId());
 
         // then
-        assertThat(response.url()).contains(hearit.getOriginalAudioUrl());
+        assertThat(response.url()).isEqualTo(TEST_BASE_URL + hearit.getOriginalAudioUrl());
     }
 
     @Test
@@ -59,7 +63,7 @@ class FileSourceServiceTest {
         ShortAudioResponse response = fileSourceService.getShortAudio(hearit.getId());
 
         // then
-        assertThat(response.url()).contains(hearit.getShortAudioUrl());
+        assertThat(response.url()).isEqualTo(TEST_BASE_URL + hearit.getShortAudioUrl());
     }
 
     @Test
@@ -72,7 +76,19 @@ class FileSourceServiceTest {
         ScriptResponse response = fileSourceService.getScript(hearit.getId());
 
         // then
-        assertThat(response.url()).contains(hearit.getScriptUrl());
+        assertThat(response.url()).isEqualTo(TEST_BASE_URL + hearit.getScriptUrl());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 히어릿 아이디 요청 시 NotFoundException을 던진다.")
+    void notFoundHearitExceptionTest() {
+        // given
+        Long notSavedHearitId = 1L;
+
+        // when & then
+        assertThatThrownBy(() -> fileSourceService.getScript(notSavedHearitId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("hearitId");
     }
 
     private Hearit saveHearit(int num) {
