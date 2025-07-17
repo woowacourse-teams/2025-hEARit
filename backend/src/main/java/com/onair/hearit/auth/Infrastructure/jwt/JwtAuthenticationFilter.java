@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.Infrastructure;
+package com.onair.hearit.auth.Infrastructure.jwt;
 
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.domain.MemberRole;

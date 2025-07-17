@@ -1,7 +1,7 @@
 package com.onair.hearit.auth.config;
 
-import com.onair.hearit.auth.Infrastructure.JwtAuthenticationFilter;
-import com.onair.hearit.auth.Infrastructure.JwtTokenProvider;
+import com.onair.hearit.auth.Infrastructure.jwt.JwtAuthenticationFilter;
+import com.onair.hearit.auth.Infrastructure.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

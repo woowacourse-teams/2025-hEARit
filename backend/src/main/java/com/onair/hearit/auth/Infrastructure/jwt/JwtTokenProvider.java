@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.Infrastructure;
+package com.onair.hearit.auth.Infrastructure.jwt;
 
 import com.onair.hearit.domain.MemberRole;
 import io.jsonwebtoken.Claims;
