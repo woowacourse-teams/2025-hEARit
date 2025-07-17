@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onair.hearit.DbHelper;
+import com.onair.hearit.auth.Infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.Infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
@@ -27,6 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("fake-test")
 @Import({AuthService.class, BCryptPasswordEncoder.class, JwtTokenProvider.class, DbHelper.class})
 class AuthServiceTest {
+
+    @MockitoBean
+    KakaoUserInfoClient kakaoUserInfoClient;
 
     @Autowired
     private AuthService authService;
@@ -39,7 +44,6 @@ class AuthServiceTest {
 
     @Autowired
     MemberRepository memberRepository;
-
 
     @Autowired
     DbHelper dbHelper;

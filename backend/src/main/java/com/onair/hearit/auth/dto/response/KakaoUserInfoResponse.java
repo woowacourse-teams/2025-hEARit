@@ -4,7 +4,7 @@ public record KakaoUserInfoResponse(
         String id,
         Properties properties
 ) {
-    private record Properties(
+    public record Properties(
             String nickname
     ) {
     }
