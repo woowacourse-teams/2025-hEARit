@@ -12,7 +12,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.data.HearitDummyData
+import com.onair.hearit.data.dummy.HearitDummyData
 import com.onair.hearit.databinding.FragmentExploreBinding
 
 class ExploreFragment : Fragment() {
