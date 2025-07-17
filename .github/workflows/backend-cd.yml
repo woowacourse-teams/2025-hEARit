@@ -1,0 +1,56 @@
+name: Backend CD to EC2
+
+on:
+  workflow_run:
+    workflows: [ "Backend CI" ]
+    types:
+      - completed
+
+jobs:
+  build:
+    name: Build and Upload Artifact
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build bootJar
+        working-directory: backend
+        run: ./gradlew bootJar
+
+      - name: Rename jar to app.jar
+        working-directory: backend/build/libs
+        run: |
+          JAR_NAME=$(ls *.jar | head -n 1)
+          mv "$JAR_NAME" app.jar
+
+      - name: Upload jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/build/libs/app.jar
+
+  deploy:
+    name: Deploy on EC2
+    needs: build
+    runs-on: [ self-hosted, backend, Linux, ARM64 ]
+
+    steps:
+      - name: Download jar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jar
+          path: ~/hearit
+
+      - name: Make deploy script executable
+        run: chmod +x ~/hearit/deploy.sh
+
+      - name: Run deploy script with sudo
+        run: sudo bash ~/hearit/deploy.sh

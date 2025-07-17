@@ -14,4 +14,9 @@ public abstract class HearitException extends RuntimeException {
         this.errorCode = errorCode;
         this.detail = detail;
     }
+
+    @Override
+    public String getMessage() {
+        return this.detail;
+    }
 }
