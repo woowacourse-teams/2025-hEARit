@@ -1,11 +1,10 @@
 name: Backend CD to EC2
 
 on:
-  pull_request:
-    branches: [ "develop-be" ]
-    paths:
-      - 'backend/**'
-  workflow_dispatch:
+  workflow_run:
+    workflows: [ "Backend CI" ]
+    types:
+      - completed
 
 jobs:
   build:
@@ -29,7 +28,9 @@ jobs:
           mysql.root.password=${{ secrets.MYSQL_ROOT_PASSWORD }}
           jwt.secret=${{ secrets.JWT_SECRET }}
           jwt.expiration=${{ secrets.JWT_EXPIRATION }}
-          EOF
+          server.port=${{ secrets.SERVER_PORT }}
+          amazon.s3.bucket.url=${{ secrets.AMAZON_S3_BUCKET_URL }}
+          EOF 
 
       - name: Build bootJar
         working-directory: backend
