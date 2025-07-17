@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.SubtitleLine
 
-class ScriptAdapter : ListAdapter<SubtitleLine, ScriptViewHolder>((ScriptDiffUtil)) {
+class ScriptAdapter : ListAdapter<SubtitleLine, ScriptViewHolder>((DiffCallback)) {
     private var highlightedId: Long? = null
 
     fun highlightSubtitle(id: Long?) {
@@ -24,7 +24,7 @@ class ScriptAdapter : ListAdapter<SubtitleLine, ScriptViewHolder>((ScriptDiffUti
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): ScriptViewHolder = ScriptViewHolder(parent)
+    ): ScriptViewHolder = ScriptViewHolder.create(parent)
 
     override fun onBindViewHolder(
         holder: ScriptViewHolder,
@@ -37,15 +37,18 @@ class ScriptAdapter : ListAdapter<SubtitleLine, ScriptViewHolder>((ScriptDiffUti
 
     override fun getItemCount(): Int = currentList.size
 
-    object ScriptDiffUtil : DiffUtil.ItemCallback<SubtitleLine>() {
-        override fun areItemsTheSame(
-            oldItem: SubtitleLine,
-            newItem: SubtitleLine,
-        ): Boolean = oldItem.id == newItem.id
+    companion object {
+        private val DiffCallback =
+            object : DiffUtil.ItemCallback<SubtitleLine>() {
+                override fun areItemsTheSame(
+                    oldItem: SubtitleLine,
+                    newItem: SubtitleLine,
+                ): Boolean = oldItem.id == newItem.id
 
-        override fun areContentsTheSame(
-            oldItem: SubtitleLine,
-            newItem: SubtitleLine,
-        ): Boolean = oldItem == newItem
+                override fun areContentsTheSame(
+                    oldItem: SubtitleLine,
+                    newItem: SubtitleLine,
+                ): Boolean = oldItem == newItem
+            }
     }
 }

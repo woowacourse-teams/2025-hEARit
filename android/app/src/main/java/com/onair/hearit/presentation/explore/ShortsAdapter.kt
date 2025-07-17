@@ -8,11 +8,11 @@ import com.onair.hearit.domain.HearitShortsItem
 
 class ShortsAdapter(
     private val player: ExoPlayer,
-) : ListAdapter<HearitShortsItem, ShortsViewHolder>((ExploreShortsDiffUtil)) {
+) : ListAdapter<HearitShortsItem, ShortsViewHolder>((DiffCallback)) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): ShortsViewHolder = ShortsViewHolder(parent, player)
+    ): ShortsViewHolder = ShortsViewHolder.create(parent, player)
 
     override fun onBindViewHolder(
         holder: ShortsViewHolder,
@@ -23,15 +23,18 @@ class ShortsAdapter(
 
     override fun getItemCount(): Int = currentList.size
 
-    object ExploreShortsDiffUtil : DiffUtil.ItemCallback<HearitShortsItem>() {
-        override fun areItemsTheSame(
-            oldItem: HearitShortsItem,
-            newItem: HearitShortsItem,
-        ): Boolean = oldItem.id == newItem.id
+    companion object {
+        private val DiffCallback =
+            object : DiffUtil.ItemCallback<HearitShortsItem>() {
+                override fun areItemsTheSame(
+                    oldItem: HearitShortsItem,
+                    newItem: HearitShortsItem,
+                ): Boolean = oldItem.id == newItem.id
 
-        override fun areContentsTheSame(
-            oldItem: HearitShortsItem,
-            newItem: HearitShortsItem,
-        ): Boolean = oldItem == newItem
+                override fun areContentsTheSame(
+                    oldItem: HearitShortsItem,
+                    newItem: HearitShortsItem,
+                ): Boolean = oldItem == newItem
+            }
     }
 }

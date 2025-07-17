@@ -8,8 +8,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.data.HearitDummyData
@@ -19,8 +19,10 @@ class ExploreFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
-    private lateinit var adapter: ShortsAdapter
+
     private lateinit var player: ExoPlayer
+    private lateinit var adapter: ShortsAdapter
+    private val snapHelper = PagerSnapHelper()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,22 +43,48 @@ class ExploreFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupWindowInsets()
+        initPlayer()
+        setupRecyclerView()
+        submitDummyData()
+
+        player.addListener(
+            object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    if (state == Player.STATE_ENDED) {
+                        scrollToNextItem()
+                    }
+                }
+            },
+        )
+    }
+
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
+    }
 
-        setupRecyclerView()
+    private fun initPlayer() {
+        player = ExoPlayer.Builder(requireContext()).build()
+    }
+
+    private fun scrollToNextItem() {
+        val layoutManager = binding.rvExplore.layoutManager ?: return
+        val currentSnapView = snapHelper.findSnapView(layoutManager) ?: return
+        val currentPosition = layoutManager.getPosition(currentSnapView)
+
+        val nextPosition = currentPosition + 1
+        if (nextPosition < adapter.itemCount) {
+            binding.rvExplore.smoothScrollToPosition(nextPosition)
+        }
     }
 
     private fun setupRecyclerView() {
-        player = ExoPlayer.Builder(requireContext()).build()
         adapter = ShortsAdapter(player)
-        binding.rvExplore.adapter = this.adapter
-        binding.rvExplore.layoutManager = LinearLayoutManager(requireContext())
-
-        val snapHelper = PagerSnapHelper()
+        binding.rvExplore.adapter = adapter
         snapHelper.attachToRecyclerView(binding.rvExplore)
 
         binding.rvExplore.addOnScrollListener(
@@ -78,6 +106,9 @@ class ExploreFragment : Fragment() {
                 }
             },
         )
+    }
+
+    private fun submitDummyData() {
         val dummyItems = HearitDummyData.getShorts(requireContext().packageName)
         adapter.submitList(dummyItems)
     }
@@ -85,5 +116,6 @@ class ExploreFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        player.release()
     }
 }
