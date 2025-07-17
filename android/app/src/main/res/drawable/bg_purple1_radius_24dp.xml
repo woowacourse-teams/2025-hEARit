@@ -1,19 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-
-    <!-- 투명 배경 -->
     <solid android:color="@android:color/transparent" />
-
-    <!-- 보라색 테두리 -->
     <stroke
         android:width="2dp"
         android:color="@color/hearit_purple1" />
-
-    <!-- 양쪽 둥근 모서리 -->
-    <corners
-        android:topLeftRadius="40dp"
-        android:topRightRadius="40dp"
-        android:bottomLeftRadius="40dp"
-        android:bottomRightRadius="40dp" />
+    <corners android:radius="40dp" />
 </shape>

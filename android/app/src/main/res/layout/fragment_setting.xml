@@ -51,7 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:background="@drawable/bg_purple3_radius_24dp"
+            android:background="@drawable/bg_purple1_radius_24dp"
             android:gravity="center"
             android:paddingHorizontal="60dp"
             android:paddingVertical="16dp"
