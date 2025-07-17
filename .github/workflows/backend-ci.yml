@@ -24,7 +24,7 @@ jobs:
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
           TZ: Asia/Seoul
         ports:
-          - "${{ secrets.TEST_MYSQL_PORT }}:3306"
+          - "13307:3306"
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
@@ -63,7 +63,7 @@ jobs:
       - name: Wait for MySQL to be ready
         run: |
           for i in {1..10}; do
-            nc -zv 127.0.0.1 ${{ secrets.TEST_MYSQL_PORT }} && echo "MySQL is up!" && break
+            nc -zv 127.0.0.1 13307 && echo "MySQL is up!" && break
             echo "Waiting for MySQL..." && sleep 5
           done
 
