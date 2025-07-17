@@ -25,11 +25,7 @@ jobs:
           TZ: Asia/Seoul
         ports:
           - "13307:3306"
-    #        options: >-
-    #          --health-cmd="mysqladmin ping -h127.0.0.1 -P3306 -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }}"
-    #          --health-interval=10s
-    #          --health-timeout=5s
-    #          --health-retries=5
+
 
     defaults:
       run:
@@ -51,25 +47,25 @@ jobs:
 
       - name: Generate application-secret.properties from Base64
         run: |
-          mkdir -p backend/src/main/resources
-          echo "${{ secrets.APPLICATION_SECRET_PROPERTIES }}" | base64 --decode > backend/src/main/resources/application-secret.properties
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_SECRET_PROPERTIES }}" | base64 --decode > src/main/resources/application-secret.properties
 
       - name: Wait for MySQL to be ready
         run: |
           for i in {1..10}; do
-            mysqladmin ping -h127.0.0.1 -P13307 -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} && echo "MySQL is ready!" && break
+            mysqladmin ping -h127.0.0.1 -P3306 -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} && echo "MySQL is ready!" && break
             echo "Waiting for MySQL..." && sleep 5
           done
 
       - name: Run Tests
-        run: ./gradlew test
+        run: ./gradlew test -Dspring.profiles.active=integration-test
 
       - name: Upload JUnit Test Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: junit-report
-          path: backend/build/reports/tests/test
+          path: build/reports/tests/test
 
       - name: Build with Gradle
         run: ./gradlew build -x test
