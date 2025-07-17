@@ -8,7 +8,6 @@
     <string name="all_privacy_policy">개인정보처리방침</string>
     <string name="all_terms_of_use">이용 약관</string>
     <string name="all_account_info">설정 및 계정 정보</string>
-    <string name="all_app_version">앱 버전 v%s</string>
 
     <!-- HomeFragment-->
     <string name="home_logo_description">궁금했던 내용들을, 히어릿을 통해 빠르게 들어보세요!</string>
@@ -45,11 +44,9 @@
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 골라 들으세요!</string>
 
     <!-- SettingFragment-->
-    <string name="setting_title">설정 및 계정정보</string>
-    <string name="setting_detail_info">계정 세부 정보</string>
-    <string name="setting_email">이메일</string>
     <string name="setting_notification">알림</string>
     <string name="setting_recommend_notification">히어릿 추천 알림</string>
+    <string name="setting_app_version">앱 버전 v%s</string>
 
     <!-- LibraryFragment-->
     <string name="library_nickname"><font color="#B677F3">닉네임제한은9글자</font>님,</string>

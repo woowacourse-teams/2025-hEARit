@@ -10,7 +10,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
-import com.onair.hearit.BuildConfig
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.presentation.explore.ExploreFragment
@@ -63,9 +62,6 @@ class MainActivity :
             val intent = Intent(Intent.ACTION_VIEW, TERMS_OF_USE_URL.toUri())
             startActivity(intent)
         }
-
-        binding.layoutDrawer.tvFooterAppVersion.text =
-            getString(R.string.all_app_version, BuildConfig.VERSION_NAME)
 
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
