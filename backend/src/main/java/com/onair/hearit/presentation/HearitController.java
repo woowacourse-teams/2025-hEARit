@@ -5,19 +5,19 @@ import com.onair.hearit.dto.response.HearitDetailResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/hearit")
+@RequestMapping("/api/v1/hearits")
 public class HearitController {
 
     private final HearitService hearitService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<HearitDetailResponse> readHearit(@RequestParam(name = "id") Long hearitId) {
+    public ResponseEntity<HearitDetailResponse> readHearit(@PathVariable(name = "id") Long hearitId) {
         HearitDetailResponse response = hearitService.getHearitDetail(hearitId);
         return ResponseEntity.ok(response);
     }
