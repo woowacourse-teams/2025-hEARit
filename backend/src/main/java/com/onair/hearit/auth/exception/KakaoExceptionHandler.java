@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.onair.hearit.auth")
 public class KakaoExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(KakaoClientException.class)
