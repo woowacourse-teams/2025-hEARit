@@ -10,30 +10,26 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.R
 import com.onair.hearit.databinding.ItemExploreBinding
 import com.onair.hearit.domain.HearitShortsItem
 
 class ShortsViewHolder(
-    parent: ViewGroup,
+    private val binding: ItemExploreBinding,
     private val player: ExoPlayer,
 ) : RecyclerView.ViewHolder(
-        LayoutInflater.from(parent.context).inflate(R.layout.item_explore, parent, false),
+        binding.root,
     ) {
-    private val binding = ItemExploreBinding.bind(itemView)
     private val handler = Handler(Looper.getMainLooper())
     private var updateRunnable: Runnable? = null
 
-    private lateinit var hearitShortsItem: HearitShortsItem
+    private var hearitShortsItem: HearitShortsItem? = null
     private val scriptAdapter = ScriptAdapter()
 
     @OptIn(UnstableApi::class)
     fun bind(item: HearitShortsItem) {
         this.hearitShortsItem = item
 
-        binding.tvExploreItemContentTitle.text = item.title
-        binding.tvExploreItemContentSummary.text = item.summary
-
+        binding.hearitItem = item
         binding.rvExploreItemScript.adapter = scriptAdapter
         scriptAdapter.submitList(item.script)
 
@@ -65,10 +61,11 @@ class ShortsViewHolder(
     }
 
     private fun updateSubtitleHighlight(currentPositionMs: Long) {
-        val currentSubtitle =
-            hearitShortsItem.script.lastOrNull { it.startTime <= currentPositionMs }
+        val item = hearitShortsItem ?: return
+
+        val currentSubtitle = item.script.lastOrNull { it.startTime <= currentPositionMs }
         val currentId = currentSubtitle?.id
-        val currentIndex = hearitShortsItem.script.indexOfLast { it.startTime <= currentPositionMs }
+        val currentIndex = item.script.indexOfLast { it.startTime <= currentPositionMs }
 
         scriptAdapter.highlightSubtitle(currentId)
 
@@ -76,6 +73,17 @@ class ShortsViewHolder(
         layoutManager?.let {
             val offset = binding.rvExploreItemScript.height / 3
             it.scrollToPositionWithOffset(currentIndex, offset)
+        }
+    }
+
+    companion object {
+        fun create(
+            parent: ViewGroup,
+            player: ExoPlayer,
+        ): ShortsViewHolder {
+            val inflater = LayoutInflater.from(parent.context)
+            val binding = ItemExploreBinding.inflate(inflater, parent, false)
+            return ShortsViewHolder(binding, player)
         }
     }
 }
