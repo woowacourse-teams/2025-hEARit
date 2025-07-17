@@ -31,12 +31,12 @@ class SettingFragmentTest {
     }
 
     @Test
-    fun `설정_및_계정정보_텍스트가_화면에_표시된다`() {
+    fun `설정_및_계정_정보_텍스트가_화면에_표시된다`() {
         onView(withId(R.id.tv_setting_title))
             .check(matches(isDisplayed()))
 
         onView(withId(R.id.tv_setting_title))
-            .check(matches(withText("설정 및 계정정보")))
+            .check(matches(withText("설정 및 계정 정보")))
     }
 
     @Test
