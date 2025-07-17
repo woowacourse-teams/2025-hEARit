@@ -1,0 +1,50 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ "develop-be" ]
+  pull_request:
+    branches: [ "develop-be" ]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: CI Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: current
+
+      - name: Generate application-secret.properties
+        run: |
+          mkdir -p src/main/resources
+          cat <<EOF > src/main/resources/application-secret.properties
+          mysql.root.password=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          jwt.secret=${{ secrets.JWT_SECRET }}
+          jwt.expiration=${{ secrets.JWT_EXPIRATION }}
+          server.port=${{ secrets.SERVER_PORT }}
+          amazon.s3.bucket.url=${{ secrets.AMAZON_S3_BUCKET_URL }}
+          EOF
+
+      - name: Run Tests
+        run: ./gradlew test
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
