@@ -51,7 +51,7 @@ class LibraryFragment :
         val bookmarks = BookmarkDummyData.getBookmarks()
         adapter.submitList(bookmarks)
 
-        binding.tvLibraryGuideWhenNoBookmark.visibility =
+        binding.layoutLibraryWhenNoBookmark.visibility =
             if (bookmarks.isEmpty()) View.VISIBLE else View.GONE
     }
 

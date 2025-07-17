@@ -56,4 +56,6 @@
     <string name="library_guide">오늘은 어떤 <font color="#B677F3">히어릿</font>을 들어볼까요?</string>
     <string name="library_bookmarked_hearit_title">내가 북마크한 히어릿</string>
     <string name="library_guide_when_no_bookmark">북마크한 <font color="#B677F3">히어릿</font>이 없어요!\n히어릿과 함께 IT 트렌드를 모아볼까요?</string>
+    <string name="library_guide_when_no_login"><font color="#B677F3">히어릿</font>을 모아서 듣고 싶다면,\n로그인을 해주세요!</string>
+    <string name="library_login_button_text">로그인 하러가기</string>
 </resources>

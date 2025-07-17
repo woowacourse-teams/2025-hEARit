@@ -8,14 +8,27 @@
         android:layout_height="match_parent"
         android:background="@drawable/bg_gradient_vertical">
 
-        <TextView
-            android:id="@+id/tv_library_guide_when_no_bookmark"
-            style="@style/pretendard_main_title"
+        <include
+            android:id="@+id/layout_library_when_no_login"
+            layout="@layout/layout_library_when_no_login"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="@string/library_guide_when_no_bookmark"
-            android:visibility="gone" />
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <include
+            android:id="@+id/layout_library_when_no_bookmark"
+            layout="@layout/layout_library_when_no_bookmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tv_nickname"
