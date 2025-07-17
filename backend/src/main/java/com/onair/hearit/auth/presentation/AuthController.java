@@ -1,6 +1,7 @@
 package com.onair.hearit.auth.presentation;
 
 import com.onair.hearit.auth.application.AuthService;
+import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
@@ -21,6 +22,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
         TokenResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/kakao-login")
+    public ResponseEntity<TokenResponse> loginWithKakao(@RequestBody KakaoLoginRequest request) {
+        TokenResponse response = authService.loginWithKakao(request);
         return ResponseEntity.ok(response);
     }
 

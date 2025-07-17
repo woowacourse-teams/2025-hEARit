@@ -27,7 +27,7 @@ class AuthControllerTest extends IntegrationTest {
     @Test
     @DisplayName("로그인 성공 시 200 OK 및 accessToken 반환")
     void login_success() {
-        Member member = Member.createUser(
+        Member member = Member.createLocalUser(
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234")
@@ -51,7 +51,7 @@ class AuthControllerTest extends IntegrationTest {
     @Test
     @DisplayName("비밀번호 틀리면 401 Unauthorized")
     void login_invalidPassword() {
-        Member member = Member.createUser(
+        Member member = Member.createLocalUser(
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234")
@@ -82,4 +82,5 @@ class AuthControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
+
 }

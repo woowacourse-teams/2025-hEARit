@@ -1,7 +1,7 @@
 package com.onair.hearit.auth.dto.request;
 
 public record SignupRequest(
-        String memberId,
+        String localId,
         String nickname,
         String password
 ) {

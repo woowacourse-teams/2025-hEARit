@@ -1,8 +1,11 @@
 package com.onair.hearit.auth.application;
 
-import com.onair.hearit.auth.Infrastructure.JwtTokenProvider;
+import com.onair.hearit.auth.Infrastructure.client.KakaoUserInfoClient;
+import com.onair.hearit.auth.Infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
+import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
 import com.onair.hearit.auth.dto.response.TokenResponse;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
@@ -19,24 +22,41 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final KakaoUserInfoClient kakaoUserInfoClient;
 
     public TokenResponse login(LoginRequest request) {
-        Member member = memberRepository.findByMemberId(request.memberId())
+        Member member = memberRepository.findByLocalId(request.localId())
                 .orElseThrow(() -> new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다."));
 
         if(!passwordEncoder.matches(request.password(), member.getPassword())) {
             throw new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다.");
         }
 
-        String token = jwtTokenProvider.createToken(member.getId(), member.getMemberRole());
+        String token = jwtTokenProvider.createToken(member.getId(), member.getRole());
         return new TokenResponse(token);
     }
 
     public void signup(SignupRequest request) {
-        if (memberRepository.existsByMemberId(request.memberId())) {
+        if (memberRepository.existsByLocalId(request.localId())) {
             throw new InvalidInputException("이미 존재하는 아이디입니다.");
         }
         String hash = passwordEncoder.encode(request.password());
-        memberRepository.save(Member.createUser(request.memberId(), request.nickname(), hash));
+        memberRepository.save(Member.createLocalUser(request.localId(), request.nickname(), hash));
+    }
+
+    public TokenResponse loginWithKakao(KakaoLoginRequest request) {
+        KakaoUserInfoResponse kakaoUser = kakaoUserInfoClient.getUserInfo(request.accessToken());
+
+        Member member = memberRepository.findBySocialId(kakaoUser.id())
+                .orElseGet(() -> signupWithKakao(kakaoUser));
+
+        String accessToken = jwtTokenProvider.createToken(member.getId(), member.getRole());
+
+        return new TokenResponse(accessToken);
+    }
+
+    private Member signupWithKakao(KakaoUserInfoResponse kakaoUser) {
+        Member member = Member.createSocialUser(kakaoUser.id(), kakaoUser.nickname());
+        return memberRepository.save(member);
     }
 }

@@ -21,36 +21,45 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
-    private Member(String memberId, String nickname, String password, MemberRole memberRole) {
-        this.memberId = memberId;
-        this.nickname = nickname;
+    public Member(String localId, String password, String socialId, String nickname,
+                  MemberRole role) {
+        this.localId = localId;
         this.password = password;
-        this.memberRole = memberRole;
+        this.socialId = socialId;
+        this.nickname = nickname;
+        this.role = role;
     }
 
     public static Member createAdmin(String memberId, String nickname, String password) {
-        return new Member(memberId, nickname, password, MemberRole.ADMIN);
+        return new Member(memberId, password, null, nickname, MemberRole.ADMIN);
     }
 
-    public static Member createUser(String memberId, String nickname, String password) {
-        return new Member(memberId, nickname, password, MemberRole.USER);
+    public static Member createLocalUser(String memberId, String nickname, String password) {
+        return new Member(memberId, password, null, nickname, MemberRole.USER);
+    }
+
+    public static Member createSocialUser(String socialId,  String nickname) {
+        return new Member(null, null, socialId, nickname, MemberRole.USER);
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private String memberId;
+    @Column(name = "local_id")
+    private String localId; // 자체 회원용
+
+    @Column(name = "password")
+    private String password; // 자체 회원용
+
+    @Column(name = "social_id")
+    private String socialId;
 
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
-    @Column(name = "password", nullable = false)
-    private String password;
-
-    @Column(name = "member_role", nullable = false)
-    private MemberRole memberRole;
+    @Column(name = "role", nullable = false)
+    private MemberRole role;
 
     @CreatedDate
     @Column(name = "created_at")

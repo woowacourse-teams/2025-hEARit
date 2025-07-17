@@ -34,6 +34,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'jakarta.validation:jakarta.validation-api'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Spring Security + Jwt
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -42,6 +43,7 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
+    testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner:4.2.1'
 }
 
 tasks.named('test') {
