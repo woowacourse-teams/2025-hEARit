@@ -48,7 +48,11 @@ class LibraryFragment :
         }
 
         // 테스트용으로 더미 데이터 넣어 놓음
-        adapter.submitList(BookmarkDummyData.getBookmarks())
+        val bookmarks = BookmarkDummyData.getBookmarks()
+        adapter.submitList(bookmarks)
+
+        binding.tvLibraryGuideWhenNoBookmark.visibility =
+            if (bookmarks.isEmpty()) View.VISIBLE else View.GONE
     }
 
     override fun onClickOption() {

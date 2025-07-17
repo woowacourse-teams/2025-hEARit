@@ -9,6 +9,15 @@
         android:background="@drawable/bg_gradient_vertical">
 
         <TextView
+            android:id="@+id/tv_library_guide_when_no_bookmark"
+            style="@style/pretendard_main_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/library_guide_when_no_bookmark"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/tv_nickname"
             style="@style/pretendard_nickname"
             android:layout_width="wrap_content"
