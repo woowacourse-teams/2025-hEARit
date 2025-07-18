@@ -3,7 +3,6 @@ package com.onair.hearit.presentation;
 import com.onair.hearit.application.BookmarkService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
-import com.onair.hearit.dto.response.HearitDetailResponse;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,8 @@ public class BookmarkController {
     private final BookmarkService bookmarkService;
 
     @GetMapping("/bookmarks")
-    public ResponseEntity<List<BookmarkHearitResponse>> readBookmarkHearits(@AuthenticationPrincipal CurrentMember member) {
+    public ResponseEntity<List<BookmarkHearitResponse>> readBookmarkHearits(
+            @AuthenticationPrincipal CurrentMember member) {
         List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.memberId());
         return ResponseEntity.ok(responses);
     }
