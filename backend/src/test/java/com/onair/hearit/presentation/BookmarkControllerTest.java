@@ -20,25 +20,30 @@ class BookmarkControllerTest extends IntegrationTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 북마크 목록을 반환한다.")
+    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 페이지에 따른 북마크 목록을 반환한다.")
     void readBookmarkHearitsTest() {
         // given
         Member member = saveMember();
         String token = generateToken(member);
-        int bookmarkCount = 5;
+        int bookmarkCount = 30;
         for (int i = 0; i < bookmarkCount; i++) {
             Hearit hearit = saveHearitWithSuffix(i);
             dbHelper.insertBookmark(new Bookmark(member, hearit));
         }
 
         // when & then
-        RestAssured.given()
-                .header("Authorization", "Bearer " + token)
-                .when()
-                .get("/api/v1/hearits/bookmarks")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .body("size()", equalTo(5));
+        int size = 5;
+        for (int i = 0; i < bookmarkCount / size ; i++) {
+            RestAssured.given()
+                    .header("Authorization", "Bearer " + token)
+                    .param("page", i)
+                    .param("size", size)
+                    .when()
+                    .get("/api/v1/hearits/bookmarks")
+                    .then()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("size()", equalTo(5));
+        }
     }
 
     @Test

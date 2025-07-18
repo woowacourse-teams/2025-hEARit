@@ -49,7 +49,7 @@ class BookmarkServiceTest {
     }
 
     @Test
-    @DisplayName("멤버 아이디에 따라 북마크한 히어릿 목록을 조회한다.")
+    @DisplayName("멤버 아이디에 따라 북마크한 히어릿 목록을 페이지에 따라 조회한다.")
     void getBookmarkHearitsTest() {
         // given
         Member member = saveMember();
@@ -59,7 +59,7 @@ class BookmarkServiceTest {
         }
 
         // when
-        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.getId());
+        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.getId(), 0, 5);
 
         // then
         assertThat(responses).hasSize(5);
@@ -71,13 +71,13 @@ class BookmarkServiceTest {
         // given
         Member member = saveMember();
         Hearit hearit = saveHearitWithSuffix(1);
-        int previousBookmarkCount = bookmarkService.getBookmarkHearits(member.getId()).size();
+        int previousBookmarkCount = bookmarkService.getBookmarkHearits(member.getId(), 0, 10).size();
 
         // when
         bookmarkService.addBookmark(hearit.getId(), member.getId());
 
         // then
-        int currentBookmarkCount = bookmarkService.getBookmarkHearits(member.getId()).size();
+        int currentBookmarkCount = bookmarkService.getBookmarkHearits(member.getId(), 0, 10).size();
         assertThat(previousBookmarkCount + 1).isEqualTo(currentBookmarkCount);
     }
 
