@@ -15,6 +15,7 @@ public class KakaoClientProperties {
     @NotBlank(message = "baseUrl은 비어있을 수 없습니다.")
     private final String baseUrl;
 
+    // TODO: timeout 관련 properties 설정 필요
 //    @NotNull(message = "connectTimeout은 비어있을 수 없습니다.")
 //    private final int connectTimeout;
 //

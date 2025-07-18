@@ -44,6 +44,7 @@ public class AuthService {
         memberRepository.save(Member.createLocalUser(request.localId(), request.nickname(), hash));
     }
 
+    // 소셜 로그인의 경우 회원가입이 따로 없으며 로그인 시 자동으로 회원가입되도록 구현함
     public TokenResponse loginWithKakao(KakaoLoginRequest request) {
         KakaoUserInfoResponse kakaoUser = kakaoUserInfoClient.getUserInfo(request.accessToken());
 
