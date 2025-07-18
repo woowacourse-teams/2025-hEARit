@@ -9,8 +9,10 @@ import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HearitSimpleResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,6 +67,63 @@ class HearitServiceTest {
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
     }
+
+    @Test
+    @DisplayName("히어릿 목록을 조회 시 제목이 포함된 히어릿만 반환한다.")
+    void searchHearitsByTitle_onlyTitleMatch() {
+        // given
+        Hearit hearit1 = saveHearitWithSuffix(1);
+        Hearit hearit2 = saveHearitWithSuffix(1);
+        Hearit hearit3 = saveHearitWithSuffix(3);
+
+        // when
+        List<HearitSimpleResponse> result = hearitService.searchHearitsByTitle("title1", 0, 10);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result.get(0).title()).isEqualTo("title1"),
+                () -> assertThat(result.get(1).title()).isEqualTo("title1")
+        );
+    }
+
+    @Test
+    @DisplayName("히어릿 목록을 조회 시 최신순으로 정렬되어 반환된다.")
+    void searchHearitsByTitle_sortedByCreatedAtDesc() {
+        // given
+        Hearit hearit1 = saveHearitWithSuffix(1);
+        Hearit hearit2 = saveHearitWithSuffix(2);
+
+        // when
+        List<HearitSimpleResponse> result = hearitService.searchHearitsByTitle("title", 0, 10);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result.get(0).id()).isEqualTo(hearit2.getId()),
+                () -> assertThat(result.get(1).id()).isEqualTo(hearit1.getId())
+        );
+    }
+
+
+    @Test
+    @DisplayName("히어릿 목록을 조회 시 페이지네이션이 적용되어 반환된다.")
+    void searchHearitsByTitle_pagination() {
+        // given
+        Hearit hearit1 = saveHearitWithSuffix(1);
+        Hearit hearit2 = saveHearitWithSuffix(2);
+        Hearit hearit3 = saveHearitWithSuffix(3);
+
+        // when
+        List<HearitSimpleResponse> result = hearitService.searchHearitsByTitle("title", 1, 2);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(1),
+                () -> assertThat(result.getFirst().id()).isEqualTo(hearit1.getId())
+        );
+    }
+
 
     private Hearit saveHearitWithSuffix(int suffix) {
         Category category = new Category("name" + suffix);

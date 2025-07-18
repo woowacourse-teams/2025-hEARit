@@ -1,10 +1,12 @@
 package com.onair.hearit.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HearitSimpleResponse;
 import io.restassured.RestAssured;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +42,37 @@ class HearitControllerTest extends IntegrationTest {
                 .get("/api/v1/hearits/" + notFoundHearitId)
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
+    }
+
+
+    @Test
+    @DisplayName("히어릿 검색 요청 시 200 OK 및 제목이 포함된 히어릿을 최신순으로 히어릿들을 반환한다.")
+    void searchHearitsWithPaginationAndKeyword() {
+        // given
+        Hearit h1 = saveHearitWithSuffix(1);
+        Hearit h2 = saveHearitWithSuffix(1);
+        Hearit h3 = saveHearitWithSuffix(2);
+
+        // when & then
+        var response = RestAssured
+                .given()
+                .queryParam("title", "title1")
+                .queryParam("page", 0)
+                .queryParam("size", 2)
+                .when()
+                .get("/api/v1/hearits/search")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract().jsonPath().getList(".", HearitSimpleResponse.class);
+
+        // then
+        assertAll(
+                () -> assertThat(response).hasSize(2),
+                () -> assertThat(response.get(0).title()).isEqualTo("title1"),
+                () -> assertThat(response.get(1).title()).isEqualTo("title1"),
+                () -> assertThat(response.get(0).id()).isEqualTo(h2.getId()),
+                () -> assertThat(response.get(1).id()).isEqualTo(h1.getId())
+        );
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {
