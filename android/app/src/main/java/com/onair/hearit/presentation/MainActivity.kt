@@ -81,15 +81,8 @@ class MainActivity :
 
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_explore -> {
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container_view, ExploreFragment())
-                        .commit()
-                    true
-                }
-
                 R.id.nav_home -> {
+                    showPlayerControlView()
                     supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.fragment_container_view, HomeFragment())
@@ -98,6 +91,7 @@ class MainActivity :
                 }
 
                 R.id.nav_search -> {
+                    showPlayerControlView()
                     supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.fragment_container_view, SearchFragment())
@@ -105,7 +99,17 @@ class MainActivity :
                     true
                 }
 
+                R.id.nav_explore -> {
+                    hidePlayerControlView()
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.fragment_container_view, ExploreFragment())
+                        .commit()
+                    true
+                }
+
                 R.id.nav_library -> {
+                    showPlayerControlView()
                     supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.fragment_container_view, LibraryFragment())
@@ -120,6 +124,27 @@ class MainActivity :
 
     override fun openDrawer() {
         binding.drawerLayout.openDrawer(GravityCompat.END)
+    }
+
+    @OptIn(UnstableApi::class)
+    fun hidePlayerControlView() {
+        val controller = binding.layoutBottomPlayerController
+        controller
+            .animate()
+            .translationY(controller.height.toFloat())
+            .setDuration(200)
+            .start()
+        controller.player?.pause()
+    }
+
+    @OptIn(UnstableApi::class)
+    fun showPlayerControlView() {
+        val controller = binding.layoutBottomPlayerController
+        controller
+            .animate()
+            .translationY(0f)
+            .setDuration(200)
+            .start()
     }
 
     companion object {
