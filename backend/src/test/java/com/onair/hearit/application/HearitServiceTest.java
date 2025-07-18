@@ -69,7 +69,7 @@ class HearitServiceTest {
     }
 
     @Test
-    @DisplayName("최대 10개의  랜덤 히어릿을 조회할 수 있다.")
+    @DisplayName("최대 10개의 랜덤 히어릿을 조회할 수 있다.")
     void getRandomHearits() {
         // given
         IntStream.rangeClosed(1, 11)

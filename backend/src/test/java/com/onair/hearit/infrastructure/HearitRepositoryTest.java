@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @Import(DbHelper.class)
 @ActiveProfiles("fake-test")
-public class HearitRepositoryTest {
+class HearitRepositoryTest {
 
     @Autowired
     private DbHelper dbHelper;
