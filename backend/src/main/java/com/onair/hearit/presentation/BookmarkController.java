@@ -30,13 +30,15 @@ public class BookmarkController {
     }
 
     @PostMapping("/{hearitId}/bookmarks")
-    public ResponseEntity<Void> createBookmark(@PathVariable Long hearitId, @AuthenticationPrincipal CurrentMember member) {
+    public ResponseEntity<Void> createBookmark(@PathVariable Long hearitId,
+                                               @AuthenticationPrincipal CurrentMember member) {
         bookmarkService.addBookmark(hearitId, member.memberId());
         return ResponseEntity.created(URI.create("/api/v1/hearits/" + hearitId)).build();
     }
 
     @DeleteMapping("/{hearitId}/bookmarks/{bookmarkId}")
-    public ResponseEntity<Void> deleteBookmark(@PathVariable Long bookmarkId, @AuthenticationPrincipal CurrentMember member) {
+    public ResponseEntity<Void> deleteBookmark(@PathVariable Long bookmarkId,
+                                               @AuthenticationPrincipal CurrentMember member) {
         bookmarkService.deleteBookmark(bookmarkId, member.memberId());
         return ResponseEntity.noContent().build();
     }

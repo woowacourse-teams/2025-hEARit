@@ -48,6 +48,7 @@ public class BookmarkService {
         Member member = getMemberById(memberId);
         if (bookmark.isCreatedBy(member)) {
             bookmarkRepository.delete(bookmark);
+            return;
         }
         throw new UnauthorizedException("북마크를 삭제할 권한이 없습니다.");
     }
