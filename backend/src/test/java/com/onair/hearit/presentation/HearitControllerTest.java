@@ -45,7 +45,7 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("랜덤 히어릿을 조회 시, 200 OK 및 히어릿 정보 목록을 제공한다.")
-    void readExploredHearits() {
+    void readRandomHearits() {
         // given
         saveHearitWithSuffix(1);
         saveHearitWithSuffix(2);
@@ -55,6 +55,28 @@ class HearitControllerTest extends IntegrationTest {
         List<HearitDetailResponse> responses = RestAssured.given()
                 .when()
                 .get("/api/v1/hearits/random")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .jsonPath()
+                .getList(".", HearitDetailResponse.class);
+
+        // then
+        assertThat(responses).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("추천 히어릿을 조회 시, 200 OK 및 히어릿 정보 목록을 제공한다.")
+    void readTodayHearits() {
+        // given
+        saveHearitWithSuffix(1);
+        saveHearitWithSuffix(2);
+        saveHearitWithSuffix(3);
+
+        // when
+        List<HearitDetailResponse> responses = RestAssured.given()
+                .when()
+                .get("/api/v1/hearits/recommend")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()

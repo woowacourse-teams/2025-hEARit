@@ -24,8 +24,14 @@ public class HearitController {
     }
 
     @GetMapping("/random")
-    public ResponseEntity<List<HearitDetailResponse>> readExploredHearits() {
-        List<HearitDetailResponse> responses = hearitService.getExploredHearits();
+    public ResponseEntity<List<HearitDetailResponse>> readRandomHearits() {
+        List<HearitDetailResponse> responses = hearitService.getRandomHearits();
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/recommend")
+    public ResponseEntity<List<HearitDetailResponse>> readRecommendedHearits() {
+        List<HearitDetailResponse> responses = hearitService.getRecommendedHearits();
         return ResponseEntity.ok(responses);
     }
 }
