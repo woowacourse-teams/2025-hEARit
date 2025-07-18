@@ -2,6 +2,7 @@ package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HearitPersonalDetailResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +17,10 @@ public class HearitController {
 
     private final HearitService hearitService;
 
+    //TODO 실제 멤버로 변경
     @GetMapping("/{hearitId}")
-    public ResponseEntity<HearitDetailResponse> readHearit(@PathVariable Long hearitId) {
-        HearitDetailResponse response = hearitService.getHearitDetail(hearitId);
+    public ResponseEntity<HearitPersonalDetailResponse> readHearit(@PathVariable Long hearitId, Long memberId) {
+        HearitPersonalDetailResponse response = hearitService.getHearitPersonalDetail(hearitId, memberId);
         return ResponseEntity.ok(response);
     }
 }
