@@ -2,6 +2,7 @@ package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +25,19 @@ public class HearitController {
     public ResponseEntity<HearitDetailResponse> readHearit(@PathVariable Long hearitId) {
         HearitDetailResponse response = hearitService.getHearitDetail(hearitId);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "랜덤 히어릿 10개 조회", description = "랜덤 히어릿을 5개 조회합니다.")
+    @GetMapping("/random")
+    public ResponseEntity<List<HearitDetailResponse>> readRandomHearits() {
+        List<HearitDetailResponse> responses = hearitService.getRandomHearits();
+        return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "추천 히어릿 5개 조회", description = "추천 히어릿을 5개 조회합니다.")
+    @GetMapping("/recommend")
+    public ResponseEntity<List<HearitDetailResponse>> readRecommendedHearits() {
+        List<HearitDetailResponse> responses = hearitService.getRecommendedHearits();
+        return ResponseEntity.ok(responses);
     }
 }
