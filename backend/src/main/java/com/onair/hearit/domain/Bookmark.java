@@ -43,4 +43,8 @@ public class Bookmark {
         this.member = member;
         this.hearit = hearit;
     }
+
+    public boolean isCreatedBy(Member member) {
+        return this.member.equals(member);
+    }
 }
