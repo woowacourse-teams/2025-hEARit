@@ -19,8 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class KakaoExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(KakaoClientException.class)
-    public ResponseEntity<Object> handleBadRequestException(final KakaoClientException e, final WebRequest request)
-    {
+    public ResponseEntity<Object> handleBadRequestException(final KakaoClientException e, final WebRequest request) {
         log.error(e.getMessage(), e);
         return buildResponseEntity(e, e.getStatusCode(), e.getMessage(), request);
     }

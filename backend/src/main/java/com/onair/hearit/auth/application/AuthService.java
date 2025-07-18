@@ -36,7 +36,7 @@ public class AuthService {
     }
 
     private void validatePassword(LoginRequest request, Member member) {
-        if(!passwordEncoder.matches(request.password(), member.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
             throw new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다.");
         }
     }

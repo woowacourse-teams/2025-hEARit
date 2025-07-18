@@ -36,6 +36,15 @@ public class Bookmark {
     private Hearit hearit;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    public Bookmark(Member member, Hearit hearit) {
+        this.member = member;
+        this.hearit = hearit;
+    }
+
+    public boolean isCreatedBy(Member member) {
+        return this.member.equals(member);
+    }
 }

@@ -30,21 +30,16 @@ class AuthServiceTest {
 
     @MockitoBean
     KakaoUserInfoClient kakaoUserInfoClient;
-
-    @Autowired
-    private AuthService authService;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Autowired
     MemberRepository memberRepository;
-
     @Autowired
     DbHelper dbHelper;
+    @Autowired
+    private AuthService authService;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("아이디와 비밀번호로 회원가입할 수 있다")

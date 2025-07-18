@@ -1,12 +1,15 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.HearitService;
+import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.response.HearitDetailResponse;
-import java.util.List;
+import com.onair.hearit.dto.response.HearitPersonalDetailResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +25,9 @@ public class HearitController {
 
     @Operation(summary = "단일 히어릿 상세 조회", description = "히어릿ID룰 통해 하나의 히어릿 상세 정보를 조회합니다.")
     @GetMapping("/{hearitId}")
-    public ResponseEntity<HearitDetailResponse> readHearit(@PathVariable Long hearitId) {
-        HearitDetailResponse response = hearitService.getHearitDetail(hearitId);
+    public ResponseEntity<HearitPersonalDetailResponse> readHearit(@PathVariable Long hearitId,
+                                                                   @AuthenticationPrincipal CurrentMember member) {
+        HearitPersonalDetailResponse response = hearitService.getHearitPersonalDetail(hearitId, member.memberId());
         return ResponseEntity.ok(response);
     }
 

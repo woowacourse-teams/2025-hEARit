@@ -1,0 +1,107 @@
+package com.onair.hearit.presentation;
+
+import static org.hamcrest.Matchers.equalTo;
+
+import com.onair.hearit.auth.Infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.domain.Bookmark;
+import com.onair.hearit.domain.Category;
+import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.domain.Member;
+import io.restassured.RestAssured;
+import java.time.LocalDateTime;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+
+class BookmarkControllerTest extends IntegrationTest {
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Test
+    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 페이지에 따른 북마크 목록을 반환한다.")
+    void readBookmarkHearitsTest() {
+        // given
+        Member member = saveMember();
+        String token = generateToken(member);
+        int bookmarkCount = 30;
+        for (int i = 0; i < bookmarkCount; i++) {
+            Hearit hearit = saveHearitWithSuffix(i);
+            dbHelper.insertBookmark(new Bookmark(member, hearit));
+        }
+
+        // when & then
+        int size = 5;
+        for (int i = 0; i < bookmarkCount / size; i++) {
+            RestAssured.given()
+                    .header("Authorization", "Bearer " + token)
+                    .param("page", i)
+                    .param("size", size)
+                    .when()
+                    .get("/api/v1/hearits/bookmarks")
+                    .then()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("size()", equalTo(5));
+        }
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자가 북마크 추가 시, 추가 후 201 CREATED를 반환한다.")
+    void createBookmarkTest() {
+        // given
+        Member member = saveMember();
+        String token = generateToken(member);
+        Hearit hearit = saveHearitWithSuffix(1);
+
+        // when & then
+        RestAssured.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .post("/api/v1/hearits/" + hearit.getId() + "/bookmarks")
+                .then()
+                .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자가 북마크 삭제 시, 삭제 후 204 NOCONTENT를 반환한다.")
+    void deleteBookmark() {
+        // given
+        Member member = saveMember();
+        String token = generateToken(member);
+        Hearit hearit = saveHearitWithSuffix(1);
+        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(member, hearit));
+
+        // when & then
+        RestAssured.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .delete("/api/v1/hearits/" + hearit.getId() + "/bookmarks/" + bookmark.getId())
+                .then()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
+    private Member saveMember() {
+        return dbHelper.insertMember(new Member("testId", "test1234!", null, "testMember"));
+    }
+
+    private String generateToken(Member member) {
+        return jwtTokenProvider.createToken(member.getId());
+    }
+
+    private Hearit saveHearitWithSuffix(int suffix) {
+        Category category = new Category("name" + suffix);
+        dbHelper.insertCategory(category);
+
+        Hearit hearit = new Hearit(
+                "title" + suffix,
+                "summary" + suffix, suffix,
+                "originalAudioUrl" + suffix,
+                "shortAudioUrl" + suffix,
+                "scriptUrl" + suffix,
+                "source" + suffix,
+                LocalDateTime.now(),
+                category);
+        return dbHelper.insertHearit(hearit);
+    }
+}
