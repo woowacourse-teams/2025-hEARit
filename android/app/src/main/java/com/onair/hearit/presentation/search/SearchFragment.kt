@@ -11,6 +11,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
 import com.onair.hearit.domain.CategoryItem
 import com.onair.hearit.domain.KeywordItem
@@ -48,8 +49,23 @@ class SearchFragment : Fragment() {
             insets
         }
 
+        setupSearchEnterKey()
         setKeywordRecyclerView()
         setCategoriesRecyclerView()
+    }
+
+    private fun setupSearchEnterKey() {
+        binding.etSearch.setOnEditorActionListener { v, actionId, event ->
+            if (event != null &&
+                event.keyCode == android.view.KeyEvent.KEYCODE_ENTER &&
+                event.action == android.view.KeyEvent.ACTION_DOWN
+            ) {
+                navigateToSearchResult()
+                true
+            } else {
+                false
+            }
+        }
     }
 
     private fun setKeywordRecyclerView() {
@@ -91,5 +107,15 @@ class SearchFragment : Fragment() {
                 )
             }
         categoryAdapter.submitList(sampleCategories)
+    }
+
+    private fun navigateToSearchResult() {
+        parentFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.fragment_container_view,
+                SearchResultFragment(),
+            ).addToBackStack(null)
+            .commit()
     }
 }
