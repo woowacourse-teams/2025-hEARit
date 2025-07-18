@@ -13,6 +13,8 @@ import com.onair.hearit.dto.response.HearitSimpleResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -69,6 +71,35 @@ class HearitServiceTest {
     }
 
     @Test
+    @DisplayName("최대 10개의 랜덤 히어릿을 조회할 수 있다.")
+    void getRandomHearits() {
+        // given
+        IntStream.rangeClosed(1, 11)
+                .forEach(this::saveHearitWithSuffix);
+
+        // when
+        List<HearitDetailResponse> hearits = hearitService.getRandomHearits();
+
+        // then
+        assertThat(hearits).hasSize(10);
+    }
+
+    @Test
+    @DisplayName("최대 5개의 추천 히어릿을 조회할 수 있다.")
+    void getRecommendedHearits() {
+        // given
+        IntStream.rangeClosed(1, 6)
+                .forEach(this::saveHearitWithSuffix);
+
+        // when
+        List<HearitDetailResponse> hearits = hearitService.getRecommendedHearits();
+
+        // then
+        assertThat(hearits).hasSize(5);
+    }
+
+
+    @Test
     @DisplayName("히어릿 목록을 조회 시 제목이 포함된 히어릿만 반환한다.")
     void searchHearitsByTitle_onlyTitleMatch() {
         // given
@@ -123,7 +154,6 @@ class HearitServiceTest {
                 () -> assertThat(result.getFirst().id()).isEqualTo(hearit1.getId())
         );
     }
-
 
     private Hearit saveHearitWithSuffix(int suffix) {
         Category category = new Category("name" + suffix);

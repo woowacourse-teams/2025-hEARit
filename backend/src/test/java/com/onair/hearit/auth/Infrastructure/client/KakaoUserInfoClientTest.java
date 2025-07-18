@@ -16,7 +16,7 @@ class KakaoUserInfoClientTest extends IntegrationTest {
     @Disabled("실제 카카오 외부 API를 호출하는 테스트-필요시 활성화")
     @Test
     @DisplayName("실제 카카오 API를 호출하여 사용자정보를 가져온다.")
-    void 실제_카카오_API_호출하여_사용자정보를_가져온다() {
+    void fetchUserInfo_usingRealKakaoApi() {
         String kakaoAccessToken = "yC5CmZ1kj1jHcCICRBWX_dvbXIMqfn8rAAAAAQoXBi4AAAGYE03XhpQkbXeV0h_w";
 
         KakaoUserInfoResponse response = kakaoUserInfoClient.getUserInfo(kakaoAccessToken);

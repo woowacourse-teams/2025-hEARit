@@ -9,6 +9,7 @@ import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSimpleResponse;
 import io.restassured.RestAssured;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,50 @@ class HearitControllerTest extends IntegrationTest {
                 .get("/api/v1/hearits/" + notFoundHearitId)
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
+    }
+
+    @Test
+    @DisplayName("랜덤 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
+    void readRandomHearits() {
+        // given
+        saveHearitWithSuffix(1);
+        saveHearitWithSuffix(2);
+        saveHearitWithSuffix(3);
+
+        // when
+        List<HearitDetailResponse> responses = RestAssured.given()
+                .when()
+                .get("/api/v1/hearits/random")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .jsonPath()
+                .getList(".", HearitDetailResponse.class);
+
+        // then
+        assertThat(responses).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("추천 히어릿을 조회 시, 200 OK 및 최대 5개 히어릿 정보 목록을 제공한다.")
+    void readRecommendedHearits() {
+        // given
+        saveHearitWithSuffix(1);
+        saveHearitWithSuffix(2);
+        saveHearitWithSuffix(3);
+
+        // when
+        List<HearitDetailResponse> responses = RestAssured.given()
+                .when()
+                .get("/api/v1/hearits/recommend")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .jsonPath()
+                .getList(".", HearitDetailResponse.class);
+
+        // then
+        assertThat(responses).hasSize(3);
     }
 
 
