@@ -11,6 +11,8 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,6 +66,20 @@ class HearitServiceTest {
         assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
+    }
+
+    @Test
+    @DisplayName("최대 탐색 개수인 10개의 랜덤 히어릿을 조회할 수 있다.")
+    void findByMemberId() {
+        // given
+        IntStream.rangeClosed(1, 11)
+                .forEach(this::saveHearitWithSuffix);
+
+        // when
+        List<HearitDetailResponse> hearits = hearitService.getExploredHearits();
+
+        // then
+        assertThat(hearits).hasSize(10);
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {
