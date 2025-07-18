@@ -44,7 +44,7 @@ class HearitControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("랜덤 히어릿을 조회 시, 200 OK 및 히어릿 정보 목록을 제공한다.")
+    @DisplayName("랜덤 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
     void readRandomHearits() {
         // given
         saveHearitWithSuffix(1);
@@ -66,8 +66,8 @@ class HearitControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("추천 히어릿을 조회 시, 200 OK 및 히어릿 정보 목록을 제공한다.")
-    void readTodayHearits() {
+    @DisplayName("추천 히어릿을 조회 시, 200 OK 및 최대 5개 히어릿 정보 목록을 제공한다.")
+    void readRecommendedHearits() {
         // given
         saveHearitWithSuffix(1);
         saveHearitWithSuffix(2);
