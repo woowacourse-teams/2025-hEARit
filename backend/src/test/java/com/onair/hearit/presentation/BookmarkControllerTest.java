@@ -1,12 +1,12 @@
 package com.onair.hearit.presentation;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import com.onair.hearit.auth.Infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
-import com.onair.hearit.dto.response.HearitPersonalDetailResponse;
 import io.restassured.RestAssured;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -14,46 +14,66 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-class HearitControllerTest extends IntegrationTest {
+class BookmarkControllerTest extends IntegrationTest {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
-    void readHearitWithSuccess() {
+    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 북마크 목록을 반환한다.")
+    void readBookmarkHearitsTest() {
+        // given
+        Member member = saveMember();
+        String token = generateToken(member);
+        int bookmarkCount = 5;
+        for (int i = 0; i < bookmarkCount; i++) {
+            Hearit hearit = saveHearitWithSuffix(i);
+            dbHelper.insertBookmark(new Bookmark(member, hearit));
+        }
+
+        // when & then
+        RestAssured.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/api/v1/hearits/bookmarks")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", equalTo(5));
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자가 북마크 추가 시, 추가 후 201 CREATED를 반환한다.")
+    void createBookmarkTest() {
         // given
         Member member = saveMember();
         String token = generateToken(member);
         Hearit hearit = saveHearitWithSuffix(1);
 
         // when & then
-        HearitPersonalDetailResponse response = RestAssured.given()
+        RestAssured.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .get("/api/v1/hearits/" + hearit.getId())
+                .post("/api/v1/hearits/" + hearit.getId() + "/bookmarks")
                 .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract().as(HearitPersonalDetailResponse.class);
-
-        assertThat(response.id()).isEqualTo(hearit.getId());
+                .statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
-    @DisplayName("히어릿 단일 조회 시, 존재하지 않는 아이디인 경우 404 NOT_FOUND를 반환한다.")
-    void readHearitWithNotFound() {
+    @DisplayName("로그인한 사용자가 북마크 삭제 시, 삭제 후 204 NOCONTENT를 반환한다.")
+    void deleteBookmark() {
         // given
         Member member = saveMember();
         String token = generateToken(member);
-        Long notFoundHearitId = 1L;
+        Hearit hearit = saveHearitWithSuffix(1);
+        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(member, hearit));
 
         // when & then
         RestAssured.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .get("/api/v1/hearits/" + notFoundHearitId)
+                .delete("/api/v1/hearits/" + hearit.getId() + "/bookmarks/" + bookmark.getId())
                 .then()
-                .statusCode(HttpStatus.NOT_FOUND.value());
+                .statusCode(HttpStatus.NO_CONTENT.value());
     }
 
     private Member saveMember() {
