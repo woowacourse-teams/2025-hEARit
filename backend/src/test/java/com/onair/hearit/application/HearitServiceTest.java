@@ -25,12 +25,12 @@ import org.springframework.test.context.ActiveProfiles;
 class HearitServiceTest {
 
     @Autowired
-    HearitRepository hearitRepository;
+    private DbHelper dbHelper;
 
     @Autowired
-    DbHelper dbHelper;
+    private HearitRepository hearitRepository;
 
-    HearitService hearitService;
+    private HearitService hearitService;
 
     @BeforeEach
     void setup() {
@@ -48,7 +48,7 @@ class HearitServiceTest {
 
         // then
         assertAll(
-                () -> assertThat(response.id()).isEqualTo(2L),
+                () -> assertThat(response.id()).isEqualTo(hearit.getId()),
                 () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
                 () -> assertThat(response.summary()).isEqualTo(hearit.getSummary())
         );
