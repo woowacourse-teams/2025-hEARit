@@ -33,7 +33,7 @@ class BookmarkControllerTest extends IntegrationTest {
 
         // when & then
         int size = 5;
-        for (int i = 0; i < bookmarkCount / size ; i++) {
+        for (int i = 0; i < bookmarkCount / size; i++) {
             RestAssured.given()
                     .header("Authorization", "Bearer " + token)
                     .param("page", i)
