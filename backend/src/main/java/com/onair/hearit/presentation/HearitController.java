@@ -27,7 +27,7 @@ public class HearitController {
 
     @GetMapping("/search")
     public ResponseEntity<List<HearitSimpleResponse>> searchHearitsByTitle(
-            @RequestParam String title,
+            @RequestParam(defaultValue = "") String title,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         List<HearitSimpleResponse> response = hearitService.searchHearitsByTitle(title, page, size);
