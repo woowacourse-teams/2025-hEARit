@@ -60,4 +60,7 @@
     <string name="search_recommend_keyword">오늘의 추천 키워드</string>
     <string name="search_category_look_forward">카테고리 둘러보기</string>
     <string name="search_keyword">검색어를 입력해주세요</string>
+
+    <!-- LoginActivity-->
+    <string name="login_with_hearit">회원가입 없이 <font color="#B677F3">히어릿</font>을 이용하고 싶어요</string>
 </resources>
