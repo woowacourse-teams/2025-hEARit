@@ -2,14 +2,13 @@ package com.onair.hearit.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.dto.response.OriginalAudioResponse;
-import com.onair.hearit.dto.response.ScriptResponse;
-import com.onair.hearit.dto.response.ShortAudioResponse;
+import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,9 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @Import(DbHelper.class)
 @ActiveProfiles("fake-test")
-class FileSourceServiceTest {
-
-    private static final String TEST_BASE_URL = "https://test.com";
+class HearitServiceTest {
 
     @Autowired
     private DbHelper dbHelper;
@@ -33,60 +30,38 @@ class FileSourceServiceTest {
     @Autowired
     private HearitRepository hearitRepository;
 
-    private FileSourceService fileSourceService;
+    private HearitService hearitService;
 
     @BeforeEach
     void setup() {
-        fileSourceService = new FileSourceService(TEST_BASE_URL, hearitRepository);
+        hearitService = new HearitService(hearitRepository);
     }
 
     @Test
-    @DisplayName("히어릿 아이디로 요청 시 original audio url을 제공한다.")
-    void getOriginalAudioTest() {
+    @DisplayName("히어릿 아이디로 단일 히어릿 정보를 조회 할 수 있다.")
+    void getHearitDetailTest() {
         // given
         Hearit hearit = saveHearitWithSuffix(1);
 
         // when
-        OriginalAudioResponse response = fileSourceService.getOriginalAudio(hearit.getId());
+        HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId());
 
         // then
-        assertThat(response.url()).isEqualTo(TEST_BASE_URL + hearit.getOriginalAudioUrl());
+        assertAll(
+                () -> assertThat(response.id()).isEqualTo(hearit.getId()),
+                () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
+                () -> assertThat(response.summary()).isEqualTo(hearit.getSummary())
+        );
     }
 
     @Test
-    @DisplayName("히어릿 아이디로 요청 시 short audio url을 제공한다.")
-    void getShortAudioTest() {
+    @DisplayName("존재하지 않는 히어릿 아이디로 단일 히어릿 조회 시 NoFoundException을 던진다.")
+    void getHearitDetailNotFoundTest() {
         // given
-        Hearit hearit = saveHearitWithSuffix(1);
-
-        // when
-        ShortAudioResponse response = fileSourceService.getShortAudio(hearit.getId());
-
-        // then
-        assertThat(response.url()).isEqualTo(TEST_BASE_URL + hearit.getShortAudioUrl());
-    }
-
-    @Test
-    @DisplayName("히어릿 아이디로 요청 시 script url을 제공한다.")
-    void getScriptTest() {
-        // given
-        Hearit hearit = saveHearitWithSuffix(1);
-
-        // when
-        ScriptResponse response = fileSourceService.getScript(hearit.getId());
-
-        // then
-        assertThat(response.url()).isEqualTo(TEST_BASE_URL + hearit.getScriptUrl());
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 히어릿 아이디 요청 시 NotFoundException을 던진다.")
-    void notFoundHearitExceptionTest() {
-        // given
-        Long notSavedHearitId = 1L;
+        Long notExistHearitId = 1L;
 
         // when & then
-        assertThatThrownBy(() -> fileSourceService.getScript(notSavedHearitId))
+        assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
     }
