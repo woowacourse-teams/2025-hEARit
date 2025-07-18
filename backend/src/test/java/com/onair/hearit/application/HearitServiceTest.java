@@ -70,7 +70,7 @@ class HearitServiceTest {
 
     @Test
     @DisplayName("최대 탐색 개수인 10개의 랜덤 히어릿을 조회할 수 있다.")
-    void findByMemberId() {
+    void getExploredHearits() {
         // given
         IntStream.rangeClosed(1, 11)
                 .forEach(this::saveHearitWithSuffix);
@@ -80,6 +80,20 @@ class HearitServiceTest {
 
         // then
         assertThat(hearits).hasSize(10);
+    }
+
+    @Test
+    @DisplayName("최대 탐색 개수인 5개의 오늘의 히어릿을 조회할 수 있다.")
+    void getTodayHearits() {
+        // given
+        IntStream.rangeClosed(1, 6)
+                .forEach(this::saveHearitWithSuffix);
+
+        // when
+        List<HearitDetailResponse> hearits = hearitService.getTodayHearits();
+
+        // then
+        assertThat(hearits).hasSize(5);
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {
