@@ -14,11 +14,11 @@ public class HearitService {
     private final HearitRepository hearitRepository;
 
     public HearitDetailResponse getHearitDetail(Long hearitId) {
-        Hearit hearit = findHearitById(hearitId);
+        Hearit hearit = getHearitById(hearitId);
         return HearitDetailResponse.from(hearit);
     }
 
-    private Hearit findHearitById(Long hearitId) {
+    private Hearit getHearitById(Long hearitId) {
         return hearitRepository.findById(hearitId)
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
     }

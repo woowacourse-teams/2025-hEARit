@@ -16,8 +16,8 @@ public class HearitController {
 
     private final HearitService hearitService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<HearitDetailResponse> readHearit(@PathVariable(name = "id") Long hearitId) {
+    @GetMapping("/{hearitId}")
+    public ResponseEntity<HearitDetailResponse> readHearit(@PathVariable Long hearitId) {
         HearitDetailResponse response = hearitService.getHearitDetail(hearitId);
         return ResponseEntity.ok(response);
     }
