@@ -44,7 +44,7 @@ class FileSourceServiceTest {
     @DisplayName("히어릿 아이디로 요청 시 original audio url을 제공한다.")
     void getOriginalAudioTest() {
         // given
-        Hearit hearit = saveHearit(1);
+        Hearit hearit = saveHearitWithSuffix(1);
 
         // when
         OriginalAudioResponse response = fileSourceService.getOriginalAudio(hearit.getId());
@@ -57,7 +57,7 @@ class FileSourceServiceTest {
     @DisplayName("히어릿 아이디로 요청 시 short audio url을 제공한다.")
     void getShortAudioTest() {
         // given
-        Hearit hearit = saveHearit(1);
+        Hearit hearit = saveHearitWithSuffix(1);
 
         // when
         ShortAudioResponse response = fileSourceService.getShortAudio(hearit.getId());
@@ -70,7 +70,7 @@ class FileSourceServiceTest {
     @DisplayName("히어릿 아이디로 요청 시 script url을 제공한다.")
     void getScriptTest() {
         // given
-        Hearit hearit = saveHearit(1);
+        Hearit hearit = saveHearitWithSuffix(1);
 
         // when
         ScriptResponse response = fileSourceService.getScript(hearit.getId());
@@ -91,17 +91,17 @@ class FileSourceServiceTest {
                 .hasMessageContaining("hearitId");
     }
 
-    private Hearit saveHearit(int num) {
-        Category category = new Category("name" + num);
+    private Hearit saveHearitWithSuffix(int suffix) {
+        Category category = new Category("name" + suffix);
         dbHelper.insertCategory(category);
 
         Hearit hearit = new Hearit(
-                "title" + num,
-                "summary" + num, num,
-                "originalAudioUrl" + num,
-                "shortAudioUrl" + num,
-                "scriptUrl" + num,
-                "source" + num,
+                "title" + suffix,
+                "summary" + suffix, suffix,
+                "originalAudioUrl" + suffix,
+                "shortAudioUrl" + suffix,
+                "scriptUrl" + suffix,
+                "source" + suffix,
                 LocalDateTime.now(),
                 category);
         return dbHelper.insertHearit(hearit);

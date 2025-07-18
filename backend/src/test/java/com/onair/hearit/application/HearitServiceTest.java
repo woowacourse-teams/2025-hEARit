@@ -41,14 +41,14 @@ class HearitServiceTest {
     @DisplayName("히어릿 아이디로 단일 히어릿 정보를 조회 할 수 있다.")
     void getHearitDetailTest() {
         // given
-        Hearit hearit = saveHearit(1);
+        Hearit hearit = saveHearitWithSuffix(1);
 
         // when
         HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId());
 
         // then
         assertAll(
-                () -> assertThat(response.id()).isEqualTo(hearit.getId()),
+                () -> assertThat(response.id()).isEqualTo(2L),
                 () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
                 () -> assertThat(response.summary()).isEqualTo(hearit.getSummary())
         );
@@ -66,17 +66,17 @@ class HearitServiceTest {
                 .hasMessageContaining("hearitId");
     }
 
-    private Hearit saveHearit(int num) {
-        Category category = new Category("name" + num);
+    private Hearit saveHearitWithSuffix(int suffix) {
+        Category category = new Category("name" + suffix);
         dbHelper.insertCategory(category);
 
         Hearit hearit = new Hearit(
-                "title" + num,
-                "summary" + num, num,
-                "originalAudioUrl" + num,
-                "shortAudioUrl" + num,
-                "scriptUrl" + num,
-                "source" + num,
+                "title" + suffix,
+                "summary" + suffix, suffix,
+                "originalAudioUrl" + suffix,
+                "shortAudioUrl" + suffix,
+                "scriptUrl" + suffix,
+                "source" + suffix,
                 LocalDateTime.now(),
                 category);
         return dbHelper.insertHearit(hearit);
