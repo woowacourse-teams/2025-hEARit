@@ -8,6 +8,28 @@
         android:layout_height="match_parent"
         android:background="@drawable/bg_gradient_vertical">
 
+        <include
+            android:id="@+id/layout_library_when_no_login"
+            layout="@layout/layout_library_when_no_login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_bookmarked_hearit_title" />
+
+        <include
+            android:id="@+id/layout_library_when_no_bookmark"
+            layout="@layout/layout_library_when_no_bookmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_bookmarked_hearit_title" />
+
         <TextView
             android:id="@+id/tv_nickname"
             style="@style/pretendard_nickname"

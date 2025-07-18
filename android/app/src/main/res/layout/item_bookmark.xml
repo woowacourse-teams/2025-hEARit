@@ -74,7 +74,7 @@
         <View
             android:layout_width="0dp"
             android:layout_height="56dp"
-            android:background="@drawable/bg_radius_right_8dp"
+            android:background="@drawable/bg_purple3_radius_left_8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.05" />
