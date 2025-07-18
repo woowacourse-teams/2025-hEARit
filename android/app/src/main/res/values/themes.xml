@@ -7,5 +7,7 @@
         <item name="bottomSheetDialogTheme">@style/CustomBottomSheetDialogTheme</item>
     </style>
 
-    <style name="Theme.HEARit" parent="Base.Theme.HEARit" />
+    <style name="Theme.HEARit" parent="Base.Theme.HEARit">
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
 </resources>
