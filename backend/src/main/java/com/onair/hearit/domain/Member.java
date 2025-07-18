@@ -21,21 +21,39 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
+    public Member(String localId, String password, String socialId, String nickname) {
+        this.localId = localId;
+        this.password = password;
+        this.socialId = socialId;
+        this.nickname = nickname;
+    }
+
+    public static Member createLocalUser(String memberId, String nickname, String password) {
+        return new Member(memberId, password, null, nickname);
+    }
+
+    public static Member createSocialUser(String socialId,  String nickname) {
+        return new Member(null, null, socialId, nickname);
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;
+    @Column(name = "local_id")
+    private String localId; // 자체 회원용
+
+    @Column(name = "password")
+    private String password; // 자체 회원용
+
+    @Column(name = "social_id")
+    private String socialId;
 
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
-    @Column(name = "password", nullable = false)
-    private String password;
-
     @CreatedDate
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "deleted_at")
