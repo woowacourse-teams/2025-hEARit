@@ -25,7 +25,7 @@ class AuthControllerTest extends IntegrationTest {
     PasswordEncoder passwordEncoder;
 
     @Test
-    @DisplayName("로그인 성공 시 200 OK 및 accessToken 반환")
+    @DisplayName("로그인 성공 시 200 OK 및 accessToken를 반환한다.")
     void login_success() {
         Member member = Member.createLocalUser(
                 "test123",
@@ -49,7 +49,7 @@ class AuthControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("비밀번호 틀리면 401 Unauthorized")
+    @DisplayName("비밀번호 틀리면 401 Unauthorized 반환한다.")
     void login_invalidPassword() {
         Member member = Member.createLocalUser(
                 "test123",
@@ -70,7 +70,7 @@ class AuthControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 회원이면 401 Unauthorized")
+    @DisplayName("존재하지 않는 회원이면 401 Unauthorized 반환한다.")
     void login_nonexistentMember() {
         LoginRequest request = new LoginRequest("ghost123", "pass1234");
 

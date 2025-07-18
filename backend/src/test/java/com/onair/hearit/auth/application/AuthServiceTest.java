@@ -22,10 +22,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
-@Transactional
 @ActiveProfiles("fake-test")
 @Import({AuthService.class, BCryptPasswordEncoder.class, JwtTokenProvider.class, DbHelper.class})
 class AuthServiceTest {

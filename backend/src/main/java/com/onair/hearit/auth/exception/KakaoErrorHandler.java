@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
@@ -15,7 +14,6 @@ import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class KakaoErrorHandler implements ErrorHandler {
 
     private final ObjectMapper objectMapper;

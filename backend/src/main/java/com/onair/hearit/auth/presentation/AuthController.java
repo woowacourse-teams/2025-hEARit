@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
@@ -34,7 +34,6 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@RequestBody SignupRequest request) {
         authService.signup(request);
-
         return ResponseEntity.ok().build();
     }
 }

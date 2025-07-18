@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class KakaoUserInfoClient {
 
     private final RestClient kakaoRestClient;

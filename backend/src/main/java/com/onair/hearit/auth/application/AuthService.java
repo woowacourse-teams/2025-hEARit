@@ -25,11 +25,14 @@ public class AuthService {
     private final KakaoUserInfoClient kakaoUserInfoClient;
 
     public TokenResponse login(LoginRequest request) {
-        Member member = memberRepository.findByLocalId(request.localId())
-                .orElseThrow(() -> new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다."));
+        Member member = getMemberByLocalId(request.localId());
         validatePassword(request, member);
-        String token = jwtTokenProvider.createToken(member.getId(), member.getRole());
-        return new TokenResponse(token);
+        return createTokenResponseFrom(member);
+    }
+
+    private Member getMemberByLocalId(String localId) {
+        return memberRepository.findByLocalId(localId)
+                .orElseThrow(() -> new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다."));
     }
 
     private void validatePassword(LoginRequest request, Member member) {
@@ -56,14 +59,16 @@ public class AuthService {
 
         Member member = memberRepository.findBySocialId(kakaoUser.id())
                 .orElseGet(() -> signupWithKakao(kakaoUser));
-
-        String accessToken = jwtTokenProvider.createToken(member.getId(), member.getRole());
-
-        return new TokenResponse(accessToken);
+        return createTokenResponseFrom(member);
     }
 
     private Member signupWithKakao(KakaoUserInfoResponse kakaoUser) {
         Member member = Member.createSocialUser(kakaoUser.id(), kakaoUser.nickname());
         return memberRepository.save(member);
+    }
+
+    private TokenResponse createTokenResponseFrom(Member member) {
+        String token = jwtTokenProvider.createToken(member.getId(), member.getRole());
+        return new TokenResponse(token);
     }
 }
