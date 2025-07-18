@@ -3,6 +3,8 @@ package com.onair.hearit.presentation;
 import com.onair.hearit.application.BookmarkService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/hearits/")
+@Tag(name = "Bookmark", description = "북마크 및 북마크 재생목록")
 public class BookmarkController {
 
     private final BookmarkService bookmarkService;
 
+    @Operation(summary = "북마크 재생목록 조회", description = "로그인한 회원이 page, size로 재생목록을 조회합니다.")
     @GetMapping("/bookmarks")
     public ResponseEntity<List<BookmarkHearitResponse>> readBookmarkHearits(
             @AuthenticationPrincipal CurrentMember member,
@@ -32,6 +36,7 @@ public class BookmarkController {
         return ResponseEntity.ok(responses);
     }
 
+    @Operation(summary = "북마크 생성", description = "로그인한 회원이 히어릿 ID로 북마크를 생성합니다.")
     @PostMapping("/{hearitId}/bookmarks")
     public ResponseEntity<Void> createBookmark(@PathVariable Long hearitId,
                                                @AuthenticationPrincipal CurrentMember member) {
@@ -39,6 +44,7 @@ public class BookmarkController {
         return ResponseEntity.created(URI.create("/api/v1/hearits/" + hearitId)).build();
     }
 
+    @Operation(summary = "북마크 삭제", description = "로그인한 히어릿 ID와 북마크 ID로 북마크를 삭제합니다.")
     @DeleteMapping("/{hearitId}/bookmarks/{bookmarkId}")
     public ResponseEntity<Void> deleteBookmark(@PathVariable Long bookmarkId,
                                                @AuthenticationPrincipal CurrentMember member) {
