@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/hearit_black1">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_login_symbol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/img_login_background"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@null"
+                android:src="@drawable/img_logo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_login_logo"
+                style="@style/prompt_splash_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/all_logo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/btn_login_kakao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="40dp"
+            android:contentDescription="@null"
+            android:src="@drawable/img_kakao_login"
+            app:layout_constraintBottom_toTopOf="@id/tv_login_hearit" />
+
+        <TextView
+            android:id="@+id/tv_login_hearit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="90dp"
+            android:fontFamily="@font/pretendardbold"
+            android:padding="10dp"
+            android:text="@string/login_with_hearit"
+            android:textColor="@color/hearit_gray4"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1.5dp"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="-12dp"
+            android:background="@color/hearit_gray4"
+            app:layout_constraintEnd_toEndOf="@id/tv_login_hearit"
+            app:layout_constraintStart_toStartOf="@id/tv_login_hearit"
+            app:layout_constraintTop_toBottomOf="@id/tv_login_hearit" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

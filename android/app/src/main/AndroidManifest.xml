@@ -8,12 +8,24 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_app_icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_app_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.HEARit"
         tools:targetApi="31">
+        <activity
+            android:name=".presentation.login.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.SplashActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".presentation.CompleteHearitActivity"
             android:exported="false" />
@@ -25,14 +37,8 @@
             android:exported="false" />
         <activity
             android:name=".presentation.MainActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustPan">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
     </application>
 
 </manifest>
