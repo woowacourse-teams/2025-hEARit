@@ -9,6 +9,7 @@ import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,11 +31,14 @@ class HearitServiceTest {
     @Autowired
     private HearitRepository hearitRepository;
 
+    @Autowired
+    private BookmarkRepository bookmarkRepository;
+
     private HearitService hearitService;
 
     @BeforeEach
     void setup() {
-        hearitService = new HearitService(hearitRepository);
+        hearitService = new HearitService(hearitRepository, bookmarkRepository);
     }
 
     @Test
