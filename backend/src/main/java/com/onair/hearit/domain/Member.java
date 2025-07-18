@@ -25,17 +25,23 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "local_id")
     private String localId; // 자체 회원용
+
     @Column(name = "password")
     private String password; // 자체 회원용
+
     @Column(name = "social_id")
     private String socialId;
+
     @Column(name = "nickname", nullable = false)
     private String nickname;
+
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 

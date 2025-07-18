@@ -31,7 +31,7 @@ public class BookmarkController {
     public ResponseEntity<List<BookmarkHearitResponse>> readBookmarkHearits(
             @AuthenticationPrincipal CurrentMember member,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.memberId(), page, size);
         return ResponseEntity.ok(responses);
     }
