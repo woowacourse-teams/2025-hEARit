@@ -1,6 +1,5 @@
 package com.onair.hearit.auth.Infrastructure.jwt;
 
-import com.onair.hearit.domain.MemberRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -25,13 +24,12 @@ public class JwtTokenProvider {
         this.expiration = expiration;
     }
 
-    public String createToken(Long userId, MemberRole role) {
+    public String createToken(Long userId) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
-                .claim("role", role.name())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
@@ -53,11 +51,6 @@ public class JwtTokenProvider {
 
     public Long getMemberId(String token) {
         return Long.parseLong(parseClaims(token).getSubject());
-    }
-
-    public MemberRole getRole(String token) {
-        String role = parseClaims(token).get("role", String.class);
-        return MemberRole.valueOf(role);
     }
 
     private Claims parseClaims(String token) {

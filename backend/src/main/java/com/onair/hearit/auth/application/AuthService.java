@@ -68,7 +68,7 @@ public class AuthService {
     }
 
     private TokenResponse createTokenResponseFrom(Member member) {
-        String token = jwtTokenProvider.createToken(member.getId(), member.getRole());
+        String token = jwtTokenProvider.createToken(member.getId());
         return new TokenResponse(token);
     }
 }

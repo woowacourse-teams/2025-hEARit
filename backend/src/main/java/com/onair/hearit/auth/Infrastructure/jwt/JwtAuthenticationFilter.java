@@ -1,17 +1,13 @@
 package com.onair.hearit.auth.Infrastructure.jwt;
 
 import com.onair.hearit.auth.dto.CurrentMember;
-import com.onair.hearit.domain.MemberRole;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -32,12 +28,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         Long memberId = jwtTokenProvider.getMemberId(token);
-        MemberRole role = jwtTokenProvider.getRole(token);
-        CurrentMember currentMember = new CurrentMember(memberId, role);
+        CurrentMember currentMember = new CurrentMember(memberId);
 
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(currentMember, null,
-                authorities);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(currentMember, null, null);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         chain.doFilter(request, response);
