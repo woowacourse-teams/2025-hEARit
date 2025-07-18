@@ -19,7 +19,7 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("원본 오디오 url 요청 시, 200 OK 및 id와 url을 반환한다.")
     void readOriginalAudioUrlWithSuccess() {
         // given
-        Hearit hearit = saveHearit(1);
+        Hearit hearit = saveHearitWithSuffix(1);
 
         // when
         OriginalAudioResponse response = RestAssured.when()
@@ -36,7 +36,7 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("1분 오디오 url 요청 시, 200 OK 및 id와 url을 반환한다.")
     void readShortAudioUrlWithSuccess() {
         // given
-        Hearit hearit = saveHearit(1);
+        Hearit hearit = saveHearitWithSuffix(1);
 
         // when
         ShortAudioResponse response = RestAssured.when()
@@ -53,7 +53,7 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("대본 url 요청 시 200 OK 및 id와 url을 반환한다.")
     void readScriptUrlWithSuccess() {
         // given
-        Hearit hearit = saveHearit(1);
+        Hearit hearit = saveHearitWithSuffix(1);
 
         // when
         ScriptResponse response = RestAssured.when()
@@ -79,17 +79,17 @@ class FileSourceControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }
 
-    private Hearit saveHearit(int num) {
-        Category category = new Category("name" + num);
+    private Hearit saveHearitWithSuffix(int suffix) {
+        Category category = new Category("name" + suffix);
         dbHelper.insertCategory(category);
 
         Hearit hearit = new Hearit(
-                "title" + num,
-                "summary" + num, num,
-                "originalAudioUrl" + num,
-                "shortAudioUrl" + num,
-                "scriptUrl" + num,
-                "source" + num,
+                "title" + suffix,
+                "summary" + suffix, suffix,
+                "originalAudioUrl" + suffix,
+                "shortAudioUrl" + suffix,
+                "scriptUrl" + suffix,
+                "source" + suffix,
                 LocalDateTime.now(),
                 category);
         return dbHelper.insertHearit(hearit);

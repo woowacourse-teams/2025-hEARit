@@ -18,21 +18,21 @@ public class FileSourceController {
 
     private final FileSourceService fileSourceService;
 
-    @GetMapping("/{id}/original-audio-url")
-    public ResponseEntity<OriginalAudioResponse> readOriginalAudioUrl(@PathVariable Long id) {
-        OriginalAudioResponse response = fileSourceService.getOriginalAudio(id);
+    @GetMapping("/{hearitId}/original-audio-url")
+    public ResponseEntity<OriginalAudioResponse> readOriginalAudioUrl(@PathVariable Long hearitId) {
+        OriginalAudioResponse response = fileSourceService.getOriginalAudio(hearitId);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}/short-audio-url")
-    public ResponseEntity<ShortAudioResponse> readShortAudioUrl(@PathVariable Long id) {
-        ShortAudioResponse response = fileSourceService.getShortAudio(id);
+    @GetMapping("/{hearitId}/short-audio-url")
+    public ResponseEntity<ShortAudioResponse> readShortAudioUrl(@PathVariable Long hearitId) {
+        ShortAudioResponse response = fileSourceService.getShortAudio(hearitId);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}/script-url")
-    public ResponseEntity<ScriptResponse> readScriptUrl(@PathVariable Long id) {
-        ScriptResponse response = fileSourceService.getScript(id);
+    @GetMapping("/{hearitId}/script-url")
+    public ResponseEntity<ScriptResponse> readScriptUrl(@PathVariable Long hearitId) {
+        ScriptResponse response = fileSourceService.getScript(hearitId);
         return ResponseEntity.ok(response);
     }
 }
