@@ -2,6 +2,7 @@ package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,5 +21,11 @@ public class HearitController {
     public ResponseEntity<HearitDetailResponse> readHearit(@PathVariable Long hearitId) {
         HearitDetailResponse response = hearitService.getHearitDetail(hearitId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/random")
+    public ResponseEntity<List<HearitDetailResponse>> readExploredHearits() {
+        List<HearitDetailResponse> responses = hearitService.getExploredHearits();
+        return ResponseEntity.ok(responses);
     }
 }
