@@ -27,21 +27,27 @@ public class AuthService {
     public TokenResponse login(LoginRequest request) {
         Member member = memberRepository.findByLocalId(request.localId())
                 .orElseThrow(() -> new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다."));
-
-        if(!passwordEncoder.matches(request.password(), member.getPassword())) {
-            throw new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다.");
-        }
-
+        validatePassword(request, member);
         String token = jwtTokenProvider.createToken(member.getId(), member.getRole());
         return new TokenResponse(token);
     }
 
+    private void validatePassword(LoginRequest request, Member member) {
+        if(!passwordEncoder.matches(request.password(), member.getPassword())) {
+            throw new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다.");
+        }
+    }
+
     public void signup(SignupRequest request) {
+        validateDuplicatedId(request);
+        String hash = passwordEncoder.encode(request.password());
+        memberRepository.save(Member.createLocalUser(request.localId(), request.nickname(), hash));
+    }
+
+    private void validateDuplicatedId(SignupRequest request) {
         if (memberRepository.existsByLocalId(request.localId())) {
             throw new InvalidInputException("이미 존재하는 아이디입니다.");
         }
-        String hash = passwordEncoder.encode(request.password());
-        memberRepository.save(Member.createLocalUser(request.localId(), request.nickname(), hash));
     }
 
     // 소셜 로그인의 경우 회원가입이 따로 없으며 로그인 시 자동으로 회원가입되도록 구현함
