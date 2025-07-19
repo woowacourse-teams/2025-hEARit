@@ -128,6 +128,10 @@ class PlayerDetailActivity : AppCompatActivity() {
 
         // 스크립트 하이라이트 업데이트 루프 시작
         handler.post(updateRunnable)
+
+        binding.btnHearitPlayerBookmark.setOnClickListener {
+            it.isSelected = !it.isSelected
+        }
     }
 
     override fun onDestroy() {

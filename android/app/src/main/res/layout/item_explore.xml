@@ -16,6 +16,18 @@
         android:layout_height="match_parent"
         android:background="@color/hearit_black1">
 
+        <ImageView
+            android:id="@+id/btn_explore_item_bookmark"
+            android:layout_width="42dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="230dp"
+            android:contentDescription="@null"
+            android:src="@drawable/bookmark_selector"
+            app:layout_constraintBottom_toBottomOf="@id/layout_sound_wave"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/layout_sound_wave"
             android:layout_width="wrap_content"
@@ -99,7 +111,7 @@
             android:id="@+id/layout_explore_player"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="-10dp"
+            android:layout_marginBottom="-12dp"
             app:controller_layout_id="@layout/explore_player_controller"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
