@@ -1,18 +1,19 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.HearitService;
+import com.onair.hearit.dto.request.TitleSearchRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
-import java.util.List;
+import com.onair.hearit.dto.response.HearitSearchResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import com.onair.hearit.dto.response.HearitSimpleResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -45,11 +46,9 @@ public class HearitController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<HearitSimpleResponse>> searchHearitsByTitle(
-            @RequestParam(defaultValue = "") String title,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        List<HearitSimpleResponse> response = hearitService.searchHearitsByTitle(title, page, size);
+    public ResponseEntity<List<HearitSearchResponse>> searchHearitsByTitle(
+            @Valid @ModelAttribute TitleSearchRequest condition) {
+        List<HearitSearchResponse> response = hearitService.searchHearitsByTitle(condition);
         return ResponseEntity.ok(response);
     }
 }
