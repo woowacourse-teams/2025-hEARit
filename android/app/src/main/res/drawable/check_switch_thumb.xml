@@ -4,6 +4,7 @@
         <shape android:shape="oval">
             <size android:width="24dp" android:height="24dp" />
             <solid android:color="@color/white" />
+            <stroke android:width="2dp" android:color="@color/hearit_purple3" />
         </shape>
     </item>
 
@@ -11,6 +12,7 @@
         <shape android:shape="oval">
             <size android:width="24dp" android:height="24dp" />
             <solid android:color="@color/white" />
+            <stroke android:width="8dp" android:color="@color/transparent" />
         </shape>
     </item>
 </selector>
