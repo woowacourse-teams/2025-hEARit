@@ -24,7 +24,7 @@ public class SwaggerConfig {
                 )
                 .info(new Info()
                         .title("Hearit API")
-                        .description("히어잇 백엔드 API 문서")
+                        .description("히어릿 백엔드 API 문서")
                         .version("v1"))
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("로컬 서버"),
