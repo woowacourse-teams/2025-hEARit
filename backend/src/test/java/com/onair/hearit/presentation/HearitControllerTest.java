@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.HearitDetailResponse;
-import com.onair.hearit.dto.response.HearitSimpleResponse;
+import com.onair.hearit.dto.response.HearitSearchResponse;
 import io.restassured.RestAssured;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -94,30 +94,52 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("히어릿 검색 요청 시 200 OK 및 제목이 포함된 히어릿을 최신순으로 히어릿들을 반환한다.")
     void searchHearitsWithPaginationAndKeyword() {
         // given
-        Hearit h1 = saveHearitWithSuffix(1);
-        Hearit h2 = saveHearitWithSuffix(1);
-        Hearit h3 = saveHearitWithSuffix(2);
+        Hearit hearit1 = saveHearitByTitle("exampletitle1");
+        Hearit hearit2 = saveHearitByTitle("title1example");
+        Hearit hearit3 = saveHearitByTitle("wwtitle1ww");
+        Hearit hearit4 = saveHearitByTitle("notitle");
 
         // when & then
         var response = RestAssured
                 .given()
-                .queryParam("title", "title1")
+                .queryParam("search", "title1")
                 .queryParam("page", 0)
-                .queryParam("size", 2)
+                .queryParam("size", 10)
                 .when()
                 .get("/api/v1/hearits/search")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .extract().jsonPath().getList(".", HearitSimpleResponse.class);
+                .extract().jsonPath().getList(".", HearitSearchResponse.class);
 
         // then
         assertAll(
-                () -> assertThat(response).hasSize(2),
-                () -> assertThat(response.get(0).title()).isEqualTo("title1"),
-                () -> assertThat(response.get(1).title()).isEqualTo("title1"),
-                () -> assertThat(response.get(0).id()).isEqualTo(h2.getId()),
-                () -> assertThat(response.get(1).id()).isEqualTo(h1.getId())
+                () -> assertThat(response).hasSize(3),
+                () -> assertThat(response).extracting(HearitSearchResponse::title)
+                        .allSatisfy(title -> assertThat(title).contains("title1"))
         );
+    }
+
+    @Test
+    @DisplayName("검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")
+    void searchHearitsWithInvalidParams() {
+        // when & then
+        RestAssured.given()
+                .queryParam("search", "title1")
+                .queryParam("page", -1)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v1/hearits/search")
+                .then().log().all()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        RestAssured.given()
+                .queryParam("search", "title1")
+                .queryParam("page", 0)
+                .queryParam("size", -5)
+                .when()
+                .get("/api/v1/hearits/search")
+                .then().log().all()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {
@@ -131,6 +153,22 @@ class HearitControllerTest extends IntegrationTest {
                 "shortAudioUrl" + suffix,
                 "scriptUrl" + suffix,
                 "source" + suffix,
+                LocalDateTime.now(),
+                category);
+        return dbHelper.insertHearit(hearit);
+    }
+
+    private Hearit saveHearitByTitle(String title) {
+        Category category = new Category("category");
+        dbHelper.insertCategory(category);
+        Hearit hearit = new Hearit(
+                title,
+                "summary",
+                1,
+                "originalAudioUrl",
+                "shortAudioUrl",
+                "scriptUrl",
+                "source",
                 LocalDateTime.now(),
                 category);
         return dbHelper.insertHearit(hearit);
