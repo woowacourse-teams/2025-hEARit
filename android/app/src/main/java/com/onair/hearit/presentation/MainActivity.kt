@@ -32,88 +32,64 @@ class MainActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        initInsets()
+        initPlayer()
+        initNavigation()
+        initDrawer()
+
+        if (savedInstanceState == null) {
+            showFragment(HomeFragment())
+        }
+    }
+
+    private fun initInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.customDrawer) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, systemBars.bottom)
             insets
         }
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
+    }
 
+    @OptIn(UnstableApi::class)
+    private fun initPlayer() {
         player =
             ExoPlayer.Builder(this).build().apply {
                 val uri = "android.resource://$packageName/${R.raw.test_audio2}".toUri()
-                val mediaItem = MediaItem.fromUri(uri)
-                setMediaItem(mediaItem)
+                setMediaItem(MediaItem.fromUri(uri))
                 prepare()
                 playWhenReady = true
             }
         binding.layoutBottomPlayerController.player = player
+    }
 
+    private fun initNavigation() {
         binding.layoutBottomNavigation.itemIconTintList = null
-
-        if (savedInstanceState == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .add(R.id.fragment_container_view, HomeFragment())
-                .commit()
-        }
-
-        binding.layoutDrawer.tvDrawerAccountInfo.setOnClickListener {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container_view, SettingFragment())
-                .addToBackStack(null)
-                .commit()
-            binding.drawerLayout.closeDrawer(GravityCompat.END)
-        }
-
-        binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, PRIVACY_POLICY_URL.toUri())
-            startActivity(intent)
-        }
-
-        binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, TERMS_OF_USE_URL.toUri())
-            startActivity(intent)
-        }
-
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
                     showPlayerControlView()
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container_view, HomeFragment())
-                        .commit()
+                    showFragment(HomeFragment())
                     true
                 }
 
                 R.id.nav_search -> {
                     showPlayerControlView()
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container_view, SearchFragment())
-                        .commit()
+                    showFragment(SearchFragment())
                     true
                 }
 
                 R.id.nav_explore -> {
                     hidePlayerControlView()
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container_view, ExploreFragment())
-                        .commit()
+                    showFragment(ExploreFragment())
                     true
                 }
 
                 R.id.nav_library -> {
                     showPlayerControlView()
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container_view, LibraryFragment())
-                        .commit()
+                    showFragment(LibraryFragment())
                     true
                 }
 
@@ -122,29 +98,61 @@ class MainActivity :
         }
     }
 
+    private fun initDrawer() {
+        binding.layoutDrawer.tvDrawerAccountInfo.setOnClickListener {
+            showFragment(SettingFragment(), addToBackStack = true)
+            binding.drawerLayout.closeDrawer(GravityCompat.END)
+        }
+
+        binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener {
+            openUrl(PRIVACY_POLICY_URL)
+        }
+
+        binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener {
+            openUrl(TERMS_OF_USE_URL)
+        }
+    }
+
+    private fun openUrl(url: String) {
+        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+    }
+
+    private fun showFragment(
+        fragment: androidx.fragment.app.Fragment,
+        addToBackStack: Boolean = false,
+    ) {
+        supportFragmentManager
+            .beginTransaction()
+            .apply {
+                replace(R.id.fragment_container_view, fragment)
+                if (addToBackStack) addToBackStack(null)
+            }.commit()
+    }
+
     override fun openDrawer() {
         binding.drawerLayout.openDrawer(GravityCompat.END)
     }
 
     @OptIn(UnstableApi::class)
     fun hidePlayerControlView() {
-        val controller = binding.layoutBottomPlayerController
-        controller
-            .animate()
-            .translationY(controller.height.toFloat())
-            .setDuration(200)
-            .start()
-        controller.player?.pause()
+        binding.layoutBottomPlayerController.apply {
+            animate().translationY(height.toFloat()).setDuration(200).start()
+            player?.pause()
+        }
     }
 
     @OptIn(UnstableApi::class)
     fun showPlayerControlView() {
-        val controller = binding.layoutBottomPlayerController
-        controller
+        binding.layoutBottomPlayerController
             .animate()
             .translationY(0f)
             .setDuration(200)
             .start()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        player.release()
     }
 
     companion object {
