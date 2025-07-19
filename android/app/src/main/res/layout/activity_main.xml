@@ -26,6 +26,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <androidx.media3.ui.PlayerControlView
+                android:id="@+id/layout_bottom_player_controller"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                app:controller_layout_id="@layout/layout_bottom_player_controller"
+                app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
+                app:show_timeout="0" />
+
             <com.google.android.material.bottomnavigation.BottomNavigationView
                 android:id="@+id/layout_bottom_navigation"
                 android:layout_width="match_parent"
