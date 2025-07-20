@@ -42,4 +42,9 @@ class SearchResultFragment : Fragment() {
         // 테스트용으로 더미 데이터 넣어 놓음
         adapter.submitList(SearchedHearitDummyData.searchedItems)
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

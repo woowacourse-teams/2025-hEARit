@@ -115,4 +115,9 @@ class SearchFragment : Fragment() {
             ).addToBackStack(null)
             .commit()
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
