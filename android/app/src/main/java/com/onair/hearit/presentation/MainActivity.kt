@@ -34,17 +34,17 @@ class MainActivity :
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        initInsets()
-        initPlayer()
-        initNavigation()
-        initDrawer()
+        setupInsets()
+        setupPlayer()
+        setupNavigation()
+        setupDrawer()
 
         if (savedInstanceState == null) {
             showFragment(HomeFragment())
         }
     }
 
-    private fun initInsets() {
+    private fun setupInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.customDrawer) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, systemBars.bottom)
@@ -54,7 +54,7 @@ class MainActivity :
     }
 
     @OptIn(UnstableApi::class)
-    private fun initPlayer() {
+    private fun setupPlayer() {
         player =
             ExoPlayer.Builder(this).build().apply {
                 val uri = "android.resource://$packageName/${R.raw.test_audio2}".toUri()
@@ -65,7 +65,7 @@ class MainActivity :
         binding.layoutBottomPlayerController.player = player
     }
 
-    private fun initNavigation() {
+    private fun setupNavigation() {
         binding.layoutBottomNavigation.itemIconTintList = null
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -98,7 +98,7 @@ class MainActivity :
         }
     }
 
-    private fun initDrawer() {
+    private fun setupDrawer() {
         binding.layoutDrawer.tvDrawerAccountInfo.setOnClickListener {
             showFragment(SettingFragment(), addToBackStack = true)
             binding.drawerLayout.closeDrawer(GravityCompat.END)
