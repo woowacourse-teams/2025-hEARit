@@ -50,6 +50,7 @@
                 android:drawablePadding="10dp"
                 android:drawableTint="@color/hearit_gray1"
                 android:hint="@string/search_keyword"
+                android:imeOptions="actionSearch"
                 android:inputType="text|textNoSuggestions"
                 android:maxLines="1"
                 android:paddingHorizontal="12dp"

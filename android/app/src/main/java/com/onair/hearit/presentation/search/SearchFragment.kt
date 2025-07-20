@@ -1,9 +1,11 @@
 package com.onair.hearit.presentation.search
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -55,10 +57,9 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupSearchEnterKey() {
-        binding.etSearch.setOnEditorActionListener { v, actionId, event ->
-            if (event != null &&
-                event.keyCode == android.view.KeyEvent.KEYCODE_ENTER &&
-                event.action == android.view.KeyEvent.ACTION_DOWN
+        binding.etSearch.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
             ) {
                 navigateToSearchResult()
                 true
