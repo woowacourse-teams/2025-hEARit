@@ -22,8 +22,8 @@ class HearitControllerTest extends IntegrationTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
-    void readHearitWithSuccess() {
+    @DisplayName("로그인한 사용자가 히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
+    void readHearitWithSuccessWithMember() {
         // given
         Member member = saveMember();
         String token = generateToken(member);
@@ -39,6 +39,24 @@ class HearitControllerTest extends IntegrationTest {
                 .extract().as(HearitPersonalDetailResponse.class);
 
         assertThat(response.id()).isEqualTo(hearit.getId());
+    }
+
+    @Test
+    @DisplayName("로그인 하지 않은 사용자가 히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
+    void readHearitWithSuccessWithNotMember() {
+        // given
+        Hearit hearit = saveHearitWithSuffix(1);
+
+        // when & then
+        HearitPersonalDetailResponse response = RestAssured.given()
+                .when()
+                .get("/api/v1/hearits/" + hearit.getId())
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract().as(HearitPersonalDetailResponse.class);
+
+        assertThat(response.id()).isEqualTo(hearit.getId());
+        assertThat(response.isBookmarked()).isEqualTo(false);
     }
 
     @Test

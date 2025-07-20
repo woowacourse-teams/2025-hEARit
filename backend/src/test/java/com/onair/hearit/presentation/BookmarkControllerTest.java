@@ -64,6 +64,24 @@ class BookmarkControllerTest extends IntegrationTest {
     }
 
     @Test
+    @DisplayName("로그인한 사용자가 이미 추가된 북마크 추가 시, 추가 후 409 CONFLICT를 반환한다.")
+    void createBookmarkTestWithConflict() {
+        // given
+        Member member = saveMember();
+        String token = generateToken(member);
+        Hearit hearit = saveHearitWithSuffix(1);
+        dbHelper.insertBookmark(new Bookmark(member, hearit));
+
+        // when & then
+        RestAssured.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .post("/api/v1/hearits/" + hearit.getId() + "/bookmarks")
+                .then()
+                .statusCode(HttpStatus.CONFLICT.value());
+    }
+
+    @Test
     @DisplayName("로그인한 사용자가 북마크 삭제 시, 삭제 후 204 NOCONTENT를 반환한다.")
     void deleteBookmark() {
         // given
@@ -79,6 +97,25 @@ class BookmarkControllerTest extends IntegrationTest {
                 .delete("/api/v1/hearits/" + hearit.getId() + "/bookmarks/" + bookmark.getId())
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
+    @Test
+    @DisplayName("자신의 북마크가 아닌 북마크 삭제 시, 403 UNAUTHORIZED를 반환한다.")
+    void notFoundHearitId() {
+        // given
+        Member bookmarkMember = saveMember();
+        Member notBookmarkMember = saveMember();
+        String token = generateToken(notBookmarkMember);
+        Hearit hearit = saveHearitWithSuffix(1);
+        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(bookmarkMember, hearit));
+
+        // when & then
+        RestAssured.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .delete("/api/v1/hearits/" + hearit.getId() + "/bookmarks/" + bookmark.getId())
+                .then()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     private Member saveMember() {

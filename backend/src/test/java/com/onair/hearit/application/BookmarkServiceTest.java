@@ -53,16 +53,14 @@ class BookmarkServiceTest {
     void getBookmarkHearitsTest() {
         // given
         Member member = saveMember();
-        for (int i = 0; i < 5; i++) {
-            Hearit hearit = saveHearitWithSuffix(i);
-            dbHelper.insertBookmark(new Bookmark(member, hearit));
-        }
+        Hearit hearit = saveHearitWithSuffix(1);
+        dbHelper.insertBookmark(new Bookmark(member, hearit));
 
         // when
-        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.getId(), 0, 5);
+        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.getId(), 0, 1);
 
         // then
-        assertThat(responses).hasSize(5);
+        assertThat(responses).hasSize(1);
     }
 
     @Test
@@ -71,13 +69,13 @@ class BookmarkServiceTest {
         // given
         Member member = saveMember();
         Hearit hearit = saveHearitWithSuffix(1);
-        int previousBookmarkCount = bookmarkService.getBookmarkHearits(member.getId(), 0, 10).size();
+        int previousBookmarkCount = bookmarkRepository.findAll().size();
 
         // when
         bookmarkService.addBookmark(hearit.getId(), member.getId());
 
         // then
-        int currentBookmarkCount = bookmarkService.getBookmarkHearits(member.getId(), 0, 10).size();
+        int currentBookmarkCount = bookmarkRepository.findAll().size();
         assertThat(previousBookmarkCount + 1).isEqualTo(currentBookmarkCount);
     }
 

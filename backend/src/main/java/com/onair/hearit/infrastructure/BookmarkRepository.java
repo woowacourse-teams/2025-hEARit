@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
-    boolean existsByHearitIdAndMemberId(Long hearitId, Long memberId);
-
     List<Bookmark> findAllByMemberOrderByCreatedAtDesc(Member member, Pageable pageable);
+
+    boolean existsByHearitIdAndMemberId(Long hearitId, Long memberId);
 }
