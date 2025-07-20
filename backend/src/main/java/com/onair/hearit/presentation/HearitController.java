@@ -27,8 +27,14 @@ public class HearitController {
     @GetMapping("/{hearitId}")
     public ResponseEntity<HearitPersonalDetailResponse> readHearit(@PathVariable Long hearitId,
                                                                    @AuthenticationPrincipal CurrentMember member) {
-        HearitPersonalDetailResponse response = hearitService.getHearitPersonalDetail(hearitId, member.memberId());
+        //TODO : 추후에 security url permit 해야함
+        Long memberId = extractMemberId(member);
+        HearitPersonalDetailResponse response = hearitService.getHearitPersonalDetail(hearitId, memberId);
         return ResponseEntity.ok(response);
+    }
+
+    private Long extractMemberId(CurrentMember member) {
+        return (member != null) ? member.memberId() : null;
     }
 
     @Operation(summary = "랜덤 히어릿 10개 조회", description = "랜덤 히어릿을 5개 조회합니다.")
