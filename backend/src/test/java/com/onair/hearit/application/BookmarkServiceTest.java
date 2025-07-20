@@ -90,7 +90,7 @@ class BookmarkServiceTest {
         // when & then
         assertThatThrownBy(() -> bookmarkService.addBookmark(hearit.getId(), member.getId()))
                 .isInstanceOf(AlreadyExistException.class)
-                .hasMessageContaining("이미 북마크가 존재합니다.");
+                .hasMessageContaining("이미 북마크된 히어릿입니다.");
     }
 
     @Test
