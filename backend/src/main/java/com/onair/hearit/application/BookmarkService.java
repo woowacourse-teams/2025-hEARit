@@ -37,7 +37,7 @@ public class BookmarkService {
     @Transactional
     public void addBookmark(Long hearitId, Long memberId) {
         if (bookmarkRepository.existsByHearitIdAndMemberId(hearitId, memberId)) {
-            throw new AlreadyExistException("이미 북마크가 존재합니다.");
+            throw new AlreadyExistException("이미 북마크된 히어릿입니다.");
         }
         Hearit hearit = getHearitById(hearitId);
         Member member = getMemberById(memberId);
@@ -50,10 +50,9 @@ public class BookmarkService {
         Bookmark bookmark = getBookmarkById(bookmarkId);
         Member member = getMemberById(memberId);
         if (bookmark.isCreatedBy(member)) {
-            bookmarkRepository.delete(bookmark);
-            return;
+            throw new UnauthorizedException("북마크를 삭제할 권한이 없습니다.");
         }
-        throw new UnauthorizedException("북마크를 삭제할 권한이 없습니다.");
+        bookmarkRepository.delete(bookmark);
     }
 
     private Member getMemberById(Long memberId) {
