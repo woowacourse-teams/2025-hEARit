@@ -68,6 +68,9 @@ public class Member {
         if (!(o instanceof Member member)) {
             return false;
         }
+        if (this.id == null || member.id == null) {
+            return false;
+        }
         return Objects.equals(id, member.id);
     }
 
