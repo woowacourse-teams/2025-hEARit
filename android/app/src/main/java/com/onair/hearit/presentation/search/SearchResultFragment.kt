@@ -17,10 +17,6 @@ class SearchResultFragment : Fragment() {
 
     private val adapter by lazy { SearchedHearitAdapter() }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

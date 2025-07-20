@@ -26,10 +26,6 @@ class SearchFragment : Fragment() {
     private val adapter = KeywordAdapter()
     private val categoryAdapter = CategoryAdapter()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
