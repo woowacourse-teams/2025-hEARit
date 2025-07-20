@@ -1,11 +1,13 @@
 package com.onair.hearit.presentation.search
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -35,6 +37,7 @@ class SearchFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?,
@@ -50,14 +53,26 @@ class SearchFragment : Fragment() {
         setupSearchEnterKey()
         setKeywordRecyclerView()
         setCategoriesRecyclerView()
+
+        binding.nestedScrollView.setOnTouchListener { v, event ->
+            hideKeyboard()
+            false
+        }
     }
 
     private fun setupSearchEnterKey() {
-        binding.etSearch.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
-            ) {
-                navigateToSearchResult()
+        val editTextSearch = binding.etSearch
+
+        editTextSearch.setOnEditorActionListener { _, actionId, event ->
+            val isSearchAction = (actionId == EditorInfo.IME_ACTION_SEARCH)
+
+            if (isSearchAction) {
+                val searchedText = editTextSearch.text
+                if (searchedText.isNotEmpty()) {
+                    navigateToSearchResult()
+                } else {
+                    hideKeyboard()
+                }
                 true
             } else {
                 false
@@ -114,6 +129,13 @@ class SearchFragment : Fragment() {
                 SearchResultFragment(),
             ).addToBackStack(null)
             .commit()
+    }
+
+    private fun hideKeyboard() {
+        val inputMethodManager =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val view = requireActivity().currentFocus ?: View(requireContext())
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     override fun onDestroyView() {
