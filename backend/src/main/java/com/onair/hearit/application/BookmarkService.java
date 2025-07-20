@@ -49,7 +49,7 @@ public class BookmarkService {
     public void deleteBookmark(Long bookmarkId, Long memberId) {
         Bookmark bookmark = getBookmarkById(bookmarkId);
         Member member = getMemberById(memberId);
-        if (bookmark.isCreatedBy(member)) {
+        if (!bookmark.isCreatedBy(member)) {
             throw new UnauthorizedException("북마크를 삭제할 권한이 없습니다.");
         }
         bookmarkRepository.delete(bookmark);
