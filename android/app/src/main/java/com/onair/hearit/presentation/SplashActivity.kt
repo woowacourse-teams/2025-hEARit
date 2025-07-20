@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivitySplashBinding
@@ -34,6 +35,7 @@ class SplashActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, 0, systemBars.right, 0)
             insets
         }
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
     private fun navigateToMainWithDelay() {
