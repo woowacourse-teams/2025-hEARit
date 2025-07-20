@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.Infrastructure.client;
+package com.onair.hearit.auth.infrastructure.client;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

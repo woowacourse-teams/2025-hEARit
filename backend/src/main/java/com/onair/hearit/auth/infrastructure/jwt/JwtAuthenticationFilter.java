@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.Infrastructure.jwt;
+package com.onair.hearit.auth.infrastructure.jwt;
 
 import com.onair.hearit.auth.dto.CurrentMember;
 import jakarta.servlet.FilterChain;

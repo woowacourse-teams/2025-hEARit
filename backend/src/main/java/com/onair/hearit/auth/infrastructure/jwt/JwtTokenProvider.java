@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.Infrastructure.jwt;
+package com.onair.hearit.auth.infrastructure.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

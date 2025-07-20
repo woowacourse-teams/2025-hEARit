@@ -2,7 +2,7 @@ package com.onair.hearit.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.onair.hearit.auth.Infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
