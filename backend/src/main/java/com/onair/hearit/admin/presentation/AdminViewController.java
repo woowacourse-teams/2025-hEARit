@@ -15,6 +15,11 @@ public class AdminViewController {
         return "admin/hearit-upload";
     }
 
+    @GetMapping("/hearits")
+    public String hearitListPage() {
+        return "admin/hearit-list";
+    }
+
     @GetMapping
     public String adminHome() {
         return "admin/home";

@@ -2,6 +2,7 @@ package com.onair.hearit.admin.application;
 
 import com.onair.hearit.admin.dto.HearitUploadRequest;
 import com.onair.hearit.admin.dto.KeywordInfoResponse;
+import com.onair.hearit.admin.dto.PagedResponse;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -15,6 +16,10 @@ import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.KeywordRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +32,18 @@ public class AdminHearitService {
     private final CategoryRepository categoryRepository;
     private final KeywordRepository keywordRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
+
+    public PagedResponse<HearitDetailResponse> getPageHearits(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("createdAt")));
+        Page<Hearit> pageHearits = hearitRepository.findAllForAdmin(pageable);
+
+        Page<HearitDetailResponse> dtoPage = pageHearits.map(HearitDetailResponse::from);
+        return PagedResponse.from(dtoPage);
+    }
+
+    public void deleteHearitById(Long hearitId) {
+        hearitRepository.deleteById(hearitId);
+    }
 
     @Transactional
     public HearitDetailResponse uploadHearit(HearitUploadRequest request) {

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>히어릿 관리</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .pagination {
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 8px 16px;
+        }
+    </style>
+</head>
+<body>
+<h1>히어릿 관리</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>제목</th>
+        <th>요약</th>
+        <th>재생 시간</th>
+        <th>출처</th>
+        <th>생성일</th>
+        <th>작업</th>
+    </tr>
+    </thead>
+    <tbody id="hearit-table-body">
+    <!-- 히어릿 데이터가 여기에 동적으로 추가됩니다. -->
+    </tbody>
+</table>
+
+<div class="pagination">
+    <button id="prev-page" disabled>이전</button>
+    <span id="page-info"></span>
+    <button id="next-page" disabled>다음</button>
+</div>
+
+<script>
+    let currentPage = 0;
+    const pageSize = 15;
+
+    async function fetchHearits(page) {
+        try {
+            const response = await fetch(`/api/v1/admin/hearits?page=${page}&size=${pageSize}`);
+            if (!response.ok) {
+                throw new Error('데이터를 불러오는 데 실패했습니다.');
+            }
+            const pagedData = await response.json();
+            updateTable(pagedData.content);
+            updatePagination(pagedData);
+            currentPage = page;
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+        }
+    }
+
+    function updateTable(hearits) {
+        const tableBody = document.getElementById('hearit-table-body');
+        tableBody.innerHTML = '';
+        hearits.forEach(hearit => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${hearit.id}</td>
+                <td>${hearit.title}</td>
+                <td>${hearit.summary}</td>
+                <td>${hearit.playTime}초</td>
+                <td>${hearit.source}</td>
+                <td>${new Date(hearit.createdAt).toLocaleString()}</td>
+                <td><button onclick="deleteHearit(${hearit.id})">삭제</button></td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function updatePagination(pagedData) {
+        document.getElementById('page-info').textContent = `페이지 ${pagedData.page + 1} / ${pagedData.totalPages}`;
+        document.getElementById('prev-page').disabled = pagedData.isFirst;
+        document.getElementById('next-page').disabled = pagedData.isLast;
+    }
+
+    async function deleteHearit(hearitId) {
+        if (!confirm(`정말로 ID ${hearitId} 히어릿을 삭제하시겠습니까?`)) {
+            return;
+        }
+        try {
+            const response = await fetch(`/api/v1/admin/hearits/${hearitId}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                alert('성공적으로 삭제되었습니다.');
+                fetchHearits(currentPage);
+            } else {
+                throw new Error('삭제에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchHearits(0);
+
+        document.getElementById('prev-page').addEventListener('click', () => {
+            fetchHearits(currentPage - 1);
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            fetchHearits(currentPage + 1);
+        });
+    });
+</script>
+
+</body>
+</html> 
