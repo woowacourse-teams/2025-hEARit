@@ -28,6 +28,6 @@ public class CategoryService {
 
     private Category findCategory(final Long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("hearitId", String.valueOf(id)));
+                .orElseThrow(() -> new NotFoundException("categoryId", String.valueOf(id)));
     }
 }
