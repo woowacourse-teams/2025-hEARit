@@ -129,7 +129,7 @@ class BookmarkServiceTest {
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix);
+        Category category = new Category("name" + suffix, "#123");
         dbHelper.insertCategory(category);
 
         Hearit hearit = new Hearit(

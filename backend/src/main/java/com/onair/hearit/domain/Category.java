@@ -23,7 +23,11 @@ public class Category {
     @Column(name = "name", nullable = false)
     private String name;
 
-    public Category(String name) {
+    @Column(name = "color_code", nullable = false)
+    private String colorCode;
+
+    public Category(String name, String colorCode) {
         this.name = name;
+        this.colorCode = colorCode;
     }
 }

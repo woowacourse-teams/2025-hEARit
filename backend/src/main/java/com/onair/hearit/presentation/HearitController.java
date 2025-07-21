@@ -1,9 +1,12 @@
 package com.onair.hearit.presentation;
 
+import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.response.HearitListResponse;
+import com.onair.hearit.dto.request.TitleSearchCondition;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HearitSearchResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -13,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HearitController {
 
     private final HearitService hearitService;
+    private final HearitSearchService hearitSearchService;
 
     @Operation(summary = "단일 히어릿 상세 조회", description = "히어릿ID룰 통해 하나의 히어릿 상세 정보를 조회합니다.")
     @GetMapping("/{hearitId}")
@@ -49,5 +54,16 @@ public class HearitController {
     public ResponseEntity<List<HearitListResponse>> readRecommendedHearits() {
         List<HearitListResponse> responses = hearitService.getRecommendedHearits();
         return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<HearitSearchResponse>> searchHearitsByTitle(
+            @RequestParam(name = "searchTerm") String searchTerm,
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "20") Integer size
+    ) {
+        TitleSearchCondition condition = new TitleSearchCondition(searchTerm, page, size);
+        List<HearitSearchResponse> response = hearitSearchService.searchByTitle(condition);
+        return ResponseEntity.ok(response);
     }
 }
