@@ -16,8 +16,8 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("""
                 SELECT h
                 FROM Hearit h
-                WHERE LOWER(h.title) LIKE LOWER(CONCAT('%', :search, '%'))
+                WHERE LOWER(h.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
                 ORDER BY h.createdAt DESC
             """)
-    Page<Hearit> findByTitleOrderByCreatedAtDesc(@Param("search") String search, Pageable pageable);
+    Page<Hearit> findByTitleOrderByCreatedAtDesc(@Param("searchTerm") String searchTerm, Pageable pageable);
 }

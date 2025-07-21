@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 class TitleSearchConditionTest {
 
     @Test
-    @DisplayName("search, page, size 중 하나라도 null이면 예외가 발생한다.")
+    @DisplayName("searchTerm, page, size 중 하나라도 null이면 예외가 발생한다.")
     void throwExceptionWhenAnyFieldIsNull() {
         // given
-        String validSearchTerm = "search";
+        String validSearchTerm = "searchTerm";
         int validPage = 0;
         int validSize = 10;
 
@@ -36,7 +36,7 @@ class TitleSearchConditionTest {
     @DisplayName("page, size가 유효 범위를 벗어나면 예외가 발생한다.")
     void throwExceptionWhenPageOrSizeIsOutOfRange() {
         // given
-        String validSearchTerm = "search";
+        String validSearchTerm = "searchTerm";
 
         int negativePage = -1;
         int negativeSize = -5;
