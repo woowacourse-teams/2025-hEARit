@@ -2,7 +2,7 @@ package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
-import com.onair.hearit.dto.request.TitleSearchRequest;
+import com.onair.hearit.dto.request.TitleSearchCondition;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,7 +49,7 @@ public class HearitController {
 
     @GetMapping("/search")
     public ResponseEntity<List<HearitSearchResponse>> searchHearitsByTitle(
-            @Valid @ModelAttribute TitleSearchRequest condition) {
+            @Valid @ModelAttribute TitleSearchCondition condition) {
         List<HearitSearchResponse> response = hearitSearchService.searchByTitle(condition);
         return ResponseEntity.ok(response);
     }

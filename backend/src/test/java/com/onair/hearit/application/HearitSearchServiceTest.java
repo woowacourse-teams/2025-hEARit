@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.dto.request.TitleSearchRequest;
+import com.onair.hearit.dto.request.TitleSearchCondition;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
@@ -44,7 +44,7 @@ class HearitSearchServiceTest {
         Hearit hearit4 = saveHearitByTitle("notitle");
 
         // when
-        TitleSearchRequest condition = new TitleSearchRequest("title1", 0, 10);
+        TitleSearchCondition condition = new TitleSearchCondition("title1", 0, 10);
         List<HearitSearchResponse> result = hearitSearchService.searchByTitle(condition);
 
         // then
@@ -63,7 +63,7 @@ class HearitSearchServiceTest {
         Hearit hearit2 = saveHearitByTitle("title2");
 
         // when
-        TitleSearchRequest condition = new TitleSearchRequest("title", 0, 10);
+        TitleSearchCondition condition = new TitleSearchCondition("title", 0, 10);
         List<HearitSearchResponse> result = hearitSearchService.searchByTitle(condition);
 
         // then
@@ -83,7 +83,7 @@ class HearitSearchServiceTest {
         Hearit hearit3 = saveHearitByTitle("title3");
 
         // when
-        TitleSearchRequest condition = new TitleSearchRequest("title", 1, 2);
+        TitleSearchCondition condition = new TitleSearchCondition("title", 1, 2);
         List<HearitSearchResponse> result = hearitSearchService.searchByTitle(condition);
 
         // then
