@@ -14,23 +14,24 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HearitException.class)
     public ProblemDetail handleHearitException(HearitException ex, HttpServletRequest request) {
-        ErrorCode errorCode = ex.getErrorCode();
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(errorCode.getHttpStatus(), ex.getDetail());
-        problemDetail.setTitle(errorCode.getTitle());
-        problemDetail.setType(URI.create(request.getRequestURI()));
-        return problemDetail;
+        return buildProblemDetail(ex.getErrorCode(), ex.getDetail(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        ErrorCode errorCode = ErrorCode.INVALID_INPUT;
+        String detail = extractValidationDetail(ex);
+        return buildProblemDetail(ErrorCode.INVALID_INPUT, detail, request);
+    }
 
-        String detail = ex.getBindingResult()
+    private String extractValidationDetail(MethodArgumentNotValidException ex) {
+        return ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
+    }
 
+    private ProblemDetail buildProblemDetail(ErrorCode errorCode, String detail, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(errorCode.getHttpStatus(), detail);
         problemDetail.setTitle(errorCode.getTitle());
         problemDetail.setType(URI.create(request.getRequestURI()));
