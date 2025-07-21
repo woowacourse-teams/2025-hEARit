@@ -54,7 +54,7 @@ class SearchFragment : Fragment() {
         setKeywordRecyclerView()
         setCategoriesRecyclerView()
 
-        binding.nestedScrollView.setOnTouchListener { v, event ->
+        binding.nsvSearch.setOnTouchListener { v, event ->
             hideKeyboard()
             false
         }
