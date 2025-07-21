@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
@@ -103,6 +104,7 @@ class PlayerDetailActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
 
         player =
             ExoPlayer.Builder(this).build().apply {
@@ -131,6 +133,10 @@ class PlayerDetailActivity : AppCompatActivity() {
 
         binding.btnHearitPlayerBookmark.setOnClickListener {
             it.isSelected = !it.isSelected
+        }
+
+        binding.ibPlayerDetailBack.setOnClickListener {
+            finish()
         }
     }
 
