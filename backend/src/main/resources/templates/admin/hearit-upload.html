@@ -42,11 +42,18 @@
             <option value="" disabled selected>카테고리를 선택하세요</option>
         </select>
     </div>
+    <div>
+        <label>키워드</label>
+        <div id="keyword-checkboxes">
+            <!-- 키워드 체크박스가 여기에 동적으로 추가됩니다. -->
+        </div>
+    </div>
     <button type="button" onclick="uploadHearit()">업로드</button>
 </form>
 
 <script>
     document.addEventListener('DOMContentLoaded', async function() {
+        // 카테고리 로드
         try {
             const response = await fetch('/api/v1/admin/categories');
             if (response.ok) {
@@ -64,12 +71,37 @@
         } catch (error) {
             console.error('Error:', error);
         }
+
+        // 키워드 로드
+        try {
+            const response = await fetch('/api/v1/admin/keywords');
+            if (response.ok) {
+                const keywords = await response.json();
+                const keywordCheckboxes = document.getElementById('keyword-checkboxes');
+                keywords.forEach(keyword => {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'keywordIds';
+                    checkbox.value = keyword.id;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(keyword.name));
+                    keywordCheckboxes.appendChild(label);
+                });
+            } else {
+                console.error('키워드를 불러오는 데 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     });
 
     async function uploadHearit() {
         const form = document.getElementById('upload-form');
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
+        data.keywordIds = formData.getAll('keywordIds').map(id => parseInt(id, 10));
+
 
         if (!data.categoryId) {
             alert('카테고리를 선택해주세요.');

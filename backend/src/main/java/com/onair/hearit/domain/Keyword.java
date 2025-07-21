@@ -22,4 +22,8 @@ public class Keyword {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    public Keyword(String name) {
+        this.name = name;
+    }
 }

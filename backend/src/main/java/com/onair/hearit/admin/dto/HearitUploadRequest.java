@@ -1,5 +1,7 @@
 package com.onair.hearit.admin.dto;
 
+import java.util.List;
+
 public record HearitUploadRequest(
         String title,
         String summary,
@@ -8,6 +10,7 @@ public record HearitUploadRequest(
         String shortAudioUrl,
         String scriptUrl,
         String source,
-        Long categoryId
+        Long categoryId,
+        List<Long> keywordIds
 ) {
 }

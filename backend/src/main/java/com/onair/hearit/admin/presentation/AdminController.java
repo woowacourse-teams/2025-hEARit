@@ -4,6 +4,7 @@ import com.onair.hearit.admin.application.AdminAuthService;
 import com.onair.hearit.admin.application.AdminHearitService;
 import com.onair.hearit.admin.dto.AdminLoginRequest;
 import com.onair.hearit.admin.dto.HearitUploadRequest;
+import com.onair.hearit.admin.dto.KeywordInfoResponse;
 import com.onair.hearit.dto.response.CategoryInfoResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import java.net.URI;
@@ -38,6 +39,12 @@ public class AdminController {
     @GetMapping("/categories")
     public ResponseEntity<List<CategoryInfoResponse>> getAllCategories() {
         List<CategoryInfoResponse> response = adminHearitService.getAllCategories();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/keywords")
+    public ResponseEntity<List<KeywordInfoResponse>> getAllKeywords() {
+        List<KeywordInfoResponse> response = adminHearitService.getAllKeywords();
         return ResponseEntity.ok(response);
     }
 }
