@@ -102,7 +102,7 @@ class HearitControllerTest extends IntegrationTest {
         // when & then
         var response = RestAssured
                 .given()
-                .queryParam("search", "title1")
+                .queryParam("searchTerm", "title1")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
                 .when()
@@ -124,7 +124,7 @@ class HearitControllerTest extends IntegrationTest {
     void searchHearitsWithInvalidParams() {
         // when & then
         RestAssured.given()
-                .queryParam("search", "title1")
+                .queryParam("searchTerm", "title1")
                 .queryParam("page", -1)
                 .queryParam("size", 10)
                 .when()
@@ -133,7 +133,7 @@ class HearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.BAD_REQUEST.value());
 
         RestAssured.given()
-                .queryParam("search", "title1")
+                .queryParam("searchTerm", "title1")
                 .queryParam("page", 0)
                 .queryParam("size", -5)
                 .when()
