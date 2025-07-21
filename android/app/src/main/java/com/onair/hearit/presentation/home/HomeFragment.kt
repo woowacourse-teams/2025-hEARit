@@ -4,14 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
-import com.onair.hearit.data.dummy.RecommendDummyData
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.domain.CategoryItem
 import com.onair.hearit.domain.HearitItem
@@ -26,7 +27,7 @@ class HomeFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
+    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private lateinit var recommendAdapter: RecommendHearitAdapter
     private val categoryAdapter = CategoryAdapter()
 
@@ -44,19 +45,44 @@ class HomeFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
+        binding.lifecycleOwner = this
+        recommendAdapter = RecommendHearitAdapter(this)
 
+        setupInsets()
+        setupListeners()
+        setupRecentHearit()
+        setupRecommendRecyclerView()
+        setupCategoryRecyclerView()
+        observeViewModel()
+    }
+
+    private fun setupInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
+    }
 
-        recommendAdapter = RecommendHearitAdapter(this)
-
+    private fun setupListeners() {
         binding.ivProfile.setOnClickListener {
             (activity as? DrawerClickListener)?.openDrawer()
         }
 
+        binding.ivHomeAllCategory.setOnClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container_view, CategoryFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.ivHomeRecentHearit.setOnClickListener {
+            navigateToPlayerDetail()
+        }
+    }
+
+    private fun setupRecentHearit() {
         binding.recentHearit =
             HearitItem(
                 id = 1L,
@@ -68,29 +94,14 @@ class HomeFragment :
                 categoryId = 12,
                 createdAt = LocalDateTime.now(),
             )
+    }
 
+    private fun setupRecommendRecyclerView() {
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(binding.rvHomeRecommendHearit)
-
-        val sampleRecommendData = RecommendDummyData.getRecommendData(requireContext())
-        val repeatedItems =
-            List(20) { index -> sampleRecommendData[index % sampleRecommendData.size] }
-        recommendAdapter.submitList(repeatedItems)
         binding.rvHomeRecommendHearit.adapter = recommendAdapter
 
-        binding.rvHomeRecommendHearit.post {
-            val middlePosition = repeatedItems.size / 2
-            val layoutManager = binding.rvHomeRecommendHearit.layoutManager as LinearLayoutManager
-            val recyclerViewCenter = binding.rvHomeRecommendHearit.width / 2
-
-            // View 하나의 넓이
-            val itemWidth = (260 * resources.displayMetrics.density).toInt()
-            // 정확히 가운데 맞추기 위한 offset
-            val offset = recyclerViewCenter - (itemWidth / 2)
-            layoutManager.scrollToPositionWithOffset(middlePosition, offset)
-        }
-
-        // 스크롤 시 중심 아이템 강조 효과 적용
+        // 중심 아이템 강조 효과
         binding.rvHomeRecommendHearit.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(
@@ -106,7 +117,9 @@ class HomeFragment :
                 }
             },
         )
+    }
 
+    private fun setupCategoryRecyclerView() {
         binding.rvHomeCategory.adapter = categoryAdapter
         val sampleCategories =
             List(6) { i ->
@@ -118,18 +131,6 @@ class HomeFragment :
                 )
             }
         categoryAdapter.submitList(sampleCategories)
-
-        binding.ivHomeAllCategory.setOnClickListener {
-            parentFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container_view, CategoryFragment())
-                .addToBackStack(null)
-                .commit()
-        }
-
-        binding.ivHomeRecentHearit.setOnClickListener {
-            navigateToPlayerDetail()
-        }
     }
 
     private fun applyCenterScalingEffect(
@@ -154,6 +155,35 @@ class HomeFragment :
         // 중심에 가까울수록 불투명, 멀수록 더 투명
         child.z = (1 - d) * 10f
         child.alpha = 0.5f + (1 - d) * 0.5f
+    }
+
+    private fun observeViewModel() {
+        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
+            val repeatedItems = List(30) { index -> recommendItems[index % recommendItems.size] }
+            recommendAdapter.submitList(repeatedItems) {
+                scrollToMiddlePosition()
+            }
+        }
+
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
+        }
+    }
+
+    // 리스트 중앙에 포지션 배치
+    private fun scrollToMiddlePosition() {
+        binding.rvHomeRecommendHearit.post {
+            val middlePosition = recommendAdapter.currentList.size / 2
+            val layoutManager = binding.rvHomeRecommendHearit.layoutManager as LinearLayoutManager
+            val recyclerViewCenter = binding.rvHomeRecommendHearit.width / 2
+            val itemWidth = (260 * resources.displayMetrics.density).toInt()
+            val offset = recyclerViewCenter - (itemWidth / 2)
+            layoutManager.scrollToPositionWithOffset(middlePosition, offset)
+        }
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     private fun navigateToPlayerDetail() {
