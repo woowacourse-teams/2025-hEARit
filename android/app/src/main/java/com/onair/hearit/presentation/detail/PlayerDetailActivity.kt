@@ -105,6 +105,9 @@ class PlayerDetailActivity : AppCompatActivity() {
             binding.playerView.player = controller
             binding.baseController.setPlayer(controller)
 
+            controller.prepare()
+            controller.play()
+
             startScriptSync(controller)
         }
 
