@@ -59,6 +59,15 @@ class ExploreFragment : Fragment() {
         )
     }
 
+    // 홈에서 돌아올 때 사용함 + exoplayer는 UI가 완전히 포커스를 가진 시점 이후에 재생되어야 하기 때문에 onResume에서 실행
+    override fun onResume() {
+        super.onResume()
+        // player가 준비된 상태이고 + 현재 재생중이 아닌경우 => Explore 화면에서는 항상 실행되어야 하기 때문임
+        if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
+            player.play()
+        }
+    }
+
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -113,9 +122,18 @@ class ExploreFragment : Fragment() {
         adapter.submitList(dummyItems)
     }
 
+    override fun onPause() {
+        super.onPause()
+        player.pause()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         player.release()
     }
 }
