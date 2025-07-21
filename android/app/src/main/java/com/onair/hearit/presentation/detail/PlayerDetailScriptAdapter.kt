@@ -37,7 +37,7 @@ class PlayerDetailScriptAdapter(
         val binding = holder.binding
 
         val timePrefix = formatTime(item.startTimeMs)
-        binding.tvScriptBody.text = "$timePrefix ${item.text}"
+        binding.tvScriptBody.text = "$timePrefix    ${item.text}"
 
         if (position == highlightedPosition) {
             binding.tvScriptBody.setTextColor(ContextCompat.getColor(context, R.color.hearit_gray4))
