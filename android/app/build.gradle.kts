@@ -39,7 +39,7 @@ android {
         jvmTarget = "21"
     }
     defaultConfig {
-        val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("base.url") ?: ""
+        val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
     buildFeatures {
