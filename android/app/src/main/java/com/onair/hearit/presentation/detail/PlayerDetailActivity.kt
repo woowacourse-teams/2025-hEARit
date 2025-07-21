@@ -83,13 +83,36 @@ class PlayerDetailActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
 
+        setupWindowInsets()
+        initMediaController()
+
+        layoutManager = LinearLayoutManager(this)
+        playerDetailScriptAdapter = PlayerDetailScriptAdapter(scriptLines)
+        binding.rvScript.apply {
+            this.layoutManager = this@PlayerDetailActivity.layoutManager
+            adapter = playerDetailScriptAdapter
+        }
+
+        binding.btnHearitPlayerBookmark.setOnClickListener {
+            it.isSelected = !it.isSelected
+        }
+
+        binding.ibPlayerDetailBack.setOnClickListener {
+            finish()
+        }
+    }
+
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
+    }
 
+    @OptIn(UnstableApi::class)
+    private fun initMediaController() {
         val serviceIntent = Intent(this, PlaybackService::class.java)
         startService(serviceIntent)
 
@@ -109,21 +132,6 @@ class PlayerDetailActivity : AppCompatActivity() {
             controller.play()
 
             startScriptSync(controller)
-        }
-
-        layoutManager = LinearLayoutManager(this)
-        playerDetailScriptAdapter = PlayerDetailScriptAdapter(scriptLines)
-        binding.rvScript.apply {
-            this.layoutManager = this@PlayerDetailActivity.layoutManager
-            adapter = playerDetailScriptAdapter
-        }
-
-        binding.btnHearitPlayerBookmark.setOnClickListener {
-            it.isSelected = !it.isSelected
-        }
-
-        binding.ibPlayerDetailBack.setOnClickListener {
-            finish()
         }
     }
 
