@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +28,7 @@ class HomeFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
+    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private lateinit var recommendAdapter: RecommendHearitAdapter
     private val categoryAdapter = CategoryAdapter()
 
@@ -154,6 +156,21 @@ class HomeFragment :
         // 중심에 가까울수록 불투명, 멀수록 더 투명
         child.z = (1 - d) * 10f
         child.alpha = 0.5f + (1 - d) * 0.5f
+    private fun observeViewModel() {
+        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
+            val repeatedItems = List(30) { index -> recommendItems[index % recommendItems.size] }
+            recommendAdapter.submitList(repeatedItems) {
+                scrollToMiddlePosition()
+            }
+        }
+
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
+        }
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     private fun navigateToPlayerDetail() {
