@@ -8,11 +8,12 @@ import com.onair.hearit.domain.HearitShortsItem
 
 class ShortsAdapter(
     private val player: ExoPlayer,
+    private val shortsClickListener: ShortsClickListener,
 ) : ListAdapter<HearitShortsItem, ShortsViewHolder>((DiffCallback)) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): ShortsViewHolder = ShortsViewHolder.create(parent, player)
+    ): ShortsViewHolder = ShortsViewHolder.create(parent, player, shortsClickListener)
 
     override fun onBindViewHolder(
         holder: ShortsViewHolder,

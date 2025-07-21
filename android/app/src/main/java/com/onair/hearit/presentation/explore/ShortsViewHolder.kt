@@ -10,12 +10,13 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.databinding.ItemExploreBinding
+import com.onair.hearit.databinding.ItemShortsBinding
 import com.onair.hearit.domain.HearitShortsItem
 
 class ShortsViewHolder(
-    private val binding: ItemExploreBinding,
+    private val binding: ItemShortsBinding,
     private val player: ExoPlayer,
+    private val shortsClickListener: ShortsClickListener,
 ) : RecyclerView.ViewHolder(
         binding.root,
     ) {
@@ -24,6 +25,10 @@ class ShortsViewHolder(
 
     private var hearitShortsItem: HearitShortsItem? = null
     private val scriptAdapter = ScriptAdapter()
+
+    init {
+        binding.shortsClickListener = shortsClickListener
+    }
 
     @OptIn(UnstableApi::class)
     fun bind(item: HearitShortsItem) {
@@ -80,10 +85,11 @@ class ShortsViewHolder(
         fun create(
             parent: ViewGroup,
             player: ExoPlayer,
+            shortsClickListener: ShortsClickListener,
         ): ShortsViewHolder {
             val inflater = LayoutInflater.from(parent.context)
-            val binding = ItemExploreBinding.inflate(inflater, parent, false)
-            return ShortsViewHolder(binding, player)
+            val binding = ItemShortsBinding.inflate(inflater, parent, false)
+            return ShortsViewHolder(binding, player, shortsClickListener)
         }
     }
 }
