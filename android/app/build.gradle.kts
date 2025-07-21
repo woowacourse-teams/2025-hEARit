@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -35,6 +37,15 @@ android {
     }
     kotlinOptions {
         jvmTarget = "21"
+    }
+    defaultConfig {
+        val localProperties =
+            Properties().apply {
+                load(File(rootDir, "local.properties").inputStream())
+            }
+
+        val baseUrl = localProperties["BASE_URL"] as String
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
     buildFeatures {
         buildConfig = true
