@@ -19,6 +19,7 @@
         style="@style/pretendard_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLines="2"
         android:paddingHorizontal="60dp"
         android:paddingVertical="20dp"
         android:text="@{subtitleLine.sentence}"
