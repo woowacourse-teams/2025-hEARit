@@ -16,7 +16,6 @@ class RecommendViewHolder(
 
     fun bind(item: RecommendHearitItem) {
         binding.item = item
-        binding.executePendingBindings()
     }
 
     companion object {
