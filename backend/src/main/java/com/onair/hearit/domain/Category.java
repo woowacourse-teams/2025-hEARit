@@ -26,7 +26,8 @@ public class Category {
     @Column(name = "color_code", nullable = false)
     private String colorCode;
 
-    public Category(String name) {
+    public Category(String name, String colorCode) {
         this.name = name;
+        this.colorCode = colorCode;
     }
 }

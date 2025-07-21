@@ -1,7 +1,7 @@
 package com.onair.hearit.auth.application;
 
-import com.onair.hearit.auth.Infrastructure.client.KakaoUserInfoClient;
-import com.onair.hearit.auth.Infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
+import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
@@ -36,7 +36,7 @@ public class AuthService {
     }
 
     private void validatePassword(LoginRequest request, Member member) {
-        if(!passwordEncoder.matches(request.password(), member.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
             throw new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다.");
         }
     }

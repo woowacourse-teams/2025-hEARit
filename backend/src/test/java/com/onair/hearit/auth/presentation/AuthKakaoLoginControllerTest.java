@@ -7,7 +7,7 @@ import static io.restassured.RestAssured.given;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.onair.hearit.IntegrationTest;
-import com.onair.hearit.auth.Infrastructure.client.KakaoUserInfoClient;
+import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
 import io.restassured.http.ContentType;

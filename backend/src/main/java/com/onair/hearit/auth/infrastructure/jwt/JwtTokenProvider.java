@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.Infrastructure.jwt;
+package com.onair.hearit.auth.infrastructure.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -37,7 +37,7 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
-        if(token == null || token.isBlank()) {
+        if (token == null || token.isBlank()) {
             return false;
         }
 
