@@ -97,7 +97,7 @@ class SearchFragment : Fragment() {
                 KeywordItem("# Spring"),
                 KeywordItem("# NotebookLM"),
                 KeywordItem("# Parcelable"),
-                KeywordItem("#Serialization"),
+                KeywordItem("# Serialization"),
                 KeywordItem("# hearit"),
                 KeywordItem("# JPA"),
                 KeywordItem("# Activity"),
