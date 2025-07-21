@@ -2,6 +2,7 @@ package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.BookmarkService;
 import com.onair.hearit.auth.dto.CurrentMember;
+import com.onair.hearit.dto.request.BookmarkListCondition;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,10 +30,11 @@ public class BookmarkController {
     @Operation(summary = "북마크 재생목록 조회", description = "로그인한 회원이 page, size로 재생목록을 조회합니다.")
     @GetMapping("/bookmarks")
     public ResponseEntity<List<BookmarkHearitResponse>> readBookmarkHearits(
-            @AuthenticationPrincipal CurrentMember member,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size) {
-        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.memberId(), page, size);
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @AuthenticationPrincipal CurrentMember member) {
+        BookmarkListCondition condition = new BookmarkListCondition(page, size);
+        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.memberId(), condition);
         return ResponseEntity.ok(responses);
     }
 

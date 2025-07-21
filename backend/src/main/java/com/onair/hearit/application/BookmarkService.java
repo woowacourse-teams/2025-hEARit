@@ -6,6 +6,7 @@ import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.request.BookmarkListCondition;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -25,9 +26,9 @@ public class BookmarkService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public List<BookmarkHearitResponse> getBookmarkHearits(Long memberId, int page, int size) {
+    public List<BookmarkHearitResponse> getBookmarkHearits(Long memberId, BookmarkListCondition condition) {
         Member member = getMemberById(memberId);
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(condition.page(), condition.size());
         List<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByCreatedAtDesc(member, pageable);
         return bookmarks.stream()
                 .map(BookmarkHearitResponse::from)

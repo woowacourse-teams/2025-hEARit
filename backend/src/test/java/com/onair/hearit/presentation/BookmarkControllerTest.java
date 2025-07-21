@@ -11,6 +11,8 @@ import io.restassured.RestAssured;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
@@ -44,6 +46,45 @@ class BookmarkControllerTest extends IntegrationTest {
                     .statusCode(HttpStatus.OK.value())
                     .body("size()", equalTo(5));
         }
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, page가 0 미만인 경우 400 BADREQUEST가 발생한다.")
+    void readBookmarkHearitsTestWithBadRequestByPage() {
+        // given
+        Member member = saveMember();
+        String token = generateToken(member);
+        Hearit hearit = saveHearitWithSuffix(1);
+        dbHelper.insertBookmark(new Bookmark(member, hearit));
+
+        // when & then
+        RestAssured.given()
+                .header("Authorization", "Bearer " + token)
+                .param("page", -1)
+                .when()
+                .get("/api/v1/hearits/bookmarks")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value()).log();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 51})
+    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, size가 0 ~ 50이 아닌 경우 400 BADREQUEST가 발생한다.")
+    void readBookmarkHearitsTestWithBadRequestBySize() {
+        // given
+        Member member = saveMember();
+        String token = generateToken(member);
+        Hearit hearit = saveHearitWithSuffix(1);
+        dbHelper.insertBookmark(new Bookmark(member, hearit));
+
+        // when & then
+        RestAssured.given()
+                .header("Authorization", "Bearer " + token)
+                .param("size", -1)
+                .when()
+                .get("/api/v1/hearits/bookmarks")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value()).log();
     }
 
     @Test

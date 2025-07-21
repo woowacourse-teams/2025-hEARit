@@ -10,6 +10,7 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.request.BookmarkListCondition;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -57,7 +58,7 @@ class BookmarkServiceTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit));
 
         // when
-        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.getId(), 0, 1);
+        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.getId(), new BookmarkListCondition(0, 20));
 
         // then
         assertThat(responses).hasSize(1);
