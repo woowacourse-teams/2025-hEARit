@@ -8,6 +8,18 @@
         android:layout_height="match_parent"
         android:background="@color/hearit_black1">
 
+        <ImageButton
+            android:id="@+id/ib_player_detail_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/hearit_black1"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/tv_hearit_player_title"
             style="@style/pretendard_sub_title"
