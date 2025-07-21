@@ -103,11 +103,9 @@ class HearitSearchServiceTest {
         // given
         Category category1 = saveCategory("Spring", "#001");
         Category category2 = saveCategory("Java", "#002");
-
         Hearit hearit1 = saveHearitWithCategory(category1);
         Hearit hearit2 = saveHearitWithCategory(category1);
         saveHearitWithCategory(category2);
-
         CategorySearchCondition condition = new CategorySearchCondition(category1.getId(), 0, 10);
 
         // when
@@ -126,11 +124,9 @@ class HearitSearchServiceTest {
     void searchHearitsByCategory_pagination() {
         // given
         Category category = saveCategory("Spring", "#001");
-
         Hearit hearit1 = saveHearitWithCategory(category);
         Hearit hearit2 = saveHearitWithCategory(category);
         Hearit hearit3 = saveHearitWithCategory(category);
-
         CategorySearchCondition condition = new CategorySearchCondition(category.getId(), 1, 2);
 
         // when
@@ -147,7 +143,14 @@ class HearitSearchServiceTest {
     private Hearit saveHearitByTitle(String title) {
         Category category = new Category("category", "#123");
         dbHelper.insertCategory(category);
-        Hearit hearit = new Hearit(title, "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
+        Hearit hearit = new Hearit(
+                title,
+                "summary",
+                1,
+                "originalAudioUrl",
+                "shortAudioUrl",
+                "scriptUrl",
+                "source",
                 LocalDateTime.now(), category);
         return dbHelper.insertHearit(hearit);
     }
@@ -158,8 +161,16 @@ class HearitSearchServiceTest {
     }
 
     private Hearit saveHearitWithCategory(Category category) {
-        Hearit hearit = new Hearit("title", "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
-                LocalDateTime.now(), category);
+        Hearit hearit = new Hearit(
+                "title",
+                "summary",
+                1,
+                "originalAudioUrl",
+                "shortAudioUrl",
+                "scriptUrl",
+                "source",
+                LocalDateTime.now(),
+                category);
         return dbHelper.insertHearit(hearit);
     }
 
