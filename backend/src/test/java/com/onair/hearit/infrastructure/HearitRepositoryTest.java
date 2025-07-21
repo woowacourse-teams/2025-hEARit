@@ -67,10 +67,10 @@ class HearitRepositoryTest {
     @DisplayName("제목에 특정 키워드가 포함된 히어릿만 조회할 수 있다.")
     void findByTitleContainingIgnoreCase() {
         // given
-        Hearit hearit1 = saveHearitByTitle("exampletitle1");
-        Hearit hearit2 = saveHearitByTitle("title1example");
-        Hearit hearit3 = saveHearitByTitle("wwtitle1ww");
-        Hearit hearit4 = saveHearitByTitle("notitle");
+        saveHearitByTitle("exampletitle1");
+        saveHearitByTitle("title1example");
+        saveHearitByTitle("wwtitle1ww");
+        saveHearitByTitle("notitle");
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -128,7 +128,7 @@ class HearitRepositoryTest {
 
 
     private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix);
+        Category category = new Category("name" + suffix, "#123");
         dbHelper.insertCategory(category);
 
         Hearit hearit = new Hearit(
@@ -144,7 +144,7 @@ class HearitRepositoryTest {
     }
 
     private Hearit saveHearitByTitle(String title) {
-        Category category = new Category("category");
+        Category category = new Category("category", "#123");
         dbHelper.insertCategory(category);
         Hearit hearit = new Hearit(
                 title,

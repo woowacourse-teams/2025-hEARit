@@ -38,10 +38,10 @@ class HearitSearchServiceTest {
     @DisplayName("히어릿 목록을 조회 시 제목이 포함된 히어릿만 반환한다.")
     void searchHearitsByTitle_onlyTitleMatch() {
         // given
-        Hearit hearit1 = saveHearitByTitle("exampletitle1");
-        Hearit hearit2 = saveHearitByTitle("title1example");
-        Hearit hearit3 = saveHearitByTitle("wwtitle1ww");
-        Hearit hearit4 = saveHearitByTitle("notitle");
+        saveHearitByTitle("exampletitle1");
+        saveHearitByTitle("title1example");
+        saveHearitByTitle("wwtitle1ww");
+        saveHearitByTitle("notitle");
 
         // when
         TitleSearchCondition condition = new TitleSearchCondition("title1", 0, 10);
@@ -94,7 +94,7 @@ class HearitSearchServiceTest {
     }
 
     private Hearit saveHearitByTitle(String title) {
-        Category category = new Category("category");
+        Category category = new Category("category", "#123");
         dbHelper.insertCategory(category);
         Hearit hearit = new Hearit(
                 title,
@@ -108,4 +108,4 @@ class HearitSearchServiceTest {
                 category);
         return dbHelper.insertHearit(hearit);
     }
-} 
+}

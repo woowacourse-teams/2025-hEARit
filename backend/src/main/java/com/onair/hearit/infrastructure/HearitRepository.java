@@ -14,10 +14,10 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     List<Hearit> findRandom(Pageable pageable);
 
     @Query("""
-                SELECT h
-                FROM Hearit h
-                WHERE LOWER(h.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
-                ORDER BY h.createdAt DESC
+            SELECT h
+            FROM Hearit h
+            WHERE LOWER(h.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+            ORDER BY h.createdAt DESC
             """)
     Page<Hearit> findByTitleOrderByCreatedAtDesc(@Param("searchTerm") String searchTerm, Pageable pageable);
 }

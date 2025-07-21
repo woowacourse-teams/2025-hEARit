@@ -1,8 +1,6 @@
 package com.onair.hearit.dto.response;
 
 import com.onair.hearit.domain.Hearit;
-import java.util.List;
-import org.springframework.data.domain.Page;
 
 public record HearitSearchResponse(
         Long id,
@@ -18,11 +16,5 @@ public record HearitSearchResponse(
                 hearit.getSummary(),
                 hearit.getPlayTime()
         );
-    }
-
-    public static List<HearitSearchResponse> from(Page<Hearit> hearits) {
-        return hearits.stream()
-                .map(HearitSearchResponse::from)
-                .toList();
     }
 }
