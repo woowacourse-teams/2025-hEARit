@@ -14,8 +14,11 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.data.dummy.HearitDummyData
 import com.onair.hearit.databinding.FragmentExploreBinding
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
-class ExploreFragment : Fragment() {
+class ExploreFragment :
+    Fragment(),
+    ShortsClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
@@ -92,7 +95,7 @@ class ExploreFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = ShortsAdapter(player)
+        adapter = ShortsAdapter(player, this)
         binding.rvExplore.adapter = adapter
         snapHelper.attachToRecyclerView(binding.rvExplore)
 
@@ -135,5 +138,10 @@ class ExploreFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         player.release()
+    }
+
+    override fun onClickHearitInfo() {
+        val intent = PlayerDetailActivity.newIntent(requireActivity())
+        startActivity(intent)
     }
 }
