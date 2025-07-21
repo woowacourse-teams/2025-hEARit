@@ -21,7 +21,9 @@ public class HearitSearchService {
 
     public List<HearitSearchResponse> searchByTitle(TitleSearchCondition condition) {
         Pageable pageable = PageRequest.of(condition.page(), condition.size());
-        Page<Hearit> pageResult = hearitRepository.findByTitleOrderByCreatedAtDesc(condition.search(), pageable);
-        return HearitSearchResponse.from(pageResult);
+        Page<Hearit> result = hearitRepository.findByTitleOrderByCreatedAtDesc(condition.search(), pageable);
+        return result.stream()
+                .map(HearitSearchResponse::from)
+                .toList();
     }
 }
