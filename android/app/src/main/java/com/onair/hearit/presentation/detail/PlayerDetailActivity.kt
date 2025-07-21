@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.detail
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,24 +9,27 @@ import android.os.Looper
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
+import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
-import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackParameters
+import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.domain.ScriptLine
+import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private lateinit var player: ExoPlayer
     private lateinit var layoutManager: LinearLayoutManager
+
+    private var mediaController: MediaController? = null
 
     // 스크립트 예시 (실제 데이터로 변경해야함)
     private val scriptLines =
@@ -73,26 +77,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         (16 * scale + 0.5f).toInt()
     }
 
-    private val updateRunnable =
-        object : Runnable {
-            override fun run() {
-                val pos = player.currentPosition
-                val currentIndex =
-                    scriptLines.indexOfFirst { pos in it.startTimeMs until it.endTimeMs }
-
-                if (currentIndex != -1) {
-                    playerDetailScriptAdapter.highlightPosition(currentIndex)
-
-                    val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-
-                    binding.rvScript.post {
-                        layoutManager.scrollToPositionWithOffset(currentIndex, centerOffset)
-                    }
-                }
-                handler.postDelayed(this, updateInterval)
-            }
-        }
-
     @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,20 +90,23 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
 
-        player =
-            ExoPlayer.Builder(this).build().apply {
-                val uri = "android.resource://$packageName/${R.raw.test_audio}".toUri()
-                val mediaItem = MediaItem.fromUri(uri)
-                setMediaItem(mediaItem)
-                prepare()
-                playWhenReady = true
-            }
+        val serviceIntent = Intent(this, PlaybackService::class.java)
+        startService(serviceIntent)
 
-        binding.playerView.player = player
-        binding.baseController.setPlayer(player)
+        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
 
-        // 속도 설정
-        player.playbackParameters = PlaybackParameters(1.0f)
+        lifecycleScope.launch {
+            val controller =
+                MediaController
+                    .Builder(this@PlayerDetailActivity, sessionToken)
+                    .buildAsync()
+                    .await()
+
+            binding.playerView.player = controller
+            binding.baseController.setPlayer(controller)
+
+            startScriptSync(controller)
+        }
 
         layoutManager = LinearLayoutManager(this)
         playerDetailScriptAdapter = PlayerDetailScriptAdapter(scriptLines)
@@ -127,9 +114,6 @@ class PlayerDetailActivity : AppCompatActivity() {
             this.layoutManager = this@PlayerDetailActivity.layoutManager
             adapter = playerDetailScriptAdapter
         }
-
-        // 스크립트 하이라이트 업데이트 루프 시작
-        handler.post(updateRunnable)
 
         binding.btnHearitPlayerBookmark.setOnClickListener {
             it.isSelected = !it.isSelected
@@ -140,10 +124,34 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun startScriptSync(controller: Player) {
+        val updateRunnable =
+            object : Runnable {
+                override fun run() {
+                    val pos = controller.currentPosition
+                    val currentIndex =
+                        scriptLines.indexOfFirst { pos in it.startTimeMs until it.endTimeMs }
+
+                    if (currentIndex != -1) {
+                        playerDetailScriptAdapter.highlightPosition(currentIndex)
+
+                        val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
+                        binding.rvScript.post {
+                            layoutManager.scrollToPositionWithOffset(currentIndex, centerOffset)
+                        }
+                    }
+
+                    handler.postDelayed(this, updateInterval)
+                }
+            }
+
+        handler.post(updateRunnable)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        player.release()
-        handler.removeCallbacks(updateRunnable)
+        handler.removeCallbacksAndMessages(null)
+        mediaController?.release()
     }
 
     companion object {
