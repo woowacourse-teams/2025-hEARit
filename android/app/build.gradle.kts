@@ -70,7 +70,7 @@ dependencies {
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
-    // LiveData (필요 시)
+    // LiveData
     implementation(libs.androidx.lifecycle.livedata.ktx)
 
     // android test
