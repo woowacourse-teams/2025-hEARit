@@ -14,6 +14,7 @@ import com.onair.hearit.infrastructure.MemberRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class BookmarkService {
     public List<BookmarkHearitResponse> getBookmarkHearits(Long memberId, BookmarkListCondition condition) {
         Member member = getMemberById(memberId);
         Pageable pageable = PageRequest.of(condition.page(), condition.size());
-        List<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByCreatedAtDesc(member, pageable);
+        Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByCreatedAtDesc(member, pageable);
         return bookmarks.stream()
                 .map(BookmarkHearitResponse::from)
                 .toList();
