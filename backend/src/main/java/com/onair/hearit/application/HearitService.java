@@ -31,7 +31,6 @@ public class HearitService {
 
     public List<HearitDetailResponse> getRandomHearits() {
         Pageable pageable = PageRequest.of(0, MAX_EXPLORE_COUNT);
-
         return hearitRepository.findRandom(pageable).stream()
                 .map(HearitDetailResponse::from)
                 .toList();
@@ -39,7 +38,6 @@ public class HearitService {
 
     public List<HearitDetailResponse> getRecommendedHearits() {
         Pageable pageable = PageRequest.of(0, MAX_RECOMMEND_HEARIT_COUNT);
-
         return hearitRepository.findRandom(pageable).stream()
                 .map(HearitDetailResponse::from)
                 .toList();
