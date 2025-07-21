@@ -7,6 +7,7 @@ import com.onair.hearit.data.HearitRemoteDataSourceImpl
 import com.onair.hearit.data.HearitRepositoryImpl
 import com.onair.hearit.di.NetworkProvider
 
+@Suppress("UNCHECKED_CAST")
 class HomeViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(
         modelClass: Class<T>,
