@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.response.HearitListResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -48,15 +51,19 @@ class HearitServiceTest {
     void getHearitDetailTest() {
         // given
         Hearit hearit = saveHearitWithSuffix(1);
+        Member member = saveMember();
+        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(member, hearit));
 
         // when
-        HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId());
+        HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(), member.getId());
 
         // then
         assertAll(
                 () -> assertThat(response.id()).isEqualTo(hearit.getId()),
                 () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
-                () -> assertThat(response.summary()).isEqualTo(hearit.getSummary())
+                () -> assertThat(response.summary()).isEqualTo(hearit.getSummary()),
+                () -> assertThat(response.isBookmarked()).isTrue(),
+                () -> assertThat(response.bookmarkId()).isEqualTo(bookmark.getId())
         );
     }
 
@@ -65,9 +72,10 @@ class HearitServiceTest {
     void getHearitDetailNotFoundTest() {
         // given
         Long notExistHearitId = 1L;
+        Member member = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId))
+        assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId, member.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
     }
@@ -80,7 +88,7 @@ class HearitServiceTest {
                 .forEach(this::saveHearitWithSuffix);
 
         // when
-        List<HearitDetailResponse> hearits = hearitService.getRandomHearits();
+        List<HearitListResponse> hearits = hearitService.getRandomHearits();
 
         // then
         assertThat(hearits).hasSize(10);
@@ -94,10 +102,14 @@ class HearitServiceTest {
                 .forEach(this::saveHearitWithSuffix);
 
         // when
-        List<HearitDetailResponse> hearits = hearitService.getRecommendedHearits();
+        List<HearitListResponse> hearits = hearitService.getRecommendedHearits();
 
         // then
         assertThat(hearits).hasSize(5);
+    }
+
+    private Member saveMember() {
+        return dbHelper.insertMember(new Member("testId", "test1234!", null, "testMember"));
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {

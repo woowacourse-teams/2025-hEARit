@@ -6,8 +6,8 @@ import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.response.HearitListResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
-import com.onair.hearit.dto.response.HearitPersonalDetailResponse;
 import io.restassured.RestAssured;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,13 +30,13 @@ class HearitControllerTest extends IntegrationTest {
         Hearit hearit = saveHearitWithSuffix(1);
 
         // when & then
-        HearitPersonalDetailResponse response = RestAssured.given()
+        HearitDetailResponse response = RestAssured.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .get("/api/v1/hearits/" + hearit.getId())
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .extract().as(HearitPersonalDetailResponse.class);
+                .extract().as(HearitDetailResponse.class);
 
         assertThat(response.id()).isEqualTo(hearit.getId());
     }
@@ -48,12 +48,12 @@ class HearitControllerTest extends IntegrationTest {
         Hearit hearit = saveHearitWithSuffix(1);
 
         // when & then
-        HearitPersonalDetailResponse response = RestAssured.given()
+        HearitDetailResponse response = RestAssured.given()
                 .when()
                 .get("/api/v1/hearits/" + hearit.getId())
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .extract().as(HearitPersonalDetailResponse.class);
+                .extract().as(HearitDetailResponse.class);
 
         assertThat(response.id()).isEqualTo(hearit.getId());
         assertThat(response.isBookmarked()).isEqualTo(false);
@@ -85,14 +85,14 @@ class HearitControllerTest extends IntegrationTest {
         saveHearitWithSuffix(3);
 
         // when
-        List<HearitDetailResponse> responses = RestAssured.given()
+        List<HearitListResponse> responses = RestAssured.given()
                 .when()
                 .get("/api/v1/hearits/random")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .jsonPath()
-                .getList(".", HearitDetailResponse.class);
+                .getList(".", HearitListResponse.class);
 
         // then
         assertThat(responses).hasSize(3);
@@ -107,14 +107,14 @@ class HearitControllerTest extends IntegrationTest {
         saveHearitWithSuffix(3);
 
         // when
-        List<HearitDetailResponse> responses = RestAssured.given()
+        List<HearitListResponse> responses = RestAssured.given()
                 .when()
                 .get("/api/v1/hearits/recommend")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .jsonPath()
-                .getList(".", HearitDetailResponse.class);
+                .getList(".", HearitListResponse.class);
 
         // then
         assertThat(responses).hasSize(3);
