@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class HearitSearchService {
+
     private final HearitRepository hearitRepository;
 
     public HearitSearchService(HearitRepository hearitRepository) {

@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation;
 
+import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.dto.request.TitleSearchRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HearitController {
 
     private final HearitService hearitService;
+    private final HearitSearchService hearitSearchService;
 
     @Operation(summary = "단일 히어릿 상세 조회", description = "히어릿ID룰 통해 하나의 히어릿 상세 정보를 조회합니다.")
     @GetMapping("/{hearitId}")
@@ -48,7 +50,7 @@ public class HearitController {
     @GetMapping("/search")
     public ResponseEntity<List<HearitSearchResponse>> searchHearitsByTitle(
             @Valid @ModelAttribute TitleSearchRequest condition) {
-        List<HearitSearchResponse> response = hearitService.searchHearitsByTitle(condition);
+        List<HearitSearchResponse> response = hearitSearchService.searchByTitle(condition);
         return ResponseEntity.ok(response);
     }
 }

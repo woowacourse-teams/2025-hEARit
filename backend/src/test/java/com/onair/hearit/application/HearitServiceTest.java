@@ -36,8 +36,7 @@ class HearitServiceTest {
 
     @BeforeEach
     void setup() {
-        HearitSearchService hearitSearchService = new HearitSearchService(hearitRepository);
-        hearitService = new HearitService(hearitRepository, hearitSearchService);
+        hearitService = new HearitService(hearitRepository);
     }
 
     @Test
