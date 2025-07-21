@@ -3,109 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>히어릿 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .pagination {
-            margin-top: 20px;
-        }
-        .pagination button {
-            padding: 8px 16px;
-        }
-        #upload-section { display: none; margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
-        #upload-form div { margin-bottom: 10px; }
+        #upload-section { display: none; }
     </style>
 </head>
 <body>
-<h1>히어릿 관리</h1>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>히어릿 관리</h1>
+        <button id="toggle-upload-form" class="btn btn-primary d-flex align-items-center">
+            히어릿 추가
+            <i id="toggle-icon" class="bi bi-chevron-down ms-2"></i>
+        </button>
+    </div>
 
-<button id="toggle-upload-form">히어릿 추가</button>
-
-<div id="upload-section">
-    <h2>새 히어릿 업로드</h2>
-    <form id="upload-form">
-        <div>
-            <label for="title">제목</label>
-            <input type="text" id="title" name="title">
-        </div>
-        <div>
-            <label for="summary">요약</label>
-            <input type="text" id="summary" name="summary">
-        </div>
-        <div>
-            <label for="playTime">재생 시간(초)</label>
-            <input type="number" id="playTime" name="playTime">
-        </div>
-        <div>
-            <label for="originalAudioUrl">원본 오디오 URL</label>
-            <input type="text" id="originalAudioUrl" name="originalAudioUrl">
-        </div>
-        <div>
-            <label for="shortAudioUrl">요약 오디오 URL</label>
-            <input type="text" id="shortAudioUrl" name="shortAudioUrl">
-        </div>
-        <div>
-            <label for="scriptUrl">대본 URL</label>
-            <input type="text" id="scriptUrl" name="scriptUrl">
-        </div>
-        <div>
-            <label for="source">출처</label>
-            <input type="text" id="source" name="source">
-        </div>
-        <div>
-            <label for="categoryId">카테고리</label>
-            <select id="categoryId" name="categoryId" required>
-                <option value="" disabled selected>카테고리를 선택하세요</option>
-            </select>
-        </div>
-        <div>
-            <label>키워드</label>
-            <div id="keyword-checkboxes">
-                <!-- 키워드 체크박스가 여기에 동적으로 추가됩니다. -->
+    <div id="upload-section" class="card card-body mb-4">
+        <h2 class="mb-3">새 히어릿 업로드</h2>
+        <form id="upload-form">
+            <div class="row">
+                <div class="col-md-6 mb-3"><label for="title" class="form-label">제목</label><input type="text" class="form-control" id="title" name="title"></div>
+                <div class="col-md-6 mb-3"><label for="source" class="form-label">출처</label><input type="text" class="form-control" id="source" name="source"></div>
             </div>
-        </div>
-        <button type="button" onclick="uploadHearit()">등록</button>
-    </form>
+            <div class="mb-3"><label for="summary" class="form-label">요약</label><textarea class="form-control" id="summary" name="summary" rows="2"></textarea></div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label for="originalAudioUrl" class="form-label">원본 오디오 URL</label><input type="text" class="form-control" id="originalAudioUrl" name="originalAudioUrl"></div>
+                <div class="col-md-6 mb-3"><label for="shortAudioUrl" class="form-label">요약 오디오 URL</label><input type="text" class="form-control" id="shortAudioUrl" name="shortAudioUrl"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label for="scriptUrl" class="form-label">대본 URL</label><input type="text" class="form-control" id="scriptUrl" name="scriptUrl"></div>
+                <div class="col-md-3 mb-3"><label for="playTime" class="form-label">재생 시간(초)</label><input type="number" class="form-control" id="playTime" name="playTime"></div>
+                <div class="col-md-3 mb-3"><label for="categoryId" class="form-label">카테고리</label><select id="categoryId" name="categoryId" class="form-select" required><option value="" disabled selected>선택...</option></select></div>
+            </div>
+            <div class="mb-3"><label class="form-label d-block">키워드</label><div id="keyword-checkboxes"></div></div>
+            <button type="button" class="btn btn-success" onclick="uploadHearit()">등록</button>
+            <button type="button" class="btn btn-secondary" id="cancel-upload">취소</button>
+        </form>
+    </div>
+
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr><th>ID</th><th>제목</th><th>요약</th><th>재생 시간</th><th>출처</th><th>생성일</th><th>작업</th></tr>
+        </thead>
+        <tbody id="hearit-table-body"></tbody>
+    </table>
+
+    <nav><ul class="pagination justify-content-center" id="pagination-controls"></ul></nav>
 </div>
 
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>제목</th>
-        <th>요약</th>
-        <th>재생 시간</th>
-        <th>출처</th>
-        <th>생성일</th>
-        <th>작업</th>
-    </tr>
-    </thead>
-    <tbody id="hearit-table-body">
-    <!-- 히어릿 데이터가 여기에 동적으로 추가됩니다. -->
-    </tbody>
-</table>
-
-<div class="pagination">
-    <button id="prev-page" disabled>이전</button>
-    <span id="page-info"></span>
-    <button id="next-page" disabled>다음</button>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let currentPage = 0;
     const pageSize = 15;
 
-    // --- 데이터 로드 함수들 ---
     async function fetchCategories() {
         try {
             const response = await fetch('/api/v1/admin/categories');
@@ -119,12 +70,8 @@
                     option.textContent = category.name;
                     categorySelect.appendChild(option);
                 });
-            } else {
-                console.error('카테고리를 불러오는 데 실패했습니다.');
-            }
-        } catch (error) {
-            console.error('Error fetching categories:', error);
-        }
+            } else console.error('카테고리를 불러오는 데 실패했습니다.');
+        } catch (error) { console.error('Error fetching categories:', error); }
     }
 
     async function fetchKeywords() {
@@ -135,21 +82,24 @@
                 const keywordCheckboxes = document.getElementById('keyword-checkboxes');
                 keywordCheckboxes.innerHTML = '';
                 keywords.forEach(keyword => {
-                    const label = document.createElement('label');
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'form-check form-check-inline';
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
+                    checkbox.className = 'form-check-input';
                     checkbox.name = 'keywordIds';
                     checkbox.value = keyword.id;
-                    label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(keyword.name));
-                    keywordCheckboxes.appendChild(label);
+                    checkbox.id = `keyword-${keyword.id}`;
+                    const label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.setAttribute('for', `keyword-${keyword.id}`);
+                    label.textContent = keyword.name;
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(label);
+                    keywordCheckboxes.appendChild(wrapper);
                 });
-            } else {
-                console.error('키워드를 불러오는 데 실패했습니다.');
-            }
-        } catch (error) {
-            console.error('Error fetching keywords:', error);
-        }
+            } else console.error('키워드를 불러오는 데 실패했습니다.');
+        } catch (error) { console.error('Error fetching keywords:', error); }
     }
 
     async function fetchHearits(page) {
@@ -166,7 +116,6 @@
         }
     }
 
-    // --- UI 업데이트 함수들 ---
     function updateTable(hearits) {
         const tableBody = document.getElementById('hearit-table-body');
         tableBody.innerHTML = '';
@@ -179,40 +128,50 @@
                 <td>${hearit.playTime}초</td>
                 <td>${hearit.source}</td>
                 <td>${new Date(hearit.createdAt).toLocaleString()}</td>
-                <td><button onclick="deleteHearit(${hearit.id})">삭제</button></td>
+                <td><button class="btn btn-danger btn-sm" onclick="deleteHearit(${hearit.id})">삭제</button></td>
             `;
             tableBody.appendChild(row);
         });
     }
 
     function updatePagination(pagedData) {
-        document.getElementById('page-info').textContent = `페이지 ${pagedData.page + 1} / ${pagedData.totalPages}`;
-        document.getElementById('prev-page').disabled = pagedData.isFirst;
-        document.getElementById('next-page').disabled = pagedData.isLast;
+        const paginationControls = document.getElementById('pagination-controls');
+        paginationControls.innerHTML = '';
+        const createPageItem = (text, page, isDisabled = false, isActive = false) => {
+            const li = document.createElement('li');
+            li.className = `page-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}`;
+            const link = document.createElement('a');
+            link.className = 'page-link';
+            link.href = '#';
+            link.textContent = text;
+            if (!isDisabled) {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    fetchHearits(page);
+                });
+            }
+            li.appendChild(link);
+            return li;
+        };
+        paginationControls.appendChild(createPageItem('이전', currentPage - 1, pagedData.isFirst));
+        paginationControls.appendChild(createPageItem(`${pagedData.page + 1} / ${pagedData.totalPages}`, -1, true));
+        paginationControls.appendChild(createPageItem('다음', currentPage + 1, pagedData.isLast));
     }
     
-    // --- 이벤트 핸들러 함수들 ---
     async function uploadHearit() {
         const form = document.getElementById('upload-form');
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         data.keywordIds = formData.getAll('keywordIds').map(id => parseInt(id, 10));
-
-        if (!data.categoryId) {
-            alert('카테고리를 선택해주세요.');
-            return;
-        }
-
+        if (!data.categoryId) { alert('카테고리를 선택해주세요.'); return; }
         data.playTime = parseInt(data.playTime, 10);
         data.categoryId = parseInt(data.categoryId, 10);
-
         try {
             const response = await fetch('/api/v1/admin/hearits', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-
             if (response.ok) {
                 alert('히어릿이 성공적으로 업로드되었습니다.');
                 form.reset();
@@ -238,35 +197,33 @@
             } else {
                 throw new Error('삭제에 실패했습니다.');
             }
-        } catch (error) {
-            console.error('Error deleting hearit:', error);
-            alert(error.message);
-        }
+        } catch (error) { console.error('Error deleting hearit:', error); alert(error.message); }
     }
 
-    // --- 페이지 초기화 ---
     document.addEventListener('DOMContentLoaded', () => {
-        // 데이터 로드
         fetchCategories();
         fetchKeywords();
         fetchHearits(0);
 
-        // 이벤트 리스너 등록
-        document.getElementById('toggle-upload-form').addEventListener('click', () => {
-            const formSection = document.getElementById('upload-section');
+        const toggleBtn = document.getElementById('toggle-upload-form');
+        const formSection = document.getElementById('upload-section');
+        const toggleIcon = document.getElementById('toggle-icon');
+
+        const setFormState = (show) => {
+            formSection.style.display = show ? 'block' : 'none';
+            toggleIcon.classList.toggle('bi-chevron-up', show);
+            toggleIcon.classList.toggle('bi-chevron-down', !show);
+        };
+
+        toggleBtn.addEventListener('click', () => {
             const isHidden = formSection.style.display === 'none';
-            formSection.style.display = isHidden ? 'block' : 'none';
+            setFormState(isHidden);
         });
         
-        document.getElementById('prev-page').addEventListener('click', () => {
-            fetchHearits(currentPage - 1);
-        });
-
-        document.getElementById('next-page').addEventListener('click', () => {
-            fetchHearits(currentPage + 1);
+        document.getElementById('cancel-upload').addEventListener('click', () => {
+            setFormState(false);
         });
     });
 </script>
-
 </body>
 </html> 
