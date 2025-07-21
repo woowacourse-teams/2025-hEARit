@@ -16,15 +16,18 @@ import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.domain.CategoryItem
 import com.onair.hearit.domain.HearitItem
 import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import java.time.LocalDateTime
 import kotlin.math.abs
 
-class HomeFragment : Fragment() {
+class HomeFragment :
+    Fragment(),
+    RecommendClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val recommendAdapter = RecommendHearitAdapter()
+    private lateinit var recommendAdapter: RecommendHearitAdapter
     private val categoryAdapter = CategoryAdapter()
 
     override fun onCreateView(
@@ -47,6 +50,8 @@ class HomeFragment : Fragment() {
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
+
+        recommendAdapter = RecommendHearitAdapter(this)
 
         binding.ivProfile.setOnClickListener {
             (activity as? DrawerClickListener)?.openDrawer()
@@ -121,6 +126,10 @@ class HomeFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
+
+        binding.ivHomeRecentHearit.setOnClickListener {
+            navigateToPlayerDetail()
+        }
     }
 
     private fun applyCenterScalingEffect(
@@ -145,6 +154,15 @@ class HomeFragment : Fragment() {
         // 중심에 가까울수록 불투명, 멀수록 더 투명
         child.z = (1 - d) * 10f
         child.alpha = 0.5f + (1 - d) * 0.5f
+    }
+
+    private fun navigateToPlayerDetail() {
+        val intent = PlayerDetailActivity.newIntent(requireActivity())
+        startActivity(intent)
+    }
+
+    override fun onClickRecommendHearit() {
+        navigateToPlayerDetail()
     }
 
     override fun onDestroyView() {
