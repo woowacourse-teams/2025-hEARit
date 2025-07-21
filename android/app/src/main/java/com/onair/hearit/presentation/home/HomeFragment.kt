@@ -170,6 +170,7 @@ class HomeFragment :
         }
     }
 
+    // 리스트 중앙에 포지션 배치
     private fun scrollToMiddlePosition() {
         binding.rvHomeRecommendHearit.post {
             val middlePosition = recommendAdapter.currentList.size / 2
