@@ -10,11 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin")
 public class AdminViewController {
 
-    @GetMapping("/hearits/upload")
-    public String hearitUploadForm() {
-        return "admin/hearit-upload";
-    }
-
     @GetMapping("/hearits")
     public String hearitListPage() {
         return "admin/hearit-list";
