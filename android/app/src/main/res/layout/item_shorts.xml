@@ -9,6 +9,9 @@
             name="hearitItem"
             type="com.onair.hearit.domain.HearitShortsItem" />
 
+        <variable
+            name="shortsClickListener"
+            type="com.onair.hearit.presentation.explore.ShortsClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -68,6 +71,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginBottom="40dp"
             android:background="@drawable/bg_gradient_radius_8dp"
+            android:onClick="@{() -> shortsClickListener.onClickHearitInfo()}"
             app:layout_constraintBottom_toTopOf="@id/layout_explore_player"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">

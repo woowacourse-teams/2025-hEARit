@@ -8,12 +8,17 @@
         <variable
             name="item"
             type="com.onair.hearit.domain.RecommendHearitItem" />
+
+        <variable
+            name="recommendClickListener"
+            type="com.onair.hearit.presentation.home.RecommendClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="256dp"
         android:layout_height="256dp"
         android:background="@drawable/bg_gray1_stroke_radius_8dp"
+        android:onClick="@{() -> recommendClickListener.onClickRecommendHearit()}"
         android:paddingVertical="32dp">
 
         <TextView
