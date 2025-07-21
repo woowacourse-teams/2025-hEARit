@@ -1,4 +1,4 @@
-import java.util.Properties
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -39,13 +39,11 @@ android {
         jvmTarget = "21"
     }
     defaultConfig {
-        val localProperties =
-            Properties().apply {
-                load(File(rootDir, "local.properties").inputStream())
-            }
-
-        val baseUrl = localProperties["BASE_URL"] as String
-        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+        buildConfigField(
+            "String",
+            "BASE_URL",
+            "\"${gradleLocalProperties(rootDir, providers).getProperty("base.url")}\"",
+        )
     }
     buildFeatures {
         buildConfig = true
