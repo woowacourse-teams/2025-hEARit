@@ -28,9 +28,9 @@ jobs:
 
       - name: Add Local Properties
         env:
-          BASE_URL: ${{ secrets.BASE_URL }}
+          BASE_URL: ${{secrets.BASE_URL}}
         run:
-          echo base.url=${BASE_URL} >> ./local.properties
+          echo base.url=\"$_BASE_URL\" >> ./local.properties
         
       - name: Get Google Services JSON
         env:
