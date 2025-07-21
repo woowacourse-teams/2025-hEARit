@@ -149,7 +149,7 @@ class HearitControllerTest extends IntegrationTest {
                 .queryParam("page", 0)
                 .queryParam("size", 10)
                 .when()
-                .get("/api/v1/hearits/search")
+                .get("/api/v1/hearits/search/title")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract().jsonPath().getList(".", HearitSearchResponse.class);
@@ -171,7 +171,7 @@ class HearitControllerTest extends IntegrationTest {
                 .queryParam("page", -1)
                 .queryParam("size", 10)
                 .when()
-                .get("/api/v1/hearits/search")
+                .get("/api/v1/hearits/search/title")
                 .then().log().all()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
 
@@ -180,10 +180,44 @@ class HearitControllerTest extends IntegrationTest {
                 .queryParam("page", 0)
                 .queryParam("size", -5)
                 .when()
-                .get("/api/v1/hearits/search")
+                .get("/api/v1/hearits/search/title")
                 .then().log().all()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
+
+    @Test
+    @DisplayName("카테고리로 히어릿 검색 시 200 OK 및 해당 카테고리의 히어릿들을 최신순으로 반환한다.")
+    void searchHearitsByCategoryWithPagination() {
+        // given
+        Category category1 = saveCategory("Spring", "#001");
+        Category category2 = saveCategory("Java", "#002");
+
+        Hearit hearit1 = saveHearitWithCategoryAndTitle(category1);
+        Hearit hearit2 = saveHearitWithCategoryAndTitle(category1);
+        saveHearitWithCategoryAndTitle(category2);
+
+        // when
+        List<HearitSearchResponse> responses = RestAssured
+                .given()
+                .queryParam("categoryId", category1.getId())
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v1/hearits/search/category")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .jsonPath()
+                .getList(".", HearitSearchResponse.class);
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).id()).isEqualTo(hearit2.getId()),
+                () -> assertThat(responses.get(1).id()).isEqualTo(hearit1.getId())
+        );
+    }
+
 
     private Hearit saveHearitWithSuffix(int suffix) {
         Category category = new Category("name" + suffix, "#123");
@@ -216,4 +250,25 @@ class HearitControllerTest extends IntegrationTest {
                 category);
         return dbHelper.insertHearit(hearit);
     }
+
+    private Category saveCategory(String name, String color) {
+        Category category = new Category(name, color);
+        return dbHelper.insertCategory(category);
+    }
+
+    private Hearit saveHearitWithCategoryAndTitle(Category category) {
+        Hearit hearit = new Hearit(
+                "title",
+                "summary",
+                1,
+                "originalAudioUrl",
+                "shortAudioUrl",
+                "scriptUrl",
+                "source",
+                LocalDateTime.now(),
+                category
+        );
+        return dbHelper.insertHearit(hearit);
+    }
+
 }

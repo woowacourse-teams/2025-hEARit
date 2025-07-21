@@ -3,9 +3,10 @@ package com.onair.hearit.presentation;
 import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.auth.dto.CurrentMember;
-import com.onair.hearit.dto.response.HearitListResponse;
+import com.onair.hearit.dto.request.CategorySearchCondition;
 import com.onair.hearit.dto.request.TitleSearchCondition;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HearitListResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,7 +57,8 @@ public class HearitController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/search")
+    @Operation(summary = "히어릿 제목명으로 검색", description = "히어릿의 제목명, page 정보를 입력해 히어릿을 검색합니다. ")
+    @GetMapping("/search/title")
     public ResponseEntity<List<HearitSearchResponse>> searchHearitsByTitle(
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -64,6 +66,18 @@ public class HearitController {
     ) {
         TitleSearchCondition condition = new TitleSearchCondition(searchTerm, page, size);
         List<HearitSearchResponse> response = hearitSearchService.searchByTitle(condition);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "히어릿 카테고리명으로 검색", description = "히어릿의 카테고리명, page 정보를 입력해 히어릿을 검색합니다. ")
+    @GetMapping("/search/category")
+    public ResponseEntity<List<HearitSearchResponse>> searchHearitsByCategory(
+            @RequestParam(name = "categoryId") Long categoryId,
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "20") Integer size
+    ) {
+        CategorySearchCondition condition = new CategorySearchCondition(categoryId, page, size);
+        List<HearitSearchResponse> response = hearitSearchService.searchByCategory(condition);
         return ResponseEntity.ok(response);
     }
 }

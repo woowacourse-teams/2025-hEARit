@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.dto.request.CategorySearchCondition;
 import com.onair.hearit.dto.request.TitleSearchCondition;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -23,10 +24,13 @@ import org.springframework.test.context.ActiveProfiles;
 @Import(DbHelper.class)
 @ActiveProfiles("fake-test")
 class HearitSearchServiceTest {
+
     @Autowired
     private DbHelper dbHelper;
+
     @Autowired
     private HearitRepository hearitRepository;
+
     private HearitSearchService hearitSearchService;
 
     @BeforeEach
@@ -93,19 +97,70 @@ class HearitSearchServiceTest {
         );
     }
 
+    @Test
+    @DisplayName("히어릿 목록을 조회 시 카테고리에 해당하는 히어릿만 반환한다.")
+    void searchHearitsByCategory_onlyMatchingCategory() {
+        // given
+        Category category1 = saveCategory("Spring", "#001");
+        Category category2 = saveCategory("Java", "#002");
+
+        Hearit hearit1 = saveHearitWithCategory(category1);
+        Hearit hearit2 = saveHearitWithCategory(category1);
+        saveHearitWithCategory(category2);
+
+        CategorySearchCondition condition = new CategorySearchCondition(category1.getId(), 0, 10);
+
+        // when
+        List<HearitSearchResponse> result = hearitSearchService.searchByCategory(condition);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                        .containsExactly(hearit2.getId(), hearit1.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("히어릿 목록을 조회 시 최신순으로 페이지네이션이 적용된다.")
+    void searchHearitsByCategory_pagination() {
+        // given
+        Category category = saveCategory("Spring", "#001");
+
+        Hearit hearit1 = saveHearitWithCategory(category);
+        Hearit hearit2 = saveHearitWithCategory(category);
+        Hearit hearit3 = saveHearitWithCategory(category);
+
+        CategorySearchCondition condition = new CategorySearchCondition(category.getId(), 1, 2);
+
+        // when
+        List<HearitSearchResponse> result = hearitSearchService.searchByCategory(condition);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(1),
+                () -> assertThat(result.get(0).id()).isEqualTo(hearit1.getId())
+        );
+    }
+
+
     private Hearit saveHearitByTitle(String title) {
         Category category = new Category("category", "#123");
         dbHelper.insertCategory(category);
-        Hearit hearit = new Hearit(
-                title,
-                "summary",
-                1,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
-                "source",
-                LocalDateTime.now(),
-                category);
+        Hearit hearit = new Hearit(title, "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
+                LocalDateTime.now(), category);
         return dbHelper.insertHearit(hearit);
     }
+
+    private Category saveCategory(String name, String color) {
+        Category category = new Category(name, color);
+        return dbHelper.insertCategory(category);
+    }
+
+    private Hearit saveHearitWithCategory(Category category) {
+        Hearit hearit = new Hearit("title", "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
+                LocalDateTime.now(), category);
+        return dbHelper.insertHearit(hearit);
+    }
+
 }
