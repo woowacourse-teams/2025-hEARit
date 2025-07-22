@@ -10,7 +10,7 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
-import com.onair.hearit.dto.response.HearitListResponse;
+import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -88,7 +88,7 @@ class HearitServiceTest {
                 .forEach(this::saveHearitWithSuffix);
 
         // when
-        List<HearitListResponse> hearits = hearitService.getRandomHearits();
+        List<RecommendHearitResponse> hearits = hearitService.getRandomHearits();
 
         // then
         assertThat(hearits).hasSize(10);
@@ -102,7 +102,7 @@ class HearitServiceTest {
                 .forEach(this::saveHearitWithSuffix);
 
         // when
-        List<HearitListResponse> hearits = hearitService.getRecommendedHearits();
+        List<RecommendHearitResponse> hearits = hearitService.getRecommendedHearits();
 
         // then
         assertThat(hearits).hasSize(5);

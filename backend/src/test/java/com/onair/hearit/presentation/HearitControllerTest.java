@@ -8,7 +8,7 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.HearitDetailResponse;
-import com.onair.hearit.dto.response.HearitListResponse;
+import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import io.restassured.RestAssured;
 import java.time.LocalDateTime;
@@ -89,14 +89,14 @@ class HearitControllerTest extends IntegrationTest {
         saveHearitWithSuffix(3);
 
         // when
-        List<HearitListResponse> responses = RestAssured.given()
+        List<RecommendHearitResponse> responses = RestAssured.given()
                 .when()
                 .get("/api/v1/hearits/random")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .jsonPath()
-                .getList(".", HearitListResponse.class);
+                .getList(".", RecommendHearitResponse.class);
 
         // then
         assertThat(responses).hasSize(3);
@@ -111,14 +111,14 @@ class HearitControllerTest extends IntegrationTest {
         saveHearitWithSuffix(3);
 
         // when
-        List<HearitListResponse> responses = RestAssured.given()
+        List<RecommendHearitResponse> responses = RestAssured.given()
                 .when()
                 .get("/api/v1/hearits/recommend")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .jsonPath()
-                .getList(".", HearitListResponse.class);
+                .getList(".", RecommendHearitResponse.class);
 
         // then
         assertThat(responses).hasSize(3);
