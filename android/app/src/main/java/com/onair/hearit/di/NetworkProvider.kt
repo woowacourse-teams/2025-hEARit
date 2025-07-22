@@ -1,10 +1,13 @@
 package com.onair.hearit.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.onair.hearit.BuildConfig
+import com.onair.hearit.data.HearitService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import retrofit2.create
 
 object NetworkProvider {
     private val okhttpClient =
@@ -16,11 +19,11 @@ object NetworkProvider {
     private val retrofit: Retrofit by lazy {
         Retrofit
             .Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.BASE_URL)
             .client(okhttpClient)
             .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
 
-    private const val BASE_URL = ""
+    val hearitService: HearitService by lazy { retrofit.create() }
 }

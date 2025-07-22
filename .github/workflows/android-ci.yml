@@ -25,6 +25,12 @@ jobs:
           
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Add Local Properties
+        env:
+          BASE_URL: ${{secrets.BASE_URL}}
+        run:
+          echo base.url=\"$_BASE_URL\" >> ./local.properties
         
       - name: Get Google Services JSON
         env:
