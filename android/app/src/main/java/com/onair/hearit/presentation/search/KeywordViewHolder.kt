@@ -4,13 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemKeywordBinding
-import com.onair.hearit.domain.KeywordItem
+import com.onair.hearit.domain.Keyword
 
 class KeywordViewHolder(
     val binding: ItemKeywordBinding,
 ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(keywordItem: KeywordItem) {
-        binding.keywordItem = keywordItem
+    fun bind(keyword: Keyword) {
+        binding.keywordItem = keyword
     }
 
     companion object {

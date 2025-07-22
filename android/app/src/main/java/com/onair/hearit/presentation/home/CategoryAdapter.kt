@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ItemCategoryBinding
-import com.onair.hearit.domain.CategoryItem
+import com.onair.hearit.domain.Category
 
-class CategoryAdapter : ListAdapter<CategoryItem, CategoryAdapter.CategoryViewHolder>(DiffCallback) {
+class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
@@ -32,7 +32,7 @@ class CategoryAdapter : ListAdapter<CategoryItem, CategoryAdapter.CategoryViewHo
     class CategoryViewHolder(
         private val binding: ItemCategoryBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: CategoryItem) {
+        fun bind(item: Category) {
             binding.item = item
             binding.clCategory.setBackgroundResource(R.drawable.bg_purple3_radius_8dp)
             val background = binding.clCategory.background.mutate()
@@ -53,15 +53,15 @@ class CategoryAdapter : ListAdapter<CategoryItem, CategoryAdapter.CategoryViewHo
 
     companion object {
         val DiffCallback =
-            object : DiffUtil.ItemCallback<CategoryItem>() {
+            object : DiffUtil.ItemCallback<Category>() {
                 override fun areItemsTheSame(
-                    oldItem: CategoryItem,
-                    newItem: CategoryItem,
+                    oldItem: Category,
+                    newItem: Category,
                 ): Boolean = oldItem.id == newItem.id
 
                 override fun areContentsTheSame(
-                    oldItem: CategoryItem,
-                    newItem: CategoryItem,
+                    oldItem: Category,
+                    newItem: Category,
                 ): Boolean = oldItem == newItem
             }
     }

@@ -3,9 +3,9 @@ package com.onair.hearit.presentation.explore
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.SubtitleLine
+import com.onair.hearit.domain.ScriptLine
 
-class ScriptAdapter : ListAdapter<SubtitleLine, ScriptViewHolder>((DiffCallback)) {
+class ScriptAdapter : ListAdapter<ScriptLine, ScriptViewHolder>((DiffCallback)) {
     private var highlightedId: Long? = null
 
     fun highlightSubtitle(id: Long?) {
@@ -39,15 +39,15 @@ class ScriptAdapter : ListAdapter<SubtitleLine, ScriptViewHolder>((DiffCallback)
 
     companion object {
         private val DiffCallback =
-            object : DiffUtil.ItemCallback<SubtitleLine>() {
+            object : DiffUtil.ItemCallback<ScriptLine>() {
                 override fun areItemsTheSame(
-                    oldItem: SubtitleLine,
-                    newItem: SubtitleLine,
+                    oldItem: ScriptLine,
+                    newItem: ScriptLine,
                 ): Boolean = oldItem.id == newItem.id
 
                 override fun areContentsTheSame(
-                    oldItem: SubtitleLine,
-                    newItem: SubtitleLine,
+                    oldItem: ScriptLine,
+                    newItem: ScriptLine,
                 ): Boolean = oldItem == newItem
             }
     }

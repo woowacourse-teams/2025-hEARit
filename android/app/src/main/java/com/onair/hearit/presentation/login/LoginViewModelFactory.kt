@@ -3,9 +3,9 @@ package com.onair.hearit.presentation.login
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.onair.hearit.data.AuthRemoteDataSourceImpl
-import com.onair.hearit.data.AuthRepositoryImpl
-import com.onair.hearit.data.DataStoreRepositoryImpl
+import com.onair.hearit.data.datasource.AuthRemoteDataSourceImpl
+import com.onair.hearit.data.repository.AuthRepositoryImpl
+import com.onair.hearit.data.repository.DataStoreRepositoryImpl
 import com.onair.hearit.di.NetworkProvider
 
 class LoginViewModelFactory(

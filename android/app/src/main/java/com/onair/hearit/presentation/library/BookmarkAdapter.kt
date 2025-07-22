@@ -3,11 +3,11 @@ package com.onair.hearit.presentation.library
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.BookmarkItem
+import com.onair.hearit.domain.Bookmark
 
 class BookmarkAdapter(
     private val bookmarkListener: BookmarkClickListener,
-) : ListAdapter<BookmarkItem, BookmarkViewHolder>(DiffCallback) {
+) : ListAdapter<Bookmark, BookmarkViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
@@ -17,21 +17,21 @@ class BookmarkAdapter(
         holder: BookmarkViewHolder,
         position: Int,
     ) {
-        val item: BookmarkItem = getItem(position)
+        val item: Bookmark = getItem(position)
         holder.bind(item)
     }
 
     companion object {
         private val DiffCallback =
-            object : DiffUtil.ItemCallback<BookmarkItem>() {
+            object : DiffUtil.ItemCallback<Bookmark>() {
                 override fun areItemsTheSame(
-                    oldItem: BookmarkItem,
-                    newItem: BookmarkItem,
+                    oldItem: Bookmark,
+                    newItem: Bookmark,
                 ): Boolean = oldItem.id == newItem.id
 
                 override fun areContentsTheSame(
-                    oldItem: BookmarkItem,
-                    newItem: BookmarkItem,
+                    oldItem: Bookmark,
+                    newItem: Bookmark,
                 ): Boolean = oldItem == newItem
             }
     }

@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.HearitShortsItem
+import com.onair.hearit.domain.HearitShorts
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
 import com.onair.hearit.presentation.SingleLiveData
@@ -15,8 +15,8 @@ class ExploreViewModel(
     private val hearitRepository: HearitRepository,
     private val mediaFileRepository: MediaFileRepository,
 ) : ViewModel() {
-    private val _shortsHearits: MutableLiveData<List<HearitShortsItem>> = MutableLiveData()
-    val shortsHearits: LiveData<List<HearitShortsItem>> = _shortsHearits
+    private val _shortsHearits: MutableLiveData<List<HearitShorts>> = MutableLiveData()
+    val shortsHearits: LiveData<List<HearitShorts>> = _shortsHearits
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -30,7 +30,7 @@ class ExploreViewModel(
             hearitRepository
                 .getRandomHearits()
                 .onSuccess { randomItems ->
-                    val shortsItem: List<HearitShortsItem> =
+                    val shortsItem: List<HearitShorts> =
                         randomItems.mapNotNull { item ->
                             val result = mediaFileRepository.getShortsHearitItem(item)
                             if (result.isFailure) {
