@@ -80,7 +80,7 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "히어릿 카테고리명으로 검색", description = "히어릿의 카테고리명, page 정보를 입력해 히어릿을 검색합니다. ")
+    @Operation(summary = "히어릿 카테고리로 조회", description = "히어릿의 카테고리 id, page 정보를 입력해 히어릿을 조회합니다. ")
     @GetMapping("/search/category")
     public ResponseEntity<List<HearitSearchResponse>> searchHearitsByCategory(
             @RequestParam(name = "categoryId") Long categoryId,
@@ -91,7 +91,7 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "히어릿 키워드로 검색", description = "히어릿의 키워드, page 정보를 입력해 히어릿을 검색합니다. ")
+    @Operation(summary = "히어릿 키워드로 조회", description = "히어릿의 키워드 id, page 정보를 입력해 히어릿을 조회합니다. ")
     @GetMapping("/search/keyword")
     public ResponseEntity<List<HearitSearchResponse>> searchHearitsByKeyword(
             @RequestParam(name = "keywordId") Long keywordId,
