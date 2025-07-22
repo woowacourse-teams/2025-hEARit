@@ -125,8 +125,7 @@ class ExploreFragment :
 
     private fun observeViewModel() {
         viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
-            val mappedItems = shortsHearits
-            adapter.submitList(mappedItems)
+            adapter.submitList(shortsHearits)
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
