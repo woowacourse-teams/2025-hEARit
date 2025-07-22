@@ -43,6 +43,8 @@
 
     <!-- ExploreFragment-->
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 골라 들으세요!</string>
+    <string name="explore_toast_random_hearits_load_fail">랜덤 히어릿 목록 조회에 실패했습니다.</string>
+    <string name="explore_toast_shorts_load_fail">탐색 쇼츠 목록 조회에 실패했습니다.</string>
 
     <!-- SettingFragment-->
     <string name="setting_notification">알림</string>
@@ -68,4 +70,6 @@
 
     <!-- LoginActivity-->
     <string name="login_with_hearit">회원가입 없이 <font color="#B677F3">히어릿</font>을 이용하고 싶어요</string>
+    <string name="login_toast_kakao_login_fail">카카오 로그인에 실패했습니다.</string>
+    <string name="login_toast_save_token_fail">토큰 저장에 실패했습니다.</string>
 </resources>

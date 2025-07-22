@@ -1,5 +1,6 @@
 [versions]
 agp = "8.9.1"
+datastorePreferences = "1.1.7"
 firebaseBom = "33.16.0"
 flexbox = "3.0.0"
 fragmentTesting = "1.8.8"
@@ -23,9 +24,11 @@ kotlinx-serialization-json = "1.8.1"
 runner = "1.6.2"
 rules = "1.6.1"
 junitKtx = "1.2.1"
+v2User = "2.21.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentTesting" }
 androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragmentTesting" }
 androidx-media3-common = { module = "androidx.media3:media3-common", version.ref = "media3" }
@@ -53,6 +56,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2-kotlinx-serialization-converter" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

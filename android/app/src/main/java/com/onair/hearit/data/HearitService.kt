@@ -8,6 +8,9 @@ interface HearitService {
     @GET("hearits/recommend")
     suspend fun getRecommendHearits(): Response<List<RecommendHearitResponse>>
 
+    @GET("hearits/random")
+    suspend fun getRandomHearits(): Response<List<RandomHearitResponse>>
+
     @GET("hearits/search")
     suspend fun getSearchHearits(
         @Query("searchTerm") searchTerm: String,
