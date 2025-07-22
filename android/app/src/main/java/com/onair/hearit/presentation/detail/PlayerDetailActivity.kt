@@ -84,7 +84,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
 
         setupWindowInsets()
-        initMediaController()
+        setupMediaController()
 
         layoutManager = LinearLayoutManager(this)
         playerDetailScriptAdapter = PlayerDetailScriptAdapter(scriptLines)
@@ -112,7 +112,7 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     @OptIn(UnstableApi::class)
-    private fun initMediaController() {
+    private fun setupMediaController() {
         val serviceIntent = Intent(this, PlaybackService::class.java)
         startService(serviceIntent)
 
