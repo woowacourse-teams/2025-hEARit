@@ -1,5 +1,5 @@
 package com.onair.hearit.data
 
 interface AuthRemoteDataSource {
-    suspend fun login(loginRequest: LoginRequest): Result<LoginResponse>
+    suspend fun kakaoLogin(kakaoLoginRequest: KakaoLoginRequest): Result<KakaoLoginResponse>
 }
