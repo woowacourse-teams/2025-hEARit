@@ -1,6 +1,5 @@
 package com.onair.hearit.data.dto
 
-import com.onair.hearit.domain.RecommendHearitItem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -19,10 +18,3 @@ data class RecommendHearitResponse(
     @SerialName("title")
     val title: String,
 )
-
-fun RecommendHearitResponse.toDomain(): RecommendHearitItem =
-    RecommendHearitItem(
-        id = this.id,
-        title = this.title,
-        desc = this.summary,
-    )

@@ -1,6 +1,5 @@
 package com.onair.hearit.data.dto
 
-import com.onair.hearit.domain.SearchedHearitItem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -15,11 +14,3 @@ data class SearchHearitResponse(
     @SerialName("title")
     val title: String,
 )
-
-fun SearchHearitResponse.toDomain(): SearchedHearitItem =
-    SearchedHearitItem(
-        id = this.id,
-        title = this.title,
-        playTime = this.playTime,
-        summary = this.summary,
-    )

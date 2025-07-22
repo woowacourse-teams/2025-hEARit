@@ -1,7 +1,7 @@
 package com.onair.hearit.data.repository
 
 import com.onair.hearit.data.datasource.HearitRemoteDataSource
-import com.onair.hearit.data.dto.toDomain
+import com.onair.hearit.data.toDomain
 import com.onair.hearit.domain.RandomHearitItem
 import com.onair.hearit.domain.RecommendHearitItem
 import com.onair.hearit.domain.SearchedHearitItem
