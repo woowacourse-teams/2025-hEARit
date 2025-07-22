@@ -29,16 +29,6 @@ public class KeywordService {
                 .toList();
     }
 
-    public KeywordResponse getKeywordById(final Long id) {
-        Keyword keyword = findKeywordById(id);
-        return KeywordResponse.from(keyword);
-    }
-
-    private Keyword findKeywordById(Long id) {
-        return keywordRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("keywordId", String.valueOf(id)));
-    }
-
     public List<KeywordResponse> getRecommendedKeyword(int size) {
         long seed = LocalDate.now().toEpochDay();
         List<Long> allIds = keywordRepository.findAllIds();
@@ -53,5 +43,15 @@ public class KeywordService {
         int fetchSize = Math.min(size, allIds.size());
         Collections.shuffle(allIds, new Random(seed));
         return allIds.subList(0, fetchSize);
+    }
+
+    public KeywordResponse getKeywordById(final Long id) {
+        Keyword keyword = findKeywordById(id);
+        return KeywordResponse.from(keyword);
+    }
+
+    private Keyword findKeywordById(Long id) {
+        return keywordRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("keywordId", String.valueOf(id)));
     }
 }
