@@ -35,6 +35,7 @@ public class AdminHearitService {
     private final KeywordRepository keywordRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
 
+    //TODO: 리팩터링 필요
     public PagedResponse<HearitAdminResponse> getPageHearits(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("createdAt")));
         Page<Hearit> pageHearits = hearitRepository.findAllForAdmin(pageable);

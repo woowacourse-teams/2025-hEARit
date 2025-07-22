@@ -12,6 +12,6 @@ public class AdminAuthService {
     private final AdminRepository adminRepository;
 
     public void login(AdminLoginRequest request) {
-
+        //TODO: 로그인 로직 추가
     }
 }
