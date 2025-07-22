@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         //TODO: 추후 허용되는 api만 여는 화이트리스트 방식으로 변경 (현재는 모두 permit)
                         .requestMatchers("/api/v1/**").permitAll()
+                        .requestMatchers("/admin/**").permitAll() //TODO: admin 로그인 구현 후 권한 검사 해야함
                         .requestMatchers("/docs").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
