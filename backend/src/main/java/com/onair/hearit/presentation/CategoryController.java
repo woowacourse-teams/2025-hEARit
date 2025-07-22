@@ -26,8 +26,7 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> readCategories(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size
-    ) {
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         CategoryListCondition condition = new CategoryListCondition(page, size);
         List<CategoryResponse> responses = categoryService.getCategories(condition);
         return ResponseEntity.ok(responses);

@@ -85,8 +85,7 @@ public class HearitController {
     public ResponseEntity<List<HearitSearchResponse>> searchHearitsByCategory(
             @RequestParam(name = "categoryId") Long categoryId,
             @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "20") Integer size
-    ) {
+            @RequestParam(name = "size", defaultValue = "20") Integer size) {
         CategorySearchCondition condition = new CategorySearchCondition(categoryId, page, size);
         List<HearitSearchResponse> response = hearitSearchService.findHearitsByCategory(condition);
         return ResponseEntity.ok(response);
@@ -97,8 +96,7 @@ public class HearitController {
     public ResponseEntity<List<HearitSearchResponse>> searchHearitsByKeyword(
             @RequestParam(name = "keywordId") Long keywordId,
             @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "20") Integer size
-    ) {
+            @RequestParam(name = "size", defaultValue = "20") Integer size) {
         KeywordSearchCondition condition = new KeywordSearchCondition(keywordId, page, size);
         List<HearitSearchResponse> response = hearitSearchService.findHearitsByKeyword(condition);
         return ResponseEntity.ok(response);
