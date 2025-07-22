@@ -27,6 +27,7 @@ class HearitSearchServiceTest {
     private DbHelper dbHelper;
     @Autowired
     private HearitRepository hearitRepository;
+
     private HearitSearchService hearitSearchService;
 
     @BeforeEach

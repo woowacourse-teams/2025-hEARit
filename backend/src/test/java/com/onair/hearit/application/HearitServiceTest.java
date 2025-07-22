@@ -10,8 +10,10 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
-import com.onair.hearit.dto.response.RecommendHearitResponse;
+import com.onair.hearit.dto.request.RandomHearitCondition;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.RandomHearitResponse;
+import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
@@ -84,11 +86,15 @@ class HearitServiceTest {
     @DisplayName("최대 10개의 랜덤 히어릿을 조회할 수 있다.")
     void getRandomHearits() {
         // given
-        IntStream.rangeClosed(1, 11)
-                .forEach(this::saveHearitWithSuffix);
+        Member member = saveMember();
+        for (int i = 1; i <= 11; i++) {
+            Hearit hearit = saveHearitWithSuffix(i);
+            dbHelper.insertBookmark(new Bookmark(member, hearit));
+        }
+        RandomHearitCondition condition = new RandomHearitCondition(0, 10);
 
         // when
-        List<RecommendHearitResponse> hearits = hearitService.getRandomHearits();
+        List<RandomHearitResponse> hearits = hearitService.getRandomHearits(member.getId(), condition);
 
         // then
         assertThat(hearits).hasSize(10);

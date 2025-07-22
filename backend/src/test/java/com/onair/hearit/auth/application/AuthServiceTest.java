@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onair.hearit.DbHelper;
-import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
-import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
+import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
+import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.domain.Member;
@@ -30,14 +30,19 @@ class AuthServiceTest {
 
     @MockitoBean
     KakaoUserInfoClient kakaoUserInfoClient;
+
     @Autowired
     MemberRepository memberRepository;
+
     @Autowired
     DbHelper dbHelper;
+
     @Autowired
     private AuthService authService;
+
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
