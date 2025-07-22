@@ -24,40 +24,36 @@ class KeywordRepositoryTest {
     private DbHelper dbHelper;
 
     @Test
-    @DisplayName("지정한 개수만큼 랜덤 키워드를 조회할 수 있다.")
-    void findRandomWithSeed_returnsSpecifiedSize() {
+    @DisplayName("저장된 키워드들의 ID 목록을 조회할 수 있다.")
+    void findAllIds_returnsAllKeywordIds() {
         // given
-        saveKeyword("keyword1");
-        saveKeyword("keyword2");
-        saveKeyword("keyword3");
-        saveKeyword("keyword4");
-        saveKeyword("keyword5");
-
-        int size = 3;
-        long seed = 12345L;
+        Keyword keyword1 = saveKeyword("keyword1");
+        Keyword keyword2 = saveKeyword("keyword2");
+        Keyword keyword3 = saveKeyword("keyword3");
 
         // when
-        List<Keyword> result = keywordRepository.findRandomWithSeed(seed, size);
+        List<Long> ids = keywordRepository.findAllIds();
 
         // then
-        assertThat(result).hasSize(size);
+        assertThat(ids).containsExactlyInAnyOrder(keyword1.getId(), keyword2.getId(), keyword3.getId());
     }
 
     @Test
-    @DisplayName("전체 키워드 수보다 더 많은 개수를 요청하면 모든 키워드를 반환한다.")
-    void findRandomWithSeed_whenSizeExceedsTotal_returnsAll() {
+    @DisplayName("ID 목록으로 키워드를 조회할 수 있다.")
+    void findAllByIdIn_returnsMatchingKeywords() {
         // given
-        saveKeyword("keyword1");
-        saveKeyword("keyword2");
+        Keyword keyword1 = saveKeyword("keyword1");
+        Keyword keyword2 = saveKeyword("keyword2");
+        saveKeyword("keyword3");
 
-        int requestedSize = 5;
-        long seed = 999L;
+        List<Long> selectedIds = List.of(keyword1.getId(), keyword2.getId());
 
         // when
-        List<Keyword> result = keywordRepository.findRandomWithSeed(seed, requestedSize);
+        List<Keyword> result = keywordRepository.findAllByIdIn(selectedIds);
 
         // then
-        assertThat(result).hasSize(2);
+        assertThat(result).extracting(Keyword::getId)
+                .containsExactlyInAnyOrderElementsOf(selectedIds);
     }
 
     private Keyword saveKeyword(String name) {

@@ -4,7 +4,9 @@ import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.response.KeywordResponse;
 import com.onair.hearit.infrastructure.KeywordRepository;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +34,17 @@ public class KeywordService {
     }
 
     public List<KeywordResponse> getRecommendedKeyword(long seed, int size) {
-        List<Keyword> keywords = keywordRepository.findRandomWithSeed(seed, size);
+        List<Long> allIds = keywordRepository.findAllIds();
+        List<Long> selectedIds = pickRandomIds(allIds, seed, size);
+        List<Keyword> keywords = keywordRepository.findAllByIdIn(selectedIds);
         return keywords.stream()
                 .map(KeywordResponse::from)
                 .toList();
+    }
+
+    private List<Long> pickRandomIds(List<Long> allIds, long seed, int size) {
+        int fetchSize = Math.min(size, allIds.size());
+        Collections.shuffle(allIds, new Random(seed));
+        return allIds.subList(0, fetchSize);
     }
 } 

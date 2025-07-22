@@ -8,9 +8,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface KeywordRepository extends JpaRepository<Keyword, Long> {
 
-    @Query(
-            value = "SELECT * FROM keyword ORDER BY RAND(:seed) LIMIT :size",
-            nativeQuery = true
-    )
-    List<Keyword> findRandomWithSeed(@Param("seed") long seed, @Param("size") int size);
+    @Query("SELECT k.id FROM Keyword k")
+    List<Long> findAllIds();
+
+    @Query("SELECT k FROM Keyword k WHERE k.id IN :ids")
+    List<Keyword> findAllByIdIn(@Param("ids") List<Long> ids);
 }

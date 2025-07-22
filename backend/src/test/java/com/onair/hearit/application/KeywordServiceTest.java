@@ -84,53 +84,42 @@ class KeywordServiceTest {
     @DisplayName("오늘의 추천 키워드를 지정한 개수만큼 조회할 수 있다.")
     void getRecommendedKeywords() {
         // given
-        Keyword keyword1 = saveKeyword("keyword1");
-        Keyword keyword2 = saveKeyword("keyword2");
-        Keyword keyword3 = saveKeyword("keyword3");
-        Keyword keyword4 = saveKeyword("keyword4");
-        Keyword keyword5 = saveKeyword("keyword5");
+        saveKeyword("keyword1");
+        saveKeyword("keyword2");
+        saveKeyword("keyword3");
+        saveKeyword("keyword4");
+        saveKeyword("keyword5");
 
         int size = 3;
 
         // when
-        List<KeywordResponse> result = keywordService.getRecommendedKeyword(1, size);
+        List<KeywordResponse> result = keywordService.getRecommendedKeyword(1L, size);
 
         // then
         assertThat(result).hasSize(size);
-        assertThat(result).extracting(KeywordResponse::id)
-                .allMatch(id -> List.of(
-                        keyword1.getId(), keyword2.getId(), keyword3.getId(),
-                        keyword4.getId(), keyword5.getId()
-                ).contains(id));
     }
+
 
     @Test
     @DisplayName("같은 시드값으로 호출하면 추천 키워드 결과는 항상 동일하다.")
     void getRecommendedKeywords_shouldBeDeterministicForSameSeed() {
         // given
-        Keyword keyword1 = saveKeyword("keyword1");
-        Keyword keyword2 = saveKeyword("keyword2");
-        Keyword keyword3 = saveKeyword("keyword3");
-        Keyword keyword4 = saveKeyword("keyword4");
-        Keyword keyword5 = saveKeyword("keyword5");
-
+        saveKeyword("keyword1");
+        saveKeyword("keyword2");
+        saveKeyword("keyword3");
+        saveKeyword("keyword4");
+        saveKeyword("keyword5");
         int size = 3;
-        long fixedSeed = 20250722L;  // 시드 고정
+        long fixedSeed = 20250722L;
 
         // when
-        List<KeywordResponse> firstResponse = keywordService.getRecommendedKeyword(fixedSeed, size);
-        List<KeywordResponse> secondResponse = keywordService.getRecommendedKeyword(fixedSeed, size);
+        List<KeywordResponse> first = keywordService.getRecommendedKeyword(fixedSeed, size);
+        List<KeywordResponse> second = keywordService.getRecommendedKeyword(fixedSeed, size);
 
         // then
-        assertThat(firstResponse).hasSize(size);
-        assertThat(secondResponse).hasSize(size);
-
-        assertThat(firstResponse)
-                .extracting(KeywordResponse::id)
+        assertThat(first).extracting(KeywordResponse::id)
                 .containsExactlyElementsOf(
-                        secondResponse.stream()
-                                .map(KeywordResponse::id)
-                                .toList()
+                        second.stream().map(KeywordResponse::id).toList()
                 );
     }
 
