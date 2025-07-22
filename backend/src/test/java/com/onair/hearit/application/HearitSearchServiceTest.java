@@ -112,7 +112,7 @@ class HearitSearchServiceTest {
         CategorySearchCondition condition = new CategorySearchCondition(category1.getId(), 0, 10);
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.searchByCategory(condition);
+        List<HearitSearchResponse> result = hearitSearchService.findHearitsByCategory(condition);
 
         // then
         assertAll(
@@ -133,7 +133,7 @@ class HearitSearchServiceTest {
         CategorySearchCondition condition = new CategorySearchCondition(category.getId(), 1, 2);
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.searchByCategory(condition);
+        List<HearitSearchResponse> result = hearitSearchService.findHearitsByCategory(condition);
 
         // then
         assertAll(
@@ -156,7 +156,7 @@ class HearitSearchServiceTest {
         KeywordSearchCondition condition = new KeywordSearchCondition(keyword1.getId(), 0, 10);
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.searchByKeyword(condition);
+        List<HearitSearchResponse> result = hearitSearchService.findHearitsByKeyword(condition);
 
         // then
         assertAll(
@@ -178,7 +178,7 @@ class HearitSearchServiceTest {
         KeywordSearchCondition condition = new KeywordSearchCondition(keyword.getId(), 1, 2); // page 1, size 2
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.searchByKeyword(condition);
+        List<HearitSearchResponse> result = hearitSearchService.findHearitsByKeyword(condition);
 
         // then
         assertAll(
