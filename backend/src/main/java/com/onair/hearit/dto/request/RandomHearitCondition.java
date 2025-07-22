@@ -2,16 +2,12 @@ package com.onair.hearit.dto.request;
 
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 
-public record TitleSearchCondition(
-        String searchTerm,
+public record RandomHearitCondition(
         int page,
         int size
 ) {
 
-    public TitleSearchCondition {
-        if (searchTerm == null || searchTerm.length() > 20) {
-            throw new InvalidInputException("검색어는 20자를 이하어야 합니다.");
-        }
+    public RandomHearitCondition {
         if (page < 0) {
             throw new InvalidInputException("page는 0 이상이어야 합니다.");
         }
