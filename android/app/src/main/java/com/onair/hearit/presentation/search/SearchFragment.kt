@@ -61,22 +61,19 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupSearchEnterKey() {
-        val editTextSearch = binding.etSearch
-
-        editTextSearch.setOnEditorActionListener { _, actionId, event ->
-            val isSearchAction = (actionId == EditorInfo.IME_ACTION_SEARCH)
-
-            if (isSearchAction) {
-                val searchedText = editTextSearch.text
-                if (searchedText.isNotEmpty()) {
-                    navigateToSearchResult()
-                } else {
+        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val searchTerm =
+                    binding.etSearch.text
+                        .toString()
+                        .trim()
+                if (searchTerm.isNotBlank()) {
+                    navigateToSearchResult(searchTerm)
                     hideKeyboard()
+                    true
                 }
-                true
-            } else {
-                false
             }
+            false
         }
     }
 
@@ -121,20 +118,20 @@ class SearchFragment : Fragment() {
         categoryAdapter.submitList(sampleCategories)
     }
 
-    private fun navigateToSearchResult() {
+    private fun navigateToSearchResult(searchTerm: String) {
+        val fragment = SearchResultFragment.newInstance(searchTerm)
+
         parentFragmentManager
             .beginTransaction()
-            .replace(
-                R.id.fragment_container_view,
-                SearchResultFragment(),
-            ).addToBackStack(null)
+            .replace(R.id.fragment_container_view, fragment)
+            .addToBackStack(null)
             .commit()
     }
 
     private fun hideKeyboard() {
         val inputMethodManager =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val view = requireActivity().currentFocus ?: View(requireContext())
+        val view = requireActivity().currentFocus ?: binding.root
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 

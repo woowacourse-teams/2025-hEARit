@@ -3,9 +3,9 @@ package com.onair.hearit.presentation.search
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.SearchedItem
+import com.onair.hearit.domain.SearchedHearitItem
 
-class SearchedHearitAdapter : ListAdapter<SearchedItem, SearchedHearitViewHolder>(DiffCallback) {
+class SearchedHearitAdapter : ListAdapter<SearchedHearitItem, SearchedHearitViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
@@ -15,21 +15,21 @@ class SearchedHearitAdapter : ListAdapter<SearchedItem, SearchedHearitViewHolder
         holder: SearchedHearitViewHolder,
         position: Int,
     ) {
-        val item: SearchedItem = getItem(position)
+        val item: SearchedHearitItem = getItem(position)
         holder.bind(item)
     }
 
     companion object {
         private val DiffCallback =
-            object : DiffUtil.ItemCallback<SearchedItem>() {
+            object : DiffUtil.ItemCallback<SearchedHearitItem>() {
                 override fun areItemsTheSame(
-                    oldItem: SearchedItem,
-                    newItem: SearchedItem,
+                    oldItem: SearchedHearitItem,
+                    newItem: SearchedHearitItem,
                 ): Boolean = oldItem.id == newItem.id
 
                 override fun areContentsTheSame(
-                    oldItem: SearchedItem,
-                    newItem: SearchedItem,
+                    oldItem: SearchedHearitItem,
+                    newItem: SearchedHearitItem,
                 ): Boolean = oldItem == newItem
             }
     }
