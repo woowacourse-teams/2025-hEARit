@@ -29,4 +29,9 @@ public class HearitKeyword {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "keyword_id")
     private Keyword keyword;
+
+    public HearitKeyword(final Hearit hearit, final Keyword keyword) {
+        this.hearit = hearit;
+        this.keyword = keyword;
+    }
 }

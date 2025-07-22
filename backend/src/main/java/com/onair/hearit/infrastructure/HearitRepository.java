@@ -22,4 +22,13 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     Page<Hearit> findByTitleOrderByCreatedAtDesc(@Param("searchTerm") String searchTerm, Pageable pageable);
 
     Page<Hearit> findByCategoryIdOrderByCreatedAtDesc(Long categoryId, Pageable pageable);
+
+    @Query("""
+            SELECT h
+            FROM Hearit h
+            JOIN HearitKeyword hk ON hk.hearit = h
+            WHERE hk.keyword.id = :keywordId
+            ORDER BY h.createdAt DESC
+            """)
+    Page<Hearit> findByKeywordIdOrderByCreatedAtDesc(@Param("keywordId") Long keywordId, Pageable pageable);
 }

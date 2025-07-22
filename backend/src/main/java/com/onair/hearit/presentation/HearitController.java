@@ -4,6 +4,7 @@ import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.CategorySearchCondition;
+import com.onair.hearit.dto.request.KeywordSearchCondition;
 import com.onair.hearit.dto.request.TitleSearchCondition;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitListResponse;
@@ -78,6 +79,18 @@ public class HearitController {
     ) {
         CategorySearchCondition condition = new CategorySearchCondition(categoryId, page, size);
         List<HearitSearchResponse> response = hearitSearchService.searchByCategory(condition);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "히어릿 키워드로 검색", description = "히어릿의 키워드, page 정보를 입력해 히어릿을 검색합니다. ")
+    @GetMapping("/search/keyword")
+    public ResponseEntity<List<HearitSearchResponse>> searchHearitsByKeyword(
+            @RequestParam(name = "keywordId") Long keywordId,
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "20") Integer size
+    ) {
+        KeywordSearchCondition condition = new KeywordSearchCondition(keywordId, page, size);
+        List<HearitSearchResponse> response = hearitSearchService.searchByKeyword(condition);
         return ResponseEntity.ok(response);
     }
 }

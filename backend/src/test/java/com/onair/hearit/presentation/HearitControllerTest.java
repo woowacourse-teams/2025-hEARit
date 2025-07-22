@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.domain.HearitKeyword;
+import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitListResponse;
@@ -192,9 +194,9 @@ class HearitControllerTest extends IntegrationTest {
         Category category1 = saveCategory("Spring", "#001");
         Category category2 = saveCategory("Java", "#002");
 
-        Hearit hearit1 = saveHearitWithCategoryAndTitle(category1);
-        Hearit hearit2 = saveHearitWithCategoryAndTitle(category1);
-        saveHearitWithCategoryAndTitle(category2);
+        Hearit hearit1 = saveHearitWithCategory(category1);
+        Hearit hearit2 = saveHearitWithCategory(category1);
+        saveHearitWithCategory(category2);
 
         // when
         List<HearitSearchResponse> responses = RestAssured
@@ -218,6 +220,63 @@ class HearitControllerTest extends IntegrationTest {
         );
     }
 
+    @Test
+    @DisplayName("키워드로 히어릿 검색 시 200 OK 및 해당 키워드의 히어릿들을 최신순으로 반환한다.")
+    void searchHearitsByKeywordWithPagination() {
+        // given
+        Keyword keyword1 = saveKeyword("AI");
+        Keyword keyword2 = saveKeyword("Java");
+        Hearit hearit1 = saveHearitWithKeyword(keyword1);
+        Hearit hearit2 = saveHearitWithKeyword(keyword1);
+        saveHearitWithKeyword(keyword2);
+
+        // when
+        List<HearitSearchResponse> responses = RestAssured
+                .given()
+                .queryParam("keywordId", keyword1.getId())
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v1/hearits/search/keyword")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .jsonPath()
+                .getList(".", HearitSearchResponse.class);
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).id()).isEqualTo(hearit2.getId()),
+                () -> assertThat(responses.get(1).id()).isEqualTo(hearit1.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("유효하지 않은 page 또는 size 값이 주어지면 400 BAD_REQUEST를 반환한다.")
+    void searchHearitsByKeywordWithInvalidParams() {
+        Keyword keyword = saveKeyword("DevOps");
+
+        // page 음수
+        RestAssured.given()
+                .queryParam("keywordId", keyword.getId())
+                .queryParam("page", -1)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v1/hearits/search/keyword")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // size 음수
+        RestAssured.given()
+                .queryParam("keywordId", keyword.getId())
+                .queryParam("page", 0)
+                .queryParam("size", -5)
+                .when()
+                .get("/api/v1/hearits/search/keyword")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
 
     private Hearit saveHearitWithSuffix(int suffix) {
         Category category = new Category("name" + suffix, "#123");
@@ -256,7 +315,7 @@ class HearitControllerTest extends IntegrationTest {
         return dbHelper.insertCategory(category);
     }
 
-    private Hearit saveHearitWithCategoryAndTitle(Category category) {
+    private Hearit saveHearitWithCategory(Category category) {
         Hearit hearit = new Hearit(
                 "title",
                 "summary",
@@ -271,4 +330,25 @@ class HearitControllerTest extends IntegrationTest {
         return dbHelper.insertHearit(hearit);
     }
 
+    private Keyword saveKeyword(String name) {
+        return dbHelper.insertKeyword(new Keyword(name));
+    }
+
+    private Hearit saveHearitWithKeyword(Keyword keyword) {
+        Category category = saveCategory("category", "#abc");
+        Hearit hearit = new Hearit(
+                "title",
+                "summary",
+                1,
+                "originalAudioUrl",
+                "shortAudioUrl",
+                "scriptUrl",
+                "source",
+                LocalDateTime.now(),
+                category
+        );
+        Hearit savedHearit = dbHelper.insertHearit(hearit);
+        dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
+        return savedHearit;
+    }
 }
