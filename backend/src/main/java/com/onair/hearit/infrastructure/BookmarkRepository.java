@@ -11,7 +11,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     Page<Bookmark> findAllByMemberOrderByCreatedAtDesc(Member member, Pageable pageable);
 
-    boolean existsByHearitIdAndMemberId(Long hearitId, Long memberId);
-
     Optional<Bookmark> findByHearitIdAndMemberId(Long hearitId, Long memberId);
+
+    boolean existsByHearitIdAndMemberId(Long hearitId, Long memberId);
 }

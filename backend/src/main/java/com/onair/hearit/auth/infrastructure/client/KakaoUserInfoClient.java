@@ -25,7 +25,7 @@ public class KakaoUserInfoClient {
                     )
                     .body(KakaoUserInfoResponse.class);
         } catch (Exception e) {
-            //TODO: 적절한 예외 (커스텀 예외? + 예외처리 더 생각
+            //TODO: 적절한 예외 적용 필요
             throw new IllegalArgumentException("유효하지 않은 카카오 액세스 토큰입니다.", e);
         }
     }
