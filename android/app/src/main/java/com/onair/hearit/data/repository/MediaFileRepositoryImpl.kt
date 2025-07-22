@@ -1,5 +1,6 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.repository
 
+import com.onair.hearit.data.datasource.MediaFileRemoteDataSource
 import com.onair.hearit.domain.HearitShortsItem
 import com.onair.hearit.domain.RandomHearitItem
 import com.onair.hearit.domain.ShortAudioUrlItem
@@ -34,7 +35,7 @@ class MediaFileRepositoryImpl(
                     .getOrElse { throw it }
 
             val jsonString = responseBody.string()
-            Json.decodeFromString(jsonString)
+            Json.Default.decodeFromString(jsonString)
         }
 
     override suspend fun getShortsHearitItem(item: RandomHearitItem): Result<HearitShortsItem> = combine(item)

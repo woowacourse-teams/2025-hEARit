@@ -1,10 +1,7 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.repository
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
+import com.onair.hearit.data.dataStore
 import com.onair.hearit.domain.repository.DataStoreRepository
 import kotlinx.coroutines.flow.first
 

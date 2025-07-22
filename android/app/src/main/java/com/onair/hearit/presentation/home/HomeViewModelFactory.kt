@@ -2,8 +2,8 @@ package com.onair.hearit.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.onair.hearit.data.HearitRemoteDataSourceImpl
-import com.onair.hearit.data.HearitRepositoryImpl
+import com.onair.hearit.data.datasource.HearitRemoteDataSourceImpl
+import com.onair.hearit.data.repository.HearitRepositoryImpl
 import com.onair.hearit.di.NetworkProvider
 
 @Suppress("UNCHECKED_CAST")

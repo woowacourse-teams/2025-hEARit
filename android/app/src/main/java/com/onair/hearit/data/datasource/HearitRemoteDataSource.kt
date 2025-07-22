@@ -1,4 +1,8 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.datasource
+
+import com.onair.hearit.data.dto.RandomHearitResponse
+import com.onair.hearit.data.dto.RecommendHearitResponse
+import com.onair.hearit.data.dto.SearchHearitResponse
 
 interface HearitRemoteDataSource {
     suspend fun getRecommendHearits(): Result<List<RecommendHearitResponse>>

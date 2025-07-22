@@ -1,5 +1,7 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.repository
 
+import com.onair.hearit.data.datasource.AuthRemoteDataSource
+import com.onair.hearit.data.dto.KakaoLoginRequest
 import com.onair.hearit.domain.repository.AuthRepository
 
 class AuthRepositoryImpl(

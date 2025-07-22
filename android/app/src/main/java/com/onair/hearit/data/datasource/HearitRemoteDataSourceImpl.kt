@@ -1,4 +1,9 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.datasource
+
+import com.onair.hearit.data.api.HearitService
+import com.onair.hearit.data.dto.RandomHearitResponse
+import com.onair.hearit.data.dto.RecommendHearitResponse
+import com.onair.hearit.data.dto.SearchHearitResponse
 
 class HearitRemoteDataSourceImpl(
     private val hearitService: HearitService,

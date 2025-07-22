@@ -1,4 +1,4 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.dto
 
 import com.onair.hearit.domain.RandomHearitItem
 import kotlinx.serialization.SerialName

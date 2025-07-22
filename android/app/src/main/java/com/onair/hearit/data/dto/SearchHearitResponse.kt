@@ -1,28 +1,25 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.dto
 
-import com.onair.hearit.domain.RecommendHearitItem
+import com.onair.hearit.domain.SearchedHearitItem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RecommendHearitResponse(
-    @SerialName("createdAt")
-    val createdAt: String,
+data class SearchHearitResponse(
     @SerialName("id")
     val id: Long,
     @SerialName("playTime")
     val playTime: Int,
-    @SerialName("source")
-    val source: String,
     @SerialName("summary")
     val summary: String,
     @SerialName("title")
     val title: String,
 )
 
-fun RecommendHearitResponse.toDomain(): RecommendHearitItem =
-    RecommendHearitItem(
+fun SearchHearitResponse.toDomain(): SearchedHearitItem =
+    SearchedHearitItem(
         id = this.id,
         title = this.title,
-        desc = this.summary,
+        playTime = this.playTime,
+        summary = this.summary,
     )

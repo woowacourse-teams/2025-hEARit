@@ -1,4 +1,4 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.repository
 
 import com.onair.hearit.BuildConfig
 

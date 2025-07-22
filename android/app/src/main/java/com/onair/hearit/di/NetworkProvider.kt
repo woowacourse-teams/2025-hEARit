@@ -2,9 +2,9 @@ package com.onair.hearit.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.onair.hearit.BuildConfig
-import com.onair.hearit.data.AuthService
-import com.onair.hearit.data.HearitService
-import com.onair.hearit.data.MediaFileService
+import com.onair.hearit.data.api.AuthService
+import com.onair.hearit.data.api.HearitService
+import com.onair.hearit.data.api.MediaFileService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient

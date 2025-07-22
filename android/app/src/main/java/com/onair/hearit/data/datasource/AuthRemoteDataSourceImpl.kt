@@ -1,4 +1,8 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.datasource
+
+import com.onair.hearit.data.api.AuthService
+import com.onair.hearit.data.dto.KakaoLoginRequest
+import com.onair.hearit.data.dto.KakaoLoginResponse
 
 class AuthRemoteDataSourceImpl(
     private val authService: AuthService,

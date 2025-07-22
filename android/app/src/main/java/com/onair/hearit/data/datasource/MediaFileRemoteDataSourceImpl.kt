@@ -1,5 +1,8 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.datasource
 
+import com.onair.hearit.data.api.MediaFileService
+import com.onair.hearit.data.dto.ScriptUrlResponse
+import com.onair.hearit.data.dto.ShortAudioUrlResponse
 import okhttp3.ResponseBody
 
 class MediaFileRemoteDataSourceImpl(

@@ -1,5 +1,7 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.api
 
+import com.onair.hearit.data.dto.ScriptUrlResponse
+import com.onair.hearit.data.dto.ShortAudioUrlResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.GET
