@@ -16,7 +16,9 @@ public class JwtTokenProvider {
     private final String secretKey;
     private final long expiration;
 
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, @Value("${jwt.expiration}") long expiration) {
+    public JwtTokenProvider(
+            @Value("${jwt.secret}") String secretKey,
+            @Value("${jwt.expiration}") long expiration) {
         this.secretKey = secretKey;
         this.expiration = expiration;
     }

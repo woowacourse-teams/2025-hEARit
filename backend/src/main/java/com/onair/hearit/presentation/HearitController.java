@@ -45,8 +45,8 @@ public class HearitController {
     @GetMapping("/random")
     public ResponseEntity<List<RandomHearitResponse>> readRandomHearits(
             @AuthenticationPrincipal CurrentMember member,
-            @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
         Long memberId = extractMemberId(member);
         RandomHearitCondition condition = new RandomHearitCondition(page, size);
         List<RandomHearitResponse> responses = hearitService.getRandomHearits(memberId, condition);
@@ -54,7 +54,10 @@ public class HearitController {
     }
 
     private Long extractMemberId(CurrentMember member) {
-        return (member != null) ? member.memberId() : null;
+        if (member == null) {
+            return null;
+        }
+        return member.memberId();
     }
 
     @Operation(summary = "추천 히어릿 5개 조회", description = "추천 히어릿을 5개 조회합니다.")
@@ -67,8 +70,8 @@ public class HearitController {
     @GetMapping("/search")
     public ResponseEntity<List<HearitSearchResponse>> searchHearitsByTitle(
             @RequestParam(name = "searchTerm") String searchTerm,
-            @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "20") Integer size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         TitleSearchCondition condition = new TitleSearchCondition(searchTerm, page, size);
         List<HearitSearchResponse> response = hearitSearchService.searchByTitle(condition);
         return ResponseEntity.ok(response);

@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HearitService {
 
-    private static final int MAX_RECOMMEND_HEARIT_COUNT = 5;
+    private static final int RECOMMEND_HEARIT_COUNT = 5;
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -29,8 +29,10 @@ public class HearitService {
     public HearitDetailResponse getHearitDetail(Long hearitId, Long memberId) {
         Hearit hearit = getHearitById(hearitId);
         Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(hearitId, memberId);
-        return bookmarkOptional.map(bookmark -> HearitDetailResponse.fromWithBookmark(hearit, bookmark))
-                .orElseGet(() -> HearitDetailResponse.from(hearit));
+        if (bookmarkOptional.isPresent()) {
+            return HearitDetailResponse.fromWithBookmark(hearit, bookmarkOptional.get());
+        }
+        return HearitDetailResponse.from(hearit);
     }
 
     private Hearit getHearitById(Long hearitId) {
@@ -47,13 +49,15 @@ public class HearitService {
     }
 
     private RandomHearitResponse toRandomHearitResponse(Hearit hearit, Long memberId) {
-        return bookmarkRepository.findByHearitIdAndMemberId(hearit.getId(), memberId)
-                .map(bookmark -> RandomHearitResponse.fromWithBookmark(hearit, bookmark))
-                .orElseGet(() -> RandomHearitResponse.from(hearit));
+        Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(hearit.getId(), memberId);
+        if (bookmarkOptional.isPresent()) {
+            return RandomHearitResponse.fromWithBookmark(hearit, bookmarkOptional.get());
+        }
+        return RandomHearitResponse.from(hearit);
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
-        Pageable pageable = PageRequest.of(0, MAX_RECOMMEND_HEARIT_COUNT);
+        Pageable pageable = PageRequest.of(0, RECOMMEND_HEARIT_COUNT);
         return hearitRepository.findRandom(pageable).stream()
                 .map(RecommendHearitResponse::from)
                 .toList();
