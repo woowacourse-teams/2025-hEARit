@@ -9,7 +9,6 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -57,13 +56,12 @@ public class AdminHearitService {
     }
 
     @Transactional
-    public HearitDetailResponse uploadHearit(HearitUploadRequest request) {
+    public void uploadHearit(HearitUploadRequest request) {
         Category category = getCategoryById(request.categoryId());
         Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), request.originalAudioUrl(),
                 request.shortAudioUrl(), request.scriptUrl(), request.source(), category);
         Hearit savedHearit = hearitRepository.save(hearit);
         saveHearitKeywords(request.keywordIds(), savedHearit);
-        return HearitDetailResponse.from(savedHearit);
     }
 
     private Category getCategoryById(Long categoryId) {

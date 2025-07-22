@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.Infrastructure.client;
+package com.onair.hearit.auth.infrastructure.client;
 
 import com.onair.hearit.IntegrationTest;
 import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;

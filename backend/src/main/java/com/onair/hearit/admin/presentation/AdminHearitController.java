@@ -6,7 +6,6 @@ import com.onair.hearit.admin.dto.request.AdminLoginRequest;
 import com.onair.hearit.admin.dto.request.HearitUploadRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.dto.response.PagedResponse;
-import com.onair.hearit.dto.response.HearitDetailResponse;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,9 +40,9 @@ public class AdminHearitController {
     }
 
     @PostMapping("/hearits")
-    public ResponseEntity<HearitDetailResponse> createHearit(@RequestBody HearitUploadRequest request) {
-        HearitDetailResponse response = adminHearitService.uploadHearit(request);
-        return ResponseEntity.created(URI.create("/hearits/" + response.id())).body(response);
+    public ResponseEntity<Void> createHearit(@RequestBody HearitUploadRequest request) {
+        adminHearitService.uploadHearit(request);
+        return ResponseEntity.created(URI.create("/")).build();
     }
 
     @DeleteMapping("/hearits/{hearitId}")

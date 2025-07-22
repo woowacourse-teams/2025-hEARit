@@ -1,10 +1,14 @@
 package com.onair.hearit.application;
 
 import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.dto.response.HearitListResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,25 +22,30 @@ public class HearitService {
     private static final int MAX_RECOMMEND_HEARIT_COUNT = 5;
 
     private final HearitRepository hearitRepository;
+    private final BookmarkRepository bookmarkRepository;
 
-    public HearitDetailResponse getHearitDetail(Long hearitId) {
+    public HearitDetailResponse getHearitDetail(Long hearitId, Long memberId) {
         Hearit hearit = getHearitById(hearitId);
-        return HearitDetailResponse.from(hearit);
+        Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(hearitId, memberId);
+        if (bookmarkOptional.isPresent()) {
+            return HearitDetailResponse.of(hearit, bookmarkOptional.get());
+        }
+        return HearitDetailResponse.of(hearit, false);
     }
 
-    public List<HearitDetailResponse> getRandomHearits() {
+    public List<HearitListResponse> getRandomHearits() {
         Pageable pageable = PageRequest.of(0, MAX_EXPLORE_COUNT);
 
         return hearitRepository.findRandom(pageable).stream()
-                .map(HearitDetailResponse::from)
+                .map(HearitListResponse::from)
                 .toList();
     }
 
-    public List<HearitDetailResponse> getRecommendedHearits() {
+    public List<HearitListResponse> getRecommendedHearits() {
         Pageable pageable = PageRequest.of(0, MAX_RECOMMEND_HEARIT_COUNT);
 
         return hearitRepository.findRandom(pageable).stream()
-                .map(HearitDetailResponse::from)
+                .map(HearitListResponse::from)
                 .toList();
     }
 

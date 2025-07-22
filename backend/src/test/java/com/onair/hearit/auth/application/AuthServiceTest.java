@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onair.hearit.DbHelper;
-import com.onair.hearit.auth.Infrastructure.client.KakaoUserInfoClient;
-import com.onair.hearit.auth.Infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
+import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
@@ -30,21 +30,16 @@ class AuthServiceTest {
 
     @MockitoBean
     KakaoUserInfoClient kakaoUserInfoClient;
-
-    @Autowired
-    private AuthService authService;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Autowired
     MemberRepository memberRepository;
-
     @Autowired
     DbHelper dbHelper;
+    @Autowired
+    private AuthService authService;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("아이디와 비밀번호로 회원가입할 수 있다")
