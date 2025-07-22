@@ -1,5 +1,6 @@
 package com.onair.hearit.admin.application;
 
+import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitUploadRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse.KeywordInHearit;
@@ -26,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class AdminHearitService {
 
     private final HearitRepository hearitRepository;
@@ -91,7 +91,13 @@ public class AdminHearitService {
         }
     }
 
-    public void deleteHearitById(Long hearitId) {
-        hearitRepository.deleteById(hearitId);
+    @Transactional
+    public void updateHearit(Long hearitId, HearitUpdateRequest request) {
+        Category category = getCategoryById(request.categoryId());
+        Hearit hearit = hearitRepository.findById(hearitId)
+                .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
+
+        hearit.update(request.title(), request.summary(), request.playTime(), request.originalAudioUrl(),
+                request.shortAudioUrl(), request.scriptUrl(), request.source(), category);
     }
 }

@@ -9,9 +9,13 @@ public record HearitAdminResponse(
         Long id,
         String title,
         String summary,
+        String originalAudioUrl,
+        String shortAudioUrl,
+        String scriptUrl,
         String source,
         Integer playTime,
         LocalDateTime createdAt,
+        CategoryInfoResponse category,
         List<KeywordInHearit> keywords
 ) {
     public record KeywordInHearit(
@@ -24,9 +28,13 @@ public record HearitAdminResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
+                hearit.getOriginalAudioUrl(),
+                hearit.getShortAudioUrl(),
+                hearit.getScriptUrl(),
                 hearit.getSource(),
                 hearit.getPlayTime(),
                 hearit.getCreatedAt(),
+                CategoryInfoResponse.from(hearit.getCategory()),
                 keywordMap.getOrDefault(hearit.getId(), List.of())
         );
     }

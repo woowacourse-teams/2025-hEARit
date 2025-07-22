@@ -3,16 +3,17 @@ package com.onair.hearit.admin.presentation;
 import com.onair.hearit.admin.application.AdminAuthService;
 import com.onair.hearit.admin.application.AdminHearitService;
 import com.onair.hearit.admin.dto.request.AdminLoginRequest;
+import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitUploadRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.dto.response.PagedResponse;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,9 +46,11 @@ public class AdminHearitController {
         return ResponseEntity.created(URI.create("/")).build();
     }
 
-    @DeleteMapping("/hearits/{hearitId}")
-    public ResponseEntity<Void> deleteHearitById(@PathVariable Long hearitId) {
-        adminHearitService.deleteHearitById(hearitId);
+    @PutMapping("/hearits/{hearitId}")
+    public ResponseEntity<Void> updateHearitById(
+            @PathVariable Long hearitId,
+            @RequestBody HearitUpdateRequest request) {
+        adminHearitService.updateHearit(hearitId, request);
         return ResponseEntity.noContent().build();
     }
 }
