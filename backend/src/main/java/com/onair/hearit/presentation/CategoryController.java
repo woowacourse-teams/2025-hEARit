@@ -9,7 +9,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,12 +29,5 @@ public class CategoryController {
         CategoryListCondition condition = new CategoryListCondition(page, size);
         List<CategoryResponse> responses = categoryService.getCategories(condition);
         return ResponseEntity.ok(responses);
-    }
-
-    @Operation(summary = "단일 카테고리 조회", description = "단일 카테고리를 조회합니다.")
-    @GetMapping("/{categoryId}")
-    public ResponseEntity<CategoryResponse> readCategory(@PathVariable Long categoryId) {
-        CategoryResponse response = categoryService.getCategoryById(categoryId);
-        return ResponseEntity.ok(response);
     }
 }

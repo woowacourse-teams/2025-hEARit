@@ -45,40 +45,6 @@ class CategoryControllerTest extends IntegrationTest {
         );
     }
 
-    @Test
-    @DisplayName("단일 카테고리 조회 시 200 OK 및 해당 카테고리 정보를 반환한다.")
-    void readSingleCategory() {
-        // given
-        Category category = saveCategory("category", "#abc");
-
-        // when
-        CategoryResponse result = RestAssured.given()
-                .when()
-                .get("/api/v1/category/" + category.getId())
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .as(CategoryResponse.class);
-
-        // then
-        assertAll(
-                () -> assertThat(result.id()).isEqualTo(category.getId()),
-                () -> assertThat(result.name()).isEqualTo(category.getName()),
-                () -> assertThat(result.colorCode()).isEqualTo(category.getColorCode())
-        );
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 카테고리를 조회 시 404 NOT_FOUND를 반환한다.")
-    void readNotFoundCategory() {
-        // when & then
-        RestAssured.given()
-                .when()
-                .get("/api/v1/category/999")
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value());
-    }
-
     private Category saveCategory(String name, String color) {
         return dbHelper.insertCategory(new Category(name, color));
     }

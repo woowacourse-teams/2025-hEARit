@@ -1,11 +1,9 @@
 package com.onair.hearit.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.DbHelper;
-import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.dto.request.CategoryListCondition;
 import com.onair.hearit.dto.response.CategoryResponse;
@@ -60,19 +58,6 @@ class CategoryServiceTest {
                 () -> assertThat(result).extracting(CategoryResponse::colorCode)
                         .containsExactly("#333", "#444")
         );
-    }
-
-
-    @Test
-    @DisplayName("존재하지 않는 카테고리를 조회하면 NotFoundException이 발생한다.")
-    void getCategory_ById_notFound() {
-        // given
-        Long notExistId = 999L;
-
-        // when & then
-        assertThatThrownBy(() -> categoryService.getCategoryById(notExistId))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("categoryId");
     }
 
     private Category saveCategory(String name, String color) {

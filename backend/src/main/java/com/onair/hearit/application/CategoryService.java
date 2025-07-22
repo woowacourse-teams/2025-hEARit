@@ -1,6 +1,5 @@
 package com.onair.hearit.application;
 
-import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.dto.request.CategoryListCondition;
 import com.onair.hearit.dto.response.CategoryResponse;
@@ -24,15 +23,5 @@ public class CategoryService {
         return categories.stream()
                 .map(CategoryResponse::from)
                 .toList();
-    }
-
-    public CategoryResponse getCategoryById(Long id) {
-        Category category = findCategoryById(id);
-        return CategoryResponse.from(category);
-    }
-
-    private Category findCategoryById(Long id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("categoryId", String.valueOf(id)));
     }
 }
