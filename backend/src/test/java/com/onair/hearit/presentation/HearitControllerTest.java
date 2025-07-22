@@ -10,8 +10,9 @@ import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.HearitDetailResponse;
-import com.onair.hearit.dto.response.HearitListResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
+import com.onair.hearit.dto.response.RandomHearitResponse;
+import com.onair.hearit.dto.response.RecommendHearitResponse;
 import io.restassured.RestAssured;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -91,14 +92,14 @@ class HearitControllerTest extends IntegrationTest {
         saveHearitWithSuffix(3);
 
         // when
-        List<HearitListResponse> responses = RestAssured.given()
+        List<RandomHearitResponse> responses = RestAssured.given()
                 .when()
                 .get("/api/v1/hearits/random")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .jsonPath()
-                .getList(".", HearitListResponse.class);
+                .getList(".", RandomHearitResponse.class);
 
         // then
         assertThat(responses).hasSize(3);
@@ -113,27 +114,18 @@ class HearitControllerTest extends IntegrationTest {
         saveHearitWithSuffix(3);
 
         // when
-        List<HearitListResponse> responses = RestAssured.given()
+        List<RecommendHearitResponse> responses = RestAssured.given()
                 .when()
                 .get("/api/v1/hearits/recommend")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .jsonPath()
-                .getList(".", HearitListResponse.class);
+                .getList(".", RecommendHearitResponse.class);
 
         // then
         assertThat(responses).hasSize(3);
     }
-
-    private Member saveMember() {
-        return dbHelper.insertMember(new Member("testId", "test1234!", null, "testMember"));
-    }
-
-    private String generateToken(Member member) {
-        return jwtTokenProvider.createToken(member.getId());
-    }
-
 
     @Test
     @DisplayName("히어릿 검색 요청 시 200 OK 및 제목이 포함된 히어릿을 최신순으로 히어릿들을 반환한다.")
@@ -274,6 +266,14 @@ class HearitControllerTest extends IntegrationTest {
                 .get("/api/v1/hearits/search/keyword")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    private Member saveMember() {
+        return dbHelper.insertMember(new Member("testId", "test1234!", null, "testMember"));
+    }
+
+    private String generateToken(Member member) {
+        return jwtTokenProvider.createToken(member.getId());
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {

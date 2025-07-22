@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 public class FileSourceService {
 
     private final String sourceBaseUrl;
-
     private final HearitRepository hearitRepository;
 
     public FileSourceService(@Value("${amazon.s3.bucket}") String sourceBaseUrl, HearitRepository hearitRepository) {

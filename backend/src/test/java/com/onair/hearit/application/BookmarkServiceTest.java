@@ -58,7 +58,8 @@ class BookmarkServiceTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit));
 
         // when
-        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.getId(), new BookmarkListCondition(0, 20));
+        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(
+                member.getId(), new BookmarkListCondition(0, 20));
 
         // then
         assertThat(responses).hasSize(1);

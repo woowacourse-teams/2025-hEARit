@@ -39,7 +39,7 @@ class HearitRepositoryTest {
         Pageable pageable = PageRequest.of(0, 1);
 
         // when
-        List<Hearit> hearits = hearitRepository.findRandom(pageable);
+        Page<Hearit> hearits = hearitRepository.findRandom(pageable);
 
         // then
         assertAll(() -> {
@@ -57,10 +57,10 @@ class HearitRepositoryTest {
         Pageable pageable = PageRequest.of(0, 2);
 
         // when
-        List<Hearit> hearits = hearitRepository.findRandom(pageable);
+        Page<Hearit> hearits = hearitRepository.findRandom(pageable);
 
         // then
-        assertThat(hearits.size()).isEqualTo(hearitRepository.findAll().size());
+        assertThat(hearits.getTotalElements()).isEqualTo(hearitRepository.findAll().size());
     }
 
     @Test
@@ -126,7 +126,6 @@ class HearitRepositoryTest {
         );
     }
 
-
     private Hearit saveHearitWithSuffix(int suffix) {
         Category category = new Category("name" + suffix, "#123");
         dbHelper.insertCategory(category);
@@ -158,5 +157,4 @@ class HearitRepositoryTest {
                 category);
         return dbHelper.insertHearit(hearit);
     }
-
 }
