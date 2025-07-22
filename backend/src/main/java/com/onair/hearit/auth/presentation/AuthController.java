@@ -7,6 +7,7 @@ import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +41,6 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@RequestBody SignupRequest request) {
         authService.signup(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.created(URI.create("/")).build();
     }
 }

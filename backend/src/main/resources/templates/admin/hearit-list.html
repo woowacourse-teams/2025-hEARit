@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>히어릿 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        #upload-section { display: none; }
+        #keyword-section { display: none; }
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>히어릿 관리</h1>
+        <div>
+            <button id="toggle-upload-form" class="btn btn-primary d-flex align-items-center">
+                히어릿 추가 <i id="toggle-icon" class="bi bi-chevron-down ms-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 히어릿 추가 폼 -->
+    <div id="upload-section" class="card card-body mb-4">
+        <h2 class="mb-3">새 히어릿 업로드</h2>
+        <form id="upload-form">
+            <div class="row">
+                <div class="col-md-6 mb-3"><label for="title" class="form-label">제목</label><input type="text" class="form-control" id="title" name="title"></div>
+                <div class="col-md-6 mb-3"><label for="source" class="form-label">출처</label><input type="text" class="form-control" id="source" name="source"></div>
+            </div>
+            <div class="mb-3"><label for="summary" class="form-label">요약</label><textarea class="form-control" id="summary" name="summary" rows="2"></textarea></div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label for="originalAudioUrl" class="form-label">원본 오디오 URL</label><input type="text" class="form-control" id="originalAudioUrl" name="originalAudioUrl"></div>
+                <div class="col-md-6 mb-3"><label for="shortAudioUrl" class="form-label">요약 오디오 URL</label><input type="text" class="form-control" id="shortAudioUrl" name="shortAudioUrl"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label for="scriptUrl" class="form-label">대본 URL</label><input type="text" class="form-control" id="scriptUrl" name="scriptUrl"></div>
+                <div class="col-md-3 mb-3"><label for="playTime" class="form-label">재생 시간(초)</label><input type="number" class="form-control" id="playTime" name="playTime"></div>
+                <div class="col-md-3 mb-3"><label for="categoryId" class="form-label">카테고리</label><select id="categoryId" name="categoryId" class="form-select" required><option value="" disabled selected>선택...</option></select></div>
+            </div>
+            <div class="mb-3"><label class="form-label d-block">키워드</label><div id="keyword-checkboxes"></div></div>
+            <button type="button" class="btn btn-success" onclick="uploadHearit()">등록</button>
+            <button type="button" class="btn btn-secondary" id="cancel-upload">취소</button>
+        </form>
+    </div>
+
+    <!-- 히어릿 목록 테이블 및 페이징 -->
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Title</th>
+                <th scope="col">Summary</th>
+                <th scope="col">Play Time</th>
+                <th scope="col">Original Audio URL</th>
+                <th scope="col">Short Audio URL</th>
+                <th scope="col">Script URL</th>
+                <th scope="col">Source</th>
+                <th scope="col">Created At</th>
+                <th scope="col">Category</th>
+                <th scope="col">Keywords</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="hearit-table-body"></tbody>
+    </table>
+    <nav><ul class="pagination justify-content-center" id="pagination-controls"></ul></nav>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentPage = 0;
+    const pageSize = 15;
+
+    async function fetchCategories() {
+        try {
+            const response = await fetch('/api/v1/admin/categories');
+            if (response.ok) {
+                const result = await response.json();
+                const categories = result.content;
+                const categorySelect = document.getElementById('categoryId');
+                categorySelect.innerHTML = '<option value="" disabled selected>카테고리를 선택하세요</option>';
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    categorySelect.appendChild(option);
+                });
+            } else console.error('카테고리를 불러오는 데 실패했습니다.');
+        } catch (error) { console.error('Error fetching categories:', error); }
+    }
+
+    async function fetchKeywords() {
+        try {
+            const response = await fetch('/api/v1/admin/keywords');
+            if (response.ok) {
+                const result = await response.json();
+                const keywords = result.content;
+                const keywordCheckboxes = document.getElementById('keyword-checkboxes');
+                keywordCheckboxes.innerHTML = '';
+                keywords.forEach(keyword => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'form-check form-check-inline';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'form-check-input';
+                    checkbox.name = 'keywordIds';
+                    checkbox.value = keyword.id;
+                    checkbox.id = `keyword-${keyword.id}`;
+                    const label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.setAttribute('for', `keyword-${keyword.id}`);
+                    label.textContent = keyword.name;
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(label);
+                    keywordCheckboxes.appendChild(wrapper);
+                });
+            } else console.error('키워드를 불러오는 데 실패했습니다.');
+        } catch (error) { console.error('Error fetching keywords:', error); }
+    }
+
+    async function fetchHearits(page) {
+        try {
+            const response = await fetch(`/api/v1/admin/hearits?page=${page}&size=${pageSize}`);
+            if (!response.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
+            const pagedData = await response.json();
+            updateTable(pagedData.content);
+            updatePagination(pagedData);
+            currentPage = page;
+        } catch (error) {
+            console.error('Error fetching hearits:', error);
+            alert(error.message);
+        }
+    }
+
+    // Renders the hearit list table
+    let editingId = null;
+    function updateTable(hearits) {
+        const tableBody = document.getElementById('hearit-table-body');
+        tableBody.innerHTML = '';
+        hearits.forEach(hearit => {
+            const row = document.createElement('tr');
+            if (editingId === hearit.id) {
+                // Edit mode: show inputs for editable fields, others as text
+                row.innerHTML = `
+                    <td>${hearit.id}</td>
+                    <td><input type="text" class="form-control" value="${hearit.title}" id="edit-title-${hearit.id}" style="min-width: 120px;"></td>
+                    <td><input type="text" class="form-control" value="${hearit.summary || ''}" id="edit-summary-${hearit.id}" style="min-width: 120px;"></td>
+                    <td style="min-width: 80px;"><input type="number" class="form-control" value="${hearit.playTime}" id="edit-playtime-${hearit.id}" style="min-width: 120px;"></td>
+                    <td><input type="text" class="form-control" value="${hearit.originalAudioUrl || ''}" id="edit-original-url-${hearit.id}" style="min-width: 120px;"></td>
+                    <td><input type="text" class="form-control" value="${hearit.shortAudioUrl || ''}" id="edit-short-url-${hearit.id}" style="min-width: 120px;"></td>
+                    <td><input type="text" class="form-control" value="${hearit.scriptUrl || ''}" id="edit-script-url-${hearit.id}" style="min-width: 120px;"></td>
+                    <td><input type="text" class="form-control" value="${hearit.source}" id="edit-source-${hearit.id}" style="min-width: 120px;"></td>
+                    <td>${hearit.createdAt ? new Date(hearit.createdAt).toLocaleString() : ''}</td>
+                    <td>
+                        ${hearit.category?.name || ''}
+                        <input type="hidden" id="edit-category-id-${hearit.id}" value="${hearit.category?.id || ''}">
+                    </td>
+                    <td>${
+                        Array.isArray(hearit.keywords)
+                            ? hearit.keywords.map(k => `<span class="badge text-bg-secondary me-1">${k.name}</span>`).join('')
+                            : ''
+                    }</td>
+                    <td>
+                        <button class="btn btn-success btn-sm" onclick="saveEdit(${hearit.id})">저장</button>
+                        <button class="btn btn-secondary btn-sm" onclick="cancelEditHearit()">취소</button>
+                    </td>
+                `;
+            } else {
+                // Display mode
+                row.innerHTML = `
+                    <td>${hearit.id}</td>
+                    <td>${hearit.title}</td>
+                    <td>${hearit.summary}</td>
+                    <td style="min-width: 80px;">${hearit.playTime}초</td>
+                    <td>${hearit.originalAudioUrl ? hearit.originalAudioUrl : ''}</td>
+                    <td>${hearit.shortAudioUrl ? hearit.shortAudioUrl : ''}</td>
+                    <td>${hearit.scriptUrl ? hearit.scriptUrl : ''}</td>
+                    <td>${hearit.source}</td>
+                    <td>${hearit.createdAt ? new Date(hearit.createdAt).toLocaleString() : ''}</td>
+                    <td>${hearit.category?.name || ''}</td>
+                    <td>${
+                        Array.isArray(hearit.keywords)
+                            ? hearit.keywords.map(k => `<span class="badge text-bg-secondary me-1">${k.name}</span>`).join('')
+                            : ''
+                    }</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editHearit(${hearit.id})">수정</button>
+                    </td>
+                `;
+            }
+            tableBody.appendChild(row);
+        });
+    }
+
+    function updatePagination(pagedData) {
+        const paginationControls = document.getElementById('pagination-controls');
+        paginationControls.innerHTML = '';
+        const createPageItem = (text, page, isDisabled = false, isActive = false) => {
+            const li = document.createElement('li');
+            li.className = `page-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}`;
+            const link = document.createElement('a');
+            link.className = 'page-link';
+            link.href = '#';
+            link.textContent = text;
+            if (!isDisabled) {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    fetchHearits(page);
+                });
+            }
+            li.appendChild(link);
+            return li;
+        };
+        paginationControls.appendChild(createPageItem('이전', currentPage - 1, pagedData.isFirst));
+        paginationControls.appendChild(createPageItem(`${pagedData.page + 1} / ${pagedData.totalPages}`, -1, true));
+        paginationControls.appendChild(createPageItem('다음', currentPage + 1, pagedData.isLast));
+    }
+
+    async function uploadHearit() {
+        const form = document.getElementById('upload-form');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        data.keywordIds = formData.getAll('keywordIds').map(id => parseInt(id, 10));
+        if (!data.categoryId) { alert('카테고리를 선택해주세요.'); return; }
+        data.playTime = parseInt(data.playTime, 10);
+        data.categoryId = parseInt(data.categoryId, 10);
+        try {
+            const response = await fetch('/api/v1/admin/hearits', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                alert('히어릿이 성공적으로 업로드되었습니다.');
+                form.reset();
+                document.getElementById('upload-section').style.display = 'none';
+                fetchHearits(0);
+            } else {
+                const errorData = await response.json();
+                alert('업로드 실패: ' + (errorData.message || '서버 오류'));
+            }
+        } catch (error) {
+            console.error('Error uploading hearit:', error);
+            alert('업로드 중 오류가 발생했습니다.');
+        }
+    }
+
+    async function deleteHearit(hearitId) {
+        if (!confirm(`정말로 ID ${hearitId} 히어릿을 삭제하시겠습니까?`)) return;
+        try {
+            const response = await fetch(`/api/v1/admin/hearits/${hearitId}`, { method: 'DELETE' });
+            if (response.ok) {
+                alert('성공적으로 삭제되었습니다.');
+                fetchHearits(currentPage);
+            } else {
+                throw new Error('삭제에 실패했습니다.');
+            }
+        } catch (error) { console.error('Error deleting hearit:', error); alert(error.message); }
+    }
+
+    // Start editing a hearit
+    function editHearit(hearitId) {
+        editingId = hearitId;
+        fetchHearits(currentPage);
+    }
+
+    // Save edits for a hearit
+    async function saveEdit(id) {
+        const title = document.getElementById(`edit-title-${id}`).value;
+        const summary = document.getElementById(`edit-summary-${id}`).value;
+        const playTime = parseInt(document.getElementById(`edit-playtime-${id}`).value, 10);
+        const originalUrl = document.getElementById(`edit-original-url-${id}`).value;
+        const shortUrl = document.getElementById(`edit-short-url-${id}`).value;
+        const scriptUrl = document.getElementById(`edit-script-url-${id}`).value;
+        const source = document.getElementById(`edit-source-${id}`).value;
+        const categoryId = parseInt(document.getElementById(`edit-category-id-${id}`).value, 10);
+        // categoryId, keywordIds 편집은 추후 지원
+        const updated = {
+            title,
+            summary,
+            playTime,
+            originalAudioUrl: originalUrl,
+            shortAudioUrl: shortUrl,
+            scriptUrl: scriptUrl,
+            source,
+            categoryId
+        };
+        try {
+            const response = await fetch(`/api/v1/admin/hearits/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updated)
+            });
+            if (response.ok) {
+                alert('수정되었습니다.');
+                editingId = null;
+                fetchHearits(currentPage);
+            } else {
+                const err = await response.json();
+                alert('수정 실패: ' + (err.message || '오류 발생'));
+            }
+        } catch (e) {
+            console.error('Update error:', e);
+            alert('수정 중 오류 발생');
+        }
+    }
+
+    function cancelEditHearit() {
+        editingId = null;
+        fetchHearits(currentPage);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchCategories();
+        fetchKeywords();
+        fetchHearits(0);
+
+        const toggleBtn = document.getElementById('toggle-upload-form');
+        const formSection = document.getElementById('upload-section');
+        const toggleIcon = document.getElementById('toggle-icon');
+
+        const setFormState = (show) => {
+            formSection.style.display = show ? 'block' : 'none';
+            toggleIcon.classList.toggle('bi-chevron-up', show);
+            toggleIcon.classList.toggle('bi-chevron-down', !show);
+        };
+
+        toggleBtn.addEventListener('click', () => {
+            const isHidden = formSection.style.display === 'none';
+            setFormState(isHidden);
+        });
+
+        document.getElementById('cancel-upload').addEventListener('click', () => {
+            setFormState(false);
+        });
+    });
+</script>
+</body>
+</html> 

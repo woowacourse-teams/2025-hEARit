@@ -92,7 +92,7 @@ class FileSourceServiceTest {
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix, "#123");
+        Category category = new Category("name" + suffix, "#FFFFFFFF");
         dbHelper.insertCategory(category);
 
         Hearit hearit = new Hearit(
