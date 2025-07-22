@@ -8,6 +8,7 @@ public record CategorySearchCondition(
         int page,
         int size
 ) {
+
     public CategorySearchCondition {
         if (categoryId == null) {
             throw new InvalidInputException("카테고리 id는 null이 될 수 없습니다. ");

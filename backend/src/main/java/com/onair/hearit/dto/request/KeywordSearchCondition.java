@@ -8,6 +8,7 @@ public record KeywordSearchCondition(
         int page,
         int size
 ) {
+
     public KeywordSearchCondition {
         if (keywordId == null) {
             throw new InvalidInputException("키워드 id는 null이 될 수 없습니다. ");
