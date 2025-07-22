@@ -29,12 +29,12 @@ public class KeywordService {
                 .toList();
     }
 
-    public KeywordResponse getKeyword(final Long id) {
-        Keyword keyword = findKeyword(id);
+    public KeywordResponse getKeywordById(final Long id) {
+        Keyword keyword = findKeywordById(id);
         return KeywordResponse.from(keyword);
     }
 
-    private Keyword findKeyword(Long id) {
+    private Keyword findKeywordById(Long id) {
         return keywordRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("keywordId", String.valueOf(id)));
     }

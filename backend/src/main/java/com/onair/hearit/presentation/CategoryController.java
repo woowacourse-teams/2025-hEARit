@@ -36,7 +36,7 @@ public class CategoryController {
     @Operation(summary = "단일 카테고리 조회", description = "단일 카테고리를 조회합니다.")
     @GetMapping("/{categoryId}")
     public ResponseEntity<CategoryResponse> readCategory(@PathVariable Long categoryId) {
-        CategoryResponse response = categoryService.getCategory(categoryId);
+        CategoryResponse response = categoryService.getCategoryById(categoryId);
         return ResponseEntity.ok(response);
     }
 }

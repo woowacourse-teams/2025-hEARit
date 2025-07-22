@@ -36,7 +36,7 @@ public class KeywordController {
     @Operation(summary = "단일 키워드 조회", description = "단일 키워드를 조회합니다.")
     @GetMapping("/{keywordId}")
     public ResponseEntity<KeywordResponse> readKeyword(@PathVariable Long keywordId) {
-        KeywordResponse response = keywordService.getKeyword(keywordId);
+        KeywordResponse response = keywordService.getKeywordById(keywordId);
         return ResponseEntity.ok(response);
     }
 

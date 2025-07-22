@@ -58,12 +58,12 @@ class KeywordServiceTest {
 
     @Test
     @DisplayName("단일 키워드를 조회할 수 있다.")
-    void getKeywordById() {
+    void getKeywordByIdById() {
         // given
         Keyword keyword = saveKeyword("keyword");
 
         // when
-        KeywordResponse result = keywordService.getKeyword(keyword.getId());
+        KeywordResponse result = keywordService.getKeywordById(keyword.getId());
 
         // then
         assertThat(result.id()).isEqualTo(keyword.getId());
@@ -72,12 +72,12 @@ class KeywordServiceTest {
 
     @Test
     @DisplayName("존재하지 않는 키워드를 조회하면 NotFoundException이 발생한다.")
-    void getKeyword_notFound() {
+    void getKeyword_ById_notFound() {
         // given
         Long notExistId = 999L;
 
         // when & then
-        assertThatThrownBy(() -> keywordService.getKeyword(notExistId))
+        assertThatThrownBy(() -> keywordService.getKeywordById(notExistId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("keywordId");
     }

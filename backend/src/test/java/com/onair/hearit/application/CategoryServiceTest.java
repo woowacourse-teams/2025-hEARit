@@ -60,12 +60,12 @@ class CategoryServiceTest {
 
     @Test
     @DisplayName("단일 카테고리를 조회할 수 있다.")
-    void getCategoryById() {
+    void getCategoryByIdById() {
         // given
         Category category = saveCategory("category", "#abc");
 
         // when
-        CategoryResponse result = categoryService.getCategory(category.getId());
+        CategoryResponse result = categoryService.getCategoryById(category.getId());
 
         // then
         assertThat(result.id()).isEqualTo(category.getId());
@@ -74,12 +74,12 @@ class CategoryServiceTest {
 
     @Test
     @DisplayName("존재하지 않는 카테고리를 조회하면 NotFoundException이 발생한다.")
-    void getCategory_notFound() {
+    void getCategory_ById_notFound() {
         // given
         Long notExistId = 999L;
 
         // when & then
-        assertThatThrownBy(() -> categoryService.getCategory(notExistId))
+        assertThatThrownBy(() -> categoryService.getCategoryById(notExistId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("categoryId");
     }
