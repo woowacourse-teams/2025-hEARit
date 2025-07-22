@@ -151,7 +151,7 @@ class HearitSearchServiceTest {
 
         Hearit hearit1 = saveHearitWithKeyword(keyword1);
         Hearit hearit2 = saveHearitWithKeyword(keyword1);
-        saveHearitWithKeyword(keyword2);
+        Hearit hearit3 = saveHearitWithKeyword(keyword2);
 
         KeywordSearchCondition condition = new KeywordSearchCondition(keyword1.getId(), 0, 10);
 
