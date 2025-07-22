@@ -76,6 +76,7 @@ class LoginActivity : AppCompatActivity() {
                 } else if (token != null) {
                     showToast("카카오 로그인 성공")
                     Log.d("meeple_log", token.accessToken)
+                    viewModel.kakaoLogin(token.accessToken)
                 }
             }
 
