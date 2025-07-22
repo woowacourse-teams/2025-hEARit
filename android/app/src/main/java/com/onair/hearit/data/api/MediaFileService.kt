@@ -1,5 +1,6 @@
 package com.onair.hearit.data.api
 
+import com.onair.hearit.data.dto.OriginalAudioUrlResponse
 import com.onair.hearit.data.dto.ScriptUrlResponse
 import com.onair.hearit.data.dto.ShortAudioUrlResponse
 import okhttp3.ResponseBody
@@ -18,6 +19,11 @@ interface MediaFileService {
     suspend fun getScriptUrl(
         @Path("hearitId") hearitId: Long,
     ): Response<ScriptUrlResponse>
+
+    @GET("hearits/{hearitId}/original-audio-url")
+    suspend fun getOriginalAudioUrl(
+        @Path("hearitId") hearitId: Long,
+    ): Response<OriginalAudioUrlResponse>
 
     @GET
     suspend fun getScriptJson(
