@@ -32,7 +32,7 @@ class LoginActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
         setupWindowInsets()
 
-        initKakao()
+        setupKakao()
 
         binding.layoutLoginSymbol
             .animate()
@@ -66,7 +66,7 @@ class LoginActivity : AppCompatActivity() {
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
-    private fun initKakao() {
+    private fun setupKakao() {
         binding.btnLoginKakao.setOnClickListener {
             // 카카오계정으로 로그인 공통 callback 구성
             // 카카오톡으로 로그인 할 수 없어 카카오계정으로 로그인할 경우 사용됨
