@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class SearchResultViewModel(
     private val hearitRepository: HearitRepository,
-    private val searchTerm: String,
+    private val initialSearchTerm: String,
 ) : ViewModel() {
     private val _searchedHearits: MutableLiveData<List<SearchedHearitItem>> = MutableLiveData()
     val searchedHearits: LiveData<List<SearchedHearitItem>> = _searchedHearits
@@ -20,17 +20,26 @@ class SearchResultViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    var currentSearchTerm: String = initialSearchTerm
+        private set
+
     init {
-        fetchData()
+        fetchData(initialSearchTerm)
     }
 
-    private fun fetchData() {
+    fun search(searchTerm: String) {
+        if (searchTerm == currentSearchTerm) return
+
+        currentSearchTerm = searchTerm
+        fetchData(searchTerm)
+    }
+
+    private fun fetchData(searchTerm: String) {
         viewModelScope.launch {
             hearitRepository
                 .getSearchHearits(searchTerm)
-                .onSuccess { searchedHearits ->
-                    _searchedHearits.value = searchedHearits
-                }.onFailure {
+                .onSuccess { _searchedHearits.value = it }
+                .onFailure {
                     _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
                 }
         }

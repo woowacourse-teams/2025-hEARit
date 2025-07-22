@@ -61,22 +61,19 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupSearchEnterKey() {
-        val editTextSearch = binding.etSearch
-
-        editTextSearch.setOnEditorActionListener { _, actionId, event ->
-            val isSearchAction = (actionId == EditorInfo.IME_ACTION_SEARCH)
-
-            if (isSearchAction) {
-                val searchTerm = editTextSearch.text.toString()
+        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val searchTerm =
+                    binding.etSearch.text
+                        .toString()
+                        .trim()
                 if (searchTerm.isNotBlank()) {
                     navigateToSearchResult(searchTerm)
-                } else {
                     hideKeyboard()
+                    true
                 }
-                true
-            } else {
-                false
             }
+            false
         }
     }
 
@@ -122,13 +119,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun navigateToSearchResult(searchTerm: String) {
-        val fragment =
-            SearchResultFragment().apply {
-                arguments =
-                    Bundle().apply {
-                        putString("searchTerm", searchTerm)
-                    }
-            }
+        val fragment = SearchResultFragment.newInstance(searchTerm)
 
         parentFragmentManager
             .beginTransaction()
@@ -138,10 +129,10 @@ class SearchFragment : Fragment() {
     }
 
     private fun hideKeyboard() {
-        val inputMethodManager =
+        val imm =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val view = requireActivity().currentFocus ?: View(requireContext())
-        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+        val view = requireActivity().currentFocus ?: binding.root
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     override fun onDestroyView() {
