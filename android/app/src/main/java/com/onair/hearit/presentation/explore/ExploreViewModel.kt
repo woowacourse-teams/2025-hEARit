@@ -8,6 +8,7 @@ import com.onair.hearit.R
 import com.onair.hearit.domain.HearitShortsItem
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
+import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 
 class ExploreViewModel(
@@ -17,8 +18,8 @@ class ExploreViewModel(
     private val _shortsHearits: MutableLiveData<List<HearitShortsItem>> = MutableLiveData()
     val shortsHearits: LiveData<List<HearitShortsItem>> = _shortsHearits
 
-    private val _toastMessage = MutableLiveData<Int>()
-    val toastMessage: LiveData<Int> get() = _toastMessage
+    private val _toastMessage = SingleLiveData<Int>()
+    val toastMessage: LiveData<Int> = _toastMessage
 
     init {
         fetchData()
@@ -40,7 +41,7 @@ class ExploreViewModel(
 
                     _shortsHearits.value = shortsItem
                 }.onFailure {
-                    _toastMessage.value = R.string.explore_toast_shorts_load_fail
+                    _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
                 }
         }
     }
