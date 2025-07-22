@@ -18,4 +18,4 @@ public record KeywordSearchCondition(
             throw new InvalidInputException("size는 0 이상 50 이하의 값이어야 합니다.");
         }
     }
-} 
+}
