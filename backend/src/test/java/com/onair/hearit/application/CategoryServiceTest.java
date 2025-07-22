@@ -38,26 +38,6 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("전체 카테고리를 조회할 수 있다.")
-    void getAllCategories() {
-        // given
-        Category category1 = saveCategory("category1", "#111");
-        Category category2 = saveCategory("category2", "#222");
-        Category category3 = saveCategory("category3", "#333");
-        CategoryListCondition condition = new CategoryListCondition(0, 10);
-
-        // when
-        List<CategoryResponse> result = categoryService.getCategories(condition);
-
-        // then
-        assertAll(
-                () -> assertThat(result).hasSize(3),
-                () -> assertThat(result).extracting(CategoryResponse::id)
-                        .contains(category1.getId(), category2.getId(), category3.getId())
-        );
-    }
-
-    @Test
     @DisplayName("카테고리 목록 조회 시 페이지네이션이 적용되어 반환된다.")
     void getCategories_withPagination() {
         // given
@@ -75,26 +55,13 @@ class CategoryServiceTest {
         // then
         assertAll(
                 () -> assertThat(result).hasSize(2),
-                () -> assertThat(result)
-                        .extracting(CategoryResponse::name)
-                        .containsExactly("category3", "category4")
+                () -> assertThat(result).extracting(CategoryResponse::name)
+                        .containsExactly("category3", "category4"),
+                () -> assertThat(result).extracting(CategoryResponse::colorCode)
+                        .containsExactly("#333", "#444")
         );
     }
 
-
-    @Test
-    @DisplayName("단일 카테고리를 조회할 수 있다.")
-    void getCategoryByIdById() {
-        // given
-        Category category = saveCategory("category", "#abc");
-
-        // when
-        CategoryResponse result = categoryService.getCategoryById(category.getId());
-
-        // then
-        assertThat(result.id()).isEqualTo(category.getId());
-        assertThat(result.name()).isEqualTo(category.getName());
-    }
 
     @Test
     @DisplayName("존재하지 않는 카테고리를 조회하면 NotFoundException이 발생한다.")

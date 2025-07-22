@@ -37,25 +37,28 @@ class KeywordServiceTest {
     }
 
     @Test
-    @DisplayName("전체 키워드를 조회할 수 있다.")
-    void getAllKeywords() {
+    @DisplayName("키워드 목록 조회 시 페이지네이션이 적용되어 반환된다.")
+    void getKeywords_withPagination() {
         // given
         Keyword keyword1 = saveKeyword("keyword1");
         Keyword keyword2 = saveKeyword("keyword2");
         Keyword keyword3 = saveKeyword("keyword3");
-        KeywordListCondition condition = new KeywordListCondition(0, 10);
+        Keyword keyword4 = saveKeyword("keyword4");
+        Keyword keyword5 = saveKeyword("keyword5");
+
+        KeywordListCondition condition = new KeywordListCondition(1, 2); // page = 1 (두 번째 페이지), size = 2
 
         // when
         List<KeywordResponse> result = keywordService.getKeywords(condition);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(3),
+                () -> assertThat(result).hasSize(2),
                 () -> assertThat(result).extracting(KeywordResponse::id)
-                        .contains(keyword1.getId(), keyword2.getId(), keyword3.getId())
+                        .containsExactly(keyword3.getId(), keyword4.getId())
         );
     }
-
+    
     @Test
     @DisplayName("단일 키워드를 조회할 수 있다.")
     void getKeywordByIdById() {
