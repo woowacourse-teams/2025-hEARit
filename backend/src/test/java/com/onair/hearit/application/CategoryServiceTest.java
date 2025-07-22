@@ -57,6 +57,30 @@ class CategoryServiceTest {
         );
     }
 
+    @Test
+    @DisplayName("카테고리 목록 조회 시 페이지네이션이 적용되어 반환된다.")
+    void getCategories_withPagination() {
+        // given
+        saveCategory("category1", "#111");
+        saveCategory("category2", "#222");
+        saveCategory("category3", "#333");
+        saveCategory("category4", "#444");
+        saveCategory("category5", "#555");
+
+        CategoryListCondition condition = new CategoryListCondition(1, 2); // page 1 (두 번째 페이지), size 2
+
+        // when
+        List<CategoryResponse> result = categoryService.getCategories(condition);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result)
+                        .extracting(CategoryResponse::name)
+                        .containsExactly("category3", "category4")
+        );
+    }
+
 
     @Test
     @DisplayName("단일 카테고리를 조회할 수 있다.")
