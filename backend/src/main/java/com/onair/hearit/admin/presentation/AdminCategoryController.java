@@ -4,6 +4,7 @@ import com.onair.hearit.admin.application.AdminCategoryService;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.response.PagedResponse;
 import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Hidden
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/categories")
