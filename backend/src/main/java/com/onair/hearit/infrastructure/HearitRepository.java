@@ -9,9 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface HearitRepository extends JpaRepository<Hearit, Long> {
 
-    @Query("SELECT h FROM Hearit h")
-    Page<Hearit> findAllForAdmin(Pageable pageable);
-
     @Query("SELECT h FROM Hearit h ORDER BY function('RAND')")
     Page<Hearit> findRandom(Pageable pageable);
 

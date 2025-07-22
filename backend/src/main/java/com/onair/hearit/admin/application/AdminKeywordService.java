@@ -19,7 +19,7 @@ public class AdminKeywordService {
 
     public PagedResponse<KeywordInfoResponse> getPageKeywords(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Keyword> pageKeywords = keywordRepository.findAllForAdmin(pageable);
+        Page<Keyword> pageKeywords = keywordRepository.findAll(pageable);
         Page<KeywordInfoResponse> dtoPage = pageKeywords.map(KeywordInfoResponse::from);
         return PagedResponse.from(dtoPage);
     }

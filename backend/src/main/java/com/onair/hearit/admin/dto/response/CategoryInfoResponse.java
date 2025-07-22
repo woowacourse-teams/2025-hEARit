@@ -1,4 +1,4 @@
-package com.onair.hearit.dto.response;
+package com.onair.hearit.admin.dto.response;
 
 import com.onair.hearit.domain.Category;
 

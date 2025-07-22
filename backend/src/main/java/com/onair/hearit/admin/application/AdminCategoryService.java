@@ -3,7 +3,7 @@ package com.onair.hearit.admin.application;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.response.PagedResponse;
 import com.onair.hearit.domain.Category;
-import com.onair.hearit.dto.response.CategoryInfoResponse;
+import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +19,7 @@ public class AdminCategoryService {
 
     public PagedResponse<CategoryInfoResponse> getPageCategories(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Category> pageKeywords = categoryRepository.findAllForAdmin(pageable);
+        Page<Category> pageKeywords = categoryRepository.findAll(pageable);
         Page<CategoryInfoResponse> dtoPage = pageKeywords.map(CategoryInfoResponse::from);
         return PagedResponse.from(dtoPage);
     }
