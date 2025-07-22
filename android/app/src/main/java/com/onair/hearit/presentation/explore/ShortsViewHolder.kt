@@ -39,7 +39,8 @@ class ShortsViewHolder(
         scriptAdapter.submitList(item.script)
 
         binding.layoutExplorePlayer.player = player
-        val mediaItem = MediaItem.fromUri(item.audioUri)
+
+        val mediaItem = MediaItem.fromUri(item.audioUrl)
         player.setMediaItem(mediaItem)
         player.prepare()
         player.playWhenReady = true
@@ -68,9 +69,9 @@ class ShortsViewHolder(
     private fun updateSubtitleHighlight(currentPositionMs: Long) {
         val item = hearitShortsItem ?: return
 
-        val currentSubtitle = item.script.lastOrNull { it.startTime <= currentPositionMs }
+        val currentSubtitle = item.script.lastOrNull { it.start <= currentPositionMs }
         val currentId = currentSubtitle?.id
-        val currentIndex = item.script.indexOfLast { it.startTime <= currentPositionMs }
+        val currentIndex = item.script.indexOfLast { it.start <= currentPositionMs }
 
         scriptAdapter.highlightSubtitle(currentId)
 

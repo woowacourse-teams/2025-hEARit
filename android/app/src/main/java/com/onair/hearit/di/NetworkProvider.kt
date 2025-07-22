@@ -3,6 +3,7 @@ package com.onair.hearit.di
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.onair.hearit.BuildConfig
 import com.onair.hearit.data.HearitService
+import com.onair.hearit.data.MediaFileService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -26,4 +27,5 @@ object NetworkProvider {
     }
 
     val hearitService: HearitService by lazy { retrofit.create() }
+    val mediaFileService: MediaFileService by lazy { retrofit.create() }
 }

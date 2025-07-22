@@ -6,4 +6,7 @@ import retrofit2.http.GET
 interface HearitService {
     @GET("hearits/recommend")
     suspend fun getRecommendHearits(): Response<List<RecommendHearitResponse>>
+
+    @GET("hearits/random")
+    suspend fun getRandomHearits(): Response<List<RandomHearitResponse>>
 }
