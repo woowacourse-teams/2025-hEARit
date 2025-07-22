@@ -2,10 +2,11 @@ package com.onair.hearit.admin.presentation;
 
 import com.onair.hearit.admin.application.AdminAuthService;
 import com.onair.hearit.admin.application.AdminHearitService;
-import com.onair.hearit.admin.dto.AdminLoginRequest;
-import com.onair.hearit.admin.dto.HearitUploadRequest;
-import com.onair.hearit.admin.dto.KeywordInfoResponse;
-import com.onair.hearit.admin.dto.PagedResponse;
+import com.onair.hearit.admin.dto.request.AdminLoginRequest;
+import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
+import com.onair.hearit.admin.dto.request.HearitUploadRequest;
+import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
+import com.onair.hearit.admin.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.CategoryInfoResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import java.net.URI;
@@ -43,7 +44,7 @@ public class AdminController {
     }
 
     @PostMapping("/hearits")
-    public ResponseEntity<HearitDetailResponse> addHearit(@RequestBody HearitUploadRequest request) {
+    public ResponseEntity<HearitDetailResponse> createHearit(@RequestBody HearitUploadRequest request) {
         HearitDetailResponse response = adminHearitService.uploadHearit(request);
         return ResponseEntity.created(URI.create("/hearits/" + response.id())).body(response);
     }
@@ -57,6 +58,12 @@ public class AdminController {
     @GetMapping("/categories")
     public ResponseEntity<List<CategoryInfoResponse>> getAllCategories() {
         List<CategoryInfoResponse> response = adminHearitService.getAllCategories();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<CategoryInfoResponse> createCategory(@RequestBody CategoryCreateRequest request) {
+        CategoryInfoResponse response = adminHearitService.addCategory(request);
         return ResponseEntity.ok(response);
     }
 

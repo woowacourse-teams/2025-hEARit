@@ -15,6 +15,11 @@ public class AdminViewController {
         return "admin/hearit-list";
     }
 
+    @GetMapping("/categories")
+    public String categoryListPage() {
+        return "admin/category-list";
+    }
+
     @GetMapping
     public String adminHome() {
         return "admin/home";

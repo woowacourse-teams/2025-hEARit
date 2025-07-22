@@ -1,8 +1,9 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.dto.HearitUploadRequest;
-import com.onair.hearit.admin.dto.KeywordInfoResponse;
-import com.onair.hearit.admin.dto.PagedResponse;
+import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
+import com.onair.hearit.admin.dto.request.HearitUploadRequest;
+import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
+import com.onair.hearit.admin.dto.response.PagedResponse;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -72,6 +73,12 @@ public class AdminHearitService {
         return categories.stream()
                 .map(CategoryInfoResponse::from)
                 .toList();
+    }
+
+    public CategoryInfoResponse addCategory(CategoryCreateRequest request) {
+        Category category = new Category(request.name(), request.colorCode());
+        Category saved = categoryRepository.save(category);
+        return CategoryInfoResponse.from(saved);
     }
 
     public List<KeywordInfoResponse> getAllKeywords() {

@@ -1,8 +1,9 @@
-INSERT INTO category (id, name)
-VALUES (1, 'Network'),
-       (2, 'Android'),
-       (3, 'Spring'),
-       (4, 'Java');
+INSERT INTO category (id, name, color_code)
+VALUES (1, 'Network', '#9900A3E4'),
+       (2, 'Android', '#99A4C639'),
+       (3, 'Spring', '#996DB33F'),
+       (4, 'Java', '#99E14A3A'),
+       (5, 'Kotlin', '#998A48FA');
 
 INSERT INTO keyword (id, name)
 VALUES (1, '테코톡'),
