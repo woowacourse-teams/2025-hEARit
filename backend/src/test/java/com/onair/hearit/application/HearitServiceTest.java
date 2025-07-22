@@ -97,7 +97,7 @@ class HearitServiceTest {
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix);
+        Category category = new Category("name" + suffix, "#FFFFFFFF");
         dbHelper.insertCategory(category);
 
         Hearit hearit = new Hearit(
