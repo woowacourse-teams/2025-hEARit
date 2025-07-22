@@ -4,16 +4,16 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemExploreScriptBinding
-import com.onair.hearit.domain.SubtitleLine
+import com.onair.hearit.domain.ScriptLine
 
 class ScriptViewHolder(
     private val binding: ItemExploreScriptBinding,
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(
-        subtitleLine: SubtitleLine,
+        scriptLine: ScriptLine,
         isHighlighted: Boolean,
     ) {
-        binding.subtitleLine = subtitleLine
+        binding.subtitleLine = scriptLine
         binding.isHighlighted = isHighlighted
     }
 

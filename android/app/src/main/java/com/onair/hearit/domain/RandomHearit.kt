@@ -11,9 +11,9 @@ data class RandomHearitItem(
 
 fun RandomHearitItem.toHearitShortsItem(
     audioUrl: String,
-    script: List<SubtitleLine>,
-): HearitShortsItem =
-    HearitShortsItem(
+    script: List<ScriptLine>,
+): HearitShorts =
+    HearitShorts(
         id = this.id,
         title = this.title,
         summary = this.summary,

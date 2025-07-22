@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemBookmarkBinding
-import com.onair.hearit.domain.BookmarkItem
+import com.onair.hearit.domain.Bookmark
 
 class BookmarkViewHolder(
     private val binding: ItemBookmarkBinding,
@@ -14,7 +14,7 @@ class BookmarkViewHolder(
         binding.bookmarkListener = bookmarkListener
     }
 
-    fun bind(bookmark: BookmarkItem) {
+    fun bind(bookmark: Bookmark) {
         binding.item = bookmark
     }
 

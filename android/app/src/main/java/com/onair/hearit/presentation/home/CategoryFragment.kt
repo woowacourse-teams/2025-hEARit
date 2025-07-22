@@ -8,7 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.onair.hearit.databinding.FragmentCategoryBinding
-import com.onair.hearit.domain.CategoryItem
+import com.onair.hearit.domain.Category
 
 class CategoryFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -42,7 +42,7 @@ class CategoryFragment : Fragment() {
         val sampleCategories =
             List(8) { i ->
                 val colors = if (i % 2 == 0) "#9533F5" else "#B2B4B6"
-                CategoryItem(
+                Category(
                     id = i.toLong(),
                     color = colors,
                     category = "카테고리 $i",

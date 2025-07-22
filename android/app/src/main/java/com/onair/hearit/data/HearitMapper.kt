@@ -4,19 +4,19 @@ import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 import com.onair.hearit.domain.RandomHearitItem
-import com.onair.hearit.domain.RecommendHearitItem
-import com.onair.hearit.domain.SearchedHearitItem
+import com.onair.hearit.domain.RecommendHearit
+import com.onair.hearit.domain.SearchedHearit
 
-fun SearchHearitResponse.toDomain(): SearchedHearitItem =
-    SearchedHearitItem(
+fun SearchHearitResponse.toDomain(): SearchedHearit =
+    SearchedHearit(
         id = this.id,
         title = this.title,
         playTime = this.playTime,
         summary = this.summary,
     )
 
-fun RecommendHearitResponse.toDomain(): RecommendHearitItem =
-    RecommendHearitItem(
+fun RecommendHearitResponse.toDomain(): RecommendHearit =
+    RecommendHearit(
         id = this.id,
         title = this.title,
         desc = this.summary,

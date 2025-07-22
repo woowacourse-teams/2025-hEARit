@@ -1,6 +1,6 @@
 package com.onair.hearit.domain
 
-data class ShortAudioUrlItem(
+data class ShortAudioUrl(
     val id: Long,
     val url: String,
 )

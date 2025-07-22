@@ -17,8 +17,8 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
-import com.onair.hearit.domain.CategoryItem
-import com.onair.hearit.domain.KeywordItem
+import com.onair.hearit.domain.Category
+import com.onair.hearit.domain.Keyword
 import com.onair.hearit.presentation.home.CategoryAdapter
 
 class SearchFragment : Fragment() {
@@ -88,17 +88,17 @@ class SearchFragment : Fragment() {
         binding.rvKeyword.layoutManager = layoutManager
         binding.rvKeyword.adapter = this.adapter
 
-        val keywords: List<KeywordItem> =
+        val keywords: List<Keyword> =
             listOf(
-                KeywordItem("# Kotlin"),
-                KeywordItem("# Spring"),
-                KeywordItem("# NotebookLM"),
-                KeywordItem("# Parcelable"),
-                KeywordItem("# Serialization"),
-                KeywordItem("# hearit"),
-                KeywordItem("# JPA"),
-                KeywordItem("# Activity"),
-                KeywordItem("# HTTP"),
+                Keyword("# Kotlin"),
+                Keyword("# Spring"),
+                Keyword("# NotebookLM"),
+                Keyword("# Parcelable"),
+                Keyword("# Serialization"),
+                Keyword("# hearit"),
+                Keyword("# JPA"),
+                Keyword("# Activity"),
+                Keyword("# HTTP"),
             )
 
         adapter.submitList(keywords)
@@ -109,7 +109,7 @@ class SearchFragment : Fragment() {
         val sampleCategories =
             List(20) { i ->
                 val colors = if (i % 2 == 0) "#9533F5" else "#B2B4B6"
-                CategoryItem(
+                Category(
                     id = i.toLong(),
                     color = colors,
                     category = "카테고리 $i",

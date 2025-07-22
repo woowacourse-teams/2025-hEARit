@@ -4,12 +4,12 @@ import android.view.ViewGroup
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.HearitShortsItem
+import com.onair.hearit.domain.HearitShorts
 
 class ShortsAdapter(
     private val player: ExoPlayer,
     private val shortsClickListener: ShortsClickListener,
-) : ListAdapter<HearitShortsItem, ShortsViewHolder>((DiffCallback)) {
+) : ListAdapter<HearitShorts, ShortsViewHolder>((DiffCallback)) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
@@ -26,15 +26,15 @@ class ShortsAdapter(
 
     companion object {
         private val DiffCallback =
-            object : DiffUtil.ItemCallback<HearitShortsItem>() {
+            object : DiffUtil.ItemCallback<HearitShorts>() {
                 override fun areItemsTheSame(
-                    oldItem: HearitShortsItem,
-                    newItem: HearitShortsItem,
+                    oldItem: HearitShorts,
+                    newItem: HearitShorts,
                 ): Boolean = oldItem.id == newItem.id
 
                 override fun areContentsTheSame(
-                    oldItem: HearitShortsItem,
-                    newItem: HearitShortsItem,
+                    oldItem: HearitShorts,
+                    newItem: HearitShorts,
                 ): Boolean = oldItem == newItem
             }
     }

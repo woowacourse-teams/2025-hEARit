@@ -7,7 +7,7 @@
 
         <variable
             name="hearitItem"
-            type="com.onair.hearit.domain.HearitShortsItem" />
+            type="com.onair.hearit.domain.HearitShorts" />
 
         <variable
             name="shortsClickListener"

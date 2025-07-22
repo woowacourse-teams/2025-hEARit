@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentHomeBinding
-import com.onair.hearit.domain.CategoryItem
-import com.onair.hearit.domain.HearitItem
+import com.onair.hearit.domain.Category
+import com.onair.hearit.domain.RecentHearit
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import java.time.LocalDateTime
@@ -84,7 +84,7 @@ class HomeFragment :
 
     private fun setupRecentHearit() {
         binding.recentHearit =
-            HearitItem(
+            RecentHearit(
                 id = 1L,
                 title = "최근 들은 히어릿 제목",
                 summary = "summary",
@@ -124,7 +124,7 @@ class HomeFragment :
         val sampleCategories =
             List(6) { i ->
                 val colors = if (i % 2 == 0) "#9533F5" else "#B2B4B6"
-                CategoryItem(
+                Category(
                     id = i.toLong(),
                     color = colors,
                     category = "카테고리 $i",

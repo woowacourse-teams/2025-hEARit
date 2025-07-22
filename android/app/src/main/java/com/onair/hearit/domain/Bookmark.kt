@@ -1,6 +1,6 @@
 package com.onair.hearit.domain
 
-data class BookmarkItem(
+data class Bookmark(
     val id: Long,
     val title: String,
     val playTime: Int,

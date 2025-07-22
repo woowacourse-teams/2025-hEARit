@@ -1,12 +1,14 @@
 package com.onair.hearit.domain
 
-data class HearitShortsItem(
+import java.time.LocalDateTime
+
+data class RecentHearit(
     val id: Long,
     val title: String,
     val summary: String,
-    val source: String,
     val audioUrl: String,
-    val script: List<SubtitleLine>,
+    val scriptUrl: String,
     val playTime: Int,
-    val createdAt: String,
+    val categoryId: Int,
+    val createdAt: LocalDateTime,
 )
