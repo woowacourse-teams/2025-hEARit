@@ -67,9 +67,9 @@ class SearchFragment : Fragment() {
             val isSearchAction = (actionId == EditorInfo.IME_ACTION_SEARCH)
 
             if (isSearchAction) {
-                val searchedText = editTextSearch.text
-                if (searchedText.isNotEmpty()) {
-                    navigateToSearchResult()
+                val searchTerm = editTextSearch.text.toString()
+                if (searchTerm.isNotBlank()) {
+                    navigateToSearchResult(searchTerm)
                 } else {
                     hideKeyboard()
                 }
@@ -121,13 +121,19 @@ class SearchFragment : Fragment() {
         categoryAdapter.submitList(sampleCategories)
     }
 
-    private fun navigateToSearchResult() {
+    private fun navigateToSearchResult(searchTerm: String) {
+        val fragment =
+            SearchResultFragment().apply {
+                arguments =
+                    Bundle().apply {
+                        putString("searchTerm", searchTerm)
+                    }
+            }
+
         parentFragmentManager
             .beginTransaction()
-            .replace(
-                R.id.fragment_container_view,
-                SearchResultFragment(),
-            ).addToBackStack(null)
+            .replace(R.id.fragment_container_view, fragment)
+            .addToBackStack(null)
             .commit()
     }
 
