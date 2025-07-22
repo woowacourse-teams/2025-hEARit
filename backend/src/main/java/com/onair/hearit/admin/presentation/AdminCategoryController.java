@@ -4,6 +4,7 @@ import com.onair.hearit.admin.application.AdminCategoryService;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.response.PagedResponse;
 import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,6 @@ public class AdminCategoryController {
     @PostMapping
     public ResponseEntity<CategoryInfoResponse> createCategory(@RequestBody CategoryCreateRequest request) {
         CategoryInfoResponse response = adminCategoryService.addCategory(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.created(URI.create("/")).body(response);
     }
 }
