@@ -28,7 +28,7 @@ class CategoryControllerTest extends IntegrationTest {
                 .param("page", 1)
                 .param("size", 2)
                 .when()
-                .get("/api/v1/category")
+                .get("/api/v1/categories")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
