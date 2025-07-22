@@ -4,15 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.data.dummy.HearitDummyData
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
@@ -22,6 +23,7 @@ class ExploreFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: ExploreViewModel by viewModels { ExploreViewModelFactory() }
 
     private lateinit var player: ExoPlayer
     private lateinit var adapter: ShortsAdapter
@@ -45,11 +47,12 @@ class ExploreFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
+        binding.lifecycleOwner = this
 
         setupWindowInsets()
         initPlayer()
         setupRecyclerView()
-        submitDummyData()
+        observeViewModel()
 
         player.addListener(
             object : Player.Listener {
@@ -111,7 +114,7 @@ class ExploreFragment :
                         val position = layoutManager.getPosition(snapView)
                         val item = adapter.currentList.getOrNull(position) ?: return
 
-                        player.setMediaItem(MediaItem.fromUri(item.audioUri))
+                        player.setMediaItem(MediaItem.fromUri(item.audioUrl))
                         player.prepare()
                         player.play()
                     }
@@ -120,9 +123,15 @@ class ExploreFragment :
         )
     }
 
-    private fun submitDummyData() {
-        val dummyItems = HearitDummyData.getShorts(requireContext().packageName)
-        adapter.submitList(dummyItems)
+    private fun observeViewModel() {
+        viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
+            val mappedItems = shortsHearits
+            adapter.submitList(mappedItems)
+        }
+
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
+        }
     }
 
     override fun onPause() {
@@ -143,5 +152,9 @@ class ExploreFragment :
     override fun onClickHearitInfo() {
         val intent = PlayerDetailActivity.newIntent(requireActivity())
         startActivity(intent)
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }
