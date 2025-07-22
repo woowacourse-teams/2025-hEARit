@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Keyword;
+import com.onair.hearit.dto.request.KeywordListCondition;
 import com.onair.hearit.dto.response.KeywordResponse;
 import com.onair.hearit.infrastructure.KeywordRepository;
 import java.util.List;
@@ -42,9 +43,10 @@ class KeywordServiceTest {
         Keyword keyword1 = saveKeyword("keyword1");
         Keyword keyword2 = saveKeyword("keyword2");
         Keyword keyword3 = saveKeyword("keyword3");
+        KeywordListCondition condition = new KeywordListCondition(0, 10);
 
         // when
-        List<KeywordResponse> result = keywordService.getKeywords();
+        List<KeywordResponse> result = keywordService.getKeywords(condition);
 
         // then
         assertAll(
@@ -93,14 +95,14 @@ class KeywordServiceTest {
         int size = 3;
 
         // when
-        List<KeywordResponse> result = keywordService.getRecommendedKeyword(1L, size);
+        List<KeywordResponse> result = keywordService.getRecommendedKeyword(size);
 
         // then
         assertThat(result).hasSize(size);
     }
 
     @Test
-    @DisplayName("같은 시드값으로 호출하면 추천 키워드 결과는 항상 동일하다.")
+    @DisplayName("같은 날 호출하면 추천 키워드 결과는 항상 동일하다.")
     void getRecommendedKeywords_shouldBeDeterministicForSameSeed() {
         // given
         saveKeyword("keyword1");
@@ -109,11 +111,10 @@ class KeywordServiceTest {
         saveKeyword("keyword4");
         saveKeyword("keyword5");
         int size = 3;
-        long fixedSeed = 20250722L;
 
         // when
-        List<KeywordResponse> first = keywordService.getRecommendedKeyword(fixedSeed, size);
-        List<KeywordResponse> second = keywordService.getRecommendedKeyword(fixedSeed, size);
+        List<KeywordResponse> first = keywordService.getRecommendedKeyword(size);
+        List<KeywordResponse> second = keywordService.getRecommendedKeyword(size);
 
         // then
         assertThat(first).extracting(KeywordResponse::id)

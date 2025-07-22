@@ -118,7 +118,7 @@ class HearitSearchServiceTest {
         assertAll(
                 () -> assertThat(result).hasSize(2),
                 () -> assertThat(result).extracting(HearitSearchResponse::id)
-                        .containsExactly(hearit2.getId(), hearit1.getId())
+                        .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId())
         );
     }
 

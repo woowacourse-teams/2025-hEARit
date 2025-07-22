@@ -1,10 +1,10 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.KeywordService;
+import com.onair.hearit.dto.request.KeywordListCondition;
 import com.onair.hearit.dto.response.KeywordResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +24,12 @@ public class KeywordController {
 
     @Operation(summary = "전체 키워드 목록 조회", description = "전체 키워드 목록을 조회합니다.")
     @GetMapping
-    public ResponseEntity<List<KeywordResponse>> readKeywords() {
-        List<KeywordResponse> responses = keywordService.getKeywords();
+    public ResponseEntity<List<KeywordResponse>> readKeywords(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size
+    ) {
+        KeywordListCondition condition = new KeywordListCondition(page, size);
+        List<KeywordResponse> responses = keywordService.getKeywords(condition);
         return ResponseEntity.ok(responses);
     }
 
@@ -38,9 +42,10 @@ public class KeywordController {
 
     @Operation(summary = "오늘의 추천 키워드 조회", description = "오늘의 추천 키워드를 조회합니다.")
     @GetMapping("/recommend")
-    public ResponseEntity<List<KeywordResponse>> readRecommendedKeywords(@RequestParam(defaultValue = "9") int size) {
-        long todaySeed = LocalDate.now().toEpochDay();
-        List<KeywordResponse> responses = keywordService.getRecommendedKeyword(todaySeed, size);
+    public ResponseEntity<List<KeywordResponse>> readRecommendedKeywords(
+            @RequestParam(name = "size", defaultValue = "9") int size
+    ) {
+        List<KeywordResponse> responses = keywordService.getRecommendedKeyword(size);
         return ResponseEntity.ok(responses);
     }
 } 
