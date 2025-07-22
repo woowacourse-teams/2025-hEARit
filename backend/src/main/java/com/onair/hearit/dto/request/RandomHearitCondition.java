@@ -2,12 +2,12 @@ package com.onair.hearit.dto.request;
 
 import com.onair.hearit.common.exception.custom.InvalidPageException;
 
-public record BookmarkListCondition(
+public record RandomHearitCondition(
         int page,
         int size
 ) {
 
-    public BookmarkListCondition {
+    public RandomHearitCondition {
         if (page < 0) {
             throw new InvalidPageException(0);
         }

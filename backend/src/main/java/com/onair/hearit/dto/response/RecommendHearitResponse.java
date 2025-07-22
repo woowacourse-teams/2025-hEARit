@@ -3,7 +3,7 @@ package com.onair.hearit.dto.response;
 import com.onair.hearit.domain.Hearit;
 import java.time.LocalDateTime;
 
-public record HearitListResponse(
+public record RecommendHearitResponse(
         Long id,
         String title,
         String summary,
@@ -12,8 +12,8 @@ public record HearitListResponse(
         LocalDateTime createdAt
 ) {
 
-    public static HearitListResponse from(Hearit hearit) {
-        return new HearitListResponse(
+    public static RecommendHearitResponse from(Hearit hearit) {
+        return new RecommendHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
