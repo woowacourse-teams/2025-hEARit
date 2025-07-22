@@ -30,7 +30,7 @@ public class HearitKeyword {
     @JoinColumn(name = "keyword_id")
     private Keyword keyword;
 
-    public HearitKeyword(final Hearit hearit, final Keyword keyword) {
+    public HearitKeyword(Hearit hearit, Keyword keyword) {
         this.hearit = hearit;
         this.keyword = keyword;
     }

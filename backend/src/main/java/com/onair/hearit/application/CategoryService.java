@@ -26,12 +26,12 @@ public class CategoryService {
                 .toList();
     }
 
-    public CategoryResponse getCategory(final Long id) {
+    public CategoryResponse getCategory(Long id) {
         Category category = findCategory(id);
         return CategoryResponse.from(category);
     }
 
-    private Category findCategory(final Long id) {
+    private Category findCategory(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("categoryId", String.valueOf(id)));
     }

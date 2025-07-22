@@ -34,7 +34,7 @@ public class KeywordService {
         return KeywordResponse.from(keyword);
     }
 
-    private Keyword findKeyword(final Long id) {
+    private Keyword findKeyword(Long id) {
         return keywordRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("keywordId", String.valueOf(id)));
     }
