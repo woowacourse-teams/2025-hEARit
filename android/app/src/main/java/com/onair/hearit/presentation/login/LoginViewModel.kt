@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.DataStoreRepository
+import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
@@ -17,7 +18,7 @@ class LoginViewModel(
     private val _loginState = MutableLiveData<Boolean>()
     val loginState: LiveData<Boolean> = _loginState
 
-    private val _toastMessage = MutableLiveData<Int>()
+    private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
     fun kakaoLogin(accessToken: String) {
