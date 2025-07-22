@@ -12,6 +12,7 @@ import com.onair.hearit.infrastructure.HearitRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,8 @@ public class HearitService {
 
     public List<RandomHearitResponse> getRandomHearits(Long memberId, RandomHearitCondition condition) {
         Pageable pageable = PageRequest.of(condition.page(), condition.size());
-        return hearitRepository.findRandom(pageable).stream()
+        Page<Hearit> hearits = hearitRepository.findRandom(pageable);
+        return hearits.stream()
                 .map(hearit -> toRandomHearitResponse(hearit, memberId))
                 .toList();
     }
