@@ -3,6 +3,7 @@ package com.onair.hearit.common.config;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import java.util.List;
@@ -22,6 +23,7 @@ public class SwaggerConfig {
                                 .bearerFormat("JWT")
                         )
                 )
+                .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
                 .info(new Info()
                         .title("Hearit API")
                         .description("히어릿 백엔드 API 문서")
