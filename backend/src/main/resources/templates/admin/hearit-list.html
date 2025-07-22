@@ -73,7 +73,8 @@
         try {
             const response = await fetch('/api/v1/admin/categories');
             if (response.ok) {
-                const categories = await response.json();
+                const result = await response.json();
+                const categories = result.content;
                 const categorySelect = document.getElementById('categoryId');
                 categorySelect.innerHTML = '<option value="" disabled selected>카테고리를 선택하세요</option>';
                 categories.forEach(category => {
@@ -90,7 +91,8 @@
         try {
             const response = await fetch('/api/v1/admin/keywords');
             if (response.ok) {
-                const keywords = await response.json();
+                const result = await response.json();
+                const keywords = result.content;
                 const keywordCheckboxes = document.getElementById('keyword-checkboxes');
                 keywordCheckboxes.innerHTML = '';
                 keywords.forEach(keyword => {
