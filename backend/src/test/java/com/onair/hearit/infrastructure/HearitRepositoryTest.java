@@ -75,7 +75,7 @@ class HearitRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Hearit> result = hearitRepository.findByTitleOrderByCreatedAtDesc("title1", pageable);
+        Page<Hearit> result = hearitRepository.findLatestByTitle("title1", pageable);
 
         // then
         assertAll(
@@ -95,7 +95,7 @@ class HearitRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Hearit> result = hearitRepository.findByTitleOrderByCreatedAtDesc("title", pageable);
+        Page<Hearit> result = hearitRepository.findLatestByTitle("title", pageable);
 
         // then
         List<Hearit> content = result.getContent();
@@ -117,7 +117,7 @@ class HearitRepositoryTest {
         Pageable pageable = PageRequest.of(1, 2); // 2개씩 끊어서 2페이지면 3번째 하나만 조회
 
         // when
-        Page<Hearit> result = hearitRepository.findByTitleOrderByCreatedAtDesc("title", pageable);
+        Page<Hearit> result = hearitRepository.findLatestByTitle("title", pageable);
 
         // then
         assertAll(
