@@ -18,5 +18,16 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             WHERE LOWER(h.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
             ORDER BY h.createdAt DESC
             """)
-    Page<Hearit> findByTitleOrderByCreatedAtDesc(@Param("searchTerm") String searchTerm, Pageable pageable);
+    Page<Hearit> findLatestByTitle(@Param("searchTerm") String searchTerm, Pageable pageable);
+
+    Page<Hearit> findByCategoryIdOrderByCreatedAtDesc(Long categoryId, Pageable pageable);
+
+    @Query("""
+            SELECT h
+            FROM Hearit h
+            JOIN HearitKeyword hk ON hk.hearit = h
+            WHERE hk.keyword.id = :keywordId
+            ORDER BY h.createdAt DESC
+            """)
+    Page<Hearit> findLatestByKeywordId(@Param("keywordId") Long keywordId, Pageable pageable);
 }

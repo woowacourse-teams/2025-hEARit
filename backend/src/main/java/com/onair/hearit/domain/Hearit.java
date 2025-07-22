@@ -83,7 +83,7 @@ public class Hearit {
     }
 
     public void update(String title, String summary, Integer playTime, String originalAudioUrl,
-                  String shortAudioUrl, String scriptUrl, String source, Category category) {
+                       String shortAudioUrl, String scriptUrl, String source, Category category) {
         this.title = title;
         this.summary = summary;
         this.playTime = playTime;
