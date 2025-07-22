@@ -6,7 +6,7 @@ public record KeywordResponse(
         Long id,
         String name
 ) {
-    public static KeywordResponse from(final Keyword keyword) {
+    public static KeywordResponse from(Keyword keyword) {
         return new KeywordResponse(
                 keyword.getId(),
                 keyword.getName()
