@@ -41,6 +41,12 @@ android {
     defaultConfig {
         val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
+        val kakaoNativeKey =
+            gradleLocalProperties(rootDir, providers).getProperty("KAKAO_NATIVE_KEY") ?: ""
+        buildConfigField("String", "KAKAO_NATIVE_KEY", "\"$kakaoNativeKey\"")
+
+        manifestPlaceholders["kakaoNativeKey"] = kakaoNativeKey
     }
     buildFeatures {
         buildConfig = true
@@ -100,4 +106,7 @@ dependencies {
     // firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+
+    // kakao SDK
+    implementation(libs.v2.user)
 }
