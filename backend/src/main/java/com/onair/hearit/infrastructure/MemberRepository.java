@@ -8,7 +8,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByLocalId(String memberId);
 
-    boolean existsByLocalId(String memberId);
-
     Optional<Member> findBySocialId(String socialId);
+
+    boolean existsByLocalId(String memberId);
 }

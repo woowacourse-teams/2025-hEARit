@@ -40,16 +40,18 @@ public class BookmarkController {
 
     @Operation(summary = "북마크 생성", description = "로그인한 회원이 히어릿 ID로 북마크를 생성합니다.")
     @PostMapping("/{hearitId}/bookmarks")
-    public ResponseEntity<Void> createBookmark(@PathVariable Long hearitId,
-                                               @AuthenticationPrincipal CurrentMember member) {
+    public ResponseEntity<Void> createBookmark(
+            @PathVariable Long hearitId,
+            @AuthenticationPrincipal CurrentMember member) {
         bookmarkService.addBookmark(hearitId, member.memberId());
         return ResponseEntity.created(URI.create("/api/v1/hearits/" + hearitId)).build();
     }
 
     @Operation(summary = "북마크 삭제", description = "로그인한 히어릿 ID와 북마크 ID로 북마크를 삭제합니다.")
     @DeleteMapping("/{hearitId}/bookmarks/{bookmarkId}")
-    public ResponseEntity<Void> deleteBookmark(@PathVariable Long bookmarkId,
-                                               @AuthenticationPrincipal CurrentMember member) {
+    public ResponseEntity<Void> deleteBookmark(
+            @PathVariable Long bookmarkId,
+            @AuthenticationPrincipal CurrentMember member) {
         bookmarkService.deleteBookmark(bookmarkId, member.memberId());
         return ResponseEntity.noContent().build();
     }

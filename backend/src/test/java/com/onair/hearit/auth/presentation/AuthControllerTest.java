@@ -82,5 +82,4 @@ class AuthControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
-
 }
