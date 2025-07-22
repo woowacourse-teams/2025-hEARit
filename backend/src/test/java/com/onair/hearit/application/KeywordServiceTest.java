@@ -99,7 +99,6 @@ class KeywordServiceTest {
         assertThat(result).hasSize(size);
     }
 
-
     @Test
     @DisplayName("같은 시드값으로 호출하면 추천 키워드 결과는 항상 동일하다.")
     void getRecommendedKeywords_shouldBeDeterministicForSameSeed() {
@@ -122,7 +121,6 @@ class KeywordServiceTest {
                         second.stream().map(KeywordResponse::id).toList()
                 );
     }
-
 
     private Keyword saveKeyword(String name) {
         Keyword keyword = new Keyword(name);

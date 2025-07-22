@@ -256,8 +256,6 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("유효하지 않은 page 또는 size 값이 주어지면 400 BAD_REQUEST를 반환한다.")
     void searchHearitsByKeywordWithInvalidParams() {
         Keyword keyword = saveKeyword("DevOps");
-
-        // page 음수
         RestAssured.given()
                 .queryParam("keywordId", keyword.getId())
                 .queryParam("page", -1)
