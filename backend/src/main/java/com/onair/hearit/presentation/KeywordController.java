@@ -48,4 +48,4 @@ public class KeywordController {
         List<KeywordResponse> responses = keywordService.getRecommendedKeyword(size);
         return ResponseEntity.ok(responses);
     }
-} 
+}
