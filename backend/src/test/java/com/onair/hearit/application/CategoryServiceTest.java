@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
+import com.onair.hearit.dto.request.CategoryListCondition;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import java.util.List;
@@ -43,9 +44,10 @@ class CategoryServiceTest {
         Category category1 = saveCategory("category1", "#111");
         Category category2 = saveCategory("category2", "#222");
         Category category3 = saveCategory("category3", "#333");
+        CategoryListCondition condition = new CategoryListCondition(0, 10);
 
         // when
-        List<CategoryResponse> result = categoryService.getCategories();
+        List<CategoryResponse> result = categoryService.getCategories(condition);
 
         // then
         assertAll(
