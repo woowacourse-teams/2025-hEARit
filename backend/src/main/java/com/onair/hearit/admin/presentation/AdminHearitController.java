@@ -3,14 +3,11 @@ package com.onair.hearit.admin.presentation;
 import com.onair.hearit.admin.application.AdminAuthService;
 import com.onair.hearit.admin.application.AdminHearitService;
 import com.onair.hearit.admin.dto.request.AdminLoginRequest;
-import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitUploadRequest;
-import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
+import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.dto.response.PagedResponse;
-import com.onair.hearit.dto.response.CategoryInfoResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import java.net.URI;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,9 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
-public class AdminController {
+@RequestMapping("/api/v1/admin")
+public class AdminHearitController {
 
     private final AdminAuthService adminAuthService;
     private final AdminHearitService adminHearitService;
@@ -36,10 +33,10 @@ public class AdminController {
     }
 
     @GetMapping("/hearits")
-    public ResponseEntity<PagedResponse<HearitDetailResponse>> getPageHearits(
+    public ResponseEntity<PagedResponse<HearitAdminResponse>> getPageHearits(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
-        PagedResponse<HearitDetailResponse> response = adminHearitService.getPageHearits(page, size);
+        PagedResponse<HearitAdminResponse> response = adminHearitService.getPageHearits(page, size);
         return ResponseEntity.ok(response);
     }
 
@@ -53,23 +50,5 @@ public class AdminController {
     public ResponseEntity<Void> deleteHearitById(@PathVariable Long hearitId) {
         adminHearitService.deleteHearitById(hearitId);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/categories")
-    public ResponseEntity<List<CategoryInfoResponse>> getAllCategories() {
-        List<CategoryInfoResponse> response = adminHearitService.getAllCategories();
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/categories")
-    public ResponseEntity<CategoryInfoResponse> createCategory(@RequestBody CategoryCreateRequest request) {
-        CategoryInfoResponse response = adminHearitService.addCategory(request);
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/keywords")
-    public ResponseEntity<List<KeywordInfoResponse>> getAllKeywords() {
-        List<KeywordInfoResponse> response = adminHearitService.getAllKeywords();
-        return ResponseEntity.ok(response);
     }
 }

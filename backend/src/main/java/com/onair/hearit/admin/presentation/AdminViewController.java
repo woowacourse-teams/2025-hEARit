@@ -20,6 +20,11 @@ public class AdminViewController {
         return "admin/category-list";
     }
 
+    @GetMapping("/keywords")
+    public String keywordListPage() {
+        return "admin/keyword-list";
+    }
+
     @GetMapping
     public String adminHome() {
         return "admin/home";

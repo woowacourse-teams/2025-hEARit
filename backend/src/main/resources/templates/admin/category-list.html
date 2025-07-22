@@ -28,6 +28,11 @@
                         <!-- 카테고리 데이터가 여기에 동적으로 추가됩니다. -->
                         </tbody>
                     </table>
+                    <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Category pagination">
+                        <button class="btn btn-outline-secondary" id="category-prev-btn">Previous</button>
+                        <span id="category-page-info" class="mx-2"></span>
+                        <button class="btn btn-outline-secondary" id="category-next-btn">Next</button>
+                    </nav>
                 </div>
             </div>
         </div>
@@ -78,38 +83,53 @@
         return (yiq >= 128) ? '#000' : '#FFF';
     }
 
-    async function fetchCategories() {
+    // Pagination variables
+    let currentPage = 0;
+    const pageSize = 15;
+
+    async function fetchCategories(page = 0, size = pageSize) {
         try {
-            const response = await fetch('/api/v1/admin/categories');
+            const response = await fetch(`/api/v1/admin/categories?page=${page}&size=${size}`);
             if (!response.ok) throw new Error('카테고리 목록을 불러오는 데 실패했습니다.');
-            const categories = await response.json();
-            updateCategoryList(categories);
+            const paged = await response.json();
+            updateCategoryList(paged);
         } catch (error) {
             console.error('Error:', error);
             alert(error.message);
         }
     }
 
-    function updateCategoryList(categories) {
+    function updateCategoryList(pagedResponse) {
         const tableBody = document.getElementById('category-list-body');
         tableBody.innerHTML = '';
+        const categories = pagedResponse.content || [];
         if (categories.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="3" class="text-center">표시할 카테고리가 없습니다.</td></tr>';
-            return;
+        } else {
+            categories.forEach(category => {
+                const row = document.createElement('tr');
+                const textColor = getContrastYIQ(category.colorCode);
+                const rgba = hex8ToRgba(category.colorCode) || category.colorCode;
+                row.innerHTML = `
+                    <td>${category.id}</td>
+                    <td>${category.name}</td>
+                    <td>
+                        <span class="badge" style="background-color: ${rgba}; color: ${textColor};">${category.colorCode}</span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
         }
-        categories.forEach(category => {
-            const row = document.createElement('tr');
-            const textColor = getContrastYIQ(category.colorCode);
-            const rgba = hex8ToRgba(category.colorCode) || category.colorCode; // ✅ rgba 변환 적용
-            row.innerHTML = `
-                <td>${category.id}</td>
-                <td>${category.name}</td>
-                <td>
-                    <span class="badge" style="background-color: ${rgba}; color: ${textColor};">${category.colorCode}</span>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
+        // Pagination controls
+        const pageInfo = document.getElementById('category-page-info');
+        const prevBtn = document.getElementById('category-prev-btn');
+        const nextBtn = document.getElementById('category-next-btn');
+        const totalPages = pagedResponse.totalPages || 1;
+        const totalElements = pagedResponse.totalElements || 0;
+        const pageNumber = pagedResponse.page || 0;
+        pageInfo.textContent = `Page ${pageNumber + 1} of ${totalPages} (${totalElements} total)`;
+        prevBtn.disabled = pageNumber === 0;
+        nextBtn.disabled = pageNumber >= totalPages - 1;
     }
 
     async function createCategory(name, colorCode) {
@@ -145,7 +165,20 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        fetchCategories();
+        // Load first page
+        fetchCategories(currentPage, pageSize);
+
+        // Pagination button listeners
+        document.getElementById('category-prev-btn').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                fetchCategories(currentPage, pageSize);
+            }
+        });
+        document.getElementById('category-next-btn').addEventListener('click', () => {
+            currentPage++;
+            fetchCategories(currentPage, pageSize);
+        });
 
         const colorInput = document.getElementById('category-color');
         const colorPreview = document.getElementById('color-preview');
