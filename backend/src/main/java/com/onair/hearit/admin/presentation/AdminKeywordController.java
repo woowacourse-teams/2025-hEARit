@@ -7,6 +7,7 @@ import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import java.net.URI;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,12 @@ public class AdminKeywordController {
             @RequestParam(defaultValue = "15") int size) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<KeywordInfoResponse> response = adminKeywordService.getKeywords(pagingRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<KeywordInfoResponse>> readAllKeywords() {
+        List<KeywordInfoResponse> response = adminKeywordService.getAllKeywords();
         return ResponseEntity.ok(response);
     }
 

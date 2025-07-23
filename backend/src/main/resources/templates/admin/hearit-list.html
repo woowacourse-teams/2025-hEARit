@@ -20,6 +20,9 @@
             </button>
         </div>
     </div>
+    <div>
+        <p id="hearit-count" class="text-muted mb-0">히어릿 총 개수: 0개</p>
+    </div>
 
     <!-- 히어릿 추가 폼 -->
     <div id="upload-section" class="card card-body mb-4">
@@ -75,10 +78,9 @@
 
     async function fetchCategories() {
         try {
-            const response = await fetch('/api/v1/admin/categories');
+            const response = await fetch('/api/v1/admin/categories/all');
             if (response.ok) {
-                const result = await response.json();
-                const categories = result.content;
+                const categories = await response.json();
                 const categorySelect = document.getElementById('categoryId');
                 categorySelect.innerHTML = '<option value="" disabled selected>카테고리를 선택하세요</option>';
                 categories.forEach(category => {
@@ -93,10 +95,9 @@
 
     async function fetchKeywords() {
         try {
-            const response = await fetch('/api/v1/admin/keywords');
+            const response = await fetch('/api/v1/admin/keywords/all');
             if (response.ok) {
-                const result = await response.json();
-                const keywords = result.content;
+                const keywords = await response.json();
                 const keywordCheckboxes = document.getElementById('keyword-checkboxes');
                 keywordCheckboxes.innerHTML = '';
                 keywords.forEach(keyword => {
@@ -127,6 +128,7 @@
             const pagedData = await response.json();
             updateTable(pagedData.content);
             updatePagination(pagedData);
+            document.getElementById('hearit-count').textContent = `히어릿 총 개수: ${pagedData.totalElements}개`;
             currentPage = page;
         } catch (error) {
             console.error('Error fetching hearits:', error);

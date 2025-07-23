@@ -37,7 +37,7 @@ public class AdminHearitService {
 
     public PagedResponse<HearitAdminResponse> getHearits(PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(
-                pagingRequest.page(), pagingRequest.size(), Sort.by(Sort.Order.desc("createdAt")));
+                pagingRequest.page(), pagingRequest.size(), Sort.by(Sort.Order.desc("id")));
         Page<Hearit> hearits = hearitRepository.findAll(pageable);
         List<Long> hearitIds = extractHearitIds(hearits);
         List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
