@@ -38,10 +38,9 @@ class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder
             val background = binding.clCategory.background.mutate()
             if (background is GradientDrawable) {
                 try {
-                    val colorInt = item.color.toColorInt()
+                    val colorInt = item.colorCode.toColorInt()
                     background.setColor(colorInt)
                 } catch (e: IllegalArgumentException) {
-                    // 파싱 실패 시 기본 색상 지정하거나 로그 출력
                     val context = binding.root.context
                     val defaultColor = ContextCompat.getColor(context, R.color.hearit_gray2)
                     background.setColor(defaultColor)
