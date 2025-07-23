@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.detail
 
+import android.content.Intent
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -9,7 +10,6 @@ import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSession.ControllerInfo
 import androidx.media3.session.MediaSessionService
-import com.onair.hearit.R
 
 @androidx.annotation.OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
@@ -19,23 +19,7 @@ class PlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        player =
-            ExoPlayer.Builder(this).build().apply {
-                setMediaItem(
-                    MediaItem
-                        .Builder()
-                        .setUri("android.resource://$packageName/${R.raw.test_audio2}".toUri())
-                        .setMediaMetadata(
-                            MediaMetadata
-                                .Builder()
-                                .setTitle("테스트 오디오")
-                                .setArtist("HEARit")
-                                .build(),
-                        ).build(),
-                )
-                prepare()
-                playWhenReady = false // MediaController 쪽에서 play() 요청할 때 실행
-            }
+        player = ExoPlayer.Builder(this).build()
 
         mediaSession =
             MediaSession
@@ -46,6 +30,34 @@ class PlaybackService : MediaSessionService() {
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider.Builder(this).build(),
         )
+    }
+
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
+        val audioUrl = intent?.getStringExtra("AUDIO_URL")
+        val title = intent?.getStringExtra("TITLE") ?: "히어릿"
+
+        if (!audioUrl.isNullOrEmpty()) {
+            val mediaItem =
+                MediaItem
+                    .Builder()
+                    .setUri(audioUrl.toUri())
+                    .setMediaMetadata(
+                        MediaMetadata
+                            .Builder()
+                            .setTitle(title)
+                            .build(),
+                    ).build()
+
+            player.setMediaItem(mediaItem)
+            player.prepare()
+            player.playWhenReady = true
+        }
+
+        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onGetSession(controllerInfo: ControllerInfo): MediaSession? = mediaSession

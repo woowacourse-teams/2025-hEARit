@@ -1,5 +1,5 @@
 package com.onair.hearit.presentation.explore
 
 interface ShortsClickListener {
-    fun onClickHearitInfo()
+    fun onClickHearitInfo(hearitId: Long)
 }
