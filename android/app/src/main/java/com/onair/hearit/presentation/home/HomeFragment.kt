@@ -14,11 +14,9 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentHomeBinding
-import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import java.time.LocalDateTime
 import kotlin.math.abs
 
 class HomeFragment :
@@ -50,7 +48,6 @@ class HomeFragment :
 
         setupWindowInsets()
         setupListeners()
-        setupRecentHearit()
         setupRecommendRecyclerView()
         setupCategoryRecyclerView()
         observeViewModel()
@@ -80,20 +77,6 @@ class HomeFragment :
         binding.ivHomeRecentHearit.setOnClickListener {
             navigateToPlayerDetail()
         }
-    }
-
-    private fun setupRecentHearit() {
-        binding.recentHearit =
-            RecentHearit(
-                id = 1L,
-                title = "최근 들은 히어릿 제목",
-                summary = "summary",
-                audioUrl = "a",
-                scriptUrl = "a",
-                playTime = 123,
-                categoryId = 12,
-                createdAt = LocalDateTime.now(),
-            )
     }
 
     private fun setupRecommendRecyclerView() {
@@ -148,6 +131,10 @@ class HomeFragment :
     }
 
     private fun observeViewModel() {
+        viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->
+            binding.recentHearit = recentHearit
+        }
+
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
             val repeatedItems = List(30) { index -> recommendItems[index % recommendItems.size] }
             recommendAdapter.submitList(repeatedItems) {
