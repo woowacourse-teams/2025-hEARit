@@ -3,9 +3,9 @@ package com.onair.hearit.data.datasource
 import com.onair.hearit.data.api.KeywordService
 import com.onair.hearit.data.dto.KeywordResponse
 
-class KeywordDataSourceImpl(
+class KeywordRemoteDataSourceImpl(
     private val keywordService: KeywordService,
-) : KeywordDataSource {
+) : KeywordRemoteDataSource {
     override suspend fun getRecommendKeywords(size: Int?): Result<List<KeywordResponse>> =
         handleApiCall(
             errorMessage = "키워드 조회 실패",

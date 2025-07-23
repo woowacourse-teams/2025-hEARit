@@ -2,6 +2,6 @@ package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.dto.KeywordResponse
 
-interface KeywordDataSource {
+interface KeywordRemoteDataSource {
     suspend fun getRecommendKeywords(size: Int?): Result<List<KeywordResponse>>
 }
