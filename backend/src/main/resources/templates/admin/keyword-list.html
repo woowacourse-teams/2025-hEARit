@@ -12,6 +12,9 @@
 <body>
 <div class="container mt-4">
     <h1>키워드 관리</h1>
+    <div>
+        <p id="keyword-count" class="text-muted mb-0">키워드 총 개수: 0개</p>
+    </div>
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span>키워드 목록</span>
@@ -57,6 +60,7 @@
             if (!response.ok) throw new Error('키워드 목록을 불러오는 데 실패했습니다.');
             const data = await response.json();
             updateKeywordList(data);
+            document.getElementById('keyword-count').textContent = `키워드 총 개수: ${data.totalElements}개`;
         } catch (error) {
             console.error('Error:', error);
             alert(error.message);

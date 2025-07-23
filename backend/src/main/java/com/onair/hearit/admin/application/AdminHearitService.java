@@ -36,15 +36,25 @@ public class AdminHearitService {
     private final HearitKeywordRepository hearitKeywordRepository;
 
     public PagedResponse<HearitAdminResponse> getHearits(PagingRequest pagingRequest) {
-        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(),
-                Sort.by(Sort.Order.desc("createdAt")));
+        Pageable pageable = PageRequest.of(
+                pagingRequest.page(), pagingRequest.size(), Sort.by(Sort.Order.desc("id")));
         Page<Hearit> hearits = hearitRepository.findAll(pageable);
-        List<Long> hearitIds = hearits.getContent().stream()
+        List<Long> hearitIds = extractHearitIds(hearits);
+        List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
+        Map<Long, List<KeywordInHearit>> keywordMap = mapKeywordsByHearitId(hearitKeywords);
+
+        Page<HearitAdminResponse> dtoPage = hearits.map(h -> HearitAdminResponse.from(h, keywordMap));
+        return PagedResponse.from(dtoPage);
+    }
+
+    private List<Long> extractHearitIds(Page<Hearit> hearits) {
+        return hearits.getContent().stream()
                 .map(Hearit::getId)
                 .toList();
-        List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
+    }
 
-        Map<Long, List<KeywordInHearit>> keywordMap = hearitKeywords.stream()
+    private Map<Long, List<KeywordInHearit>> mapKeywordsByHearitId(List<HearitKeyword> hearitKeywords) {
+        return hearitKeywords.stream()
                 .collect(Collectors.groupingBy(
                         hk -> hk.getHearit().getId(),
                         Collectors.mapping(
@@ -52,8 +62,6 @@ public class AdminHearitService {
                                 Collectors.toList()
                         )
                 ));
-        Page<HearitAdminResponse> dtoPage = hearits.map(h -> HearitAdminResponse.from(h, keywordMap));
-        return PagedResponse.from(dtoPage);
     }
 
     @Transactional
