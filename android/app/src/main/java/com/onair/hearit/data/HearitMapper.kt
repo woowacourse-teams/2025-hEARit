@@ -5,9 +5,8 @@ import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
-import com.onair.hearit.domain.model.RandomHearitItem
-import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RandomHearit
+import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
