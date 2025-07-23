@@ -4,7 +4,7 @@ import android.view.ViewGroup
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.HearitShorts
+import com.onair.hearit.domain.model.HearitShorts
 
 class ShortsAdapter(
     private val player: ExoPlayer,

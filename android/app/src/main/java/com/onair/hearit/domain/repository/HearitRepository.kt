@@ -1,8 +1,8 @@
 package com.onair.hearit.domain.repository
 
-import com.onair.hearit.domain.RandomHearitItem
-import com.onair.hearit.domain.RecommendHearit
-import com.onair.hearit.domain.SearchedHearit
+import com.onair.hearit.domain.model.RandomHearitItem
+import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.SearchedHearit
 
 interface HearitRepository {
     suspend fun getRecommendHearits(): Result<List<RecommendHearit>>

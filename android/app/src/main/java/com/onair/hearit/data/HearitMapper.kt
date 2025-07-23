@@ -3,9 +3,9 @@ package com.onair.hearit.data
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
-import com.onair.hearit.domain.RandomHearitItem
-import com.onair.hearit.domain.RecommendHearit
-import com.onair.hearit.domain.SearchedHearit
+import com.onair.hearit.domain.model.RandomHearitItem
+import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.SearchedHearit
 
 fun SearchHearitResponse.toDomain(): SearchedHearit =
     SearchedHearit(

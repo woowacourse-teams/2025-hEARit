@@ -3,7 +3,7 @@ package com.onair.hearit.presentation.library
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.Bookmark
+import com.onair.hearit.domain.model.Bookmark
 
 class BookmarkAdapter(
     private val bookmarkListener: BookmarkClickListener,
