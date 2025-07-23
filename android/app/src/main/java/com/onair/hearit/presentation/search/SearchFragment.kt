@@ -90,7 +90,7 @@ class SearchFragment : Fragment() {
             }
 
         binding.rvKeyword.layoutManager = layoutManager
-        binding.rvKeyword.adapter = this.keywordAdapter
+        binding.rvKeyword.adapter = keywordAdapter
     }
 
     private fun setupCategoryRecyclerView() {
