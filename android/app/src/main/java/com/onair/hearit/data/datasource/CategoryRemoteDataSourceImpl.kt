@@ -3,9 +3,9 @@ package com.onair.hearit.data.datasource
 import com.onair.hearit.data.api.CategoryService
 import com.onair.hearit.data.dto.CategoryResponse
 
-class CategoryDataSourceImpl(
+class CategoryRemoteDataSourceImpl(
     private val categoryService: CategoryService,
-) : CategoryDataSource {
+) : CategoryRemoteDataSource {
     override suspend fun getCategories(): Result<List<CategoryResponse>> =
         handleApiCall(
             errorMessage = "카테고리 조회 실패",
