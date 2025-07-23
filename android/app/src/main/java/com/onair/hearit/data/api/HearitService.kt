@@ -19,12 +19,15 @@ interface HearitService {
     suspend fun getRecommendHearits(): Response<List<RecommendHearitResponse>>
 
     @GET("hearits/random")
-    suspend fun getRandomHearits(): Response<List<RandomHearitResponse>>
+    suspend fun getRandomHearits(
+        @Query("page") page: Int?,
+        @Query("size") size: Int?,
+    ): Response<List<RandomHearitResponse>>
 
     @GET("hearits/search")
     suspend fun getSearchHearits(
         @Query("searchTerm") searchTerm: String,
-        @Query("page") page: Int = 0,
-        @Query("size") size: Int = 20,
+        @Query("page") page: Int?,
+        @Query("size") size: Int?,
     ): Response<List<SearchHearitResponse>>
 }
