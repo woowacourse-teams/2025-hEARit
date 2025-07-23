@@ -17,19 +17,26 @@ class HearitRemoteDataSourceImpl(
             },
         )
 
-    override suspend fun getRandomHearits(): Result<List<RandomHearitResponse>> =
+    override suspend fun getRandomHearits(
+        page: Int?,
+        size: Int?,
+    ): Result<List<RandomHearitResponse>> =
         handleApiCall(
             errorMessage = ERROR_RANDOM_HEARIT_MESSAGE,
-            apiCall = { hearitService.getRandomHearits() },
+            apiCall = { hearitService.getRandomHearits(page, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
         )
 
-    override suspend fun getSearchHearits(searchTerm: String): Result<List<SearchHearitResponse>> =
+    override suspend fun getSearchHearits(
+        searchTerm: String,
+        page: Int?,
+        size: Int?,
+    ): Result<List<SearchHearitResponse>> =
         handleApiCall(
             errorMessage = "검색 히어릿 조회 실패",
-            apiCall = { hearitService.getSearchHearits(searchTerm) },
+            apiCall = { hearitService.getSearchHearits(searchTerm, page, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException("응답 바디가 null입니다.")
             },

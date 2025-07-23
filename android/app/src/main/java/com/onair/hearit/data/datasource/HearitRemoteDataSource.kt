@@ -7,7 +7,14 @@ import com.onair.hearit.data.dto.SearchHearitResponse
 interface HearitRemoteDataSource {
     suspend fun getRecommendHearits(): Result<List<RecommendHearitResponse>>
 
-    suspend fun getRandomHearits(): Result<List<RandomHearitResponse>>
+    suspend fun getRandomHearits(
+        page: Int?,
+        size: Int?,
+    ): Result<List<RandomHearitResponse>>
 
-    suspend fun getSearchHearits(searchTerm: String): Result<List<SearchHearitResponse>>
+    suspend fun getSearchHearits(
+        searchTerm: String,
+        page: Int?,
+        size: Int?,
+    ): Result<List<SearchHearitResponse>>
 }
