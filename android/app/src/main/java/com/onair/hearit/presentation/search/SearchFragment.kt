@@ -25,8 +25,8 @@ class SearchFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-    private val keywordAdapter = KeywordAdapter()
-    private val categoryAdapter = CategoryAdapter()
+    private val keywordAdapter by lazy { KeywordAdapter() }
+    private val categoryAdapter by lazy { CategoryAdapter() }
     private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory() }
 
     override fun onCreateView(

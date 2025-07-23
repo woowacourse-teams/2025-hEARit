@@ -26,7 +26,9 @@ class ExploreFragment :
     private val viewModel: ExploreViewModel by viewModels { ExploreViewModelFactory() }
 
     private lateinit var player: ExoPlayer
-    private lateinit var adapter: ShortsAdapter
+    private val adapter: ShortsAdapter by lazy {
+        ShortsAdapter(player, this)
+    }
     private val snapHelper = PagerSnapHelper()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,7 +98,6 @@ class ExploreFragment :
     }
 
     private fun setupRecyclerView() {
-        adapter = ShortsAdapter(player, this)
         binding.rvExplore.adapter = adapter
         snapHelper.attachToRecyclerView(binding.rvExplore)
 
