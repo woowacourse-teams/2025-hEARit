@@ -7,7 +7,7 @@ import com.onair.hearit.common.exception.custom.InvalidPageException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class TitleSearchConditionTest {
+class SearchConditionTest {
 
     @Test
     @DisplayName("page, size가 유효 범위를 벗어나면 예외가 발생한다.")
@@ -24,11 +24,11 @@ class TitleSearchConditionTest {
 
         // when & then
         assertAll(
-                () -> assertThatThrownBy(() -> new TitleSearchCondition(validSearchTerm, negativePage, validSize))
+                () -> assertThatThrownBy(() -> new SearchCondition(validSearchTerm, negativePage, validSize))
                         .isInstanceOf(InvalidPageException.class),
-                () -> assertThatThrownBy(() -> new TitleSearchCondition(validSearchTerm, validPage, negativeSize))
+                () -> assertThatThrownBy(() -> new SearchCondition(validSearchTerm, validPage, negativeSize))
                         .isInstanceOf(InvalidPageException.class),
-                () -> assertThatThrownBy(() -> new TitleSearchCondition(validSearchTerm, validPage, oversizedSize))
+                () -> assertThatThrownBy(() -> new SearchCondition(validSearchTerm, validPage, oversizedSize))
                         .isInstanceOf(InvalidPageException.class)
         );
     }

@@ -9,8 +9,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.CategorySearchCondition;
-import com.onair.hearit.dto.request.KeywordSearchCondition;
-import com.onair.hearit.dto.request.TitleSearchCondition;
+import com.onair.hearit.dto.request.SearchCondition;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
@@ -42,23 +41,50 @@ class HearitSearchServiceTest {
     }
 
     @Test
-    @DisplayName("히어릿 목록을 검색으로 조회 시 제목이 포함된 히어릿만 반환한다.")
-    void searchHearitsByTitle_onlyTitleMatch() {
+    @DisplayName("검색 시 제목에 검색어가 포함된 히어릿만 반환한다.")
+    void searchHearitsByTitle_Success() {
         // given
-        saveHearitByTitle("exampletitle1");
-        saveHearitByTitle("title1example");
-        saveHearitByTitle("wwtitle1ww");
-        saveHearitByTitle("notitle");
+        SearchCondition condition = new SearchCondition("Spring", 0, 10);
+        Hearit hearit = saveHearitWithTitleAndKeyword("exampleSpring1", saveKeyword("keyword"));     // 제목에 검색어 포함됨
+        Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1example", saveKeyword("1spring1"));   // 제목에 검색어 포함됨
+        Hearit hearit2 = saveHearitWithTitleAndKeyword("wwSpring1ww", saveKeyword("keyword2"));      // 제목에 검색어 포함됨
+        Hearit hearit3 = saveHearitWithTitleAndKeyword("noSpring", saveKeyword("Spring"));           // 제목에 검색어 포함됨
+        Hearit hearit4 = saveHearitWithTitleAndKeyword("pring", saveKeyword("sring"));               // 검색어서 제외됨
+        Hearit hearit5 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("noKeyword"));         // 검색에서 제외됨
 
         // when
-        TitleSearchCondition condition = new TitleSearchCondition("title1", 0, 10);
-        List<HearitSearchResponse> result = hearitSearchService.searchByTitle(condition);
+        List<HearitSearchResponse> result = hearitSearchService.search(condition);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(4),
+                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                        .containsExactlyInAnyOrder(hearit.getId(), hearit1.getId(), hearit2.getId(), hearit3.getId()),
+                () -> assertThat(result).extracting(HearitSearchResponse::id).doesNotContain(hearit4.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("검색 시 키워드에 검색어가 포함된 히어릿만 반환한다.")
+    void searchHearitsByKeyword_Succces() {
+        // given
+        SearchCondition condition = new SearchCondition("Spring", 0, 10);
+        Hearit hearit = saveHearitWithTitleAndKeyword("example1", saveKeyword("Spring1"));     // 키워드에 검색어 포함됨
+        Hearit hearit1 = saveHearitWithTitleAndKeyword("noTitle", saveKeyword("1springA"));    // 키워드에 검색어 포함됨
+        Hearit hearit2 = saveHearitWithTitleAndKeyword("SpringS", saveKeyword("2sprINg1"));    // 키워드에 검색어 포함됨
+        Hearit hearit3 = saveHearitWithTitleAndKeyword("ring", saveKeyword("SRing"));        // 검색어서 제외됨
+        Hearit hearit4 = saveHearitWithTitleAndKeyword("noTitle", saveKeyword("noKeyword"));   // 검색에서 제외됨
+
+        // when
+        List<HearitSearchResponse> result = hearitSearchService.search(condition);
 
         // then
         assertAll(
                 () -> assertThat(result).hasSize(3),
-                () -> assertThat(result).extracting(HearitSearchResponse::title)
-                        .allSatisfy(title -> assertThat(title).contains("title1"))
+                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                        .containsExactlyInAnyOrder(hearit.getId(), hearit1.getId(), hearit2.getId()),
+                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                        .doesNotContain(hearit3.getId(), hearit4.getId())
         );
     }
 
@@ -66,32 +92,35 @@ class HearitSearchServiceTest {
     @DisplayName("히어릿 목록을 검색으로 조회 시 최신순으로 정렬되어 반환된다.")
     void searchHearitsByTitle_sortedByCreatedAtDesc() {
         // given
-        Hearit hearit1 = saveHearitByTitle("title1");
-        Hearit hearit2 = saveHearitByTitle("title2");
+        Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));         // oldest
+        Hearit hearit2 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("springKeyword"));   // middle
+        Hearit hearit3 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("springKeyword"));   // latest
 
         // when
-        TitleSearchCondition condition = new TitleSearchCondition("title", 0, 10);
-        List<HearitSearchResponse> result = hearitSearchService.searchByTitle(condition);
+        SearchCondition condition = new SearchCondition("Spring", 0, 10);
+        List<HearitSearchResponse> result = hearitSearchService.search(condition);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result.get(0).id()).isEqualTo(hearit2.getId()),
-                () -> assertThat(result.get(1).id()).isEqualTo(hearit1.getId())
+                () -> assertThat(result).hasSize(3),
+                () -> assertThat(result.get(0).id()).isEqualTo(hearit3.getId()),
+                () -> assertThat(result.get(1).id()).isEqualTo(hearit2.getId()),
+                () -> assertThat(result.get(2).id()).isEqualTo(hearit1.getId())
         );
     }
+
 
     @Test
     @DisplayName("히어릿 목록을 검색으로 조회 시 페이지네이션이 적용되어 반환된다.")
     void searchHearitsByTitle_pagination() {
         // given
-        Hearit hearit1 = saveHearitByTitle("title1");
-        Hearit hearit2 = saveHearitByTitle("title2");
-        Hearit hearit3 = saveHearitByTitle("title3");
+        Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));
+        Hearit hearit2 = saveHearitWithTitleAndKeyword("spring2", saveKeyword("springKeyword"));
+        Hearit hearit3 = saveHearitWithTitleAndKeyword("otherTitle", saveKeyword("Spring"));
 
         // when
-        TitleSearchCondition condition = new TitleSearchCondition("title", 1, 2);
-        List<HearitSearchResponse> result = hearitSearchService.searchByTitle(condition);
+        SearchCondition condition = new SearchCondition("Spring", 1, 2);
+        List<HearitSearchResponse> result = hearitSearchService.search(condition);
 
         // then
         assertAll(
@@ -99,6 +128,7 @@ class HearitSearchServiceTest {
                 () -> assertThat(result.get(0).id()).isEqualTo(hearit1.getId())
         );
     }
+
 
     @Test
     @DisplayName("히어릿 목록을 카테고리 조회 시 카테고리에 해당하는 히어릿만 반환한다.")
@@ -142,83 +172,14 @@ class HearitSearchServiceTest {
         );
     }
 
-    @Test
-    @DisplayName("히어릿 목록을 키워드로 조회 시 해당 키워드가 포함된 히어릿만 반환한다.")
-    void searchHearitsByKeyword_onlyMatchingKeyword() {
-        // given
-        Keyword keyword1 = saveKeyword("keyword1");
-        Keyword keyword2 = saveKeyword("keyword2");
-
-        Hearit hearit1 = saveHearitWithKeyword(keyword1);
-        Hearit hearit2 = saveHearitWithKeyword(keyword1);
-        Hearit hearit3 = saveHearitWithKeyword(keyword2);
-
-        KeywordSearchCondition condition = new KeywordSearchCondition(keyword1.getId(), 0, 10);
-
-        // when
-        List<HearitSearchResponse> result = hearitSearchService.findHearitsByKeyword(condition);
-
-        // then
-        assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(HearitSearchResponse::id)
-                        .containsOnly(hearit2.getId(), hearit1.getId())
-        );
-    }
-
-    @Test
-    @DisplayName("히어릿 목록을 키워드로 조회 시 최신순으로 페이지네이션이 적용된다.")
-    void searchHearitsByKeyword_pagination() {
-        // given
-        Keyword keyword = saveKeyword("keyword");
-        Hearit hearit1 = saveHearitWithKeyword(keyword);
-        Hearit hearit2 = saveHearitWithKeyword(keyword);
-        Hearit hearit3 = saveHearitWithKeyword(keyword);
-
-        KeywordSearchCondition condition = new KeywordSearchCondition(keyword.getId(), 1, 2); // page 1, size 2
-
-        // when
-        List<HearitSearchResponse> result = hearitSearchService.findHearitsByKeyword(condition);
-
-        // then
-        assertAll(
-                () -> assertThat(result).hasSize(1),
-                () -> assertThat(result.get(0).id()).isEqualTo(hearit1.getId())
-        );
-    }
-
-
-    private Hearit saveHearitByTitle(String title) {
-        Category category = new Category("category", "#123");
-        dbHelper.insertCategory(category);
-        Hearit hearit = new Hearit(
-                title,
-                "summary",
-                1,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
-                "source",
-                LocalDateTime.now(), category);
-        return dbHelper.insertHearit(hearit);
-    }
-
     private Category saveCategory(String name, String color) {
         Category category = new Category(name, color);
         return dbHelper.insertCategory(category);
     }
 
     private Hearit saveHearitWithCategory(Category category) {
-        Hearit hearit = new Hearit(
-                "title",
-                "summary",
-                1,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
-                "source",
-                LocalDateTime.now(),
-                category);
+        Hearit hearit = new Hearit("title", "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
+                LocalDateTime.now(), category);
         return dbHelper.insertHearit(hearit);
     }
 
@@ -226,20 +187,11 @@ class HearitSearchServiceTest {
         return dbHelper.insertKeyword(new Keyword(name));
     }
 
-    private Hearit saveHearitWithKeyword(Keyword keyword) {
+    private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
         Category category = saveCategory("category", "#abc");
 
-        Hearit hearit = new Hearit(
-                "title",
-                "summary",
-                1,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
-                "source",
-                LocalDateTime.now(),
-                category
-        );
+        Hearit hearit = new Hearit(title, "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
+                LocalDateTime.now(), category);
 
         Hearit savedHearit = dbHelper.insertHearit(hearit);
         dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));

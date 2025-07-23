@@ -4,9 +4,8 @@ import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.CategorySearchCondition;
-import com.onair.hearit.dto.request.KeywordSearchCondition;
 import com.onair.hearit.dto.request.RandomHearitCondition;
-import com.onair.hearit.dto.request.TitleSearchCondition;
+import com.onair.hearit.dto.request.SearchCondition;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
@@ -69,14 +68,14 @@ public class HearitController {
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "히어릿 제목명으로 검색", description = "히어릿의 제목명, page 정보를 입력해 히어릿을 검색합니다. ")
-    @GetMapping("/search/title")
+    @Operation(summary = "검색어를 입력해 히어릿을 검색", description = "검색어를 포함하는 제목 또는 키워드를 가진 히어릿을 검색합니다. ")
+    @GetMapping("/search")
     public ResponseEntity<List<HearitSearchResponse>> searchHearitsByTitle(
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
-        TitleSearchCondition condition = new TitleSearchCondition(searchTerm, page, size);
-        List<HearitSearchResponse> response = hearitSearchService.searchByTitle(condition);
+        SearchCondition condition = new SearchCondition(searchTerm, page, size);
+        List<HearitSearchResponse> response = hearitSearchService.search(condition);
         return ResponseEntity.ok(response);
     }
 
@@ -88,17 +87,6 @@ public class HearitController {
             @RequestParam(name = "size", defaultValue = "20") Integer size) {
         CategorySearchCondition condition = new CategorySearchCondition(categoryId, page, size);
         List<HearitSearchResponse> response = hearitSearchService.findHearitsByCategory(condition);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "히어릿 키워드로 조회", description = "히어릿의 키워드 id, page 정보를 입력해 히어릿을 조회합니다. ")
-    @GetMapping("/search/keyword")
-    public ResponseEntity<List<HearitSearchResponse>> searchHearitsByKeyword(
-            @RequestParam(name = "keywordId") Long keywordId,
-            @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "20") Integer size) {
-        KeywordSearchCondition condition = new KeywordSearchCondition(keywordId, page, size);
-        List<HearitSearchResponse> response = hearitSearchService.findHearitsByKeyword(condition);
         return ResponseEntity.ok(response);
     }
 }

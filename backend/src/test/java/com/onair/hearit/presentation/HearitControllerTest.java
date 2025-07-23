@@ -143,7 +143,7 @@ class HearitControllerTest extends IntegrationTest {
                 .queryParam("page", 0)
                 .queryParam("size", 10)
                 .when()
-                .get("/api/v1/hearits/search/title")
+                .get("/api/v1/hearits/search")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract().jsonPath().getList(".", HearitSearchResponse.class);
@@ -165,7 +165,7 @@ class HearitControllerTest extends IntegrationTest {
                 .queryParam("page", -1)
                 .queryParam("size", 10)
                 .when()
-                .get("/api/v1/hearits/search/title")
+                .get("/api/v1/hearits/search")
                 .then().log().all()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
 
@@ -174,7 +174,7 @@ class HearitControllerTest extends IntegrationTest {
                 .queryParam("page", 0)
                 .queryParam("size", -5)
                 .when()
-                .get("/api/v1/hearits/search/title")
+                .get("/api/v1/hearits/search")
                 .then().log().all()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
