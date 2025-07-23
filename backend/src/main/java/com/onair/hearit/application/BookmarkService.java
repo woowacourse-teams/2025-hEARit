@@ -13,7 +13,6 @@ import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.MemberRepository;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +31,8 @@ public class BookmarkService {
         Member member = getMemberById(memberId);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByCreatedAtDesc(member, pageable);
-        Page<BookmarkHearitResponse> bookmarkHearits = bookmarks.map(bookmark -> BookmarkHearitResponse.of(bookmark, bookmark.getHearit()));
+        Page<BookmarkHearitResponse> bookmarkHearits = bookmarks.map(
+                bookmark -> BookmarkHearitResponse.of(bookmark, bookmark.getHearit()));
         return PagedResponse.from(bookmarkHearits);
     }
 

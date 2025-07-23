@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/keyword")
+@RequestMapping("/api/v1/keywords")
 @Tag(name = "Keyword", description = "키워드")
 public class KeywordController {
 
@@ -35,7 +35,7 @@ public class KeywordController {
     @Operation(summary = "단일 키워드 조회", description = "단일 키워드를 조회합니다.")
     @GetMapping("/{keywordId}")
     public ResponseEntity<KeywordResponse> readKeyword(@PathVariable Long keywordId) {
-        KeywordResponse response = keywordService.getKeywordById(keywordId);
+        KeywordResponse response = keywordService.getKeyword(keywordId);
         return ResponseEntity.ok(response);
     }
 
