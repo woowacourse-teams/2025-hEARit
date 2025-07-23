@@ -1,6 +1,4 @@
-package com.onair.hearit.domain
-
-import com.onair.hearit.domain.model.ScriptLine
+package com.onair.hearit.domain.model
 
 data class Hearit(
     val id: Long,

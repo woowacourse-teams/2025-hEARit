@@ -1,8 +1,10 @@
 package com.onair.hearit.domain
 
 import RandomHearitItem
+import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.HearitShorts
 import com.onair.hearit.domain.model.ScriptLine
+import com.onair.hearit.domain.model.SingleHearit
 
 fun RandomHearitItem.toHearitShorts(
     audioUrl: String,

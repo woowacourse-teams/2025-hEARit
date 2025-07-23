@@ -1,9 +1,9 @@
 package com.onair.hearit.domain.repository
 
 import RandomHearitItem
-import com.onair.hearit.domain.SingleHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
+import com.onair.hearit.domain.model.SingleHearit
 
 interface HearitRepository {
     suspend fun getHearit(hearitId: Long): Result<SingleHearit>

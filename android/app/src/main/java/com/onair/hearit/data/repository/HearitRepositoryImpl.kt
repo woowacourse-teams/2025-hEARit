@@ -3,9 +3,9 @@ package com.onair.hearit.data.repository
 import RandomHearitItem
 import com.onair.hearit.data.datasource.HearitRemoteDataSource
 import com.onair.hearit.data.toDomain
-import com.onair.hearit.domain.SingleHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
+import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.repository.HearitRepository
 
 class HearitRepositoryImpl(

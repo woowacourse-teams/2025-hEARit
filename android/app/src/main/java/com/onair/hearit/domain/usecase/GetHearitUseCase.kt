@@ -1,6 +1,6 @@
 package com.onair.hearit.domain.usecase
 
-import com.onair.hearit.domain.Hearit
+import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
 import com.onair.hearit.domain.toHearit
