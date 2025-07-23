@@ -185,7 +185,6 @@ class HomeFragment :
     private fun navigateToPlayerDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         startActivity(intent)
-        requireActivity().finish()
     }
 
     override fun onClickRecommendHearit(hearitId: Long) {
