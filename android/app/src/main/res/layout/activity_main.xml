@@ -31,6 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="12dp"
+                android:visibility="gone"
                 app:controller_layout_id="@layout/layout_bottom_player_controller"
                 app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
                 app:show_timeout="0" />

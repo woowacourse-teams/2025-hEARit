@@ -11,7 +11,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
-import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.onair.hearit.R
@@ -24,7 +23,8 @@ import com.onair.hearit.presentation.setting.SettingFragment
 
 class MainActivity :
     AppCompatActivity(),
-    DrawerClickListener {
+    DrawerClickListener,
+    PlayerControllerView {
     private lateinit var binding: ActivityMainBinding
     private lateinit var player: ExoPlayer
 
@@ -34,17 +34,18 @@ class MainActivity :
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        setupInsets()
+        setupWindowInsets()
         setupPlayer()
         setupNavigation()
         setupDrawer()
 
         if (savedInstanceState == null) {
             showFragment(HomeFragment())
+            hidePlayerControlView()
         }
     }
 
-    private fun setupInsets() {
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.customDrawer) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, systemBars.bottom)
@@ -57,10 +58,10 @@ class MainActivity :
     private fun setupPlayer() {
         player =
             ExoPlayer.Builder(this).build().apply {
-                val uri = "android.resource://$packageName/${R.raw.test_audio2}".toUri()
-                setMediaItem(MediaItem.fromUri(uri))
+//                val uri = "android.resource://$packageName/${R.raw.test_audio2}".toUri()
+//                setMediaItem(MediaItem.fromUri(uri))
                 prepare()
-                playWhenReady = true
+                playWhenReady = false
             }
         binding.layoutBottomPlayerController.player = player
     }
@@ -70,7 +71,6 @@ class MainActivity :
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    showPlayerControlView()
                     showFragment(HomeFragment())
                     true
                 }
@@ -134,15 +134,16 @@ class MainActivity :
     }
 
     @OptIn(UnstableApi::class)
-    fun hidePlayerControlView() {
-        binding.layoutBottomPlayerController.apply {
-            animate().translationY(height.toFloat()).setDuration(200).start()
-            player?.pause()
+    override fun hidePlayerControlView() {
+        binding.layoutBottomPlayerController.post {
+            binding.layoutBottomPlayerController.apply {
+                animate().translationY(height.toFloat()).setDuration(200).start()
+                player?.pause()
+            }
         }
     }
 
-    @OptIn(UnstableApi::class)
-    fun showPlayerControlView() {
+    override fun showPlayerControlView() {
         binding.layoutBottomPlayerController
             .animate()
             .translationY(0f)

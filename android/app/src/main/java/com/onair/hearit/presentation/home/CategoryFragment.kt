@@ -7,14 +7,15 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.onair.hearit.databinding.FragmentCategoryBinding
-import com.onair.hearit.domain.model.Category
 
 class CategoryFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentCategoryBinding? = null
     private val binding get() = _binding!!
 
+    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private val categoryAdapter = CategoryAdapter()
 
     override fun onCreateView(
@@ -32,26 +33,33 @@ class CategoryFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupWindowInsets()
+        setupRecyclerView()
+        setupListeners()
+        observeViewModel()
+    }
+
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
+    }
 
+    private fun setupRecyclerView() {
         binding.rvCategory.adapter = categoryAdapter
-        val sampleCategories =
-            List(8) { i ->
-                val colors = if (i % 2 == 0) "#9533F5" else "#B2B4B6"
-                Category(
-                    id = i.toLong(),
-                    color = colors,
-                    category = "카테고리 $i",
-                )
-            }
-        categoryAdapter.submitList(sampleCategories)
+    }
 
+    private fun setupListeners() {
         binding.ibCategoryBack.setOnClickListener {
             parentFragmentManager.popBackStack()
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.categories.observe(viewLifecycleOwner) { categories ->
+            categoryAdapter.submitList(categories)
         }
     }
 

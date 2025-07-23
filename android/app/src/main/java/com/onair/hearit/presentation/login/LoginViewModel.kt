@@ -1,6 +1,5 @@
 package com.onair.hearit.presentation.login
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -40,7 +39,6 @@ class LoginViewModel(
                 .saveAccessToken(appToken)
                 .onSuccess {
                     _loginState.value = true
-                    Log.d("meeple_log", "${dataStoreRepository.getAccessToken()}")
                 }.onFailure {
                     _toastMessage.value = R.string.login_toast_save_token_fail
                     _loginState.value = false
