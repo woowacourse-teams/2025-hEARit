@@ -6,8 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.domain.HearitKeyword;
+import com.onair.hearit.domain.Keyword;
 import java.time.LocalDateTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,67 +65,51 @@ class HearitRepositoryTest {
     }
 
     @Test
-    @DisplayName("제목에 특정 키워드가 포함된 히어릿만 조회할 수 있다.")
-    void findByTitleContainingIgnoreCase() {
+    @DisplayName("제목 또는 키워드에 검색어가 포함된 히어릿만 반환한다.")
+    void searchByTerm_filterByTitleOrKeyword() {
         // given
-        saveHearitByTitle("exampletitle1");
-        saveHearitByTitle("title1example");
-        saveHearitByTitle("wwtitle1ww");
-        saveHearitByTitle("notitle");
+        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("SpringKeyword"));
+        Keyword keyword2 = dbHelper.insertKeyword(new Keyword("NotMatched"));
+
+        Hearit titleMatched = saveHearitWithTitleAndKeyword("SpringBoot is great", keyword2); // 제목만 매칭
+        Hearit keywordMatched = saveHearitWithTitleAndKeyword("No match in title", keyword1); // 키워드만 매칭
+        Hearit notMatched = saveHearitWithTitleAndKeyword("No match at all", keyword2);       // 둘 다 매칭 안 됨
 
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Hearit> result = hearitRepository.findLatestByTitle("title1", pageable);
+        Page<Hearit> result = hearitRepository.searchByTerm("%spring%", pageable);
 
         // then
         assertAll(
-                () -> assertThat(result.getContent()).hasSize(3),
+                () -> assertThat(result.getContent()).hasSize(2),
                 () -> assertThat(result.getContent()).extracting(Hearit::getTitle)
-                        .allSatisfy(title -> assertThat(title).containsIgnoringCase("title1"))
+                        .containsExactlyInAnyOrder(
+                                titleMatched.getTitle(),
+                                keywordMatched.getTitle()
+                        )
         );
     }
 
     @Test
-    @DisplayName("제목을 통해 조회된 히어릿은 최신순으로 정렬된다.")
-    void findByTitleContainingIgnoreCaseSortedDesc() {
+    @DisplayName("제목과 키워드 둘 다 검색어가 포함돼도 중복 없이 하나만 반환된다.")
+    void searchByTerm_avoidDuplicateWhenTitleAndKeywordMatch() {
         // given
-        Hearit olderHearit = saveHearitByTitle("title");
-        Hearit newerHearit = saveHearitByTitle("title");
+        Keyword keyword = dbHelper.insertKeyword(new Keyword("springboot"));
+        Hearit hearit = saveHearitWithTitleAndKeyword("SpringBoot", keyword); // 제목, 키워드 모두 매칭
 
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Hearit> result = hearitRepository.findLatestByTitle("title", pageable);
-
-        // then
-        List<Hearit> content = result.getContent();
-        assertAll(
-                () -> assertThat(content).hasSize(2),
-                () -> assertThat(content.get(0).getId()).isEqualTo(newerHearit.getId()),
-                () -> assertThat(content.get(1).getId()).isEqualTo(olderHearit.getId())
-        );
-    }
-
-    @Test
-    @DisplayName("제목을 통해 조회할 때 지정된 개수만큼 결과를 조회할 수 있다.")
-    void findByTitleContainingIgnoreCaseWithPagination() {
-        // given
-        saveHearitByTitle("title1");
-        saveHearitByTitle("title2");
-        saveHearitByTitle("title3");
-
-        Pageable pageable = PageRequest.of(1, 2); // 2개씩 끊어서 2페이지면 3번째 하나만 조회
-
-        // when
-        Page<Hearit> result = hearitRepository.findLatestByTitle("title", pageable);
+        Page<Hearit> result = hearitRepository.searchByTerm("%spring%", pageable);
 
         // then
         assertAll(
                 () -> assertThat(result.getContent()).hasSize(1),
-                () -> assertThat(result.getTotalElements()).isEqualTo(3)
+                () -> assertThat(result.getContent().get(0).getId()).isEqualTo(hearit.getId())
         );
     }
+
 
     private Hearit saveHearitWithSuffix(int suffix) {
         Category category = new Category("name" + suffix, "#123");
@@ -156,5 +141,19 @@ class HearitRepositoryTest {
                 LocalDateTime.now(),
                 category);
         return dbHelper.insertHearit(hearit);
+    }
+
+    private Category saveCategory(String name, String colorCode) {
+        Category category = new Category(name, colorCode);
+        return dbHelper.insertCategory(category);
+    }
+
+    private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
+        Category category = saveCategory("category", "#abc");
+        Hearit hearit = new Hearit(title, "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
+                LocalDateTime.now(), category);
+        Hearit savedHearit = dbHelper.insertHearit(hearit);
+        dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
+        return savedHearit;
     }
 }

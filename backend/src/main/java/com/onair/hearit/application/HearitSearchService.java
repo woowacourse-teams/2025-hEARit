@@ -1,7 +1,6 @@
 package com.onair.hearit.application;
 
 import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.dto.request.CategorySearchCondition;
 import com.onair.hearit.dto.request.SearchCondition;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -23,14 +22,6 @@ public class HearitSearchService {
         Pageable pageable = PageRequest.of(condition.page(), condition.size());
         Page<Hearit> hearits = hearitRepository.searchByTerm(likeSearchTerm, pageable);
         return hearits.stream()
-                .map(HearitSearchResponse::from)
-                .toList();
-    }
-
-    public List<HearitSearchResponse> findHearitsByCategory(CategorySearchCondition condition) {
-        Pageable pageable = PageRequest.of(condition.page(), condition.size());
-        Page<Hearit> result = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(condition.categoryId(), pageable);
-        return result.stream()
                 .map(HearitSearchResponse::from)
                 .toList();
     }
