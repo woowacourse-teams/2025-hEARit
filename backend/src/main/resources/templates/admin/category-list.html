@@ -8,6 +8,9 @@
 <body>
 <div class="container mt-4">
     <h1>카테고리 관리</h1>
+    <div>
+        <p id="category-count" class="text-muted mb-0">카테고리 총 개수: 0개</p>
+    </div>
     <div class="row mt-4">
         <!-- 카테고리 목록 -->
         <div class="col-md-8">
@@ -93,6 +96,7 @@
             if (!response.ok) throw new Error('카테고리 목록을 불러오는 데 실패했습니다.');
             const paged = await response.json();
             updateCategoryList(paged);
+            document.getElementById('category-count').textContent = `카테고리 총 개수: ${paged.totalElements}개`;
         } catch (error) {
             console.error('Error:', error);
             alert(error.message);
