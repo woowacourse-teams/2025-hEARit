@@ -141,14 +141,7 @@ class HomeFragment :
 
     private fun observeViewModel() {
         viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->
-            if (recentHearit == null) {
-                binding.groupHomeRecentHearitExist.visibility = View.GONE
-                binding.tvHomeNoRecentHearitText.visibility = View.VISIBLE
-            } else {
-                binding.groupHomeRecentHearitExist.visibility = View.VISIBLE
-                binding.tvHomeNoRecentHearitText.visibility = View.GONE
-                binding.recentHearit = recentHearit
-            }
+            binding.recentHearit = recentHearit
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->

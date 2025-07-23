@@ -107,7 +107,8 @@
                 android:id="@+id/group_home_recent_hearit_exist"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:constraint_referenced_ids="tv_home_recent_hearit_title, tv_home_recent_hearit_text,iv_home_recent_play" />
+                app:constraint_referenced_ids="tv_home_recent_hearit_title, tv_home_recent_hearit_text,iv_home_recent_play"
+                app:visibleIfNotNull="@{recentHearit}" />
 
             <TextView
                 android:id="@+id/tv_home_no_recent_hearit_text"
@@ -116,9 +117,10 @@
                 android:layout_height="0dp"
                 android:layout_marginHorizontal="20dp"
                 android:gravity="center"
-                android:text="최근에 들은 히어릿이 없어요.  들으러 가볼까요?"
+                android:text="@string/home_no_recent_hearit_text"
                 app:layout_constraintBottom_toBottomOf="@id/iv_home_recent_hearit"
-                app:layout_constraintTop_toTopOf="@id/iv_home_recent_hearit" />
+                app:layout_constraintTop_toTopOf="@id/iv_home_recent_hearit"
+                app:visibleIfNull="@{recentHearit}" />
 
             <TextView
                 android:id="@+id/tv_home_nickname"
