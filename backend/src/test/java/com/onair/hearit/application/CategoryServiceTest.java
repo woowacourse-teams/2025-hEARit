@@ -5,9 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.domain.Category;
+import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
+import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
+import com.onair.hearit.infrastructure.HearitRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,11 +32,14 @@ class CategoryServiceTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private HearitRepository hearitRepository;
+
     private CategoryService categoryService;
 
     @BeforeEach
     void setup() {
-        categoryService = new CategoryService(categoryRepository);
+        categoryService = new CategoryService(categoryRepository, hearitRepository);
     }
 
     @Test
@@ -60,8 +67,56 @@ class CategoryServiceTest {
         );
     }
 
+    @Test
+    @DisplayName("히어릿 목록을 카테고리 조회 시 카테고리에 해당하는 히어릿만 반환한다.")
+    void searchHearitsByCategory_onlyMatchingCategory() {
+        // given
+        Category category1 = saveCategory("Spring", "#001");
+        Category category2 = saveCategory("Java", "#002");
+        Hearit hearit1 = saveHearitWithCategory(category1);
+        Hearit hearit2 = saveHearitWithCategory(category1);
+        saveHearitWithCategory(category2);
+        PagingRequest request = new PagingRequest(0, 10);
+
+        // when
+        List<HearitSearchResponse> result = categoryService.findHearitsByCategory(category1.getId(), request);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                        .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("히어릿 목록을 카테고리 조회 시 최신순으로 페이지네이션이 적용된다.")
+    void searchHearitsByCategory_pagination() {
+        // given
+        Category category = saveCategory("Spring", "#001");
+        Hearit hearit1 = saveHearitWithCategory(category);
+        Hearit hearit2 = saveHearitWithCategory(category);
+        Hearit hearit3 = saveHearitWithCategory(category);
+        PagingRequest request = new PagingRequest(1, 2);
+
+        // when
+        List<HearitSearchResponse> result = categoryService.findHearitsByCategory(category.getId(), request);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(1),
+                () -> assertThat(result.get(0).id()).isEqualTo(hearit1.getId())
+        );
+    }
+
     private Category saveCategory(String name, String color) {
         Category category = new Category(name, color);
         return dbHelper.insertCategory(category);
+    }
+
+    private Hearit saveHearitWithCategory(Category category) {
+        Hearit hearit = new Hearit("title", "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
+                LocalDateTime.now(), category);
+        return dbHelper.insertHearit(hearit);
     }
 }

@@ -12,22 +12,18 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("SELECT h FROM Hearit h ORDER BY function('RAND')")
     Page<Hearit> findRandom(Pageable pageable);
 
-    @Query("""
-            SELECT h
-            FROM Hearit h
-            WHERE LOWER(h.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
-            ORDER BY h.createdAt DESC
-            """)
-    Page<Hearit> findLatestByTitle(@Param("searchTerm") String searchTerm, Pageable pageable);
-
     Page<Hearit> findByCategoryIdOrderByCreatedAtDesc(Long categoryId, Pageable pageable);
 
-    @Query("""
-            SELECT h
-            FROM Hearit h
-            JOIN HearitKeyword hk ON hk.hearit = h
-            WHERE hk.keyword.id = :keywordId
-            ORDER BY h.createdAt DESC
-            """)
-    Page<Hearit> findLatestByKeywordId(@Param("keywordId") Long keywordId, Pageable pageable);
+    @Query(value = """
+            SELECT DISTINCT h.*
+            FROM hearit h
+            LEFT JOIN hearit_keyword hk ON h.id = hk.hearit_id
+            LEFT JOIN keyword k ON hk.keyword_id = k.id
+            WHERE
+                LOWER(h.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+                OR LOWER(k.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+            ORDER BY h.created_at DESC
+            """, nativeQuery = true)
+    Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
+
 }
