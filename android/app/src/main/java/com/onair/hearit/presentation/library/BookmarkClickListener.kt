@@ -3,5 +3,5 @@ package com.onair.hearit.presentation.library
 interface BookmarkClickListener {
     fun onClickOption()
 
-    fun onClickBookmarkedHearit()
+    fun onClickBookmarkedHearit(hearitId: Long)
 }

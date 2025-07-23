@@ -6,7 +6,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.concurrent.futures.await
@@ -16,66 +18,27 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
-import com.onair.hearit.domain.model.ScriptLine
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private lateinit var layoutManager: LinearLayoutManager
+    private lateinit var adapter: PlayerDetailScriptAdapter
 
     private var mediaController: MediaController? = null
 
-    // 스크립트 예시 (실제 데이터로 변경해야함)
-    private val scriptLines =
-        listOf(
-            ScriptLine(1, 0, 1500, "I'm your pookie in the morning"),
-            ScriptLine(2, 1500, 4000, "You're my pookie in the night"),
-            ScriptLine(3, 4000, 6500, "너만 보면 Super crazy"),
-            ScriptLine(4, 6500, 8000, "Oh my 아찔 gets the vibe"),
-            ScriptLine(5, 8000, 11000, "Don't matter what I do"),
-            ScriptLine(6, 11000, 13000, "하나 둘 셋 Gimme that cue"),
-            ScriptLine(7, 13000, 14000, "Cuz I'm your pookie"),
-            ScriptLine(8, 14000, 16000, "두근두근 Gets the sign"),
-            ScriptLine(9, 16000, 18000, "That's right"),
-            ScriptLine(10, 18000, 21000, "내 Fresh new 립스틱 Pick해, 오늘의 color"),
-            ScriptLine(11, 21000, 25000, "Oh my, 새로 고침 거울 속 느낌 공기도 달라"),
-            ScriptLine(12, 25000, 29000, "밉지 않지 All I gotta do is blow a kiss"),
-            ScriptLine(
-                13,
-                29000,
-                34000,
-                "Even salt tastes sweet, 이건 Z to A, And never felt like this",
-            ),
-            ScriptLine(
-                14,
-                34000,
-                38000,
-                "Cuz I get what I want, and I want what I get, like every time",
-            ),
-            ScriptLine(
-                15,
-                38000,
-                42000,
-                "Cuz I glow when I roll out of bed, No regrets I'm living my life",
-            ),
-            ScriptLine(16, 42000, 46000, "지루한 걱정 따윈 no more"),
-            ScriptLine(17, 46000, 50000, "이제는 어쩜 love sick and we know it"),
-            ScriptLine(
-                18,
-                50000,
-                54000,
-                "I'm your pookie in the morning, I'm your pookie in the night",
-            ),
-            ScriptLine(19, 54000, 58000, "너만 보면 super crazy, 두근두근, gets the vibe"),
-        )
-
-    private lateinit var playerDetailScriptAdapter: PlayerDetailScriptAdapter
+    private val hearitId: Long by lazy {
+        intent.getLongExtra(HEARIT_ID, -1)
+    }
+    private val viewModel: PlayerDetailViewModel by viewModels {
+        PlayerDetailViewModelFactory(hearitId)
+    }
 
     private val handler = Handler(Looper.getMainLooper())
     private val updateInterval = 300L
@@ -90,24 +53,15 @@ class PlayerDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
+        binding.lifecycleOwner = this
 
         setupWindowInsets()
+        adapter = PlayerDetailScriptAdapter()
+        binding.rvScript.adapter = adapter
+
+        observeViewModel()
         setupMediaController()
-
-        layoutManager = LinearLayoutManager(this)
-        playerDetailScriptAdapter = PlayerDetailScriptAdapter(scriptLines)
-        binding.rvScript.apply {
-            this.layoutManager = this@PlayerDetailActivity.layoutManager
-            adapter = playerDetailScriptAdapter
-        }
-
-        binding.btnHearitPlayerBookmark.setOnClickListener {
-            it.isSelected = !it.isSelected
-        }
-
-        binding.ibPlayerDetailBack.setOnClickListener {
-            finish()
-        }
+        setupClickListener()
     }
 
     private fun setupWindowInsets() {
@@ -134,7 +88,18 @@ class PlayerDetailActivity : AppCompatActivity() {
                     .await()
 
             binding.playerView.player = controller
-            binding.baseController.setPlayer(controller)
+            controller.addListener(
+                object : Player.Listener {
+                    override fun onTimelineChanged(
+                        timeline: Timeline,
+                        reason: Int,
+                    ) {
+                        if (timeline.windowCount > 0) {
+                            binding.baseController.setPlayer(controller)
+                        }
+                    }
+                },
+            )
 
             controller.prepare()
             controller.play()
@@ -143,21 +108,49 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupClickListener() {
+        binding.btnHearitPlayerBookmark.setOnClickListener {
+            it.isSelected = !it.isSelected
+        }
+
+        binding.ibPlayerDetailBack.setOnClickListener {
+            finish()
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.hearit.observe(this) { hearit ->
+            binding.hearit = hearit
+            adapter.submitList(hearit.script)
+
+            startPlaybackService(
+                audioUrl = hearit.audioUrl,
+                title = hearit.title,
+            )
+        }
+
+        viewModel.toastMessage.observe(this) { msgResId ->
+            Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun startScriptSync(controller: Player) {
         val updateRunnable =
             object : Runnable {
                 override fun run() {
                     val pos = controller.currentPosition
-                    val currentIndex =
-                        scriptLines.indexOfFirst { pos in it.start until it.end }
 
-                    if (currentIndex != -1) {
-                        playerDetailScriptAdapter.highlightPosition(currentIndex)
+                    val currentItem =
+                        adapter.currentList.firstOrNull { pos in it.start until it.end }
 
+                    if (currentItem != null) {
+                        adapter.highlightScriptLine(currentItem.id)
+
+                        val currentIndex = adapter.currentList.indexOf(currentItem)
                         val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-                        binding.rvScript.post {
-                            layoutManager.scrollToPositionWithOffset(currentIndex, centerOffset)
-                        }
+
+                        (binding.rvScript.layoutManager as LinearLayoutManager)
+                            .scrollToPositionWithOffset(currentIndex, centerOffset)
                     }
 
                     handler.postDelayed(this, updateInterval)
@@ -167,15 +160,36 @@ class PlayerDetailActivity : AppCompatActivity() {
         handler.post(updateRunnable)
     }
 
+    private fun startPlaybackService(
+        audioUrl: String,
+        title: String,
+    ) {
+        val serviceIntent =
+            Intent(this, PlaybackService::class.java).apply {
+                putExtra("AUDIO_URL", audioUrl)
+                putExtra("TITLE", title)
+            }
+        startService(serviceIntent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         mediaController?.release()
+
+        val stopIntent = Intent(this, PlaybackService::class.java)
+        stopService(stopIntent)
     }
 
     companion object {
-        fun newIntent(context: Context): Intent =
+        private const val HEARIT_ID = "hearit_id"
+
+        fun newIntent(
+            context: Context,
+            hearitId: Long,
+        ): Intent =
             Intent(context, PlayerDetailActivity::class.java).apply {
+                putExtra(HEARIT_ID, hearitId)
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
     }

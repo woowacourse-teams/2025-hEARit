@@ -76,10 +76,6 @@ class HomeFragment :
                 .addToBackStack(null)
                 .commit()
         }
-
-        binding.ivHomeRecentHearit.setOnClickListener {
-            navigateToPlayerDetail()
-        }
     }
 
     private fun setupRecentHearit() {
@@ -180,13 +176,13 @@ class HomeFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun navigateToPlayerDetail() {
-        val intent = PlayerDetailActivity.newIntent(requireActivity())
+    private fun navigateToPlayerDetail(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         startActivity(intent)
     }
 
-    override fun onClickRecommendHearit() {
-        navigateToPlayerDetail()
+    override fun onClickRecommendHearit(hearitId: Long) {
+        navigateToPlayerDetail(hearitId)
         (requireActivity() as? MainActivity)?.showPlayerControlView()
     }
 
