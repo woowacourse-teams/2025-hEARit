@@ -1,14 +1,11 @@
 package com.onair.hearit.data
 
+import RandomHearitItem
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
-import com.onair.hearit.domain.RandomHearit
-import com.onair.hearit.domain.RecommendHearit
-import com.onair.hearit.domain.SearchedHearit
 import com.onair.hearit.domain.SingleHearit
-import com.onair.hearit.domain.model.RandomHearitItem
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
 
@@ -27,8 +24,8 @@ fun RecommendHearitResponse.toDomain(): RecommendHearit =
         desc = this.summary,
     )
 
-fun RandomHearitResponse.toDomain(): RandomHearit =
-    RandomHearit(
+fun RandomHearitResponse.toDomain(): RandomHearitItem =
+    RandomHearitItem(
         id = this.id,
         title = this.title,
         summary = this.summary,

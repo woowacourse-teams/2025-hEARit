@@ -7,7 +7,7 @@
 
         <variable
             name="scriptLine"
-            type="com.onair.hearit.domain.ScriptLine" />
+            type="com.onair.hearit.domain.model.ScriptLine" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

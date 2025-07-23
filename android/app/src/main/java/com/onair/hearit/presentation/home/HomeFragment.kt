@@ -181,8 +181,8 @@ class HomeFragment :
         startActivity(intent)
     }
 
-    override fun onClickRecommendHearit() {
-        navigateToPlayerDetail()
+    override fun onClickRecommendHearit(hearitId: Long) {
+        navigateToPlayerDetail(hearitId)
         (requireActivity() as? MainActivity)?.showPlayerControlView()
     }
 

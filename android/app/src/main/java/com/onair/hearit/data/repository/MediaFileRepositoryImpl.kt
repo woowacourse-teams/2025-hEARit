@@ -1,17 +1,13 @@
 package com.onair.hearit.data.repository
 
+import RandomHearitItem
 import com.onair.hearit.data.datasource.MediaFileRemoteDataSource
+import com.onair.hearit.domain.Hearit
+import com.onair.hearit.domain.OriginalAudioUrl
+import com.onair.hearit.domain.SingleHearit
 import com.onair.hearit.domain.model.HearitShorts
-import com.onair.hearit.domain.model.RandomHearitItem
 import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.domain.model.ShortAudioUrl
-import com.onair.hearit.domain.Hearit
-import com.onair.hearit.domain.HearitShorts
-import com.onair.hearit.domain.OriginalAudioUrl
-import com.onair.hearit.domain.RandomHearit
-import com.onair.hearit.domain.ScriptLine
-import com.onair.hearit.domain.ShortAudioUrl
-import com.onair.hearit.domain.SingleHearit
 import com.onair.hearit.domain.repository.MediaFileRepository
 import com.onair.hearit.domain.toHearit
 import com.onair.hearit.domain.toHearitShorts
@@ -55,11 +51,11 @@ class MediaFileRepositoryImpl(
             OriginalAudioUrl(id = response.id, url = response.url)
         }
 
-    override suspend fun getShortsHearitItem(item: RandomHearit): Result<HearitShorts> = combineHearitShorts(item)
+    override suspend fun getShortsHearitItem(item: RandomHearitItem): Result<HearitShorts> = combineHearitShorts(item)
 
     override suspend fun getOriginalHearitItem(item: SingleHearit): Result<Hearit> = combineHearit(item)
 
-    private suspend fun combineHearitShorts(item: RandomHearit): Result<HearitShorts> =
+    private suspend fun combineHearitShorts(item: RandomHearitItem): Result<HearitShorts> =
         handleResult {
             val hearitId = item.id
 
