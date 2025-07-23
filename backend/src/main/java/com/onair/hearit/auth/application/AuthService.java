@@ -12,6 +12,7 @@ import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.infrastructure.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoUserInfoClient kakaoUserInfoClient;
+
+    @Value("${hearit.profile.default-image-url}")
+    private String defaultProfileImage;
 
     public TokenResponse login(LoginRequest request) {
         Member member = getMemberByLocalId(request.localId());
@@ -44,7 +48,7 @@ public class AuthService {
     public void signup(SignupRequest request) {
         validateDuplicatedId(request);
         String hash = passwordEncoder.encode(request.password());
-        memberRepository.save(Member.createLocalUser(request.localId(), request.nickname(), hash));
+        memberRepository.save(Member.createLocalUser(request.localId(), request.nickname(), hash, defaultProfileImage));
     }
 
     private void validateDuplicatedId(SignupRequest request) {
@@ -63,7 +67,7 @@ public class AuthService {
     }
 
     private Member signupWithKakao(KakaoUserInfoResponse kakaoUser) {
-        Member member = Member.createSocialUser(kakaoUser.id(), kakaoUser.nickname());
+        Member member = Member.createSocialUser(kakaoUser.id(), kakaoUser.nickname(), kakaoUser.profileImage());
         return memberRepository.save(member);
     }
 

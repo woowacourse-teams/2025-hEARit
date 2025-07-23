@@ -30,7 +30,8 @@ class AuthControllerTest extends IntegrationTest {
         Member member = Member.createLocalUser(
                 "test123",
                 "testName",
-                passwordEncoder.encode("pass1234")
+                passwordEncoder.encode("pass1234"),
+                "profile.jpg"
         );
         dbHelper.insertMember(member);
 
@@ -54,7 +55,8 @@ class AuthControllerTest extends IntegrationTest {
         Member member = Member.createLocalUser(
                 "test123",
                 "testName",
-                passwordEncoder.encode("pass1234")
+                passwordEncoder.encode("pass1234"),
+                "profile.jpg"
         );
         dbHelper.insertMember(member);
 

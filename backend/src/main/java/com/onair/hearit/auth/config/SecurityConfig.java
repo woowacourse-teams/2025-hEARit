@@ -4,6 +4,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 import com.onair.hearit.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,17 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    private static final String[] AUTH_WHITELIST = {
+            "/api/v1/auth/**",
+            "/api/v1/hearits/**",
+            "/api/v1/categories/**",
+            "/api/v1/keywords/**",
+            "/admin/**", //TODO: admin 로그인 구현 후 권한 검사 해야함
+            "/docs",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -35,16 +47,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        //TODO: 추후 허용되는 api만 여는 화이트리스트 방식으로 변경 (현재는 모두 permit)
-                        .requestMatchers("/api/v1/**").permitAll()
-                        .requestMatchers("/admin/**").permitAll() //TODO: admin 로그인 구현 후 권한 검사 해야함
-                        .requestMatchers("/docs").permitAll()
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers(AUTH_WHITELIST).permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtTokenProvider, Arrays.stream(AUTH_WHITELIST).toList());
     }
 }

@@ -3,6 +3,7 @@ package com.onair.hearit.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.TestFixture;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -269,7 +270,7 @@ class HearitControllerTest extends IntegrationTest {
     }
 
     private Member saveMember() {
-        return dbHelper.insertMember(new Member("testId", "test1234!", null, "testMember"));
+        return dbHelper.insertMember(TestFixture.createFixedMember());
     }
 
     private String generateToken(Member member) {

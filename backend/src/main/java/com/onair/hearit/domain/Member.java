@@ -38,6 +38,9 @@ public class Member {
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
+    @Column(name = "profile_image")
+    private String profileImage;
+
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -45,19 +48,20 @@ public class Member {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    public Member(String localId, String password, String socialId, String nickname) {
+    private Member(String localId, String password, String socialId, String nickname, String profileImage) {
         this.localId = localId;
         this.password = password;
         this.socialId = socialId;
         this.nickname = nickname;
+        this.profileImage = profileImage;
     }
 
-    public static Member createLocalUser(String memberId, String nickname, String password) {
-        return new Member(memberId, password, null, nickname);
+    public static Member createLocalUser(String memberId, String nickname, String password, String profileImage) {
+        return new Member(memberId, password, null, nickname, profileImage);
     }
 
-    public static Member createSocialUser(String socialId, String nickname) {
-        return new Member(null, null, socialId, nickname);
+    public static Member createSocialUser(String socialId, String nickname, String profileImage) {
+        return new Member(null, null, socialId, nickname, profileImage);
     }
 
     @Override
