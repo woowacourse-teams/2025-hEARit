@@ -5,6 +5,7 @@ import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.BookmarkListCondition;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
 import java.util.List;
@@ -38,7 +39,11 @@ public class BookmarkController {
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "북마크 생성", description = "로그인한 회원이 히어릿 ID로 북마크를 생성합니다.")
+    @Operation(summary = "북마크 생성", description = "로그인한 회원이 히어릿 ID로 북마크를 생성합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "북마크 성공"),
+                    @ApiResponse(responseCode = "400", description = "이미 북마크된 히어릿")
+            })
     @PostMapping("/{hearitId}/bookmarks")
     public ResponseEntity<Void> createBookmark(
             @PathVariable Long hearitId,

@@ -6,6 +6,7 @@ import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,11 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "회원가입", description = "새로운 계정을 생성합니다.")
+    @Operation(summary = "회원가입", description = "새로운 계정을 생성합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "회원가입 성공"),
+                    @ApiResponse(responseCode = "400", description = "중복된 이메일")
+            })
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@RequestBody SignupRequest request) {
         authService.signup(request);
