@@ -9,7 +9,6 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.request.SearchCondition;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
@@ -98,7 +97,6 @@ class HearitSearchServiceTest {
         Hearit hearit3 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("springKeyword"));   // latest
 
         // when
-        SearchCondition condition = new SearchCondition("Spring", 0, 10);
         List<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
 
         // then
