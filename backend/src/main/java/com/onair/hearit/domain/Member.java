@@ -56,9 +56,8 @@ public class Member {
         this.profileImage = profileImage;
     }
 
-    public static Member createLocalUser(String memberId, String nickname, String password) {
-        String defaultProfileImage = "http://hearit.o-r.kr/images/default-profile.jpg";
-        return new Member(memberId, password, null, nickname, defaultProfileImage);
+    public static Member createLocalUser(String memberId, String nickname, String password, String profileImage) {
+        return new Member(memberId, password, null, nickname, profileImage);
     }
 
     public static Member createSocialUser(String socialId, String nickname, String profileImage) {

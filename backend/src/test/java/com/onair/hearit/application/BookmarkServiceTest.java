@@ -3,6 +3,7 @@ package com.onair.hearit.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.onair.TestFixture;
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
@@ -126,7 +127,7 @@ class BookmarkServiceTest {
     }
 
     private Member saveMember() {
-        return dbHelper.insertMember(Member.createLocalUser("testId", "testNickname", "testPassword"));
+        return dbHelper.insertMember(TestFixture.createFixedMember());
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {

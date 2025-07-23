@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.TestFixture;
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Member;
@@ -39,8 +40,7 @@ class MemberServiceTest {
     @DisplayName("회원 정보를 ID로 조회할 수 있다.")
     void getMemberById_localMember() {
         // given
-        Member member = dbHelper.insertMember(
-                Member.createLocalUser("memberId", "nickname", "password"));
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // when
         MemberInfoResponse response = memberService.getMemberById(member.getId());

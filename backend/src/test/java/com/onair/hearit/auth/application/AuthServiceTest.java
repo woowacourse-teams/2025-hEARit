@@ -70,7 +70,7 @@ class AuthServiceTest {
     void signup_duplicate_id() {
         // given
         dbHelper.insertMember(
-                Member.createLocalUser("sameId", "nickname", "password"));
+                Member.createLocalUser("sameId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
 
         SignupRequest signupRequest = new SignupRequest("sameId", "another", "password");
 
@@ -84,7 +84,8 @@ class AuthServiceTest {
     @DisplayName("로그인 성공 시 토큰을 반환한다.")
     void login_success() {
         // given
-        dbHelper.insertMember(Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password")));
+        dbHelper.insertMember(
+                Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
 
         LoginRequest loginRequest = new LoginRequest("localId", "password");
 
@@ -111,7 +112,7 @@ class AuthServiceTest {
     @DisplayName("비밀번호가 틀릴 경우 인증예외가 발생한다")
     void login_fail_wrong_password() {
         // given
-        dbHelper.insertMember(Member.createLocalUser("localId", "nickname", "password"));
+        dbHelper.insertMember(Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
 
         LoginRequest loginRequest = new LoginRequest("localId", "wrongpassword");
 

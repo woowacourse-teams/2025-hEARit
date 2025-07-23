@@ -2,6 +2,7 @@ package com.onair.hearit.presentation;
 
 import static org.hamcrest.Matchers.equalTo;
 
+import com.onair.TestFixture;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
@@ -160,7 +161,7 @@ class BookmarkControllerTest extends IntegrationTest {
     }
 
     private Member saveMember() {
-        return dbHelper.insertMember(Member.createLocalUser("testId", "testNickname", "testPassword"));
+        return dbHelper.insertMember(TestFixture.createFixedMember());
     }
 
     private String generateToken(Member member) {
