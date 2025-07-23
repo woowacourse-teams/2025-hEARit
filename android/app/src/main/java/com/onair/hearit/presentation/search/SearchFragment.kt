@@ -34,7 +34,7 @@ class SearchFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -52,7 +52,7 @@ class SearchFragment : Fragment() {
         setupCategoryRecyclerView()
         observeViewModel()
 
-        binding.nsvSearch.setOnTouchListener { v, event ->
+        binding.nsvSearch.setOnTouchListener { _, _ ->
             hideKeyboard()
             false
         }
@@ -76,7 +76,6 @@ class SearchFragment : Fragment() {
                 if (searchTerm.isNotBlank()) {
                     navigateToSearchResult(searchTerm)
                     hideKeyboard()
-                    true
                 }
             }
             false
