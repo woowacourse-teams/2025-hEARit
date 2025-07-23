@@ -25,10 +25,8 @@ class ExploreFragment :
     private val binding get() = _binding!!
     private val viewModel: ExploreViewModel by viewModels { ExploreViewModelFactory() }
 
-    private lateinit var player: ExoPlayer
-    private val adapter: ShortsAdapter by lazy {
-        ShortsAdapter(player, this)
-    }
+    private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
+    private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +50,6 @@ class ExploreFragment :
         binding.lifecycleOwner = this
 
         setupWindowInsets()
-        initPlayer()
         setupRecyclerView()
         observeViewModel()
 
@@ -80,10 +77,6 @@ class ExploreFragment :
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
-    }
-
-    private fun initPlayer() {
-        player = ExoPlayer.Builder(requireContext()).build()
     }
 
     private fun scrollToNextItem() {
