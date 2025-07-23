@@ -37,7 +37,6 @@ public class HearitController {
     public ResponseEntity<HearitDetailResponse> readHearit(
             @PathVariable Long hearitId,
             @AuthenticationPrincipal CurrentMember member) {
-        //TODO : 추후 security url permit 적용
         Long memberId = extractMemberId(member);
         HearitDetailResponse response = hearitService.getHearitDetail(hearitId, memberId);
         return ResponseEntity.ok(response);
@@ -102,4 +101,3 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 }
-
