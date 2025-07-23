@@ -2,7 +2,7 @@ package com.onair.hearit.admin.dto.request;
 
 import java.util.List;
 
-public record HearitUploadRequest(
+public record HearitCreateRequest(
         String title,
         String summary,
         Integer playTime,
