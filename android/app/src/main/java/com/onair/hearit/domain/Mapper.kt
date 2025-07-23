@@ -1,10 +1,10 @@
 package com.onair.hearit.domain
 
-fun RandomHearitItem.toHearitShortsItem(
+fun RandomHearit.toHearitShortsItem(
     audioUrl: String,
     script: List<ScriptLine>,
-): HearitShorts =
-    HearitShorts(
+): ShortsHearit =
+    ShortsHearit(
         id = this.id,
         title = this.title,
         summary = this.summary,
