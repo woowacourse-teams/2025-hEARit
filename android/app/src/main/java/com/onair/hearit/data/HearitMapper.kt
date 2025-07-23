@@ -1,11 +1,19 @@
 package com.onair.hearit.data
 
+import com.onair.hearit.data.database.RecentHearitEntity
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 import com.onair.hearit.domain.model.RandomHearitItem
+import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
+
+fun RecentHearit.toData(): RecentHearitEntity =
+    RecentHearitEntity(
+        hearitId = this.id,
+        title = this.title,
+    )
 
 fun SearchHearitResponse.toDomain(): SearchedHearit =
     SearchedHearit(
@@ -13,6 +21,12 @@ fun SearchHearitResponse.toDomain(): SearchedHearit =
         title = this.title,
         playTime = this.playTime,
         summary = this.summary,
+    )
+
+fun RecentHearitEntity.toDomain(): RecentHearit =
+    RecentHearit(
+        id = this.hearitId,
+        title = this.title,
     )
 
 fun RecommendHearitResponse.toDomain(): RecommendHearit =
