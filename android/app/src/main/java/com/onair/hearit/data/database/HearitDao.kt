@@ -8,8 +8,8 @@ import androidx.room.Query
 @Dao
 interface HearitDao {
     @Query("SELECT * FROM recent_hearit")
-    fun getRecentHearit(): RecentHearitEntity
+    suspend fun getRecentHearit(): RecentHearitEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertRecentHearit(entity: RecentHearitEntity)
+    suspend fun insertRecentHearit(entity: RecentHearitEntity)
 }

@@ -17,6 +17,7 @@ import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.explore.ExploreFragment
 import kotlin.math.abs
 
 class HomeFragment :
@@ -27,7 +28,7 @@ class HomeFragment :
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private lateinit var recommendAdapter: RecommendHearitAdapter
-    private val categoryAdapter = CategoryAdapter()
+    private lateinit var categoryAdapter: CategoryAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,6 +46,7 @@ class HomeFragment :
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
         recommendAdapter = RecommendHearitAdapter(this)
+        categoryAdapter = CategoryAdapter()
 
         setupWindowInsets()
         setupListeners()
@@ -132,7 +134,14 @@ class HomeFragment :
 
     private fun observeViewModel() {
         viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->
-            binding.recentHearit = recentHearit
+            if (recentHearit == null) {
+                binding.groupHomeRecentHearitExist.visibility = View.GONE
+                binding.tvHomeNoRecentHearitText.visibility = View.VISIBLE
+            } else {
+                binding.groupHomeRecentHearitExist.visibility = View.VISIBLE
+                binding.tvHomeNoRecentHearitText.visibility = View.GONE
+                binding.recentHearit = recentHearit
+            }
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->

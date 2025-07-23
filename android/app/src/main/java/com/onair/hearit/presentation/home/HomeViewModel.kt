@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.home
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,8 +20,8 @@ class HomeViewModel(
     private val hearitRepository: HearitRepository,
     private val recentHearitRepository: RecentHearitRepository,
 ) : ViewModel() {
-    private val _recentHearit: MutableLiveData<RecentHearit> = MutableLiveData()
-    val recentHearit: LiveData<RecentHearit> = _recentHearit
+    private val _recentHearit: MutableLiveData<RecentHearit?> = MutableLiveData()
+    val recentHearit: LiveData<RecentHearit?> = _recentHearit
 
     private val _recommendHearits: MutableLiveData<List<RecommendHearit>> = MutableLiveData()
     val recommendHearits: LiveData<List<RecommendHearit>> = _recommendHearits
