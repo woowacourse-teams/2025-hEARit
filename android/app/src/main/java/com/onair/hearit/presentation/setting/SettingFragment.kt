@@ -4,12 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.onair.hearit.BuildConfig
-import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSettingBinding
 
 class SettingFragment : Fragment() {
@@ -33,24 +32,38 @@ class SettingFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+        setupWindowInsets()
+        setupListener()
+        observeViewModel()
+    }
+
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
+    }
 
+    private fun setupListener() {
         binding.ibBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
         binding.switchNotification.setOnClickListener {
         }
+    }
 
-        binding.tvSettingAppVersion.text =
-            getString(R.string.setting_app_version, BuildConfig.VERSION_NAME)
-
+    private fun observeViewModel() {
         viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
             binding.userInfo = userInfo
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

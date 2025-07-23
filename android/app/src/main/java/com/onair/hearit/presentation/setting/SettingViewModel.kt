@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.onair.hearit.BuildConfig
 import com.onair.hearit.R
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.UserInfo
@@ -14,6 +15,8 @@ import kotlinx.coroutines.launch
 class SettingViewModel(
     private val memberRepository: MemberRepository,
 ) : ViewModel() {
+    val appVersion = BuildConfig.VERSION_NAME
+
     private val _userInfo: MutableLiveData<UserInfo> = MutableLiveData()
     val userInfo: LiveData<UserInfo> = _userInfo
 

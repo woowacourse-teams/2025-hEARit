@@ -8,6 +8,10 @@
         <variable
             name="userInfo"
             type="com.onair.hearit.domain.model.UserInfo" />
+
+        <variable
+            name="viewModel"
+            type="com.onair.hearit.presentation.setting.SettingViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -111,12 +115,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:text="@string/setting_app_version"
+            android:text="@{String.format(@string/setting_app_version, viewModel.appVersion)}"
             android:textColor="@color/hearit_gray4"
             app:layout_constraintBottom_toTopOf="@id/tv_setting_app_email"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="앱 버전 v1.0.0" />
+            tools:text="앱 버전 v1.0.03" />
 
         <TextView
             android:id="@+id/tv_setting_app_email"
