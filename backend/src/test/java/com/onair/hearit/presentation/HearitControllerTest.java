@@ -130,7 +130,7 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("히어릿 검색 요청 시 200 OK 및 제목이 포함된 히어릿을 최신순으로 히어릿들을 반환한다.")
-    void searchHearitsWithPaginationAndKeyword() {
+    void searchHearitsWithPagination() {
         // given
         Keyword keyword = saveKeyword("Spring");
         Keyword keyword1 = saveKeyword("noKeyword");
@@ -179,29 +179,6 @@ class HearitControllerTest extends IntegrationTest {
                 .when()
                 .get("/api/v1/hearits/search")
                 .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
-    }
-
-    @Test
-    @DisplayName("유효하지 않은 page 또는 size 값이 주어지면 400 BAD_REQUEST를 반환한다.")
-    void searchHearitsByKeywordWithInvalidParams() {
-        Keyword keyword = saveKeyword("DevOps");
-        RestAssured.given()
-                .queryParam("searchTerm", "abc")
-                .queryParam("page", -1)
-                .queryParam("size", 10)
-                .when()
-                .get("/api/v1/hearits/search")
-                .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
-
-        RestAssured.given()
-                .queryParam("searchTerm", "abc")
-                .queryParam("page", 0)
-                .queryParam("size", -5)
-                .when()
-                .get("/api/v1/hearits/search")
-                .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 

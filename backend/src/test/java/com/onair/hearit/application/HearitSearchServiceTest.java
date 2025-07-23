@@ -111,7 +111,7 @@ class HearitSearchServiceTest {
 
     @Test
     @DisplayName("히어릿 목록을 검색으로 조회 시 페이지네이션이 적용되어 반환된다.")
-    void searchHearitsByTitle_pagination() {
+    void searchHearits_pagination() {
         // given
         PagingRequest request = new PagingRequest(1, 2);
         Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));
