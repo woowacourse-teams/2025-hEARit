@@ -10,7 +10,7 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
-import com.onair.hearit.dto.request.RandomHearitCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
@@ -91,10 +91,10 @@ class HearitServiceTest {
             Hearit hearit = saveHearitWithSuffix(i);
             dbHelper.insertBookmark(new Bookmark(member, hearit));
         }
-        RandomHearitCondition condition = new RandomHearitCondition(0, 10);
+        PagingRequest pagingRequest = new PagingRequest(0, 10);
 
         // when
-        List<RandomHearitResponse> hearits = hearitService.getRandomHearits(member.getId(), condition);
+        List<RandomHearitResponse> hearits = hearitService.getRandomHearits(member.getId(), pagingRequest);
 
         // then
         assertThat(hearits).hasSize(10);

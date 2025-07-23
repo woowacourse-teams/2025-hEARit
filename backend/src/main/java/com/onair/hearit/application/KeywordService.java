@@ -2,7 +2,7 @@ package com.onair.hearit.application;
 
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.dto.request.KeywordListCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.KeywordResponse;
 import com.onair.hearit.infrastructure.KeywordRepository;
 import java.time.LocalDate;
@@ -21,8 +21,8 @@ public class KeywordService {
 
     private final KeywordRepository keywordRepository;
 
-    public List<KeywordResponse> getKeywords(KeywordListCondition condition) {
-        Pageable pageable = PageRequest.of(condition.page(), condition.size());
+    public List<KeywordResponse> getKeywords(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Keyword> keywords = keywordRepository.findAll(pageable);
         return keywords.stream()
                 .map(KeywordResponse::from)
