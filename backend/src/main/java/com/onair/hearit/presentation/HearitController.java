@@ -3,7 +3,7 @@ package com.onair.hearit.presentation;
 import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.auth.dto.CurrentMember;
-import com.onair.hearit.dto.request.RandomHearitCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.request.TitleSearchCondition;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
@@ -48,8 +48,8 @@ public class HearitController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Long memberId = extractMemberId(member);
-        RandomHearitCondition condition = new RandomHearitCondition(page, size);
-        List<RandomHearitResponse> responses = hearitService.getRandomHearits(memberId, condition);
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        List<RandomHearitResponse> responses = hearitService.getRandomHearits(memberId, pagingRequest);
         return ResponseEntity.ok(responses);
     }
 

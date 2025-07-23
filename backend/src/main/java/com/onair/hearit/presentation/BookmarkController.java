@@ -2,7 +2,7 @@ package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.BookmarkService;
 import com.onair.hearit.auth.dto.CurrentMember;
-import com.onair.hearit.dto.request.BookmarkListCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +33,7 @@ public class BookmarkController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
             @AuthenticationPrincipal CurrentMember member) {
-        BookmarkListCondition condition = new BookmarkListCondition(page, size);
+        PagingRequest condition = new PagingRequest(page, size);
         List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.memberId(), condition);
         return ResponseEntity.ok(responses);
     }

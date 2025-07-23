@@ -2,8 +2,9 @@ package com.onair.hearit.admin.presentation;
 
 import com.onair.hearit.admin.application.AdminCategoryService;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
-import com.onair.hearit.admin.dto.response.PagedResponse;
 import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
+import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,11 @@ public class AdminCategoryController {
     private final AdminCategoryService adminCategoryService;
 
     @GetMapping
-    public ResponseEntity<PagedResponse<CategoryInfoResponse>> getAllCategories(
+    public ResponseEntity<PagedResponse<CategoryInfoResponse>> readCategories(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "15") int size
-    ) {
-        PagedResponse<CategoryInfoResponse> response = adminCategoryService.getPageCategories(page, size);
+            @RequestParam(defaultValue = "15") int size) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        PagedResponse<CategoryInfoResponse> response = adminCategoryService.getCategories(pagingRequest);
         return ResponseEntity.ok(response);
     }
 
