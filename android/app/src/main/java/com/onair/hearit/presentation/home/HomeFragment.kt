@@ -16,6 +16,7 @@ import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.domain.RecentHearit
 import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import java.time.LocalDateTime
 import kotlin.math.abs
@@ -186,6 +187,7 @@ class HomeFragment :
 
     override fun onClickRecommendHearit() {
         navigateToPlayerDetail()
+        (requireActivity() as? MainActivity)?.showPlayerControlView()
     }
 
     override fun onDestroyView() {
