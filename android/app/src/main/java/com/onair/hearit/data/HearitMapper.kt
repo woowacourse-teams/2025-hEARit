@@ -5,11 +5,13 @@ import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
+import com.onair.hearit.domain.model.UserInfo
 
 fun RecentHearit.toData(): RecentHearitEntity =
     RecentHearitEntity(
@@ -58,4 +60,11 @@ fun HearitResponse.toDomain(): SingleHearit =
         createdAt = this.createdAt,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
+    )
+
+fun UserInfoResponse.toDomain(): UserInfo =
+    UserInfo(
+        id = this.id,
+        nickname = this.nickname,
+        profileImage = this.profileImage,
     )
