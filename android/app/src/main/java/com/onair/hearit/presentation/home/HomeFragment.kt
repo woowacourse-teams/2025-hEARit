@@ -1,6 +1,7 @@
 package com.onair.hearit.presentation.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,6 +58,11 @@ class HomeFragment :
         setupRecommendRecyclerView()
         setupCategoryRecyclerView()
         observeViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.getRecentHearit()
     }
 
     private fun setupWindowInsets() {
@@ -134,6 +140,7 @@ class HomeFragment :
 
     private fun observeViewModel() {
         viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->
+            Log.d("meeple_log", "$recentHearit")
             if (recentHearit == null) {
                 binding.groupHomeRecentHearitExist.visibility = View.GONE
                 binding.tvHomeNoRecentHearitText.visibility = View.VISIBLE

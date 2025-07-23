@@ -32,20 +32,11 @@ class HomeViewModel(
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
+        getRecentHearit()
         fetchData()
     }
 
     private fun fetchData() {
-        viewModelScope.launch {
-            recentHearitRepository
-                .getRecentHearit()
-                .onSuccess { recentHearit ->
-                    _recentHearit.value = recentHearit
-                }.onFailure {
-                    _toastMessage.value = R.string.home_toast_recent_load_fail
-                }
-        }
-
         viewModelScope.launch {
             hearitRepository
                 .getRecommendHearits()
@@ -63,6 +54,18 @@ class HomeViewModel(
                     _categories.value = categories
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_categories_load_fail
+                }
+        }
+    }
+
+    fun getRecentHearit() {
+        viewModelScope.launch {
+            recentHearitRepository
+                .getRecentHearit()
+                .onSuccess { recentHearit ->
+                    _recentHearit.value = recentHearit
+                }.onFailure {
+                    _toastMessage.value = R.string.home_toast_recent_load_fail
                 }
         }
     }
