@@ -64,6 +64,8 @@ class ExploreViewModel(
                     }.onFailure {
                         _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
                     }
+            } catch (_: Exception) {
+                _toastMessage.value = R.string.explore_toast_shorts_hearits_load_fail
             } finally {
                 isLoading = false
             }

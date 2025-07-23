@@ -47,7 +47,7 @@
     <!-- ExploreFragment-->
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 골라 들으세요!</string>
     <string name="explore_toast_random_hearits_load_fail">랜덤 히어릿 목록 조회에 실패했습니다.</string>
-    <string name="explore_toast_shorts_load_fail">탐색 쇼츠 목록 조회에 실패했습니다.</string>
+    <string name="explore_toast_shorts_hearits_load_fail">탐색 쇼츠 목록 조회에 실패했습니다.</string>
 
     <!-- SettingFragment-->
     <string name="setting_notification">알림</string>
