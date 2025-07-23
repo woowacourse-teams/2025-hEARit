@@ -48,7 +48,7 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    @DisplayName("아이디와 비밀번호로 회원가입할 수 있다 + 기본 프로필 이미지가 저장된다.")
+    @DisplayName("아이디와 비밀번호로 회원가입할 수 있으며, 기본 프로필 이미지로 저장된다.")
     void signup_success() {
         // given
         SignupRequest request = new SignupRequest("localId", "nickname", "password123");
