@@ -23,7 +23,7 @@ public class AdminKeywordController {
     private final AdminKeywordService adminKeywordService;
 
     @GetMapping
-    public ResponseEntity<PagedResponse<KeywordInfoResponse>> getPageKeywords(
+    public ResponseEntity<PagedResponse<KeywordInfoResponse>> readPageKeywords(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size
     ) {

@@ -24,7 +24,7 @@ public class AdminCategoryController {
     private final AdminCategoryService adminCategoryService;
 
     @GetMapping
-    public ResponseEntity<PagedResponse<CategoryInfoResponse>> getAllCategories(
+    public ResponseEntity<PagedResponse<CategoryInfoResponse>> readAllCategories(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size
     ) {

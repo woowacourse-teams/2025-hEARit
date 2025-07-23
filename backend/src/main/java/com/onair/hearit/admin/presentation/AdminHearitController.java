@@ -35,7 +35,7 @@ public class AdminHearitController {
     }
 
     @GetMapping("/hearits")
-    public ResponseEntity<PagedResponse<HearitAdminResponse>> getPageHearits(
+    public ResponseEntity<PagedResponse<HearitAdminResponse>> readPageHearits(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
         PagedResponse<HearitAdminResponse> response = adminHearitService.getPageHearits(page, size);

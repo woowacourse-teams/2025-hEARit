@@ -31,7 +31,7 @@ public class MemberController {
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             })
     @GetMapping("/me")
-    public ResponseEntity<MemberInfoResponse> getCurrentMemberInfo(@AuthenticationPrincipal CurrentMember member) {
+    public ResponseEntity<MemberInfoResponse> readCurrentMemberInfo(@AuthenticationPrincipal CurrentMember member) {
         MemberInfoResponse response = memberService.getMemberById(member.memberId());
         return ResponseEntity.ok(response);
     }
