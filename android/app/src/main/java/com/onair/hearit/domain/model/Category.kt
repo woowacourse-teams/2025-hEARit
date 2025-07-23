@@ -1,7 +1,7 @@
-package com.onair.hearit.domain
+package com.onair.hearit.domain.model
 
 data class Category(
-    val id: Int,
+    val id: Long,
     val colorCode: String,
     val name: String,
 )
