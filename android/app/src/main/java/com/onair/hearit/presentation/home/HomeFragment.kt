@@ -48,6 +48,15 @@ class HomeFragment :
         recommendAdapter = RecommendHearitAdapter(this)
         categoryAdapter = CategoryAdapter()
 
+        binding.tvHomeNoRecentHearitText.setOnClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .replace(
+                    R.id.fragment_container_view,
+                    ExploreFragment(),
+                ).addToBackStack(null)
+                .commit()
+        }
         setupWindowInsets()
         setupListeners()
         setupRecommendRecyclerView()
