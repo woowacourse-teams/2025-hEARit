@@ -1,9 +1,11 @@
 package com.onair.hearit.data
 
 import com.onair.hearit.data.dto.HearitResponse
+import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
@@ -44,4 +46,10 @@ fun HearitResponse.toDomain(): SingleHearit =
         createdAt = this.createdAt,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
+    )
+
+fun KeywordResponse.toDomain(): Keyword =
+    Keyword(
+        id = this.id,
+        name = this.name,
     )
