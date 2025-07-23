@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.onair.hearit.BuildConfig
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSettingBinding
@@ -15,6 +16,7 @@ class SettingFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: SettingViewModel by viewModels { SettingViewModelFactory() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,5 +48,9 @@ class SettingFragment : Fragment() {
 
         binding.tvSettingAppVersion.text =
             getString(R.string.setting_app_version, BuildConfig.VERSION_NAME)
+
+        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
+            binding.userInfo = userInfo
+        }
     }
 }
