@@ -20,16 +20,11 @@ public class HearitSearchService {
     private final HearitRepository hearitRepository;
 
     public List<HearitSearchResponse> search(String searchTerm, PagingRequest pagingRequest) {
-        String likeSearchTerm = formatLikePattern(searchTerm);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<Hearit> hearits = hearitRepository.searchByTerm(likeSearchTerm, pageable);
+        Page<Hearit> hearits = hearitRepository.searchByTerm(searchTerm, pageable);
         return hearits.stream()
                 .map(HearitSearchResponse::from)
                 .toList();
-    }
-
-    private String formatLikePattern(String term) {
-        return String.format(LIKE_PATTERN_TEMPLATE, term);
     }
 }
 

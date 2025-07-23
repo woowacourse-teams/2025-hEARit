@@ -20,9 +20,10 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             LEFT JOIN hearit_keyword hk ON h.id = hk.hearit_id
             LEFT JOIN keyword k ON hk.keyword_id = k.id
             WHERE
-                LOWER(h.title) LIKE LOWER(:searchTerm)
-                OR LOWER(k.name) LIKE LOWER(:searchTerm)
+                LOWER(h.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+                OR LOWER(k.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
             ORDER BY h.created_at DESC
             """, nativeQuery = true)
     Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
+
 }
