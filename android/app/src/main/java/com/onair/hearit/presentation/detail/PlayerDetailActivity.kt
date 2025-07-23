@@ -51,22 +51,17 @@ class PlayerDetailActivity : AppCompatActivity() {
     @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
+        binding.lifecycleOwner = this
 
-        setupView()
-
+        setupWindowInsets()
         adapter = PlayerDetailScriptAdapter()
         binding.rvScript.adapter = adapter
 
         observeViewModel()
         setupMediaController()
         setupClickListener()
-    }
-
-    private fun setupView() {
-        enableEdgeToEdge()
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
-        binding.lifecycleOwner = this
-        setupWindowInsets()
     }
 
     private fun setupWindowInsets() {
