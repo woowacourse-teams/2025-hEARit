@@ -40,7 +40,7 @@ class HearitSearchServiceTest {
     }
 
     @Test
-    @DisplayName("검색 시 제목에 검색어가 포함된 히어릿만 반환한다.")
+    @DisplayName("검색 시 제목에 검색어가 포함된 히어릿을 반환한다.")
     void searchHearitsByTitle_Success() {
         // given
         PagingRequest request = new PagingRequest(0, 10);
@@ -64,7 +64,7 @@ class HearitSearchServiceTest {
     }
 
     @Test
-    @DisplayName("검색 시 키워드에 검색어가 포함된 히어릿만 반환한다.")
+    @DisplayName("검색 시 키워드에 검색어가 포함된 히어릿을 반환한다.")
     void searchHearitsByKeyword_Succces() {
         // given
         PagingRequest request = new PagingRequest(0, 10);
@@ -86,6 +86,31 @@ class HearitSearchServiceTest {
                         .doesNotContain(hearit3.getId(), hearit4.getId())
         );
     }
+
+    @Test
+    @DisplayName("검색어가 제목 또는 키워드에 포함된 히어릿을 모두 반환한다.")
+    void searchHearitsByTitleOrKeyword_Success() {
+        // given
+        PagingRequest request = new PagingRequest(0, 10);
+
+        Hearit titleOnly = saveHearitWithTitleAndKeyword("spring-title", saveKeyword("nomatch")); // 제목만 매칭
+        Hearit keywordOnly = saveHearitWithTitleAndKeyword("nomatch-title", saveKeyword("spring-keyword")); // 키워드만 매칭
+        Hearit bothMatch = saveHearitWithTitleAndKeyword("spring-title", saveKeyword("spring-keyword")); // 둘 다 매칭
+        Hearit neither = saveHearitWithTitleAndKeyword("notitle", saveKeyword("nokeyword")); // 둘 다 매칭 안 됨
+
+        // when
+        List<HearitSearchResponse> result = hearitSearchService.search("spring", request);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(3),
+                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                        .containsExactlyInAnyOrder(titleOnly.getId(), keywordOnly.getId(), bothMatch.getId()),
+                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                        .doesNotContain(neither.getId())
+        );
+    }
+
 
     @Test
     @DisplayName("히어릿 목록을 검색으로 조회 시 최신순으로 정렬되어 반환된다.")

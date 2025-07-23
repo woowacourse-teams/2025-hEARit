@@ -65,7 +65,7 @@ class HearitRepositoryTest {
     }
 
     @Test
-    @DisplayName("제목 또는 키워드에 검색어가 포함된 히어릿만 반환한다.")
+    @DisplayName("제목 또는 키워드에 검색어가 포함된 히어릿을 반환한다.")
     void searchByTerm_filterByTitleOrKeyword() {
         // given
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("SpringKeyword"));
