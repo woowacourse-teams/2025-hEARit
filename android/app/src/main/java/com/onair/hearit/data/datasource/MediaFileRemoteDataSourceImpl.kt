@@ -1,6 +1,7 @@
 package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.api.MediaFileService
+import com.onair.hearit.data.dto.OriginalAudioUrlResponse
 import com.onair.hearit.data.dto.ScriptUrlResponse
 import com.onair.hearit.data.dto.ShortAudioUrlResponse
 import okhttp3.ResponseBody
@@ -21,6 +22,15 @@ class MediaFileRemoteDataSourceImpl(
         handleApiCall(
             errorMessage = ERROR_SCRIPT_FILE_LOAD_MESSAGE,
             apiCall = { mediaFileService.getScriptUrl(hearitId) },
+            transform = { response ->
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
+            },
+        )
+
+    override suspend fun getOriginalAudioUrl(hearitId: Long): Result<OriginalAudioUrlResponse> =
+        handleApiCall(
+            errorMessage = ERROR_AUDIO_FILE_LOAD_MESSAGE,
+            apiCall = { mediaFileService.getOriginalAudioUrl(hearitId) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },

@@ -60,8 +60,8 @@ class LibraryFragment :
         sheet.show(parentFragmentManager, sheet.tag)
     }
 
-    override fun onClickBookmarkedHearit() {
-        val intent = PlayerDetailActivity.newIntent(requireActivity())
+    override fun onClickBookmarkedHearit(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         startActivity(intent)
     }
 }
