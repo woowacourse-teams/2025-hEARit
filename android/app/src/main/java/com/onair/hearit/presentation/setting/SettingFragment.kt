@@ -60,6 +60,14 @@ class SettingFragment : Fragment() {
         viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
             binding.userInfo = userInfo
         }
+
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
+        }
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
