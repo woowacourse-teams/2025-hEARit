@@ -66,4 +66,17 @@ class HomeViewModel(
                 }
         }
     }
+
+    fun saveRecentHearit(
+        hearitId: Long,
+        title: String,
+    ) {
+        viewModelScope.launch {
+            recentHearitRepository
+                .saveRecentHearit(RecentHearit(hearitId, title))
+                .onFailure {
+                    _toastMessage.value = R.string.home_toast_recent_save_fail
+                }
+        }
+    }
 }

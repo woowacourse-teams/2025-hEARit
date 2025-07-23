@@ -181,8 +181,12 @@ class HomeFragment :
         startActivity(intent)
     }
 
-    override fun onClickRecommendHearit(hearitId: Long) {
+    override fun onClickRecommendHearit(
+        hearitId: Long,
+        title: String,
+    ) {
         navigateToPlayerDetail(hearitId)
+        viewModel.saveRecentHearit(hearitId, title)
         (requireActivity() as? MainActivity)?.showPlayerControlView()
     }
 
