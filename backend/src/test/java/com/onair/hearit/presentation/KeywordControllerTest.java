@@ -28,7 +28,7 @@ class KeywordControllerTest extends IntegrationTest {
                 .param("page", 1)
                 .param("size", 2)
                 .when()
-                .get("/api/v1/keyword")
+                .get("/api/v1/keywords")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
@@ -53,7 +53,7 @@ class KeywordControllerTest extends IntegrationTest {
         // when
         Keyword result = RestAssured.given()
                 .when()
-                .get("/api/v1/keyword/" + keyword.getId())
+                .get("/api/v1/keywords/" + keyword.getId())
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
@@ -73,7 +73,7 @@ class KeywordControllerTest extends IntegrationTest {
         // when & then
         RestAssured.given()
                 .when()
-                .get("/api/v1/keyword/999")
+                .get("/api/v1/keywords/999")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }
@@ -91,7 +91,7 @@ class KeywordControllerTest extends IntegrationTest {
         List<Keyword> result = RestAssured.given()
                 .param("size", size)
                 .when()
-                .get("/api/v1/keyword/recommend")
+                .get("/api/v1/keywords/recommend")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()

@@ -269,7 +269,7 @@ class HearitControllerTest extends IntegrationTest {
     }
 
     private Member saveMember() {
-        return dbHelper.insertMember(new Member("testId", "test1234!", null, "testMember"));
+        return dbHelper.insertMember(Member.createLocalUser("testId", "testNickname", "testPassword"));
     }
 
     private String generateToken(Member member) {

@@ -115,7 +115,7 @@ class HearitServiceTest {
     }
 
     private Member saveMember() {
-        return dbHelper.insertMember(new Member("testId", "test1234!", null, "testMember"));
+        return dbHelper.insertMember(Member.createLocalUser("testId", "testNickname", "testPassword"));
     }
 
     private Hearit saveHearitWithSuffix(int suffix) {

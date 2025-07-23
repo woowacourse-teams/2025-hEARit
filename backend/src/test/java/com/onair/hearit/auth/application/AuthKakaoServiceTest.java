@@ -43,9 +43,10 @@ class AuthKakaoServiceTest {
 
         String kakaoId = "12345678";
         String nickname = "새로운유저";
+        String profileImage = "프로필이미지.URL";
         KakaoUserInfoResponse kakaoUserInfo = new KakaoUserInfoResponse(
                 kakaoId
-                , new KakaoUserInfoResponse.Properties(nickname));
+                , new KakaoUserInfoResponse.Properties(nickname, profileImage));
         String accessToken = "valid-token";
         Mockito.when(kakaoUserInfoClient.getUserInfo(accessToken)).thenReturn(kakaoUserInfo);
 
@@ -66,12 +67,13 @@ class AuthKakaoServiceTest {
         // given
         String kakaoId = "12345678";
         String nickname = "존재하는유저";
-        Member saved = memberRepository.save(Member.createSocialUser(kakaoId, nickname));
+        String profileImage = "프로필이미지.URL";
+        Member saved = memberRepository.save(Member.createSocialUser(kakaoId, nickname, profileImage));
         assertThat(memberRepository.findBySocialId(kakaoId)).isPresent(); // 회원 정보가 이미 있음을 확인
 
         String accessToken = "valid-token";
         KakaoUserInfoResponse kakaoUserInfo = new KakaoUserInfoResponse(
-                kakaoId, new KakaoUserInfoResponse.Properties(nickname));
+                kakaoId, new KakaoUserInfoResponse.Properties(nickname, profileImage));
         Mockito.when(kakaoUserInfoClient.getUserInfo(accessToken)).thenReturn(kakaoUserInfo);
 
         KakaoLoginRequest request = new KakaoLoginRequest(accessToken);

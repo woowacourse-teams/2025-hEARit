@@ -63,7 +63,7 @@ public class AuthService {
     }
 
     private Member signupWithKakao(KakaoUserInfoResponse kakaoUser) {
-        Member member = Member.createSocialUser(kakaoUser.id(), kakaoUser.nickname());
+        Member member = Member.createSocialUser(kakaoUser.id(), kakaoUser.nickname(), kakaoUser.profileImage());
         return memberRepository.save(member);
     }
 
