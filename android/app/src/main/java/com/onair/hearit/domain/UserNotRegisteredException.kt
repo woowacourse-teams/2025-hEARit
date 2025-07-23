@@ -1,4 +1,4 @@
-package com.onair.hearit.data.datasource
+package com.onair.hearit.domain
 
 class UserNotRegisteredException(
     message: String,
