@@ -1,9 +1,11 @@
 package com.onair.hearit.presentation
 
 import android.util.TypedValue
+import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import com.onair.hearit.R
 import java.text.SimpleDateFormat
@@ -86,4 +88,20 @@ fun setFormattedDate(
     } catch (e: Exception) {
         textView.text = ""
     }
+}
+
+@BindingAdapter("visibleIfNotNull")
+fun setVisibleIfNotNull(
+    view: View,
+    value: Any?,
+) {
+    view.isVisible = value != null
+}
+
+@BindingAdapter("visibleIfNull")
+fun setVisibleIfNull(
+    view: View,
+    value: Any?,
+) {
+    view.isVisible = value == null
 }

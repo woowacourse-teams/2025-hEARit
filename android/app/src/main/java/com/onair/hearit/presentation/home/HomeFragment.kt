@@ -1,10 +1,12 @@
 package com.onair.hearit.presentation.home
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -14,11 +16,9 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentHomeBinding
-import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import java.time.LocalDateTime
 import kotlin.math.abs
 
 class HomeFragment :
@@ -29,7 +29,7 @@ class HomeFragment :
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private lateinit var recommendAdapter: RecommendHearitAdapter
-    private val categoryAdapter = CategoryAdapter()
+    private lateinit var categoryAdapter: CategoryAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,13 +47,23 @@ class HomeFragment :
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
         recommendAdapter = RecommendHearitAdapter(this)
+        categoryAdapter = CategoryAdapter()
 
+        binding.tvHomeNoRecentHearitText.setOnClickListener {
+            (activity as? MainActivity)?.apply {
+                selectTab(R.id.nav_explore)
+            }
+        }
         setupWindowInsets()
         setupListeners()
-        setupRecentHearit()
         setupRecommendRecyclerView()
         setupCategoryRecyclerView()
         observeViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.getRecentHearit()
     }
 
     private fun setupWindowInsets() {
@@ -76,20 +86,6 @@ class HomeFragment :
                 .addToBackStack(null)
                 .commit()
         }
-    }
-
-    private fun setupRecentHearit() {
-        binding.recentHearit =
-            RecentHearit(
-                id = 1L,
-                title = "최근 들은 히어릿 제목",
-                summary = "summary",
-                audioUrl = "a",
-                scriptUrl = "a",
-                playTime = 123,
-                categoryId = 12,
-                createdAt = LocalDateTime.now(),
-            )
     }
 
     private fun setupRecommendRecyclerView() {
@@ -144,6 +140,10 @@ class HomeFragment :
     }
 
     private fun observeViewModel() {
+        viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->
+            binding.recentHearit = recentHearit
+        }
+
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
             val repeatedItems = List(30) { index -> recommendItems[index % recommendItems.size] }
             recommendAdapter.submitList(repeatedItems) {
@@ -178,11 +178,22 @@ class HomeFragment :
 
     private fun navigateToPlayerDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
+        playerDetailLauncher.launch(intent)
     }
 
-    override fun onClickRecommendHearit(hearitId: Long) {
+    private val playerDetailLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                viewModel.getRecentHearit()
+            }
+        }
+
+    override fun onClickRecommendHearit(
+        hearitId: Long,
+        title: String,
+    ) {
         navigateToPlayerDetail(hearitId)
+        viewModel.saveRecentHearit(hearitId, title)
         (requireActivity() as? MainActivity)?.showPlayerControlView()
     }
 
