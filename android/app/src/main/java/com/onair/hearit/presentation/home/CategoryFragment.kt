@@ -8,7 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.onair.hearit.databinding.FragmentCategoryBinding
-import com.onair.hearit.domain.Category
+import com.onair.hearit.domain.model.Category
 
 class CategoryFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")

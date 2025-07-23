@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ItemCategoryBinding
-import com.onair.hearit.domain.Category
+import com.onair.hearit.domain.model.Category
 
 class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(

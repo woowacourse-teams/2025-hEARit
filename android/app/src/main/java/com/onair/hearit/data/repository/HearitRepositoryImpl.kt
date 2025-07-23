@@ -2,9 +2,9 @@ package com.onair.hearit.data.repository
 
 import com.onair.hearit.data.datasource.HearitRemoteDataSource
 import com.onair.hearit.data.toDomain
-import com.onair.hearit.domain.RandomHearit
-import com.onair.hearit.domain.RecommendHearit
-import com.onair.hearit.domain.SearchedHearit
+import com.onair.hearit.domain.model.RandomHearitItem
+import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.HearitRepository
 
 class HearitRepositoryImpl(
@@ -19,7 +19,7 @@ class HearitRepositoryImpl(
     override suspend fun getRandomHearits(
         page: Int?,
         size: Int?,
-    ): Result<List<RandomHearit>> =
+    ): Result<List<RandomHearitItem>> =
         handleResult {
             val response = hearitRemoteDataSource.getRandomHearits(page, size).getOrThrow()
             response.map { it.toDomain() }

@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentHomeBinding
-import com.onair.hearit.domain.Category
-import com.onair.hearit.domain.RecentHearit
+import com.onair.hearit.domain.model.Category
+import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import java.time.LocalDateTime

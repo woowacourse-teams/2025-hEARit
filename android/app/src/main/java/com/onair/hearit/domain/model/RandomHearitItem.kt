@@ -1,12 +1,10 @@
-package com.onair.hearit.domain
+package com.onair.hearit.domain.model
 
-data class ShortsHearit(
+data class RandomHearitItem(
     val id: Long,
     val title: String,
     val summary: String,
     val source: String,
-    val audioUrl: String,
-    val script: List<ScriptLine>,
     val playTime: Int,
     val createdAt: String,
 )

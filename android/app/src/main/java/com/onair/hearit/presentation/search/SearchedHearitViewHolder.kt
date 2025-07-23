@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemSearchedHearitBinding
-import com.onair.hearit.domain.SearchedHearit
+import com.onair.hearit.domain.model.SearchedHearit
 
 class SearchedHearitViewHolder(
     private val binding: ItemSearchedHearitBinding,

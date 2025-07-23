@@ -5,8 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.RandomHearit
-import com.onair.hearit.domain.ShortsHearit
+import com.onair.hearit.domain.model.HearitShorts
+import com.onair.hearit.domain.model.RandomHearitItem
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
@@ -19,8 +19,8 @@ class ExploreViewModel(
     private val hearitRepository: HearitRepository,
     private val getShortsHearitUseCase: GetShortsHearitUseCase,
 ) : ViewModel() {
-    private val _shortsHearits = MutableLiveData<List<ShortsHearit>>()
-    val shortsHearits: LiveData<List<ShortsHearit>> = _shortsHearits
+    private val _shortsHearits = MutableLiveData<List<HearitShorts>>()
+    val shortsHearits: LiveData<List<HearitShorts>> = _shortsHearits
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -70,7 +70,7 @@ class ExploreViewModel(
         }
     }
 
-    private suspend fun buildShortsHearit(items: List<RandomHearit>): List<ShortsHearit> =
+    private suspend fun buildShortsHearit(items: List<RandomHearitItem>): List<HearitShorts> =
         coroutineScope {
             items
                 .map { item ->
@@ -80,7 +80,7 @@ class ExploreViewModel(
         }
 
     private fun updateShortsHearit(
-        newItems: List<ShortsHearit>,
+        newItems: List<HearitShorts>,
         isInitial: Boolean,
     ) {
         _shortsHearits.value =

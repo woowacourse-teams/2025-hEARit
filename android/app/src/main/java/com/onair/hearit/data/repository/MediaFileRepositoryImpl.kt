@@ -1,8 +1,8 @@
 package com.onair.hearit.data.repository
 
 import com.onair.hearit.data.datasource.MediaFileRemoteDataSource
-import com.onair.hearit.domain.ScriptLine
-import com.onair.hearit.domain.ShortAudioUrl
+import com.onair.hearit.domain.model.ScriptLine
+import com.onair.hearit.domain.model.ShortAudioUrl
 import com.onair.hearit.domain.repository.MediaFileRepository
 import kotlinx.serialization.json.Json
 
