@@ -187,7 +187,8 @@ class HomeFragment :
     }
 
     private fun navigateToPlayerDetail() {
-        val intent = PlayerDetailActivity.newIntent(requireActivity())
+        // 추후 수정해야 함
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), 1)
         startActivity(intent)
     }
 

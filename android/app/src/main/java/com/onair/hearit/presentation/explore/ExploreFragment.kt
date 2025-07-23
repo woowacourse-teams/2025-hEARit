@@ -148,8 +148,8 @@ class ExploreFragment :
         player.release()
     }
 
-    override fun onClickHearitInfo() {
-        val intent = PlayerDetailActivity.newIntent(requireActivity())
+    override fun onClickHearitInfo(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         startActivity(intent)
     }
 

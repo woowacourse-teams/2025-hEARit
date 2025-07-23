@@ -10,5 +10,5 @@ data class Hearit(
     val playTime: Int,
     val createdAt: String,
     val isBookmarked: Boolean,
-    val bookmarkId: Int,
+    val bookmarkId: Int?,
 )

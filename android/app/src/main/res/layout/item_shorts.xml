@@ -71,7 +71,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginBottom="40dp"
             android:background="@drawable/bg_gradient_radius_8dp"
-            android:onClick="@{() -> shortsClickListener.onClickHearitInfo()}"
+            android:onClick="@{() -> shortsClickListener.onClickHearitInfo(hearitItem.id)}"
             app:layout_constraintBottom_toTopOf="@id/layout_explore_player"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">

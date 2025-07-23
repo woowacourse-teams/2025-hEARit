@@ -4,23 +4,25 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.R
 import com.onair.hearit.domain.ScriptLine
 
-class PlayerDetailScriptAdapter(
-    private val items: List<ScriptLine>,
-) : RecyclerView.Adapter<PlayerDetailScriptViewHolder>() {
-    private var highlightedPosition = -1
+class PlayerDetailScriptAdapter : ListAdapter<ScriptLine, PlayerDetailScriptViewHolder>(DiffCallback) {
+    private var highlightedId: Long? = null
 
-    fun highlightPosition(position: Int) {
-        if (position == highlightedPosition) return
+    fun highlightScriptLine(id: Long?) {
+        if (highlightedId == id) return
 
-        val oldPos = highlightedPosition
-        highlightedPosition = position
+        val previousId = highlightedId
+        highlightedId = id
 
-        if (oldPos != -1) notifyItemChanged(oldPos)
-        notifyItemChanged(highlightedPosition)
+        val prevIndex = currentList.indexOfFirst { it.id == previousId }
+        val newIndex = currentList.indexOfFirst { it.id == id }
+
+        if (prevIndex != -1) notifyItemChanged(prevIndex)
+        if (newIndex != -1) notifyItemChanged(newIndex)
     }
 
     override fun onCreateViewHolder(
@@ -32,32 +34,51 @@ class PlayerDetailScriptAdapter(
         holder: PlayerDetailScriptViewHolder,
         position: Int,
     ) {
-        val item = items[position]
+        val item = getItem(position)
         val context = holder.itemView.context
         val binding = holder.binding
 
         val timePrefix = formatTime(item.start)
-        binding.tvScriptBody.text = "$timePrefix    ${item.text}"
+        binding.tvScriptBody.text = item.text
+        binding.tvScriptTime.text = timePrefix
 
-        if (position == highlightedPosition) {
-            binding.tvScriptBody.setTextColor(ContextCompat.getColor(context, R.color.hearit_gray4))
-            binding.tvScriptBody.setBackgroundColor(Color.TRANSPARENT)
+        binding.tvScriptBody.setTextColor(ContextCompat.getColor(context, R.color.hearit_gray4))
+        binding.tvScriptBody.setBackgroundColor(Color.TRANSPARENT)
+        binding.tvScriptTime.setTextColor(ContextCompat.getColor(context, R.color.hearit_gray4))
+        binding.tvScriptTime.setBackgroundColor(Color.TRANSPARENT)
+
+        if (item.id == highlightedId) {
             binding.tvScriptBody.textSize = 18f
             binding.tvScriptBody.setTypeface(null, Typeface.BOLD)
+            binding.tvScriptTime.textSize = 18f
+            binding.tvScriptTime.setTypeface(null, Typeface.BOLD)
         } else {
-            binding.tvScriptBody.setTextColor(ContextCompat.getColor(context, R.color.hearit_gray4))
-            binding.tvScriptBody.setBackgroundColor(Color.TRANSPARENT)
             binding.tvScriptBody.textSize = 16f
             binding.tvScriptBody.setTypeface(null, Typeface.NORMAL)
+            binding.tvScriptTime.textSize = 16f
+            binding.tvScriptTime.setTypeface(null, Typeface.NORMAL)
         }
     }
-
-    override fun getItemCount() = items.size
 
     private fun formatTime(ms: Long): String {
         val totalSeconds = ms / 1000
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
         return String.format("%02d:%02d", minutes, seconds)
+    }
+
+    companion object {
+        private val DiffCallback =
+            object : DiffUtil.ItemCallback<ScriptLine>() {
+                override fun areItemsTheSame(
+                    oldItem: ScriptLine,
+                    newItem: ScriptLine,
+                ): Boolean = oldItem.id == newItem.id
+
+                override fun areContentsTheSame(
+                    oldItem: ScriptLine,
+                    newItem: ScriptLine,
+                ): Boolean = oldItem == newItem
+            }
     }
 }

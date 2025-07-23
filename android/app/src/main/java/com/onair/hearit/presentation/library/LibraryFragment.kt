@@ -61,7 +61,8 @@ class LibraryFragment :
     }
 
     override fun onClickBookmarkedHearit() {
-        val intent = PlayerDetailActivity.newIntent(requireActivity())
+        // 추후 수정 예정
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), 1)
         startActivity(intent)
     }
 }
