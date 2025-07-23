@@ -54,7 +54,7 @@ class PlaybackService : MediaSessionService() {
 
             player.setMediaItem(mediaItem)
             player.prepare()
-            player.playWhenReady = true // 액티비티 시작하며 바로 재생
+            player.playWhenReady = true
         }
 
         return super.onStartCommand(intent, flags, startId)
