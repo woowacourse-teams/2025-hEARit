@@ -1,7 +1,7 @@
 language: "ko-KR"
 
 reviews:
-  profile: "thorough"
+  profile: "assertive"
   request_changes_workflow: false
   high_level_summary: true
   review_status: true
