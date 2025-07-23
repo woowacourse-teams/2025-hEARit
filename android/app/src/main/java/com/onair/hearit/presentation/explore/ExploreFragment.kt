@@ -65,10 +65,8 @@ class ExploreFragment :
         )
     }
 
-    // 홈에서 돌아올 때 사용함 + exoplayer는 UI가 완전히 포커스를 가진 시점 이후에 재생되어야 하기 때문에 onResume에서 실행
     override fun onResume() {
         super.onResume()
-        // player가 준비된 상태이고 + 현재 재생중이 아닌경우 => Explore 화면에서는 항상 실행되어야 하기 때문임
         if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
             player.play()
         }
@@ -117,6 +115,8 @@ class ExploreFragment :
                         player.setMediaItem(MediaItem.fromUri(item.audioUrl))
                         player.prepare()
                         player.play()
+
+                        checkAndLoadNextPage(position)
                     }
                 }
             },
@@ -130,6 +130,12 @@ class ExploreFragment :
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
+        }
+    }
+
+    private fun checkAndLoadNextPage(position: Int) {
+        if (position >= adapter.itemCount - 2) {
+            viewModel.fetchNextPage()
         }
     }
 

@@ -7,6 +7,7 @@ import com.onair.hearit.data.datasource.MediaFileRemoteDataSourceImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
 import com.onair.hearit.data.repository.MediaFileRepositoryImpl
 import com.onair.hearit.di.NetworkProvider
+import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
 
 @Suppress("UNCHECKED_CAST")
 class ExploreViewModelFactory : ViewModelProvider.Factory {
@@ -16,6 +17,11 @@ class ExploreViewModelFactory : ViewModelProvider.Factory {
         val mediaFileRemoteDataSource =
             MediaFileRemoteDataSourceImpl(NetworkProvider.mediaFileService)
         val mediaFileRepository = MediaFileRepositoryImpl(mediaFileRemoteDataSource)
-        return ExploreViewModel(hearitRepository, mediaFileRepository) as T
+        val getShortsHearitUseCase = GetShortsHearitUseCase(mediaFileRepository)
+
+        return ExploreViewModel(
+            hearitRepository = hearitRepository,
+            getShortsHearitUseCase = getShortsHearitUseCase,
+        ) as T
     }
 }
