@@ -66,7 +66,7 @@ class KeywordServiceTest {
         Keyword keyword = saveKeyword("keyword");
 
         // when
-        KeywordResponse result = keywordService.getKeywordById(keyword.getId());
+        KeywordResponse result = keywordService.getKeyword(keyword.getId());
 
         // then
         assertThat(result.id()).isEqualTo(keyword.getId());
@@ -80,7 +80,7 @@ class KeywordServiceTest {
         Long notExistId = 999L;
 
         // when & then
-        assertThatThrownBy(() -> keywordService.getKeywordById(notExistId))
+        assertThatThrownBy(() -> keywordService.getKeyword(notExistId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("keywordId");
     }

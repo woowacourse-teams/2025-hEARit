@@ -45,7 +45,7 @@ public class KeywordService {
         return allIds.subList(0, fetchSize);
     }
 
-    public KeywordResponse getKeywordById(final Long id) {
+    public KeywordResponse getKeyword(final Long id) {
         Keyword keyword = findKeywordById(id);
         return KeywordResponse.from(keyword);
     }

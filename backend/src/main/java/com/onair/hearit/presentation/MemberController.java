@@ -32,7 +32,7 @@ public class MemberController {
             })
     @GetMapping("/me")
     public ResponseEntity<MemberInfoResponse> readCurrentMemberInfo(@AuthenticationPrincipal CurrentMember member) {
-        MemberInfoResponse response = memberService.getMemberById(member.memberId());
+        MemberInfoResponse response = memberService.getMember(member.memberId());
         return ResponseEntity.ok(response);
     }
 }

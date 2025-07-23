@@ -43,7 +43,7 @@ class MemberServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // when
-        MemberInfoResponse response = memberService.getMemberById(member.getId());
+        MemberInfoResponse response = memberService.getMember(member.getId());
 
         // then
         assertAll(() -> {
@@ -60,7 +60,7 @@ class MemberServiceTest {
         Long nonExistId = 999L;
 
         // when & then
-        assertThatThrownBy(() -> memberService.getMemberById(nonExistId))
+        assertThatThrownBy(() -> memberService.getMember(nonExistId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("memberId");
     }
