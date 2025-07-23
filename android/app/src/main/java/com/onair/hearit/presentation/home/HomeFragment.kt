@@ -17,7 +17,6 @@ import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.explore.ExploreFragment
 import kotlin.math.abs
 
 class HomeFragment :
@@ -49,13 +48,9 @@ class HomeFragment :
         categoryAdapter = CategoryAdapter()
 
         binding.tvHomeNoRecentHearitText.setOnClickListener {
-            parentFragmentManager
-                .beginTransaction()
-                .replace(
-                    R.id.fragment_container_view,
-                    ExploreFragment(),
-                ).addToBackStack(null)
-                .commit()
+            (activity as? MainActivity)?.apply {
+                selectTab(R.id.nav_explore)
+            }
         }
         setupWindowInsets()
         setupListeners()
