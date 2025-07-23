@@ -56,6 +56,7 @@
     <string name="setting_notification">알림</string>
     <string name="setting_recommend_notification">히어릿 추천 알림</string>
     <string name="setting_app_version">앱 버전 v%s</string>
+    <string name="setting_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
 
     <!-- LibraryFragment-->
     <string name="library_nickname"><font color="#B677F3">닉네임제한은9글자</font>님,</string>

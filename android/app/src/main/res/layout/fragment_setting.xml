@@ -5,6 +5,9 @@
 
     <data>
 
+        <variable
+            name="userInfo"
+            type="com.onair.hearit.domain.model.UserInfo" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -39,11 +42,12 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_marginTop="40dp"
-            android:src="@drawable/img_default_profile"
+            app:imageUrl="@{userInfo.profileImage}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_setting_title"
-            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage" />
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage"
+            tools:src="@drawable/img_default_profile" />
 
         <TextView
             android:id="@+id/tv_setting_nickname"
@@ -55,7 +59,7 @@
             android:gravity="center"
             android:paddingHorizontal="60dp"
             android:paddingVertical="12dp"
-            android:text="@string/app_name"
+            android:text="@{userInfo.nickname}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/iv_setting_profile"
@@ -93,8 +97,8 @@
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switch_notification"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:thumb="@drawable/check_switch_thumb"
             app:layout_constraintBottom_toBottomOf="@id/tv_setting_notification_text"
             app:layout_constraintEnd_toEndOf="@id/divider1"
