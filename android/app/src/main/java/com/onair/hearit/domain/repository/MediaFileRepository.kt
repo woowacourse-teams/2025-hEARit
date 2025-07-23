@@ -1,8 +1,6 @@
 package com.onair.hearit.domain.repository
 
-import RandomHearitItem
 import com.onair.hearit.domain.model.Hearit
-import com.onair.hearit.domain.model.HearitShorts
 import com.onair.hearit.domain.model.OriginalAudioUrl
 import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.domain.model.ShortAudioUrl

@@ -1,6 +1,6 @@
 package com.onair.hearit.domain.repository
 
-import RandomHearitItem
+import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
@@ -13,7 +13,7 @@ interface HearitRepository {
     suspend fun getRandomHearits(
         page: Int? = null,
         size: Int? = null,
-    ): Result<List<RandomHearitItem>>
+    ): Result<List<RandomHearit>>
 
     suspend fun getSearchHearits(
         searchTerm: String,

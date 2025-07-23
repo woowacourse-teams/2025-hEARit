@@ -11,7 +11,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemShortsBinding
-import com.onair.hearit.domain.model.HearitShorts
+import com.onair.hearit.domain.model.ShortsHearit
 
 class ShortsViewHolder(
     private val binding: ItemShortsBinding,
@@ -23,7 +23,7 @@ class ShortsViewHolder(
     private val handler = Handler(Looper.getMainLooper())
     private var updateRunnable: Runnable? = null
 
-    private var shortsHearit: HearitShorts? = null
+    private var shortsHearit: ShortsHearit? = null
     private val scriptAdapter = ScriptAdapter()
 
     init {
@@ -31,7 +31,7 @@ class ShortsViewHolder(
     }
 
     @OptIn(UnstableApi::class)
-    fun bind(item: HearitShorts) {
+    fun bind(item: ShortsHearit) {
         this.shortsHearit = item
 
         binding.hearitItem = item

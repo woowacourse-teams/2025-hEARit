@@ -30,7 +30,6 @@ class MediaFileRepositoryImpl(
                 mediaFileRemoteDataSource.getScriptJson(scriptUrl).getOrElse { throw it }
             val jsonString = responseBody.string()
             Json.decodeFromString(jsonString)
-            Json.Default.decodeFromString(jsonString)
         }
 
     override suspend fun getOriginalAudioUrl(hearitId: Long): Result<OriginalAudioUrl> =
