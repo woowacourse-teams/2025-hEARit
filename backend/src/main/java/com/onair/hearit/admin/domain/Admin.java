@@ -18,16 +18,16 @@ public class Admin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(name = "login_id", nullable = false, unique = true)
-    String loginId;
+    private String loginId;
 
     @Column(name = "password", nullable = false)
-    String password;
+    private String password;
 
     @Column(name = "nickname", nullable = false)
-    String nickname;
+    private String nickname;
 
     public Admin(String loginId, String password, String nickname) {
         this.loginId = loginId;

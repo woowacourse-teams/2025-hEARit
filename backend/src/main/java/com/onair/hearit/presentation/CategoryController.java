@@ -1,7 +1,7 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.CategoryService;
-import com.onair.hearit.dto.request.CategoryListCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,8 +26,8 @@ public class CategoryController {
     public ResponseEntity<List<CategoryResponse>> readCategories(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
-        CategoryListCondition condition = new CategoryListCondition(page, size);
-        List<CategoryResponse> responses = categoryService.getCategories(condition);
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        List<CategoryResponse> responses = categoryService.getCategories(pagingRequest);
         return ResponseEntity.ok(responses);
     }
 }

@@ -1,15 +1,16 @@
 package com.onair.hearit.admin.application;
 
+import com.onair.hearit.admin.dto.request.HearitCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
-import com.onair.hearit.admin.dto.request.HearitUploadRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse.KeywordInHearit;
-import com.onair.hearit.admin.dto.response.PagedResponse;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
+import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -34,11 +35,11 @@ public class AdminHearitService {
     private final KeywordRepository keywordRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
 
-    //TODO: 리팩터링 필요
-    public PagedResponse<HearitAdminResponse> getPageHearits(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("createdAt")));
-        Page<Hearit> pageHearits = hearitRepository.findAll(pageable);
-        List<Long> hearitIds = pageHearits.getContent().stream()
+    public PagedResponse<HearitAdminResponse> getHearits(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(),
+                Sort.by(Sort.Order.desc("createdAt")));
+        Page<Hearit> hearits = hearitRepository.findAll(pageable);
+        List<Long> hearitIds = hearits.getContent().stream()
                 .map(Hearit::getId)
                 .toList();
         List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
@@ -51,12 +52,12 @@ public class AdminHearitService {
                                 Collectors.toList()
                         )
                 ));
-        Page<HearitAdminResponse> dtoPage = pageHearits.map(h -> HearitAdminResponse.from(h, keywordMap));
+        Page<HearitAdminResponse> dtoPage = hearits.map(h -> HearitAdminResponse.from(h, keywordMap));
         return PagedResponse.from(dtoPage);
     }
 
     @Transactional
-    public void uploadHearit(HearitUploadRequest request) {
+    public void addHearit(HearitCreateRequest request) {
         Category category = getCategoryById(request.categoryId());
         Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), request.originalAudioUrl(),
                 request.shortAudioUrl(), request.scriptUrl(), request.source(), category);
@@ -92,7 +93,7 @@ public class AdminHearitService {
     }
 
     @Transactional
-    public void updateHearit(Long hearitId, HearitUpdateRequest request) {
+    public void modifyHearit(Long hearitId, HearitUpdateRequest request) {
         Category category = getCategoryById(request.categoryId());
         Hearit hearit = hearitRepository.findById(hearitId)
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));

@@ -3,7 +3,7 @@ package com.onair.hearit.dto.request;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.common.exception.custom.InvalidPageException;
+import com.onair.hearit.common.exception.custom.InvalidInputException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,11 +25,11 @@ class TitleSearchConditionTest {
         // when & then
         assertAll(
                 () -> assertThatThrownBy(() -> new TitleSearchCondition(validSearchTerm, negativePage, validSize))
-                        .isInstanceOf(InvalidPageException.class),
+                        .isInstanceOf(InvalidInputException.class),
                 () -> assertThatThrownBy(() -> new TitleSearchCondition(validSearchTerm, validPage, negativeSize))
-                        .isInstanceOf(InvalidPageException.class),
+                        .isInstanceOf(InvalidInputException.class),
                 () -> assertThatThrownBy(() -> new TitleSearchCondition(validSearchTerm, validPage, oversizedSize))
-                        .isInstanceOf(InvalidPageException.class)
+                        .isInstanceOf(InvalidInputException.class)
         );
     }
 }

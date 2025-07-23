@@ -1,7 +1,7 @@
 package com.onair.hearit.application;
 
 import com.onair.hearit.domain.Category;
-import com.onair.hearit.dto.request.CategoryListCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import java.util.List;
@@ -17,8 +17,8 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public List<CategoryResponse> getCategories(CategoryListCondition condition) {
-        Pageable pageable = PageRequest.of(condition.page(), condition.size());
+    public List<CategoryResponse> getCategories(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Category> categories = categoryRepository.findAll(pageable);
         return categories.stream()
                 .map(CategoryResponse::from)
