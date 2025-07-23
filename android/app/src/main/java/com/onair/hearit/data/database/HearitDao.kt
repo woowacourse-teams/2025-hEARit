@@ -11,5 +11,5 @@ interface HearitDao {
     fun getRecentHearit(): RecentHearitEntity
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertRecentHearit()
+    fun insertRecentHearit(entity: RecentHearitEntity)
 }
