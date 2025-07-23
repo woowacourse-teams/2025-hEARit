@@ -7,7 +7,7 @@
 
         <variable
             name="item"
-            type="com.onair.hearit.domain.SearchedHearit" />
+            type="com.onair.hearit.domain.model.SearchedHearit" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

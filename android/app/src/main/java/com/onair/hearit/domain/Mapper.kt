@@ -1,5 +1,9 @@
 package com.onair.hearit.domain
 
+import com.onair.hearit.domain.model.HearitShorts
+import com.onair.hearit.domain.model.RandomHearitItem
+import com.onair.hearit.domain.model.ScriptLine
+
 fun RandomHearit.toHearitShorts(
     audioUrl: String,
     script: List<ScriptLine>,

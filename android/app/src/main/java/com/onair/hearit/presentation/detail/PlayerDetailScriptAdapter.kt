@@ -7,7 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.R
-import com.onair.hearit.domain.ScriptLine
+import com.onair.hearit.domain.model.ScriptLine
 
 class PlayerDetailScriptAdapter : ListAdapter<ScriptLine, PlayerDetailScriptViewHolder>(DiffCallback) {
     private var highlightedId: Long? = null

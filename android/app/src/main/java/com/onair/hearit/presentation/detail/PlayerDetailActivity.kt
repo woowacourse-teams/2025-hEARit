@@ -25,6 +25,7 @@ import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
+import com.onair.hearit.domain.model.ScriptLine
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {

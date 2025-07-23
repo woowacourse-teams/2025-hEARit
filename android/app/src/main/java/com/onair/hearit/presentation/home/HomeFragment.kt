@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentHomeBinding
-import com.onair.hearit.domain.Category
-import com.onair.hearit.domain.RecentHearit
+import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import java.time.LocalDateTime
 import kotlin.math.abs
@@ -48,7 +48,7 @@ class HomeFragment :
         binding.lifecycleOwner = this
         recommendAdapter = RecommendHearitAdapter(this)
 
-        setupInsets()
+        setupWindowInsets()
         setupListeners()
         setupRecentHearit()
         setupRecommendRecyclerView()
@@ -56,7 +56,7 @@ class HomeFragment :
         observeViewModel()
     }
 
-    private fun setupInsets() {
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
@@ -117,16 +117,6 @@ class HomeFragment :
 
     private fun setupCategoryRecyclerView() {
         binding.rvHomeCategory.adapter = categoryAdapter
-        val sampleCategories =
-            List(6) { i ->
-                val colors = if (i % 2 == 0) "#9533F5" else "#B2B4B6"
-                Category(
-                    id = i.toLong(),
-                    color = colors,
-                    category = "카테고리 $i",
-                )
-            }
-        categoryAdapter.submitList(sampleCategories)
     }
 
     private fun applyCenterScalingEffect(
@@ -161,6 +151,10 @@ class HomeFragment :
             }
         }
 
+        viewModel.categories.observe(viewLifecycleOwner) { categories ->
+            categoryAdapter.submitList(categories)
+        }
+
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
@@ -187,8 +181,9 @@ class HomeFragment :
         startActivity(intent)
     }
 
-    override fun onClickRecommendHearit(hearitId: Long) {
-        navigateToPlayerDetail(hearitId)
+    override fun onClickRecommendHearit() {
+        navigateToPlayerDetail()
+        (requireActivity() as? MainActivity)?.showPlayerControlView()
     }
 
     override fun onDestroyView() {

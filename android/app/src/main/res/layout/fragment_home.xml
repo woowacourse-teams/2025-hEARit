@@ -7,7 +7,7 @@
 
         <variable
             name="recentHearit"
-            type="com.onair.hearit.domain.RecentHearit" />
+            type="com.onair.hearit.domain.model.RecentHearit" />
     </data>
 
     <androidx.core.widget.NestedScrollView

@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemExploreScriptBinding
-import com.onair.hearit.domain.ScriptLine
+import com.onair.hearit.domain.model.ScriptLine
 
 class ScriptViewHolder(
     private val binding: ItemExploreScriptBinding,

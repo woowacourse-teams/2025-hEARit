@@ -6,6 +6,9 @@ import com.onair.hearit.domain.RandomHearit
 import com.onair.hearit.domain.RecommendHearit
 import com.onair.hearit.domain.SearchedHearit
 import com.onair.hearit.domain.SingleHearit
+import com.onair.hearit.domain.model.RandomHearitItem
+import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.HearitRepository
 
 class HearitRepositoryImpl(

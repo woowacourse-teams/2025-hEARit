@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemKeywordBinding
-import com.onair.hearit.domain.Keyword
+import com.onair.hearit.domain.model.Keyword
 
 class KeywordViewHolder(
     val binding: ItemKeywordBinding,

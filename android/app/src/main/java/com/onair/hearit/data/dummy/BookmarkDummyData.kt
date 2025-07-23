@@ -1,6 +1,6 @@
 package com.onair.hearit.data.dummy
 
-import com.onair.hearit.domain.Bookmark
+import com.onair.hearit.domain.model.Bookmark
 
 object BookmarkDummyData {
     fun getBookmarks(): List<Bookmark> =

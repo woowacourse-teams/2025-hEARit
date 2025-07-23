@@ -11,7 +11,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemShortsBinding
-import com.onair.hearit.domain.HearitShorts
+import com.onair.hearit.domain.model.HearitShorts
 
 class ShortsViewHolder(
     private val binding: ItemShortsBinding,

@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemRecommendHearitBinding
-import com.onair.hearit.domain.RecommendHearit
+import com.onair.hearit.domain.model.RecommendHearit
 
 class RecommendViewHolder(
     private val binding: ItemRecommendHearitBinding,

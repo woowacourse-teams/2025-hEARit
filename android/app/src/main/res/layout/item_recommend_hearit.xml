@@ -7,7 +7,7 @@
 
         <variable
             name="item"
-            type="com.onair.hearit.domain.RecommendHearit" />
+            type="com.onair.hearit.domain.model.RecommendHearit" />
 
         <variable
             name="recommendClickListener"

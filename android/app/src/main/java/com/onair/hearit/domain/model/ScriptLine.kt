@@ -1,4 +1,4 @@
-package com.onair.hearit.domain
+package com.onair.hearit.domain.model
 
 import kotlinx.serialization.Serializable
 
