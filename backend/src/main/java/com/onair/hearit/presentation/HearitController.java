@@ -4,7 +4,6 @@ import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.request.SearchCondition;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
@@ -72,7 +71,6 @@ public class HearitController {
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
-        SearchCondition condition = new SearchCondition(searchTerm, page, size);
         PagingRequest pagingRequest = new PagingRequest(page, size);
         List<HearitSearchResponse> response = hearitSearchService.search(searchTerm, pagingRequest);
         return ResponseEntity.ok(response);
