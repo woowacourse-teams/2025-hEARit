@@ -19,7 +19,7 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
-import com.onair.hearit.domain.Keyword
+import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.home.CategoryAdapter
 
 class SearchFragment : Fragment() {

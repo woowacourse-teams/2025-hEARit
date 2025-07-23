@@ -7,7 +7,7 @@
 
         <variable
             name="keywordItem"
-            type="com.onair.hearit.domain.Keyword" />
+            type="com.onair.hearit.domain.model.Keyword" />
 
     </data>
 

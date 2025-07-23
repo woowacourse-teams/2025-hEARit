@@ -1,6 +1,6 @@
 package com.onair.hearit.domain.repository
 
-import com.onair.hearit.domain.Category
+import com.onair.hearit.domain.model.Category
 
 interface CategoryRepository {
     suspend fun getCategories(): Result<List<Category>>

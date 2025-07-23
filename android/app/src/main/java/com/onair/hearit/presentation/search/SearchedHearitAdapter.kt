@@ -3,7 +3,7 @@ package com.onair.hearit.presentation.search
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.SearchedHearit
+import com.onair.hearit.domain.model.SearchedHearit
 
 class SearchedHearitAdapter : ListAdapter<SearchedHearit, SearchedHearitViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(

@@ -5,8 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.Category
-import com.onair.hearit.domain.RecommendHearit
+import com.onair.hearit.domain.model.Category
+import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.presentation.SingleLiveData

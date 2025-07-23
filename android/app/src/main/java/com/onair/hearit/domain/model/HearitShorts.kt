@@ -1,4 +1,4 @@
-package com.onair.hearit.domain
+package com.onair.hearit.domain.model
 
 data class HearitShorts(
     val id: Long,

@@ -3,7 +3,7 @@ package com.onair.hearit.presentation.explore
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.ScriptLine
+import com.onair.hearit.domain.model.ScriptLine
 
 class ScriptAdapter : ListAdapter<ScriptLine, ScriptViewHolder>((DiffCallback)) {
     private var highlightedId: Long? = null

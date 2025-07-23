@@ -68,14 +68,12 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupKakao() {
         binding.btnLoginKakao.setOnClickListener {
-            // 카카오계정으로 로그인 공통 callback 구성
             // 카카오톡으로 로그인 할 수 없어 카카오계정으로 로그인할 경우 사용됨
             val kakaoCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
                 if (error != null) {
                     Log.e("kakao login", "카카오계정으로 로그인 실패", error)
                 } else if (token != null) {
                     showToast("카카오 로그인 성공")
-                    Log.d("meeple_log", token.accessToken)
                     viewModel.kakaoLogin(token.accessToken)
                 }
             }

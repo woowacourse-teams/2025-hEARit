@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
-import com.onair.hearit.domain.ScriptLine
+import com.onair.hearit.domain.model.ScriptLine
 
 class PlayerDetailScriptAdapter(
     private val items: List<ScriptLine>,

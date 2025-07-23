@@ -3,7 +3,7 @@ package com.onair.hearit.presentation.search
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.Keyword
+import com.onair.hearit.domain.model.Keyword
 
 class KeywordAdapter : ListAdapter<Keyword, KeywordViewHolder>(DiffUtil) {
     override fun onCreateViewHolder(
