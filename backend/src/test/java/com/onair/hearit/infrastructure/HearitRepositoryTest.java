@@ -96,7 +96,7 @@ class HearitRepositoryTest {
     void searchByTerm_avoidDuplicateWhenTitleAndKeywordMatch() {
         // given
         Keyword keyword = dbHelper.insertKeyword(new Keyword("springboot"));
-        Hearit hearit = saveHearitWithTitleAndKeyword("SpringBoot", keyword); // 제목, 키워드 모두 매칭
+        Hearit hearit = saveHearitWithTitleAndKeyword("SpringBoot", keyword);
 
         Pageable pageable = PageRequest.of(0, 10);
 

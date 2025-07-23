@@ -1,8 +1,7 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.CategoryService;
-import com.onair.hearit.dto.request.CategoryListCondition;
-import com.onair.hearit.dto.request.CategorySearchCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,8 +28,8 @@ public class CategoryController {
     public ResponseEntity<List<CategoryResponse>> readCategories(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
-        CategoryListCondition condition = new CategoryListCondition(page, size);
-        List<CategoryResponse> responses = categoryService.getCategories(condition);
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        List<CategoryResponse> responses = categoryService.getCategories(pagingRequest);
         return ResponseEntity.ok(responses);
     }
 
@@ -40,8 +39,8 @@ public class CategoryController {
             @PathVariable Long categoryId,
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "20") Integer size) {
-        CategorySearchCondition condition = new CategorySearchCondition(categoryId, page, size);
-        List<HearitSearchResponse> response = categoryService.findHearitsByCategory(condition);
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        List<HearitSearchResponse> response = categoryService.findHearitsByCategory(categoryId, pagingRequest);
         return ResponseEntity.ok(response);
     }
 }

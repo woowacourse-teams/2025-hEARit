@@ -2,8 +2,7 @@ package com.onair.hearit.application;
 
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.dto.request.CategoryListCondition;
-import com.onair.hearit.dto.request.CategorySearchCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
@@ -22,17 +21,17 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final HearitRepository hearitRepository;
 
-    public List<CategoryResponse> getCategories(CategoryListCondition condition) {
-        Pageable pageable = PageRequest.of(condition.page(), condition.size());
+    public List<CategoryResponse> getCategories(PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Category> categories = categoryRepository.findAll(pageable);
         return categories.stream()
                 .map(CategoryResponse::from)
                 .toList();
     }
 
-    public List<HearitSearchResponse> findHearitsByCategory(CategorySearchCondition condition) {
-        Pageable pageable = PageRequest.of(condition.page(), condition.size());
-        Page<Hearit> result = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(condition.categoryId(), pageable);
+    public List<HearitSearchResponse> findHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
+        Page<Hearit> result = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
         return result.stream()
                 .map(HearitSearchResponse::from)
                 .toList();

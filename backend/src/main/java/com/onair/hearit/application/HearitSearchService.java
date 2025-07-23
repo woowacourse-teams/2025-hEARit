@@ -1,7 +1,7 @@
 package com.onair.hearit.application;
 
 import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.dto.request.SearchCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.util.List;
@@ -17,9 +17,9 @@ public class HearitSearchService {
 
     private final HearitRepository hearitRepository;
 
-    public List<HearitSearchResponse> search(SearchCondition condition) {
-        String likeSearchTerm = "%" + condition.searchTerm() + "%";
-        Pageable pageable = PageRequest.of(condition.page(), condition.size());
+    public List<HearitSearchResponse> search(String searchTerm, PagingRequest pagingRequest) {
+        String likeSearchTerm = "%" + searchTerm + "%";
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.searchByTerm(likeSearchTerm, pageable);
         return hearits.stream()
                 .map(HearitSearchResponse::from)

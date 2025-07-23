@@ -6,8 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.dto.request.CategoryListCondition;
-import com.onair.hearit.dto.request.CategorySearchCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
@@ -53,10 +52,10 @@ class CategoryServiceTest {
         saveCategory("category4", "#444");
         saveCategory("category5", "#555");
 
-        CategoryListCondition condition = new CategoryListCondition(1, 2);
+        PagingRequest pagingRequest = new PagingRequest(1, 2);// page 1 (두 번째 페이지), size 2
 
         // when
-        List<CategoryResponse> result = categoryService.getCategories(condition);
+        List<CategoryResponse> result = categoryService.getCategories(pagingRequest);
 
         // then
         assertAll(
@@ -77,10 +76,10 @@ class CategoryServiceTest {
         Hearit hearit1 = saveHearitWithCategory(category1);
         Hearit hearit2 = saveHearitWithCategory(category1);
         saveHearitWithCategory(category2);
-        CategorySearchCondition condition = new CategorySearchCondition(category1.getId(), 0, 10);
+        PagingRequest request = new PagingRequest(0, 10);
 
         // when
-        List<HearitSearchResponse> result = categoryService.findHearitsByCategory(condition);
+        List<HearitSearchResponse> result = categoryService.findHearitsByCategory(category1.getId(), request);
 
         // then
         assertAll(
@@ -98,10 +97,10 @@ class CategoryServiceTest {
         Hearit hearit1 = saveHearitWithCategory(category);
         Hearit hearit2 = saveHearitWithCategory(category);
         Hearit hearit3 = saveHearitWithCategory(category);
-        CategorySearchCondition condition = new CategorySearchCondition(category.getId(), 1, 2);
+        PagingRequest request = new PagingRequest(1, 2);
 
         // when
-        List<HearitSearchResponse> result = categoryService.findHearitsByCategory(condition);
+        List<HearitSearchResponse> result = categoryService.findHearitsByCategory(category.getId(), request);
 
         // then
         assertAll(

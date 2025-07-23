@@ -8,6 +8,7 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.request.SearchCondition;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -43,7 +44,7 @@ class HearitSearchServiceTest {
     @DisplayName("검색 시 제목에 검색어가 포함된 히어릿만 반환한다.")
     void searchHearitsByTitle_Success() {
         // given
-        SearchCondition condition = new SearchCondition("Spring", 0, 10);
+        PagingRequest request = new PagingRequest(0, 10);
         Hearit hearit = saveHearitWithTitleAndKeyword("exampleSpring1", saveKeyword("keyword"));     // 제목에 검색어 포함됨
         Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1example", saveKeyword("1spring1"));   // 제목에 검색어 포함됨
         Hearit hearit2 = saveHearitWithTitleAndKeyword("wwSpring1ww", saveKeyword("keyword2"));      // 제목에 검색어 포함됨
@@ -52,7 +53,7 @@ class HearitSearchServiceTest {
         Hearit hearit5 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("noKeyword"));         // 검색에서 제외됨
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.search(condition);
+        List<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
 
         // then
         assertAll(
@@ -67,7 +68,7 @@ class HearitSearchServiceTest {
     @DisplayName("검색 시 키워드에 검색어가 포함된 히어릿만 반환한다.")
     void searchHearitsByKeyword_Succces() {
         // given
-        SearchCondition condition = new SearchCondition("Spring", 0, 10);
+        PagingRequest request = new PagingRequest(0, 10);
         Hearit hearit = saveHearitWithTitleAndKeyword("example1", saveKeyword("Spring1"));     // 키워드에 검색어 포함됨
         Hearit hearit1 = saveHearitWithTitleAndKeyword("noTitle", saveKeyword("1springA"));    // 키워드에 검색어 포함됨
         Hearit hearit2 = saveHearitWithTitleAndKeyword("SpringS", saveKeyword("2sprINg1"));    // 키워드에 검색어 포함됨
@@ -75,7 +76,7 @@ class HearitSearchServiceTest {
         Hearit hearit4 = saveHearitWithTitleAndKeyword("noTitle", saveKeyword("noKeyword"));   // 검색에서 제외됨
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.search(condition);
+        List<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
 
         // then
         assertAll(
@@ -91,13 +92,14 @@ class HearitSearchServiceTest {
     @DisplayName("히어릿 목록을 검색으로 조회 시 최신순으로 정렬되어 반환된다.")
     void searchHearitsByTitle_sortedByCreatedAtDesc() {
         // given
+        PagingRequest request = new PagingRequest(0, 10);
         Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));         // oldest
         Hearit hearit2 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("springKeyword"));   // middle
         Hearit hearit3 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("springKeyword"));   // latest
 
         // when
         SearchCondition condition = new SearchCondition("Spring", 0, 10);
-        List<HearitSearchResponse> result = hearitSearchService.search(condition);
+        List<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
 
         // then
         assertAll(
@@ -113,13 +115,13 @@ class HearitSearchServiceTest {
     @DisplayName("히어릿 목록을 검색으로 조회 시 페이지네이션이 적용되어 반환된다.")
     void searchHearitsByTitle_pagination() {
         // given
+        PagingRequest request = new PagingRequest(1, 2);
         Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));
         Hearit hearit2 = saveHearitWithTitleAndKeyword("spring2", saveKeyword("springKeyword"));
         Hearit hearit3 = saveHearitWithTitleAndKeyword("otherTitle", saveKeyword("Spring"));
 
         // when
-        SearchCondition condition = new SearchCondition("Spring", 1, 2);
-        List<HearitSearchResponse> result = hearitSearchService.search(condition);
+        List<HearitSearchResponse> result = hearitSearchService.search("spring", request);
 
         // then
         assertAll(

@@ -195,9 +195,8 @@ class HearitControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
 
-        // size 음수
         RestAssured.given()
-                .queryParam("keywordId", keyword.getId())
+                .queryParam("searchTerm", "abc")
                 .queryParam("page", 0)
                 .queryParam("size", -5)
                 .when()
