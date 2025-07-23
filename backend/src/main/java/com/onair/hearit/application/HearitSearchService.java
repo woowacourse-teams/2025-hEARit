@@ -15,14 +15,21 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HearitSearchService {
 
+    private static final String LIKE_PATTERN_TEMPLATE = "%%%s%%";
+
     private final HearitRepository hearitRepository;
 
     public List<HearitSearchResponse> search(String searchTerm, PagingRequest pagingRequest) {
-        String likeSearchTerm = "%" + searchTerm + "%";
+        String likeSearchTerm = formatLikePattern(searchTerm);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.searchByTerm(likeSearchTerm, pageable);
         return hearits.stream()
                 .map(HearitSearchResponse::from)
                 .toList();
     }
+
+    private String formatLikePattern(String term) {
+        return String.format(LIKE_PATTERN_TEMPLATE, term);
+    }
 }
+
