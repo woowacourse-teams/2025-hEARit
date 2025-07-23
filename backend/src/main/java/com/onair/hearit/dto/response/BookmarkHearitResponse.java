@@ -11,8 +11,7 @@ public record BookmarkHearitResponse(
         Integer playTime
 ) {
 
-    public static BookmarkHearitResponse from(Bookmark bookmark) {
-        Hearit hearit = bookmark.getHearit();
+    public static BookmarkHearitResponse of(Bookmark bookmark, Hearit hearit) {
         return new BookmarkHearitResponse(
                 hearit.getId(),
                 bookmark.getId(),

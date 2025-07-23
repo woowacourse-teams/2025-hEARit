@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.domain.Category;
-import com.onair.hearit.dto.request.CategoryListCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import java.util.List;
@@ -45,10 +45,10 @@ class CategoryServiceTest {
         saveCategory("category4", "#444");
         saveCategory("category5", "#555");
 
-        CategoryListCondition condition = new CategoryListCondition(1, 2); // page 1 (두 번째 페이지), size 2
+        PagingRequest pagingRequest = new PagingRequest(1, 2);// page 1 (두 번째 페이지), size 2
 
         // when
-        List<CategoryResponse> result = categoryService.getCategories(condition);
+        List<CategoryResponse> result = categoryService.getCategories(pagingRequest);
 
         // then
         assertAll(

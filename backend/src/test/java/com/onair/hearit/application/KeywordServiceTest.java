@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.dto.request.KeywordListCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.KeywordResponse;
 import com.onair.hearit.infrastructure.KeywordRepository;
 import java.util.List;
@@ -46,10 +46,10 @@ class KeywordServiceTest {
         Keyword keyword4 = saveKeyword("keyword4");
         Keyword keyword5 = saveKeyword("keyword5");
 
-        KeywordListCondition condition = new KeywordListCondition(1, 2); // page = 1 (두 번째 페이지), size = 2
+        PagingRequest pagingRequest = new PagingRequest(1, 2);// page = 1 (두 번째 페이지), size = 2
 
         // when
-        List<KeywordResponse> result = keywordService.getKeywords(condition);
+        List<KeywordResponse> result = keywordService.getKeywords(pagingRequest);
 
         // then
         assertAll(

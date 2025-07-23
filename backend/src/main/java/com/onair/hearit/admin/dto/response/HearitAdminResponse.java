@@ -18,10 +18,6 @@ public record HearitAdminResponse(
         CategoryInfoResponse category,
         List<KeywordInHearit> keywords
 ) {
-    public record KeywordInHearit(
-            String name
-    ) {
-    }
 
     public static HearitAdminResponse from(Hearit hearit, Map<Long, List<KeywordInHearit>> keywordMap) {
         return new HearitAdminResponse(
@@ -37,5 +33,10 @@ public record HearitAdminResponse(
                 CategoryInfoResponse.from(hearit.getCategory()),
                 keywordMap.getOrDefault(hearit.getId(), List.of())
         );
+    }
+
+    public record KeywordInHearit(
+            String name
+    ) {
     }
 }

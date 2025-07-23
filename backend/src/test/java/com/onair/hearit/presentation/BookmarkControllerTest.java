@@ -44,7 +44,7 @@ class BookmarkControllerTest extends IntegrationTest {
                     .get("/api/v1/hearits/bookmarks")
                     .then()
                     .statusCode(HttpStatus.OK.value())
-                    .body("size()", equalTo(5));
+                    .body("content.size()", equalTo(5));
         }
     }
 

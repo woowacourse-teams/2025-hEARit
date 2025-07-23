@@ -1,7 +1,7 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.KeywordService;
-import com.onair.hearit.dto.request.KeywordListCondition;
+import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.KeywordResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,8 +27,8 @@ public class KeywordController {
     public ResponseEntity<List<KeywordResponse>> readKeywords(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
-        KeywordListCondition condition = new KeywordListCondition(page, size);
-        List<KeywordResponse> responses = keywordService.getKeywords(condition);
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        List<KeywordResponse> responses = keywordService.getKeywords(pagingRequest);
         return ResponseEntity.ok(responses);
     }
 

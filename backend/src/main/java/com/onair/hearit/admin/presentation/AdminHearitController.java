@@ -3,10 +3,11 @@ package com.onair.hearit.admin.presentation;
 import com.onair.hearit.admin.application.AdminAuthService;
 import com.onair.hearit.admin.application.AdminHearitService;
 import com.onair.hearit.admin.dto.request.AdminLoginRequest;
+import com.onair.hearit.admin.dto.request.HearitCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
-import com.onair.hearit.admin.dto.request.HearitUploadRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
-import com.onair.hearit.admin.dto.response.PagedResponse;
+import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
@@ -35,16 +36,17 @@ public class AdminHearitController {
     }
 
     @GetMapping("/hearits")
-    public ResponseEntity<PagedResponse<HearitAdminResponse>> readPageHearits(
+    public ResponseEntity<PagedResponse<HearitAdminResponse>> readHearits(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
-        PagedResponse<HearitAdminResponse> response = adminHearitService.getPageHearits(page, size);
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        PagedResponse<HearitAdminResponse> response = adminHearitService.getHearits(pagingRequest);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/hearits")
-    public ResponseEntity<Void> createHearit(@RequestBody HearitUploadRequest request) {
-        adminHearitService.uploadHearit(request);
+    public ResponseEntity<Void> createHearit(@RequestBody HearitCreateRequest request) {
+        adminHearitService.addHearit(request);
         return ResponseEntity.created(URI.create("/")).build();
     }
 
@@ -52,7 +54,7 @@ public class AdminHearitController {
     public ResponseEntity<Void> updateHearitById(
             @PathVariable Long hearitId,
             @RequestBody HearitUpdateRequest request) {
-        adminHearitService.updateHearit(hearitId, request);
+        adminHearitService.modifyHearit(hearitId, request);
         return ResponseEntity.noContent().build();
     }
 }
