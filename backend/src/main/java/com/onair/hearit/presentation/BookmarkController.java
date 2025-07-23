@@ -5,11 +5,14 @@ import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.BookmarkListCondition;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,7 +45,8 @@ public class BookmarkController {
     @Operation(summary = "북마크 생성", description = "로그인한 회원이 히어릿 ID로 북마크를 생성합니다.",
             responses = {
                     @ApiResponse(responseCode = "201", description = "북마크 성공"),
-                    @ApiResponse(responseCode = "400", description = "이미 북마크된 히어릿")
+                    @ApiResponse(responseCode = "400", description = "이미 북마크된 히어릿",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             })
     @PostMapping("/{hearitId}/bookmarks")
     public ResponseEntity<Void> createBookmark(

@@ -2,6 +2,7 @@ package com.onair.hearit.auth.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.DbHelper;
 import com.onair.hearit.auth.dto.request.LoginRequest;
@@ -47,7 +48,7 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    @DisplayName("아이디와 비밀번호로 회원가입할 수 있다")
+    @DisplayName("아이디와 비밀번호로 회원가입할 수 있다 + 기본 프로필 이미지가 저장된다.")
     void signup_success() {
         // given
         SignupRequest request = new SignupRequest("localId", "nickname", "password123");
@@ -57,8 +58,11 @@ class AuthServiceTest {
 
         // then
         Member saved = memberRepository.findByLocalId("localId").orElseThrow();
-        assertThat(saved.getNickname()).isEqualTo("nickname");
-        assertThat(passwordEncoder.matches("password123", saved.getPassword())).isTrue();
+        assertAll(() -> {
+            assertThat(saved.getNickname()).isEqualTo("nickname");
+            assertThat(passwordEncoder.matches("password123", saved.getPassword())).isTrue();
+            assertThat(saved.getProfileImage()).isNotNull();
+        });
     }
 
     @Test
