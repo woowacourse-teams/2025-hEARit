@@ -59,7 +59,7 @@ class BookmarkServiceTest {
 
         // when
         List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(
-                member.getId(), new PagingRequest(0, 20));
+                member.getId(), new PagingRequest(0, 20)).content();
 
         // then
         assertThat(responses).hasSize(1);

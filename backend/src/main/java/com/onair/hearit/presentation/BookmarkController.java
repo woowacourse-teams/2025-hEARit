@@ -4,10 +4,10 @@ import com.onair.hearit.application.BookmarkService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,12 +29,13 @@ public class BookmarkController {
 
     @Operation(summary = "북마크 재생목록 조회", description = "로그인한 회원이 page, size로 재생목록을 조회합니다.")
     @GetMapping("/bookmarks")
-    public ResponseEntity<List<BookmarkHearitResponse>> readBookmarkHearits(
+    public ResponseEntity<PagedResponse<BookmarkHearitResponse>> readBookmarkHearits(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
             @AuthenticationPrincipal CurrentMember member) {
         PagingRequest condition = new PagingRequest(page, size);
-        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.memberId(), condition);
+        PagedResponse<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.memberId(),
+                condition);
         return ResponseEntity.ok(responses);
     }
 

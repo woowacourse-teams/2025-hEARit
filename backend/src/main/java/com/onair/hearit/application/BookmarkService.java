@@ -8,6 +8,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.MemberRepository;
@@ -15,6 +16,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -26,13 +28,12 @@ public class BookmarkService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public List<BookmarkHearitResponse> getBookmarkHearits(Long memberId, PagingRequest condition) {
+    public PagedResponse<BookmarkHearitResponse> getBookmarkHearits(Long memberId, PagingRequest pagingRequest) {
         Member member = getMemberById(memberId);
-        Pageable pageable = org.springframework.data.domain.PageRequest.of(condition.page(), condition.size());
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByCreatedAtDesc(member, pageable);
-        return bookmarks.stream()
-                .map(BookmarkHearitResponse::from)
-                .toList();
+        Page<BookmarkHearitResponse> bookmarkHearits = bookmarks.map(bookmark -> BookmarkHearitResponse.of(bookmark, bookmark.getHearit()));
+        return PagedResponse.from(bookmarkHearits);
     }
 
     @Transactional
