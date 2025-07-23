@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.Keyword
 
-class KeywordAdapter : ListAdapter<Keyword, KeywordViewHolder>(DiffUtil) {
+class KeywordAdapter : ListAdapter<Keyword, KeywordViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
@@ -19,12 +19,12 @@ class KeywordAdapter : ListAdapter<Keyword, KeywordViewHolder>(DiffUtil) {
     }
 
     companion object {
-        val DiffUtil =
+        private val DiffCallback =
             object : DiffUtil.ItemCallback<Keyword>() {
                 override fun areItemsTheSame(
                     oldItem: Keyword,
                     newItem: Keyword,
-                ): Boolean = oldItem.keyword == newItem.keyword
+                ): Boolean = oldItem.id == newItem.id
 
                 override fun areContentsTheSame(
                     oldItem: Keyword,
