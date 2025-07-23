@@ -34,7 +34,7 @@ class MainActivity :
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        setupInsets()
+        setupWindowInsets()
         setupPlayer()
         setupNavigation()
         setupDrawer()
@@ -45,7 +45,7 @@ class MainActivity :
         }
     }
 
-    private fun setupInsets() {
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.customDrawer) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, systemBars.bottom)

@@ -48,7 +48,7 @@ class HomeFragment :
         binding.lifecycleOwner = this
         recommendAdapter = RecommendHearitAdapter(this)
 
-        setupInsets()
+        setupWindowInsets()
         setupListeners()
         setupRecentHearit()
         setupRecommendRecyclerView()
@@ -56,7 +56,7 @@ class HomeFragment :
         observeViewModel()
     }
 
-    private fun setupInsets() {
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
