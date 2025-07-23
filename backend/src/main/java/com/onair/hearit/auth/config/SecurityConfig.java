@@ -36,6 +36,7 @@ public class SecurityConfig {
             "/api/v1/keywords/**",
             "/api/v1/admin/**", //TODO: admin 로그인 구현 후 권한 검사 해야함
             "/admin/**", //TODO: admin 로그인 구현 후 권한 검사 해야함
+            "/api/v1/admin/**",
             "/docs",
             "/swagger-ui/**",
             "/v3/api-docs/**"
