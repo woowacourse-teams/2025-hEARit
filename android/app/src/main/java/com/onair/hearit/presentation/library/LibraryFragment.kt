@@ -4,10 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import com.onair.hearit.data.dummy.BookmarkDummyData
+import androidx.fragment.app.viewModels
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
@@ -17,6 +18,8 @@ class LibraryFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
+
+    private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
 
     private val adapter by lazy { BookmarkAdapter(this) }
 
@@ -41,18 +44,29 @@ class LibraryFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupWindowInsets()
+        observeViewModel()
+    }
+
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
+    }
 
-        // 테스트용으로 더미 데이터 넣어 놓음
-        val bookmarks = BookmarkDummyData.getBookmarks()
-        adapter.submitList(bookmarks)
+    private fun observeViewModel() {
+        viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarks ->
+            adapter.submitList(bookmarks)
 
-        binding.layoutLibraryWhenNoBookmark.visibility =
-            if (bookmarks.isEmpty()) View.VISIBLE else View.GONE
+            binding.layoutLibraryWhenNoBookmark.visibility =
+                if (bookmarks.isNullOrEmpty()) View.VISIBLE else View.GONE
+        }
+
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            Toast.makeText(requireContext(), getString(resId), Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onClickOption() {

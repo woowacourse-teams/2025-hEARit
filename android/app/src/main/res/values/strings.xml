@@ -64,6 +64,7 @@
     <string name="library_guide_when_no_bookmark">북마크한 <font color="#B677F3">히어릿</font>이 없어요!\n히어릿과 함께 IT 트렌드를 모아볼까요?</string>
     <string name="library_guide_when_no_login"><font color="#B677F3">히어릿</font>을 모아서 듣고 싶다면,\n로그인을 해주세요!</string>
     <string name="library_login_button_text">로그인 하러가기</string>
+    <string name="library_toast_bookmark_load_fail">북마크 조회에 실패했습니다.</string>
 
     <!-- SearchFragment-->
     <string name="search_recommend_keyword">오늘의 추천 키워드</string>

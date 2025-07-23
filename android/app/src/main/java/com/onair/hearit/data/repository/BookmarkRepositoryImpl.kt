@@ -1,0 +1,19 @@
+package com.onair.hearit.data.repository
+
+import com.onair.hearit.data.datasource.BookmarkRemoteDataSource
+import com.onair.hearit.data.toDomain
+import com.onair.hearit.domain.model.Bookmark
+import com.onair.hearit.domain.repository.BookmarkRepository
+
+class BookmarkRepositoryImpl(
+    private val bookmarkDataSource: BookmarkRemoteDataSource,
+) : BookmarkRepository {
+    override suspend fun getBookmarks(
+        page: Int?,
+        size: Int?,
+    ): Result<List<Bookmark>> =
+        handleResult {
+            val response = bookmarkDataSource.getBookmarks(page, size).getOrThrow()
+            response.content.map { it.toDomain() }
+        }
+}
