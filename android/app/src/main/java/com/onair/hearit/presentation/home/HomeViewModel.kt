@@ -6,16 +6,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
+import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.HearitRepository
+import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val categoryRepository: CategoryRepository,
     private val hearitRepository: HearitRepository,
+    private val recentHearitRepository: RecentHearitRepository,
 ) : ViewModel() {
+    private val _recentHearit: MutableLiveData<RecentHearit?> = MutableLiveData()
+    val recentHearit: LiveData<RecentHearit?> = _recentHearit
+
     private val _recommendHearits: MutableLiveData<List<RecommendHearit>> = MutableLiveData()
     val recommendHearits: LiveData<List<RecommendHearit>> = _recommendHearits
 
@@ -26,6 +32,7 @@ class HomeViewModel(
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
+        getRecentHearit()
         fetchData()
     }
 
@@ -47,6 +54,31 @@ class HomeViewModel(
                     _categories.value = categories
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_categories_load_fail
+                }
+        }
+    }
+
+    fun getRecentHearit() {
+        viewModelScope.launch {
+            recentHearitRepository
+                .getRecentHearit()
+                .onSuccess { recentHearit ->
+                    _recentHearit.value = recentHearit
+                }.onFailure {
+                    _toastMessage.value = R.string.home_toast_recent_load_fail
+                }
+        }
+    }
+
+    fun saveRecentHearit(
+        hearitId: Long,
+        title: String,
+    ) {
+        viewModelScope.launch {
+            recentHearitRepository
+                .saveRecentHearit(RecentHearit(hearitId, title))
+                .onFailure {
+                    _toastMessage.value = R.string.home_toast_recent_save_fail
                 }
         }
     }

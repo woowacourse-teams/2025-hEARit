@@ -54,6 +54,10 @@ class MainActivity :
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
+    fun selectTab(itemId: Int) {
+        binding.layoutBottomNavigation.selectedItemId = itemId
+    }
+
     @OptIn(UnstableApi::class)
     private fun setupPlayer() {
         player =

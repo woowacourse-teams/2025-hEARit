@@ -13,10 +13,13 @@
     <!-- HomeFragment-->
     <string name="home_logo_description">궁금했던 내용들을, 히어릿을 통해 빠르게 들어보세요!</string>
     <string name="home_recent_hearit_text">최근에 들은 히어릿</string>
+    <string name="home_no_recent_hearit_text">최근에 들은 히어릿이 없어요.  들으러 가볼까요?</string>
     <string name="home_recommend_hearit_text">오늘의 히어릿</string>
     <string name="home_category_text">카테고리</string>
     <string name="home_example_recommend_description">Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나</string>
     <string name="home_toast_recommend_load_fail">추천 히어릿 목록 조회에 실패했습니다.</string>
+    <string name="home_toast_recent_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
+    <string name="home_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다.</string>
 
     <!--CategoryFragment-->
     <string name="category_text">전체 카테고리 목록</string>

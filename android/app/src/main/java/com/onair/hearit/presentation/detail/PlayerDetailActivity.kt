@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.detail
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -114,6 +115,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
 
         binding.ibPlayerDetailBack.setOnClickListener {
+            setResult(Activity.RESULT_OK)
             finish()
         }
     }
@@ -182,7 +184,7 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val HEARIT_ID = "hearit_id"
+        const val HEARIT_ID = "hearit_id"
 
         fun newIntent(
             context: Context,
