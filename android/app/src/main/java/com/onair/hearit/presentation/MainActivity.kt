@@ -23,7 +23,8 @@ import com.onair.hearit.presentation.setting.SettingFragment
 
 class MainActivity :
     AppCompatActivity(),
-    DrawerClickListener {
+    DrawerClickListener,
+    PlayerControllerView {
     private lateinit var binding: ActivityMainBinding
     private lateinit var player: ExoPlayer
 
@@ -133,7 +134,7 @@ class MainActivity :
     }
 
     @OptIn(UnstableApi::class)
-    fun hidePlayerControlView() {
+    override fun hidePlayerControlView() {
         binding.layoutBottomPlayerController.post {
             binding.layoutBottomPlayerController.apply {
                 animate().translationY(height.toFloat()).setDuration(200).start()
@@ -142,7 +143,7 @@ class MainActivity :
         }
     }
 
-    fun showPlayerControlView() {
+    override fun showPlayerControlView() {
         binding.layoutBottomPlayerController
             .animate()
             .translationY(0f)
