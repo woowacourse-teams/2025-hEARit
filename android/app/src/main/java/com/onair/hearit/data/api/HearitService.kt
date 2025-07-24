@@ -29,5 +29,5 @@ interface HearitService {
         @Query("searchTerm") searchTerm: String,
         @Query("page") page: Int?,
         @Query("size") size: Int?,
-    ): Response<List<SearchHearitResponse>>
+    ): Response<SearchHearitResponse>
 }

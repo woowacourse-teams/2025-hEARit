@@ -6,7 +6,10 @@ import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.data.dto.SearchHearitResponse.Content
 import com.onair.hearit.domain.model.Keyword
+import com.onair.hearit.domain.model.PageResult
+import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
@@ -19,7 +22,7 @@ fun RecentHearit.toData(): RecentHearitEntity =
         title = this.title,
     )
 
-fun SearchHearitResponse.toDomain(): SearchedHearit =
+private fun Content.toDomain(): SearchedHearit =
     SearchedHearit(
         id = this.id,
         title = this.title,
@@ -66,4 +69,17 @@ fun KeywordResponse.toDomain(): Keyword =
     Keyword(
         id = this.id,
         name = this.name,
+    )
+
+fun SearchHearitResponse.toDomain(): PageResult<SearchedHearit> =
+    PageResult(
+        items = content.map { it.toDomain() },
+        paging =
+            Paging(
+                page = page,
+                size = size,
+                totalPages = totalPages,
+                isFirst = isFirst,
+                isLast = isLast,
+            ),
     )

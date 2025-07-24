@@ -19,5 +19,5 @@ interface HearitRemoteDataSource {
         searchTerm: String,
         page: Int?,
         size: Int?,
-    ): Result<List<SearchHearitResponse>>
+    ): Result<SearchHearitResponse>
 }
