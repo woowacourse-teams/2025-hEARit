@@ -2,12 +2,15 @@ package com.onair.hearit.presentation
 
 import android.util.TypedValue
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
+import coil.load
 import com.onair.hearit.R
+import com.onair.hearit.presentation.library.BookmarkUiState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -104,4 +107,33 @@ fun setVisibleIfNull(
     value: Any?,
 ) {
     view.isVisible = value == null
+}
+
+@BindingAdapter("imageUrl")
+fun setImageUrl(
+    view: ImageView,
+    url: String?,
+) {
+    view
+        .load(url) {
+            crossfade(true)
+            error(R.drawable.img_default_profile)
+            placeholder(R.drawable.img_default_profile)
+        }
+}
+
+@BindingAdapter("visibleIfNotLogin")
+fun setVisibleIfNotLogin(
+    view: View,
+    state: BookmarkUiState?,
+) {
+    view.isVisible = state is BookmarkUiState.NotLoggedIn
+}
+
+@BindingAdapter("visibleIfLogin")
+fun setVisibleIfLogin(
+    view: View,
+    state: BookmarkUiState?,
+) {
+    view.isVisible = state is BookmarkUiState.LoggedIn
 }

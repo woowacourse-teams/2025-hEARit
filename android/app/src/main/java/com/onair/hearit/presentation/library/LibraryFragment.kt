@@ -18,20 +18,17 @@ class LibraryFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: BookmarkViewModel by viewModels { BookmarkViewModelFactory() }
 
     private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
 
     private val adapter by lazy { BookmarkAdapter(this) }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         binding.rvBookmark.adapter = adapter
@@ -59,6 +56,11 @@ class LibraryFragment :
     private fun observeViewModel() {
         viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarks ->
             adapter.submitList(bookmarks)
+            observeViewModel()
+
+            // 테스트용으로 더미 데이터 넣어 놓음
+            val bookmarks = BookmarkDummyData.getBookmarks()
+            adapter.submitList(bookmarks)
 
             binding.layoutLibraryWhenNoBookmark.visibility =
                 if (bookmarks.isNullOrEmpty()) View.VISIBLE else View.GONE
@@ -66,6 +68,16 @@ class LibraryFragment :
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             Toast.makeText(requireContext(), getString(resId), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
+            binding.uiState = uiState
+        }
+
+        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
+            binding.userInfo = userInfo
         }
     }
 

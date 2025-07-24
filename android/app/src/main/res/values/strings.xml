@@ -9,6 +9,8 @@
     <string name="all_terms_of_use">이용 약관</string>
     <string name="all_account_info">설정 및 계정 정보</string>
     <string name="all_toast_categories_load_fail">카테고리 조회에 실패했습니다.</string>
+    <string name="all_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
+    <string name="all_toast_save_user_info_fail">유저 정보 저장에 실패했습니다.</string>
 
     <!-- HomeFragment-->
     <string name="home_logo_description">궁금했던 내용들을, 히어릿을 통해 빠르게 들어보세요!</string>
@@ -57,9 +59,9 @@
     <string name="setting_notification">알림</string>
     <string name="setting_recommend_notification">히어릿 추천 알림</string>
     <string name="setting_app_version">앱 버전 v%s</string>
+    <string name="setting_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
 
     <!-- LibraryFragment-->
-    <string name="library_nickname"><font color="#B677F3">닉네임제한은9글자</font>님,</string>
     <string name="library_guide">오늘은 어떤 <font color="#B677F3">히어릿</font>을 들어볼까요?</string>
     <string name="library_bookmarked_hearit_title">내가 북마크한 히어릿</string>
     <string name="library_guide_when_no_bookmark">북마크한 <font color="#B677F3">히어릿</font>이 없어요!\n히어릿과 함께 IT 트렌드를 모아볼까요?</string>

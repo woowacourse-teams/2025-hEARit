@@ -10,6 +10,7 @@ object LoggingInterceptorProvider {
     private val json =
         Json {
             prettyPrint = true
+            coerceInputValues = true
         }
 
     fun provide(): HttpLoggingInterceptor =
