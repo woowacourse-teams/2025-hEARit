@@ -19,15 +19,14 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
-import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.home.CategoryAdapter
 
 class SearchFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-    private val adapter = KeywordAdapter()
-    private val categoryAdapter = CategoryAdapter()
+    private val keywordAdapter by lazy { KeywordAdapter() }
+    private val categoryAdapter by lazy { CategoryAdapter() }
     private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory() }
 
     override fun onCreateView(
@@ -91,22 +90,7 @@ class SearchFragment : Fragment() {
             }
 
         binding.rvKeyword.layoutManager = layoutManager
-        binding.rvKeyword.adapter = this.adapter
-
-        val keywords: List<Keyword> =
-            listOf(
-                Keyword("# Kotlin"),
-                Keyword("# Spring"),
-                Keyword("# NotebookLM"),
-                Keyword("# Parcelable"),
-                Keyword("# Serialization"),
-                Keyword("# hearit"),
-                Keyword("# JPA"),
-                Keyword("# Activity"),
-                Keyword("# HTTP"),
-            )
-
-        adapter.submitList(keywords)
+        binding.rvKeyword.adapter = keywordAdapter
     }
 
     private fun setupCategoryRecyclerView() {
@@ -118,6 +102,9 @@ class SearchFragment : Fragment() {
             categoryAdapter.submitList(categories)
         }
 
+        viewModel.keywords.observe(viewLifecycleOwner) { keywords ->
+            keywordAdapter.submitList(keywords)
+        }
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }

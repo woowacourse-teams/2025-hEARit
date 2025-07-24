@@ -10,7 +10,7 @@ class KeywordViewHolder(
     val binding: ItemKeywordBinding,
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(keyword: Keyword) {
-        binding.keywordItem = keyword
+        binding.keyword = keyword
     }
 
     companion object {
