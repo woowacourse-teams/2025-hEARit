@@ -52,6 +52,7 @@ class SearchResultFragment : Fragment() {
         setupSearchEnterKey()
         setupRecyclerView()
         observeViewModel()
+        setupSearchEndIcon()
 
         binding.nsvSearchResult.setOnTouchListener { v, event ->
             hideKeyboard()
@@ -105,6 +106,19 @@ class SearchResultFragment : Fragment() {
                 }
             }
             false
+        }
+    }
+
+    private fun setupSearchEndIcon() {
+        binding.tilSearchResult.setEndIconOnClickListener {
+            val searchTerm =
+                binding.etSearchResult.text
+                    .toString()
+                    .trim()
+            if (searchTerm.isNotBlank()) {
+                hideKeyboard()
+                viewModel.search(searchTerm)
+            }
         }
     }
 
