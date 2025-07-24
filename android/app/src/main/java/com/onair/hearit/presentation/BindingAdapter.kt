@@ -137,3 +137,12 @@ fun setVisibleIfLogin(
 ) {
     view.isVisible = state is BookmarkUiState.LoggedIn
 }
+
+@BindingAdapter("setSelectedState")
+fun setSelectedState(
+    view: ImageView,
+    condition: Boolean?,
+) {
+    val isSelected = condition == true
+    view.isSelected = isSelected
+}

@@ -54,6 +54,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
         binding.lifecycleOwner = this
+        binding.viewModel = viewModel
 
         setupWindowInsets()
         adapter = PlayerDetailScriptAdapter()
@@ -109,10 +110,6 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     private fun setupClickListener() {
-        binding.btnHearitPlayerBookmark.setOnClickListener {
-            it.isSelected = !it.isSelected
-        }
-
         binding.ibPlayerDetailBack.setOnClickListener {
             setResult(RESULT_OK)
             finish()

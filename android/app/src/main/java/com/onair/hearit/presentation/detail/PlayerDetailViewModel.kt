@@ -19,7 +19,7 @@ class PlayerDetailViewModel(
     private val _hearit: MutableLiveData<Hearit> = MutableLiveData()
     val hearit: LiveData<Hearit> = _hearit
 
-    private val _isBookmarked: MutableLiveData<Boolean> = MutableLiveData()
+    private val _isBookmarked: MutableLiveData<Boolean> = MutableLiveData(false)
     val isBookmarked: LiveData<Boolean> = _isBookmarked
 
     private val _toastMessage = SingleLiveData<Int>()
