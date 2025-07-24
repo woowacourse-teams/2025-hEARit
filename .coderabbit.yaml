@@ -1,0 +1,11 @@
+language: "ko-KR"
+
+reviews:
+  profile: "assertive"
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches: [".*"]
+
+chat:
+  auto_reply: true
