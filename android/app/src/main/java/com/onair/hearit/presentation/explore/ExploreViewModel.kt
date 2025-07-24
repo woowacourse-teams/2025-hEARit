@@ -29,8 +29,6 @@ class ExploreViewModel(
 
     private lateinit var paging: Paging
     private var currentPage = 0
-
-    // 현재 테스트용 페이지 사이즈
     private var isLastPage = false
     private var isLoading = false
 
@@ -69,9 +67,9 @@ class ExploreViewModel(
         }
     }
 
-    private suspend fun buildShortsHearit(items: PageResult<RandomHearit>): List<ShortsHearit> =
+    private suspend fun buildShortsHearit(pageItems: PageResult<RandomHearit>): List<ShortsHearit> =
         coroutineScope {
-            items.items
+            pageItems.items
                 .map { item ->
                     async { getShortsHearitUseCase(item).getOrNull() }
                 }.awaitAll()
