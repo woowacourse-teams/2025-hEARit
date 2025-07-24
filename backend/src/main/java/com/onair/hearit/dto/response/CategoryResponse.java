@@ -7,7 +7,6 @@ public record CategoryResponse(
         String name,
         String colorCode
 ) {
-
     public static CategoryResponse from(Category category) {
         return new CategoryResponse(
                 category.getId(),

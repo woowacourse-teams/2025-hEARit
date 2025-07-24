@@ -14,7 +14,6 @@ public record RandomHearitResponse(
         Boolean isBookmarked,
         Long bookmarkId
 ) {
-
     public static RandomHearitResponse from(Hearit hearit) {
         return new RandomHearitResponse(
                 hearit.getId(),

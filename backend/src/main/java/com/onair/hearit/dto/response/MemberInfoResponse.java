@@ -7,7 +7,6 @@ public record MemberInfoResponse(
         String nickname,
         String profileImage
 ) {
-
     public static MemberInfoResponse from(Member member) {
         return new MemberInfoResponse(member.getId(), member.getNickname(), member.getProfileImage());
     }

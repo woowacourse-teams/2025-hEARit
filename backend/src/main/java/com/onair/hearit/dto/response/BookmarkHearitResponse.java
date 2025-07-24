@@ -10,7 +10,6 @@ public record BookmarkHearitResponse(
         String summary,
         Integer playTime
 ) {
-
     public static BookmarkHearitResponse of(Bookmark bookmark, Hearit hearit) {
         return new BookmarkHearitResponse(
                 hearit.getId(),
