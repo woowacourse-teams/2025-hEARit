@@ -3,7 +3,7 @@ package com.onair.hearit.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.DbHelper;
+import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.request.PagingRequest;
@@ -13,7 +13,6 @@ import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

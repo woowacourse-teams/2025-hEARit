@@ -3,7 +3,7 @@ package com.onair.hearit.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.TestFixture;
+import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;

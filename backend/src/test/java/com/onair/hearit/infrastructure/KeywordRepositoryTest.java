@@ -2,7 +2,7 @@ package com.onair.hearit.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.onair.hearit.DbHelper;
+import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.domain.Keyword;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

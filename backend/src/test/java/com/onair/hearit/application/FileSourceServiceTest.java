@@ -3,7 +3,7 @@ package com.onair.hearit.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.onair.hearit.DbHelper;
+import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;

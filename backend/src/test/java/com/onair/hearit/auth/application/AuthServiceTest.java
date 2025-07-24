@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.DbHelper;
+import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;

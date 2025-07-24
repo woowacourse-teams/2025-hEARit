@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.TestFixture;
-import com.onair.hearit.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
+import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;

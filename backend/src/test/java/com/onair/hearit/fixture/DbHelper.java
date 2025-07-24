@@ -1,4 +1,4 @@
-package com.onair.hearit;
+package com.onair.hearit.fixture;
 
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;

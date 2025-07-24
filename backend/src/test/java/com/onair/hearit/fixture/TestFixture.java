@@ -1,4 +1,4 @@
-package com.onair;
+package com.onair.hearit.fixture;
 
 import com.onair.hearit.domain.Member;
 

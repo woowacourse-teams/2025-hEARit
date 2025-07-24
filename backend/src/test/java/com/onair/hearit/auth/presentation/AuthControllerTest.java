@@ -4,8 +4,8 @@ package com.onair.hearit.auth.presentation;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.onair.hearit.DbHelper;
-import com.onair.hearit.IntegrationTest;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
 import com.onair.hearit.domain.Member;

@@ -3,7 +3,7 @@ package com.onair.hearit.auth.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.onair.hearit.DbHelper;
+import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
 import com.onair.hearit.auth.dto.response.TokenResponse;

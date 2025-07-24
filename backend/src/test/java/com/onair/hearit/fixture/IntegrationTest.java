@@ -1,4 +1,4 @@
-package com.onair.hearit;
+package com.onair.hearit.fixture;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
