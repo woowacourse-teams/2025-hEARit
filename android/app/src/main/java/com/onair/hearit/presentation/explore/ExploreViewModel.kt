@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.ShortsHearit
+import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
@@ -17,10 +18,14 @@ import kotlinx.coroutines.launch
 
 class ExploreViewModel(
     private val hearitRepository: HearitRepository,
+    private val bookmarkRepository: BookmarkRepository,
     private val getShortsHearitUseCase: GetShortsHearitUseCase,
 ) : ViewModel() {
     private val _shortsHearits = MutableLiveData<List<ShortsHearit>>()
     val shortsHearits: LiveData<List<ShortsHearit>> = _shortsHearits
+
+    private val _isBookmarked: MutableLiveData<Boolean> = MutableLiveData()
+    val isBookmarked: LiveData<Boolean> = _isBookmarked
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -91,5 +96,17 @@ class ExploreViewModel(
             } else {
                 _shortsHearits.value.orEmpty() + newItems
             }
+    }
+
+    private fun addBookmark(hearitId: Long) {
+        viewModelScope.launch {
+            bookmarkRepository
+                .addBookmark(hearitId)
+                .onSuccess { _isBookmarked.value = true }
+                .onFailure {
+                    _isBookmarked.value = false
+                    _toastMessage.value = R.string.player_detail_toast_bookmark_fail
+                }
+        }
     }
 }

@@ -26,6 +26,7 @@
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="230dp"
             android:contentDescription="@null"
+            android:onClick="@{() -> shortsClickListener.onClickBookmark(hearitItem.id)}"
             android:src="@drawable/bookmark_selector"
             app:layout_constraintBottom_toBottomOf="@id/layout_sound_wave"
             app:layout_constraintEnd_toEndOf="parent"

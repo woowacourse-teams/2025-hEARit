@@ -133,6 +133,18 @@ class ExploreFragment :
         }
     }
 
+    private fun showToast(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onClickHearitInfo(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
+        startActivity(intent)
+    }
+
+    override fun onClickBookmark(hearitId: Long) {
+    }
+
     override fun onPause() {
         super.onPause()
         player.pause()
@@ -146,14 +158,5 @@ class ExploreFragment :
     override fun onDestroy() {
         super.onDestroy()
         player.release()
-    }
-
-    override fun onClickHearitInfo(hearitId: Long) {
-        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
-    }
-
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }
