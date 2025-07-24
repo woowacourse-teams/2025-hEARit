@@ -12,9 +12,11 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -129,18 +131,19 @@ class HearitControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("히어릿 검색 요청 시 200 OK 및 제목이 포함된 히어릿을 최신순으로 히어릿들을 반환한다.")
+    @DisplayName("히어릿 검색 요청 시 200 OK 및 제목 또는 키워드에 검색어가 포함된 히어릿을 최신순으로 반환한다.")
     void searchHearitsWithPagination() {
         // given
         Keyword keyword = saveKeyword("Spring");
         Keyword keyword1 = saveKeyword("noKeyword");
-        Hearit hearit = saveHearitWithTitleAndKeyword("examplespring1", keyword);// 검색어 포함됨
-        Hearit hearit1 = saveHearitWithTitleAndKeyword("SPRING1example", keyword1);// 검색어 포함됨
-        Hearit hearit2 = saveHearitWithTitleAndKeyword("notitle", keyword); // 검색어 포함됨
-        Hearit hearit3 = saveHearitWithTitleAndKeyword("notitle", keyword1); // 검색어 포함 안 됨
 
-        // when & then
-        var response = RestAssured
+        Hearit hearit = saveHearitWithTitleAndKeyword("examplespring1", keyword);     // 제목 매칭
+        Hearit hearit1 = saveHearitWithTitleAndKeyword("SPRING1example", keyword1);   // 제목 매칭
+        Hearit hearit2 = saveHearitWithTitleAndKeyword("notitle", keyword);           // 키워드 매칭
+        Hearit hearit3 = saveHearitWithTitleAndKeyword("notitle", keyword1);          // 매칭 안됨
+
+        // when
+        PagedResponse<HearitSearchResponse> pagedResponse = RestAssured
                 .given()
                 .queryParam("searchTerm", "spring")
                 .queryParam("page", 0)
@@ -149,15 +152,24 @@ class HearitControllerTest extends IntegrationTest {
                 .get("/api/v1/hearits/search")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .extract().jsonPath().getList(".", HearitSearchResponse.class);
+                .extract()
+                .as(new TypeRef<>() {
+                });
+
+        List<HearitSearchResponse> responses = pagedResponse.content();
 
         // then
         assertAll(
-                () -> assertThat(response).hasSize(3),
-                () -> assertThat(response).extracting(HearitSearchResponse::id)
-                        .containsExactlyInAnyOrder(hearit.getId(), hearit1.getId(), hearit2.getId())
+                () -> assertThat(responses).hasSize(3),
+                () -> assertThat(responses).extracting(HearitSearchResponse::id)
+                        .containsExactlyInAnyOrder(
+                                hearit.getId(),
+                                hearit1.getId(),
+                                hearit2.getId()
+                        )
         );
     }
+
 
     @Test
     @DisplayName("검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")

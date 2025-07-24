@@ -5,6 +5,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.util.List;
@@ -29,11 +30,10 @@ public class CategoryService {
                 .toList();
     }
 
-    public List<HearitSearchResponse> findHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
+    public PagedResponse<HearitSearchResponse> findHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> result = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        return result.stream()
-                .map(HearitSearchResponse::from)
-                .toList();
+        Page<HearitSearchResponse> response = result.map(HearitSearchResponse::from);
+        return PagedResponse.from(response);
     }
 }

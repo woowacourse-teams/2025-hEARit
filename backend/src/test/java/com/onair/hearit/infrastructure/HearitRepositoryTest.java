@@ -68,8 +68,8 @@ class HearitRepositoryTest {
     @DisplayName("제목 또는 키워드에 검색어가 포함된 히어릿을 반환한다.")
     void searchByTerm_filterByTitleOrKeyword() {
         // given
-        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("SpringKeyword"));
-        Keyword keyword2 = dbHelper.insertKeyword(new Keyword("NotMatched"));
+        Keyword keyword1 = saveKeyword("Springboot");
+        Keyword keyword2 = saveKeyword("NotMatched");
 
         Hearit titleMatched = saveHearitWithTitleAndKeyword("SpringBoot is great", keyword2); // 제목만 매칭
         Hearit keywordMatched = saveHearitWithTitleAndKeyword("No match in title", keyword1); // 키워드만 매칭
@@ -78,7 +78,7 @@ class HearitRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Hearit> result = hearitRepository.searchByTerm("%spring%", pageable);
+        Page<Hearit> result = hearitRepository.searchByTerm("spring", pageable);
 
         // then
         assertAll(
@@ -101,7 +101,7 @@ class HearitRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Hearit> result = hearitRepository.searchByTerm("%spring%", pageable);
+        Page<Hearit> result = hearitRepository.searchByTerm("spring", pageable);
 
         // then
         assertAll(
@@ -127,22 +127,6 @@ class HearitRepositoryTest {
         return dbHelper.insertHearit(hearit);
     }
 
-    private Hearit saveHearitByTitle(String title) {
-        Category category = new Category("category", "#123");
-        dbHelper.insertCategory(category);
-        Hearit hearit = new Hearit(
-                title,
-                "summary",
-                1,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
-                "source",
-                LocalDateTime.now(),
-                category);
-        return dbHelper.insertHearit(hearit);
-    }
-
     private Category saveCategory(String name, String colorCode) {
         Category category = new Category(name, colorCode);
         return dbHelper.insertCategory(category);
@@ -156,4 +140,9 @@ class HearitRepositoryTest {
         dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
         return savedHearit;
     }
+
+    private Keyword saveKeyword(String name) {
+        return dbHelper.insertKeyword(new Keyword(name));
+    }
+
 }
