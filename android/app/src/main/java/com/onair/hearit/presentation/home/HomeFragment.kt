@@ -26,7 +26,8 @@ import kotlin.math.abs
 class HomeFragment :
     Fragment(),
     RecommendClickListener,
-    CategoryClickListener {
+    CategoryClickListener,
+    RecentHearitClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -49,12 +50,14 @@ class HomeFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
+        binding.recentClickListener = this
 
         binding.tvHomeNoRecentHearitText.setOnClickListener {
             (activity as? MainActivity)?.apply {
                 selectTab(R.id.nav_explore)
             }
         }
+        binding.ivHomeRecentPlay.setOnClickListener { }
         setupWindowInsets()
         setupListeners()
         setupRecommendRecyclerView()
@@ -186,27 +189,6 @@ class HomeFragment :
         playerDetailLauncher.launch(intent)
     }
 
-    private val playerDetailLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                viewModel.getRecentHearit()
-            }
-        }
-
-    override fun onClickRecommendHearit(
-        hearitId: Long,
-        title: String,
-    ) {
-        navigateToPlayerDetail(hearitId)
-        viewModel.saveRecentHearit(hearitId, title)
-        (requireActivity() as? MainActivity)?.showPlayerControlView()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private fun navigateToSearchResult(searchTerm: String) {
         val fragment = SearchResultFragment.newInstance(searchTerm)
 
@@ -217,7 +199,32 @@ class HomeFragment :
             .commit()
     }
 
+    private val playerDetailLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                viewModel.getRecentHearit()
+            }
+        }
+
+    override fun onClickRecentHearit(hearitId: Long) {
+        navigateToPlayerDetail(hearitId)
+    }
+
+    override fun onClickRecommendHearit(
+        hearitId: Long,
+        title: String,
+    ) {
+        navigateToPlayerDetail(hearitId)
+        viewModel.saveRecentHearit(hearitId, title)
+        (requireActivity() as? MainActivity)?.showPlayerControlView()
+    }
+
     override fun onCategoryClick(category: String) {
         navigateToSearchResult(category)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
