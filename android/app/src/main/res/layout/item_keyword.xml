@@ -6,7 +6,7 @@
     <data>
 
         <variable
-            name="keywordItem"
+            name="keyword"
             type="com.onair.hearit.domain.model.Keyword" />
 
     </data>
@@ -22,7 +22,7 @@
         android:gravity="center"
         android:paddingHorizontal="16dp"
         android:paddingVertical="6dp"
-        android:text="@{keywordItem.keyword}"
+        android:text="@{@string/search_recommend_keyword_name(keyword.name)}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

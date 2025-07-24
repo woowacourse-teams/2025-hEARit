@@ -1,5 +1,6 @@
 package com.onair.hearit.domain.model
 
 data class Keyword(
-    val keyword: String,
+    val id: Long,
+    val name: String,
 )
