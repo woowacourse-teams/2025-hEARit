@@ -219,7 +219,6 @@ class HomeFragment :
         title: String,
     ) {
         navigateToPlayerDetail(hearitId)
-        viewModel.saveRecentHearit(hearitId, title)
         (requireActivity() as? MainActivity)?.showPlayerControlView()
     }
 
