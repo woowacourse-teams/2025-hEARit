@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.library
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.fragment.app.viewModels
 import com.onair.hearit.data.dummy.BookmarkDummyData
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.login.LoginActivity
 
 class LibraryFragment :
     Fragment(),
@@ -49,6 +51,12 @@ class LibraryFragment :
         // 테스트용으로 더미 데이터 넣어 놓음
         val bookmarks = BookmarkDummyData.getBookmarks()
         adapter.submitList(bookmarks)
+
+        binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish()
+        }
 
         binding.layoutLibraryWhenNoBookmark.visibility =
             if (bookmarks.isEmpty()) View.VISIBLE else View.GONE
