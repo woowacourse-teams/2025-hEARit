@@ -2,6 +2,7 @@ package com.onair.hearit.data.repository
 
 import com.onair.hearit.data.datasource.HearitRemoteDataSource
 import com.onair.hearit.data.toDomain
+import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
@@ -26,20 +27,17 @@ class HearitRepositoryImpl(
     override suspend fun getRandomHearits(
         page: Int?,
         size: Int?,
-    ): Result<List<RandomHearit>> =
+    ): Result<PageResult<RandomHearit>> =
         handleResult {
-            val response = hearitRemoteDataSource.getRandomHearits(page, size).getOrThrow()
-            response.map { it.toDomain() }
+            hearitRemoteDataSource.getRandomHearits(page, size).getOrThrow().toDomain()
         }
 
     override suspend fun getSearchHearits(
         searchTerm: String,
         page: Int?,
         size: Int?,
-    ): Result<List<SearchedHearit>> =
+    ): Result<PageResult<SearchedHearit>> =
         handleResult {
-            val response =
-                hearitRemoteDataSource.getSearchHearits(searchTerm, page, size).getOrThrow()
-            response.map { it.toDomain() }
+            hearitRemoteDataSource.getSearchHearits(searchTerm, page, size).getOrThrow().toDomain()
         }
 }

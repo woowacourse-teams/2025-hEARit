@@ -29,15 +29,11 @@ class ExploreFragment :
     private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = FragmentExploreBinding.inflate(inflater, container, false)
         return binding.root
     }

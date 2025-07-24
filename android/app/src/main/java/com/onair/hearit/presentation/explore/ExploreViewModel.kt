@@ -5,6 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.domain.model.PageResult
+import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.ShortsHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
@@ -30,10 +32,8 @@ class ExploreViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    private lateinit var paging: Paging
     private var currentPage = 0
-
-    // 현재 테스트용 페이지 사이즈
-    private val pageSize = 5
     private var isLastPage = false
     private var isLoading = false
 
@@ -53,19 +53,14 @@ class ExploreViewModel(
         isLoading = true
         viewModelScope.launch {
             try {
-                val result = hearitRepository.getRandomHearits(page, pageSize)
+                val result = hearitRepository.getRandomHearits(page)
 
                 result
                     .onSuccess { randomItems ->
+                        paging = randomItems.paging
                         val shortsList = buildShortsHearit(randomItems)
-
                         updateShortsHearit(shortsList, isInitial)
-
-                        // API 스펙 변경되면 수정할 예정 -> 현재는 디폴트 값 0으로 보내는 중
-                        // currentPage++
-
-                        // 서버에서 API 스펙 변경되면 수정할 예정 -> 현재는 그냥 5개 불렀을 때 5개 보다 적게 내려오면 마지막이라고 판단함
-                        isLastPage = shortsList.size < pageSize
+                        isLastPage = paging.isLast
                     }.onFailure {
                         _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
                     }
@@ -77,9 +72,9 @@ class ExploreViewModel(
         }
     }
 
-    private suspend fun buildShortsHearit(items: List<RandomHearit>): List<ShortsHearit> =
+    private suspend fun buildShortsHearit(pageItems: PageResult<RandomHearit>): List<ShortsHearit> =
         coroutineScope {
-            items
+            pageItems.items
                 .map { item ->
                     async { getShortsHearitUseCase(item).getOrNull() }
                 }.awaitAll()

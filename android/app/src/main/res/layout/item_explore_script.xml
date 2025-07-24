@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -20,13 +19,9 @@
         exploreHighlightedStyle="@{isHighlighted}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="60dp"
-        android:paddingVertical="20dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        android:paddingVertical="16dp"
         android:text="@{subtitleLine.text}"
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Intent란 안드로이드의 구성요소 4가지 사이에서
-데이터를 전달하거나" />
+        tools:text="Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나" />
 </layout>

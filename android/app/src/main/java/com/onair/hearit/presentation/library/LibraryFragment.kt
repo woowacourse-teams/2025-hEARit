@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.library
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.login.LoginActivity
 
 class LibraryFragment :
     Fragment(),
@@ -50,6 +52,14 @@ class LibraryFragment :
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
+        }
+
+        observeViewModel()
+
+        binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish()
         }
     }
 
