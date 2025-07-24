@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.onair.hearit.data.datasource.BookmarkRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.HearitRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.MediaFileRemoteDataSourceImpl
-import com.onair.hearit.data.repository.BookmarkRepositoryImpl
 import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
+import com.onair.hearit.data.repository.BookmarkRepositoryImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
 import com.onair.hearit.data.repository.MediaFileRepositoryImpl
 import com.onair.hearit.data.repository.RecentHearitRepositoryImpl
