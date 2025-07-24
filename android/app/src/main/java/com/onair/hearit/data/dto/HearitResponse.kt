@@ -20,5 +20,5 @@ data class HearitResponse(
     @SerialName("isBookmarked")
     val isBookmarked: Boolean,
     @SerialName("bookmarkId")
-    val bookmarkId: Int?,
+    val bookmarkId: Long?,
 )

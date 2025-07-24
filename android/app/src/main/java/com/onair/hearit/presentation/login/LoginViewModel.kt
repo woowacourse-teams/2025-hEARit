@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.di.TokenProvider
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.presentation.SingleLiveData
@@ -25,6 +26,7 @@ class LoginViewModel(
             authRepository
                 .kakaoLogin(accessToken)
                 .onSuccess { appToken ->
+                    TokenProvider.accessToken = appToken
                     saveAccessToken(appToken)
                 }.onFailure {
                     _toastMessage.value = R.string.login_toast_kakao_login_fail

@@ -8,6 +8,10 @@
         <variable
             name="hearit"
             type="com.onair.hearit.domain.model.Hearit" />
+
+        <variable
+            name="viewModel"
+            type="com.onair.hearit.presentation.detail.PlayerDetailViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -80,10 +84,12 @@
             android:layout_height="48dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:background="@drawable/bookmark_selector"
             android:contentDescription="@null"
-            android:src="@drawable/bookmark_selector"
+            android:onClick="@{() -> viewModel.toggleBookmark()}"
             app:layout_constraintEnd_toEndOf="@id/base_controller"
-            app:layout_constraintTop_toTopOf="@id/base_controller" />
+            app:layout_constraintTop_toTopOf="@id/base_controller"
+            app:setSelectedState="@{viewModel.isBookmarked}" />
 
         <TextView
             android:id="@+id/tv_script_title"

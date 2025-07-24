@@ -20,6 +20,8 @@ fun RandomHearit.toHearitShorts(
         script = script,
         playTime = this.playTime,
         createdAt = this.createdAt,
+        isBookmarked = this.isBookmarked,
+        bookmarkId = this.bookmarkId,
     )
 
 fun SingleHearit.toHearit(
