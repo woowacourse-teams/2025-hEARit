@@ -15,20 +15,24 @@ class SearchResultViewModel(
     private val hearitRepository: HearitRepository,
     private val initialSearchTerm: String,
 ) : ViewModel() {
-    private val _searchedHearits: MutableLiveData<List<SearchedHearit>> = MutableLiveData()
+    private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
     val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
     private var paging: Paging? = null
+    private var currentPage: Int = 0
     private var isLoading = false
+
+    private val isLastPage: Boolean
+        get() = paging?.isLast == true
 
     var currentSearchTerm: String = initialSearchTerm
         private set
 
     init {
-        fetchData(initialSearchTerm)
+        fetchData(initialSearchTerm, page = 0)
     }
 
     fun search(searchTerm: String) {
@@ -36,8 +40,9 @@ class SearchResultViewModel(
 
         currentSearchTerm = searchTerm
         paging = null
+        currentPage = 0
         _searchedHearits.value = emptyList()
-        fetchData(searchTerm)
+        fetchData(searchTerm, page = 0)
     }
 
     private fun fetchData(
@@ -49,11 +54,13 @@ class SearchResultViewModel(
 
         viewModelScope.launch {
             try {
-                val result = hearitRepository.getSearchHearits(searchTerm, page = page)
+                val result = hearitRepository.getSearchHearits(searchTerm, page)
 
                 result
                     .onSuccess { pageResult ->
                         paging = pageResult.paging
+                        currentPage = pageResult.paging.page
+
                         val currentList =
                             if (page == 0) emptyList() else _searchedHearits.value.orEmpty()
                         _searchedHearits.value = currentList + pageResult.items
@@ -69,10 +76,7 @@ class SearchResultViewModel(
     }
 
     fun loadNextPageIfPossible() {
-        val currentPaging = paging ?: return
-        if (currentPaging.isLast) return
-
-        val nextPage = currentPaging.page + 1
-        fetchData(currentSearchTerm, nextPage)
+        if (isLoading || isLastPage) return
+        fetchData(currentSearchTerm, currentPage + 1)
     }
 }
