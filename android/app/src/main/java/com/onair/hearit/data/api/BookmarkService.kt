@@ -1,5 +1,6 @@
 package com.onair.hearit.data.api
 
+import com.onair.hearit.data.dto.BookmarkIdResponse
 import com.onair.hearit.data.dto.BookmarkResponse
 import retrofit2.Response
 import retrofit2.http.DELETE
@@ -21,7 +22,7 @@ interface BookmarkService {
     suspend fun postBookmark(
         @Header("Authorization") token: String,
         @Path("hearitId") hearitId: Long,
-    ): Response<Unit>
+    ): Response<BookmarkIdResponse>
 
     @DELETE("hearits/{hearitId}/bookmarks/{bookmarkId}")
     suspend fun deleteBookmark(

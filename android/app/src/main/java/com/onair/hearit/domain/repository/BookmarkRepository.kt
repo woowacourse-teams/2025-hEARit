@@ -8,7 +8,7 @@ interface BookmarkRepository {
         size: Int?,
     ): Result<List<Bookmark>>
 
-    suspend fun addBookmark(hearitId: Long): Result<Unit>
+    suspend fun addBookmark(hearitId: Long): Result<Long>
 
     suspend fun deleteBookmark(
         hearitId: Long,

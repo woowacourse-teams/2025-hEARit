@@ -22,6 +22,9 @@ class PlayerDetailViewModel(
     private val _isBookmarked: MutableLiveData<Boolean> = MutableLiveData(false)
     val isBookmarked: LiveData<Boolean> = _isBookmarked
 
+    private val _bookmarkId: MutableLiveData<Long?> = MutableLiveData()
+    val bookmarkId: LiveData<Long?> = _bookmarkId
+
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
@@ -29,22 +32,27 @@ class PlayerDetailViewModel(
         fetchData()
     }
 
-    fun toggleBookmark(bookmarkId: Long) {
+    fun toggleBookmark() {
         if (isBookmarked.value == true) {
-            deleteBookmark(bookmarkId)
+            deleteBookmark()
         } else {
             addBookmark()
         }
     }
 
-    private fun deleteBookmark(bookmarkId: Long) {
-        viewModelScope.launch {
-            bookmarkRepository
-                .deleteBookmark(hearitId, bookmarkId)
-                .onSuccess { _isBookmarked.value = false }
-                .onFailure {
-                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
-                }
+    private fun deleteBookmark() {
+        val id = _bookmarkId.value
+        if (id != null) {
+            viewModelScope.launch {
+                bookmarkRepository
+                    .deleteBookmark(hearitId, id)
+                    .onSuccess {
+                        _isBookmarked.value = false
+                        _bookmarkId.value = null
+                    }.onFailure {
+                        _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                    }
+            }
         }
     }
 
@@ -52,8 +60,10 @@ class PlayerDetailViewModel(
         viewModelScope.launch {
             bookmarkRepository
                 .addBookmark(hearitId)
-                .onSuccess { _isBookmarked.value = true }
-                .onFailure {
+                .onSuccess { bookmarkId ->
+                    _isBookmarked.value = true
+                    _bookmarkId.value = bookmarkId
+                }.onFailure {
                     _toastMessage.value = R.string.all_toast_add_bookmark_fail
                 }
         }
@@ -65,7 +75,10 @@ class PlayerDetailViewModel(
                 .onSuccess {
                     _hearit.value = it
                     _isBookmarked.value = it.isBookmarked
-                }.onFailure { _toastMessage.value = R.string.player_detail_toast_hearit_load_fail }
+                    _bookmarkId.value = it.bookmarkId
+                }.onFailure {
+                    _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
+                }
         }
     }
 }

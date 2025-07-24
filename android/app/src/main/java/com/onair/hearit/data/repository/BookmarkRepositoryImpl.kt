@@ -17,9 +17,10 @@ class BookmarkRepositoryImpl(
             response.content.map { it.toDomain() }
         }
 
-    override suspend fun addBookmark(hearitId: Long): Result<Unit> =
+    override suspend fun addBookmark(hearitId: Long): Result<Long> =
         handleResult {
-            bookmarkDataSource.addBookmark(hearitId).getOrThrow()
+            val response = bookmarkDataSource.addBookmark(hearitId).getOrThrow()
+            response.id
         }
 
     override suspend fun deleteBookmark(

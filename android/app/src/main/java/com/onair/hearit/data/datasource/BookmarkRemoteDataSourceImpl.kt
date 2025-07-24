@@ -1,6 +1,7 @@
 package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.api.BookmarkService
+import com.onair.hearit.data.dto.BookmarkIdResponse
 import com.onair.hearit.data.dto.BookmarkResponse
 import com.onair.hearit.di.TokenProvider
 
@@ -19,7 +20,7 @@ class BookmarkRemoteDataSourceImpl(
             },
         )
 
-    override suspend fun addBookmark(hearitId: Long): Result<Unit> =
+    override suspend fun addBookmark(hearitId: Long): Result<BookmarkIdResponse> =
         handleApiCall(
             errorMessage = ERROR_BOOKMARK_ADD_MESSAGE,
             apiCall = { bookmarkService.postBookmark(getAuthHeader(), hearitId) },
