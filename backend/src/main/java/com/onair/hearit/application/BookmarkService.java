@@ -8,6 +8,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -37,14 +38,15 @@ public class BookmarkService {
     }
 
     @Transactional
-    public void addBookmark(Long hearitId, Long memberId) {
+    public BookmarkInfoResponse addBookmark(Long hearitId, Long memberId) {
         if (bookmarkRepository.existsByHearitIdAndMemberId(hearitId, memberId)) {
             throw new AlreadyExistException("이미 북마크된 히어릿입니다.");
         }
         Hearit hearit = getHearitById(hearitId);
         Member member = getMemberById(memberId);
         Bookmark bookmark = new Bookmark(member, hearit);
-        bookmarkRepository.save(bookmark);
+        Bookmark saved = bookmarkRepository.save(bookmark);
+        return BookmarkInfoResponse.from(saved);
     }
 
     @Transactional

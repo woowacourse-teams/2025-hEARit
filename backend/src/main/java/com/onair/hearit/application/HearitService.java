@@ -5,6 +5,7 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
@@ -40,12 +41,11 @@ public class HearitService {
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
     }
 
-    public List<RandomHearitResponse> getRandomHearits(Long memberId, PagingRequest pagingRequest) {
+    public PagedResponse<RandomHearitResponse> getRandomHearits(Long memberId, PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findRandom(pageable);
-        return hearits.stream()
-                .map(hearit -> toRandomHearitResponse(hearit, memberId))
-                .toList();
+        Page<RandomHearitResponse> hearitDtos = hearits.map(hearit -> toRandomHearitResponse(hearit, memberId));
+        return PagedResponse.from(hearitDtos);
     }
 
     private RandomHearitResponse toRandomHearitResponse(Hearit hearit, Long memberId) {

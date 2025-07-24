@@ -95,17 +95,17 @@ class HearitControllerTest extends IntegrationTest {
         saveHearitWithSuffix(3);
 
         // when
-        List<RandomHearitResponse> responses = RestAssured.given()
+        PagedResponse<RandomHearitResponse> responses = RestAssured.given()
                 .when()
                 .get("/api/v1/hearits/random")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
-                .jsonPath()
-                .getList(".", RandomHearitResponse.class);
+                .as(new TypeRef<>() {
+                });
 
         // then
-        assertThat(responses).hasSize(3);
+        assertThat(responses.content()).hasSize(3);
     }
 
     @Test

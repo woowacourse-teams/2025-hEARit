@@ -24,7 +24,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @Operation(summary = "전체 카테고리 목록 조회", description = "전체 카테고리 목록들을 조회합니다.")
+    @Operation(summary = "전체 카테고리 목록을 조회", description = "전체 카테고리 목록들을 조회합니다.")
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> readCategories(
             @RequestParam(name = "page", defaultValue = "0") int page,

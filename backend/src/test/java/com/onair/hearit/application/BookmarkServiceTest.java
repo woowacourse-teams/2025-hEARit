@@ -2,6 +2,7 @@ package com.onair.hearit.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.TestFixture;
 import com.onair.hearit.DbHelper;
@@ -13,6 +14,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.MemberRepository;
@@ -75,11 +77,14 @@ class BookmarkServiceTest {
         int previousBookmarkCount = bookmarkRepository.findAll().size();
 
         // when
-        bookmarkService.addBookmark(hearit.getId(), member.getId());
+        BookmarkInfoResponse response = bookmarkService.addBookmark(hearit.getId(), member.getId());
 
         // then
         int currentBookmarkCount = bookmarkRepository.findAll().size();
-        assertThat(previousBookmarkCount + 1).isEqualTo(currentBookmarkCount);
+        assertAll(() -> {
+            assertThat(previousBookmarkCount + 1).isEqualTo(currentBookmarkCount);
+            assertThat(response.id()).isNotNull();
+        });
     }
 
     @Test
