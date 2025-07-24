@@ -54,6 +54,7 @@ class SearchFragment :
         setKeywordRecyclerView()
         setupCategoryRecyclerView()
         observeViewModel()
+        setupSearchEndIcon()
 
         binding.nsvSearch.setOnTouchListener { _, _ ->
             hideKeyboard()
@@ -99,6 +100,19 @@ class SearchFragment :
 
     private fun setupCategoryRecyclerView() {
         binding.rvSearchCategories.adapter = categoryAdapter
+    }
+
+    private fun setupSearchEndIcon() {
+        binding.tilSearch.setEndIconOnClickListener {
+            val searchTerm =
+                binding.etSearch.text
+                    .toString()
+                    .trim()
+            if (searchTerm.isNotBlank()) {
+                hideKeyboard()
+                navigateToSearchResult(searchTerm)
+            }
+        }
     }
 
     private fun observeViewModel() {

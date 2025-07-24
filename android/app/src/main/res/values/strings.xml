@@ -73,6 +73,7 @@
     <string name="search_category_look_forward">카테고리 둘러보기</string>
     <string name="search_keyword">검색어를 입력해주세요</string>
     <string name="search_toast_keywords_load_fail">오늘의 키워드 조회에 실패했습니다.</string>
+    <string name="search_guide_when_no_hearits">검색된 <font color="#B677F3">히어릿</font>이 없어요!</string>
 
     <!-- SearchResultFragment-->
     <string name="search_result_searched_hearit">검색된 히어릿 목록</string>

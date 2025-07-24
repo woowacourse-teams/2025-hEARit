@@ -15,6 +15,9 @@ class SearchResultViewModel(
     private val hearitRepository: HearitRepository,
     private val initialSearchTerm: String,
 ) : ViewModel() {
+    private val _uiState = MutableLiveData<SearchUiState>()
+    val uiState: LiveData<SearchUiState> = _uiState
+
     private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
     val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
 
@@ -39,10 +42,13 @@ class SearchResultViewModel(
         if (searchTerm == currentSearchTerm) return
 
         currentSearchTerm = searchTerm
+        resetPaging()
+        fetchData(searchTerm, page = 0)
+    }
+
+    private fun resetPaging() {
         paging = null
         currentPage = 0
-        _searchedHearits.value = emptyList()
-        fetchData(searchTerm, page = 0)
     }
 
     private fun fetchData(
@@ -63,7 +69,10 @@ class SearchResultViewModel(
 
                         val currentList =
                             if (page == 0) emptyList() else _searchedHearits.value.orEmpty()
-                        _searchedHearits.value = currentList + pageResult.items
+
+                        val updatedList = currentList + pageResult.items
+                        _searchedHearits.value = updatedList
+                        updateUiState(updatedList)
                     }.onFailure {
                         _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
                     }
@@ -78,5 +87,14 @@ class SearchResultViewModel(
     fun loadNextPageIfPossible() {
         if (isLoading || isLastPage) return
         fetchData(currentSearchTerm, currentPage + 1)
+    }
+
+    private fun updateUiState(hearits: List<SearchedHearit>) {
+        _uiState.value =
+            if (hearits.isEmpty()) {
+                SearchUiState.NoHearits
+            } else {
+                SearchUiState.HearitsExist(hearits)
+            }
     }
 }
