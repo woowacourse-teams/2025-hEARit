@@ -7,9 +7,9 @@ import com.onair.hearit.databinding.ItemCategoryBinding
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.presentation.CategoryClickListener
 
-class CategoryViewHolder(
-    val binding: ItemCategoryBinding,
-    val listener: CategoryClickListener,
+class CategoryViewHolder private constructor(
+    private val binding: ItemCategoryBinding,
+    private val listener: CategoryClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(category: Category) {
         binding.item = category

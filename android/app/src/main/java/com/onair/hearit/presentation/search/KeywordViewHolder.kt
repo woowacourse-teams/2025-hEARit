@@ -6,9 +6,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemKeywordBinding
 import com.onair.hearit.domain.model.Keyword
 
-class KeywordViewHolder(
-    val binding: ItemKeywordBinding,
-    val listener: KeywordClickListener,
+class KeywordViewHolder private constructor(
+    private val binding: ItemKeywordBinding,
+    private val listener: KeywordClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(keyword: Keyword) {
         binding.keyword = keyword

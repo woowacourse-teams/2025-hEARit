@@ -143,18 +143,10 @@ fun setVisibleIfLogin(
 @BindingAdapter("categoryBackgroundColor")
 fun setCategoryBackgroundColor(
     view: View,
-    colorCode: String?,
+    colorCode: String,
 ) {
     val background = view.background?.mutate()
     if (background is GradientDrawable) {
-        val color =
-            try {
-                colorCode?.toColorInt()
-            } catch (_: IllegalArgumentException) {
-                null
-            }
-
-        val finalColor = color ?: ContextCompat.getColor(view.context, R.color.hearit_gray2)
-        background.setColor(finalColor)
+        background.setColor(colorCode.toColorInt())
     }
 }
