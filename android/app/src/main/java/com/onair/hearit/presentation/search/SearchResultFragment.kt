@@ -37,6 +37,7 @@ class SearchResultFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         _binding = FragmentSearchResultBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.etSearchResult.setText(searchTerm)
         return binding.root
     }
@@ -123,6 +124,10 @@ class SearchResultFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
+            binding.uiState = uiState
+        }
+
         viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
             adapter.submitList(searchedHearits)
         }
