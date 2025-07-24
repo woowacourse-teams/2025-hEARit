@@ -16,8 +16,12 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentSearchResultBinding
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.explore.ShortsClickListener
 
-class SearchResultFragment : Fragment() {
+class SearchResultFragment :
+    Fragment(),
+    ShortsClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchResultBinding? = null
     private val binding get() = _binding!!
@@ -29,7 +33,7 @@ class SearchResultFragment : Fragment() {
     private val viewModel: SearchResultViewModel by viewModels {
         SearchResultViewModelFactory(searchTerm)
     }
-    private val adapter by lazy { SearchedHearitAdapter() }
+    private val adapter by lazy { SearchedHearitAdapter(this) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -151,6 +155,11 @@ class SearchResultFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onClickHearitInfo(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
+        startActivity(intent)
     }
 
     companion object {
