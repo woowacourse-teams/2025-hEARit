@@ -13,7 +13,7 @@ import retrofit2.http.Query
 interface HearitService {
     @GET("hearits/{hearitId}")
     suspend fun getHearit(
-        @Header("Authorization") token: String,
+        @Header("Authorization") token: String?,
         @Path("hearitId") hearitId: Long,
     ): Response<HearitResponse>
 
@@ -22,7 +22,7 @@ interface HearitService {
 
     @GET("hearits/random")
     suspend fun getRandomHearits(
-        @Header("Authorization") token: String,
+        @Header("Authorization") token: String?,
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<RandomHearitResponse>
