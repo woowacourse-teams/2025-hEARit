@@ -1,26 +1,18 @@
 package com.onair.hearit.presentation.home
 
-import android.graphics.drawable.GradientDrawable
-import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.R
-import com.onair.hearit.databinding.ItemCategoryBinding
 import com.onair.hearit.domain.model.Category
+import com.onair.hearit.presentation.CategoryClickListener
 
-class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(DiffCallback) {
+class CategoryAdapter(
+    private val listener: CategoryClickListener,
+) : ListAdapter<Category, CategoryViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): CategoryViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val binding = ItemCategoryBinding.inflate(inflater, parent, false)
-        return CategoryViewHolder(binding)
-    }
+    ): CategoryViewHolder = CategoryViewHolder.create(parent, listener)
 
     override fun onBindViewHolder(
         holder: CategoryViewHolder,
@@ -29,29 +21,8 @@ class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder
         holder.bind(getItem(position))
     }
 
-    class CategoryViewHolder(
-        private val binding: ItemCategoryBinding,
-    ) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Category) {
-            binding.item = item
-            binding.clCategory.setBackgroundResource(R.drawable.bg_purple3_radius_8dp)
-            val background = binding.clCategory.background.mutate()
-            if (background is GradientDrawable) {
-                try {
-                    val colorInt = item.colorCode.toColorInt()
-                    background.setColor(colorInt)
-                } catch (e: IllegalArgumentException) {
-                    val context = binding.root.context
-                    val defaultColor = ContextCompat.getColor(context, R.color.hearit_gray2)
-                    background.setColor(defaultColor)
-                }
-            }
-            binding.executePendingBindings()
-        }
-    }
-
     companion object {
-        val DiffCallback =
+        private val DiffCallback =
             object : DiffUtil.ItemCallback<Category>() {
                 override fun areItemsTheSame(
                     oldItem: Category,

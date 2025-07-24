@@ -1,11 +1,13 @@
 package com.onair.hearit.presentation
 
+import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import coil.load
@@ -136,4 +138,15 @@ fun setVisibleIfLogin(
     state: BookmarkUiState?,
 ) {
     view.isVisible = state is BookmarkUiState.LoggedIn
+}
+
+@BindingAdapter("categoryBackgroundColor")
+fun setCategoryBackgroundColor(
+    view: View,
+    colorCode: String,
+) {
+    val background = view.background?.mutate()
+    if (background is GradientDrawable) {
+        background.setColor(colorCode.toColorInt())
+    }
 }

@@ -45,7 +45,7 @@ class HearitRemoteDataSourceImpl(
         searchTerm: String,
         page: Int?,
         size: Int?,
-    ): Result<List<SearchHearitResponse>> =
+    ): Result<SearchHearitResponse> =
         handleApiCall(
             errorMessage = "검색 히어릿 조회 실패",
             apiCall = { hearitService.getSearchHearits(searchTerm, page, size) },

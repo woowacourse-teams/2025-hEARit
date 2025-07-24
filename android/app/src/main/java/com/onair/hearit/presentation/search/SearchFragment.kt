@@ -19,14 +19,18 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
+import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.home.CategoryAdapter
 
-class SearchFragment : Fragment() {
+class SearchFragment :
+    Fragment(),
+    CategoryClickListener,
+    KeywordClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-    private val keywordAdapter by lazy { KeywordAdapter() }
-    private val categoryAdapter by lazy { CategoryAdapter() }
+    private val keywordAdapter by lazy { KeywordAdapter(this) }
+    private val categoryAdapter by lazy { CategoryAdapter(this) }
     private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory() }
 
     override fun onCreateView(
@@ -134,5 +138,15 @@ class SearchFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onCategoryClick(category: String) {
+        navigateToSearchResult(category)
+        hideKeyboard()
+    }
+
+    override fun onKeywordClick(keyword: String) {
+        navigateToSearchResult(keyword)
+        hideKeyboard()
     }
 }
