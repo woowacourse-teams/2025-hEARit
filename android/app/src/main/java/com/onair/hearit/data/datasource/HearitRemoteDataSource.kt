@@ -13,7 +13,7 @@ interface HearitRemoteDataSource {
     suspend fun getRandomHearits(
         page: Int?,
         size: Int?,
-    ): Result<List<RandomHearitResponse>>
+    ): Result<RandomHearitResponse>
 
     suspend fun getSearchHearits(
         searchTerm: String,

@@ -14,7 +14,7 @@ interface HearitRepository {
     suspend fun getRandomHearits(
         page: Int? = null,
         size: Int? = null,
-    ): Result<List<RandomHearit>>
+    ): Result<PageResult<RandomHearit>>
 
     suspend fun getSearchHearits(
         searchTerm: String,

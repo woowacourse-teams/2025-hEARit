@@ -27,10 +27,9 @@ class HearitRepositoryImpl(
     override suspend fun getRandomHearits(
         page: Int?,
         size: Int?,
-    ): Result<List<RandomHearit>> =
+    ): Result<PageResult<RandomHearit>> =
         handleResult {
-            val response = hearitRemoteDataSource.getRandomHearits(page, size).getOrThrow()
-            response.map { it.toDomain() }
+            hearitRemoteDataSource.getRandomHearits(page, size).getOrThrow().toDomain()
         }
 
     override suspend fun getSearchHearits(
@@ -39,9 +38,6 @@ class HearitRepositoryImpl(
         size: Int?,
     ): Result<PageResult<SearchedHearit>> =
         handleResult {
-            hearitRemoteDataSource
-                .getSearchHearits(searchTerm, page, size)
-                .getOrThrow()
-                .toDomain()
+            hearitRemoteDataSource.getSearchHearits(searchTerm, page, size).getOrThrow().toDomain()
         }
 }
