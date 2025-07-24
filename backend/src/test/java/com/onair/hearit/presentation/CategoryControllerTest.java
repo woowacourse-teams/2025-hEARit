@@ -29,7 +29,7 @@ class CategoryControllerTest extends IntegrationTest {
         Category category5 = saveCategory("category5", "#555");
 
         // when
-        List<CategoryResponse> result = RestAssured.given()
+        PagedResponse<CategoryResponse> result = RestAssured.given()
                 .param("page", 1)
                 .param("size", 2)
                 .when()
@@ -37,15 +37,15 @@ class CategoryControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
-                .jsonPath()
-                .getList(".", CategoryResponse.class);
+                .as(new TypeRef<>() {
+                });
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(CategoryResponse::id)
+                () -> assertThat(result.content()).hasSize(2),
+                () -> assertThat(result.content()).extracting(CategoryResponse::id)
                         .containsExactly(category3.getId(), category4.getId()),
-                () -> assertThat(result).extracting(CategoryResponse::colorCode)
+                () -> assertThat(result.content()).extracting(CategoryResponse::colorCode)
                         .containsExactly("#333", "#444")
         );
     }
