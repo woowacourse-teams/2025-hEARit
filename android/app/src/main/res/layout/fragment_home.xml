@@ -12,6 +12,10 @@
         <variable
             name="userInfo"
             type="com.onair.hearit.domain.model.UserInfo" />
+
+        <variable
+            name="recentClickListener"
+            type="com.onair.hearit.presentation.home.RecentHearitClickListener" />
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -68,6 +72,7 @@
                 android:layout_marginTop="20dp"
                 android:background="@drawable/bg_gradient_radius_8dp"
                 android:contentDescription="@null"
+                android:onClick="@{() -> recentClickListener.onClickRecentHearit(recentHearit.id)}"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
 
             <TextView
@@ -185,7 +190,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_category"
                 app:spanCount="2"
-                tools:itemCount="12"
+                tools:itemCount="8"
                 tools:listitem="@layout/item_category" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

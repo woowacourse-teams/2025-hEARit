@@ -6,12 +6,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.RecentHearit
+import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 
 class PlayerDetailViewModel(
     private val hearitId: Long,
+    private val recentHearitRepository: RecentHearitRepository,
     private val getHearitUseCase: GetHearitUseCase,
 ) : ViewModel() {
     private val _hearit: MutableLiveData<Hearit> = MutableLiveData()
@@ -27,8 +30,24 @@ class PlayerDetailViewModel(
     private fun fetchData() {
         viewModelScope.launch {
             getHearitUseCase(hearitId)
-                .onSuccess { _hearit.value = it }
-                .onFailure { _toastMessage.value = R.string.player_detail_toast_hearit_load_fail }
+                .onSuccess {
+                    _hearit.value = it
+                    saveRecentHearit()
+                }.onFailure {
+                    _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
+                }
+        }
+    }
+
+    private fun saveRecentHearit() {
+        val hearit = hearit.value ?: return
+        viewModelScope.launch {
+            recentHearitRepository
+                .saveRecentHearit(
+                    RecentHearit(hearit.id, hearit.title),
+                ).onFailure {
+                    _toastMessage.value = R.string.player_detail_toast_recent_save_fail
+                }
         }
     }
 }

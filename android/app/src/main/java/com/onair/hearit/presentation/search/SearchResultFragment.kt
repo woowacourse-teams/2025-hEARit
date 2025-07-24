@@ -39,7 +39,7 @@ class SearchResultFragment :
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = FragmentSearchResultBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         binding.etSearchResult.setText(searchTerm)
@@ -59,7 +59,7 @@ class SearchResultFragment :
         observeViewModel()
         setupSearchEndIcon()
 
-        binding.nsvSearchResult.setOnTouchListener { v, event ->
+        binding.nsvSearchResult.setOnTouchListener { _, _ ->
             hideKeyboard()
             false
         }
@@ -152,14 +152,14 @@ class SearchResultFragment :
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     override fun onClickHearitInfo(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         startActivity(intent)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
