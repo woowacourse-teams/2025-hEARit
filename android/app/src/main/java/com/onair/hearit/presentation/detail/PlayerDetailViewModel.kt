@@ -77,6 +77,7 @@ class PlayerDetailViewModel(
             getHearitUseCase(hearitId)
                 .onSuccess {
                     _hearit.value = it
+                    saveRecentHearit()
                     _isBookmarked.value = it.isBookmarked
                     _bookmarkId.value = it.bookmarkId
                 }.onFailure { it: Throwable ->
