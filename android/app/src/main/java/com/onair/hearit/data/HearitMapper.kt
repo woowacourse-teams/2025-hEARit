@@ -6,7 +6,6 @@ import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
-import com.onair.hearit.data.dto.SearchHearitResponse.Content
 import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.PageResult
@@ -24,12 +23,24 @@ fun RecentHearit.toData(): RecentHearitEntity =
         title = this.title,
     )
 
-private fun Content.toDomain(): SearchedHearit =
+private fun SearchHearitResponse.Content.toDomain(): SearchedHearit =
     SearchedHearit(
         id = this.id,
         title = this.title,
         playTime = this.playTime,
         summary = this.summary,
+    )
+
+private fun RandomHearitResponse.Content.toDomain(): RandomHearit =
+    RandomHearit(
+        id = this.id,
+        title = this.title,
+        summary = this.summary,
+        source = this.source,
+        playTime = this.playTime,
+        createdAt = this.createdAt,
+        isBookmarked = this.isBookmarked,
+        bookmarkId = this.bookmarkId,
     )
 
 fun RecentHearitEntity.toDomain(): RecentHearit =
@@ -45,14 +56,17 @@ fun RecommendHearitResponse.toDomain(): RecommendHearit =
         desc = this.summary,
     )
 
-fun RandomHearitResponse.toDomain(): RandomHearit =
-    RandomHearit(
-        id = this.id,
-        title = this.title,
-        summary = this.summary,
-        source = this.source,
-        playTime = this.playTime,
-        createdAt = this.createdAt,
+fun RandomHearitResponse.toDomain(): PageResult<RandomHearit> =
+    PageResult(
+        items = content.map { it.toDomain() },
+        paging =
+            Paging(
+                page = page,
+                size = size,
+                totalPages = totalPages,
+                isFirst = isFirst,
+                isLast = isLast,
+            ),
     )
 
 fun HearitResponse.toDomain(): SingleHearit =

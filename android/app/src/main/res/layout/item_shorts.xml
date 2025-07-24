@@ -53,14 +53,14 @@
             android:id="@+id/rv_explore_item_script"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginVertical="20dp"
+            android:layout_marginBottom="28dp"
+            android:clipToPadding="false"
             android:orientation="vertical"
+            android:paddingHorizontal="32dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@id/layout_explore_hearit_info"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/guideline_top_5"
-            tools:itemCount="4"
+            tools:itemCount="5"
             tools:listitem="@layout/item_explore_script" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
