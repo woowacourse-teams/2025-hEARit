@@ -14,7 +14,6 @@ public record HearitDetailResponse(
         Boolean isBookmarked,
         Long bookmarkId
 ) {
-
     public static HearitDetailResponse from(Hearit hearit) {
         return new HearitDetailResponse(
                 hearit.getId(),

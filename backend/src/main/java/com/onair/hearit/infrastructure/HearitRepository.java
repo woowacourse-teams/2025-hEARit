@@ -25,5 +25,4 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             ORDER BY h.created_at DESC
             """, nativeQuery = true)
     Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
-
 }

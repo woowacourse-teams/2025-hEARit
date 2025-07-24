@@ -21,9 +21,7 @@ public class KakaoErrorHandler implements ErrorHandler {
     @Override
     public void handle(HttpRequest request, ClientHttpResponse response) throws IOException {
         KakaoErrorResponse kakaoErrorResponse = extractResponseFrom(response.getBody());
-
-        throw new KakaoClientException(
-                response.getStatusCode(), kakaoErrorResponse.msg());
+        throw new KakaoClientException(response.getStatusCode(), kakaoErrorResponse.msg());
     }
 
     private KakaoErrorResponse extractResponseFrom(InputStream errorStream) {

@@ -28,17 +28,17 @@ public class AdminCategoryService {
         return PagedResponse.from(dtoPage);
     }
 
-    @Transactional
-    public CategoryInfoResponse addCategory(CategoryCreateRequest request) {
-        Category category = new Category(request.name(), request.colorCode());
-        Category saved = categoryRepository.save(category);
-        return CategoryInfoResponse.from(saved);
-    }
-
     public List<CategoryInfoResponse> getAllCategories() {
         List<Category> allCategories = categoryRepository.findAll();
         return allCategories.stream()
                 .map(CategoryInfoResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public CategoryInfoResponse addCategory(CategoryCreateRequest request) {
+        Category category = new Category(request.name(), request.colorCode());
+        Category saved = categoryRepository.save(category);
+        return CategoryInfoResponse.from(saved);
     }
 }

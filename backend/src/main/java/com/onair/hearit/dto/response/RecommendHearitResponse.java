@@ -11,7 +11,6 @@ public record RecommendHearitResponse(
         Integer playTime,
         LocalDateTime createdAt
 ) {
-
     public static RecommendHearitResponse from(Hearit hearit) {
         return new RecommendHearitResponse(
                 hearit.getId(),

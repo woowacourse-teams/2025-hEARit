@@ -18,7 +18,6 @@ public record HearitAdminResponse(
         CategoryInfoResponse category,
         List<KeywordInHearit> keywords
 ) {
-
     public static HearitAdminResponse from(Hearit hearit, Map<Long, List<KeywordInHearit>> keywordMap) {
         return new HearitAdminResponse(
                 hearit.getId(),

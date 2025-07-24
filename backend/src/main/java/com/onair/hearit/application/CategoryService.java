@@ -8,7 +8,6 @@ import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,18 +21,17 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final HearitRepository hearitRepository;
 
-    public List<CategoryResponse> getCategories(PagingRequest pagingRequest) {
+    public PagedResponse<CategoryResponse> getCategories(PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Category> categories = categoryRepository.findAll(pageable);
-        return categories.stream()
-                .map(CategoryResponse::from)
-                .toList();
+        Page<CategoryResponse> categoryDtos = categories.map(CategoryResponse::from);
+        return PagedResponse.from(categoryDtos);
     }
 
-    public PagedResponse<HearitSearchResponse> findHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
+    public PagedResponse<HearitSearchResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<Hearit> result = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        Page<HearitSearchResponse> response = result.map(HearitSearchResponse::from);
-        return PagedResponse.from(response);
+        Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
+        Page<HearitSearchResponse> hearitDtos = hearits.map(HearitSearchResponse::from);
+        return PagedResponse.from(hearitDtos);
     }
 }

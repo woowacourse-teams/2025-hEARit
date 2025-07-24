@@ -56,14 +56,14 @@ class CategoryServiceTest {
         PagingRequest pagingRequest = new PagingRequest(1, 2);// page 1 (두 번째 페이지), size 2
 
         // when
-        List<CategoryResponse> result = categoryService.getCategories(pagingRequest);
+        PagedResponse<CategoryResponse> result = categoryService.getCategories(pagingRequest);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(CategoryResponse::name)
+                () -> assertThat(result.content()).hasSize(2),
+                () -> assertThat(result.content()).extracting(CategoryResponse::name)
                         .containsExactly("category3", "category4"),
-                () -> assertThat(result).extracting(CategoryResponse::colorCode)
+                () -> assertThat(result.content()).extracting(CategoryResponse::colorCode)
                         .containsExactly("#333", "#444")
         );
     }
@@ -80,7 +80,7 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<HearitSearchResponse> result = categoryService.findHearitsByCategory(category1.getId(), request);
+        PagedResponse<HearitSearchResponse> result = categoryService.getHearitsByCategory(category1.getId(), request);
 
         // then
         assertAll(
@@ -101,7 +101,7 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(1, 2);
 
         // when
-        PagedResponse<HearitSearchResponse> result = categoryService.findHearitsByCategory(category.getId(), request);
+        PagedResponse<HearitSearchResponse> result = categoryService.getHearitsByCategory(category.getId(), request);
 
         // then
         assertAll(

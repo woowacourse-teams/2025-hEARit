@@ -57,7 +57,7 @@ public class AuthService {
         }
     }
 
-    // 소셜 로그인의 경우 회원가입이 따로 없으며 로그인 시 자동으로 회원가입되도록 구현함
+    // 소셜 로그인의 경우 회원가입이 따로 없으며 로그인 시 자동으로 회원가입되도록 구현
     public TokenResponse loginWithKakao(KakaoLoginRequest request) {
         KakaoUserInfoResponse kakaoUser = kakaoUserInfoClient.getUserInfo(request.accessToken());
 

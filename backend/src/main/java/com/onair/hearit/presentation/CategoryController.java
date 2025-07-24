@@ -7,7 +7,6 @@ import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,11 +25,11 @@ public class CategoryController {
 
     @Operation(summary = "전체 카테고리 목록을 조회", description = "전체 카테고리 목록들을 조회합니다.")
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> readCategories(
+    public ResponseEntity<PagedResponse<CategoryResponse>> readCategories(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        List<CategoryResponse> responses = categoryService.getCategories(pagingRequest);
+        PagedResponse<CategoryResponse> responses = categoryService.getCategories(pagingRequest);
         return ResponseEntity.ok(responses);
     }
 
@@ -41,7 +40,7 @@ public class CategoryController {
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "20") Integer size) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<HearitSearchResponse> response = categoryService.findHearitsByCategory(categoryId, pagingRequest);
+        PagedResponse<HearitSearchResponse> response = categoryService.getHearitsByCategory(categoryId, pagingRequest);
         return ResponseEntity.ok(response);
     }
 }

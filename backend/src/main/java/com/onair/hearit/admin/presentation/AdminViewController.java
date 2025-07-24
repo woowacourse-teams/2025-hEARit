@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin")
 public class AdminViewController {
 
+    @GetMapping
+    public String adminHome() {
+        return "admin/home";
+    }
+
     @GetMapping("/hearits")
     public String hearitListPage() {
         return "admin/hearit-list";
@@ -25,10 +30,5 @@ public class AdminViewController {
     @GetMapping("/keywords")
     public String keywordListPage() {
         return "admin/keyword-list";
-    }
-
-    @GetMapping
-    public String adminHome() {
-        return "admin/home";
     }
 }

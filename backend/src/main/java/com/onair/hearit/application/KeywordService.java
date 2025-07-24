@@ -29,7 +29,7 @@ public class KeywordService {
                 .toList();
     }
 
-    public List<KeywordResponse> getRecommendedKeyword(int size) {
+    public List<KeywordResponse> getRecommendedKeywords(int size) {
         long seed = LocalDate.now().toEpochDay();
         List<Long> allIds = keywordRepository.findAllIds();
         List<Long> selectedIds = pickRandomIds(allIds, seed, size);
@@ -46,11 +46,11 @@ public class KeywordService {
     }
 
     public KeywordResponse getKeyword(final Long id) {
-        Keyword keyword = findKeywordById(id);
+        Keyword keyword = getKeywordById(id);
         return KeywordResponse.from(keyword);
     }
 
-    private Keyword findKeywordById(Long id) {
+    private Keyword getKeywordById(Long id) {
         return keywordRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("keywordId", String.valueOf(id)));
     }

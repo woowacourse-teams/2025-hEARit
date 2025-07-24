@@ -8,7 +8,6 @@ public record HearitSearchResponse(
         String summary,
         Integer playTime
 ) {
-
     public static HearitSearchResponse from(Hearit hearit) {
         return new HearitSearchResponse(
                 hearit.getId(),
