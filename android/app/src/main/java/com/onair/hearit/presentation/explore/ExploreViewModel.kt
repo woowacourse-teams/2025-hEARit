@@ -100,7 +100,7 @@ class ExploreViewModel(
                 isBookmarked = isBookmarked,
                 bookmarkId = bookmarkId,
             )
-        _shortsHearits.value = currentList // LiveData 트리거
+        _shortsHearits.value = currentList
     }
 
     private fun fetchData(

@@ -146,8 +146,7 @@ fun setSelectedState(
     view: ImageView,
     condition: Boolean?,
 ) {
-    val isSelected = condition == true
-    view.isSelected = isSelected
+    view.isSelected = condition == true
 }
 
 @BindingAdapter("categoryBackgroundColor")
