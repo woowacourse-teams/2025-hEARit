@@ -20,7 +20,7 @@ class CategoryFragment :
     private var _binding: FragmentCategoryBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
+    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory(requireContext()) }
     private val categoryAdapter = CategoryAdapter(this)
 
     override fun onCreateView(

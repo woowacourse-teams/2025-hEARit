@@ -48,18 +48,23 @@ class SearchResultViewModel(
         isLoading = true
 
         viewModelScope.launch {
-            hearitRepository
-                .getSearchHearits(searchTerm, page = page)
-                .onSuccess { pageResult ->
-                    paging = pageResult.paging
-                    val currentList =
-                        if (page == 0) emptyList() else _searchedHearits.value.orEmpty()
-                    _searchedHearits.value = currentList + pageResult.items
-                }.onFailure {
-                    _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
-                }
+            try {
+                val result = hearitRepository.getSearchHearits(searchTerm, page = page)
 
-            isLoading = false
+                result
+                    .onSuccess { pageResult ->
+                        paging = pageResult.paging
+                        val currentList =
+                            if (page == 0) emptyList() else _searchedHearits.value.orEmpty()
+                        _searchedHearits.value = currentList + pageResult.items
+                    }.onFailure {
+                        _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
+                    }
+            } catch (_: Exception) {
+                _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
+            } finally {
+                isLoading = false
+            }
         }
     }
 
