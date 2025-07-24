@@ -69,6 +69,8 @@ fun UserInfoResponse.toDomain(): UserInfo =
         id = this.id,
         nickname = this.nickname,
         profileImage = this.profileImage,
+    )
+
 fun KeywordResponse.toDomain(): Keyword =
     Keyword(
         id = this.id,
