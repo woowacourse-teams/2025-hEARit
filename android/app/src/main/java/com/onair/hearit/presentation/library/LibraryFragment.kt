@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.onair.hearit.data.dummy.BookmarkDummyData
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -17,18 +18,14 @@ class LibraryFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
-
+    private val viewModel: BookmarkViewModel by viewModels { BookmarkViewModelFactory() }
     private val adapter by lazy { BookmarkAdapter(this) }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         binding.rvBookmark.adapter = adapter
@@ -47,12 +44,24 @@ class LibraryFragment :
             insets
         }
 
+        observeViewModel()
+
         // 테스트용으로 더미 데이터 넣어 놓음
         val bookmarks = BookmarkDummyData.getBookmarks()
         adapter.submitList(bookmarks)
 
         binding.layoutLibraryWhenNoBookmark.visibility =
             if (bookmarks.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun observeViewModel() {
+        viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
+            binding.uiState = uiState
+        }
+
+        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
+            binding.userInfo = userInfo
+        }
     }
 
     override fun onClickOption() {

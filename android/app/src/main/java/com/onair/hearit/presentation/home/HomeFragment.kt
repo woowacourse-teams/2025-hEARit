@@ -27,9 +27,9 @@ class HomeFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
-    private lateinit var recommendAdapter: RecommendHearitAdapter
-    private lateinit var categoryAdapter: CategoryAdapter
+    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory(requireContext()) }
+    private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
+    private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,8 +46,6 @@ class HomeFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
-        recommendAdapter = RecommendHearitAdapter(this)
-        categoryAdapter = CategoryAdapter()
 
         binding.tvHomeNoRecentHearitText.setOnClickListener {
             (activity as? MainActivity)?.apply {
@@ -140,6 +138,10 @@ class HomeFragment :
     }
 
     private fun observeViewModel() {
+        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
+            binding.userInfo = userInfo
+        }
+
         viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->
             binding.recentHearit = recentHearit
         }

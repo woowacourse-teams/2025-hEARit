@@ -14,8 +14,7 @@ class CategoryFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentCategoryBinding? = null
     private val binding get() = _binding!!
-
-    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
+    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory(requireContext()) }
     private val categoryAdapter = CategoryAdapter()
 
     override fun onCreateView(
