@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import com.onair.TestFixture;
@@ -8,6 +9,7 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.response.BookmarkInfoResponse;
 import io.restassured.RestAssured;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -97,12 +99,15 @@ class BookmarkControllerTest extends IntegrationTest {
         Hearit hearit = saveHearitWithSuffix(1);
 
         // when & then
-        RestAssured.given()
+        BookmarkInfoResponse response = RestAssured.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .post("/api/v1/hearits/" + hearit.getId() + "/bookmarks")
                 .then()
-                .statusCode(HttpStatus.CREATED.value());
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().as(BookmarkInfoResponse.class);
+
+        assertThat(response.id()).isNotNull();
     }
 
     @Test

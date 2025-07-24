@@ -4,6 +4,7 @@ import com.onair.hearit.application.BookmarkService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -50,11 +51,11 @@ public class BookmarkController {
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             })
     @PostMapping("/{hearitId}/bookmarks")
-    public ResponseEntity<Void> createBookmark(
+    public ResponseEntity<BookmarkInfoResponse> createBookmark(
             @PathVariable Long hearitId,
             @AuthenticationPrincipal CurrentMember member) {
-        bookmarkService.addBookmark(hearitId, member.memberId());
-        return ResponseEntity.created(URI.create("/api/v1/hearits/" + hearitId)).build();
+        BookmarkInfoResponse response = bookmarkService.addBookmark(hearitId, member.memberId());
+        return ResponseEntity.created(URI.create("/api/v1/hearits/" + hearitId)).body(response);
     }
 
     @Operation(summary = "북마크 삭제", description = "로그인한 히어릿 ID와 북마크 ID로 북마크를 삭제합니다.")
