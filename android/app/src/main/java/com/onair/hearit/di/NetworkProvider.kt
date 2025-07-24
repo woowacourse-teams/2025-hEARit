@@ -25,7 +25,6 @@ object NetworkProvider {
     private val okhttpClient =
         OkHttpClient
             .Builder()
-            .addInterceptor(AuthInterceptorProvider)
             .addInterceptor(LoggingInterceptorProvider.provide())
             .build()
 
