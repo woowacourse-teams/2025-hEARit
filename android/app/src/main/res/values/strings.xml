@@ -11,6 +11,8 @@
     <string name="all_toast_categories_load_fail">카테고리 조회에 실패했습니다.</string>
     <string name="all_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
     <string name="all_toast_save_user_info_fail">유저 정보 저장에 실패했습니다.</string>
+    <string name="all_toast_add_bookmark_fail">북마크 저장에 실패했습니다.</string>
+    <string name="all_toast_delete_bookmark_fail">북마크 삭제에 실패했습니다.</string>
 
     <!-- HomeFragment-->
     <string name="home_logo_description">궁금했던 내용들을, 히어릿을 통해 빠르게 들어보세요!</string>
@@ -48,7 +50,6 @@
     <string name="player_detail_script_title">스크립트</string>
     <string name="player_detail_toast_single_hearit_load_fail">단일 히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_hearit_load_fail">히어릿 조회에 실패했습니다.</string>
-    <string name="player_detail_toast_bookmark_fail">북마크 저장에 실패했습니다.</string>
 
     <!-- ExploreFragment-->
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 골라 들으세요!</string>

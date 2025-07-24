@@ -105,7 +105,7 @@ class ExploreViewModel(
                 .onSuccess { _isBookmarked.value = true }
                 .onFailure {
                     _isBookmarked.value = false
-                    _toastMessage.value = R.string.player_detail_toast_bookmark_fail
+                    _toastMessage.value = R.string.all_toast_add_bookmark_fail
                 }
         }
     }

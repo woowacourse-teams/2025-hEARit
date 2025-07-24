@@ -29,24 +29,32 @@ class PlayerDetailViewModel(
         fetchData()
     }
 
-    fun toggleBookmark() {
+    fun toggleBookmark(bookmarkId: Long) {
         if (isBookmarked.value == true) {
-            deleteBookmark()
+            deleteBookmark(bookmarkId)
         } else {
             addBookmark()
         }
     }
 
-    private fun deleteBookmark() {}
+    private fun deleteBookmark(bookmarkId: Long) {
+        viewModelScope.launch {
+            bookmarkRepository
+                .deleteBookmark(hearitId, bookmarkId)
+                .onSuccess { _isBookmarked.value = false }
+                .onFailure {
+                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                }
+        }
+    }
 
-    private fun addBookmark() {
+    fun addBookmark() {
         viewModelScope.launch {
             bookmarkRepository
                 .addBookmark(hearitId)
                 .onSuccess { _isBookmarked.value = true }
                 .onFailure {
-                    _isBookmarked.value = false
-                    _toastMessage.value = R.string.player_detail_toast_bookmark_fail
+                    _toastMessage.value = R.string.all_toast_add_bookmark_fail
                 }
         }
     }
@@ -54,8 +62,10 @@ class PlayerDetailViewModel(
     private fun fetchData() {
         viewModelScope.launch {
             getHearitUseCase(hearitId)
-                .onSuccess { _hearit.value = it }
-                .onFailure { _toastMessage.value = R.string.player_detail_toast_hearit_load_fail }
+                .onSuccess {
+                    _hearit.value = it
+                    _isBookmarked.value = it.isBookmarked
+                }.onFailure { _toastMessage.value = R.string.player_detail_toast_hearit_load_fail }
         }
     }
 }

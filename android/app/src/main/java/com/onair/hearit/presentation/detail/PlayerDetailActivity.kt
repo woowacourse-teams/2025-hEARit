@@ -114,10 +114,6 @@ class PlayerDetailActivity : AppCompatActivity() {
             setResult(RESULT_OK)
             finish()
         }
-
-        binding.btnHearitPlayerBookmark.setOnClickListener {
-            viewModel.toggleBookmark()
-        }
     }
 
     private fun observeViewModel() {
