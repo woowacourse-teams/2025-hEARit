@@ -21,21 +21,21 @@ public class FileSourceService {
     }
 
     public OriginalAudioResponse getOriginalAudio(Long hearitId) {
-        Hearit hearit = findHearit(hearitId);
+        Hearit hearit = getHearitById(hearitId);
         return new OriginalAudioResponse(hearit.getId(), createFullUrl(hearit.getOriginalAudioUrl()));
     }
 
     public ShortAudioResponse getShortAudio(Long id) {
-        Hearit hearit = findHearit(id);
+        Hearit hearit = getHearitById(id);
         return new ShortAudioResponse(hearit.getId(), createFullUrl(hearit.getShortAudioUrl()));
     }
 
     public ScriptResponse getScript(Long id) {
-        Hearit hearit = findHearit(id);
+        Hearit hearit = getHearitById(id);
         return new ScriptResponse(hearit.getId(), createFullUrl(hearit.getScriptUrl()));
     }
 
-    private Hearit findHearit(Long id) {
+    private Hearit getHearitById(Long id) {
         return hearitRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("hearitId", String.valueOf(id)));
     }

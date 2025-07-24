@@ -98,7 +98,7 @@ class KeywordServiceTest {
         int size = 3;
 
         // when
-        List<KeywordResponse> result = keywordService.getRecommendedKeyword(size);
+        List<KeywordResponse> result = keywordService.getRecommendedKeywords(size);
 
         // then
         assertThat(result).hasSize(size);
@@ -116,8 +116,8 @@ class KeywordServiceTest {
         int size = 3;
 
         // when
-        List<KeywordResponse> first = keywordService.getRecommendedKeyword(size);
-        List<KeywordResponse> second = keywordService.getRecommendedKeyword(size);
+        List<KeywordResponse> first = keywordService.getRecommendedKeywords(size);
+        List<KeywordResponse> second = keywordService.getRecommendedKeywords(size);
 
         // then
         assertThat(first).extracting(KeywordResponse::id)
