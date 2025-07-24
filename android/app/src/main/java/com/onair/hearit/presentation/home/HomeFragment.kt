@@ -16,14 +16,17 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentHomeBinding
+import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.search.SearchResultFragment
 import kotlin.math.abs
 
 class HomeFragment :
     Fragment(),
-    RecommendClickListener {
+    RecommendClickListener,
+    CategoryClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -47,7 +50,7 @@ class HomeFragment :
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
         recommendAdapter = RecommendHearitAdapter(this)
-        categoryAdapter = CategoryAdapter()
+        categoryAdapter = CategoryAdapter(this)
 
         binding.tvHomeNoRecentHearitText.setOnClickListener {
             (activity as? MainActivity)?.apply {
@@ -200,5 +203,19 @@ class HomeFragment :
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun navigateToSearchResult(searchTerm: String) {
+        val fragment = SearchResultFragment.newInstance(searchTerm)
+
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container_view, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onCategoryClick(category: String) {
+        navigateToSearchResult(category)
     }
 }

@@ -8,15 +8,20 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentCategoryBinding
+import com.onair.hearit.presentation.CategoryClickListener
+import com.onair.hearit.presentation.search.SearchResultFragment
 
-class CategoryFragment : Fragment() {
+class CategoryFragment :
+    Fragment(),
+    CategoryClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentCategoryBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
-    private val categoryAdapter = CategoryAdapter()
+    private val categoryAdapter = CategoryAdapter(this)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,6 +52,16 @@ class CategoryFragment : Fragment() {
         }
     }
 
+    private fun navigateToSearchResult(searchTerm: String) {
+        val fragment = SearchResultFragment.newInstance(searchTerm)
+
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container_view, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
     private fun setupRecyclerView() {
         binding.rvCategory.adapter = categoryAdapter
     }
@@ -66,5 +81,9 @@ class CategoryFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onCategoryClick(category: String) {
+        navigateToSearchResult(category)
     }
 }

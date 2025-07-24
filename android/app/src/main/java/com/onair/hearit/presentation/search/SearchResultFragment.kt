@@ -13,6 +13,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentSearchResultBinding
 
 class SearchResultFragment : Fragment() {
@@ -35,7 +37,6 @@ class SearchResultFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         _binding = FragmentSearchResultBinding.inflate(inflater, container, false)
-        binding.rvSearchedHearit.adapter = adapter
         binding.etSearchResult.setText(searchTerm)
         return binding.root
     }
@@ -49,6 +50,7 @@ class SearchResultFragment : Fragment() {
 
         setupWindowInsets()
         setupSearchEnterKey()
+        setupRecyclerView()
         observeViewModel()
 
         binding.nsvSearchResult.setOnTouchListener { v, event ->
@@ -63,6 +65,30 @@ class SearchResultFragment : Fragment() {
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
+    }
+
+    private fun setupRecyclerView() {
+        binding.rvSearchedHearit.adapter = adapter
+
+        binding.rvSearchedHearit.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int,
+                ) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    val layoutManager = recyclerView.layoutManager as? LinearLayoutManager ?: return
+                    val totalItemCount = layoutManager.itemCount
+                    val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+
+                    if (lastVisibleItem >= totalItemCount - 3) {
+                        viewModel.loadNextPageIfPossible()
+                    }
+                }
+            },
+        )
     }
 
     private fun setupSearchEnterKey() {
