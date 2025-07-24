@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentSearchResultBinding
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ShortsClickListener
 
@@ -26,12 +27,12 @@ class SearchResultFragment :
     private var _binding: FragmentSearchResultBinding? = null
     private val binding get() = _binding!!
 
-    private val searchTerm: String by lazy {
-        arguments?.getString("searchTerm") ?: ""
+    private val input: SearchInput by lazy {
+        SearchInput.from(requireArguments())
     }
 
     private val viewModel: SearchResultViewModel by viewModels {
-        SearchResultViewModelFactory(searchTerm)
+        SearchResultViewModelFactory(input)
     }
     private val adapter by lazy { SearchedHearitAdapter(this) }
 
@@ -42,7 +43,14 @@ class SearchResultFragment :
     ): View {
         _binding = FragmentSearchResultBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
-        binding.etSearchResult.setText(searchTerm)
+
+        binding.etSearchResult.setText(
+            when (val input = input) {
+                is SearchInput.Keyword -> input.term
+                is SearchInput.Category -> input.name
+            },
+        )
+
         return binding.root
     }
 
@@ -55,9 +63,9 @@ class SearchResultFragment :
 
         setupWindowInsets()
         setupSearchEnterKey()
+        setupSearchEndIcon()
         setupRecyclerView()
         observeViewModel()
-        setupSearchEndIcon()
 
         binding.nsvSearchResult.setOnTouchListener { _, _ ->
             hideKeyboard()
@@ -73,41 +81,17 @@ class SearchResultFragment :
         }
     }
 
-    private fun setupRecyclerView() {
-        binding.rvSearchedHearit.adapter = adapter
-
-        binding.rvSearchedHearit.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(
-                    recyclerView: RecyclerView,
-                    dx: Int,
-                    dy: Int,
-                ) {
-                    super.onScrolled(recyclerView, dx, dy)
-
-                    val layoutManager = recyclerView.layoutManager as? LinearLayoutManager ?: return
-                    val totalItemCount = layoutManager.itemCount
-                    val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-
-                    if (lastVisibleItem >= totalItemCount - 3) {
-                        viewModel.loadNextPageIfPossible()
-                    }
-                }
-            },
-        )
-    }
-
     private fun setupSearchEnterKey() {
         binding.etSearchResult.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val searchTerm =
+                val term =
                     binding.etSearchResult.text
                         .toString()
                         .trim()
-                if (searchTerm.isNotBlank() && searchTerm != viewModel.currentSearchTerm) {
+                if (term.isNotBlank() && term != viewModel.currentSearchTerm) {
                     hideKeyboard()
-                    viewModel.search(searchTerm)
-                    true
+                    viewModel.search(term)
+                    return@setOnEditorActionListener true
                 }
             }
             false
@@ -116,28 +100,41 @@ class SearchResultFragment :
 
     private fun setupSearchEndIcon() {
         binding.tilSearchResult.setEndIconOnClickListener {
-            val searchTerm =
+            val term =
                 binding.etSearchResult.text
                     .toString()
                     .trim()
-            if (searchTerm.isNotBlank()) {
+            if (term.isNotBlank()) {
                 hideKeyboard()
-                viewModel.search(searchTerm)
+                viewModel.search(term)
             }
         }
     }
 
+    private fun setupRecyclerView() {
+        binding.rvSearchedHearit.adapter = adapter
+        binding.rvSearchedHearit.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(
+                    rv: RecyclerView,
+                    dx: Int,
+                    dy: Int,
+                ) {
+                    val lm = rv.layoutManager as? LinearLayoutManager ?: return
+                    val total = lm.itemCount
+                    val last = lm.findLastVisibleItemPosition()
+
+                    if (last >= total - 3) viewModel.loadNextPageIfPossible()
+                }
+            },
+        )
+    }
+
     private fun observeViewModel() {
-        viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
-            binding.uiState = uiState
-        }
-
-        viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
-            adapter.submitList(searchedHearits)
-        }
-
-        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
+        viewModel.uiState.observe(viewLifecycleOwner) { binding.uiState = it }
+        viewModel.searchedHearits.observe(viewLifecycleOwner) { adapter.submitList(it) }
+        viewModel.toastMessage.observe(viewLifecycleOwner) {
+            showToast(getString(it))
         }
     }
 
@@ -163,12 +160,9 @@ class SearchResultFragment :
     }
 
     companion object {
-        fun newInstance(searchTerm: String): SearchResultFragment =
+        fun newInstance(input: SearchInput): SearchResultFragment =
             SearchResultFragment().apply {
-                arguments =
-                    Bundle().apply {
-                        putString("searchTerm", searchTerm)
-                    }
+                arguments = input.toBundle()
             }
     }
 }

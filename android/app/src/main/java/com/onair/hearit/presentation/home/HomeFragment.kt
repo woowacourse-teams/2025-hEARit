@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentHomeBinding
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
@@ -189,8 +190,8 @@ class HomeFragment :
         playerDetailLauncher.launch(intent)
     }
 
-    private fun navigateToSearchResult(searchTerm: String) {
-        val fragment = SearchResultFragment.newInstance(searchTerm)
+    private fun navigateToSearchResult(input: SearchInput) {
+        val fragment = SearchResultFragment.newInstance(input)
 
         (activity as? MainActivity)?.apply {
             selectTab(R.id.nav_search)
@@ -222,8 +223,11 @@ class HomeFragment :
         (requireActivity() as? MainActivity)?.showPlayerControlView()
     }
 
-    override fun onCategoryClick(category: String) {
-        navigateToSearchResult(category)
+    override fun onCategoryClick(
+        categoryId: Long,
+        categoryName: String,
+    ) {
+        navigateToSearchResult(SearchInput.Category(categoryId, categoryName))
     }
 
     override fun onDestroyView() {
