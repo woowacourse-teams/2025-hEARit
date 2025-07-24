@@ -3,6 +3,7 @@ package com.onair.hearit.domain
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.ScriptLine
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.ShortsHearit
 import com.onair.hearit.domain.model.SingleHearit
 
@@ -37,3 +38,9 @@ fun SingleHearit.toHearit(
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
     )
+
+fun SearchInput.term(): String =
+    when (this) {
+        is SearchInput.Keyword -> this.term
+        is SearchInput.Category -> this.name
+    }
