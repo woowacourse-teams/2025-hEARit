@@ -10,6 +10,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import coil.load
 import com.onair.hearit.R
+import com.onair.hearit.presentation.library.BookmarkUiState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -119,4 +120,20 @@ fun setImageUrl(
             error(R.drawable.img_default_profile)
             placeholder(R.drawable.img_default_profile)
         }
+}
+
+@BindingAdapter("visibleIfNotLogin")
+fun setVisibleIfNotLogin(
+    view: View,
+    state: BookmarkUiState?,
+) {
+    view.isVisible = state is BookmarkUiState.NotLoggedIn
+}
+
+@BindingAdapter("visibleIfLogin")
+fun setVisibleIfLogin(
+    view: View,
+    state: BookmarkUiState?,
+) {
+    view.isVisible = state is BookmarkUiState.LoggedIn
 }

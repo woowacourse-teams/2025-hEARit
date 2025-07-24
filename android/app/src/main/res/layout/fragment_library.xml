@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="uiState"
+            type="com.onair.hearit.presentation.library.BookmarkUiState" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -62,15 +69,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_library_guide" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_bookmark"
+        <FrameLayout
+            android:id="@+id/fl_login_state"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintTop_toBottomOf="@id/tv_bookmarked_hearit_title"
-            tools:itemCount="8"
-            tools:listitem="@layout/item_bookmark" />
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_bookmarked_hearit_title">
+
+            <include
+                layout="@layout/layout_library_when_no_login"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="12dp"
+                app:uiState="@{uiState}" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_bookmark"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="28dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_bookmarked_hearit_title"
+                app:visibleIfLogin="@{uiState}"
+                tools:itemCount="8"
+                tools:listitem="@layout/item_bookmark" />
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
