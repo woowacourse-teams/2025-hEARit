@@ -1,11 +1,13 @@
 package com.onair.hearit.presentation.library
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -23,8 +25,14 @@ class LibraryFragment :
     private val binding get() = _binding!!
 
     private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
-
     private val adapter by lazy { BookmarkAdapter(this) }
+
+    private val playerDetailLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                viewModel.fetchData(page = 0)
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -90,6 +98,6 @@ class LibraryFragment :
 
     override fun onClickBookmarkedHearit(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
+        playerDetailLauncher.launch(intent)
     }
 }

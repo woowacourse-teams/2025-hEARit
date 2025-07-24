@@ -35,6 +35,13 @@ class HomeFragment :
     private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
     private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
 
+    private val playerDetailLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                viewModel.getRecentHearit()
+            }
+        }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -202,13 +209,6 @@ class HomeFragment :
             .addToBackStack(null)
             .commit()
     }
-
-    private val playerDetailLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                viewModel.getRecentHearit()
-            }
-        }
 
     override fun onClickRecentHearit(hearitId: Long) {
         navigateToPlayerDetail(hearitId)

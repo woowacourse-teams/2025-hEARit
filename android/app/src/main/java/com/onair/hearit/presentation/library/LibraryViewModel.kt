@@ -34,6 +34,18 @@ class LibraryViewModel(
         getUserInfo()
     }
 
+    fun fetchData(page: Int) {
+        viewModelScope.launch {
+            bookmarkRepository
+                .getBookmarks(page = page, size = null)
+                .onSuccess {
+                    _bookmarks.value = it
+                }.onFailure {
+                    _toastMessage.value = R.string.library_toast_bookmark_load_fail
+                }
+        }
+    }
+
     private fun getUserInfo() {
         viewModelScope.launch {
             memberRepository
@@ -53,18 +65,6 @@ class LibraryViewModel(
                     }
                     val defaultUserInfo = UserInfo(-1, "hEARit", null)
                     _userInfo.value = defaultUserInfo
-                }
-        }
-    }
-
-    private fun fetchData(page: Int) {
-        viewModelScope.launch {
-            bookmarkRepository
-                .getBookmarks(page = page, size = null)
-                .onSuccess {
-                    _bookmarks.value = it
-                }.onFailure {
-                    _toastMessage.value = R.string.library_toast_bookmark_load_fail
                 }
         }
     }
