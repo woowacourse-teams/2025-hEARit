@@ -8,6 +8,10 @@
         <variable
             name="uiState"
             type="com.onair.hearit.presentation.library.BookmarkUiState" />
+
+        <variable
+            name="userInfo"
+            type="com.onair.hearit.domain.model.UserInfo" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -44,9 +48,10 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
-            android:text="@string/library_nickname"
+            android:text='@{userInfo.nickname + " 님"}'
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="hEARit 님" />
 
         <TextView
             android:id="@+id/tv_library_guide"

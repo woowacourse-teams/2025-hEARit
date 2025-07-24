@@ -19,7 +19,6 @@ class LibraryFragment :
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
     private val viewModel: BookmarkViewModel by viewModels { BookmarkViewModelFactory() }
-
     private val adapter by lazy { BookmarkAdapter(this) }
 
     override fun onCreateView(
@@ -58,6 +57,10 @@ class LibraryFragment :
     private fun observeViewModel() {
         viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
             binding.uiState = uiState
+        }
+
+        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
+            binding.userInfo = userInfo
         }
     }
 
