@@ -36,13 +36,7 @@ class BookmarkRemoteDataSourceImpl(
         handleApiCall(
             errorMessage = ERROR_BOOKMARK_DELETE_MESSAGE,
             apiCall = { bookmarkService.deleteBookmark(getAuthHeader(), hearitId, bookmarkId) },
-            transform = { response ->
-                if (response.isSuccessful) {
-                    Unit
-                } else {
-                    throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
-                }
-            },
+            transform = { },
         )
 
     private fun getAuthHeader(): String {
