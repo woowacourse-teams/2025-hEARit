@@ -17,8 +17,8 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query(value = """
             SELECT DISTINCT h.*
             FROM hearit h
-            LEFT JOIN hearit_keyword hk ON h.id = hk.hearit_id
-            LEFT JOIN keyword k ON hk.keyword_id = k.id
+            JOIN hearit_keyword hk ON h.id = hk.hearit_id
+            JOIN keyword k ON hk.keyword_id = k.id
             WHERE
                 LOWER(h.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
                 OR LOWER(k.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))

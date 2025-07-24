@@ -10,9 +10,9 @@ import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitSearchResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,17 +49,17 @@ class HearitSearchServiceTest {
         Hearit hearit2 = saveHearitWithTitleAndKeyword("wwSpring1ww", saveKeyword("keyword2"));      // 제목에 검색어 포함됨
         Hearit hearit3 = saveHearitWithTitleAndKeyword("noSpring", saveKeyword("Spring"));           // 제목에 검색어 포함됨
         Hearit hearit4 = saveHearitWithTitleAndKeyword("pring", saveKeyword("sring"));               // 검색어서 제외됨
-        Hearit hearit5 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("noKeyword"));         // 검색에서 제외됨
+        saveHearitWithTitleAndKeyword("notitle", saveKeyword("noKeyword"));         // 검색에서 제외됨
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(4),
-                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                () -> assertThat(result.content()).hasSize(4),
+                () -> assertThat(result.content()).extracting(HearitSearchResponse::id)
                         .containsExactlyInAnyOrder(hearit.getId(), hearit1.getId(), hearit2.getId(), hearit3.getId()),
-                () -> assertThat(result).extracting(HearitSearchResponse::id).doesNotContain(hearit4.getId())
+                () -> assertThat(result.content()).extracting(HearitSearchResponse::id).doesNotContain(hearit4.getId())
         );
     }
 
@@ -75,14 +75,14 @@ class HearitSearchServiceTest {
         Hearit hearit4 = saveHearitWithTitleAndKeyword("noTitle", saveKeyword("noKeyword"));   // 검색에서 제외됨
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(3),
-                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                () -> assertThat(result.content()).hasSize(3),
+                () -> assertThat(result.content()).extracting(HearitSearchResponse::id)
                         .containsExactlyInAnyOrder(hearit.getId(), hearit1.getId(), hearit2.getId()),
-                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                () -> assertThat(result.content()).extracting(HearitSearchResponse::id)
                         .doesNotContain(hearit3.getId(), hearit4.getId())
         );
     }
@@ -99,18 +99,17 @@ class HearitSearchServiceTest {
         Hearit neither = saveHearitWithTitleAndKeyword("notitle", saveKeyword("nokeyword")); // 둘 다 매칭 안 됨
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.search("spring", request);
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(3),
-                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                () -> assertThat(result.content()).hasSize(3),
+                () -> assertThat(result.content()).extracting(HearitSearchResponse::id)
                         .containsExactlyInAnyOrder(titleOnly.getId(), keywordOnly.getId(), bothMatch.getId()),
-                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                () -> assertThat(result.content()).extracting(HearitSearchResponse::id)
                         .doesNotContain(neither.getId())
         );
     }
-
 
     @Test
     @DisplayName("히어릿 목록을 검색으로 조회 시 최신순으로 정렬되어 반환된다.")
@@ -122,17 +121,16 @@ class HearitSearchServiceTest {
         Hearit hearit3 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("springKeyword"));   // latest
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(3),
-                () -> assertThat(result.get(0).id()).isEqualTo(hearit3.getId()),
-                () -> assertThat(result.get(1).id()).isEqualTo(hearit2.getId()),
-                () -> assertThat(result.get(2).id()).isEqualTo(hearit1.getId())
+                () -> assertThat(result.content()).hasSize(3),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit3.getId()),
+                () -> assertThat(result.content().get(1).id()).isEqualTo(hearit2.getId()),
+                () -> assertThat(result.content().get(2).id()).isEqualTo(hearit1.getId())
         );
     }
-
 
     @Test
     @DisplayName("히어릿 목록을 검색으로 조회 시 페이지네이션이 적용되어 반환된다.")
@@ -144,12 +142,12 @@ class HearitSearchServiceTest {
         Hearit hearit3 = saveHearitWithTitleAndKeyword("otherTitle", saveKeyword("Spring"));
 
         // when
-        List<HearitSearchResponse> result = hearitSearchService.search("spring", request);
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(1),
-                () -> assertThat(result.get(0).id()).isEqualTo(hearit1.getId())
+                () -> assertThat(result.content()).hasSize(1),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
         );
     }
 

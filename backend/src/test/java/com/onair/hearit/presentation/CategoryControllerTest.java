@@ -7,7 +7,9 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -57,11 +59,10 @@ class CategoryControllerTest extends IntegrationTest {
 
         Hearit hearit1 = saveHearitWithCategory(category1);
         Hearit hearit2 = saveHearitWithCategory(category1);
-
-        saveHearitWithCategory(category2);
+        saveHearitWithCategory(category2); // 다른 카테고리
 
         // when
-        List<HearitSearchResponse> responses = RestAssured
+        PagedResponse<HearitSearchResponse> pagedResponse = RestAssured
                 .given()
                 .pathParam("categoryId", category1.getId())
                 .queryParam("page", 0)
@@ -71,8 +72,9 @@ class CategoryControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
-                .jsonPath()
-                .getList(".", HearitSearchResponse.class);
+                .as(new TypeRef<>() {
+                });
+        List<HearitSearchResponse> responses = pagedResponse.content();
 
         // then
         assertAll(
@@ -81,6 +83,7 @@ class CategoryControllerTest extends IntegrationTest {
                 () -> assertThat(responses.get(1).id()).isEqualTo(hearit1.getId())
         );
     }
+
 
     private Category saveCategory(String name, String color) {
         return dbHelper.insertCategory(new Category(name, color));

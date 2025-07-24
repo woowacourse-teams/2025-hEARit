@@ -6,6 +6,7 @@ import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,12 +68,12 @@ public class HearitController {
 
     @Operation(summary = "검색어를 입력해 히어릿을 검색", description = "검색어를 포함하는 제목 또는 키워드를 가진 히어릿을 검색합니다. ")
     @GetMapping("/search")
-    public ResponseEntity<List<HearitSearchResponse>> searchHearitsByTitle(
+    public ResponseEntity<PagedResponse<HearitSearchResponse>> searchHearitsByTitle(
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        List<HearitSearchResponse> response = hearitSearchService.search(searchTerm, pagingRequest);
+        PagedResponse<HearitSearchResponse> response = hearitSearchService.search(searchTerm, pagingRequest);
         return ResponseEntity.ok(response);
     }
 }

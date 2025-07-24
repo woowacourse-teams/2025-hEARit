@@ -9,6 +9,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.time.LocalDateTime;
@@ -79,12 +80,12 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(0, 10);
 
         // when
-        List<HearitSearchResponse> result = categoryService.findHearitsByCategory(category1.getId(), request);
+        PagedResponse<HearitSearchResponse> result = categoryService.findHearitsByCategory(category1.getId(), request);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(HearitSearchResponse::id)
+                () -> assertThat(result.content()).hasSize(2),
+                () -> assertThat(result.content()).extracting(HearitSearchResponse::id)
                         .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId())
         );
     }
@@ -100,12 +101,12 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(1, 2);
 
         // when
-        List<HearitSearchResponse> result = categoryService.findHearitsByCategory(category.getId(), request);
+        PagedResponse<HearitSearchResponse> result = categoryService.findHearitsByCategory(category.getId(), request);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(1),
-                () -> assertThat(result.get(0).id()).isEqualTo(hearit1.getId())
+                () -> assertThat(result.content()).hasSize(1),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
         );
     }
 
