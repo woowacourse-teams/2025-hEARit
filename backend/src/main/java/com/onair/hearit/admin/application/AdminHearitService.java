@@ -43,8 +43,8 @@ public class AdminHearitService {
         List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
         Map<Long, List<KeywordInHearit>> keywordMap = mapKeywordsByHearitId(hearitKeywords);
 
-        Page<HearitAdminResponse> dtoPage = hearits.map(h -> HearitAdminResponse.from(h, keywordMap));
-        return PagedResponse.from(dtoPage);
+        Page<HearitAdminResponse> hearitDtos = hearits.map(h -> HearitAdminResponse.from(h, keywordMap));
+        return PagedResponse.from(hearitDtos);
     }
 
     private List<Long> extractHearitIds(Page<Hearit> hearits) {

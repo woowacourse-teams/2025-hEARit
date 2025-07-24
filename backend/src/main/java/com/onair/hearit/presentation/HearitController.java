@@ -42,13 +42,13 @@ public class HearitController {
 
     @Operation(summary = "랜덤 히어릿 조회", description = "랜덤 히어릿을 page, size로 목록을 조회합니다.")
     @GetMapping("/random")
-    public ResponseEntity<List<RandomHearitResponse>> readRandomHearits(
+    public ResponseEntity<PagedResponse<RandomHearitResponse>> readRandomHearits(
             @AuthenticationPrincipal CurrentMember member,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Long memberId = extractMemberId(member);
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        List<RandomHearitResponse> responses = hearitService.getRandomHearits(memberId, pagingRequest);
+        PagedResponse<RandomHearitResponse> responses = hearitService.getRandomHearits(memberId, pagingRequest);
         return ResponseEntity.ok(responses);
     }
 

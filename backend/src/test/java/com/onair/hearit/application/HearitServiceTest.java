@@ -13,6 +13,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
@@ -95,10 +96,10 @@ class HearitServiceTest {
         PagingRequest pagingRequest = new PagingRequest(0, 10);
 
         // when
-        List<RandomHearitResponse> hearits = hearitService.getRandomHearits(member.getId(), pagingRequest);
+        PagedResponse<RandomHearitResponse> hearits = hearitService.getRandomHearits(member.getId(), pagingRequest);
 
         // then
-        assertThat(hearits).hasSize(10);
+        assertThat(hearits.content()).hasSize(10);
     }
 
     @Test

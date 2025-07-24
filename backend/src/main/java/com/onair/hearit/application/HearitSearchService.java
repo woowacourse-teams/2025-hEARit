@@ -20,8 +20,7 @@ public class HearitSearchService {
     public PagedResponse<HearitSearchResponse> search(String searchTerm, PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.searchByTerm(searchTerm, pageable);
-        Page<HearitSearchResponse> response = hearits.map(HearitSearchResponse::from);
-        return PagedResponse.from(response);
+        Page<HearitSearchResponse> hearitDtos = hearits.map(HearitSearchResponse::from);
+        return PagedResponse.from(hearitDtos);
     }
 }
-
