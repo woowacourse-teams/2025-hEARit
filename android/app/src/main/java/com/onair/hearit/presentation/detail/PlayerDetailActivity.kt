@@ -1,6 +1,5 @@
 package com.onair.hearit.presentation.detail
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -115,8 +114,12 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
 
         binding.ibPlayerDetailBack.setOnClickListener {
-            setResult(Activity.RESULT_OK)
+            setResult(RESULT_OK)
             finish()
+        }
+
+        binding.btnHearitPlayerBookmark.setOnClickListener {
+            viewModel.toggleBookmark()
         }
     }
 

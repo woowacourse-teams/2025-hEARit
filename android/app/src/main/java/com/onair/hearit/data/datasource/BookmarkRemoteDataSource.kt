@@ -7,4 +7,6 @@ interface BookmarkRemoteDataSource {
         page: Int?,
         size: Int?,
     ): Result<BookmarkResponse>
+
+    suspend fun addBookmark(hearitId: Long): Result<Unit>
 }

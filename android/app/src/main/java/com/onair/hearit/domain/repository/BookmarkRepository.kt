@@ -7,4 +7,6 @@ interface BookmarkRepository {
         page: Int?,
         size: Int?,
     ): Result<List<Bookmark>>
+
+    suspend fun addBookmark(hearitId: Long): Result<Unit>
 }

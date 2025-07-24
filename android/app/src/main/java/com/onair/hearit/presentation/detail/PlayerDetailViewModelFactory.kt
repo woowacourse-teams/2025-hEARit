@@ -2,8 +2,10 @@ package com.onair.hearit.presentation.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.onair.hearit.data.datasource.BookmarkRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.HearitRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.MediaFileRemoteDataSourceImpl
+import com.onair.hearit.data.repository.BookmarkRepositoryImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
 import com.onair.hearit.data.repository.MediaFileRepositoryImpl
 import com.onair.hearit.di.NetworkProvider
@@ -23,9 +25,13 @@ class PlayerDetailViewModelFactory(
 
         val getHearitUseCase = GetHearitUseCase(hearitRepository, mediaFileRepository)
 
+        val bookmarkRemoteDataSource = BookmarkRemoteDataSourceImpl(NetworkProvider.bookmarkService)
+        val bookmarkRepository = BookmarkRepositoryImpl(bookmarkRemoteDataSource)
+
         return PlayerDetailViewModel(
             hearitId,
             getHearitUseCase,
+            bookmarkRepository,
         ) as T
     }
 }
