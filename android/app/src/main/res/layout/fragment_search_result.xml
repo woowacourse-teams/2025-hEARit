@@ -4,6 +4,10 @@
 
     <data>
 
+        <variable
+            name="uiState"
+            type="com.onair.hearit.presentation.search.SearchUiState" />
+
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -88,16 +92,34 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_searched_hearit"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/cl_search_state"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="12dp"
                     android:layout_marginTop="20dp"
-                    android:nestedScrollingEnabled="false"
-                    android:orientation="vertical"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:layout_constraintTop_toBottomOf="@id/tv_searched_hearit" />
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_searched_hearit">
+
+                    <include
+                        layout="@layout/layout_search_when_no_hearits"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_marginHorizontal="12dp"
+                        app:uiState="@{uiState}" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_searched_hearit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="12dp"
+                        android:nestedScrollingEnabled="false"
+                        android:orientation="vertical"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        app:layout_constraintTop_toBottomOf="@id/tv_searched_hearit"
+                        app:visibleIfHearitsExist="@{uiState}" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>
 
