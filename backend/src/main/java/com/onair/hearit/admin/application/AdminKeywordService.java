@@ -28,17 +28,17 @@ public class AdminKeywordService {
         return PagedResponse.from(dtoPage);
     }
 
-    @Transactional
-    public KeywordInfoResponse addKeyword(KeywordCreateRequest request) {
-        Keyword keyword = new Keyword(request.name());
-        Keyword saved = keywordRepository.save(keyword);
-        return KeywordInfoResponse.from(saved);
-    }
-
     public List<KeywordInfoResponse> getAllKeywords() {
         List<Keyword> allKeywords = keywordRepository.findAll();
         return allKeywords.stream()
                 .map(KeywordInfoResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public KeywordInfoResponse addKeyword(KeywordCreateRequest request) {
+        Keyword keyword = new Keyword(request.name());
+        Keyword saved = keywordRepository.save(keyword);
+        return KeywordInfoResponse.from(saved);
     }
 }
