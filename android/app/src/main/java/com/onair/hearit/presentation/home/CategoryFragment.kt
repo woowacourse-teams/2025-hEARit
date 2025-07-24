@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentCategoryBinding
 import com.onair.hearit.presentation.CategoryClickListener
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.search.SearchResultFragment
 
 class CategoryFragment :
@@ -54,6 +55,10 @@ class CategoryFragment :
 
     private fun navigateToSearchResult(searchTerm: String) {
         val fragment = SearchResultFragment.newInstance(searchTerm)
+
+        (activity as? MainActivity)?.apply {
+            selectTab(R.id.nav_search)
+        }
 
         parentFragmentManager
             .beginTransaction()
