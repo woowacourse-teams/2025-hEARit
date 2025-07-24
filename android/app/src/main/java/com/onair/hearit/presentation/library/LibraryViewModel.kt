@@ -29,9 +29,6 @@ class LibraryViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    // 테스트용
-    private val pageSize = 5
-
     init {
         fetchData(page = 0)
         getUserInfo()
@@ -63,7 +60,7 @@ class LibraryViewModel(
     private fun fetchData(page: Int) {
         viewModelScope.launch {
             bookmarkRepository
-                .getBookmarks(page, pageSize)
+                .getBookmarks(page = page, size = null)
                 .onSuccess {
                     _bookmarks.value = it
                 }.onFailure {
