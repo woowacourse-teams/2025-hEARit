@@ -16,7 +16,7 @@ class BookmarkRemoteDataSourceImpl(
             errorMessage = ERROR_BOOKMARK_LOAD_MESSAGE,
             apiCall = { bookmarkService.getBookmarks(getAuthHeader(), page, size) },
             transform = { response ->
-                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
+                Unit
             },
         )
 
@@ -25,7 +25,7 @@ class BookmarkRemoteDataSourceImpl(
             errorMessage = ERROR_BOOKMARK_ADD_MESSAGE,
             apiCall = { bookmarkService.postBookmark(getAuthHeader(), hearitId) },
             transform = { response ->
-                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
+                Unit
             },
         )
 
@@ -37,11 +37,7 @@ class BookmarkRemoteDataSourceImpl(
             errorMessage = ERROR_BOOKMARK_DELETE_MESSAGE,
             apiCall = { bookmarkService.deleteBookmark(getAuthHeader(), hearitId, bookmarkId) },
             transform = { response ->
-                if (response.isSuccessful) {
-                    Unit
-                } else {
-                    throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
-                }
+                Unit
             },
         )
 
