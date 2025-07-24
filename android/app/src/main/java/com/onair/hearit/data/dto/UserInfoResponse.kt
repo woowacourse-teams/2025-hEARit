@@ -10,5 +10,5 @@ data class UserInfoResponse(
     @SerialName("nickname")
     val nickname: String,
     @SerialName("profileImage")
-    val profileImage: String,
+    val profileImage: String? = "",
 )

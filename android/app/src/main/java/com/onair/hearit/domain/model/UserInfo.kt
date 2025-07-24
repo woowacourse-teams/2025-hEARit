@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class UserInfo(
     val id: Long,
     val nickname: String,
-    val profileImage: String,
+    val profileImage: String?,
 )
