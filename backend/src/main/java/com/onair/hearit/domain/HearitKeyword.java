@@ -23,11 +23,11 @@ public class HearitKeyword {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hearit_id")
+    @JoinColumn(name = "hearit_id", nullable = false)
     private Hearit hearit;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "keyword_id")
+    @JoinColumn(name = "keyword_id", nullable = false)
     private Keyword keyword;
 
     public HearitKeyword(Hearit hearit, Keyword keyword) {

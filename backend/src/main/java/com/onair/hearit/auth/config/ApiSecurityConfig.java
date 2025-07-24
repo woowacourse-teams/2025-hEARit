@@ -24,13 +24,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class ApiSecurityConfig {
 
-    private final JwtTokenProvider jwtTokenProvider;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     private static final String[] AUTH_WHITELIST = {
             "/api/v1/admin/**",
             "/api/v1/auth/**",
@@ -38,6 +31,13 @@ public class ApiSecurityConfig {
             "/api/v1/categories/**",
             "/api/v1/keywords/**"
     };
+
+    private final JwtTokenProvider jwtTokenProvider;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

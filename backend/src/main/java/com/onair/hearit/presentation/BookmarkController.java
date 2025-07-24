@@ -26,21 +26,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/hearits/")
+@RequestMapping("/api/v1/bookmarks")
 @Tag(name = "Bookmark", description = "북마크 및 북마크 재생목록")
 public class BookmarkController {
 
     private final BookmarkService bookmarkService;
 
     @Operation(summary = "북마크 재생목록 조회", description = "로그인한 회원이 page, size로 재생목록을 조회합니다.")
-    @GetMapping("/bookmarks")
+    @GetMapping("/hearits")
     public ResponseEntity<PagedResponse<BookmarkHearitResponse>> readBookmarkHearits(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
             @AuthenticationPrincipal CurrentMember member) {
-        PagingRequest condition = new PagingRequest(page, size);
-        PagedResponse<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member.memberId(),
-                condition);
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        PagedResponse<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member, pagingRequest);
         return ResponseEntity.ok(responses);
     }
 
@@ -50,20 +49,20 @@ public class BookmarkController {
                     @ApiResponse(responseCode = "400", description = "이미 북마크된 히어릿",
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             })
-    @PostMapping("/{hearitId}/bookmarks")
+    @PostMapping("/hearits/{hearitId}")
     public ResponseEntity<BookmarkInfoResponse> createBookmark(
             @PathVariable Long hearitId,
             @AuthenticationPrincipal CurrentMember member) {
-        BookmarkInfoResponse response = bookmarkService.addBookmark(hearitId, member.memberId());
-        return ResponseEntity.created(URI.create("/api/v1/hearits/" + hearitId)).body(response);
+        BookmarkInfoResponse response = bookmarkService.addBookmark(member, hearitId);
+        return ResponseEntity.created(URI.create("/")).body(response);
     }
 
     @Operation(summary = "북마크 삭제", description = "로그인한 히어릿 ID와 북마크 ID로 북마크를 삭제합니다.")
-    @DeleteMapping("/{hearitId}/bookmarks/{bookmarkId}")
+    @DeleteMapping("/{bookmarkId}")
     public ResponseEntity<Void> deleteBookmark(
             @PathVariable Long bookmarkId,
             @AuthenticationPrincipal CurrentMember member) {
-        bookmarkService.deleteBookmark(bookmarkId, member.memberId());
+        bookmarkService.deleteBookmark(bookmarkId, member);
         return ResponseEntity.noContent().build();
     }
 }

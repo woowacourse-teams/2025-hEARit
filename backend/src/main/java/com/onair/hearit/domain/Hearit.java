@@ -57,19 +57,6 @@ public class Hearit {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    public Hearit(String title, String summary, Integer playTime, String originalAudioUrl, String shortAudioUrl,
-                  String scriptUrl, String source, LocalDateTime createdAt, Category category) {
-        this.title = title;
-        this.summary = summary;
-        this.playTime = playTime;
-        this.originalAudioUrl = originalAudioUrl;
-        this.shortAudioUrl = shortAudioUrl;
-        this.scriptUrl = scriptUrl;
-        this.source = source;
-        this.createdAt = createdAt;
-        this.category = category;
-    }
-
     public Hearit(String title, String summary, Integer playTime, String originalAudioUrl,
                   String shortAudioUrl, String scriptUrl, String source, Category category) {
         this.title = title;
