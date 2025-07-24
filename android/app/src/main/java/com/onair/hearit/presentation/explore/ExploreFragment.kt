@@ -15,6 +15,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentExploreBinding
+import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
 class ExploreFragment :
@@ -50,6 +51,7 @@ class ExploreFragment :
         binding.lifecycleOwner = this
 
         setupWindowInsets()
+        (activity as? PlayerControllerView)?.pause()
         setupRecyclerView()
         observeViewModel()
 

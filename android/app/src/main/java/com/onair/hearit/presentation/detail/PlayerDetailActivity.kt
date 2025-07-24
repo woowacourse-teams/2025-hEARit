@@ -1,6 +1,5 @@
 package com.onair.hearit.presentation.detail
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -26,11 +25,12 @@ import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
+import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private lateinit var adapter: PlayerDetailScriptAdapter
+    private val adapter: PlayerDetailScriptAdapter by lazy { PlayerDetailScriptAdapter() }
 
     private var mediaController: MediaController? = null
 
@@ -57,7 +57,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
 
         setupWindowInsets()
-        adapter = PlayerDetailScriptAdapter()
         binding.rvScript.adapter = adapter
 
         observeViewModel()
@@ -76,9 +75,6 @@ class PlayerDetailActivity : AppCompatActivity() {
 
     @OptIn(UnstableApi::class)
     private fun setupMediaController() {
-        val serviceIntent = Intent(this, PlaybackService::class.java)
-        startService(serviceIntent)
-
         val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
 
         lifecycleScope.launch {
@@ -88,7 +84,9 @@ class PlayerDetailActivity : AppCompatActivity() {
                     .buildAsync()
                     .await()
 
+            mediaController = controller
             binding.playerView.player = controller
+
             controller.addListener(
                 object : Player.Listener {
                     override fun onTimelineChanged(
@@ -115,7 +113,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
 
         binding.ibPlayerDetailBack.setOnClickListener {
-            setResult(Activity.RESULT_OK)
+            setResult(RESULT_OK)
             finish()
         }
     }
@@ -178,9 +176,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         mediaController?.release()
-
-        val stopIntent = Intent(this, PlaybackService::class.java)
-        stopService(stopIntent)
     }
 
     companion object {
