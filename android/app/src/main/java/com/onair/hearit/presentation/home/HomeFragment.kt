@@ -210,6 +210,10 @@ class HomeFragment :
     private fun navigateToSearchResult(searchTerm: String) {
         val fragment = SearchResultFragment.newInstance(searchTerm)
 
+        (activity as? MainActivity)?.apply {
+            selectTab(R.id.nav_search)
+        }
+
         parentFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_container_view, fragment)
