@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="20dp"
-        android:onClick="@{() -> bookmarkListener.onClickBookmarkedHearit(item.bookmarkId)}">
+        android:onClick="@{() -> bookmarkListener.onClickBookmarkedHearit(item.hearitId)}">
 
         <View
             android:layout_width="match_parent"
