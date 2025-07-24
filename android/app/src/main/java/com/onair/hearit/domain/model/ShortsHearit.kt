@@ -9,4 +9,6 @@ data class ShortsHearit(
     val script: List<ScriptLine>,
     val playTime: Int,
     val createdAt: String,
+    val isBookmarked: Boolean,
+    val bookmarkId: Long?,
 )

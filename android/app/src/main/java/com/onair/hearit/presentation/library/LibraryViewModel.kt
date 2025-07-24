@@ -6,14 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.UserNotRegisteredException
+import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 
-class BookmarkViewModel(
+class LibraryViewModel(
+    private val bookmarkRepository: BookmarkRepository,
     private val memberRepository: MemberRepository,
 ) : ViewModel() {
+    private val _bookmarks: MutableLiveData<List<Bookmark>> = MutableLiveData()
+    val bookmarks: LiveData<List<Bookmark>> = _bookmarks
+
     private val _uiState = MutableLiveData<BookmarkUiState>()
     val uiState: LiveData<BookmarkUiState> = _uiState
 
@@ -24,7 +30,20 @@ class BookmarkViewModel(
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
+        fetchData(page = 0)
         getUserInfo()
+    }
+
+    fun fetchData(page: Int) {
+        viewModelScope.launch {
+            bookmarkRepository
+                .getBookmarks(page = page, size = null)
+                .onSuccess {
+                    _bookmarks.value = it
+                }.onFailure {
+                    _toastMessage.value = R.string.library_toast_bookmark_load_fail
+                }
+        }
     }
 
     private fun getUserInfo() {
@@ -47,10 +66,6 @@ class BookmarkViewModel(
                     val defaultUserInfo = UserInfo(-1, "hEARit", null)
                     _userInfo.value = defaultUserInfo
                 }
-        }
-
-        fun loadBookmarks() {
-            // bookmark 조회 후 상태 변경
         }
     }
 }

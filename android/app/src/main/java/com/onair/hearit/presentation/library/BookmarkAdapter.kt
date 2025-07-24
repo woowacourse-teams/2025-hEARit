@@ -27,7 +27,7 @@ class BookmarkAdapter(
                 override fun areItemsTheSame(
                     oldItem: Bookmark,
                     newItem: Bookmark,
-                ): Boolean = oldItem.id == newItem.id
+                ): Boolean = oldItem.bookmarkId == newItem.bookmarkId
 
                 override fun areContentsTheSame(
                     oldItem: Bookmark,

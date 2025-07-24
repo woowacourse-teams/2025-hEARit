@@ -17,11 +17,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentSearchResultBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.explore.ShortsClickListener
 
 class SearchResultFragment :
     Fragment(),
-    ShortsClickListener {
+    SearchResultClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchResultBinding? = null
     private val binding get() = _binding!!

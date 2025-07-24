@@ -5,11 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemSearchedHearitBinding
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.presentation.explore.ShortsClickListener
 
 class SearchedHearitViewHolder(
     private val binding: ItemSearchedHearitBinding,
-    private val listener: ShortsClickListener,
+    private val listener: SearchResultClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(searchedHearit: SearchedHearit) {
         binding.item = searchedHearit
@@ -19,7 +18,7 @@ class SearchedHearitViewHolder(
     companion object {
         fun create(
             parent: ViewGroup,
-            listener: ShortsClickListener,
+            listener: SearchResultClickListener,
         ): SearchedHearitViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemSearchedHearitBinding.inflate(inflater, parent, false)

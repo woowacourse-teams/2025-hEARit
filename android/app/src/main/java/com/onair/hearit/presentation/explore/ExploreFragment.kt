@@ -138,6 +138,10 @@ class ExploreFragment :
         startActivity(intent)
     }
 
+    override fun onClickBookmark(hearitId: Long) {
+        viewModel.toggleBookmark(hearitId)
+    }
+
     override fun onPause() {
         super.onPause()
         player.pause()
