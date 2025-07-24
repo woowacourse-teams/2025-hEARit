@@ -8,6 +8,10 @@
         <variable
             name="recentHearit"
             type="com.onair.hearit.domain.model.RecentHearit" />
+
+        <variable
+            name="userInfo"
+            type="com.onair.hearit.domain.model.UserInfo" />
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -50,10 +54,11 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="20dp"
                 android:contentDescription="@null"
-                android:src="@drawable/img_default_profile"
+                app:imageUrl="@{userInfo.profileImage}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage" />
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage"
+                tools:src="@drawable/img_default_profile" />
 
             <ImageView
                 android:id="@+id/iv_home_recent_hearit"
