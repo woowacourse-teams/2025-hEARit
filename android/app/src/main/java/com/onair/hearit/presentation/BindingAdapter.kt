@@ -1,10 +1,12 @@
 package com.onair.hearit.presentation
 
+import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import com.onair.hearit.R
@@ -104,4 +106,23 @@ fun setVisibleIfNull(
     value: Any?,
 ) {
     view.isVisible = value == null
+}
+
+@BindingAdapter("categoryBackgroundColor")
+fun setCategoryBackgroundColor(
+    view: View,
+    colorCode: String?,
+) {
+    val background = view.background?.mutate()
+    if (background is GradientDrawable) {
+        val color =
+            try {
+                colorCode?.toColorInt()
+            } catch (_: IllegalArgumentException) {
+                null
+            }
+
+        val finalColor = color ?: ContextCompat.getColor(view.context, R.color.hearit_gray2)
+        background.setColor(finalColor)
+    }
 }
