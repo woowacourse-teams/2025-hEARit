@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Category
+import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.UserInfo
@@ -40,6 +41,10 @@ class HomeViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    private lateinit var paging: Paging
+    private var currentPage = 0
+    private var isLastPage = false
+
     init {
         fetchUserInfo()
         getRecentHearit()
@@ -59,9 +64,11 @@ class HomeViewModel(
 
         viewModelScope.launch {
             categoryRepository
-                .getCategories()
-                .onSuccess { categories ->
-                    _categories.value = categories
+                .getCategories(page = 0)
+                .onSuccess { pageCategories ->
+                    paging = pageCategories.paging
+                    _categories.value = pageCategories.items
+                    isLastPage = paging.isLast
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_categories_load_fail
                 }
