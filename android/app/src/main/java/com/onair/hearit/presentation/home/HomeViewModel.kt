@@ -41,7 +41,7 @@ class HomeViewModel(
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
-        checkUserLogin()
+        fetchUserInfo()
         getRecentHearit()
         fetchData()
     }
@@ -127,7 +127,7 @@ class HomeViewModel(
                         }
 
                         else -> {
-                            _toastMessage.value = R.string.home_toast_user_info_load_fail
+                            _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }
                 }
@@ -139,7 +139,7 @@ class HomeViewModel(
             dataStoreRepository
                 .saveUserInfo(userInfo)
                 .onFailure {
-                    _toastMessage.value = R.string.home_toast_save_user_info_fail
+                    _toastMessage.value = R.string.all_toast_save_user_info_fail
                 }
         }
     }

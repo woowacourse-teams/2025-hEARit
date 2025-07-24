@@ -73,7 +73,7 @@ class LoginActivity : AppCompatActivity() {
                 if (error != null) {
                     Log.e("kakao login", "카카오계정으로 로그인 실패", error)
                 } else if (token != null) {
-                    showToast("카카오 로그인 성공")
+                    Log.d("LoginActivity", "카카오 로그인 성공")
                     viewModel.kakaoLogin(token.accessToken)
                 }
             }
@@ -93,7 +93,7 @@ class LoginActivity : AppCompatActivity() {
                         // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인 시도
                         UserApiClient.instance.loginWithKakaoAccount(this, callback = kakaoCallback)
                     } else if (token != null) {
-                        showToast("카카오 로그인 성공")
+                        Log.d("LoginActivity", "카카오 로그인 성공")
                         startActivity(Intent(this, MainActivity::class.java))
                         finish()
                     }

@@ -9,6 +9,8 @@
     <string name="all_terms_of_use">이용 약관</string>
     <string name="all_account_info">설정 및 계정 정보</string>
     <string name="all_toast_categories_load_fail">카테고리 조회에 실패했습니다.</string>
+    <string name="all_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
+    <string name="all_toast_save_user_info_fail">유저 정보 저장에 실패했습니다.</string>
 
     <!-- HomeFragment-->
     <string name="home_logo_description">궁금했던 내용들을, 히어릿을 통해 빠르게 들어보세요!</string>
@@ -17,8 +19,6 @@
     <string name="home_recommend_hearit_text">오늘의 히어릿</string>
     <string name="home_category_text">카테고리</string>
     <string name="home_example_recommend_description">Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나</string>
-    <string name="home_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
-    <string name="home_toast_save_user_info_fail">유저 정보 저장에 실패했습니다.</string>
     <string name="home_toast_recommend_load_fail">추천 히어릿 목록 조회에 실패했습니다.</string>
     <string name="home_toast_recent_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
     <string name="home_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다.</string>

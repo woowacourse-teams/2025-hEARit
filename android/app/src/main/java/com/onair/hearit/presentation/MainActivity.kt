@@ -28,7 +28,6 @@ class MainActivity :
     private lateinit var binding: ActivityMainBinding
     private lateinit var player: ExoPlayer
 
-    @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
