@@ -37,6 +37,6 @@ data class RandomHearitResponse(
         @SerialName("isBookmarked")
         val isBookmarked: Boolean,
         @SerialName("bookmarkId")
-        val bookmarkId: Long,
+        val bookmarkId: Long?,
     )
 }
