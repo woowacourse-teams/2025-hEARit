@@ -139,6 +139,7 @@ class ExploreFragment :
     }
 
     override fun onClickBookmark(hearitId: Long) {
+        viewModel.toggleBookmark(hearitId)
     }
 
     override fun onPause() {

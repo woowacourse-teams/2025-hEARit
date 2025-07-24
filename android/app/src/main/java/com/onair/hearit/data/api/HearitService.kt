@@ -22,6 +22,7 @@ interface HearitService {
 
     @GET("hearits/random")
     suspend fun getRandomHearits(
+        @Header("Authorization") token: String,
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<RandomHearitResponse>

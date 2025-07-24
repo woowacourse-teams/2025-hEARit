@@ -12,6 +12,10 @@
         <variable
             name="shortsClickListener"
             type="com.onair.hearit.presentation.explore.ShortsClickListener" />
+
+        <variable
+            name="viewModel"
+            type="com.onair.hearit.presentation.explore.ExploreViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -25,12 +29,13 @@
             android:layout_height="48dp"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="230dp"
+            android:background="@drawable/bookmark_selector"
             android:contentDescription="@null"
             android:onClick="@{() -> shortsClickListener.onClickBookmark(hearitItem.id)}"
-            android:src="@drawable/bookmark_selector"
             app:layout_constraintBottom_toBottomOf="@id/layout_sound_wave"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:setSelectedState="@{hearitItem.isBookmarked}" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_top_5"

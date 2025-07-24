@@ -36,7 +36,7 @@ class HearitRemoteDataSourceImpl(
     ): Result<RandomHearitResponse> =
         handleApiCall(
             errorMessage = ERROR_RANDOM_HEARIT_MESSAGE,
-            apiCall = { hearitService.getRandomHearits(page, size) },
+            apiCall = { hearitService.getRandomHearits(getAuthHeader(), page, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
