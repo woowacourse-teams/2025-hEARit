@@ -16,8 +16,11 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentSearchResultBinding
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
-class SearchResultFragment : Fragment() {
+class SearchResultFragment :
+    Fragment(),
+    SearchResultClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchResultBinding? = null
     private val binding get() = _binding!!
@@ -29,14 +32,15 @@ class SearchResultFragment : Fragment() {
     private val viewModel: SearchResultViewModel by viewModels {
         SearchResultViewModelFactory(searchTerm)
     }
-    private val adapter by lazy { SearchedHearitAdapter() }
+    private val adapter by lazy { SearchedHearitAdapter(this) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = FragmentSearchResultBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.etSearchResult.setText(searchTerm)
         return binding.root
     }
@@ -52,8 +56,9 @@ class SearchResultFragment : Fragment() {
         setupSearchEnterKey()
         setupRecyclerView()
         observeViewModel()
+        setupSearchEndIcon()
 
-        binding.nsvSearchResult.setOnTouchListener { v, event ->
+        binding.nsvSearchResult.setOnTouchListener { _, _ ->
             hideKeyboard()
             false
         }
@@ -108,7 +113,24 @@ class SearchResultFragment : Fragment() {
         }
     }
 
+    private fun setupSearchEndIcon() {
+        binding.tilSearchResult.setEndIconOnClickListener {
+            val searchTerm =
+                binding.etSearchResult.text
+                    .toString()
+                    .trim()
+            if (searchTerm.isNotBlank()) {
+                hideKeyboard()
+                viewModel.search(searchTerm)
+            }
+        }
+    }
+
     private fun observeViewModel() {
+        viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
+            binding.uiState = uiState
+        }
+
         viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
             adapter.submitList(searchedHearits)
         }
@@ -127,6 +149,11 @@ class SearchResultFragment : Fragment() {
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         val view = requireActivity().currentFocus ?: binding.root
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    override fun onClickHearitInfo(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
+        startActivity(intent)
     }
 
     override fun onDestroyView() {

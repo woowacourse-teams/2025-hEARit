@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
+import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.KeywordRepository
 import com.onair.hearit.presentation.SingleLiveData
@@ -24,6 +25,10 @@ class SearchViewModel(
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
+
+    private lateinit var paging: Paging
+    private var currentPage = 0
+    private var isLastPage = false
 
     init {
         fetchData()
@@ -49,9 +54,11 @@ class SearchViewModel(
     private fun getCategories() {
         viewModelScope.launch {
             categoryRepository
-                .getCategories()
-                .onSuccess { categories ->
-                    _categories.value = categories
+                .getCategories(page = 0)
+                .onSuccess { pageCategories ->
+                    paging = pageCategories.paging
+                    _categories.value = pageCategories.items
+                    isLastPage = paging.isLast
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_categories_load_fail
                 }

@@ -13,6 +13,7 @@ import androidx.databinding.BindingAdapter
 import coil.load
 import com.onair.hearit.R
 import com.onair.hearit.presentation.library.BookmarkUiState
+import com.onair.hearit.presentation.search.SearchUiState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -90,7 +91,7 @@ fun setFormattedDate(
 
         val date = inputFormat.parse(dateString)
         textView.text = date?.let { outputFormat.format(it) } ?: ""
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         textView.text = ""
     }
 }
@@ -158,4 +159,20 @@ fun setCategoryBackgroundColor(
     if (background is GradientDrawable) {
         background.setColor(colorCode.toColorInt())
     }
+}
+
+@BindingAdapter("visibleIfNoHearits")
+fun setVisibleIfNoHearits(
+    view: View,
+    state: SearchUiState?,
+) {
+    view.isVisible = state is SearchUiState.NoHearits
+}
+
+@BindingAdapter("visibleIfHearitsExist")
+fun setVisibleIfHearitsExist(
+    view: View,
+    state: SearchUiState?,
+) {
+    view.isVisible = state is SearchUiState.HearitsExist
 }
