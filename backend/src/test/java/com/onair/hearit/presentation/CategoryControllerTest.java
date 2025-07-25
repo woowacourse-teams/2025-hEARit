@@ -59,7 +59,7 @@ class CategoryControllerTest extends IntegrationTest {
 
         Hearit hearit1 = saveHearitWithCategory(category1);
         Hearit hearit2 = saveHearitWithCategory(category1);
-        saveHearitWithCategory(category2); // 다른 카테고리
+        Hearit hearit3 = saveHearitWithCategory(category2);// 다른 카테고리
 
         // when
         PagedResponse<HearitSearchResponse> pagedResponse = RestAssured
