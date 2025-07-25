@@ -23,6 +23,11 @@ public class GlobalExceptionHandler {
         return buildProblemDetail(ErrorCode.INVALID_INPUT, detail, request);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnhandledException(Exception ex, HttpServletRequest request) {
+        return buildProblemDetail(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
+    }
+
     private String extractValidationDetail(MethodArgumentNotValidException ex) {
         return ex.getBindingResult()
                 .getFieldErrors()
