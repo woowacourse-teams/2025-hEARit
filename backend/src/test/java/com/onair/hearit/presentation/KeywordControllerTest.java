@@ -18,11 +18,11 @@ class KeywordControllerTest extends IntegrationTest {
     @DisplayName("전체 키워드를 조회 시 200 OK 및 페이징이 적용된 키워드 목록을 반환한다.")
     void readAllKeywords() {
         // given
-        Keyword keyword1 = saveKeyword();
-        Keyword keyword2 = saveKeyword();
-        Keyword keyword3 = saveKeyword();
-        Keyword keyword4 = saveKeyword();
-        Keyword keyword5 = saveKeyword();
+        Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword3 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword4 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword5 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
 
         // when
         List<KeywordResponse> result = RestAssured.given()
@@ -49,7 +49,7 @@ class KeywordControllerTest extends IntegrationTest {
     @DisplayName("단일 키워드 조회 시 200 OK 및 해당 키워드 정보를 반환한다.")
     void readSingleKeyword() {
         // given
-        Keyword keyword = saveKeyword();
+        Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
 
         // when
         Keyword result = RestAssured.given()
@@ -83,9 +83,9 @@ class KeywordControllerTest extends IntegrationTest {
     @DisplayName("추천 키워드 조회 시 200 OK 및 요청 개수만큼의 키워드를 반환한다.")
     void readRecommendedKeywords() {
         // given
-        saveKeyword();
-        saveKeyword();
-        saveKeyword();
+        dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        dbHelper.insertKeyword(TestFixture.createFixedKeyword());
         int size = 2;
 
         // when
@@ -101,9 +101,5 @@ class KeywordControllerTest extends IntegrationTest {
 
         // then
         assertThat(result).hasSize(size);
-    }
-
-    private Keyword saveKeyword() {
-        return dbHelper.insertKeyword(TestFixture.createFixedKeyword());
     }
 }

@@ -22,11 +22,11 @@ class CategoryControllerTest extends IntegrationTest {
     @DisplayName("전체 카테고리를 조회 시 200 OK 및 페이징이 적용된 카테고리 목록을 반환한다.")
     void readAllCategories() {
         // given
-        Category category1 = saveCategory("category1", "#111");
-        Category category2 = saveCategory("category2", "#222");
-        Category category3 = saveCategory("category3", "#333");
-        Category category4 = saveCategory("category4", "#444");
-        Category category5 = saveCategory("category5", "#555");
+        Category category1 = dbHelper.insertCategory(new Category("category1", "#111"));
+        Category category2 = dbHelper.insertCategory(new Category("category2", "#222"));
+        Category category3 = dbHelper.insertCategory(new Category("category3", "#333"));
+        Category category4 = dbHelper.insertCategory(new Category("category4", "#444"));
+        Category category5 = dbHelper.insertCategory(new Category("category5", "#555"));
 
         // when
         PagedResponse<CategoryResponse> result = RestAssured.given()
@@ -54,12 +54,12 @@ class CategoryControllerTest extends IntegrationTest {
     @DisplayName("카테고리로 히어릿 검색 시 200 OK 및 해당 카테고리의 히어릿들을 최신순으로 반환한다.")
     void searchHearitsByCategoryWithPagination() {
         // given
-        Category category1 = saveCategory("Spring", "#001");
-        Category category2 = saveCategory("Java", "#002");
+        Category category1 = dbHelper.insertCategory(new Category("Spring", "#001"));
+        Category category2 = dbHelper.insertCategory(new Category("Java", "#002"));
 
-        Hearit hearit1 = saveHearit(category1);
-        Hearit hearit2 = saveHearit(category1);
-        saveHearit(category2); // 다른 카테고리
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearit(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearit(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearit(category2)); // 다른 카테고리
 
         // when
         PagedResponse<HearitSearchResponse> pagedResponse = RestAssured
@@ -82,13 +82,5 @@ class CategoryControllerTest extends IntegrationTest {
                 () -> assertThat(responses.get(0).id()).isEqualTo(hearit2.getId()), // 최신 hearit 먼저
                 () -> assertThat(responses.get(1).id()).isEqualTo(hearit1.getId())
         );
-    }
-
-    private Category saveCategory(String name, String color) {
-        return dbHelper.insertCategory(new Category(name, color));
-    }
-
-    private Hearit saveHearit(Category category) {
-        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
     }
 }

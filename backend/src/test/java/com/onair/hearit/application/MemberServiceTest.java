@@ -41,7 +41,7 @@ class MemberServiceTest {
     @DisplayName("회원 정보를 ID로 조회할 수 있다.")
     void getMemberById_localMember() {
         // given
-        Member member = saveMember();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // when
         MemberInfoResponse response = memberService.getMember(member.getId());
@@ -64,9 +64,5 @@ class MemberServiceTest {
         assertThatThrownBy(() -> memberService.getMember(nonExistId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("memberId");
-    }
-
-    private Member saveMember() {
-        return dbHelper.insertMember(TestFixture.createFixedMember());
     }
 }

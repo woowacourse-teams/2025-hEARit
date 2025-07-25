@@ -32,10 +32,10 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("로그인한 사용자가 히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
     void readHearitWithSuccessWithMember() {
         // given
-        Member member = saveMember();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when & then
         HearitDetailResponse response = RestAssured.given()
@@ -53,8 +53,8 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("로그인 하지 않은 사용자가 히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
     void readHearitWithSuccessWithNotMember() {
         // given
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when & then
         HearitDetailResponse response = RestAssured.given()
@@ -74,7 +74,7 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("히어릿 단일 조회 시, 존재하지 않는 아이디인 경우 404 NOT_FOUND를 반환한다.")
     void readHearitWithNotFound() {
         // given
-        Member member = saveMember();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
         Long notFoundHearitId = 1L;
 
@@ -91,10 +91,10 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("랜덤 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
     void readRandomHearits() {
         // given
-        Category category = saveCategory();
-        saveHearit(category);
-        saveHearit(category);
-        saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when
         PagedResponse<RandomHearitResponse> responses = RestAssured.given()
@@ -114,10 +114,10 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("추천 히어릿을 조회 시, 200 OK 및 최대 5개 히어릿 정보 목록을 제공한다.")
     void readRecommendedHearits() {
         // given
-        Category category = saveCategory();
-        saveHearit(category);
-        saveHearit(category);
-        saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when
         List<RecommendHearitResponse> responses = RestAssured.given()
@@ -137,8 +137,8 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("히어릿 검색 요청 시 200 OK 및 제목 또는 키워드에 검색어가 포함된 히어릿을 최신순으로 반환한다.")
     void searchHearitsWithPagination() {
         // given
-        Keyword keyword = saveKeyword("Spring");
-        Keyword keyword1 = saveKeyword("noKeyword");
+        Keyword keyword = dbHelper.insertKeyword(new Keyword("Spring"));
+        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("noKeyword"));
 
         Hearit hearit = saveHearitWithTitleAndKeyword("examplespring1", keyword);     // 제목 매칭
         Hearit hearit1 = saveHearitWithTitleAndKeyword("SPRING1example", keyword1);   // 제목 매칭
@@ -196,24 +196,12 @@ class HearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
-    private Member saveMember() {
-        return dbHelper.insertMember(TestFixture.createFixedMember());
-    }
-
     private String generateToken(Member member) {
         return jwtTokenProvider.createToken(member.getId());
     }
 
-    private Category saveCategory() {
-        return dbHelper.insertCategory(TestFixture.createFixedCategory());
-    }
-
-    private Hearit saveHearit(Category category) {
-        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
-    }
-
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
-        Category category = saveCategory();
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = new Hearit(
                 title,
                 "summary",
@@ -226,9 +214,5 @@ class HearitControllerTest extends IntegrationTest {
         Hearit savedHearit = dbHelper.insertHearit(hearit);
         dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
         return savedHearit;
-    }
-
-    private Keyword saveKeyword(String name) {
-        return dbHelper.insertKeyword(new Keyword(name));
     }
 }

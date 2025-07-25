@@ -27,13 +27,13 @@ class BookmarkControllerTest extends IntegrationTest {
     @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 페이지에 따른 북마크 목록을 반환한다.")
     void readBookmarkHearitsTest() {
         // given
-        Member member = saveMember();
-        Category category = saveCategory();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         String token = generateToken(member);
         int bookmarkCount = 30;
         for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = saveHearit(category);
-            saveBookmark(member, hearit);
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+            dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
         }
 
         // when & then
@@ -55,11 +55,11 @@ class BookmarkControllerTest extends IntegrationTest {
     @DisplayName("로그인한 사용자가 북마크 목록 조회 시, page가 0 미만인 경우 400 BADREQUEST가 발생한다.")
     void readBookmarkHearitsTestWithBadRequestByPage() {
         // given
-        Member member = saveMember();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
-        saveBookmark(member, hearit);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
         RestAssured.given()
@@ -76,11 +76,11 @@ class BookmarkControllerTest extends IntegrationTest {
     @DisplayName("로그인한 사용자가 북마크 목록 조회 시, size가 0 ~ 50이 아닌 경우 400 BADREQUEST가 발생한다.")
     void readBookmarkHearitsTestWithBadRequestBySize() {
         // given
-        Member member = saveMember();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
-        saveBookmark(member, hearit);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
         RestAssured.given()
@@ -96,12 +96,12 @@ class BookmarkControllerTest extends IntegrationTest {
     @DisplayName("로그인하지 않은 사용자가 북마크 목록 조회 시, 401 UNAUTHORIZATION가 발생한다.")
     void readBookmarkHearits_error_401_whenNotLogin() {
         // given
-        Member member = saveMember();
-        Category category = saveCategory();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         int bookmarkCount = 10;
         for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = saveHearit(category);
-            saveBookmark(member, hearit);
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+            dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
         }
 
         // when & then
@@ -119,10 +119,10 @@ class BookmarkControllerTest extends IntegrationTest {
     @DisplayName("로그인한 사용자가 북마크 추가 시, 추가 후 201 CREATED를 반환한다.")
     void createBookmarkTest() {
         // given
-        Member member = saveMember();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when & then
         BookmarkInfoResponse response = RestAssured.given()
@@ -140,11 +140,11 @@ class BookmarkControllerTest extends IntegrationTest {
     @DisplayName("로그인한 사용자가 이미 추가된 북마크 추가 시, 추가 후 409 CONFLICT를 반환한다.")
     void createBookmarkTestWithConflict() {
         // given
-        Member member = saveMember();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
-        saveBookmark(member, hearit);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
         RestAssured.given()
@@ -159,11 +159,11 @@ class BookmarkControllerTest extends IntegrationTest {
     @DisplayName("로그인한 사용자가 북마크 삭제 시, 삭제 후 204 NOCONTENT를 반환한다.")
     void deleteBookmark() {
         // given
-        Member member = saveMember();
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
-        Bookmark bookmark = saveBookmark(member, hearit);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
         RestAssured.given()
@@ -178,12 +178,12 @@ class BookmarkControllerTest extends IntegrationTest {
     @DisplayName("자신의 북마크가 아닌 북마크 삭제 시, 403 UNAUTHORIZED를 반환한다.")
     void notFoundHearitId() {
         // given
-        Member bookmarkMember = saveMember();
-        Member notBookmarkMember = saveMember();
+        Member bookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
+        Member notBookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(notBookmarkMember);
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
-        Bookmark bookmark = saveBookmark(bookmarkMember, hearit);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(bookmarkMember, hearit));
 
         // when & then
         RestAssured.given()
@@ -196,21 +196,5 @@ class BookmarkControllerTest extends IntegrationTest {
 
     private String generateToken(Member member) {
         return jwtTokenProvider.createToken(member.getId());
-    }
-
-    private Member saveMember() {
-        return dbHelper.insertMember(TestFixture.createFixedMember());
-    }
-
-    private Category saveCategory() {
-        return dbHelper.insertCategory(TestFixture.createFixedCategory());
-    }
-
-    private Hearit saveHearit(Category category) {
-        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
-    }
-
-    private Bookmark saveBookmark(Member member, Hearit hearit) {
-        return dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
     }
 }

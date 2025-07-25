@@ -153,15 +153,11 @@ class HearitSearchServiceTest {
     }
 
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
-        Category category = saveCategory();
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = saveHearit(title, category);
 
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword));
         return hearit;
-    }
-
-    private Category saveCategory() {
-        return dbHelper.insertCategory(TestFixture.createFixedCategory());
     }
 
     private Hearit saveHearit(String title, Category category) {

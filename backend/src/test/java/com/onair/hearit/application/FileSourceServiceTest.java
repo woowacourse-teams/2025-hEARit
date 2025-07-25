@@ -45,8 +45,8 @@ class FileSourceServiceTest {
     @DisplayName("히어릿 아이디로 요청 시 original audio url을 제공한다.")
     void getOriginalAudioTest() {
         // given
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when
         OriginalAudioResponse response = fileSourceService.getOriginalAudio(hearit.getId());
@@ -59,8 +59,8 @@ class FileSourceServiceTest {
     @DisplayName("히어릿 아이디로 요청 시 short audio url을 제공한다.")
     void getShortAudioTest() {
         // given
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when
         ShortAudioResponse response = fileSourceService.getShortAudio(hearit.getId());
@@ -73,8 +73,8 @@ class FileSourceServiceTest {
     @DisplayName("히어릿 아이디로 요청 시 script url을 제공한다.")
     void getScriptTest() {
         // given
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when
         ScriptResponse response = fileSourceService.getScript(hearit.getId());
@@ -93,13 +93,5 @@ class FileSourceServiceTest {
         assertThatThrownBy(() -> fileSourceService.getScript(notSavedHearitId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
-    }
-
-    private Category saveCategory() {
-        return dbHelper.insertCategory(TestFixture.createFixedCategory());
-    }
-
-    private Hearit saveHearit(Category category) {
-        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
     }
 }

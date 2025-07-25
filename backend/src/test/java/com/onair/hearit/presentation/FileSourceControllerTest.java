@@ -19,8 +19,8 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("원본 오디오 url 요청 시, 200 OK 및 id와 url을 반환한다.")
     void readOriginalAudioUrlWithSuccess() {
         // given
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when
         OriginalAudioResponse response = RestAssured.when()
@@ -37,8 +37,8 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("1분 오디오 url 요청 시, 200 OK 및 id와 url을 반환한다.")
     void readShortAudioUrlWithSuccess() {
         // given
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when
         ShortAudioResponse response = RestAssured.when()
@@ -55,8 +55,8 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("대본 url 요청 시 200 OK 및 id와 url을 반환한다.")
     void readScriptUrlWithSuccess() {
         // given
-        Category category = saveCategory();
-        Hearit hearit = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
 
         // when
         ScriptResponse response = RestAssured.when()
@@ -80,13 +80,5 @@ class FileSourceControllerTest extends IntegrationTest {
                 .get("/api/v1/hearits/" + notSavedHearitId + "/script-url")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
-    }
-
-    private Category saveCategory() {
-        return dbHelper.insertCategory(TestFixture.createFixedCategory());
-    }
-
-    private Hearit saveHearit(Category category) {
-        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
     }
 }
