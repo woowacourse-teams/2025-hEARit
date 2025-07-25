@@ -2,6 +2,8 @@ package com.onair.hearit.presentation
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
@@ -27,12 +29,14 @@ class MainActivity :
     PlayerControllerView {
     private lateinit var binding: ActivityMainBinding
     private lateinit var player: ExoPlayer
+    private var backPressedTime: Long = 0L
+    private val backPressInterval = 1000L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
+        setupBackPressHandler()
         setupWindowInsets()
         setupPlayer()
         setupNavigation()
@@ -42,6 +46,28 @@ class MainActivity :
             showFragment(HomeFragment())
             hidePlayerControlView()
         }
+    }
+
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - backPressedTime <= backPressInterval) {
+                        finish()
+                    } else {
+                        backPressedTime = currentTime
+                        Toast
+                            .makeText(
+                                this@MainActivity,
+                                "뒤로가기 버튼을 한 번 더 누르면 종료됩니다.",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                    }
+                }
+            },
+        )
     }
 
     private fun setupWindowInsets() {

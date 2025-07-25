@@ -107,6 +107,7 @@ class HomeViewModel(
                 .getUserInfo()
                 .onSuccess { userInfo ->
                     saveUserInfo(userInfo)
+                    _userInfo.value = userInfo
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegisteredException -> {
