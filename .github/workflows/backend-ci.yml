@@ -22,9 +22,9 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
         ports:
-          - ${{ secrets.TEST_MYSQL_PORT }}:3306
+          - 13307:3306
         options: >-
-          --health-cmd="mysqladmin ping -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }}"
+          --health-cmd="mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
