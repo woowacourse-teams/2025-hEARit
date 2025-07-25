@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
@@ -52,17 +53,28 @@ class PlayerDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
-        binding.lifecycleOwner = this
-        binding.viewModel = viewModel
-
+        bindLayout()
+        setupBackPressHandler()
         setupWindowInsets()
-        adapter = PlayerDetailScriptAdapter()
-        binding.rvScript.adapter = adapter
-
+        setupRecyclerView()
         observeViewModel()
         setupMediaController()
         setupClickListener()
+    }
+
+    private fun bindLayout() {
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
+        binding.lifecycleOwner = this
+        binding.viewModel = viewModel
+    }
+
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {}
+            },
+        )
     }
 
     private fun setupWindowInsets() {
@@ -114,6 +126,11 @@ class PlayerDetailActivity : AppCompatActivity() {
             setResult(RESULT_OK)
             finish()
         }
+    }
+
+    private fun setupRecyclerView() {
+        adapter = PlayerDetailScriptAdapter()
+        binding.rvScript.adapter = adapter
     }
 
     private fun observeViewModel() {
