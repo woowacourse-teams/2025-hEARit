@@ -11,23 +11,22 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface BookmarkService {
-    @GET("hearits/bookmarks")
+    @GET("bookmarks/hearits")
     suspend fun getBookmarks(
-        @Header("Authorization") token: String,
+        @Header("Authorization") token: String?,
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<BookmarkResponse>
 
-    @POST("hearits/{hearitId}/bookmarks")
+    @POST("bookmarks/hearits/{hearitId}")
     suspend fun postBookmark(
-        @Header("Authorization") token: String,
+        @Header("Authorization") token: String?,
         @Path("hearitId") hearitId: Long,
     ): Response<BookmarkIdResponse>
 
-    @DELETE("hearits/{hearitId}/bookmarks/{bookmarkId}")
+    @DELETE("bookmarks/{bookmarkId}")
     suspend fun deleteBookmark(
-        @Header("Authorization") token: String,
-        @Path("hearitId") hearitId: Long,
+        @Header("Authorization") token: String?,
         @Path("bookmarkId") bookmarkId: Long,
     ): Response<Unit>
 }

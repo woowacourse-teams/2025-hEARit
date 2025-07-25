@@ -10,8 +10,5 @@ interface BookmarkRepository {
 
     suspend fun addBookmark(hearitId: Long): Result<Long>
 
-    suspend fun deleteBookmark(
-        hearitId: Long,
-        bookmarkId: Long,
-    ): Result<Unit>
+    suspend fun deleteBookmark(bookmarkId: Long): Result<Unit>
 }

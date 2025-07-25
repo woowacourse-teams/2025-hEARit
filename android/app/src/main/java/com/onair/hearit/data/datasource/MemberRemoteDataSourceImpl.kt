@@ -22,15 +22,18 @@ class MemberRemoteDataSourceImpl(
             }
         }
 
-    private fun getAuthHeader(): String {
-        val token = requireNotNull(TokenProvider.accessToken) { ERROR_TOKEN_NOT_FOUND_MESSAGE }
-        return TOKEN.format(token)
+    private fun getAuthHeader(): String? {
+        val token = TokenProvider.accessToken
+        return if (token.isNullOrBlank()) {
+            null
+        } else {
+            TOKEN.format(token)
+        }
     }
 
     companion object {
         private const val ERROR_SIGN_IN_MESSAGE = "회원가입되지 않은 사용자입니다."
         private const val ERROR_RESPONSE_BODY_NULL_MESSAGE = "응답 바디가 null입니다."
-        private const val ERROR_TOKEN_NOT_FOUND_MESSAGE = "토큰이 존재하지 않음"
         private const val TOKEN = "Bearer %s"
     }
 }
