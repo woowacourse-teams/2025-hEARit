@@ -19,6 +19,7 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.home.CategoryAdapter
 
@@ -78,7 +79,9 @@ class SearchFragment :
                         .toString()
                         .trim()
                 if (searchTerm.isNotBlank()) {
-                    navigateToSearchResult(searchTerm)
+                    navigateToSearchResult(
+                        SearchInput.Keyword(searchTerm),
+                    )
                     hideKeyboard()
                 }
             }
@@ -110,7 +113,9 @@ class SearchFragment :
                     .trim()
             if (searchTerm.isNotBlank()) {
                 hideKeyboard()
-                navigateToSearchResult(searchTerm)
+                navigateToSearchResult(
+                    SearchInput.Keyword(searchTerm),
+                )
             }
         }
     }
@@ -123,13 +128,14 @@ class SearchFragment :
         viewModel.keywords.observe(viewLifecycleOwner) { keywords ->
             keywordAdapter.submitList(keywords)
         }
+
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
     }
 
-    private fun navigateToSearchResult(searchTerm: String) {
-        val fragment = SearchResultFragment.newInstance(searchTerm)
+    private fun navigateToSearchResult(input: SearchInput) {
+        val fragment = SearchResultFragment.newInstance(input)
 
         parentFragmentManager
             .beginTransaction()
@@ -154,13 +160,16 @@ class SearchFragment :
         _binding = null
     }
 
-    override fun onCategoryClick(category: String) {
-        navigateToSearchResult(category)
+    override fun onKeywordClick(keyword: String) {
+        navigateToSearchResult(SearchInput.Keyword(keyword))
         hideKeyboard()
     }
 
-    override fun onKeywordClick(keyword: String) {
-        navigateToSearchResult(keyword)
+    override fun onCategoryClick(
+        categoryId: Long,
+        categoryName: String,
+    ) {
+        navigateToSearchResult(SearchInput.Category(categoryId, categoryName))
         hideKeyboard()
     }
 }
