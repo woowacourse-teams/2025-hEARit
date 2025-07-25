@@ -4,6 +4,7 @@ import com.onair.hearit.data.api.BookmarkService
 import com.onair.hearit.data.dto.BookmarkIdResponse
 import com.onair.hearit.data.dto.BookmarkResponse
 import com.onair.hearit.di.TokenProvider
+import com.onair.hearit.domain.NoBookmarkException
 
 class BookmarkRemoteDataSourceImpl(
     private val bookmarkService: BookmarkService,
@@ -12,13 +13,18 @@ class BookmarkRemoteDataSourceImpl(
         page: Int?,
         size: Int?,
     ): Result<BookmarkResponse> =
-        handleApiCall(
-            errorMessage = ERROR_BOOKMARK_LOAD_MESSAGE,
-            apiCall = { bookmarkService.getBookmarks(getAuthHeader(), page, size) },
-            transform = { response ->
-                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
-            },
-        )
+        runCatching {
+            val response = bookmarkService.getBookmarks(getAuthHeader(), page, size)
+            when (response.code()) {
+                200 ->
+                    response.body() ?: throw IllegalStateException(
+                        ERROR_RESPONSE_BODY_NULL_MESSAGE,
+                    )
+
+                401 -> throw NoBookmarkException(ERROR_BOOKMARK_LOAD_MESSAGE)
+                else -> throw Exception("API 호출 실패: ${response.code()} ${response.message()}")
+            }
+        }
 
     override suspend fun addBookmark(hearitId: Long): Result<BookmarkIdResponse> =
         handleApiCall(
@@ -29,19 +35,20 @@ class BookmarkRemoteDataSourceImpl(
             },
         )
 
-    override suspend fun deleteBookmark(
-        hearitId: Long,
-        bookmarkId: Long,
-    ): Result<Unit> =
+    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> =
         handleApiCall(
             errorMessage = ERROR_BOOKMARK_DELETE_MESSAGE,
-            apiCall = { bookmarkService.deleteBookmark(getAuthHeader(), hearitId, bookmarkId) },
+            apiCall = { bookmarkService.deleteBookmark(getAuthHeader(), bookmarkId) },
             transform = { },
         )
 
-    private fun getAuthHeader(): String {
-        val token = requireNotNull(TokenProvider.accessToken) { ERROR_TOKEN_NOT_FOUND_MESSAGE }
-        return TOKEN.format(token)
+    private fun getAuthHeader(): String? {
+        val token = TokenProvider.accessToken
+        return if (token.isNullOrBlank()) {
+            null
+        } else {
+            TOKEN.format(token)
+        }
     }
 
     companion object {
@@ -49,7 +56,6 @@ class BookmarkRemoteDataSourceImpl(
         private const val ERROR_BOOKMARK_ADD_MESSAGE = "북마크 생성 실패"
         private const val ERROR_BOOKMARK_DELETE_MESSAGE = "북마크 삭제 실패"
         private const val ERROR_RESPONSE_BODY_NULL_MESSAGE = "응답 바디가 null입니다."
-        private const val ERROR_TOKEN_NOT_FOUND_MESSAGE = "토큰이 존재하지 않음"
         private const val TOKEN = "Bearer %s"
     }
 }
