@@ -44,7 +44,7 @@ class BookmarkControllerTest extends IntegrationTest {
                     .param("page", i)
                     .param("size", size)
                     .when()
-                    .get("/api/v1/hearits/bookmarks")
+                    .get("/api/v1/bookmarks/hearits")
                     .then()
                     .statusCode(HttpStatus.OK.value())
                     .body("content.size()", equalTo(5));
@@ -65,7 +65,7 @@ class BookmarkControllerTest extends IntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .param("page", -1)
                 .when()
-                .get("/api/v1/hearits/bookmarks")
+                .get("/api/v1/bookmarks/hearits")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value()).log();
     }
@@ -85,9 +85,31 @@ class BookmarkControllerTest extends IntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .param("size", -1)
                 .when()
-                .get("/api/v1/hearits/bookmarks")
+                .get("/api/v1/bookmarks/hearits")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value()).log();
+    }
+
+    @Test
+    @DisplayName("로그인하지 않은 사용자가 북마크 목록 조회 시, 401 UNAUTHORIZATION가 발생한다.")
+    void readBookmarkHearits_error_401_whenNotLogin() {
+        // given
+        Member member = saveMember();
+        int bookmarkCount = 10;
+        for (int i = 0; i < bookmarkCount; i++) {
+            Hearit hearit = saveHearitWithSuffix(i);
+            dbHelper.insertBookmark(new Bookmark(member, hearit));
+        }
+
+        // when & then
+        RestAssured.given()
+                .header("Authorization", "")
+                .param("page", 0)
+                .param("size", 20)
+                .when()
+                .get("/api/v1/bookmarks/hearits")
+                .then()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Test
@@ -102,7 +124,7 @@ class BookmarkControllerTest extends IntegrationTest {
         BookmarkInfoResponse response = RestAssured.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .post("/api/v1/hearits/" + hearit.getId() + "/bookmarks")
+                .post("/api/v1/bookmarks/hearits/" + hearit.getId())
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract().as(BookmarkInfoResponse.class);
@@ -123,7 +145,7 @@ class BookmarkControllerTest extends IntegrationTest {
         RestAssured.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .post("/api/v1/hearits/" + hearit.getId() + "/bookmarks")
+                .post("/api/v1/bookmarks/hearits/" + hearit.getId())
                 .then()
                 .statusCode(HttpStatus.CONFLICT.value());
     }
@@ -141,7 +163,7 @@ class BookmarkControllerTest extends IntegrationTest {
         RestAssured.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .delete("/api/v1/hearits/" + hearit.getId() + "/bookmarks/" + bookmark.getId())
+                .delete("/api/v1/bookmarks/" + bookmark.getId())
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
@@ -160,7 +182,7 @@ class BookmarkControllerTest extends IntegrationTest {
         RestAssured.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .delete("/api/v1/hearits/" + hearit.getId() + "/bookmarks/" + bookmark.getId())
+                .delete("/api/v1/bookmarks/" + bookmark.getId())
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
