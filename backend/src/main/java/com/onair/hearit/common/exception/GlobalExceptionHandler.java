@@ -16,8 +16,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HearitException.class)
     public ProblemDetail handleHearitException(HearitException ex, HttpServletRequest request) {
-        log.error("서버 내부 오류", ex);
-        return buildProblemDetail(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getTitle(), request);
+        return buildProblemDetail(ex.getErrorCode(), ex.getDetail(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -28,7 +27,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnhandledException(Exception ex, HttpServletRequest request) {
-        return buildProblemDetail(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
+        log.error("서버 내부 오류", ex);
+        return buildProblemDetail(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getTitle(), request);
     }
 
     private String extractValidationDetail(MethodArgumentNotValidException ex) {
