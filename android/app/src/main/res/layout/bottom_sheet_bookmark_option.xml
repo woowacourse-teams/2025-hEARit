@@ -33,11 +33,11 @@
 
         <ImageView
             android:id="@+id/iv_bookmark_option_delete_bookmark"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_marginTop="26dp"
             android:contentDescription="@null"
-            android:src="@drawable/img_delete_bookmark"
+            android:src="@drawable/ic_delete_bookmark"
             app:layout_constraintStart_toStartOf="@id/tv_bookmark_option_title"
             app:layout_constraintTop_toBottomOf="@id/tv_bookmark_option_time" />
 
@@ -47,9 +47,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
-            android:layout_marginTop="4dp"
             android:text="북마크에서 삭제하기"
             android:textColor="@color/hearit_gray4"
+            app:layout_constraintBottom_toBottomOf="@id/iv_bookmark_option_delete_bookmark"
             app:layout_constraintStart_toEndOf="@id/iv_bookmark_option_delete_bookmark"
             app:layout_constraintTop_toTopOf="@id/iv_bookmark_option_delete_bookmark" />
     </androidx.constraintlayout.widget.ConstraintLayout>
