@@ -4,11 +4,13 @@ import com.onair.hearit.common.exception.custom.HearitException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -21,6 +23,12 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
         String detail = extractValidationDetail(ex);
         return buildProblemDetail(ErrorCode.INVALID_INPUT, detail, request);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnhandledException(Exception ex, HttpServletRequest request) {
+        log.error("서버 내부 오류", ex);
+        return buildProblemDetail(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getTitle(), request);
     }
 
     private String extractValidationDetail(MethodArgumentNotValidException ex) {
