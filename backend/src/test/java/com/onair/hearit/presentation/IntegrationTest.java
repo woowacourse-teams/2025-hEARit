@@ -1,6 +1,6 @@
 package com.onair.hearit.presentation;
 
-import com.onair.hearit.DbHelper;
+import com.onair.hearit.fixture.DbHelper;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

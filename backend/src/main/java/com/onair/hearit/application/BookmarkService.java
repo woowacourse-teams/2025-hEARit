@@ -29,7 +29,9 @@ public class BookmarkService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public PagedResponse<BookmarkHearitResponse> getBookmarkHearits(CurrentMember currentMember, PagingRequest pagingRequest) {
+    public PagedResponse<BookmarkHearitResponse> getBookmarkHearits(
+            CurrentMember currentMember,
+            PagingRequest pagingRequest) {
         Member member = getMemberByCurrentMember(currentMember);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByCreatedAtDesc(member, pageable);
@@ -61,7 +63,7 @@ public class BookmarkService {
     }
 
     private Member getMemberByCurrentMember(CurrentMember currentMember) {
-        if(currentMember == null) {
+        if (currentMember == null) {
             throw new UnauthorizedException("로그인한 회원이 아닙니다.");
         }
         return getMemberById(currentMember.memberId());

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.DbHelper;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
@@ -12,7 +11,9 @@ import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.infrastructure.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @ActiveProfiles("fake-test")
-@Import({AuthService.class, BCryptPasswordEncoder.class, JwtTokenProvider.class, DbHelper.class})
+@Import({AuthService.class, BCryptPasswordEncoder.class, JwtTokenProvider.class,
+        DbHelper.class, TestJpaAuditingConfig.class})
 class AuthServiceTest {
 
     @MockitoBean

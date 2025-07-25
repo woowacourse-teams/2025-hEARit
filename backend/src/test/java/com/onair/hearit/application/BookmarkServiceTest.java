@@ -4,11 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.TestFixture;
-import com.onair.hearit.DbHelper;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -16,12 +15,12 @@ import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
 import com.onair.hearit.dto.response.BookmarkInfoResponse;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.MemberRepository;
-import java.time.LocalDateTime;
 import java.util.List;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(DbHelper.class)
+@Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
 class BookmarkServiceTest {
 
@@ -58,9 +57,12 @@ class BookmarkServiceTest {
     @DisplayName("멤버 아이디에 따라 북마크한 히어릿 목록을 페이지에 따라 조회한다.")
     void getBookmarkHearitsTest() {
         // given
-        Member member = saveMember();
-        Hearit hearit = saveHearitWithSuffix(1);
-        dbHelper.insertBookmark(new Bookmark(member, hearit));
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
         List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(
@@ -74,9 +76,12 @@ class BookmarkServiceTest {
     @DisplayName("로그인하지 않은 사용자는 북마크 목록 조회시 Unauthorized 예외를 던진다.")
     void getBookmarkHearitsTest_() {
         // given
-        Member member = saveMember();
-        Hearit hearit = saveHearitWithSuffix(1);
-        dbHelper.insertBookmark(new Bookmark(member, hearit));
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
         assertThatThrownBy(() -> bookmarkService.getBookmarkHearits(
@@ -88,8 +93,11 @@ class BookmarkServiceTest {
     @DisplayName("멤버 아이디와 히어릿 아이디로 북마크를 추가한다.")
     void addBookmarkTest() {
         // given
-        Member member = saveMember();
-        Hearit hearit = saveHearitWithSuffix(1);
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         int previousBookmarkCount = bookmarkRepository.findAll().size();
 
         // when
@@ -107,9 +115,12 @@ class BookmarkServiceTest {
     @DisplayName("북마크 추가 시, 이미 북마크가 존재한다면 AlreadyExistException을 던진다.")
     void addBookmarkTest_AlreadyExistTest() {
         // given
-        Member member = saveMember();
-        Hearit hearit = saveHearitWithSuffix(1);
-        dbHelper.insertBookmark(new Bookmark(member, hearit));
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
         assertThatThrownBy(() -> bookmarkService.addBookmark(new CurrentMember(member.getId()), hearit.getId()))
@@ -121,9 +132,12 @@ class BookmarkServiceTest {
     @DisplayName("북마크 아이디와 멤버 아이디로 북마크를 삭제한다.")
     void deleteBookmarkTest() {
         // given
-        Member member = saveMember();
-        Hearit hearit = saveHearitWithSuffix(1);
-        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(member, hearit));
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
         bookmarkService.deleteBookmark(bookmark.getId(), new CurrentMember(member.getId()));
@@ -136,34 +150,19 @@ class BookmarkServiceTest {
     @DisplayName("북마크 삭제 시, 북마크를 한 멤버가 아니라면 UnauthorizedException을 던진다.")
     void deleteBookmark_UnauthorizedTest() {
         // given
-        Member bookmarkMember = saveMember();
-        Member notBookmarkMember = saveMember();
-        Hearit hearit = saveHearitWithSuffix(1);
-        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(bookmarkMember, hearit));
+        Member bookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Member notBookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(bookmarkMember, hearit));
 
         // when & then
-        assertThatThrownBy(() -> bookmarkService.deleteBookmark(bookmark.getId(), new CurrentMember(notBookmarkMember.getId())))
+        assertThatThrownBy(
+                () -> bookmarkService.deleteBookmark(bookmark.getId(), new CurrentMember(notBookmarkMember.getId())))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("북마크를 삭제할 권한이 없습니다.");
-    }
-
-    private Member saveMember() {
-        return dbHelper.insertMember(TestFixture.createFixedMember());
-    }
-
-    private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix, "#123");
-        dbHelper.insertCategory(category);
-
-        Hearit hearit = new Hearit(
-                "title" + suffix,
-                "summary" + suffix, suffix,
-                "originalAudioUrl" + suffix,
-                "shortAudioUrl" + suffix,
-                "scriptUrl" + suffix,
-                "source" + suffix,
-                LocalDateTime.now(),
-                category);
-        return dbHelper.insertHearit(hearit);
     }
 }

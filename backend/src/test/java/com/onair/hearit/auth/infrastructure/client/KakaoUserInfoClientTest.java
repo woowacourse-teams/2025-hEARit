@@ -1,7 +1,7 @@
 package com.onair.hearit.auth.infrastructure.client;
 
-import com.onair.hearit.IntegrationTest;
 import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
+import com.onair.hearit.fixture.IntegrationTest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
