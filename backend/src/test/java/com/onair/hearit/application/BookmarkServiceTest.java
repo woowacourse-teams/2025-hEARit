@@ -61,7 +61,7 @@ class BookmarkServiceTest {
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
@@ -80,7 +80,7 @@ class BookmarkServiceTest {
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
@@ -97,7 +97,7 @@ class BookmarkServiceTest {
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         int previousBookmarkCount = bookmarkRepository.findAll().size();
 
         // when
@@ -119,7 +119,7 @@ class BookmarkServiceTest {
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
@@ -136,7 +136,7 @@ class BookmarkServiceTest {
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
@@ -156,7 +156,7 @@ class BookmarkServiceTest {
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(bookmarkMember, hearit));
 
         // when & then

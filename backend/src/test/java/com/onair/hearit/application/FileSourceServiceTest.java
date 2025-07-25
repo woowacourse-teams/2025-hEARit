@@ -46,7 +46,7 @@ class FileSourceServiceTest {
     void getOriginalAudioTest() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
         OriginalAudioResponse response = fileSourceService.getOriginalAudio(hearit.getId());
@@ -60,7 +60,7 @@ class FileSourceServiceTest {
     void getShortAudioTest() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
         ShortAudioResponse response = fileSourceService.getShortAudio(hearit.getId());
@@ -74,7 +74,7 @@ class FileSourceServiceTest {
     void getScriptTest() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
         ScriptResponse response = fileSourceService.getScript(hearit.getId());

@@ -57,9 +57,9 @@ class CategoryControllerTest extends IntegrationTest {
         Category category1 = dbHelper.insertCategory(new Category("Spring", "#001"));
         Category category2 = dbHelper.insertCategory(new Category("Java", "#002"));
 
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearit(category1));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearit(category1));
-        dbHelper.insertHearit(TestFixture.createFixedHearit(category2)); // 다른 카테고리
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2)); // 다른 카테고리
 
         // when
         PagedResponse<HearitSearchResponse> pagedResponse = RestAssured

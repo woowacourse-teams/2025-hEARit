@@ -56,7 +56,7 @@ class HearitServiceTest {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
@@ -93,7 +93,7 @@ class HearitServiceTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
         for (int i = 1; i <= 11; i++) {
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
         }
         PagingRequest pagingRequest = new PagingRequest(0, 10);
@@ -111,7 +111,7 @@ class HearitServiceTest {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         IntStream.rangeClosed(1, 6)
-                .forEach((num) -> dbHelper.insertHearit(TestFixture.createFixedHearit(category)));
+                .forEach((num) -> dbHelper.insertHearit(TestFixture.createFixedHearitWith(category)));
 
         // when
         List<RecommendHearitResponse> hearits = hearitService.getRecommendedHearits();

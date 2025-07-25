@@ -20,7 +20,7 @@ class FileSourceControllerTest extends IntegrationTest {
     void readOriginalAudioUrlWithSuccess() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
         OriginalAudioResponse response = RestAssured.when()
@@ -38,7 +38,7 @@ class FileSourceControllerTest extends IntegrationTest {
     void readShortAudioUrlWithSuccess() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
         ShortAudioResponse response = RestAssured.when()
@@ -56,7 +56,7 @@ class FileSourceControllerTest extends IntegrationTest {
     void readScriptUrlWithSuccess() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
         ScriptResponse response = RestAssured.when()

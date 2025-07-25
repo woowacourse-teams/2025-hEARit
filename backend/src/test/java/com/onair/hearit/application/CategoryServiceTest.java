@@ -74,9 +74,9 @@ class CategoryServiceTest {
         // given
         Category category1 = saveCategory("Spring", "#001");
         Category category2 = saveCategory("Java", "#002");
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearit(category1));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearit(category1));
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearit(category2));
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
         PagingRequest request = new PagingRequest(0, 10);
 
         // when
@@ -95,9 +95,9 @@ class CategoryServiceTest {
     void searchHearitsByCategory_pagination() {
         // given
         Category category = saveCategory("Spring", "#001");
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         PagingRequest request = new PagingRequest(1, 2);
 
         // when

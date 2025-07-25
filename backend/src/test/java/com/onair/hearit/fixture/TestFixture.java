@@ -24,7 +24,7 @@ public class TestFixture {
         return new Category("name", "colorCode");
     }
 
-    public static Hearit createFixedHearit(Category category) {
+    public static Hearit createFixedHearitWith(Category category) {
         return new Hearit(
                 "title",
                 "summary",

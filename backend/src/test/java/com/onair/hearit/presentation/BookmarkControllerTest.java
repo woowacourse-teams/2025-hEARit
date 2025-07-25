@@ -32,7 +32,7 @@ class BookmarkControllerTest extends IntegrationTest {
         String token = generateToken(member);
         int bookmarkCount = 30;
         for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
         }
 
@@ -58,7 +58,7 @@ class BookmarkControllerTest extends IntegrationTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
@@ -79,7 +79,7 @@ class BookmarkControllerTest extends IntegrationTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
@@ -100,7 +100,7 @@ class BookmarkControllerTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         int bookmarkCount = 10;
         for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
         }
 
@@ -122,7 +122,7 @@ class BookmarkControllerTest extends IntegrationTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when & then
         BookmarkInfoResponse response = RestAssured.given()
@@ -143,7 +143,7 @@ class BookmarkControllerTest extends IntegrationTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
@@ -162,7 +162,7 @@ class BookmarkControllerTest extends IntegrationTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
@@ -182,7 +182,7 @@ class BookmarkControllerTest extends IntegrationTest {
         Member notBookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(notBookmarkMember);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(bookmarkMember, hearit));
 
         // when & then

@@ -35,7 +35,7 @@ class HearitControllerTest extends IntegrationTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when & then
         HearitDetailResponse response = RestAssured.given()
@@ -54,7 +54,7 @@ class HearitControllerTest extends IntegrationTest {
     void readHearitWithSuccessWithNotMember() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when & then
         HearitDetailResponse response = RestAssured.given()
@@ -92,9 +92,9 @@ class HearitControllerTest extends IntegrationTest {
     void readRandomHearits() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
-        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
-        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
         PagedResponse<RandomHearitResponse> responses = RestAssured.given()
@@ -115,9 +115,9 @@ class HearitControllerTest extends IntegrationTest {
     void readRecommendedHearits() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
-        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
-        dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
         List<RecommendHearitResponse> responses = RestAssured.given()

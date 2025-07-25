@@ -118,7 +118,7 @@ class HearitRepositoryTest {
     }
 
     private Hearit saveHearit(Category category) {
-        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+        return dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
     }
 
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
