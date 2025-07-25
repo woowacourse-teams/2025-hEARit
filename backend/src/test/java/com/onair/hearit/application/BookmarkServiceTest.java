@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.TestFixture;
 import com.onair.hearit.DbHelper;
+import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.domain.Bookmark;
@@ -20,6 +21,7 @@ import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,10 +64,24 @@ class BookmarkServiceTest {
 
         // when
         List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(
-                member.getId(), new PagingRequest(0, 20)).content();
+                new CurrentMember(member.getId()), new PagingRequest(0, 20)).content();
 
         // then
         assertThat(responses).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("로그인하지 않은 사용자는 북마크 목록 조회시 Unauthorized 예외를 던진다.")
+    void getBookmarkHearitsTest_() {
+        // given
+        Member member = saveMember();
+        Hearit hearit = saveHearitWithSuffix(1);
+        dbHelper.insertBookmark(new Bookmark(member, hearit));
+
+        // when
+        assertThatThrownBy(() -> bookmarkService.getBookmarkHearits(
+                null, new PagingRequest(0, 20)).content())
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @Test
@@ -77,7 +93,7 @@ class BookmarkServiceTest {
         int previousBookmarkCount = bookmarkRepository.findAll().size();
 
         // when
-        BookmarkInfoResponse response = bookmarkService.addBookmark(hearit.getId(), member.getId());
+        BookmarkInfoResponse response = bookmarkService.addBookmark(new CurrentMember(member.getId()), hearit.getId());
 
         // then
         int currentBookmarkCount = bookmarkRepository.findAll().size();
@@ -96,7 +112,7 @@ class BookmarkServiceTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit));
 
         // when & then
-        assertThatThrownBy(() -> bookmarkService.addBookmark(hearit.getId(), member.getId()))
+        assertThatThrownBy(() -> bookmarkService.addBookmark(new CurrentMember(member.getId()), hearit.getId()))
                 .isInstanceOf(AlreadyExistException.class)
                 .hasMessageContaining("이미 북마크된 히어릿입니다.");
     }
@@ -110,7 +126,7 @@ class BookmarkServiceTest {
         Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(member, hearit));
 
         // when
-        bookmarkService.deleteBookmark(bookmark.getId(), member.getId());
+        bookmarkService.deleteBookmark(bookmark.getId(), new CurrentMember(member.getId()));
 
         // then
         assertThat(bookmarkRepository.findById(bookmark.getId())).isNotPresent();
@@ -126,7 +142,7 @@ class BookmarkServiceTest {
         Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(bookmarkMember, hearit));
 
         // when & then
-        assertThatThrownBy(() -> bookmarkService.deleteBookmark(bookmark.getId(), notBookmarkMember.getId()))
+        assertThatThrownBy(() -> bookmarkService.deleteBookmark(bookmark.getId(), new CurrentMember(notBookmarkMember.getId())))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("북마크를 삭제할 권한이 없습니다.");
     }
