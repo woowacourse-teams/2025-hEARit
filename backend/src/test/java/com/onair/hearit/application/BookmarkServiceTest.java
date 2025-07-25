@@ -58,9 +58,9 @@ class BookmarkServiceTest {
     void getBookmarkHearitsTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        ;
+
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        ;
+
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
@@ -77,9 +77,9 @@ class BookmarkServiceTest {
     void getBookmarkHearitsTest_() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        ;
+
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        ;
+
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
@@ -94,9 +94,9 @@ class BookmarkServiceTest {
     void addBookmarkTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        ;
+
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        ;
+
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
         int previousBookmarkCount = bookmarkRepository.findAll().size();
 
@@ -116,9 +116,9 @@ class BookmarkServiceTest {
     void addBookmarkTest_AlreadyExistTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        ;
+
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        ;
+
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
@@ -133,9 +133,9 @@ class BookmarkServiceTest {
     void deleteBookmarkTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        ;
+
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        ;
+
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearit(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
