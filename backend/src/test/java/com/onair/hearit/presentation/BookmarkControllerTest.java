@@ -3,15 +3,14 @@ package com.onair.hearit.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.BookmarkInfoResponse;
+import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,11 +28,12 @@ class BookmarkControllerTest extends IntegrationTest {
     void readBookmarkHearitsTest() {
         // given
         Member member = saveMember();
+        Category category = saveCategory();
         String token = generateToken(member);
         int bookmarkCount = 30;
         for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = saveHearitWithSuffix(i);
-            dbHelper.insertBookmark(new Bookmark(member, hearit));
+            Hearit hearit = saveHearit(category);
+            saveBookmark(member, hearit);
         }
 
         // when & then
@@ -57,8 +57,9 @@ class BookmarkControllerTest extends IntegrationTest {
         // given
         Member member = saveMember();
         String token = generateToken(member);
-        Hearit hearit = saveHearitWithSuffix(1);
-        dbHelper.insertBookmark(new Bookmark(member, hearit));
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
+        saveBookmark(member, hearit);
 
         // when & then
         RestAssured.given()
@@ -77,8 +78,9 @@ class BookmarkControllerTest extends IntegrationTest {
         // given
         Member member = saveMember();
         String token = generateToken(member);
-        Hearit hearit = saveHearitWithSuffix(1);
-        dbHelper.insertBookmark(new Bookmark(member, hearit));
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
+        saveBookmark(member, hearit);
 
         // when & then
         RestAssured.given()
@@ -95,10 +97,11 @@ class BookmarkControllerTest extends IntegrationTest {
     void readBookmarkHearits_error_401_whenNotLogin() {
         // given
         Member member = saveMember();
+        Category category = saveCategory();
         int bookmarkCount = 10;
         for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = saveHearitWithSuffix(i);
-            dbHelper.insertBookmark(new Bookmark(member, hearit));
+            Hearit hearit = saveHearit(category);
+            saveBookmark(member, hearit);
         }
 
         // when & then
@@ -118,7 +121,8 @@ class BookmarkControllerTest extends IntegrationTest {
         // given
         Member member = saveMember();
         String token = generateToken(member);
-        Hearit hearit = saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
 
         // when & then
         BookmarkInfoResponse response = RestAssured.given()
@@ -138,8 +142,9 @@ class BookmarkControllerTest extends IntegrationTest {
         // given
         Member member = saveMember();
         String token = generateToken(member);
-        Hearit hearit = saveHearitWithSuffix(1);
-        dbHelper.insertBookmark(new Bookmark(member, hearit));
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
+        saveBookmark(member, hearit);
 
         // when & then
         RestAssured.given()
@@ -156,8 +161,9 @@ class BookmarkControllerTest extends IntegrationTest {
         // given
         Member member = saveMember();
         String token = generateToken(member);
-        Hearit hearit = saveHearitWithSuffix(1);
-        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(member, hearit));
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
+        Bookmark bookmark = saveBookmark(member, hearit);
 
         // when & then
         RestAssured.given()
@@ -175,8 +181,9 @@ class BookmarkControllerTest extends IntegrationTest {
         Member bookmarkMember = saveMember();
         Member notBookmarkMember = saveMember();
         String token = generateToken(notBookmarkMember);
-        Hearit hearit = saveHearitWithSuffix(1);
-        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(bookmarkMember, hearit));
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
+        Bookmark bookmark = saveBookmark(bookmarkMember, hearit);
 
         // when & then
         RestAssured.given()
@@ -187,27 +194,23 @@ class BookmarkControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
-    private Member saveMember() {
-        return dbHelper.insertMember(TestFixture.createFixedMember());
-    }
-
     private String generateToken(Member member) {
         return jwtTokenProvider.createToken(member.getId());
     }
 
-    private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix, "#123");
-        dbHelper.insertCategory(category);
+    private Member saveMember() {
+        return dbHelper.insertMember(TestFixture.createFixedMember());
+    }
 
-        Hearit hearit = new Hearit(
-                "title" + suffix,
-                "summary" + suffix, suffix,
-                "originalAudioUrl" + suffix,
-                "shortAudioUrl" + suffix,
-                "scriptUrl" + suffix,
-                "source" + suffix,
-                LocalDateTime.now(),
-                category);
-        return dbHelper.insertHearit(hearit);
+    private Category saveCategory() {
+        return dbHelper.insertCategory(TestFixture.createFixedCategory());
+    }
+
+    private Hearit saveHearit(Category category) {
+        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+    }
+
+    private Bookmark saveBookmark(Member member, Hearit hearit) {
+        return dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
     }
 }

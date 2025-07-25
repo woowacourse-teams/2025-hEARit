@@ -3,7 +3,7 @@ package com.onair.hearit.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
@@ -11,8 +11,9 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.HearitRepository;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(DbHelper.class)
+@Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
 class HearitSearchServiceTest {
 
@@ -151,21 +152,31 @@ class HearitSearchServiceTest {
         );
     }
 
-    private Category saveCategory(String name, String color) {
-        Category category = new Category(name, color);
-        return dbHelper.insertCategory(category);
+    private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(title, category);
+
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword));
+        return hearit;
+    }
+
+    private Category saveCategory() {
+        return dbHelper.insertCategory(TestFixture.createFixedCategory());
+    }
+
+    private Hearit saveHearit(String title, Category category) {
+        return dbHelper.insertHearit(new Hearit(
+                title,
+                "summary",
+                500,
+                "originalAudioUrl",
+                "shortAudioUrl",
+                "scriptUrl",
+                "source",
+                category));
     }
 
     private Keyword saveKeyword(String name) {
         return dbHelper.insertKeyword(new Keyword(name));
-    }
-
-    private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
-        Category category = saveCategory("category", "#abc");
-        Hearit hearit = new Hearit(title, "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
-                LocalDateTime.now(), category);
-        Hearit savedHearit = dbHelper.insertHearit(hearit);
-        dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
-        return savedHearit;
     }
 }

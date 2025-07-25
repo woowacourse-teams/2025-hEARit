@@ -3,12 +3,13 @@ package com.onair.hearit.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
-import java.time.LocalDateTime;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(DbHelper.class)
+@Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
 class HearitRepositoryTest {
 
@@ -34,8 +35,9 @@ class HearitRepositoryTest {
     @DisplayName("원하는 개수만큼 랜덤 히어릿을 조회할 수 있다.")
     void findRandom() {
         // given
-        saveHearitWithSuffix(1);
-        saveHearitWithSuffix(2);
+        Category category = saveCategory();
+        Hearit hearit1 = saveHearit(category);
+        Hearit hearit2 = saveHearit(category);
 
         Pageable pageable = PageRequest.of(0, 1);
 
@@ -53,7 +55,9 @@ class HearitRepositoryTest {
     @DisplayName("전체 히어릿 개수 < 원하는 개수면 전체 히어릿을 모두 조회할 수 있다.")
     void findRandomWithAllHearits() {
         // given
-        saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit1 = saveHearit(category);
+        Hearit hearit2 = saveHearit(category);
 
         Pageable pageable = PageRequest.of(0, 2);
 
@@ -86,8 +90,7 @@ class HearitRepositoryTest {
                 () -> assertThat(result.getContent()).extracting(Hearit::getTitle)
                         .containsExactlyInAnyOrder(
                                 titleMatched.getTitle(),
-                                keywordMatched.getTitle()
-                        )
+                                keywordMatched.getTitle())
         );
     }
 
@@ -110,32 +113,25 @@ class HearitRepositoryTest {
         );
     }
 
-
-    private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix, "#123");
-        dbHelper.insertCategory(category);
-
-        Hearit hearit = new Hearit(
-                "title" + suffix,
-                "summary" + suffix, suffix,
-                "originalAudioUrl" + suffix,
-                "shortAudioUrl" + suffix,
-                "scriptUrl" + suffix,
-                "source" + suffix,
-                LocalDateTime.now(),
-                category);
-        return dbHelper.insertHearit(hearit);
+    private Category saveCategory() {
+        return dbHelper.insertCategory(TestFixture.createFixedCategory());
     }
 
-    private Category saveCategory(String name, String colorCode) {
-        Category category = new Category(name, colorCode);
-        return dbHelper.insertCategory(category);
+    private Hearit saveHearit(Category category) {
+        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
     }
 
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
-        Category category = saveCategory("category", "#abc");
-        Hearit hearit = new Hearit(title, "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
-                LocalDateTime.now(), category);
+        Category category = saveCategory();
+        Hearit hearit = new Hearit(
+                title,
+                "summary",
+                100,
+                "originalAudioUrl",
+                "shortAudioUrl",
+                "scriptUrl",
+                "source",
+                category);
         Hearit savedHearit = dbHelper.insertHearit(hearit);
         dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
         return savedHearit;
@@ -144,5 +140,4 @@ class HearitRepositoryTest {
     private Keyword saveKeyword(String name) {
         return dbHelper.insertKeyword(new Keyword(name));
     }
-
 }

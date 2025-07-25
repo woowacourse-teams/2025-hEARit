@@ -8,9 +8,9 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
+import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,9 +57,9 @@ class CategoryControllerTest extends IntegrationTest {
         Category category1 = saveCategory("Spring", "#001");
         Category category2 = saveCategory("Java", "#002");
 
-        Hearit hearit1 = saveHearitWithCategory(category1);
-        Hearit hearit2 = saveHearitWithCategory(category1);
-        saveHearitWithCategory(category2); // 다른 카테고리
+        Hearit hearit1 = saveHearit(category1);
+        Hearit hearit2 = saveHearit(category1);
+        saveHearit(category2); // 다른 카테고리
 
         // when
         PagedResponse<HearitSearchResponse> pagedResponse = RestAssured
@@ -84,23 +84,11 @@ class CategoryControllerTest extends IntegrationTest {
         );
     }
 
-
     private Category saveCategory(String name, String color) {
         return dbHelper.insertCategory(new Category(name, color));
     }
 
-    private Hearit saveHearitWithCategory(Category category) {
-        Hearit hearit = new Hearit(
-                "title",
-                "summary",
-                1,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
-                "source",
-                LocalDateTime.now(),
-                category
-        );
-        return dbHelper.insertHearit(hearit);
+    private Hearit saveHearit(Category category) {
+        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
     }
 }

@@ -3,6 +3,7 @@ package com.onair.hearit.auth.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
@@ -23,7 +24,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @DataJpaTest
 @ActiveProfiles("fake-test")
-@Import({AuthService.class, BCryptPasswordEncoder.class, JwtTokenProvider.class, DbHelper.class})
+@Import({AuthService.class, BCryptPasswordEncoder.class, JwtTokenProvider.class,
+        DbHelper.class, TestJpaAuditingConfig.class})
 class AuthKakaoServiceTest {
 
     @MockitoBean

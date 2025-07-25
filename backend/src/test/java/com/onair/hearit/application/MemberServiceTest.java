@@ -4,11 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.fixture.TestFixture;
-import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.MemberInfoResponse;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +20,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(DbHelper.class)
+@Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
 class MemberServiceTest {
 
@@ -40,7 +41,7 @@ class MemberServiceTest {
     @DisplayName("회원 정보를 ID로 조회할 수 있다.")
     void getMemberById_localMember() {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Member member = saveMember();
 
         // when
         MemberInfoResponse response = memberService.getMember(member.getId());
@@ -63,5 +64,9 @@ class MemberServiceTest {
         assertThatThrownBy(() -> memberService.getMember(nonExistId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("memberId");
+    }
+
+    private Member saveMember() {
+        return dbHelper.insertMember(TestFixture.createFixedMember());
     }
 }

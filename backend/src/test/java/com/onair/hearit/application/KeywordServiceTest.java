@@ -4,11 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.KeywordResponse;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.KeywordRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ class KeywordServiceTest {
 
     @Autowired
     private KeywordRepository keywordRepository;
+
     private KeywordService keywordService;
 
     @BeforeEach
@@ -40,11 +42,11 @@ class KeywordServiceTest {
     @DisplayName("키워드 목록 조회 시 페이지네이션이 적용되어 반환된다.")
     void getKeywords_withPagination() {
         // given
-        Keyword keyword1 = saveKeyword("keyword1");
-        Keyword keyword2 = saveKeyword("keyword2");
-        Keyword keyword3 = saveKeyword("keyword3");
-        Keyword keyword4 = saveKeyword("keyword4");
-        Keyword keyword5 = saveKeyword("keyword5");
+        Keyword keyword1 = saveKeyword();
+        Keyword keyword2 = saveKeyword();
+        Keyword keyword3 = saveKeyword();
+        Keyword keyword4 = saveKeyword();
+        Keyword keyword5 = saveKeyword();
 
         PagingRequest pagingRequest = new PagingRequest(1, 2);// page = 1 (두 번째 페이지), size = 2
 
@@ -58,12 +60,12 @@ class KeywordServiceTest {
                         .containsExactly(keyword3.getId(), keyword4.getId())
         );
     }
-    
+
     @Test
     @DisplayName("단일 키워드를 조회할 수 있다.")
     void getKeywordByIdById() {
         // given
-        Keyword keyword = saveKeyword("keyword");
+        Keyword keyword = saveKeyword();
 
         // when
         KeywordResponse result = keywordService.getKeyword(keyword.getId());
@@ -89,11 +91,11 @@ class KeywordServiceTest {
     @DisplayName("오늘의 추천 키워드를 지정한 개수만큼 조회할 수 있다.")
     void getRecommendedKeywords() {
         // given
-        saveKeyword("keyword1");
-        saveKeyword("keyword2");
-        saveKeyword("keyword3");
-        saveKeyword("keyword4");
-        saveKeyword("keyword5");
+        saveKeyword();
+        saveKeyword();
+        saveKeyword();
+        saveKeyword();
+        saveKeyword();
 
         int size = 3;
 
@@ -108,11 +110,11 @@ class KeywordServiceTest {
     @DisplayName("같은 날 호출하면 추천 키워드 결과는 항상 동일하다.")
     void getRecommendedKeywords_shouldBeDeterministicForSameSeed() {
         // given
-        saveKeyword("keyword1");
-        saveKeyword("keyword2");
-        saveKeyword("keyword3");
-        saveKeyword("keyword4");
-        saveKeyword("keyword5");
+        saveKeyword();
+        saveKeyword();
+        saveKeyword();
+        saveKeyword();
+        saveKeyword();
         int size = 3;
 
         // when
@@ -126,8 +128,7 @@ class KeywordServiceTest {
                 );
     }
 
-    private Keyword saveKeyword(String name) {
-        Keyword keyword = new Keyword(name);
-        return dbHelper.insertKeyword(keyword);
+    private Keyword saveKeyword() {
+        return dbHelper.insertKeyword(TestFixture.createFixedKeyword());
     }
 } 

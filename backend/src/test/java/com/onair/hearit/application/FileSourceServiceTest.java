@@ -3,15 +3,16 @@ package com.onair.hearit.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.OriginalAudioResponse;
 import com.onair.hearit.dto.response.ScriptResponse;
 import com.onair.hearit.dto.response.ShortAudioResponse;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.HearitRepository;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(DbHelper.class)
+@Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
 class FileSourceServiceTest {
 
@@ -44,7 +45,8 @@ class FileSourceServiceTest {
     @DisplayName("히어릿 아이디로 요청 시 original audio url을 제공한다.")
     void getOriginalAudioTest() {
         // given
-        Hearit hearit = saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
 
         // when
         OriginalAudioResponse response = fileSourceService.getOriginalAudio(hearit.getId());
@@ -57,7 +59,8 @@ class FileSourceServiceTest {
     @DisplayName("히어릿 아이디로 요청 시 short audio url을 제공한다.")
     void getShortAudioTest() {
         // given
-        Hearit hearit = saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
 
         // when
         ShortAudioResponse response = fileSourceService.getShortAudio(hearit.getId());
@@ -70,7 +73,8 @@ class FileSourceServiceTest {
     @DisplayName("히어릿 아이디로 요청 시 script url을 제공한다.")
     void getScriptTest() {
         // given
-        Hearit hearit = saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
 
         // when
         ScriptResponse response = fileSourceService.getScript(hearit.getId());
@@ -91,19 +95,11 @@ class FileSourceServiceTest {
                 .hasMessageContaining("hearitId");
     }
 
-    private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix, "#FFFFFFFF");
-        dbHelper.insertCategory(category);
+    private Category saveCategory() {
+        return dbHelper.insertCategory(TestFixture.createFixedCategory());
+    }
 
-        Hearit hearit = new Hearit(
-                "title" + suffix,
-                "summary" + suffix, suffix,
-                "originalAudioUrl" + suffix,
-                "shortAudioUrl" + suffix,
-                "scriptUrl" + suffix,
-                "source" + suffix,
-                LocalDateTime.now(),
-                category);
-        return dbHelper.insertHearit(hearit);
+    private Hearit saveHearit(Category category) {
+        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
     }
 }

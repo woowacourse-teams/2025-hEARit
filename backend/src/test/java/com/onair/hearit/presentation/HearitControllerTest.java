@@ -3,7 +3,6 @@ package com.onair.hearit.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -15,9 +14,9 @@ import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
+import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +34,8 @@ class HearitControllerTest extends IntegrationTest {
         // given
         Member member = saveMember();
         String token = generateToken(member);
-        Hearit hearit = saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
 
         // when & then
         HearitDetailResponse response = RestAssured.given()
@@ -53,7 +53,8 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("로그인 하지 않은 사용자가 히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
     void readHearitWithSuccessWithNotMember() {
         // given
-        Hearit hearit = saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
 
         // when & then
         HearitDetailResponse response = RestAssured.given()
@@ -90,9 +91,10 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("랜덤 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
     void readRandomHearits() {
         // given
-        saveHearitWithSuffix(1);
-        saveHearitWithSuffix(2);
-        saveHearitWithSuffix(3);
+        Category category = saveCategory();
+        saveHearit(category);
+        saveHearit(category);
+        saveHearit(category);
 
         // when
         PagedResponse<RandomHearitResponse> responses = RestAssured.given()
@@ -112,9 +114,10 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("추천 히어릿을 조회 시, 200 OK 및 최대 5개 히어릿 정보 목록을 제공한다.")
     void readRecommendedHearits() {
         // given
-        saveHearitWithSuffix(1);
-        saveHearitWithSuffix(2);
-        saveHearitWithSuffix(3);
+        Category category = saveCategory();
+        saveHearit(category);
+        saveHearit(category);
+        saveHearit(category);
 
         // when
         List<RecommendHearitResponse> responses = RestAssured.given()
@@ -165,8 +168,7 @@ class HearitControllerTest extends IntegrationTest {
                         .containsExactlyInAnyOrder(
                                 hearit.getId(),
                                 hearit1.getId(),
-                                hearit2.getId()
-                        )
+                                hearit2.getId())
         );
     }
 
@@ -202,53 +204,31 @@ class HearitControllerTest extends IntegrationTest {
         return jwtTokenProvider.createToken(member.getId());
     }
 
-    private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix, "#123");
-        dbHelper.insertCategory(category);
-
-        Hearit hearit = new Hearit(
-                "title" + suffix,
-                "summary" + suffix, suffix,
-                "originalAudioUrl" + suffix,
-                "shortAudioUrl" + suffix,
-                "scriptUrl" + suffix,
-                "source" + suffix,
-                LocalDateTime.now(),
-                category);
-        return dbHelper.insertHearit(hearit);
+    private Category saveCategory() {
+        return dbHelper.insertCategory(TestFixture.createFixedCategory());
     }
 
-    private Hearit saveHearitByTitle(String title) {
-        Category category = new Category("category", "#123");
-        dbHelper.insertCategory(category);
+    private Hearit saveHearit(Category category) {
+        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+    }
+
+    private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
+        Category category = saveCategory();
         Hearit hearit = new Hearit(
                 title,
                 "summary",
-                1,
+                100,
                 "originalAudioUrl",
                 "shortAudioUrl",
                 "scriptUrl",
                 "source",
-                LocalDateTime.now(),
                 category);
-        return dbHelper.insertHearit(hearit);
-    }
-
-    private Category saveCategory(String name, String color) {
-        Category category = new Category(name, color);
-        return dbHelper.insertCategory(category);
+        Hearit savedHearit = dbHelper.insertHearit(hearit);
+        dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
+        return savedHearit;
     }
 
     private Keyword saveKeyword(String name) {
         return dbHelper.insertKeyword(new Keyword(name));
-    }
-
-    private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
-        Category category = saveCategory("category", "#abc");
-        Hearit hearit = new Hearit(title, "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
-                LocalDateTime.now(), category);
-        Hearit savedHearit = dbHelper.insertHearit(hearit);
-        dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
-        return savedHearit;
     }
 }

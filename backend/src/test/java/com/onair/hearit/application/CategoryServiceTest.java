@@ -3,16 +3,17 @@ package com.onair.hearit.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(DbHelper.class)
+@Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
 class CategoryServiceTest {
 
@@ -58,13 +59,13 @@ class CategoryServiceTest {
         PagedResponse<CategoryResponse> result = categoryService.getCategories(pagingRequest);
 
         // then
-        assertAll(
-                () -> assertThat(result.content()).hasSize(2),
-                () -> assertThat(result.content()).extracting(CategoryResponse::name)
-                        .containsExactly("category3", "category4"),
-                () -> assertThat(result.content()).extracting(CategoryResponse::colorCode)
-                        .containsExactly("#333", "#444")
-        );
+        assertAll(() -> {
+            assertThat(result.content()).hasSize(2);
+            assertThat(result.content()).extracting(CategoryResponse::name)
+                    .containsExactly("category3", "category4");
+            assertThat(result.content()).extracting(CategoryResponse::colorCode)
+                    .containsExactly("#333", "#444");
+        });
     }
 
     @Test
@@ -73,20 +74,20 @@ class CategoryServiceTest {
         // given
         Category category1 = saveCategory("Spring", "#001");
         Category category2 = saveCategory("Java", "#002");
-        Hearit hearit1 = saveHearitWithCategory(category1);
-        Hearit hearit2 = saveHearitWithCategory(category1);
-        saveHearitWithCategory(category2);
+        Hearit hearit1 = saveHearit(category1);
+        Hearit hearit2 = saveHearit(category1);
+        Hearit hearit3 = saveHearit(category2);
         PagingRequest request = new PagingRequest(0, 10);
 
         // when
         PagedResponse<HearitSearchResponse> result = categoryService.getHearitsByCategory(category1.getId(), request);
 
         // then
-        assertAll(
-                () -> assertThat(result.content()).hasSize(2),
-                () -> assertThat(result.content()).extracting(HearitSearchResponse::id)
-                        .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId())
-        );
+        assertAll(() -> {
+            assertThat(result.content()).hasSize(2);
+            assertThat(result.content()).extracting(HearitSearchResponse::id)
+                    .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
+        });
     }
 
     @Test
@@ -94,9 +95,9 @@ class CategoryServiceTest {
     void searchHearitsByCategory_pagination() {
         // given
         Category category = saveCategory("Spring", "#001");
-        Hearit hearit1 = saveHearitWithCategory(category);
-        Hearit hearit2 = saveHearitWithCategory(category);
-        Hearit hearit3 = saveHearitWithCategory(category);
+        Hearit hearit1 = saveHearit(category);
+        Hearit hearit2 = saveHearit(category);
+        Hearit hearit3 = saveHearit(category);
         PagingRequest request = new PagingRequest(1, 2);
 
         // when
@@ -114,9 +115,7 @@ class CategoryServiceTest {
         return dbHelper.insertCategory(category);
     }
 
-    private Hearit saveHearitWithCategory(Category category) {
-        Hearit hearit = new Hearit("title", "summary", 1, "originalAudioUrl", "shortAudioUrl", "scriptUrl", "source",
-                LocalDateTime.now(), category);
-        return dbHelper.insertHearit(hearit);
+    private Hearit saveHearit(Category category) {
+        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
     }
 }

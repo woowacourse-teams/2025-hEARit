@@ -7,8 +7,8 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.OriginalAudioResponse;
 import com.onair.hearit.dto.response.ScriptResponse;
 import com.onair.hearit.dto.response.ShortAudioResponse;
+import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,8 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("원본 오디오 url 요청 시, 200 OK 및 id와 url을 반환한다.")
     void readOriginalAudioUrlWithSuccess() {
         // given
-        Hearit hearit = saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
 
         // when
         OriginalAudioResponse response = RestAssured.when()
@@ -36,7 +37,8 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("1분 오디오 url 요청 시, 200 OK 및 id와 url을 반환한다.")
     void readShortAudioUrlWithSuccess() {
         // given
-        Hearit hearit = saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
 
         // when
         ShortAudioResponse response = RestAssured.when()
@@ -53,7 +55,8 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("대본 url 요청 시 200 OK 및 id와 url을 반환한다.")
     void readScriptUrlWithSuccess() {
         // given
-        Hearit hearit = saveHearitWithSuffix(1);
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
 
         // when
         ScriptResponse response = RestAssured.when()
@@ -79,19 +82,11 @@ class FileSourceControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }
 
-    private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix, "#FFFFFFFF");
-        dbHelper.insertCategory(category);
+    private Category saveCategory() {
+        return dbHelper.insertCategory(TestFixture.createFixedCategory());
+    }
 
-        Hearit hearit = new Hearit(
-                "title" + suffix,
-                "summary" + suffix, suffix,
-                "originalAudioUrl" + suffix,
-                "shortAudioUrl" + suffix,
-                "scriptUrl" + suffix,
-                "source" + suffix,
-                LocalDateTime.now(),
-                category);
-        return dbHelper.insertHearit(hearit);
+    private Hearit saveHearit(Category category) {
+        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
     }
 }

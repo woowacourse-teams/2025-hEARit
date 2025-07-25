@@ -4,9 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.fixture.TestFixture;
-import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -16,9 +15,10 @@ import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(DbHelper.class)
+@Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
 class HearitServiceTest {
 
@@ -54,9 +54,10 @@ class HearitServiceTest {
     @DisplayName("히어릿 아이디로 단일 히어릿 정보를 조회 할 수 있다.")
     void getHearitDetailTest() {
         // given
-        Hearit hearit = saveHearitWithSuffix(1);
         Member member = saveMember();
-        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(member, hearit));
+        Category category = saveCategory();
+        Hearit hearit = saveHearit(category);
+        Bookmark bookmark = saveBookmark(member, hearit);
 
         // when
         HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(), member.getId());
@@ -89,9 +90,11 @@ class HearitServiceTest {
     void getRandomHearits() {
         // given
         Member member = saveMember();
+        Category category = saveCategory();
+
         for (int i = 1; i <= 11; i++) {
-            Hearit hearit = saveHearitWithSuffix(i);
-            dbHelper.insertBookmark(new Bookmark(member, hearit));
+            Hearit hearit = saveHearit(category);
+            saveBookmark(member, hearit);
         }
         PagingRequest pagingRequest = new PagingRequest(0, 10);
 
@@ -106,8 +109,9 @@ class HearitServiceTest {
     @DisplayName("최대 5개의 추천 히어릿을 조회할 수 있다.")
     void getRecommendedHearits() {
         // given
+        Category category = saveCategory();
         IntStream.rangeClosed(1, 6)
-                .forEach(this::saveHearitWithSuffix);
+                .forEach((num) -> saveHearit(category));
 
         // when
         List<RecommendHearitResponse> hearits = hearitService.getRecommendedHearits();
@@ -120,19 +124,15 @@ class HearitServiceTest {
         return dbHelper.insertMember(TestFixture.createFixedMember());
     }
 
-    private Hearit saveHearitWithSuffix(int suffix) {
-        Category category = new Category("name" + suffix, "#123");
-        dbHelper.insertCategory(category);
+    private Category saveCategory() {
+        return dbHelper.insertCategory(TestFixture.createFixedCategory());
+    }
 
-        Hearit hearit = new Hearit(
-                "title" + suffix,
-                "summary" + suffix, suffix,
-                "originalAudioUrl" + suffix,
-                "shortAudioUrl" + suffix,
-                "scriptUrl" + suffix,
-                "source" + suffix,
-                LocalDateTime.now(),
-                category);
-        return dbHelper.insertHearit(hearit);
+    private Hearit saveHearit(Category category) {
+        return dbHelper.insertHearit(TestFixture.createFixedHearit(category));
+    }
+
+    private Bookmark saveBookmark(Member member, Hearit hearit) {
+        return dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
     }
 }
