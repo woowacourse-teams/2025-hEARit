@@ -4,17 +4,20 @@ import com.onair.hearit.common.exception.custom.HearitException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(HearitException.class)
     public ProblemDetail handleHearitException(HearitException ex, HttpServletRequest request) {
-        return buildProblemDetail(ex.getErrorCode(), ex.getDetail(), request);
+        log.error("서버 내부 오류", ex);
+        return buildProblemDetail(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getTitle(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
