@@ -2,6 +2,7 @@ package com.onair.hearit.presentation.home
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -154,6 +155,7 @@ class HomeFragment :
     private fun observeViewModel() {
         viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
             binding.userInfo = userInfo
+            Log.d("meeple_log", "$userInfo")
         }
 
         viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->
@@ -224,10 +226,10 @@ class HomeFragment :
     }
 
     override fun onCategoryClick(
-        categoryId: Long,
-        categoryName: String,
+        id: Long,
+        name: String,
     ) {
-        navigateToSearchResult(SearchInput.Category(categoryId, categoryName))
+        navigateToSearchResult(SearchInput.Category(id, name))
     }
 
     override fun onDestroyView() {

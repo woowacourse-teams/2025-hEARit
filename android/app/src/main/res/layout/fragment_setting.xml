@@ -51,6 +51,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_setting_title"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage"
+            app:strokeColor="@color/black"
+            app:strokeWidth="2dp"
             tools:src="@drawable/img_default_profile" />
 
         <TextView
