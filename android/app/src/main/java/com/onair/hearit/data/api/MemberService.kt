@@ -8,6 +8,6 @@ import retrofit2.http.Header
 interface MemberService {
     @GET("members/me")
     suspend fun getUserInfo(
-        @Header("Authorization") token: String,
+        @Header("Authorization") token: String?,
     ): Response<UserInfoResponse>
 }

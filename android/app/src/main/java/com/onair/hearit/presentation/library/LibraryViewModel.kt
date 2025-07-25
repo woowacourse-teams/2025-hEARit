@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.domain.NoBookmarkException
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
@@ -39,9 +40,20 @@ class LibraryViewModel(
             bookmarkRepository
                 .getBookmarks(page = page, size = null)
                 .onSuccess {
+                    _uiState.value = BookmarkUiState.LoggedIn
                     _bookmarks.value = it
-                }.onFailure {
-                    _toastMessage.value = R.string.library_toast_bookmark_load_fail
+                }.onFailure { throwable ->
+                    when (throwable) {
+                        is NoBookmarkException -> {
+                            _uiState.value = BookmarkUiState.NotLoggedIn
+                        }
+
+                        else -> {
+                            _toastMessage.value = R.string.library_toast_bookmark_load_fail
+                        }
+                    }
+                    val defaultUserInfo = UserInfo(-1, "hEARit", null)
+                    _userInfo.value = defaultUserInfo
                 }
         }
     }

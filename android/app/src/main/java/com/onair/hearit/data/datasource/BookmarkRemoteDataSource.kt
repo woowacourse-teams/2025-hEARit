@@ -11,8 +11,5 @@ interface BookmarkRemoteDataSource {
 
     suspend fun addBookmark(hearitId: Long): Result<BookmarkIdResponse>
 
-    suspend fun deleteBookmark(
-        hearitId: Long,
-        bookmarkId: Long,
-    ): Result<Unit>
+    suspend fun deleteBookmark(bookmarkId: Long): Result<Unit>
 }

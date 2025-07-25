@@ -23,11 +23,8 @@ class BookmarkRepositoryImpl(
             response.id
         }
 
-    override suspend fun deleteBookmark(
-        hearitId: Long,
-        bookmarkId: Long,
-    ): Result<Unit> =
+    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> =
         handleResult {
-            bookmarkDataSource.deleteBookmark(hearitId, bookmarkId).getOrThrow()
+            bookmarkDataSource.deleteBookmark(bookmarkId).getOrThrow()
         }
 }

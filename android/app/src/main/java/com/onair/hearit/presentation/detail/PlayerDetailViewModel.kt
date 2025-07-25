@@ -48,7 +48,7 @@ class PlayerDetailViewModel(
         if (id != null) {
             viewModelScope.launch {
                 bookmarkRepository
-                    .deleteBookmark(hearitId, id)
+                    .deleteBookmark(id)
                     .onSuccess {
                         _isBookmarked.value = false
                         _bookmarkId.value = null

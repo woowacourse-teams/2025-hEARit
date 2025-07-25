@@ -50,20 +50,19 @@ class ExploreViewModel(
 
         val item = currentList[index]
         if (item.isBookmarked && item.bookmarkId != null) {
-            deleteBookmark(item.id, item.bookmarkId, index)
+            deleteBookmark(item.bookmarkId, index)
         } else {
             addBookmark(item.id, index)
         }
     }
 
     private fun deleteBookmark(
-        hearitId: Long,
         bookmarkId: Long,
         index: Int,
     ) {
         viewModelScope.launch {
             bookmarkRepository
-                .deleteBookmark(hearitId, bookmarkId)
+                .deleteBookmark(bookmarkId)
                 .onSuccess {
                     updateBookmarkState(index, isBookmarked = false, bookmarkId = null)
                 }.onFailure {
