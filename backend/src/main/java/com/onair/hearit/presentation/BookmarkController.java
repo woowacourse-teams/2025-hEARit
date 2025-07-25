@@ -54,7 +54,7 @@ public class BookmarkController {
             @PathVariable Long hearitId,
             @AuthenticationPrincipal CurrentMember member) {
         BookmarkInfoResponse response = bookmarkService.addBookmark(member, hearitId);
-        return ResponseEntity.created(URI.create("/api/v1/hearits/" + hearitId)).body(response);
+        return ResponseEntity.created(URI.create("/")).body(response);
     }
 
     @Operation(summary = "북마크 삭제", description = "로그인한 히어릿 ID와 북마크 ID로 북마크를 삭제합니다.")
