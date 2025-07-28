@@ -19,14 +19,19 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
+import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.home.CategoryAdapter
 
-class SearchFragment : Fragment() {
+class SearchFragment :
+    Fragment(),
+    CategoryClickListener,
+    KeywordClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-    private val keywordAdapter by lazy { KeywordAdapter() }
-    private val categoryAdapter by lazy { CategoryAdapter() }
+    private val keywordAdapter by lazy { KeywordAdapter(this) }
+    private val categoryAdapter by lazy { CategoryAdapter(this) }
     private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory() }
 
     override fun onCreateView(
@@ -50,6 +55,7 @@ class SearchFragment : Fragment() {
         setKeywordRecyclerView()
         setupCategoryRecyclerView()
         observeViewModel()
+        setupSearchEndIcon()
 
         binding.nsvSearch.setOnTouchListener { _, _ ->
             hideKeyboard()
@@ -73,7 +79,9 @@ class SearchFragment : Fragment() {
                         .toString()
                         .trim()
                 if (searchTerm.isNotBlank()) {
-                    navigateToSearchResult(searchTerm)
+                    navigateToSearchResult(
+                        SearchInput.Keyword(searchTerm),
+                    )
                     hideKeyboard()
                 }
             }
@@ -97,6 +105,21 @@ class SearchFragment : Fragment() {
         binding.rvSearchCategories.adapter = categoryAdapter
     }
 
+    private fun setupSearchEndIcon() {
+        binding.tilSearch.setEndIconOnClickListener {
+            val searchTerm =
+                binding.etSearch.text
+                    .toString()
+                    .trim()
+            if (searchTerm.isNotBlank()) {
+                hideKeyboard()
+                navigateToSearchResult(
+                    SearchInput.Keyword(searchTerm),
+                )
+            }
+        }
+    }
+
     private fun observeViewModel() {
         viewModel.categories.observe(viewLifecycleOwner) { categories ->
             categoryAdapter.submitList(categories)
@@ -105,13 +128,14 @@ class SearchFragment : Fragment() {
         viewModel.keywords.observe(viewLifecycleOwner) { keywords ->
             keywordAdapter.submitList(keywords)
         }
+
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
     }
 
-    private fun navigateToSearchResult(searchTerm: String) {
-        val fragment = SearchResultFragment.newInstance(searchTerm)
+    private fun navigateToSearchResult(input: SearchInput) {
+        val fragment = SearchResultFragment.newInstance(input)
 
         parentFragmentManager
             .beginTransaction()
@@ -134,5 +158,18 @@ class SearchFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onKeywordClick(keyword: String) {
+        navigateToSearchResult(SearchInput.Keyword(keyword))
+        hideKeyboard()
+    }
+
+    override fun onCategoryClick(
+        categoryId: Long,
+        categoryName: String,
+    ) {
+        navigateToSearchResult(SearchInput.Category(categoryId, categoryName))
+        hideKeyboard()
     }
 }

@@ -1,23 +1,18 @@
 package com.onair.hearit.presentation
 
-import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
+import androidx.media3.exoplayer.ExoPlayer
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.presentation.explore.ExploreFragment
@@ -25,14 +20,15 @@ import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
-import com.onair.hearit.service.PlaybackService
 
-@OptIn(UnstableApi::class)
 class MainActivity :
     AppCompatActivity(),
     DrawerClickListener,
     PlayerControllerView {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var player: ExoPlayer
+    private var backPressedTime: Long = 0L
+    private val backPressInterval = 1000L
     private var mediaController: MediaController? = null
 
     private val playerViewModel: PlayerViewModel by viewModels { PlayerViewModelFactory() }
@@ -56,14 +52,35 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
+        setupBackPressHandler()
         setupWindowInsets()
         setupPlayer()
-        observeViewModel()
         setupNavigation()
         setupDrawer()
 
         showFragment(HomeFragment())
+    }
+
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - backPressedTime <= backPressInterval) {
+                        finish()
+                    } else {
+                        backPressedTime = currentTime
+                        Toast
+                            .makeText(
+                                this@MainActivity,
+                                "뒤로가기 버튼을 한 번 더 누르면 종료됩니다.",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                    }
+                }
+            },
+        )
     }
 
     private fun setupWindowInsets() {

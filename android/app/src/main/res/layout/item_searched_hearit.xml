@@ -8,13 +8,18 @@
         <variable
             name="item"
             type="com.onair.hearit.domain.model.SearchedHearit" />
+
+        <variable
+            name="listener"
+            type="com.onair.hearit.presentation.search.SearchResultClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/bg_gray1_radius_8dp">
+        android:background="@drawable/bg_gray1_radius_8dp"
+        android:onClick="@{() -> listener.onClickHearitInfo(item.id)}">
 
         <TextView
             android:id="@+id/tv_searched_hearit_title"
@@ -66,11 +71,11 @@
         <ImageView
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginStart="20dp"
+            android:layout_marginEnd="12dp"
             android:contentDescription="@null"
             android:src="@drawable/ic_right"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tv_searched_hearit_summary"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

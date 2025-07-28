@@ -9,6 +9,10 @@
     <string name="all_terms_of_use">이용 약관</string>
     <string name="all_account_info">설정 및 계정 정보</string>
     <string name="all_toast_categories_load_fail">카테고리 조회에 실패했습니다.</string>
+    <string name="all_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
+    <string name="all_toast_save_user_info_fail">유저 정보 저장에 실패했습니다.</string>
+    <string name="all_toast_add_bookmark_fail">북마크 저장에 실패했습니다.</string>
+    <string name="all_toast_delete_bookmark_fail">북마크 삭제에 실패했습니다.</string>
 
     <!-- HomeFragment-->
     <string name="home_logo_description">궁금했던 내용들을, 히어릿을 통해 빠르게 들어보세요!</string>
@@ -19,7 +23,6 @@
     <string name="home_example_recommend_description">Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나</string>
     <string name="home_toast_recommend_load_fail">추천 히어릿 목록 조회에 실패했습니다.</string>
     <string name="home_toast_recent_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
-    <string name="home_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다.</string>
 
     <!--CategoryFragment-->
     <string name="category_text">전체 카테고리 목록</string>
@@ -46,6 +49,7 @@
     <string name="player_detail_script_title">스크립트</string>
     <string name="player_detail_toast_single_hearit_load_fail">단일 히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_hearit_load_fail">히어릿 조회에 실패했습니다.</string>
+    <string name="player_detail_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다.</string>
 
     <!-- ExploreFragment-->
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 골라 들으세요!</string>
@@ -56,14 +60,15 @@
     <string name="setting_notification">알림</string>
     <string name="setting_recommend_notification">히어릿 추천 알림</string>
     <string name="setting_app_version">앱 버전 v%s</string>
+    <string name="setting_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
 
     <!-- LibraryFragment-->
-    <string name="library_nickname"><font color="#B677F3">닉네임제한은9글자</font>님,</string>
     <string name="library_guide">오늘은 어떤 <font color="#B677F3">히어릿</font>을 들어볼까요?</string>
     <string name="library_bookmarked_hearit_title">내가 북마크한 히어릿</string>
     <string name="library_guide_when_no_bookmark">북마크한 <font color="#B677F3">히어릿</font>이 없어요!\n히어릿과 함께 IT 트렌드를 모아볼까요?</string>
     <string name="library_guide_when_no_login"><font color="#B677F3">히어릿</font>을 모아서 듣고 싶다면,\n로그인을 해주세요!</string>
     <string name="library_login_button_text">로그인 하러가기</string>
+    <string name="library_toast_bookmark_load_fail">북마크 조회에 실패했습니다.</string>
 
     <!-- SearchFragment-->
     <string name="search_recommend_keyword">오늘의 추천 키워드</string>
@@ -71,6 +76,7 @@
     <string name="search_category_look_forward">카테고리 둘러보기</string>
     <string name="search_keyword">검색어를 입력해주세요</string>
     <string name="search_toast_keywords_load_fail">오늘의 키워드 조회에 실패했습니다.</string>
+    <string name="search_guide_when_no_hearits">검색된 <font color="#B677F3">히어릿</font>이 없어요!</string>
 
     <!-- SearchResultFragment-->
     <string name="search_result_searched_hearit">검색된 히어릿 목록</string>

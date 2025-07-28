@@ -1,13 +1,19 @@
 package com.onair.hearit.presentation
 
+import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
+import coil.load
 import com.onair.hearit.R
+import com.onair.hearit.presentation.library.BookmarkUiState
+import com.onair.hearit.presentation.search.SearchUiState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -85,7 +91,7 @@ fun setFormattedDate(
 
         val date = inputFormat.parse(dateString)
         textView.text = date?.let { outputFormat.format(it) } ?: ""
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         textView.text = ""
     }
 }
@@ -104,4 +110,68 @@ fun setVisibleIfNull(
     value: Any?,
 ) {
     view.isVisible = value == null
+}
+
+@BindingAdapter("imageUrl")
+fun setImageUrl(
+    view: ImageView,
+    url: String?,
+) {
+    view
+        .load(url) {
+            crossfade(true)
+            error(R.drawable.img_default_profile)
+            placeholder(R.drawable.img_default_profile)
+        }
+}
+
+@BindingAdapter("visibleIfNotLogin")
+fun setVisibleIfNotLogin(
+    view: View,
+    state: BookmarkUiState?,
+) {
+    view.isVisible = state is BookmarkUiState.NotLoggedIn
+}
+
+@BindingAdapter("visibleIfLogin")
+fun setVisibleIfLogin(
+    view: View,
+    state: BookmarkUiState?,
+) {
+    view.isVisible = state is BookmarkUiState.LoggedIn
+}
+
+@BindingAdapter("setSelectedState")
+fun setSelectedState(
+    view: ImageView,
+    condition: Boolean?,
+) {
+    view.isSelected = condition == true
+}
+
+@BindingAdapter("categoryBackgroundColor")
+fun setCategoryBackgroundColor(
+    view: View,
+    colorCode: String,
+) {
+    val background = view.background?.mutate()
+    if (background is GradientDrawable) {
+        background.setColor(colorCode.toColorInt())
+    }
+}
+
+@BindingAdapter("visibleIfNoHearits")
+fun setVisibleIfNoHearits(
+    view: View,
+    state: SearchUiState?,
+) {
+    view.isVisible = state is SearchUiState.NoHearits
+}
+
+@BindingAdapter("visibleIfHearitsExist")
+fun setVisibleIfHearitsExist(
+    view: View,
+    state: SearchUiState?,
+) {
+    view.isVisible = state is SearchUiState.HearitsExist
 }

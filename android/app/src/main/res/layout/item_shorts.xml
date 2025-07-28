@@ -12,6 +12,10 @@
         <variable
             name="shortsClickListener"
             type="com.onair.hearit.presentation.explore.ShortsClickListener" />
+
+        <variable
+            name="viewModel"
+            type="com.onair.hearit.presentation.explore.ExploreViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -25,11 +29,13 @@
             android:layout_height="48dp"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="230dp"
+            android:background="@drawable/bookmark_selector"
             android:contentDescription="@null"
-            android:src="@drawable/bookmark_selector"
+            android:onClick="@{() -> shortsClickListener.onClickBookmark(hearitItem.id)}"
             app:layout_constraintBottom_toBottomOf="@id/layout_sound_wave"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:setSelectedState="@{hearitItem.isBookmarked}" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_top_5"
@@ -40,12 +46,10 @@
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/layout_sound_wave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:paddingStart="64dp"
             android:paddingEnd="64dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
@@ -54,22 +58,23 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_explore_item_script"
             android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:layout_marginBottom="20dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="28dp"
+            android:clipToPadding="false"
             android:orientation="vertical"
+            android:paddingHorizontal="32dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@id/layout_explore_hearit_info"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/guideline_top_5"
+            tools:itemCount="5"
             tools:listitem="@layout/item_explore_script" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_explore_hearit_info"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="88dp"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginBottom="40dp"
+            android:layout_marginBottom="24dp"
             android:background="@drawable/bg_gradient_radius_8dp"
             android:onClick="@{() -> shortsClickListener.onClickHearitInfo(hearitItem.id)}"
             app:layout_constraintBottom_toTopOf="@id/layout_explore_player"
@@ -82,7 +87,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="16dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="@{hearitItem.title}"
@@ -97,11 +102,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginBottom="12dp"
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:text="@{hearitItem.summary}"
                 android:textColor="@color/hearit_gray2"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/iv_explore_right"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_explore_item_content_title"

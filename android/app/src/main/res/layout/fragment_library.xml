@@ -3,21 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="uiState"
+            type="com.onair.hearit.presentation.library.BookmarkUiState" />
+
+        <variable
+            name="userInfo"
+            type="com.onair.hearit.domain.model.UserInfo" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/bg_gradient_vertical">
-
-        <include
-            android:id="@+id/layout_library_when_no_login"
-            layout="@layout/layout_library_when_no_login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tv_bookmarked_hearit_title" />
 
         <include
             android:id="@+id/layout_library_when_no_bookmark"
@@ -37,9 +37,10 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
-            android:text="@string/library_nickname"
+            android:text='@{userInfo.nickname + " 님"}'
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="hEARit 님" />
 
         <TextView
             android:id="@+id/tv_library_guide"
@@ -62,15 +63,33 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_library_guide" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_bookmark"
+        <FrameLayout
+            android:id="@+id/fl_login_state"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintTop_toBottomOf="@id/tv_bookmarked_hearit_title"
-            tools:itemCount="8"
-            tools:listitem="@layout/item_bookmark" />
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_bookmarked_hearit_title">
+
+            <include
+                android:id="@+id/layout_library_when_no_login"
+                layout="@layout/layout_library_when_no_login"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="12dp"
+                app:uiState="@{uiState}" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_bookmark"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="28dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_bookmarked_hearit_title"
+                app:visibleIfLogin="@{uiState}"
+                tools:itemCount="8"
+                tools:listitem="@layout/item_bookmark" />
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

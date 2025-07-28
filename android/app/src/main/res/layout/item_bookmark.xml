@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="20dp"
-        android:onClick="@{() -> bookmarkListener.onClickBookmarkedHearit(item.id)}">
+        android:onClick="@{() -> bookmarkListener.onClickBookmarkedHearit(item.hearitId)}">
 
         <View
             android:layout_width="match_parent"
@@ -66,7 +66,7 @@
             android:layout_marginEnd="10dp"
             android:contentDescription="@null"
             android:onClick="@{() -> bookmarkListener.onClickOption()}"
-            android:src="@drawable/img_options_vertical"
+            android:src="@drawable/ic_option_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

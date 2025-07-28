@@ -5,43 +5,98 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.domain.model.Paging
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.domain.repository.HearitRepository
+import com.onair.hearit.domain.term
+import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 
 class SearchResultViewModel(
-    private val hearitRepository: HearitRepository,
-    private val initialSearchTerm: String,
+    private val getSearchResultUseCase: GetSearchResultUseCase,
+    initialInput: SearchInput,
 ) : ViewModel() {
-    private val _searchedHearits: MutableLiveData<List<SearchedHearit>> = MutableLiveData()
+    private val _uiState = MutableLiveData<SearchUiState>()
+    val uiState: LiveData<SearchUiState> = _uiState
+
+    private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
     val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    var currentSearchTerm: String = initialSearchTerm
-        private set
+    private var paging: Paging? = null
+    private var currentPage: Int = 0
+    private var isLoading = false
+
+    private var currentInput: SearchInput = initialInput
+
+    val currentSearchTerm: String
+        get() = currentInput.term()
 
     init {
-        fetchData(initialSearchTerm)
+        fetchData(isInitial = true)
     }
 
-    fun search(searchTerm: String) {
-        if (searchTerm == currentSearchTerm) return
-
-        currentSearchTerm = searchTerm
-        fetchData(searchTerm)
+    fun loadNextPageIfPossible() {
+        if (isLoading || paging?.isLast == true) return
+        fetchData(isInitial = false)
     }
 
-    private fun fetchData(searchTerm: String) {
+    fun search(term: String) {
+        currentInput = SearchInput.Keyword(term)
+        resetPaging()
+        fetchData(isInitial = true)
+    }
+
+    private fun resetPaging() {
+        currentPage = 0
+        paging = null
+    }
+
+    private fun fetchData(isInitial: Boolean) {
+        if (isLoading) return
+        isLoading = true
+
         viewModelScope.launch {
-            hearitRepository
-                .getSearchHearits(searchTerm)
-                .onSuccess { _searchedHearits.value = it }
-                .onFailure {
-                    _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
-                }
+            try {
+                val page = if (isInitial) 0 else currentPage + 1
+                val result = getSearchResultUseCase(currentInput, page, DEFAULT_PAGE_SIZE)
+
+                result
+                    .onSuccess { pageResult ->
+                        paging = pageResult.paging
+                        currentPage = pageResult.paging.page
+
+                        val updatedList =
+                            if (isInitial) {
+                                pageResult.items
+                            } else {
+                                _searchedHearits.value.orEmpty() + pageResult.items
+                            }
+
+                        _searchedHearits.value = updatedList
+                        updateUiState(updatedList)
+                    }.onFailure {
+                        _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
+                    }
+            } finally {
+                isLoading = false
+            }
         }
+    }
+
+    private fun updateUiState(hearits: List<SearchedHearit>) {
+        _uiState.value =
+            if (hearits.isEmpty()) {
+                SearchUiState.NoHearits
+            } else {
+                SearchUiState.HearitsExist(hearits)
+            }
+    }
+
+    companion object {
+        private const val DEFAULT_PAGE_SIZE = 20
     }
 }

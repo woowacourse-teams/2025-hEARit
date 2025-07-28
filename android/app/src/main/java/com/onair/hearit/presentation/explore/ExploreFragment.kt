@@ -30,15 +30,11 @@ class ExploreFragment :
     private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = FragmentExploreBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -135,6 +131,19 @@ class ExploreFragment :
         }
     }
 
+    private fun showToast(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onClickHearitInfo(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
+        startActivity(intent)
+    }
+
+    override fun onClickBookmark(hearitId: Long) {
+        viewModel.toggleBookmark(hearitId)
+    }
+
     override fun onPause() {
         super.onPause()
         player.pause()
@@ -148,14 +157,5 @@ class ExploreFragment :
     override fun onDestroy() {
         super.onDestroy()
         player.release()
-    }
-
-    override fun onClickHearitInfo(hearitId: Long) {
-        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
-    }
-
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }
