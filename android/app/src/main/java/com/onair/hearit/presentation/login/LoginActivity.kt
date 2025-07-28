@@ -12,6 +12,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
@@ -25,36 +27,18 @@ class LoginActivity : AppCompatActivity() {
     private val factory by lazy { LoginViewModelFactory(applicationContext) }
     private val viewModel by lazy { ViewModelProvider(this, factory)[LoginViewModel::class.java] }
 
+    private var isKakaoTalkLogin = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
         setupWindowInsets()
-
-        setupKakao()
-
-        binding.layoutLoginSymbol
-            .animate()
-            .translationY(-400f)
-            .setDuration(1000)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-
-        binding.tvLoginHearit.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
-
-        viewModel.loginState.observe(this) { state ->
-            if (state == true) {
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
-            }
-        }
-        viewModel.toastMessage.observe(this) { resId ->
-            showToast(getString(resId))
-        }
+        setupAnimation()
+        setupKakaoLogin()
+        setupListeners()
+        observeViewModel()
     }
 
     private fun setupWindowInsets() {
@@ -66,39 +50,89 @@ class LoginActivity : AppCompatActivity() {
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
-    private fun setupKakao() {
-        binding.btnLoginKakao.setOnClickListener {
-            // 카카오톡으로 로그인 할 수 없어 카카오계정으로 로그인할 경우 사용됨
-            val kakaoCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
-                if (error != null) {
-                    Log.e("kakao login", "카카오계정으로 로그인 실패", error)
-                } else if (token != null) {
-                    viewModel.kakaoLogin(token.accessToken)
-                }
-            }
+    private fun setupAnimation() {
+        binding.layoutLoginSymbol
+            .animate()
+            .translationY(-400f)
+            .setDuration(1000)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+    }
 
-            // 카카오톡이 설치되어 있으면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
-            if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
-                UserApiClient.instance.loginWithKakaoTalk(this) { token, error ->
-                    if (error != null) {
-                        Log.e("kakao login", "카카오톡으로 로그인 실패", error)
+    private fun setupListeners() {
+        binding.tvLoginHearit.setOnClickListener {
+            navigateToMain()
+        }
+    }
 
-                        // 사용자가 카카오톡 설치 후 디바이스 권한 요청 화면에서 로그인을 취소한 경우,
-                        // 의도적인 로그인 취소로 보고 카카오계정으로 로그인 시도 없이 로그인 취소로 처리 (예: 뒤로 가기)
-                        if (error is ClientError && error.reason == ClientErrorCause.Cancelled) {
-                            return@loginWithKakaoTalk
-                        }
-
-                        // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인 시도
-                        UserApiClient.instance.loginWithKakaoAccount(this, callback = kakaoCallback)
-                    } else if (token != null) {
-                        viewModel.kakaoLogin(token.accessToken)
-                    }
-                }
-            } else {
-                UserApiClient.instance.loginWithKakaoAccount(this, callback = kakaoCallback)
+    private fun observeViewModel() {
+        viewModel.loginState.observe(this) { isLoggedIn ->
+            if (isLoggedIn == true) {
+                navigateToMain()
             }
         }
+        viewModel.toastMessage.observe(this) { resId ->
+            showToast(getString(resId))
+        }
+    }
+
+    private fun setupKakaoLogin() {
+        binding.btnLoginKakao.setOnClickListener {
+            if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
+                isKakaoTalkLogin = true
+                loginWithKakaoTalk()
+            } else {
+                isKakaoTalkLogin = false
+                loginWithKakaoAccount()
+            }
+        }
+    }
+
+    private fun loginWithKakaoTalk() {
+        UserApiClient.instance.loginWithKakaoTalk(this, callback = kakaoCallback())
+    }
+
+    private fun loginWithKakaoAccount() {
+        UserApiClient.instance.loginWithKakaoAccount(this, callback = kakaoCallback())
+    }
+
+    private fun kakaoCallback(): (OAuthToken?, Throwable?) -> Unit {
+        return callback@{ token, error ->
+            when {
+                token != null -> {
+                    handleKakaoLoginSuccess(token)
+                }
+
+                error != null -> {
+                    Log.e("kakao login", "카카오 로그인 실패", error)
+
+                    if (error is ClientError && error.reason == ClientErrorCause.Cancelled) {
+                        return@callback
+                    }
+
+                    if (isKakaoTalkLogin) {
+                        isKakaoTalkLogin = false
+                        loginWithKakaoAccount()
+                    } else {
+                        showToast("카카오 로그인에 실패했습니다.")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleKakaoLoginSuccess(token: OAuthToken) {
+        UserApiClient.instance.me { user, _ ->
+            if (user != null) {
+                Firebase.analytics.setUserId(user.id.toString())
+            }
+        }
+        viewModel.kakaoLogin(token.accessToken)
+    }
+
+    private fun navigateToMain() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
     private fun showToast(message: String) {
