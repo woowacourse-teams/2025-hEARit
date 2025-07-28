@@ -14,6 +14,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.analytics.logEvent
 import com.onair.hearit.analytics.AnalyticsConstants
 import com.onair.hearit.analytics.logScreenView
 import com.onair.hearit.databinding.FragmentExploreBinding
@@ -140,9 +141,17 @@ class ExploreFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onClickHearitInfo(hearitId: Long) {
+    private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         startActivity(intent)
+    }
+
+    override fun onClickHearitInfo(hearitId: Long) {
+        AnalyticsProvider.get().logEvent(AnalyticsConstants.EVENT_EXPLORE_TO_DETAIL) {
+            param(AnalyticsConstants.PARAM_SOURCE, "explore")
+            param(AnalyticsConstants.PARAM_ITEM_ID, hearitId)
+        }
+        navigateToDetail(hearitId)
     }
 
     override fun onClickBookmark(hearitId: Long) {

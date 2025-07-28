@@ -2,11 +2,20 @@ package com.onair.hearit.analytics
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.logEvent
+import com.onair.hearit.analytics.AnalyticsConstants.EVENT_SCREEN_VIEW
+import com.onair.hearit.analytics.AnalyticsConstants.PARAM_PREVIOUS_SCREEN
+import com.onair.hearit.analytics.AnalyticsConstants.PARAM_SCREEN_CLASS
+import com.onair.hearit.analytics.AnalyticsConstants.PARAM_SCREEN_NAME
 
 object AnalyticsConstants {
     const val EVENT_SCREEN_VIEW = FirebaseAnalytics.Event.SCREEN_VIEW
+    const val EVENT_EXPLORE_TO_DETAIL = "explore_to_detail"
+
     const val PARAM_SCREEN_NAME = FirebaseAnalytics.Param.SCREEN_NAME
     const val PARAM_SCREEN_CLASS = FirebaseAnalytics.Param.SCREEN_CLASS
+    const val PARAM_PREVIOUS_SCREEN = "previous_screen"
+    const val PARAM_SOURCE = "source"
+    const val PARAM_ITEM_ID = "item_id"
 
     const val SCREEN_NAME_HOME = "홈 화면"
     const val SCREEN_CLASS_HOME = "HomeFragment"
@@ -16,14 +25,20 @@ object AnalyticsConstants {
     const val SCREEN_CLASS_EXPLORE = "ExploreFragment"
     const val SCREEN_NAME_LIBRARY = "라이브러리 화면"
     const val SCREEN_CLASS_LIBRARY = "LibraryFragment"
+    const val SCREEN_NAME_DETAIL = "상세 재생 화면"
+    const val SCREEN_CLASS_DETAIL = "DetailActivity"
 }
 
 fun FirebaseAnalytics.logScreenView(
     screenName: String,
     screenClass: String,
+    previousScreen: String? = null,
 ) {
-    logEvent(AnalyticsConstants.EVENT_SCREEN_VIEW) {
-        param(AnalyticsConstants.PARAM_SCREEN_NAME, screenName)
-        param(AnalyticsConstants.PARAM_SCREEN_CLASS, screenClass)
+    logEvent(EVENT_SCREEN_VIEW) {
+        param(PARAM_SCREEN_NAME, screenName)
+        param(PARAM_SCREEN_CLASS, screenClass)
+        previousScreen?.let {
+            param(PARAM_PREVIOUS_SCREEN, it)
+        }
     }
 }

@@ -25,7 +25,10 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsConstants
+import com.onair.hearit.analytics.logScreenView
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
+import com.onair.hearit.di.AnalyticsProvider
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
@@ -49,7 +52,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         (16 * scale + 0.5f).toInt()
     }
 
-    @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -60,6 +62,13 @@ class PlayerDetailActivity : AppCompatActivity() {
         observeViewModel()
         setupMediaController()
         setupClickListener()
+
+        val previousScreen = intent.getStringExtra(AnalyticsConstants.PARAM_SOURCE) ?: "unknown"
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsConstants.SCREEN_NAME_DETAIL,
+            screenClass = AnalyticsConstants.SCREEN_CLASS_DETAIL,
+            previousScreen = previousScreen,
+        )
     }
 
     private fun bindLayout() {
