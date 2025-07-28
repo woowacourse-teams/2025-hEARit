@@ -17,6 +17,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.google.firebase.analytics.logEvent
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsConstants
 import com.onair.hearit.analytics.logScreenView
@@ -177,10 +178,15 @@ class SearchFragment :
     }
 
     override fun onCategoryClick(
-        categoryId: Long,
-        categoryName: String,
+        id: Long,
+        name: String,
     ) {
-        navigateToSearchResult(SearchInput.Category(categoryId, categoryName))
+        AnalyticsProvider.get().logEvent(AnalyticsConstants.EVENT_SEARCH_CATEGORY_SELECTED) {
+            param(AnalyticsConstants.PARAM_CATEGORY_NAME, name)
+            param(AnalyticsConstants.PARAM_SCREEN_NAME, AnalyticsConstants.SCREEN_NAME_SEARCH)
+        }
+
+        navigateToSearchResult(SearchInput.Category(id, name))
         hideKeyboard()
     }
 }
