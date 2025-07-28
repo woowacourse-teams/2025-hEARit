@@ -109,7 +109,8 @@ class ExploreFragment :
                     newState: Int,
                 ) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                        val layoutManager =
+                            recyclerView.layoutManager as? LinearLayoutManager ?: return
                         val newPosition = layoutManager.findFirstVisibleItemPosition()
                         val snapView = snapHelper.findSnapView(layoutManager) ?: return
                         val position = layoutManager.getPosition(snapView)
