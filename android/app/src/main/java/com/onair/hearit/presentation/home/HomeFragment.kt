@@ -2,7 +2,6 @@ package com.onair.hearit.presentation.home
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,8 +14,12 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsConstants
+import com.onair.hearit.analytics.logScreenView
 import com.onair.hearit.databinding.FragmentHomeBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
@@ -77,6 +80,10 @@ class HomeFragment :
     override fun onResume() {
         super.onResume()
         viewModel.getRecentHearit()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsConstants.SCREEN_NAME_HOME,
+            screenClass = AnalyticsConstants.SCREEN_CLASS_HOME,
+        )
     }
 
     private fun setupWindowInsets() {
@@ -91,6 +98,17 @@ class HomeFragment :
         binding.ivProfile.setOnClickListener {
             (activity as? DrawerClickListener)?.openDrawer()
         }
+
+        val firebaseAnalytics = AnalyticsProvider.get()
+        firebaseAnalytics.logEvent(
+            "screen_view2",
+            Bundle().apply {
+                putString(FirebaseAnalytics.Param.SCREEN_NAME, "HomeScreen2")
+            },
+        )
+
+//        CrashlyticsProvider.get().log("some debug log")
+//        CrashlyticsProvider.get().recordException(IllegalStateException("Something went wrong"))
 
         binding.ivHomeAllCategory.setOnClickListener {
             parentFragmentManager
@@ -155,7 +173,6 @@ class HomeFragment :
     private fun observeViewModel() {
         viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
             binding.userInfo = userInfo
-            Log.d("meeple_log", "$userInfo")
         }
 
         viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->

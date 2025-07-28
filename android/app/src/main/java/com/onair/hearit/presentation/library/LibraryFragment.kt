@@ -13,7 +13,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.onair.hearit.analytics.AnalyticsConstants
+import com.onair.hearit.analytics.logScreenView
 import com.onair.hearit.databinding.FragmentLibraryBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 
@@ -53,6 +56,14 @@ class LibraryFragment :
 
         setupWindowInsets()
         observeViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsConstants.SCREEN_NAME_LIBRARY,
+            screenClass = AnalyticsConstants.SCREEN_CLASS_LIBRARY,
+        )
     }
 
     private fun setupWindowInsets() {

@@ -18,7 +18,10 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsConstants
+import com.onair.hearit.analytics.logScreenView
 import com.onair.hearit.databinding.FragmentSearchBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.home.CategoryAdapter
@@ -61,6 +64,14 @@ class SearchFragment :
             hideKeyboard()
             false
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsConstants.SCREEN_NAME_SEARCH,
+            screenClass = AnalyticsConstants.SCREEN_CLASS_SEARCH,
+        )
     }
 
     private fun setupWindowInsets() {

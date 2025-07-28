@@ -14,7 +14,10 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.analytics.AnalyticsConstants
+import com.onair.hearit.analytics.logScreenView
 import com.onair.hearit.databinding.FragmentExploreBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
 class ExploreFragment :
@@ -62,6 +65,10 @@ class ExploreFragment :
 
     override fun onResume() {
         super.onResume()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsConstants.SCREEN_NAME_EXPLORE,
+            screenClass = AnalyticsConstants.SCREEN_CLASS_EXPLORE,
+        )
         if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
             player.play()
         }
