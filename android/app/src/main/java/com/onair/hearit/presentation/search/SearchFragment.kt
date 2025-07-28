@@ -173,6 +173,11 @@ class SearchFragment :
     }
 
     override fun onKeywordClick(keyword: String) {
+        AnalyticsProvider.get().logEvent(AnalyticsConstants.EVENT_SEARCH_KEYWORD_SELECTED) {
+            param(AnalyticsConstants.PARAM_KEYWORD_NAME, keyword)
+            param(AnalyticsConstants.PARAM_SCREEN_NAME, AnalyticsConstants.SCREEN_NAME_SEARCH)
+        }
+
         navigateToSearchResult(SearchInput.Keyword(keyword))
         hideKeyboard()
     }
