@@ -14,10 +14,10 @@ import org.springframework.test.context.jdbc.Sql;
 public abstract class IntegrationTest {
 
     @LocalServerPort
-    int port;
+    protected int port;
 
     @Autowired
-    DbHelper dbHelper;
+    protected DbHelper dbHelper;
 
     @BeforeEach
     void setupPort() {

@@ -1,5 +1,6 @@
 package com.onair.hearit;
 
+import com.onair.hearit.admin.domain.Admin;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -22,6 +23,12 @@ public class DbHelper {
         em.persist(member);
         em.flush();
         return member;
+    }
+
+    public Admin insertAdmin(Admin admin) {
+        em.persist(admin);
+        em.flush();
+        return admin;
     }
 
     public Hearit insertHearit(Hearit hearit) {

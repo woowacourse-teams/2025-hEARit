@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractTokenFromHeader(header);
 
         // 화이트리스트면 토큰이 없어도 그냥 통과
-        if (token == null && isWhitelisted(request)) {
+        if ((token == null || token.isBlank()) && isWhitelisted(request)) {
             chain.doFilter(request, response);
             return;
         }
