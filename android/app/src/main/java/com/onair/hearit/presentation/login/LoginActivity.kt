@@ -127,8 +127,8 @@ class LoginActivity : AppCompatActivity() {
                 AnalyticsProvider.get().setUserId(user.id.toString())
                 CrashlyticsProvider.get().setUserId(user.id.toString())
             }
+            viewModel.kakaoLogin(token.accessToken)
         }
-        viewModel.kakaoLogin(token.accessToken)
     }
 
     private fun navigateToMain() {
