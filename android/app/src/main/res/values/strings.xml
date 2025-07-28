@@ -46,7 +46,7 @@
     <string name="menu_library">라이브러리</string>
 
     <!-- PlayerDetailActivity-->
-    <string name="player_detail_script_title">스크립트</string>
+    <string name="player_detail_read_more_title">더보기</string>
     <string name="player_detail_toast_single_hearit_load_fail">단일 히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_hearit_load_fail">히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다.</string>

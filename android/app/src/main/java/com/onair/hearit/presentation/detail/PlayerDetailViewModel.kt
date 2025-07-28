@@ -6,8 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
+import com.onair.hearit.domain.repository.KeywordRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
@@ -18,6 +20,7 @@ class PlayerDetailViewModel(
     private val recentHearitRepository: RecentHearitRepository,
     private val getHearitUseCase: GetHearitUseCase,
     private val bookmarkRepository: BookmarkRepository,
+    private val keywordRepository: KeywordRepository,
 ) : ViewModel() {
     private val _hearit: MutableLiveData<Hearit> = MutableLiveData()
     val hearit: LiveData<Hearit> = _hearit
@@ -28,11 +31,15 @@ class PlayerDetailViewModel(
     private val _bookmarkId: MutableLiveData<Long?> = MutableLiveData()
     val bookmarkId: LiveData<Long?> = _bookmarkId
 
+    private val _keywords: MutableLiveData<List<Keyword>> = MutableLiveData()
+    val keywords: LiveData<List<Keyword>> = _keywords
+
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
         fetchData()
+        getRecommendKeywords()
     }
 
     fun toggleBookmark() {
@@ -68,6 +75,18 @@ class PlayerDetailViewModel(
                     _bookmarkId.value = bookmarkId
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_add_bookmark_fail
+                }
+        }
+    }
+
+    private fun getRecommendKeywords() {
+        viewModelScope.launch {
+            keywordRepository
+                .getRecommendKeywords()
+                .onSuccess { keywords ->
+                    _keywords.value = keywords
+                }.onFailure {
+                    _toastMessage.value = R.string.search_toast_keywords_load_fail
                 }
         }
     }

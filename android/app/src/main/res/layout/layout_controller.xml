@@ -9,8 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/controller_view"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:background="@drawable/bg_gray1_radius_8dp">
+        android:layout_height="120dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_hearit_player_top_controller"
@@ -25,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="76dp"
+                android:layout_marginTop="8dp"
                 android:fadeScrollbars="false"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

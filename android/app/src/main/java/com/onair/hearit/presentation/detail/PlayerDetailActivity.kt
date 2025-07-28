@@ -24,13 +24,18 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private lateinit var adapter: PlayerDetailScriptAdapter
+    private lateinit var scriptAdapter: PlayerDetailScriptAdapter
+    private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
 
     private var mediaController: MediaController? = null
 
@@ -57,6 +62,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         setupBackPressHandler()
         setupWindowInsets()
         setupRecyclerView()
+        setKeywordRecyclerView()
         observeViewModel()
         setupMediaController()
         setupClickListener()
@@ -129,19 +135,23 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = PlayerDetailScriptAdapter()
-        binding.rvScript.adapter = adapter
+        scriptAdapter = PlayerDetailScriptAdapter()
+        binding.rvScript.adapter = scriptAdapter
     }
 
     private fun observeViewModel() {
         viewModel.hearit.observe(this) { hearit ->
             binding.hearit = hearit
-            adapter.submitList(hearit.script)
+            scriptAdapter.submitList(hearit.script)
 
             startPlaybackService(
                 audioUrl = hearit.audioUrl,
                 title = hearit.title,
             )
+        }
+
+        viewModel.keywords.observe(this) { keywords ->
+            keywordAdapter.submitList(keywords)
         }
 
         viewModel.toastMessage.observe(this) { msgResId ->
@@ -156,12 +166,12 @@ class PlayerDetailActivity : AppCompatActivity() {
                     val pos = controller.currentPosition
 
                     val currentItem =
-                        adapter.currentList.firstOrNull { pos in it.start until it.end }
+                        scriptAdapter.currentList.firstOrNull { pos in it.start until it.end }
 
                     if (currentItem != null) {
-                        adapter.highlightScriptLine(currentItem.id)
+                        scriptAdapter.highlightScriptLine(currentItem.id)
 
-                        val currentIndex = adapter.currentList.indexOf(currentItem)
+                        val currentIndex = scriptAdapter.currentList.indexOf(currentItem)
                         val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
 
                         (binding.rvScript.layoutManager as LinearLayoutManager)
@@ -185,6 +195,18 @@ class PlayerDetailActivity : AppCompatActivity() {
                 putExtra("TITLE", title)
             }
         startService(serviceIntent)
+    }
+
+    private fun setKeywordRecyclerView() {
+        val layoutManager =
+            FlexboxLayoutManager(this).apply {
+                flexDirection = FlexDirection.ROW
+                flexWrap = FlexWrap.WRAP
+                justifyContent = JustifyContent.CENTER
+            }
+
+        binding.layoutSeeMore.rvKeyword.layoutManager = layoutManager
+        binding.layoutSeeMore.rvKeyword.adapter = keywordAdapter
     }
 
     override fun onDestroy() {
