@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="hearitItem"
+            type="com.onair.hearit.domain.model.ShortsHearit" />
+
+        <variable
+            name="shortsClickListener"
+            type="com.onair.hearit.presentation.explore.ShortsClickListener" />
+
+        <variable
+            name="viewModel"
+            type="com.onair.hearit.presentation.explore.ExploreViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/hearit_black1">
+
+        <ImageView
+            android:id="@+id/btn_explore_item_bookmark"
+            android:layout_width="42dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="230dp"
+            android:background="@drawable/bookmark_selector"
+            android:contentDescription="@null"
+            android:onClick="@{() -> shortsClickListener.onClickBookmark(hearitItem.id)}"
+            app:layout_constraintBottom_toBottomOf="@id/layout_sound_wave"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:setSelectedState="@{hearitItem.isBookmarked}" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_top_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/layout_sound_wave"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:paddingStart="64dp"
+            android:paddingEnd="64dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/explore_sound_wave" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_explore_item_script"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="28dp"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:paddingHorizontal="32dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toTopOf="@id/layout_explore_hearit_info"
+            app:layout_constraintTop_toBottomOf="@id/guideline_top_5"
+            tools:itemCount="5"
+            tools:listitem="@layout/item_explore_script" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_explore_hearit_info"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/bg_gradient_radius_8dp"
+            android:onClick="@{() -> shortsClickListener.onClickHearitInfo(hearitItem.id)}"
+            app:layout_constraintBottom_toTopOf="@id/layout_explore_player"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/tv_explore_item_content_title"
+                style="@style/pretendard_sub_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="16dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@{hearitItem.title}"
+                app:layout_constraintEnd_toStartOf="@+id/iv_explore_right"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Intent란 무엇인가?" />
+
+            <TextView
+                android:id="@+id/tv_explore_item_content_summary"
+                style="@style/pretendard_body"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginBottom="12dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="@{hearitItem.summary}"
+                android:textColor="@color/hearit_gray2"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/iv_explore_right"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_explore_item_content_title"
+                tools:text="Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나...(요약)" />
+
+            <ImageView
+                android:id="@+id/iv_explore_right"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="20dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_right"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.media3.ui.PlayerControlView
+            android:id="@+id/layout_explore_player"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-12dp"
+            app:controller_layout_id="@layout/explore_player_controller"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:show_timeout="0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

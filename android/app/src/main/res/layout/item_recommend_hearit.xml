@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="item"
+            type="com.onair.hearit.domain.model.RecommendHearit" />
+
+        <variable
+            name="recommendClickListener"
+            type="com.onair.hearit.presentation.home.RecommendClickListener" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:background="@drawable/bg_gray1_stroke_radius_8dp"
+        android:onClick="@{() -> recommendClickListener.onClickRecommendHearit(item.id, item.title)}"
+        android:paddingVertical="32dp">
+
+        <TextView
+            android:id="@+id/tv_recommend_title"
+            style="@style/pretendard_main_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@{item.title}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="HTTP와 HTTPS의 차이 + 제목이 길어지면 어떻게 될까????" />
+
+        <TextView
+            style="@style/pretendard_body"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="28dp"
+            android:ellipsize="end"
+            android:maxLines="6"
+            android:text="@{item.desc}"
+            android:textColor="@color/hearit_gray2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_recommend_title"
+            tools:text="Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나...Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

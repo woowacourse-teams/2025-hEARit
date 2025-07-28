@@ -1,9 +1,13 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
-    <style name="Base.Theme.HEARit" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Base.Theme.HEARit" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:statusBarColor">@color/hearit_gray4</item>
+        <item name="android:navigationBarColor">@color/hearit_gray1</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="bottomSheetDialogTheme">@style/CustomBottomSheetDialogTheme</item>
     </style>
 
-    <style name="Theme.HEARit" parent="Base.Theme.HEARit" />
+    <style name="Theme.HEARit" parent="Base.Theme.HEARit">
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
 </resources>

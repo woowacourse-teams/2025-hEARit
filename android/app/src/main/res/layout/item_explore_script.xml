@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="subtitleLine"
+            type="com.onair.hearit.domain.model.ScriptLine" />
+
+        <variable
+            name="isHighlighted"
+            type="Boolean" />
+    </data>
+
+    <TextView
+        android:id="@+id/tv_explore_script_sentence"
+        style="@style/pretendard_body"
+        exploreHighlightedStyle="@{isHighlighted}"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        android:paddingVertical="16dp"
+        android:text="@{subtitleLine.text}"
+        tools:text="Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나" />
+</layout>

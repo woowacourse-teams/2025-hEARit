@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="item"
+            type="com.onair.hearit.domain.model.Bookmark" />
+
+        <variable
+            name="bookmarkListener"
+            type="com.onair.hearit.presentation.library.BookmarkClickListener" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="20dp"
+        android:onClick="@{() -> bookmarkListener.onClickBookmarkedHearit(item.hearitId)}">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_gray1_radius_8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_bookmark_title"
+            style="@style/pretendard_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_marginEnd="100dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@{item.title}"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tv_bookmark_time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="HTTP와 HTTPS의 차이" />
+
+        <TextView
+            android:id="@+id/tv_bookmark_time"
+            style="@style/pretendard_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintBottom_toBottomOf="@id/tv_bookmark_title"
+            app:layout_constraintEnd_toStartOf="@id/iv_bookmark_options"
+            app:layout_constraintTop_toTopOf="@id/tv_bookmark_title"
+            app:playTimeFormatted='@{item.playTime}'
+            tools:text="00:00" />
+
+        <ImageView
+            android:id="@+id/iv_bookmark_options"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@null"
+            android:onClick="@{() -> bookmarkListener.onClickOption()}"
+            android:src="@drawable/ic_option_vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_purple3_radius_left_8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.05" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

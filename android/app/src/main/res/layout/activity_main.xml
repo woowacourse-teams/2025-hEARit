@@ -1,19 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <data>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </data>
+
+    <androidx.drawerlayout.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="false">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fragment_container_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@color/hearit_black1"
+                app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.media3.ui.PlayerControlView
+                android:id="@+id/layout_bottom_player_controller"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:visibility="gone"
+                app:controller_layout_id="@layout/layout_bottom_player_controller"
+                app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
+                app:show_timeout="0" />
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/layout_bottom_navigation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/hearit_gray1"
+                android:paddingTop="5dp"
+                app:itemActiveIndicatorStyle="@null"
+                app:itemBackground="@color/hearit_gray1"
+                app:itemIconSize="20dp"
+                app:itemIconTint="@color/nav_item_color"
+                app:itemTextAppearanceActive="@style/BottomNavText"
+                app:itemTextAppearanceInactive="@style/BottomNavText"
+                app:itemTextColor="@color/nav_item_color"
+                app:labelVisibilityMode="labeled"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:menu="@menu/menu_navigation_item" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/custom_drawer"
+            android:layout_width="320dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:background="@color/hearit_gray1">
+
+            <include
+                android:id="@+id/layout_drawer"
+                layout="@layout/layout_drawer"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.drawerlayout.widget.DrawerLayout>
+</layout>
+
