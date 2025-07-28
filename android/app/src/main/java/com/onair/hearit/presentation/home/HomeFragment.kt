@@ -14,7 +14,6 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsConstants
 import com.onair.hearit.analytics.logScreenView
@@ -98,14 +97,6 @@ class HomeFragment :
         binding.ivProfile.setOnClickListener {
             (activity as? DrawerClickListener)?.openDrawer()
         }
-
-        val firebaseAnalytics = AnalyticsProvider.get()
-        firebaseAnalytics.logEvent(
-            "screen_view2",
-            Bundle().apply {
-                putString(FirebaseAnalytics.Param.SCREEN_NAME, "HomeScreen2")
-            },
-        )
 
 //        CrashlyticsProvider.get().log("some debug log")
 //        CrashlyticsProvider.get().recordException(IllegalStateException("Something went wrong"))

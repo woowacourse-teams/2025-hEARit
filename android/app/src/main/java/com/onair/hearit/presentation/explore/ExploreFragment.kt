@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.analytics.logEvent
@@ -32,6 +33,9 @@ class ExploreFragment :
     private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
     private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
+
+    var currentPosition = 0
+    var swipeCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -105,7 +109,8 @@ class ExploreFragment :
                     newState: Int,
                 ) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        val layoutManager = recyclerView.layoutManager ?: return
+                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                        val newPosition = layoutManager.findFirstVisibleItemPosition()
                         val snapView = snapHelper.findSnapView(layoutManager) ?: return
                         val position = layoutManager.getPosition(snapView)
                         val item = adapter.currentList.getOrNull(position) ?: return
@@ -113,6 +118,17 @@ class ExploreFragment :
                         player.setMediaItem(MediaItem.fromUri(item.audioUrl))
                         player.prepare()
                         player.play()
+
+                        swipeCount++
+                        currentPosition = newPosition
+                        AnalyticsProvider.get().logEvent(AnalyticsConstants.EVENT_EXPLORE_SWIPE) {
+                            param(AnalyticsConstants.PARAM_SWIPE_POSITION, currentPosition.toLong())
+                            param(AnalyticsConstants.PARAM_SWIPE_COUNT, swipeCount.toLong())
+                            param(
+                                AnalyticsConstants.PARAM_SCREEN_NAME,
+                                AnalyticsConstants.SCREEN_NAME_EXPLORE,
+                            )
+                        }
 
                         checkAndLoadNextPage(position)
                     }
