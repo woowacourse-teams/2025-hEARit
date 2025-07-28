@@ -12,14 +12,14 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityLoginBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.MainActivity
 
 class LoginActivity : AppCompatActivity() {
@@ -124,7 +124,8 @@ class LoginActivity : AppCompatActivity() {
     private fun handleKakaoLoginSuccess(token: OAuthToken) {
         UserApiClient.instance.me { user, _ ->
             if (user != null) {
-                Firebase.analytics.setUserId(user.id.toString())
+                AnalyticsProvider.get().setUserId(user.id.toString())
+                CrashlyticsProvider.get().setUserId(user.id.toString())
             }
         }
         viewModel.kakaoLogin(token.accessToken)
