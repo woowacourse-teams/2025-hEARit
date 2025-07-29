@@ -5,7 +5,5 @@ interface PlayerControllerView {
 
     fun hidePlayerControlView()
 
-    fun play(hearitId: Long)
-
     fun pause()
 }
