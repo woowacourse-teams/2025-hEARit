@@ -25,8 +25,8 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsConstants
-import com.onair.hearit.analytics.logScreenView
+import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import kotlinx.coroutines.launch
@@ -63,10 +63,10 @@ class PlayerDetailActivity : AppCompatActivity() {
         setupMediaController()
         setupClickListener()
 
-        val previousScreen = intent.getStringExtra(AnalyticsConstants.PARAM_SOURCE) ?: "unknown"
+        val previousScreen = intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: "unknown"
         AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsConstants.SCREEN_NAME_DETAIL,
-            screenClass = AnalyticsConstants.SCREEN_CLASS_DETAIL,
+            screenName = AnalyticsScreenInfo.Detail.NAME,
+            screenClass = AnalyticsScreenInfo.Detail.CLASS,
             previousScreen = previousScreen,
         )
     }

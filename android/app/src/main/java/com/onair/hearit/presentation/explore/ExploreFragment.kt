@@ -15,9 +15,9 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.analytics.logEvent
-import com.onair.hearit.analytics.AnalyticsConstants
-import com.onair.hearit.analytics.logScreenView
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -71,8 +71,8 @@ class ExploreFragment :
     override fun onResume() {
         super.onResume()
         AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsConstants.SCREEN_NAME_EXPLORE,
-            screenClass = AnalyticsConstants.SCREEN_CLASS_EXPLORE,
+            screenName = AnalyticsScreenInfo.Explore.NAME,
+            screenClass = AnalyticsScreenInfo.Explore.CLASS,
         )
         if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
             player.play()
@@ -122,14 +122,14 @@ class ExploreFragment :
 
                         swipeCount++
                         currentPosition = newPosition
-                        AnalyticsProvider.get().logEvent(AnalyticsConstants.EVENT_EXPLORE_SWIPE) {
-                            param(AnalyticsConstants.PARAM_SWIPE_POSITION, currentPosition.toLong())
-                            param(AnalyticsConstants.PARAM_SWIPE_COUNT, swipeCount.toLong())
-                            param(
-                                AnalyticsConstants.PARAM_SCREEN_NAME,
-                                AnalyticsConstants.SCREEN_NAME_EXPLORE,
-                            )
-                        }
+                        AnalyticsProvider.get().logEvent(
+                            AnalyticsEventNames.EXPLORE_SWIPE,
+                            mapOf(
+                                AnalyticsParamKeys.SWIPE_POSITION to currentPosition.toString(),
+                                AnalyticsParamKeys.SWIPE_COUNT to swipeCount.toString(),
+                                AnalyticsParamKeys.SCREEN_NAME to AnalyticsScreenInfo.Explore.NAME,
+                            ),
+                        )
 
                         checkAndLoadNextPage(position)
                     }
@@ -164,10 +164,14 @@ class ExploreFragment :
     }
 
     override fun onClickHearitInfo(hearitId: Long) {
-        AnalyticsProvider.get().logEvent(AnalyticsConstants.EVENT_EXPLORE_TO_DETAIL) {
-            param(AnalyticsConstants.PARAM_SOURCE, "explore")
-            param(AnalyticsConstants.PARAM_ITEM_ID, hearitId)
-        }
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.EXPLORE_TO_DETAIL,
+            mapOf(
+                AnalyticsParamKeys.SOURCE to "explore",
+                AnalyticsParamKeys.ITEM_ID to hearitId.toString(),
+            ),
+        )
+
         navigateToDetail(hearitId)
     }
 

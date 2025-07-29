@@ -15,8 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsConstants
-import com.onair.hearit.analytics.logScreenView
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.SearchInput
@@ -80,8 +79,8 @@ class HomeFragment :
         super.onResume()
         viewModel.getRecentHearit()
         AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsConstants.SCREEN_NAME_HOME,
-            screenClass = AnalyticsConstants.SCREEN_CLASS_HOME,
+            screenName = AnalyticsScreenInfo.Home.NAME,
+            screenClass = AnalyticsScreenInfo.Home.CLASS,
         )
     }
 
