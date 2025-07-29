@@ -32,12 +32,12 @@ import kotlinx.coroutines.launch
 class PlayerDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerDetailBinding
     private val adapter: PlayerDetailScriptAdapter by lazy { PlayerDetailScriptAdapter() }
-
     private var mediaController: MediaController? = null
 
     private val hearitId: Long by lazy {
         intent.getLongExtra(HEARIT_ID, -1)
     }
+
     private val viewModel: PlayerDetailViewModel by viewModels {
         PlayerDetailViewModelFactory(hearitId)
     }
@@ -57,8 +57,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         bindLayout()
         setupBackPressHandler()
         setupWindowInsets()
-        binding.rvScript.adapter = adapter
-
         setupRecyclerView()
         observeViewModel()
         setupMediaController()
@@ -74,6 +72,21 @@ class PlayerDetailActivity : AppCompatActivity() {
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
+    private fun bindLayout() {
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
+        binding.lifecycleOwner = this
+        binding.viewModel = viewModel
+    }
+
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {}
+            },
+        )
+    }
+
     @OptIn(UnstableApi::class)
     private fun setupMediaController() {
         val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
@@ -87,23 +100,28 @@ class PlayerDetailActivity : AppCompatActivity() {
 
             mediaController = controller
             binding.playerView.player = controller
+            binding.baseController.setPlayer(controller)
 
-            controller.addListener(
-                object : Player.Listener {
-                    override fun onTimelineChanged(
-                        timeline: Timeline,
-                        reason: Int,
-                    ) {
-                        if (timeline.windowCount > 0) {
-                            binding.baseController.setPlayer(controller)
+            val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
+            val isDifferentHearit = playingId != hearitId
+
+            if (isDifferentHearit) {
+                controller.addListener(
+                    object : Player.Listener {
+                        override fun onTimelineChanged(
+                            timeline: Timeline,
+                            reason: Int,
+                        ) {
+                            if (timeline.windowCount > 0) {
+                                controller.removeListener(this)
+                                controller.play()
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
-            controller.prepare()
-            controller.play()
-
+            controller.playWhenReady = true
             startScriptSync(controller)
         }
     }
@@ -116,7 +134,6 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = PlayerDetailScriptAdapter()
         binding.rvScript.adapter = adapter
     }
 
@@ -125,10 +142,13 @@ class PlayerDetailActivity : AppCompatActivity() {
             binding.hearit = hearit
             adapter.submitList(hearit.script)
 
-            startPlaybackService(
-                audioUrl = hearit.audioUrl,
-                title = hearit.title,
-            )
+            val currentlyPlayingId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
+            if (currentlyPlayingId != hearit.id) {
+                startPlaybackService(
+                    audioUrl = hearit.audioUrl,
+                    title = hearit.title,
+                )
+            }
         }
 
         viewModel.toastMessage.observe(this) { msgResId ->
@@ -167,10 +187,12 @@ class PlayerDetailActivity : AppCompatActivity() {
         title: String,
     ) {
         val serviceIntent =
-            Intent(this, PlaybackService::class.java).apply {
-                putExtra("AUDIO_URL", audioUrl)
-                putExtra("TITLE", title)
-            }
+            PlaybackService.newIntent(
+                context = this,
+                audioUrl = audioUrl,
+                title = title,
+                hearitId = hearitId,
+            )
         startService(serviceIntent)
     }
 
