@@ -67,9 +67,9 @@
             <ImageButton
                 android:id="@+id/exo_rew"
                 style="@style/ExoMediaButton.Rewind"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="20dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="24dp"
                 android:contentDescription="@null"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_rewind"
@@ -79,8 +79,8 @@
 
             <ImageButton
                 android:id="@+id/exo_play"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="@null"
                 android:padding="4dp"
@@ -94,9 +94,9 @@
             <ImageButton
                 android:id="@+id/exo_ffwd"
                 style="@style/ExoMediaButton.FastForward"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="20dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="24dp"
                 android:contentDescription="@null"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_fastforward"
