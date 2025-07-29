@@ -86,4 +86,8 @@
     <string name="login_with_hearit">회원가입 없이 <font color="#B677F3">히어릿</font>을 이용하고 싶어요</string>
     <string name="login_toast_kakao_login_fail">카카오 로그인에 실패했습니다.</string>
     <string name="login_toast_save_token_fail">토큰 저장에 실패했습니다.</string>
+
+    <!-- MainActivity-->
+    <string name="main_toast_recent_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
+    <string name="main_toast_load_player_hearit">플레이어 설정에 실패했습니다.</string>
 </resources>
