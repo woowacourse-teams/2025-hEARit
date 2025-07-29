@@ -34,7 +34,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
     void cannotAccessProtectedApiWithoutToken() {
         RestAssured.given().log().all()
                 .when()
-                .get("/api/v1/bookmarks") // 인증 필요한 경로
+                .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED)
                 .body("detail", equalTo("유효하지 않은 토큰입니다."));
@@ -46,7 +46,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer invalid-token")
                 .when()
-                .get("/api/v1/bookmarks") // 인증 필요한 경로
+                .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED)
                 .body("detail", equalTo("유효하지 않은 토큰입니다."));
@@ -57,7 +57,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
     void rejectIfNoAuthHeader() {
         RestAssured.given().log().all()
                 .when()
-                .get("/api/v1/bookmarks") // 인증 필요한 경로
+                .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED)
                 .body("detail", equalTo("유효하지 않은 토큰입니다."));
@@ -72,7 +72,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .get("/api/v1/bookmarks") // 인증 필요한 경로
+                .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(HttpStatus.OK);
     }
@@ -83,7 +83,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer invalid-token")
                 .when()
-                .get("/api/v1/bookmarks") // 인증 필요한 경로
+                .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(401)
                 .header("Content-Type", containsString("application/problem+json"))
