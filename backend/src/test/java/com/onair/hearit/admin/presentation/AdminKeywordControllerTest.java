@@ -1,6 +1,7 @@
 package com.onair.hearit.admin.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
 import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
@@ -36,9 +37,11 @@ class AdminKeywordControllerTest extends IntegrationTest {
                 .extract().as(new TypeRef<>() {});
 
         // then
-        assertThat(response.page()).isEqualTo(0);
-        assertThat(response.size()).isEqualTo(10);
-        assertThat(response.totalElements()).isEqualTo(20);
+        assertAll(() -> {
+            assertThat(response.page()).isEqualTo(0);
+            assertThat(response.size()).isEqualTo(10);
+            assertThat(response.totalElements()).isEqualTo(20);
+        });
     }
 
     @Test
