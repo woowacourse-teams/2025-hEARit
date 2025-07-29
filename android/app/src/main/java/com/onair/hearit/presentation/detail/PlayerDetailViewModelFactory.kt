@@ -37,7 +37,7 @@ class PlayerDetailViewModelFactory(
             MediaFileRepositoryImpl(mediaFileRemoteDataSource, crashlyticsLogger)
 
         val keywordRemoteDataSource = KeywordRemoteDataSourceImpl(NetworkProvider.keywordService)
-        val keywordRepository = KeywordRepositoryImpl(keywordRemoteDataSource)
+        val keywordRepository = KeywordRepositoryImpl(keywordRemoteDataSource, crashlyticsLogger)
 
         val getHearitUseCase = GetHearitUseCase(hearitRepository, mediaFileRepository)
 
