@@ -36,9 +36,8 @@ public class AdminCategoryService {
     }
 
     @Transactional
-    public CategoryInfoResponse addCategory(CategoryCreateRequest request) {
+    public void addCategory(CategoryCreateRequest request) {
         Category category = new Category(request.name(), request.colorCode());
-        Category saved = categoryRepository.save(category);
-        return CategoryInfoResponse.from(saved);
+        categoryRepository.save(category);
     }
 }

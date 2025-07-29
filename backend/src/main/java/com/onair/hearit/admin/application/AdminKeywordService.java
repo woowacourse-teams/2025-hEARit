@@ -36,9 +36,8 @@ public class AdminKeywordService {
     }
 
     @Transactional
-    public KeywordInfoResponse addKeyword(KeywordCreateRequest request) {
+    public void addKeyword(KeywordCreateRequest request) {
         Keyword keyword = new Keyword(request.name());
-        Keyword saved = keywordRepository.save(keyword);
-        return KeywordInfoResponse.from(saved);
+        keywordRepository.save(keyword);
     }
 }
