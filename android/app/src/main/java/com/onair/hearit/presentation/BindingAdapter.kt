@@ -46,15 +46,16 @@ fun setHighlightedStyle(
     isHighlighted: Boolean,
 ) {
     val context = textView.context
-    val textColor = ContextCompat.getColor(context, R.color.hearit_gray4)
+    val highlightTextColor = ContextCompat.getColor(context, R.color.hearit_gray4)
+    val normalTextColor = ContextCompat.getColor(context, R.color.hearit_gray2)
     val transparent = ContextCompat.getColor(context, android.R.color.transparent)
 
-    textView.setTextColor(textColor)
+    textView.setTextColor(if (isHighlighted) highlightTextColor else normalTextColor)
     textView.setBackgroundColor(transparent)
 
     textView.setTextSize(
         TypedValue.COMPLEX_UNIT_SP,
-        if (isHighlighted) 18f else 16f,
+        if (isHighlighted) 16f else 14f,
     )
 
     val fontRes =
