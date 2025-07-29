@@ -32,7 +32,7 @@ public class AdminSecurityConfig {
                         .usernameParameter("loginId")
                         .passwordParameter("password")
                         .loginProcessingUrl("/admin/login")
-                        .defaultSuccessUrl("/admin")
+                        .defaultSuccessUrl("/admin", true)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")
