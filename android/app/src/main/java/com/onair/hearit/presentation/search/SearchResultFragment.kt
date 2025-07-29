@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentSearchResultBinding
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
@@ -31,7 +32,7 @@ class SearchResultFragment :
     }
 
     private val viewModel: SearchResultViewModel by viewModels {
-        SearchResultViewModelFactory(input)
+        SearchResultViewModelFactory(input, CrashlyticsProvider.get())
     }
     private val adapter by lazy { SearchedHearitAdapter(this) }
 
