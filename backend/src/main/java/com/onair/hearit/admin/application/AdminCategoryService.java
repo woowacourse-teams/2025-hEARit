@@ -6,7 +6,6 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,7 +34,6 @@ public class AdminCategoryService {
                 .toList();
     }
 
-    @Transactional
     public void addCategory(CategoryCreateRequest request) {
         Category category = new Category(request.name(), request.colorCode());
         categoryRepository.save(category);

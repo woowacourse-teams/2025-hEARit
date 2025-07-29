@@ -6,7 +6,6 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.KeywordRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,7 +34,6 @@ public class AdminKeywordService {
                 .toList();
     }
 
-    @Transactional
     public void addKeyword(KeywordCreateRequest request) {
         Keyword keyword = new Keyword(request.name());
         keywordRepository.save(keyword);
