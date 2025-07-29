@@ -2,8 +2,8 @@ package com.onair.hearit.auth.config;
 
 import static org.hamcrest.Matchers.containsString;
 
-import com.onair.hearit.IntegrationTest;
 import com.onair.hearit.admin.domain.Admin;
+import com.onair.hearit.fixture.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.jsoup.Jsoup;

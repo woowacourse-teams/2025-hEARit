@@ -3,10 +3,10 @@ package com.onair.hearit.auth.config;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
-import com.onair.TestFixture;
-import com.onair.hearit.IntegrationTest;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
