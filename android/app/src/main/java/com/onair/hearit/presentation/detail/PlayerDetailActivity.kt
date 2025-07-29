@@ -202,7 +202,7 @@ class PlayerDetailActivity : AppCompatActivity() {
             FlexboxLayoutManager(this).apply {
                 flexDirection = FlexDirection.ROW
                 flexWrap = FlexWrap.WRAP
-                justifyContent = JustifyContent.CENTER
+                justifyContent = JustifyContent.FLEX_START
             }
 
         binding.layoutSeeMore.rvKeyword.layoutManager = layoutManager
