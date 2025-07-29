@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>카테고리 관리</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 <div class="container mt-4">
@@ -50,12 +52,12 @@
                     <form id="create-category-form">
                         <div class="mb-3">
                             <label for="category-name" class="form-label">카테고리 이름</label>
-                            <input type="text" class="form-control" id="category-name" required>
+                            <input type="text" class="form-control" id="category-name" name="name" required>
                         </div>
                         <div class="mb-3">
                             <label for="category-color" class="form-label">컬러 코드 (e.g., #RRGGBBAA)</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="category-color" value="#9900A3E4" required>
+                                <input type="text" class="form-control" id="category-color" name="colorCode" value="#9900A3E4" required>
                                 <span class="input-group-text p-2">
                                     <span id="color-preview"
                                           style="display: inline-block; width: 1.5rem; height: 1.5rem; border: 1px solid #ccc; border-radius: .25rem;"></span>
@@ -86,10 +88,10 @@
         return (yiq >= 128) ? '#000' : '#FFF';
     }
 
+
     // Pagination variables
     let currentPage = 0;
     const pageSize = 15;
-
     async function fetchCategories(page = 0, size = pageSize) {
         try {
             const response = await fetch(`/api/v1/admin/categories?page=${page}&size=${size}`);
@@ -136,36 +138,9 @@
         nextBtn.disabled = pageNumber >= totalPages - 1;
     }
 
-    async function createCategory(name, colorCode) {
-        try {
-            const response = await fetch('/api/v1/admin/categories', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({name: name, colorCode: colorCode})
-            });
-
-            if (response.ok) {
-                alert('카테고리가 성공적으로 추가되었습니다.');
-
-                const colorInput = document.getElementById('category-color');
-                const colorPreview = document.getElementById('color-preview');
-
-                document.getElementById('create-category-form').reset();
-
-                // 현재 input 값을 읽어서 preview 색상 반영
-                const currentHex = colorInput.value;
-                const rgba = hex8ToRgba(currentHex);
-                colorPreview.style.backgroundColor = rgba || '#ffffff';
-
-                await fetchCategories();
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '카테고리 추가에 실패했습니다.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert(error.message);
-        }
+    function getCookie(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? decodeURIComponent(match[2]) : null;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -199,15 +174,6 @@
 
         updateColorPreview(); // 초기 색상 설정
         colorInput.addEventListener('input', updateColorPreview);
-
-        document.getElementById('create-category-form').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const categoryName = document.getElementById('category-name').value.trim();
-            const categoryColor = document.getElementById('category-color').value;
-            if (categoryName && categoryColor) {
-                createCategory(categoryName, categoryColor);
-            }
-        });
     });
 
     function hex8ToRgba(hex) {
@@ -220,6 +186,39 @@
 
         return `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})`;
     }
+
+    // 카테고리 추가 폼 JS: fetch + CSRF via header
+    document.getElementById('create-category-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        try {
+            const response = await fetch('/api/v1/admin/categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                alert('카테고리가 성공적으로 추가되었습니다.');
+                form.reset();
+                fetchCategories(currentPage, pageSize);
+            } else {
+                const errorData = await response.json();
+                alert('추가 실패: ' + (errorData.message || '서버 오류'));
+            }
+        } catch (error) {
+            console.error('Error uploading category:', error);
+            alert('카테고리 추가 중 오류가 발생했습니다.');
+        }
+    });
 </script>
 </body>
 </html> 

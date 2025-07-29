@@ -8,6 +8,8 @@
     <style>
         #keyword-add-form-section { display: none; }
     </style>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 <div class="container mt-4">
@@ -25,7 +27,7 @@
         <div id="keyword-add-form-section" class="card-body">
             <form id="keyword-add-form" class="row g-2 align-items-center">
                 <div class="col-auto">
-                    <input type="text" class="form-control" id="keyword-name" placeholder="새 키워드명" required>
+                    <input type="text" class="form-control" id="keyword-name" name="name" placeholder="새 키워드명" required>
                 </div>
                 <div class="col-auto">
                     <button type="submit" class="btn btn-success">추가</button>
@@ -88,26 +90,6 @@
         document.getElementById('next-page').disabled = response.isLast;
     }
 
-    async function addKeyword(name) {
-        try {
-            const response = await fetch('/api/v1/admin/keywords', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name })
-            });
-            if (response.ok) {
-                alert('키워드가 성공적으로 추가되었습니다.');
-                document.getElementById('keyword-add-form').reset();
-                await fetchKeywordsForManage(currentPage, pageSize);
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '키워드 추가에 실패했습니다.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert(error.message);
-        }
-    }
 
     document.addEventListener('DOMContentLoaded', () => {
         fetchKeywordsForManage(0, pageSize);
@@ -123,10 +105,36 @@
             keywordAddToggleIcon.classList.toggle('bi-chevron-down', !isHidden);
         });
 
-        document.getElementById('keyword-add-form').addEventListener('submit', (e) => {
+        document.getElementById('keyword-add-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('keyword-name').value.trim();
-            if (name) addKeyword(name);
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            try {
+                const response = await fetch('/api/v1/admin/keywords', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    alert('키워드가 성공적으로 추가되었습니다.');
+                    form.reset();
+                    await fetchKeywordsForManage(currentPage, pageSize);
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '키워드 추가에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+            }
         });
 
         // 페이지 버튼 이벤트

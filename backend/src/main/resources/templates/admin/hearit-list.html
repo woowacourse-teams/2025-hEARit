@@ -9,6 +9,8 @@
         #upload-section { display: none; }
         #keyword-section { display: none; }
     </style>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 <div class="container-fluid mt-4">
@@ -43,7 +45,7 @@
                 <div class="col-md-3 mb-3"><label for="categoryId" class="form-label">카테고리</label><select id="categoryId" name="categoryId" class="form-select" required><option value="" disabled selected>선택...</option></select></div>
             </div>
             <div class="mb-3"><label class="form-label d-block">키워드</label><div id="keyword-checkboxes"></div></div>
-            <button type="button" class="btn btn-success" onclick="uploadHearit()">등록</button>
+            <button type="submit" class="btn btn-success">등록</button>
             <button type="button" class="btn btn-secondary" id="cancel-upload">취소</button>
         </form>
     </div>
@@ -220,47 +222,6 @@
         paginationControls.appendChild(createPageItem('다음', currentPage + 1, pagedData.isLast));
     }
 
-    async function uploadHearit() {
-        const form = document.getElementById('upload-form');
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        data.keywordIds = formData.getAll('keywordIds').map(id => parseInt(id, 10));
-        if (!data.categoryId) { alert('카테고리를 선택해주세요.'); return; }
-        data.playTime = parseInt(data.playTime, 10);
-        data.categoryId = parseInt(data.categoryId, 10);
-        try {
-            const response = await fetch('/api/v1/admin/hearits', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            if (response.ok) {
-                alert('히어릿이 성공적으로 업로드되었습니다.');
-                form.reset();
-                document.getElementById('upload-section').style.display = 'none';
-                fetchHearits(0);
-            } else {
-                const errorData = await response.json();
-                alert('업로드 실패: ' + (errorData.message || '서버 오류'));
-            }
-        } catch (error) {
-            console.error('Error uploading hearit:', error);
-            alert('업로드 중 오류가 발생했습니다.');
-        }
-    }
-
-    async function deleteHearit(hearitId) {
-        if (!confirm(`정말로 ID ${hearitId} 히어릿을 삭제하시겠습니까?`)) return;
-        try {
-            const response = await fetch(`/api/v1/admin/hearits/${hearitId}`, { method: 'DELETE' });
-            if (response.ok) {
-                alert('성공적으로 삭제되었습니다.');
-                fetchHearits(currentPage);
-            } else {
-                throw new Error('삭제에 실패했습니다.');
-            }
-        } catch (error) { console.error('Error deleting hearit:', error); alert(error.message); }
-    }
 
     // Start editing a hearit
     function editHearit(hearitId) {
@@ -290,9 +251,14 @@
             categoryId
         };
         try {
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
             const response = await fetch(`/api/v1/admin/hearits/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
                 body: JSON.stringify(updated)
             });
             if (response.ok) {
@@ -336,6 +302,43 @@
 
         document.getElementById('cancel-upload').addEventListener('click', () => {
             setFormState(false);
+        });
+
+        // Intercept upload form submission and send via fetch
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            data.keywordIds = formData.getAll('keywordIds').map(id => parseInt(id, 10));
+            data.playTime = parseInt(data.playTime, 10);
+            data.categoryId = parseInt(data.categoryId, 10);
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            try {
+                const response = await fetch('/api/v1/admin/hearits', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    alert('히어릿이 성공적으로 업로드되었습니다.');
+                    form.reset();
+                    document.getElementById('upload-section').style.display = 'none';
+                    fetchHearits(0);
+                } else {
+                    const errorData = await response.json();
+                    alert('업로드 실패: ' + (errorData.message || '서버 오류'));
+                }
+            } catch (error) {
+                console.error('Error uploading hearit:', error);
+                alert('업로드 중 오류가 발생했습니다.');
+            }
         });
     });
 </script>
