@@ -13,6 +13,13 @@
                     <a class="nav-link" th:href="@{/admin/keywords}">Keywords</a>
                 </li>
             </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <form th:action="@{/admin/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-light btn-sm">로그아웃</button>
+                    </form>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>

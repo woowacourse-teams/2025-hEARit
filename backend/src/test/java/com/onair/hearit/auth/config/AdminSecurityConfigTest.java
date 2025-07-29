@@ -59,7 +59,7 @@ class AdminSecurityConfigTest extends IntegrationTest {
 
     @Test
     @DisplayName("인증된 사용자 어드민 페이지 접근 허용된다.")
-    void canAccessAdminPage_when_unauthenticated() {
+    void canAccessAdminPage_when_authenticated() {
         // given
         dbHelper.insertAdmin(new Admin("admin", "1234", "관리자"));
         CsrfSession csrfSession = extractCsrfAndSession();
