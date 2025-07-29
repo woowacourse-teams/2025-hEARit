@@ -31,6 +31,7 @@ class MainActivity :
     private lateinit var player: ExoPlayer
     private var backPressedTime: Long = 0L
     private val backPressInterval = 1000L
+    private var currentSelectedItemId: Int = R.id.nav_home
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,6 +99,11 @@ class MainActivity :
     private fun setupNavigation() {
         binding.layoutBottomNavigation.itemIconTintList = null
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
+            if (item.itemId == currentSelectedItemId) {
+                return@setOnItemSelectedListener true
+            }
+            currentSelectedItemId = item.itemId
+
             when (item.itemId) {
                 R.id.nav_home -> {
                     showFragment(HomeFragment())

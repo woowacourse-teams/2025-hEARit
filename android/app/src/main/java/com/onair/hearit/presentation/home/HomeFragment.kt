@@ -2,7 +2,6 @@ package com.onair.hearit.presentation.home
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
@@ -33,7 +35,12 @@ class HomeFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory(requireContext()) }
+    private val viewModel: HomeViewModel by viewModels {
+        HomeViewModelFactory(
+            requireContext(),
+            CrashlyticsProvider.get(),
+        )
+    }
     private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
     private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
 
@@ -77,6 +84,10 @@ class HomeFragment :
     override fun onResume() {
         super.onResume()
         viewModel.getRecentHearit()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsScreenInfo.Home.NAME,
+            screenClass = AnalyticsScreenInfo.Home.CLASS,
+        )
     }
 
     private fun setupWindowInsets() {
@@ -91,6 +102,9 @@ class HomeFragment :
         binding.ivProfile.setOnClickListener {
             (activity as? DrawerClickListener)?.openDrawer()
         }
+
+//        CrashlyticsProvider.get().log("some debug log")
+//        CrashlyticsProvider.get().recordException(IllegalStateException("Something went wrong"))
 
         binding.ivHomeAllCategory.setOnClickListener {
             parentFragmentManager
@@ -155,7 +169,6 @@ class HomeFragment :
     private fun observeViewModel() {
         viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
             binding.userInfo = userInfo
-            Log.d("meeple_log", "$userInfo")
         }
 
         viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->

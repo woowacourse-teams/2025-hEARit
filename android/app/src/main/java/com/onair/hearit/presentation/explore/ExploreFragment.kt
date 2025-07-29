@@ -12,9 +12,15 @@ import androidx.fragment.app.viewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
 class ExploreFragment :
@@ -23,11 +29,18 @@ class ExploreFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: ExploreViewModel by viewModels { ExploreViewModelFactory() }
+    private val viewModel: ExploreViewModel by viewModels {
+        ExploreViewModelFactory(
+            CrashlyticsProvider.get(),
+        )
+    }
 
     private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
     private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
+
+    var currentPosition = 0
+    var swipeCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,6 +75,10 @@ class ExploreFragment :
 
     override fun onResume() {
         super.onResume()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsScreenInfo.Explore.NAME,
+            screenClass = AnalyticsScreenInfo.Explore.CLASS,
+        )
         if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
             player.play()
         }
@@ -97,7 +114,9 @@ class ExploreFragment :
                     newState: Int,
                 ) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        val layoutManager = recyclerView.layoutManager ?: return
+                        val layoutManager =
+                            recyclerView.layoutManager as? LinearLayoutManager ?: return
+                        val newPosition = layoutManager.findFirstVisibleItemPosition()
                         val snapView = snapHelper.findSnapView(layoutManager) ?: return
                         val position = layoutManager.getPosition(snapView)
                         val item = adapter.currentList.getOrNull(position) ?: return
@@ -105,6 +124,17 @@ class ExploreFragment :
                         player.setMediaItem(MediaItem.fromUri(item.audioUrl))
                         player.prepare()
                         player.play()
+
+                        swipeCount++
+                        currentPosition = newPosition
+                        AnalyticsProvider.get().logEvent(
+                            AnalyticsEventNames.EXPLORE_SWIPE,
+                            mapOf(
+                                AnalyticsParamKeys.SWIPE_POSITION to currentPosition.toString(),
+                                AnalyticsParamKeys.SWIPE_COUNT to swipeCount.toString(),
+                                AnalyticsParamKeys.SCREEN_NAME to AnalyticsScreenInfo.Explore.NAME,
+                            ),
+                        )
 
                         checkAndLoadNextPage(position)
                     }
@@ -133,9 +163,21 @@ class ExploreFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onClickHearitInfo(hearitId: Long) {
+    private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         startActivity(intent)
+    }
+
+    override fun onClickHearitInfo(hearitId: Long) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.EXPLORE_TO_DETAIL,
+            mapOf(
+                AnalyticsParamKeys.SOURCE to "explore",
+                AnalyticsParamKeys.ITEM_ID to hearitId.toString(),
+            ),
+        )
+
+        navigateToDetail(hearitId)
     }
 
     override fun onClickBookmark(hearitId: Long) {

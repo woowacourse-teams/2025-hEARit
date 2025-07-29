@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentCategoryBinding
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.MainActivity
@@ -22,7 +23,12 @@ class CategoryFragment :
     private var _binding: FragmentCategoryBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory(requireContext()) }
+    private val viewModel: HomeViewModel by viewModels {
+        HomeViewModelFactory(
+            requireContext(),
+            CrashlyticsProvider.get(),
+        )
+    }
     private val categoryAdapter = CategoryAdapter(this)
 
     override fun onCreateView(
@@ -69,10 +75,10 @@ class CategoryFragment :
     }
 
     override fun onCategoryClick(
-        categoryId: Long,
-        categoryName: String,
+        id: Long,
+        name: String,
     ) {
-        navigateToSearchResult(SearchInput.Category(categoryId, categoryName))
+        navigateToSearchResult(SearchInput.Category(id, name))
     }
 
     private fun setupRecyclerView() {

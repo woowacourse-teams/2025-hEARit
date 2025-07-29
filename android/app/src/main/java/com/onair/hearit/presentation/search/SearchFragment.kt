@@ -18,7 +18,12 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentSearchBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.home.CategoryAdapter
@@ -32,7 +37,9 @@ class SearchFragment :
     private val binding get() = _binding!!
     private val keywordAdapter by lazy { KeywordAdapter(this) }
     private val categoryAdapter by lazy { CategoryAdapter(this) }
-    private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory() }
+    private val viewModel: SearchViewModel by viewModels {
+        SearchViewModelFactory(CrashlyticsProvider.get())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,6 +68,14 @@ class SearchFragment :
             hideKeyboard()
             false
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsScreenInfo.Search.NAME,
+            screenClass = AnalyticsScreenInfo.Search.CLASS,
+        )
     }
 
     private fun setupWindowInsets() {
@@ -161,15 +176,31 @@ class SearchFragment :
     }
 
     override fun onKeywordClick(keyword: String) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.SEARCH_KEYWORD_SELECTED,
+            mapOf(
+                AnalyticsParamKeys.KEYWORD_NAME to keyword,
+                AnalyticsParamKeys.SCREEN_NAME to AnalyticsScreenInfo.Search.NAME,
+            ),
+        )
+
         navigateToSearchResult(SearchInput.Keyword(keyword))
         hideKeyboard()
     }
 
     override fun onCategoryClick(
-        categoryId: Long,
-        categoryName: String,
+        id: Long,
+        name: String,
     ) {
-        navigateToSearchResult(SearchInput.Category(categoryId, categoryName))
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
+            mapOf(
+                AnalyticsParamKeys.CATEGORY_NAME to name,
+                AnalyticsParamKeys.SCREEN_NAME to AnalyticsScreenInfo.Search.NAME,
+            ),
+        )
+
+        navigateToSearchResult(SearchInput.Category(id, name))
         hideKeyboard()
     }
 }

@@ -13,7 +13,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 
@@ -24,7 +27,11 @@ class LibraryFragment :
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
+    private val viewModel: LibraryViewModel by viewModels {
+        LibraryViewModelFactory(
+            CrashlyticsProvider.get(),
+        )
+    }
     private val adapter by lazy { BookmarkAdapter(this) }
 
     private val playerDetailLauncher =
@@ -53,6 +60,14 @@ class LibraryFragment :
 
         setupWindowInsets()
         observeViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsScreenInfo.Library.NAME,
+            screenClass = AnalyticsScreenInfo.Library.CLASS,
+        )
     }
 
     private fun setupWindowInsets() {

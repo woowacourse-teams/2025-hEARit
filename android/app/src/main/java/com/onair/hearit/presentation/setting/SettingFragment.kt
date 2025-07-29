@@ -10,12 +10,18 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.onair.hearit.databinding.FragmentSettingBinding
+import com.onair.hearit.di.CrashlyticsProvider
 
 class SettingFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SettingViewModel by viewModels { SettingViewModelFactory(requireContext()) }
+    private val viewModel: SettingViewModel by viewModels {
+        SettingViewModelFactory(
+            requireContext(),
+            CrashlyticsProvider.get(),
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
