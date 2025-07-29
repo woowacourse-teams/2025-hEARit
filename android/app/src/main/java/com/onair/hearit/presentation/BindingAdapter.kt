@@ -68,17 +68,6 @@ fun setHighlightedStyle(
     textView.typeface = ResourcesCompat.getFont(context, fontRes)
 }
 
-@BindingAdapter("formattedMillisToTime")
-fun setFormattedMillisToTime(
-    textView: TextView,
-    millis: Long,
-) {
-    val totalSeconds = millis / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    textView.text = String.format("%02d:%02d", minutes, seconds)
-}
-
 @BindingAdapter("formattedDate")
 fun setFormattedDate(
     textView: TextView,
