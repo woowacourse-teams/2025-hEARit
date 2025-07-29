@@ -4,6 +4,7 @@ import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.ScriptLine
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.ShortsHearit
 import com.onair.hearit.domain.model.SingleHearit
 
