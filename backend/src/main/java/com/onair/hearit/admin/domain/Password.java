@@ -19,6 +19,5 @@ public class Password {
 
     public Password(String rawPassword) {
         this.value = encoder.encode(rawPassword);
-        System.out.println("value = " + value);
     }
 }
