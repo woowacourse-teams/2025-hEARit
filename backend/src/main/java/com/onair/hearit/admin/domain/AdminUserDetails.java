@@ -19,7 +19,7 @@ public class AdminUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return admin.getNickname();
+        return admin.getLoginId();
     }
 
     @Override
