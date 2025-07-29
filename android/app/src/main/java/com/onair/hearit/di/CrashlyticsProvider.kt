@@ -1,13 +1,16 @@
 package com.onair.hearit.di
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.onair.hearit.analytics.CrashlyticsLogger
+import com.onair.hearit.analytics.FirebaseCrashlyticsLogger
+import kotlin.math.log
 
 object CrashlyticsProvider {
-    private lateinit var crashlytics: FirebaseCrashlytics
+    private var logger: CrashlyticsLogger? = null
 
     fun init() {
-        crashlytics = FirebaseCrashlytics.getInstance()
+        logger = FirebaseCrashlyticsLogger(FirebaseCrashlytics.getInstance())
     }
 
-    fun get(): FirebaseCrashlytics = crashlytics
+    fun get(): CrashlyticsLogger = logger ?: throw IllegalStateException("CrashlyticsProvider not initialized")
 }

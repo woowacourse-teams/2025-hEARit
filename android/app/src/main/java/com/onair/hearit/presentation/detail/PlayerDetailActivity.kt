@@ -29,6 +29,7 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
@@ -41,7 +42,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         intent.getLongExtra(HEARIT_ID, -1)
     }
     private val viewModel: PlayerDetailViewModel by viewModels {
-        PlayerDetailViewModelFactory(hearitId)
+        PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
     }
 
     private val handler = Handler(Looper.getMainLooper())

@@ -24,7 +24,12 @@ import com.onair.hearit.presentation.MainActivity
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
-    private val factory by lazy { LoginViewModelFactory(applicationContext) }
+    private val factory by lazy {
+        LoginViewModelFactory(
+            applicationContext,
+            CrashlyticsProvider.get(),
+        )
+    }
     private val viewModel by lazy { ViewModelProvider(this, factory)[LoginViewModel::class.java] }
 
     private var isKakaoTalkLogin = true

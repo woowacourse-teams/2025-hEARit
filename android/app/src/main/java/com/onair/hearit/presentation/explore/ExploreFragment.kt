@@ -20,6 +20,7 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
 class ExploreFragment :
@@ -28,7 +29,11 @@ class ExploreFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: ExploreViewModel by viewModels { ExploreViewModelFactory() }
+    private val viewModel: ExploreViewModel by viewModels {
+        ExploreViewModelFactory(
+            CrashlyticsProvider.get(),
+        )
+    }
 
     private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
     private val adapter by lazy { ShortsAdapter(player, this) }

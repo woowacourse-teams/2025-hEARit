@@ -18,6 +18,7 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
@@ -34,7 +35,12 @@ class HomeFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory(requireContext()) }
+    private val viewModel: HomeViewModel by viewModels {
+        HomeViewModelFactory(
+            requireContext(),
+            CrashlyticsProvider.get(),
+        )
+    }
     private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
     private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
 

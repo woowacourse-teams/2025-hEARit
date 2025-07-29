@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 
@@ -26,7 +27,11 @@ class LibraryFragment :
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
+    private val viewModel: LibraryViewModel by viewModels {
+        LibraryViewModelFactory(
+            CrashlyticsProvider.get(),
+        )
+    }
     private val adapter by lazy { BookmarkAdapter(this) }
 
     private val playerDetailLauncher =
