@@ -21,7 +21,7 @@
             style="@style/pretendard_sub_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="출처"
+            android:text="@string/player_detail_source_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -41,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:text="요약"
+            android:text="@string/player_detail_summary_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_see_more_source_body" />
 
@@ -63,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:text="키워드"
+            android:text="@string/player_detail_keyword_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_see_more_summary_body" />
 
