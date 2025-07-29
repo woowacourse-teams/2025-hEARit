@@ -41,11 +41,13 @@
             <ImageView
                 android:id="@+id/iv_player_detail_thumbnail"
                 android:layout_width="match_parent"
-                android:layout_height="372dp"
+                android:layout_height="0dp"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_gradient_radius_8dp"
                 android:contentDescription="@null"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/ib_player_detail_back" />
 
