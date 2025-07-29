@@ -75,10 +75,10 @@ class CategoryFragment :
     }
 
     override fun onCategoryClick(
-        categoryId: Long,
-        categoryName: String,
+        id: Long,
+        name: String,
     ) {
-        navigateToSearchResult(SearchInput.Category(categoryId, categoryName))
+        navigateToSearchResult(SearchInput.Category(id, name))
     }
 
     private fun setupRecyclerView() {
