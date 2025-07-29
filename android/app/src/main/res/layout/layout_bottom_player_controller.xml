@@ -1,61 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/controller_view"
-    android:layout_width="match_parent"
-    android:layout_height="64dp"
-    android:background="@drawable/bg_gray1_radius_top_8dp">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:id="@+id/tv_bottom_player_title"
-        style="@style/pretendard_bottom_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="8dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="HTTP와 HTTPS의 차이"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/tv_bottom_player_time"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <data>
 
-    <TextView
-        android:id="@+id/tv_bottom_player_time"
-        style="@style/pretendard_body"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="10:00"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/exo_play_pause"
-        app:layout_constraintStart_toEndOf="@id/tv_bottom_player_title"
-        app:layout_constraintTop_toTopOf="parent" />
+    </data>
 
-    <ImageButton
-        android:id="@+id/exo_play_pause"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="4dp"
-        android:background="@color/transparent"
-        android:contentDescription="@null"
-        android:src="@drawable/ic_bottom_play"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.media3.ui.DefaultTimeBar
-        android:id="@+id/exo_progress"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/controller_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="-12dp"
-        android:fadeScrollbars="false"
-        android:paddingStart="-10dp"
-        android:paddingEnd="-10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:played_color="@color/hearit_purple3"
-        app:scrubber_color="@android:color/transparent"
-        app:unplayed_color="@color/hearit_gray4" />
+        android:layout_height="64dp"
+        android:background="@drawable/bg_gray1_radius_top_8dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/tv_bottom_player_title"
+            style="@style/pretendard_bottom_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/exo_duration"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="HTTP와 HTTPS의 차이" />
+
+        <TextView
+            android:id="@+id/exo_duration"
+            style="@style/pretendard_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/exo_play"
+            app:layout_constraintStart_toEndOf="@id/tv_bottom_player_title"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="10:00" />
+
+        <ImageButton
+            android:id="@+id/exo_play"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="4dp"
+            android:background="@color/transparent"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_bottom_play"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.media3.ui.DefaultTimeBar
+            android:id="@+id/exo_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-12dp"
+            android:fadeScrollbars="false"
+            android:paddingStart="-10dp"
+            android:paddingEnd="-10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:played_color="@color/hearit_purple3"
+            app:scrubber_color="@android:color/transparent"
+            app:unplayed_color="@color/hearit_gray4" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
