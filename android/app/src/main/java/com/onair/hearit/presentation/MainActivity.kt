@@ -113,6 +113,11 @@ class MainActivity :
     private fun setupNavigation() {
         binding.layoutBottomNavigation.itemIconTintList = null
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
+            if (item.itemId == currentSelectedItemId) {
+                return@setOnItemSelectedListener true
+            }
+            currentSelectedItemId = item.itemId
+
             when (item.itemId) {
                 R.id.nav_home -> {
                     showFragment(HomeFragment())

@@ -25,8 +25,12 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.service.PlaybackService
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
@@ -39,7 +43,7 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     private val viewModel: PlayerDetailViewModel by viewModels {
-        PlayerDetailViewModelFactory(hearitId)
+        PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -50,7 +54,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         (16 * scale + 0.5f).toInt()
     }
 
-    @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -61,6 +64,13 @@ class PlayerDetailActivity : AppCompatActivity() {
         observeViewModel()
         setupMediaController()
         setupClickListener()
+
+        val previousScreen = intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: "unknown"
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsScreenInfo.Detail.NAME,
+            screenClass = AnalyticsScreenInfo.Detail.CLASS,
+            previousScreen = previousScreen,
+        )
     }
 
     private fun setupWindowInsets() {
@@ -121,7 +131,6 @@ class PlayerDetailActivity : AppCompatActivity() {
                 )
             }
 
-            controller.playWhenReady = true
             startScriptSync(controller)
         }
     }

@@ -7,6 +7,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.gms.google-services")
     id("org.jlleitschuh.gradle.ktlint")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -106,6 +107,7 @@ dependencies {
     // firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics.ndk)
 
     // kakao SDK
     implementation(libs.v2.user)
