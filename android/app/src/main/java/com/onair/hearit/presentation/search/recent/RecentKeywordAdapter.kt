@@ -26,7 +26,7 @@ class RecentKeywordAdapter(
                 override fun areItemsTheSame(
                     oldItem: RecentKeyword,
                     newItem: RecentKeyword,
-                ): Boolean = oldItem.id == newItem.id
+                ): Boolean = oldItem.term == newItem.term
 
                 override fun areContentsTheSame(
                     oldItem: RecentKeyword,

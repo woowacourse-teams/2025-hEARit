@@ -19,6 +19,7 @@ import com.onair.hearit.databinding.FragmentSearchBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import com.onair.hearit.presentation.search.result.SearchResultFragment
@@ -58,26 +59,51 @@ class SearchFragment : Fragment() {
         observeViewModel()
 
         binding.ivBack.setOnClickListener {
-            childFragmentManager.popBackStack()
+            childFragmentManager
+                .beginTransaction()
+                .replace(R.id.fl_search_container, SearchCategoryFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.tvSearchCancel.setOnClickListener {
+            binding.etSearch.text?.clear()
+            childFragmentManager
+                .beginTransaction()
+                .replace(R.id.fl_search_container, SearchCategoryFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         childFragmentManager.addOnBackStackChangedListener {
-            updateTopUi()
+            updateAppBarUI()
         }
 
-        updateTopUi()
+        updateAppBarUI()
     }
 
-    private fun updateTopUi() {
+    private fun updateAppBarUI() {
         val currentFragment =
             childFragmentManager.findFragmentById(R.id.fl_search_container)
 
-        if (currentFragment is SearchResultFragment) {
-            binding.tvSearchLogo.visibility = View.GONE
-            binding.ivBack.visibility = View.VISIBLE
-        } else {
-            binding.tvSearchLogo.visibility = View.VISIBLE
-            binding.ivBack.visibility = View.GONE
+        when (currentFragment) {
+            is SearchCategoryFragment -> {
+                binding.tvSearchLogo.visibility = View.VISIBLE
+                binding.ivBack.visibility = View.GONE
+                binding.tvSearchCancel.visibility = View.GONE
+            }
+
+            is SearchRecentFragment -> {
+                binding.tvSearchLogo.visibility = View.VISIBLE
+                binding.ivBack.visibility = View.GONE
+                binding.tvSearchCancel.visibility = View.VISIBLE
+            }
+
+            is SearchResultFragment -> {
+                binding.tvSearchLogo.visibility = View.GONE
+                binding.ivBack.visibility = View.VISIBLE
+                binding.tvSearchCancel.visibility = View.GONE
+            }
         }
     }
 
@@ -131,6 +157,7 @@ class SearchFragment : Fragment() {
             childFragmentManager
                 .beginTransaction()
                 .replace(R.id.fl_search_container, SearchRecentFragment())
+                .addToBackStack(null)
                 .commit()
         }
     }
@@ -143,6 +170,7 @@ class SearchFragment : Fragment() {
 
     private fun navigateToSearchResult(input: SearchInput) {
         val fragment = SearchResultFragment.newInstance(input)
+        binding.etSearch.setText(input.term())
         childFragmentManager
             .beginTransaction()
             .replace(R.id.fl_search_container, fragment)

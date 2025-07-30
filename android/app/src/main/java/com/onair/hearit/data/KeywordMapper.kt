@@ -5,7 +5,6 @@ import com.onair.hearit.domain.model.RecentKeyword
 
 fun RecentKeywordEntity.toDomain(): RecentKeyword =
     RecentKeyword(
-        id = this.id,
         term = this.term,
         searchedAt = this.searchedAt,
     )

@@ -47,36 +47,51 @@
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_search"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginVertical="10dp"
-                app:boxBackgroundMode="none"
-                app:endIconDrawable="@drawable/ic_search"
-                app:endIconMode="custom"
-                app:endIconTint="@color/hearit_gray1"
-                app:hintEnabled="false">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_search"
-                    style="@style/pretendard_body"
-                    android:layout_width="match_parent"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_search"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:boxBackgroundMode="none"
+                    app:endIconDrawable="@drawable/ic_search"
+                    app:endIconMode="custom"
+                    app:endIconTint="@color/hearit_gray1"
+                    app:hintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_search"
+                        style="@style/pretendard_body"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:autofillHints="@null"
+                        android:background="@drawable/bg_gray4_radius_8dp"
+                        android:hint="@string/search_keyword"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text|textNoSuggestions"
+                        android:maxLines="1"
+                        android:paddingHorizontal="12dp"
+                        android:textColor="@color/hearit_gray1"
+                        android:textColorHint="@color/hearit_gray2" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/tv_search_cancel"
+                    style="@style/pretendard_sub_title"
+                    android:layout_width="wrap_content"
                     android:layout_height="48dp"
-                    android:autofillHints="@null"
-                    android:background="@drawable/bg_gray4_radius_8dp"
-                    android:hint="@string/search_keyword"
-                    android:imeOptions="actionSearch"
-                    android:inputType="text|textNoSuggestions"
-                    android:maxLines="1"
-                    android:paddingHorizontal="12dp"
-                    android:textColor="@color/hearit_gray1"
-                    android:textColorHint="@color/hearit_gray2"
-                    app:layout_collapseMode="pin"
-                    app:layout_constraintTop_toBottomOf="@id/tv_search_logo" />
-            </com.google.android.material.textfield.TextInputLayout>
-
+                    android:layout_marginStart="12dp"
+                    android:gravity="center"
+                    android:text="취소"
+                    android:visibility="gone" />
+            </LinearLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.core.widget.NestedScrollView

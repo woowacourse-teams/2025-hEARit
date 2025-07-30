@@ -16,9 +16,11 @@ class RecentKeywordRepositoryImpl(
             hearitLocalDataSource.getKeywords().getOrThrow().map { it.toDomain() }
         }
 
-    override suspend fun saveKeyword(keyword: RecentKeyword): Result<Unit> =
+    override suspend fun saveKeyword(keyword: String): Result<Unit> =
         handleResult(crashlyticsLogger) {
-            hearitLocalDataSource.saveKeyword(keyword.toData())
+            val timestamp = System.currentTimeMillis()
+            val recentKeyword = RecentKeyword(term = keyword, searchedAt = timestamp)
+            hearitLocalDataSource.saveKeyword(recentKeyword.toData())
         }
 
     override suspend fun clearKeywords(): Result<Unit> =
