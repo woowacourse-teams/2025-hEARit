@@ -89,18 +89,18 @@ class SearchFragment : Fragment() {
 
     private fun setupFragmentResultListeners() {
         childFragmentManager.setFragmentResultListener(
-            "recent_keyword",
+            KEY_RECENT_SEARCH,
             viewLifecycleOwner,
         ) { _, bundle ->
-            val keyword = bundle.getString("keyword").orEmpty()
+            val keyword = bundle.getString(KEY_RECENT_SEARCH).orEmpty()
             navigateToSearchResult(SearchInput.Keyword(keyword))
         }
 
         childFragmentManager.setFragmentResultListener(
-            "category",
+            KEY_CATEGORY,
             viewLifecycleOwner,
         ) { _, bundle ->
-            val category = bundle.getString("category").orEmpty()
+            val category = bundle.getString(KEY_CATEGORY).orEmpty()
             navigateToSearchResult(SearchInput.Keyword(category))
         }
     }
@@ -223,5 +223,7 @@ class SearchFragment : Fragment() {
         private const val TAG_SEARCH_CATEGORY = "SearchCategory"
         private const val TAG_SEARCH_RECENT = "SearchRecent"
         private const val TAG_SEARCH_RESULT = "SearchResult"
+        const val KEY_CATEGORY = "category"
+        const val KEY_RECENT_SEARCH = "recent_search"
     }
 }

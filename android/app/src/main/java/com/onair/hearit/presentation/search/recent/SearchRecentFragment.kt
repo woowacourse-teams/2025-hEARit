@@ -15,6 +15,7 @@ import com.onair.hearit.databinding.FragmentSearchRecentBinding
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.term
+import com.onair.hearit.presentation.search.SearchFragment.Companion.KEY_RECENT_SEARCH
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 
@@ -80,7 +81,7 @@ class SearchRecentFragment :
     }
 
     private fun navigateToSearchResult(input: SearchInput) {
-        setFragmentResult("recent_keyword", bundleOf("keyword" to input.term()))
+        setFragmentResult(KEY_RECENT_SEARCH, bundleOf(KEY_RECENT_SEARCH to input.term()))
     }
 
     private fun showToast(message: String?) {
