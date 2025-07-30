@@ -15,4 +15,6 @@ public interface HearitKeywordRepository extends JpaRepository<HearitKeyword, Lo
                 WHERE hk.hearit.id IN :hearitIds
             """)
     List<HearitKeyword> findByHearitIdIn(@Param("hearitIds") List<Long> hearitIds);
+
+    List<HearitKeyword> findAllByHearitId(Long hearitId);
 }

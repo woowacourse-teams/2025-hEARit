@@ -32,12 +32,29 @@ class HearitRepositoryTest {
     private HearitRepository hearitRepository;
 
     @Test
+    @DisplayName("단일 히어릿 조회 시 카테고리도 함께 조회한다.")
+    void findWithCategoryById() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit savedHearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        // when
+        Hearit hearit = hearitRepository.findWithCategoryById(savedHearit.getId()).get();
+
+        // then
+        assertAll(
+                () -> assertThat(hearit.getId()).isEqualTo(savedHearit.getId()),
+                () -> assertThat(hearit.getCategory().getId()).isEqualTo(savedHearit.getCategory().getId())
+        );
+    }
+
+    @Test
     @DisplayName("원하는 개수만큼 랜덤 히어릿을 조회할 수 있다.")
     void findRandom() {
         // given
-        Category category = saveCategory();
-        Hearit hearit1 = saveHearit(category);
-        Hearit hearit2 = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         Pageable pageable = PageRequest.of(0, 1);
 
@@ -55,9 +72,9 @@ class HearitRepositoryTest {
     @DisplayName("전체 히어릿 개수 < 원하는 개수면 전체 히어릿을 모두 조회할 수 있다.")
     void findRandomWithAllHearits() {
         // given
-        Category category = saveCategory();
-        Hearit hearit1 = saveHearit(category);
-        Hearit hearit2 = saveHearit(category);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         Pageable pageable = PageRequest.of(0, 2);
 
@@ -72,8 +89,8 @@ class HearitRepositoryTest {
     @DisplayName("제목 또는 키워드에 검색어가 포함된 히어릿을 반환한다.")
     void searchByTerm_filterByTitleOrKeyword() {
         // given
-        Keyword keyword1 = saveKeyword("Springboot");
-        Keyword keyword2 = saveKeyword("NotMatched");
+        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Springboot"));
+        Keyword keyword2 = dbHelper.insertKeyword(new Keyword("NotMatched"));
 
         Hearit titleMatched = saveHearitWithTitleAndKeyword("SpringBoot is great", keyword2); // 제목만 매칭
         Hearit keywordMatched = saveHearitWithTitleAndKeyword("No match in title", keyword1); // 키워드만 매칭
@@ -113,16 +130,8 @@ class HearitRepositoryTest {
         );
     }
 
-    private Category saveCategory() {
-        return dbHelper.insertCategory(TestFixture.createFixedCategory());
-    }
-
-    private Hearit saveHearit(Category category) {
-        return dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-    }
-
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
-        Category category = saveCategory();
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = new Hearit(
                 title,
                 "summary",
@@ -135,9 +144,5 @@ class HearitRepositoryTest {
         Hearit savedHearit = dbHelper.insertHearit(hearit);
         dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
         return savedHearit;
-    }
-
-    private Keyword saveKeyword(String name) {
-        return dbHelper.insertKeyword(new Keyword(name));
     }
 }
