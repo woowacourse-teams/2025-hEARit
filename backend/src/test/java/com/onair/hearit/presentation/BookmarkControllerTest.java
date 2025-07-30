@@ -9,6 +9,7 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.BookmarkInfoResponse;
+import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
