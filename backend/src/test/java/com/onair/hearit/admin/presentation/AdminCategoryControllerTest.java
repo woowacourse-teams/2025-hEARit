@@ -34,7 +34,8 @@ class AdminCategoryControllerTest extends IntegrationTest {
                 .get("/api/v1/admin/categories")
                 .then().log().all()
                 .statusCode(HttpStatus.OK)
-                .extract().as(new TypeRef<>() {});
+                .extract().as(new TypeRef<>() {
+                });
 
         // then
         assertAll(() -> {
@@ -58,7 +59,8 @@ class AdminCategoryControllerTest extends IntegrationTest {
                 .get("/api/v1/admin/categories/all")
                 .then().log().all()
                 .statusCode(HttpStatus.OK)
-                .extract().as(new TypeRef<>() {});
+                .extract().as(new TypeRef<>() {
+                });
 
         // then
         assertThat(response).hasSize(3);

@@ -9,6 +9,8 @@ import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.domain.HearitKeyword;
+import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
@@ -20,7 +22,9 @@ import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.CategoryRepository;
+import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
+import com.onair.hearit.infrastructure.KeywordRepository;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,11 +52,19 @@ class HearitServiceTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private HearitKeywordRepository hearitKeywordRepository;
+
     private HearitService hearitService;
 
     @BeforeEach
     void setup() {
         hearitService = new HearitService(hearitRepository, bookmarkRepository, categoryRepository);
+        hearitService = new HearitService(
+                hearitRepository,
+                bookmarkRepository,
+                hearitKeywordRepository,
+                categoryRepository);
     }
 
     @Test
@@ -63,6 +75,8 @@ class HearitServiceTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+        Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        HearitKeyword hearitKeyword = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword));
 
         // when
         HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(), member.getId());
@@ -73,7 +87,9 @@ class HearitServiceTest {
                 () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
                 () -> assertThat(response.summary()).isEqualTo(hearit.getSummary()),
                 () -> assertThat(response.isBookmarked()).isTrue(),
-                () -> assertThat(response.bookmarkId()).isEqualTo(bookmark.getId())
+                () -> assertThat(response.bookmarkId()).isEqualTo(bookmark.getId()),
+                () -> assertThat(response.category()).isEqualTo(hearit.getCategory().getName()),
+                () -> assertThat(response.keywords()).hasSize(1)
         );
     }
 

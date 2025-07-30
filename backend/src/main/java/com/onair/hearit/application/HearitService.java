@@ -4,6 +4,7 @@ import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HomeCategoryHearitResponse;
@@ -11,6 +12,7 @@ import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
+import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.util.List;
@@ -31,19 +33,21 @@ public class HearitService {
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final HearitKeywordRepository hearitKeywordRepository;
     private final CategoryRepository categoryRepository;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, Long memberId) {
         Hearit hearit = getHearitById(hearitId);
+        List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId());
         Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(hearitId, memberId);
         if (bookmarkOptional.isPresent()) {
-            return HearitDetailResponse.fromWithBookmark(hearit, bookmarkOptional.get());
+            return HearitDetailResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
         }
-        return HearitDetailResponse.from(hearit);
+        return HearitDetailResponse.from(hearit, keywords);
     }
 
     private Hearit getHearitById(Long hearitId) {
-        return hearitRepository.findById(hearitId)
+        return hearitRepository.findWithCategoryById(hearitId)
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
     }
 
