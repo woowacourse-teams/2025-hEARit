@@ -53,7 +53,8 @@ fun RecommendHearitResponse.toDomain(): RecommendHearit =
     RecommendHearit(
         id = this.id,
         title = this.title,
-        desc = this.summary,
+        categoryName = this.categoryName,
+        categoryColor = this.categoryColor,
     )
 
 fun RandomHearitResponse.toDomain(): PageResult<RandomHearit> =

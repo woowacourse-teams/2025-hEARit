@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -22,7 +21,6 @@ import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.domain.model.SlideItem
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
@@ -220,31 +218,9 @@ class HomeFragment :
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
-//            val repeatedItems = List(30) { index -> recommendItems[index % recommendItems.size] }
-//            recommendAdapter.submitList(repeatedItems) {
-//                scrollToMiddlePosition()
-//            }
-            val items =
-                listOf(
-                    SlideItem(0, "Android", "HTTP와 HTTPS의 차이", "#4D7C36".toColorInt()),
-                    SlideItem(
-                        1,
-                        "Android",
-                        "스프링 @EventListener와 @TransactionalEventListener",
-                        "#1A5A92".toColorInt(),
-                    ),
-                    SlideItem(2, "Android", "Room DB 어떻게 쓰나", "#9C3F3F".toColorInt()),
-                    SlideItem(
-                        3,
-                        "Android",
-                        "스프링 @EventListener와 @TransactionalEventListener",
-                        "#4D7C36".toColorInt(),
-                    ),
-                    SlideItem(4, "Android", "Jetpack Compose 알아보기", "#1A5A92".toColorInt()),
-                )
-            recommendAdapter.submitList(items) {
+            recommendAdapter.submitList(recommendItems) {
                 scrollToMiddlePosition()
-                setupIndicator(items.size)
+                setupIndicator(recommendItems.size)
             }
         }
 

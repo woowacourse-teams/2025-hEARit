@@ -89,7 +89,7 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_recommend"
                 tools:itemCount="5"
-                tools:listitem="@layout/item_slide" />
+                tools:listitem="@layout/item_recommend_hearit" />
 
             <LinearLayout
                 android:id="@+id/indicator_container"
@@ -123,10 +123,11 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="68dp"
                 android:nestedScrollingEnabled="false"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_category"
+                app:spanCount="2"
                 tools:itemCount="6"
                 tools:listitem="@layout/item_category" />
 
