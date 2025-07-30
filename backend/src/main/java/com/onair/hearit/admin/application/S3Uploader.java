@@ -20,12 +20,12 @@ public class S3Uploader {
     private String bucket;
 
     public String uploadOriginalAudio(MultipartFile multipartFile) {
-        String key = "hearit/audio/" + multipartFile.getOriginalFilename();
+        String key = "hearit/audio/original/" + multipartFile.getOriginalFilename();
         return uploadToS3(multipartFile, key);
     }
 
     public String uploadShortAudio(MultipartFile multipartFile) {
-        String key = "hearit/audio/" + multipartFile.getOriginalFilename();
+        String key = "hearit/audio/short/" + multipartFile.getOriginalFilename();
         return uploadToS3(multipartFile, key);
     }
 
