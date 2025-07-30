@@ -1,8 +1,6 @@
 package com.onair.hearit.admin.presentation;
 
-import com.onair.hearit.admin.application.AdminAuthService;
 import com.onair.hearit.admin.application.AdminHearitService;
-import com.onair.hearit.admin.dto.request.AdminLoginRequest;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
@@ -27,13 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/admin")
 public class AdminHearitController {
 
-    private final AdminAuthService adminAuthService;
     private final AdminHearitService adminHearitService;
-
-    @PostMapping("/login")
-    public void login(@RequestBody AdminLoginRequest request) {
-        adminAuthService.login(request);
-    }
 
     @GetMapping("/hearits")
     public ResponseEntity<PagedResponse<HearitAdminResponse>> readHearits(

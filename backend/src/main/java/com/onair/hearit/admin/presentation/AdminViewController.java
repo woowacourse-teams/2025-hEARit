@@ -17,6 +17,11 @@ public class AdminViewController {
         return "admin/home";
     }
 
+    @GetMapping("/login")
+    public String showLoginPage() {
+        return "admin/login";
+    }
+
     @GetMapping("/hearits")
     public String hearitListPage() {
         return "admin/hearit-list";

@@ -41,8 +41,8 @@ public class AdminCategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoryInfoResponse> createCategory(@RequestBody CategoryCreateRequest request) {
-        CategoryInfoResponse response = adminCategoryService.addCategory(request);
-        return ResponseEntity.created(URI.create("/")).body(response);
+    public ResponseEntity<Void> createCategory(@RequestBody CategoryCreateRequest request) {
+        adminCategoryService.addCategory(request);
+        return ResponseEntity.created(URI.create("/")).build();
     }
 }
