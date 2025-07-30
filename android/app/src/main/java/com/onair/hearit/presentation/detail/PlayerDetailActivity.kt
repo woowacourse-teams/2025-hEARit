@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private lateinit var scriptAdapter: PlayerDetailScriptAdapter
+    private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
 
     private var mediaController: MediaController? = null
@@ -64,7 +64,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         bindLayout()
         setupBackPressHandler()
         setupWindowInsets()
-        setupRecyclerView()
+        setupScriptRecyclerView()
         setKeywordRecyclerView()
         observeViewModel()
         setupMediaController()
@@ -144,8 +144,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupRecyclerView() {
-        scriptAdapter = PlayerDetailScriptAdapter()
+    private fun setupScriptRecyclerView() {
         binding.rvScript.adapter = scriptAdapter
     }
 
