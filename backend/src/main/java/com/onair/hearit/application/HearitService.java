@@ -77,7 +77,7 @@ public class HearitService {
         List<Category> categories = categoryRepository.findTop3ByOrderByIdAsc();
         return categories.stream()
                 .map(category -> {
-                    List<Hearit> hearits = hearitRepository.findTop5ByCategory(category.getId(), pageable);
+                    List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), pageable);
                     return HomeCategoryHearitResponse.from(category, hearits);
                 })
                 .toList();

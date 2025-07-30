@@ -133,7 +133,7 @@ class HearitRepositoryTest {
 
     @Test
     @DisplayName("카테고리 ID로 원하는 개수의 히어릿을 조회한다.")
-    void findTop5ByCategory() {
+    void findByCategory() {
         // given
         Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -149,7 +149,7 @@ class HearitRepositoryTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         // when
-        List<Hearit> result = hearitRepository.findTop5ByCategory(category1.getId(), pageable);
+        List<Hearit> result = hearitRepository.findByCategory(category1.getId(), pageable);
 
         // then
         assertAll(

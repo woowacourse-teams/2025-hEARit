@@ -1,8 +1,8 @@
 package com.onair.hearit.infrastructure;
 
 import com.onair.hearit.domain.Hearit;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,5 +32,5 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
 
     @Query("SELECT h FROM Hearit h WHERE h.category.id = :categoryId ORDER BY h.createdAt DESC")
-    List<Hearit> findTop5ByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
+    List<Hearit> findByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
 }
