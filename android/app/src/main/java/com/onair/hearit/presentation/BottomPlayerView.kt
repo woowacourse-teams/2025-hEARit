@@ -3,15 +3,11 @@ package com.onair.hearit.presentation
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
-import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutBottomPlayerControllerBinding
@@ -26,175 +22,155 @@ class BottomPlayerView
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
     ) : ConstraintLayout(context, attrs, defStyleAttr) {
-        private lateinit var player: Player
-        private lateinit var binding: LayoutBottomPlayerControllerBinding
+        private var player: Player? = null
+        private var listener: PlayerListener? = null
 
-        private lateinit var timeBar: DefaultTimeBar
-        private lateinit var playButton: ImageButton
-        private lateinit var durationTextView: TextView
+        private val binding =
+            LayoutBottomPlayerControllerBinding.inflate(
+                LayoutInflater.from(context),
+                this,
+                true,
+            )
 
-        private val formatBuilder = StringBuilder()
-        private val formatter = Formatter(formatBuilder, Locale.getDefault())
+        private val formatter = Formatter(StringBuilder(), Locale.getDefault())
         private val window = Timeline.Window()
-
         private val progressRunnable = Runnable { updateProgress() }
-        private lateinit var listener: PlayerListener
 
         init {
-            initView()
+            setupScrubListener()
+            binding.exoPlay.setOnClickListener { togglePlayPause() }
         }
 
-        private fun initView() {
-            binding =
-                LayoutBottomPlayerControllerBinding.inflate(
-                    LayoutInflater.from(context),
-                    this,
-                    true,
-                )
-
-            timeBar = binding.exoProgress
-            playButton = binding.exoPlay
-            durationTextView = binding.exoDuration
-        }
-
-        fun setPlayer(player: Player): BottomPlayerView =
+        fun setPlayer(newPlayer: Player): BottomPlayerView =
             apply {
-                this.player = player
-                listener = PlayerListener()
-
-                player.addListener(listener)
-                timeBar.addListener(listener)
-                playButton.setOnClickListener(listener)
-
-                updateUi()
+                releasePlayer()
+                player = newPlayer
+                listener = PlayerListener().also { newPlayer.addListener(it) }
+                refresh()
             }
 
         fun setTitle(title: String) {
             binding.tvBottomPlayerTitle.text = title
         }
 
-        private fun updateUi() {
-            if (player.currentTimeline.windowCount > 0) {
-                updateTimeline()
-            }
-            updatePlayPauseButton()
+        fun setDuration(durationMs: Long) {
+            binding.exoDuration.text =
+                if (durationMs > 0) {
+                    formatTime(durationMs)
+                } else {
+                    context.getString(R.string.bottom_player_view_default_duration)
+                }
         }
 
-        private fun updateTimeline() {
-            player.currentTimeline.getWindow(player.currentMediaItemIndex, window)
+        private fun setupScrubListener() {
+            binding.exoProgress.addListener(
+                object : TimeBar.OnScrubListener {
+                    override fun onScrubStop(
+                        timeBar: TimeBar,
+                        position: Long,
+                        canceled: Boolean,
+                    ) {
+                        player?.seekTo(position)
+                        updateProgress()
+                    }
+
+                    override fun onScrubStart(
+                        timeBar: TimeBar,
+                        position: Long,
+                    ) {
+                    }
+
+                    override fun onScrubMove(
+                        timeBar: TimeBar,
+                        position: Long,
+                    ) {
+                    }
+                },
+            )
+        }
+
+        private fun refresh() {
+            player?.let {
+                updateTimeline(it)
+                updatePlayPauseButton(it)
+            }
+        }
+
+        private fun updateTimeline(player: Player) {
+            val timeline = player.currentTimeline
+            if (timeline.isEmpty) {
+                binding.exoProgress.setDuration(0)
+                setDuration(0)
+                return
+            }
+
+            timeline.getWindow(player.currentMediaItemIndex, window)
             val duration = window.durationMs
-            timeBar.setDuration(duration)
+
+            binding.exoProgress.setDuration(duration)
             setDuration(duration)
             updateProgress()
         }
 
         private fun updateProgress() {
             if (!isAttachedToWindow) return
+            val current = player ?: return
 
-            val position = player.currentPosition
-            val buffered = player.bufferedPosition
-
-            timeBar.setPosition(position)
-            timeBar.setBufferedPosition(buffered)
+            binding.exoProgress.setPosition(current.currentPosition)
+            binding.exoProgress.setBufferedPosition(current.bufferedPosition)
 
             removeCallbacks(progressRunnable)
-
-            if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-                postDelayed(progressRunnable, timeBar.preferredUpdateDelay)
+            if (current.playWhenReady && current.playbackState == Player.STATE_READY) {
+                postDelayed(progressRunnable, binding.exoProgress.preferredUpdateDelay)
             }
         }
 
-        fun setDuration(duration: Long) {
-            durationTextView.text =
-                if (duration > 0) {
-                    formatTime(duration)
-                } else {
-                    "--:--"
-                }
-        }
-
-        private fun updatePlayPauseButton() {
-            val resId =
-                if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-                    R.drawable.ic_bottom_pause
-                } else {
-                    R.drawable.ic_bottom_play
-                }
-            playButton.setImageResource(resId)
+        private fun updatePlayPauseButton(current: Player) {
+            val isPlaying = current.playWhenReady && current.playbackState == Player.STATE_READY
+            val icon = if (isPlaying) R.drawable.ic_bottom_pause else R.drawable.ic_bottom_play
+            binding.exoPlay.setImageResource(icon)
         }
 
         private fun togglePlayPause() {
-            if (player.playWhenReady) {
-                player.pause()
-            } else {
-                player.play()
+            player?.let {
+                if (it.playWhenReady) it.pause() else it.play()
             }
         }
 
-        private fun formatTime(millis: Long): String = Util.getStringForTime(formatBuilder, formatter, millis)
+        private fun formatTime(millis: Long): String = Util.getStringForTime(StringBuilder(), formatter, millis)
+
+        private fun releasePlayer() {
+            listener?.let { player?.removeListener(it) }
+            listener = null
+            player = null
+        }
 
         override fun onDetachedFromWindow() {
             super.onDetachedFromWindow()
             removeCallbacks(progressRunnable)
+            releasePlayer()
         }
 
-        private inner class PlayerListener :
-            Player.Listener,
-            TimeBar.OnScrubListener,
-            OnClickListener {
-            override fun onTimelineChanged(
-                timeline: Timeline,
-                reason: Int,
-            ) {
-                updateTimeline()
-            }
-
+        private inner class PlayerListener : Player.Listener {
             override fun onEvents(
                 player: Player,
                 events: Player.Events,
             ) {
                 if (events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)) {
-                    val title = player.mediaMetadata.title?.toString()
-                    if (!title.isNullOrBlank()) {
-                        setTitle(title)
+                    player.mediaMetadata.title?.toString()?.takeIf { it.isNotBlank() }?.let {
+                        setTitle(it)
                         setDuration(player.duration)
                     }
                 }
                 if (events.contains(Player.EVENT_TIMELINE_CHANGED)) {
-                    updateTimeline()
+                    updateTimeline(player)
                 }
-                if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) ||
+                if (
+                    events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) ||
                     events.contains(Player.EVENT_IS_PLAYING_CHANGED)
                 ) {
-                    updatePlayPauseButton()
+                    updatePlayPauseButton(player)
                     updateProgress()
-                }
-            }
-
-            override fun onScrubStart(
-                timeBar: TimeBar,
-                position: Long,
-            ) {
-            }
-
-            override fun onScrubMove(
-                timeBar: TimeBar,
-                position: Long,
-            ) {
-            }
-
-            override fun onScrubStop(
-                timeBar: TimeBar,
-                position: Long,
-                canceled: Boolean,
-            ) {
-                player.seekTo(position)
-                updateProgress()
-            }
-
-            override fun onClick(v: View?) {
-                if (v === playButton) {
-                    togglePlayPause()
                 }
             }
         }

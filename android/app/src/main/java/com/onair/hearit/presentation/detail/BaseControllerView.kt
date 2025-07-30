@@ -137,7 +137,7 @@ class BaseControllerView
             updatePlaySpeed()
         }
 
-        inner class CustomComponentListener :
+        private inner class CustomComponentListener :
             Player.Listener,
             TimeBar.OnScrubListener,
             OnClickListener {
