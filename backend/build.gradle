@@ -1,7 +1,16 @@
+// 1. 플러그인 버전 관리를 위한 buildscript 추가
+buildscript {
+    ext {
+        restdocsApiSpecVersion = '0.18.2'
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
+    id 'org.hidetake.swagger.generator' version '2.18.2'
 }
 
 group = 'com.onair'
@@ -36,6 +45,16 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // REST Docs
+    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
+
+    // restdocs-api-spec
+    testImplementation "com.epages:restdocs-api-spec-restassured:${restdocsApiSpecVersion}"
+    testImplementation "com.epages:restdocs-api-spec:${restdocsApiSpecVersion}"
+
+    // Swagger UI
+    swaggerUI 'org.webjars:swagger-ui:5.17.14'
+
     // DB
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
@@ -49,11 +68,54 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-    //Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 }
+
+// 4. 생성될 OpenAPI 스펙 파일의 위치 지정
+swaggerSources {
+    sample {
+        setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
+    }
+}
+
+openapi3 {
+    servers = [
+            { url = "http://localhost"; description = "Local Server" }
+    ]
+    title = "Hearit API 문서"
+    description = "Spring REST Docs와 Swagger UI를 이용한 API 명세서"
+    version = project.version
+    format = "yaml"
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// 6. Swagger UI 생성 시, Authorization 헤더를 위한 설정 추가
+tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI.class) {
+    dependsOn 'openapi3' // openapi3 작업이 먼저 실행되어야 함
+    doFirst {
+        def swaggerUIFile = file("${openapi3.outputDirectory}/openapi3.yaml")
+
+        // JWT 인증을 위한 securitySchemes 추가
+        def securitySchemesContent = "\ncomponents:\n" +
+                "  securitySchemes:\n" +
+                "    bearerAuth:\n" +
+                "      type: http\n" +
+                "      scheme: bearer\n" +
+                "      bearerFormat: JWT\n" +
+                "security:\n" +
+                "  - bearerAuth: []"
+
+        swaggerUIFile.append securitySchemesContent
+    }
+}
+
+// 7. bootJar 빌드 시, 생성된 Swagger UI를 static/swagger-ui에 포함
+tasks.named('bootJar') {
+    dependsOn 'generateSwaggerUISample' // Swagger UI 생성이 먼저 완료되어야 함
+    from("${tasks.generateSwaggerUISample.outputDir}") {
+        into 'static/swagger-ui'
+    }
 }
