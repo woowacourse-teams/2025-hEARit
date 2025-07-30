@@ -22,6 +22,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
@@ -38,8 +39,13 @@ class MainActivity :
     private var backPressedTime: Long = 0L
     private val backPressInterval = 1000L
     private var mediaController: MediaController? = null
+    private var currentSelectedItemId: Int = R.id.nav_home
 
-    private val playerViewModel: PlayerViewModel by viewModels { PlayerViewModelFactory() }
+    private val playerViewModel: PlayerViewModel by viewModels {
+        PlayerViewModelFactory(
+            CrashlyticsProvider.get(),
+        )
+    }
 
     override fun onResume() {
         super.onResume()
