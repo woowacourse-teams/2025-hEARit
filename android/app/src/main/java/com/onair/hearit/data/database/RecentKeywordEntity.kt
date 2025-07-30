@@ -5,7 +5,6 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "recent_keyword")
 data class RecentKeywordEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val term: String,
-    val searchedAt: String,
+    @PrimaryKey val term: String,
+    val searchedAt: Long,
 )
