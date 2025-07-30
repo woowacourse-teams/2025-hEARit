@@ -1,11 +1,15 @@
 package com.onair.hearit.presentation.detail
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -34,6 +38,7 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.presentation.detail.script.ScriptFragment
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
@@ -76,6 +81,12 @@ class PlayerDetailActivity : AppCompatActivity() {
             screenClass = AnalyticsScreenInfo.Detail.CLASS,
             previousScreen = previousScreen,
         )
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view)
+            binding.fragmentContainerView.visibility =
+                if (fragment != null && fragment.isVisible) View.VISIBLE else View.GONE
+        }
     }
 
     private fun bindLayout() {
@@ -137,10 +148,40 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupClickListener() {
         binding.ibPlayerDetailBack.setOnClickListener {
             setResult(RESULT_OK)
             finish()
+        }
+
+        val gestureDetector =
+            GestureDetector(
+                this,
+                object : GestureDetector.SimpleOnGestureListener() {
+                    override fun onSingleTapUp(e: MotionEvent): Boolean {
+                        supportFragmentManager
+                            .beginTransaction()
+                            .replace(
+                                R.id.fragment_container_view,
+                                ScriptFragment.newInstance(hearitId),
+                            ).addToBackStack(null)
+                            .commit()
+                        return true
+                    }
+
+                    // 스크롤이면 이벤트 무시
+                    override fun onScroll(
+                        e1: MotionEvent?,
+                        e2: MotionEvent,
+                        distanceX: Float,
+                        distanceY: Float,
+                    ): Boolean = false
+                },
+            )
+
+        binding.rvScript.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
         }
     }
 
