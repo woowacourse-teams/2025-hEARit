@@ -6,6 +6,7 @@ import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
+import com.onair.hearit.dto.response.HomeCategoryHearitResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
@@ -75,5 +76,12 @@ public class HearitController {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<HearitSearchResponse> response = hearitSearchService.search(searchTerm, pagingRequest);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "홈화면용 고정 카테고리별 히어릿 조회", description = "고정된 3개 카테고리별로 최신 히어릿 5개를 반환합니다.")
+    @GetMapping("/home-categories")
+    public ResponseEntity<List<HomeCategoryHearitResponse>> readHomeHearits() {
+        List<HomeCategoryHearitResponse> responses = hearitService.getHomeCategoryHearits();
+        return ResponseEntity.ok(responses);
     }
 }
