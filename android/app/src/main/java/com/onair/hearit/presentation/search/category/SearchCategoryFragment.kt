@@ -4,11 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
-import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
@@ -16,10 +17,10 @@ import com.onair.hearit.databinding.FragmentSearchCategoryBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
-import com.onair.hearit.presentation.search.result.SearchResultFragment
 
 class SearchCategoryFragment :
     Fragment(),
@@ -71,12 +72,7 @@ class SearchCategoryFragment :
     }
 
     private fun navigateToSearchResult(input: SearchInput) {
-        val fragment = SearchResultFragment.newInstance(input)
-        parentFragmentManager
-            .beginTransaction()
-            .replace(R.id.fl_search_container, fragment)
-            .addToBackStack(null)
-            .commit()
+        setFragmentResult("category", bundleOf("category" to input.term()))
     }
 
     override fun onDestroyView() {

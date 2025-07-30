@@ -47,11 +47,7 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        childFragmentManager
-            .beginTransaction()
-            .replace(R.id.fl_search_container, SearchCategoryFragment())
-            .commit()
-
+        navigateToSearchCategory()
         setupWindowInsets()
         setupSearchEnterKey()
         setupSearchBarClickListener()
@@ -59,24 +55,31 @@ class SearchFragment : Fragment() {
         observeViewModel()
 
         binding.ivBack.setOnClickListener {
-            childFragmentManager
-                .beginTransaction()
-                .replace(R.id.fl_search_container, SearchCategoryFragment())
-                .addToBackStack(null)
-                .commit()
+            navigateToSearchCategory()
         }
 
         binding.tvSearchCancel.setOnClickListener {
-            binding.etSearch.text?.clear()
-            childFragmentManager
-                .beginTransaction()
-                .replace(R.id.fl_search_container, SearchCategoryFragment())
-                .addToBackStack(null)
-                .commit()
+            navigateToSearchCategory()
         }
 
         childFragmentManager.addOnBackStackChangedListener {
             updateAppBarUI()
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            "recent_keyword",
+            viewLifecycleOwner,
+        ) { _, bundle ->
+            val keyword = bundle.getString("keyword").orEmpty()
+            navigateToSearchResult(SearchInput.Keyword(keyword))
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            "category",
+            viewLifecycleOwner,
+        ) { _, bundle ->
+            val keyword = bundle.getString("category").orEmpty()
+            navigateToSearchResult(SearchInput.Keyword(keyword))
         }
 
         updateAppBarUI()
@@ -168,9 +171,19 @@ class SearchFragment : Fragment() {
         }
     }
 
+    private fun navigateToSearchCategory() {
+        binding.etSearch.text?.clear()
+        childFragmentManager
+            .beginTransaction()
+            .replace(R.id.fl_search_container, SearchCategoryFragment())
+            .addToBackStack(null)
+            .commit()
+    }
+
     private fun navigateToSearchResult(input: SearchInput) {
         val fragment = SearchResultFragment.newInstance(input)
         binding.etSearch.setText(input.term())
+        binding.etSearch.setSelection(binding.etSearch.text?.length ?: 0)
         childFragmentManager
             .beginTransaction()
             .replace(R.id.fl_search_container, fragment)
