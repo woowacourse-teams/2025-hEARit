@@ -50,9 +50,6 @@ class HearitServiceTest {
     @Autowired
     private HearitKeywordRepository hearitKeywordRepository;
 
-    @Autowired
-    private KeywordRepository keywordRepository;
-
     private HearitService hearitService;
 
     @BeforeEach
@@ -60,8 +57,7 @@ class HearitServiceTest {
         hearitService = new HearitService(
                 hearitRepository,
                 bookmarkRepository,
-                hearitKeywordRepository,
-                keywordRepository);
+                hearitKeywordRepository);
     }
 
     @Test

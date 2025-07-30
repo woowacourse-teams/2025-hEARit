@@ -1,6 +1,7 @@
 package com.onair.hearit.infrastructure;
 
 import com.onair.hearit.domain.HearitKeyword;
+import com.onair.hearit.domain.Keyword;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,5 +17,11 @@ public interface HearitKeywordRepository extends JpaRepository<HearitKeyword, Lo
             """)
     List<HearitKeyword> findByHearitIdIn(@Param("hearitIds") List<Long> hearitIds);
 
-    List<HearitKeyword> findAllByHearitId(Long hearitId);
+    @Query("""
+                SELECT k
+                FROM HearitKeyword hk
+                JOIN hk.keyword k
+                WHERE hk.hearit.id = :hearitId
+            """)
+    List<Keyword> findKeywordsByHearitId(@Param("hearitId") Long hearitId);
 }

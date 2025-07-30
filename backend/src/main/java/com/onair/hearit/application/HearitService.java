@@ -3,7 +3,6 @@ package com.onair.hearit.application;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
@@ -13,7 +12,6 @@ import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
-import com.onair.hearit.infrastructure.KeywordRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -31,25 +29,15 @@ public class HearitService {
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
-    private final KeywordRepository keywordRepository;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, Long memberId) {
         Hearit hearit = getHearitById(hearitId);
-        List<Keyword> keywords = getKeywords(hearit);
+        List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId());
         Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(hearitId, memberId);
         if (bookmarkOptional.isPresent()) {
             return HearitDetailResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
         }
         return HearitDetailResponse.from(hearit, keywords);
-    }
-
-    private List<Keyword> getKeywords(Hearit hearit) {
-        List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findAllByHearitId(hearit.getId());
-        List<Long> hearitKeywordIds = hearitKeywords.stream()
-                .map(HearitKeyword::getId)
-                .toList();
-        List<Keyword> keywords = keywordRepository.findAllByIdIn(hearitKeywordIds);
-        return keywords;
     }
 
     private Hearit getHearitById(Long hearitId) {
