@@ -12,7 +12,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
-<div th:replace="admin/navbar :: navbar"></div>
+<div th:insert="~{admin/navbar :: navbar}"></div>
 <div class="container mt-4">
     <h1>키워드 관리</h1>
     <div>

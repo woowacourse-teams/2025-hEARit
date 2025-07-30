@@ -9,7 +9,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
-<div th:replace="admin/navbar :: navbar"></div>
+<div th:insert="~{admin/navbar :: navbar}"></div>
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>히어릿 추가</h1>
@@ -135,9 +135,16 @@
                     let errorMessage = '서버 오류';
                     try {
                         const errorData = JSON.parse(responseText);
-                        errorMessage = errorData.message || errorMessage;
+                        const detail = errorData.detail || errorData.message;
+                        if (detail) {
+                            errorMessage = detail
+                                .split(';')
+                                .map(msg => msg.trim())
+                                .filter(msg => msg.length > 0)
+                                .join('\n');
+                        }
                     } catch (_) {}
-                    alert('업로드 실패: ' + errorMessage);
+                    alert('업로드 실패:\n' + errorMessage);
                 }
             } catch (error) {
                 console.error('Error uploading hearit:', error);
