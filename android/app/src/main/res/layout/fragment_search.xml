@@ -89,7 +89,7 @@
                     android:layout_height="48dp"
                     android:layout_marginStart="12dp"
                     android:gravity="center"
-                    android:text="취소"
+                    android:text="@string/all_cancel"
                     android:visibility="gone" />
             </LinearLayout>
         </com.google.android.material.appbar.AppBarLayout>

@@ -5,6 +5,7 @@
     <string name="all_withdrawal">회원탈퇴</string>
     <string name="all_logout">로그아웃</string>
     <string name="all_setting">설정</string>
+    <string name="all_cancel">취소</string>
     <string name="all_privacy_policy">개인정보처리방침</string>
     <string name="all_terms_of_use">이용 약관</string>
     <string name="all_account_info">설정 및 계정 정보</string>
@@ -73,9 +74,12 @@
     <!-- SearchFragment-->
     <string name="search_category_text">카테고리</string>
     <string name="search_recent_text">최근 검색어</string>
+    <string name="search_recent_delete"><u>전체삭제</u></string>
     <string name="search_keyword">검색어를 입력해주세요</string>
-    <string name="search_toast_keywords_load_fail">오늘의 키워드 조회에 실패했습니다.</string>
-    <string name="search_toast_recent_keyword_load_fail">최근 검색어 조회에 실패했습니다.</string>
+    <string name="search_toast_keywords_load_fail">오늘의 키워드 조회에 실패했습니다</string>
+    <string name="search_toast_recent_keyword_load_fail">최근 검색어 조회에 실패했습니다</string>
+    <string name="search_toast_recent_keyword_delete_success">최근 검색어를 삭제했습니다</string>
+    <string name="search_toast_recent_keyword_delete_fail">최근 검색어 삭제에 실패했습니다</string>
     <string name="search_guide_when_no_hearits">검색된 <font color="#B677F3">히어릿</font>이 없어요!</string>
 
     <!-- SearchResultFragment-->

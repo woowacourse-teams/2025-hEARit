@@ -55,4 +55,17 @@ class SearchViewModel(
                 }
         }
     }
+
+    fun deleteKeywords() {
+        viewModelScope.launch {
+            recentKeywordRepository
+                .clearKeywords()
+                .onSuccess {
+                    _recentKeywords.value = emptyList()
+                    _toastMessage.value = R.string.search_toast_recent_keyword_delete_success
+                }.onFailure {
+                    _toastMessage.value = R.string.search_toast_recent_keyword_delete_fail
+                }
+        }
+    }
 }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -23,7 +24,9 @@ class SearchRecentFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchRecentBinding? = null
     private val binding get() = _binding!!
+
     private val recentKeywordAdapter by lazy { RecentKeywordAdapter(this) }
+
     private val viewModel: SearchViewModel by viewModels {
         SearchViewModelFactory(CrashlyticsProvider.get())
     }
@@ -43,9 +46,10 @@ class SearchRecentFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
-        setupRecentKeywordRecyclerView()
-        viewModel.getRecentKeywords()
+        setupRecyclerView()
+        setupDeleteButton()
         observeViewModel()
+        viewModel.getRecentKeywords()
     }
 
     private fun setupWindowInsets() {
@@ -56,13 +60,22 @@ class SearchRecentFragment :
         }
     }
 
-    private fun setupRecentKeywordRecyclerView() {
+    private fun setupRecyclerView() {
         binding.rvRecentKeyword.adapter = recentKeywordAdapter
+    }
+
+    private fun setupDeleteButton() {
+        binding.tvSearchRecentDelete.setOnClickListener {
+            viewModel.deleteKeywords()
+        }
     }
 
     private fun observeViewModel() {
         viewModel.recentKeywords.observe(viewLifecycleOwner) { keywords ->
             recentKeywordAdapter.submitList(keywords)
+        }
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
         }
     }
 
@@ -70,18 +83,20 @@ class SearchRecentFragment :
         setFragmentResult("recent_keyword", bundleOf("keyword" to input.term()))
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun showToast(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onKeywordClick(term: String) {
         navigateToSearchResult(SearchInput.Keyword(term))
     }
 
-    companion object {
-        const val TAG = "SearchRecent"
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 
+    companion object {
         fun newInstance(): SearchRecentFragment = SearchRecentFragment()
     }
 }
