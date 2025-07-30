@@ -28,9 +28,9 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
-import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
