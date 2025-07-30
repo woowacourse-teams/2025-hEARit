@@ -90,4 +90,16 @@
     <!-- MainActivity-->
     <string name="main_toast_recent_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
     <string name="main_toast_load_player_hearit">플레이어 설정에 실패했습니다.</string>
+    <string name="main_bottom_player_default_title">제목 없음</string>
+    <string name="main_toast_finish_back_pressed">뒤로가기 버튼을 한 번 더 누르면 종료됩니다.</string>
+
+    <!--    BottomPlayerView-->
+    <string name="bottom_player_view_default_duration">--:--</string>
+
+    <!--    PlaybackService-->
+    <string name="notification_channel_name">Hearit 재생 알림</string>
+    <string name="notification_title_preparing">히어릿 재생 준비 중</string>
+    <string name="notification_text_preparing">재생을 준비하고 있어요.</string>
+    <string name="notification_title_playing">히어릿 재생 중</string>
+    <string name="notification_text_playing">음악이 재생되고 있어요.</string>
 </resources>
