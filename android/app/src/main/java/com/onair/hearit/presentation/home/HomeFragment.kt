@@ -110,22 +110,6 @@ class HomeFragment :
             adapter = recommendAdapter
             snapHelper.attachToRecyclerView(this)
 
-        // 중심 아이템 강조 효과
-        binding.rvHomeRecommendHearit.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(
-                    recyclerView: RecyclerView,
-                    dx: Int,
-                    dy: Int,
-                ) {
-                    val centerX = recyclerView.width / 2
-                    for (i in 0 until recyclerView.childCount) {
-                        val child = recyclerView.getChildAt(i) ?: continue
-                        applyCenterScalingEffect(child, centerX, recyclerView)
-                    }
-                }
-            },
-        )
             addOnScrollListener(
                 object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(
@@ -138,6 +122,7 @@ class HomeFragment :
                         val snapView = snapHelper.findSnapView(layoutManager) ?: return
                         val position = layoutManager.getPosition(snapView)
                         updateCenterEffect(recyclerView)
+                        updateIndicator(position)
                     }
                 },
             )
@@ -152,10 +137,49 @@ class HomeFragment :
         }
     }
 
+    private fun updateIndicator(position: Int) {
+        val count = indicatorContainer.childCount
+        if (count == 0) return
+        setCurrentIndicator(position % count)
     }
 
-    private fun setupCategoryRecyclerView() {
-        binding.rvHomeCategory.adapter = categoryAdapter
+    private fun setupIndicator(size: Int) {
+        indicatorContainer = binding.indicatorContainer
+        indicatorContainer.removeAllViews()
+
+        repeat(size) { index ->
+            val dot =
+                View(requireContext()).apply {
+                    val sizeInPx = (8 * resources.displayMetrics.density).toInt()
+                    layoutParams =
+                        LinearLayout.LayoutParams(sizeInPx, sizeInPx).apply {
+                            marginStart = sizeInPx / 2
+                            marginEnd = sizeInPx / 2
+                        }
+                    setBackgroundResource(R.drawable.indicator_unselected)
+                    setOnClickListener { scrollToIndex(index) }
+                }
+            indicatorContainer.addView(dot)
+        }
+        setCurrentIndicator(0)
+    }
+
+    private fun scrollToIndex(index: Int) {
+        val layoutManager = binding.rvHomeRecommend.layoutManager as? LinearLayoutManager ?: return
+        val recyclerCenter = binding.rvHomeRecommend.width / 2
+        val itemWidth = (260 * resources.displayMetrics.density).toInt()
+        val offset = recyclerCenter - (itemWidth / 2)
+
+        layoutManager.scrollToPositionWithOffset(index, offset)
+    }
+
+    private fun setCurrentIndicator(index: Int) {
+        for (i in 0 until indicatorContainer.childCount) {
+            val dot = indicatorContainer.getChildAt(i)
+            val drawableRes =
+                if (i == index) R.drawable.indicator_selected else R.drawable.indicator_unselected
+            dot.setBackgroundResource(drawableRes)
+        }
     }
 
     private fun applyCenterScalingEffect(
@@ -220,6 +244,7 @@ class HomeFragment :
                 )
             recommendAdapter.submitList(items) {
                 scrollToMiddlePosition()
+                setupIndicator(items.size)
             }
         }
 
