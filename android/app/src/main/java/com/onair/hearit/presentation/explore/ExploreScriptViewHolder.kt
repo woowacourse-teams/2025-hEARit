@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemExploreScriptBinding
 import com.onair.hearit.domain.model.ScriptLine
 
-class ScriptViewHolder(
+class ExploreScriptViewHolder(
     private val binding: ItemExploreScriptBinding,
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(
@@ -18,10 +18,10 @@ class ScriptViewHolder(
     }
 
     companion object {
-        fun create(parent: ViewGroup): ScriptViewHolder {
+        fun create(parent: ViewGroup): ExploreScriptViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemExploreScriptBinding.inflate(inflater, parent, false)
-            return ScriptViewHolder(binding)
+            return ExploreScriptViewHolder(binding)
         }
     }
 }
