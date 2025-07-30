@@ -12,12 +12,14 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HomeCategoryHearitResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.BookmarkRepository;
+import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -43,11 +45,14 @@ class HearitServiceTest {
     @Autowired
     private BookmarkRepository bookmarkRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     private HearitService hearitService;
 
     @BeforeEach
     void setup() {
-        hearitService = new HearitService(hearitRepository, bookmarkRepository);
+        hearitService = new HearitService(hearitRepository, bookmarkRepository, categoryRepository);
     }
 
     @Test
@@ -118,5 +123,34 @@ class HearitServiceTest {
 
         // then
         assertThat(hearits).hasSize(5);
+    }
+
+    @Test
+    @DisplayName("홈 카테고리의 히어릿들을 키워드와 함께 조회할 수 있다.")
+    void getHomeCategoryHearits() {
+        // given
+        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        Category category3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+
+        // when
+        List<HomeCategoryHearitResponse> responses = hearitService.getHomeCategoryHearits();
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(3),
+                () -> assertThat(responses.get(0).hearits()).hasSize(3),
+                () -> assertThat(responses.get(1).hearits()).hasSize(3),
+                () -> assertThat(responses.get(2).hearits()).hasSize(3)
+        );
     }
 }
