@@ -6,18 +6,18 @@ import java.time.LocalDateTime;
 public record RecommendHearitResponse(
         Long id,
         String title,
-        String summary,
-        String source,
         Integer playTime,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String categoryName,
+        String categoryColor
 ) {
     public static RecommendHearitResponse from(Hearit hearit) {
         return new RecommendHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
-                hearit.getSummary(),
-                hearit.getSource(),
                 hearit.getPlayTime(),
-                hearit.getCreatedAt());
+                hearit.getCreatedAt(),
+                hearit.getCategory().getName(),
+                hearit.getCategory().getColorCode());
     }
 }
