@@ -41,7 +41,7 @@ public class AdminKeywordController {
     }
 
     @PostMapping
-    public ResponseEntity<KeywordInfoResponse> createKeyword(@RequestBody KeywordCreateRequest request) {
+    public ResponseEntity<Void> createKeyword(@RequestBody KeywordCreateRequest request) {
         adminKeywordService.addKeyword(request);
         return ResponseEntity.created(URI.create("/")).build();
     }
