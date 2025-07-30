@@ -14,8 +14,8 @@ import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.MainActivity
-import com.onair.hearit.presentation.search.SearchResultFragment
 import com.onair.hearit.presentation.search.category.CategoryAdapter
+import com.onair.hearit.presentation.search.result.SearchResultFragment
 
 class CategoryFragment :
     Fragment(),

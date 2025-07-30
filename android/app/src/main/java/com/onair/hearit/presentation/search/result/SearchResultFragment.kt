@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search
+package com.onair.hearit.presentation.search.result
 
 import android.annotation.SuppressLint
 import android.content.Context

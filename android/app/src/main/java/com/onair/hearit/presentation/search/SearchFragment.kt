@@ -20,6 +20,7 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
+import com.onair.hearit.presentation.search.result.SearchResultFragment
 
 class SearchFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -54,9 +55,27 @@ class SearchFragment : Fragment() {
         observeViewModel()
         setupSearchEndIcon()
 
-        binding.nsvSearch.setOnTouchListener { _, _ ->
-            hideKeyboard()
-            false
+        binding.ivBack.setOnClickListener {
+            childFragmentManager.popBackStack()
+        }
+
+        childFragmentManager.addOnBackStackChangedListener {
+            updateTopUi()
+        }
+
+        updateTopUi()
+    }
+
+    private fun updateTopUi() {
+        val currentFragment =
+            childFragmentManager.findFragmentById(R.id.fl_search_container)
+
+        if (currentFragment is SearchResultFragment) {
+            binding.tvSearchLogo.visibility = View.GONE
+            binding.ivBack.visibility = View.VISIBLE
+        } else {
+            binding.tvSearchLogo.visibility = View.VISIBLE
+            binding.ivBack.visibility = View.GONE
         }
     }
 

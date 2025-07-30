@@ -17,9 +17,9 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
-import com.onair.hearit.presentation.search.SearchResultFragment
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
+import com.onair.hearit.presentation.search.result.SearchResultFragment
 
 class SearchCategoryFragment :
     Fragment(),
@@ -71,7 +71,6 @@ class SearchCategoryFragment :
 
     private fun navigateToSearchResult(input: SearchInput) {
         val fragment = SearchResultFragment.newInstance(input)
-
         parentFragmentManager
             .beginTransaction()
             .replace(R.id.fl_search_container, fragment)

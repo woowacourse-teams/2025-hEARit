@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search
+package com.onair.hearit.presentation.search.result
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +11,7 @@ import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.term
 import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.search.SearchUiState
 import kotlinx.coroutines.launch
 
 class SearchResultViewModel(
