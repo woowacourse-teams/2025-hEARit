@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
-import com.onair.hearit.auth.dto.response.TokenResponse;
+import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
@@ -92,10 +92,10 @@ class AuthServiceTest {
         LoginRequest loginRequest = new LoginRequest("localId", "password");
 
         // when
-        TokenResponse tokenResponse = authService.login(loginRequest);
+        LoginTokenResponse loginTokenResponse = authService.login(loginRequest);
 
         // then
-        assertThat(tokenResponse.accessToken()).isNotNull();
+        assertThat(loginTokenResponse.accessToken()).isNotNull();
     }
 
     @Test

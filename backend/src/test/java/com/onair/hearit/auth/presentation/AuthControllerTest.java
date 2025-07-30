@@ -5,7 +5,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.onair.hearit.auth.dto.request.LoginRequest;
-import com.onair.hearit.auth.dto.response.TokenResponse;
+import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.IntegrationTest;
@@ -37,16 +37,16 @@ class AuthControllerTest extends IntegrationTest {
 
         LoginRequest request = new LoginRequest("test123", "pass1234");
 
-        TokenResponse tokenResponse = given().log().all()
+        LoginTokenResponse loginTokenResponse = given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
                 .post("/api/v1/auth/login")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .extract().as(TokenResponse.class);
+                .extract().as(LoginTokenResponse.class);
 
-        assertThat(tokenResponse.accessToken()).isNotNull();
+        assertThat(loginTokenResponse.accessToken()).isNotNull();
     }
 
     @Test

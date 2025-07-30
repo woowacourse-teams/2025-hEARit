@@ -1,0 +1,13 @@
+package com.onair.hearit.auth.infrastructure.jwt;
+
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+
+    Optional<RefreshToken> findByMemberId(Long memberId);
+
+    Optional<RefreshToken> findByToken(String token);
+
+    void deleteByMemberId(Long memberId);
+}

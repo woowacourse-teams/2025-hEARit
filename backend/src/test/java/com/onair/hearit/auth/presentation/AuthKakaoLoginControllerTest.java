@@ -7,7 +7,7 @@ import static io.restassured.RestAssured.given;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
-import com.onair.hearit.auth.dto.response.TokenResponse;
+import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.fixture.IntegrationTest;
 import io.restassured.http.ContentType;
@@ -57,18 +57,18 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
                                 """)));
 
         KakaoLoginRequest kakaoLoginRequest = new KakaoLoginRequest("accessToken-test-example");
-        TokenResponse tokenResponse = given().log().all()
+        LoginTokenResponse loginTokenResponse = given().log().all()
                 .contentType(ContentType.JSON)
                 .body(kakaoLoginRequest)
                 .when()
                 .post("/api/v1/auth/kakao-login")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .extract().as(TokenResponse.class);
+                .extract().as(LoginTokenResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(tokenResponse).isNotNull();
-            softly.assertThat(tokenResponse.accessToken()).isNotNull();
+            softly.assertThat(loginTokenResponse).isNotNull();
+            softly.assertThat(loginTokenResponse.accessToken()).isNotNull();
         });
     }
 

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
-import com.onair.hearit.auth.dto.response.TokenResponse;
+import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.config.TestJpaAuditingConfig;
@@ -55,7 +55,7 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(accessToken);
 
         // when
-        TokenResponse response = authService.loginWithKakao(request);
+        LoginTokenResponse response = authService.loginWithKakao(request);
 
         // then
         assertThat(response.accessToken()).isNotBlank();
@@ -81,7 +81,7 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(accessToken);
 
         // when
-        TokenResponse response = authService.loginWithKakao(request);
+        LoginTokenResponse response = authService.loginWithKakao(request);
 
         // then
         assertThat(response.accessToken()).isNotBlank();

@@ -1,6 +1,6 @@
 package com.onair.hearit.auth.dto.response;
 
-public record TokenResponse(
+public record TokenReissueResponse(
         String accessToken
 ) {
 }
