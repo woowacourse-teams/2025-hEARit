@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>히어릿 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+<div th:replace="admin/navbar :: navbar"></div>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>히어릿 추가</h1>
+    </div>
+
+    <!-- 히어릿 추가 폼 -->
+    <div id="upload-section" class="card card-body mb-4" style="display: block;">
+        <h2 class="mb-3">새 히어릿 업로드</h2>
+        <form id="upload-form">
+            <div class="row">
+                <div class="col-md-6 mb-3"><label for="title" class="form-label">제목</label><input type="text" class="form-control" id="title" name="title"></div>
+                <div class="col-md-6 mb-3"><label for="source" class="form-label">출처</label><input type="text" class="form-control" id="source" name="source"></div>
+            </div>
+            <div class="mb-3"><label for="summary" class="form-label">요약</label><textarea class="form-control" id="summary" name="summary" rows="2"></textarea></div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="originalAudio" class="form-label">원본 오디오 파일</label>
+                    <input type="file" class="form-control" id="originalAudio" name="originalAudio" accept="audio/mpeg" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="mb-3">
+                        <label for="shortAudio" class="form-label">요약 오디오 파일 (1분)</label>
+                        <input type="file" class="form-control" id="shortAudio" name="shortAudio" accept="audio/mpeg" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="mb-3">
+                        <label for="scriptFile" class="form-label">대본 JSON 파일</label>
+                        <input type="file" class="form-control" id="scriptFile" name="scriptFile" accept="application/json" required>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3"><label for="playTime" class="form-label">재생 시간(초)</label><input type="number" class="form-control" id="playTime" name="playTime"></div>
+                <div class="col-md-3 mb-3"><label for="categoryId" class="form-label">카테고리</label><select id="categoryId" name="categoryId" class="form-select" required><option value="" disabled selected>선택...</option></select></div>
+            </div>
+            <div class="mb-3"><label class="form-label d-block">키워드</label><div id="keyword-checkboxes"></div></div>
+            <button type="submit" class="btn btn-success">등록</button>
+            <button type="button" class="btn btn-secondary" id="cancel-upload">취소</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    async function fetchCategories() {
+        try {
+            const response = await fetch('/api/v1/admin/categories/all');
+            if (response.ok) {
+                const categories = await response.json();
+                const categorySelect = document.getElementById('categoryId');
+                categorySelect.innerHTML = '<option value="" disabled selected>카테고리를 선택하세요</option>';
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    categorySelect.appendChild(option);
+                });
+            } else console.error('카테고리를 불러오는 데 실패했습니다.');
+        } catch (error) { console.error('Error fetching categories:', error); }
+    }
+
+    async function fetchKeywords() {
+        try {
+            const response = await fetch('/api/v1/admin/keywords/all');
+            if (response.ok) {
+                const keywords = await response.json();
+                const keywordCheckboxes = document.getElementById('keyword-checkboxes');
+                keywordCheckboxes.innerHTML = '';
+                keywords.forEach(keyword => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'form-check form-check-inline';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'form-check-input';
+                    checkbox.name = 'keywordIds';
+                    checkbox.value = keyword.id;
+                    checkbox.id = `keyword-${keyword.id}`;
+                    const label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.setAttribute('for', `keyword-${keyword.id}`);
+                    label.textContent = keyword.name;
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(label);
+                    keywordCheckboxes.appendChild(wrapper);
+                });
+            } else console.error('키워드를 불러오는 데 실패했습니다.');
+        } catch (error) { console.error('Error fetching keywords:', error); }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchCategories();
+        fetchKeywords();
+
+        document.getElementById('cancel-upload').addEventListener('click', () => {
+            document.getElementById('upload-form').reset();
+        });
+
+        // Intercept upload form submission and send via fetch
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            formData.set("shortAudio", document.getElementById("shortAudio").files[0]);
+            formData.set("scriptFile", document.getElementById("scriptFile").files[0]);
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            try {
+                const response = await fetch('/api/v1/admin/hearits', {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    },
+                    body: formData
+                });
+                if (response.ok) {
+                    alert('히어릿이 성공적으로 업로드되었습니다.');
+                    form.reset();
+                } else {
+                    const responseText = await response.text();
+                    let errorMessage = '서버 오류';
+                    try {
+                        const errorData = JSON.parse(responseText);
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (_) {}
+                    alert('업로드 실패: ' + errorMessage);
+                }
+            } catch (error) {
+                console.error('Error uploading hearit:', error);
+                alert('업로드 중 오류가 발생했습니다.');
+            }
+        });
+    });
+</script>
+</body>
+</html>

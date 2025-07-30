@@ -1,14 +1,15 @@
 package com.onair.hearit.admin.dto.request;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public record HearitCreateRequest(
         String title,
         String summary,
         Integer playTime,
-        String originalAudioUrl,
-        String shortAudioUrl,
-        String scriptUrl,
+        MultipartFile originalAudio,
+        MultipartFile shortAudio,
+        MultipartFile scriptFile,
         String source,
         Long categoryId,
         List<Long> keywordIds
