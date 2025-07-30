@@ -31,12 +31,16 @@
         <TextView
             android:id="@+id/tv_script_hearit_title"
             style="@style/pretendard_sub_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="56dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
             android:text="@{hearit.title}"
             app:layout_constraintBottom_toBottomOf="@id/ib_script_down"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ib_script_down"
             app:layout_constraintTop_toTopOf="@id/ib_script_down"
             tools:text="HTTP와 HTTPS의 차이에 대해 알아볼까요" />
 
@@ -61,6 +65,15 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@id/base_controller"
             app:layout_constraintTop_toBottomOf="@id/tv_script_hearit_category" />
+
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/player_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rv_script"
+            app:use_controller="false" />
 
         <com.onair.hearit.presentation.detail.BaseControllerView
             android:id="@+id/base_controller"
