@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
-import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.KeywordRepository
@@ -20,9 +19,6 @@ class SearchViewModel(
     private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
     val categories: LiveData<List<Category>> = _categories
 
-    private val _keywords: MutableLiveData<List<Keyword>> = MutableLiveData()
-    val keywords: LiveData<List<Keyword>> = _keywords
-
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
@@ -35,20 +31,7 @@ class SearchViewModel(
     }
 
     private fun fetchData() {
-        getRecommendKeywords()
         getCategories()
-    }
-
-    private fun getRecommendKeywords() {
-        viewModelScope.launch {
-            keywordRepository
-                .getRecommendKeywords()
-                .onSuccess { keywords ->
-                    _keywords.value = keywords
-                }.onFailure {
-                    _toastMessage.value = R.string.search_toast_keywords_load_fail
-                }
-        }
     }
 
     private fun getCategories() {

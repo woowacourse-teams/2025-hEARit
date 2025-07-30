@@ -13,10 +13,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
@@ -30,12 +26,10 @@ import com.onair.hearit.presentation.home.CategoryAdapter
 
 class SearchFragment :
     Fragment(),
-    CategoryClickListener,
-    KeywordClickListener {
+    CategoryClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-    private val keywordAdapter by lazy { KeywordAdapter(this) }
     private val categoryAdapter by lazy { CategoryAdapter(this) }
     private val viewModel: SearchViewModel by viewModels {
         SearchViewModelFactory(CrashlyticsProvider.get())
@@ -59,7 +53,6 @@ class SearchFragment :
 
         setupWindowInsets()
         setupSearchEnterKey()
-        setKeywordRecyclerView()
         setupCategoryRecyclerView()
         observeViewModel()
         setupSearchEndIcon()
@@ -94,26 +87,12 @@ class SearchFragment :
                         .toString()
                         .trim()
                 if (searchTerm.isNotBlank()) {
-                    navigateToSearchResult(
-                        SearchInput.Keyword(searchTerm),
-                    )
+                    navigateToSearchResult(SearchInput.Keyword(searchTerm))
                     hideKeyboard()
                 }
             }
             false
         }
-    }
-
-    private fun setKeywordRecyclerView() {
-        val layoutManager =
-            FlexboxLayoutManager(requireContext()).apply {
-                flexDirection = FlexDirection.ROW
-                flexWrap = FlexWrap.WRAP
-                justifyContent = JustifyContent.CENTER
-            }
-
-        binding.rvKeyword.layoutManager = layoutManager
-        binding.rvKeyword.adapter = keywordAdapter
     }
 
     private fun setupCategoryRecyclerView() {
@@ -128,9 +107,7 @@ class SearchFragment :
                     .trim()
             if (searchTerm.isNotBlank()) {
                 hideKeyboard()
-                navigateToSearchResult(
-                    SearchInput.Keyword(searchTerm),
-                )
+                navigateToSearchResult(SearchInput.Keyword(searchTerm))
             }
         }
     }
@@ -138,10 +115,6 @@ class SearchFragment :
     private fun observeViewModel() {
         viewModel.categories.observe(viewLifecycleOwner) { categories ->
             categoryAdapter.submitList(categories)
-        }
-
-        viewModel.keywords.observe(viewLifecycleOwner) { keywords ->
-            keywordAdapter.submitList(keywords)
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
@@ -173,19 +146,6 @@ class SearchFragment :
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun onKeywordClick(keyword: String) {
-        AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.SEARCH_KEYWORD_SELECTED,
-            mapOf(
-                AnalyticsParamKeys.KEYWORD_NAME to keyword,
-                AnalyticsParamKeys.SCREEN_NAME to AnalyticsScreenInfo.Search.NAME,
-            ),
-        )
-
-        navigateToSearchResult(SearchInput.Keyword(keyword))
-        hideKeyboard()
     }
 
     override fun onCategoryClick(

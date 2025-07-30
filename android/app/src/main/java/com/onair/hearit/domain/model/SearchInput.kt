@@ -27,6 +27,7 @@ sealed class SearchInput {
         private const val KEYWORD_KEY = "keyword"
         private const val CATEGORY_ID_KEY = "categoryId"
         private const val CATEGORY_NAME_KEY = "categoryName"
+        private const val ERROR_INVALID_TERM_MESSAGE = "유효하지 않은 검색어입니다"
 
         fun from(bundle: Bundle): SearchInput =
             when {
@@ -39,7 +40,7 @@ sealed class SearchInput {
                         bundle.getString(CATEGORY_NAME_KEY) ?: "",
                     )
 
-                else -> throw IllegalArgumentException("유효하지 않은 값입니다")
+                else -> throw IllegalArgumentException(ERROR_INVALID_TERM_MESSAGE)
             }
     }
 }
