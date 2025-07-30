@@ -12,8 +12,8 @@ import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
-import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.CategoryRepository;
+import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +29,6 @@ public class HearitService {
 
     private static final int RECOMMEND_HEARIT_COUNT = 5;
     private static final int CATEGORY_HEARIT_COUNT = 5;
-    private static final List<Long> FIXED_CATEGORY_IDS = List.of(2L, 3L, 4L); // Android, Spring, Java
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
