@@ -74,15 +74,15 @@ class AdminHearitControllerTest extends IntegrationTest {
         given(s3Uploader.uploadScriptFile(any())).willReturn("mock/script.json");
 
         // when & then
-        RestAssured.given().log().all()
+        RestAssured.given().log().uri()
                 .cookie("JSESSIONID", csrfSession.sessionId())
                 .header("X-CSRF-TOKEN", csrfSession.csrfToken())
                 .multiPart("title", "히어릿 제목")
                 .multiPart("summary", "히어릿 요약")
                 .multiPart("playTime", "100")
-                .multiPart("originalAudio", new File("src/test/resources/test.mp3"))
-                .multiPart("shortAudio", new File("src/test/resources/test_short.mp3"))
-                .multiPart("scriptFile", new File("src/test/resources/test_script.json"))
+                .multiPart("originalAudio", new File("src/test/resources/ORG_test.mp3"))
+                .multiPart("shortAudio", new File("src/test/resources/SHR_test.mp3"))
+                .multiPart("scriptFile", new File("src/test/resources/SCR_test.json"))
                 .multiPart("source", "출처")
                 .multiPart("categoryId", category.getId().toString())
                 .multiPart("keywordIds", keyword.getId().toString())

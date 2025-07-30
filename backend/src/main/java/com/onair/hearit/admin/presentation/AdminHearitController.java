@@ -7,6 +7,7 @@ import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -39,7 +40,7 @@ public class AdminHearitController {
     }
 
     @PostMapping(value = "/hearits", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> createHearit(@ModelAttribute HearitCreateRequest request) {
+    public ResponseEntity<Void> createHearit(@ModelAttribute @Valid HearitCreateRequest request) {
         adminHearitService.addHearit(request);
         return ResponseEntity.created(URI.create("/")).build();
     }

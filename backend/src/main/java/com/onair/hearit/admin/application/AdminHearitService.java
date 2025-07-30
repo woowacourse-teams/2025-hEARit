@@ -4,6 +4,7 @@ import com.onair.hearit.admin.dto.request.HearitCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse.KeywordInHearit;
+import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +69,7 @@ public class AdminHearitService {
 
     @Transactional
     public void addHearit(HearitCreateRequest request) {
+        validateFiles(request.originalAudio(), request.shortAudio(), request.scriptFile());
         String originalAudioPath = s3Uploader.uploadOriginalAudio(request.originalAudio());
         String shortAudioPath = s3Uploader.uploadShortAudio(request.shortAudio());
         String scriptFilePath = s3Uploader.uploadScriptFile(request.scriptFile());
@@ -76,6 +79,24 @@ public class AdminHearitService {
                 shortAudioPath, scriptFilePath, request.source(), category);
         Hearit savedHearit = hearitRepository.save(hearit);
         saveHearitKeywords(request.keywordIds(), savedHearit);
+    }
+
+    private void validateFiles(MultipartFile originalAudio, MultipartFile shortAudio, MultipartFile scriptFile) {
+        String originalFilename = originalAudio.getOriginalFilename();
+        String shortFileName = shortAudio.getOriginalFilename();
+        String scriptFileName = scriptFile.getOriginalFilename();
+
+        if (!originalFilename.startsWith("ORG")) {
+            throw new InvalidInputException("원본 오디오 파일명은 'ORG'로 시작해야 합니다.");
+        }
+
+        if (!shortFileName.startsWith("SHR")) {
+            throw new InvalidInputException("요약 오디오 파일명은 'SHR'로 시작해야 합니다.");
+        }
+
+        if (!scriptFileName.startsWith("SCR")) {
+            throw new InvalidInputException("스크립트 파일명은 'SCR'로 시작해야 합니다.");
+        }
     }
 
     private Category getCategoryById(Long categoryId) {
