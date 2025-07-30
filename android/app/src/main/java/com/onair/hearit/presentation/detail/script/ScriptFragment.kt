@@ -1,22 +1,32 @@
 package com.onair.hearit.presentation.detail.script
 
+import android.content.ComponentName
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import com.onair.hearit.databinding.FragmentScriptBinding
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.presentation.detail.PlaybackService
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
+import kotlinx.coroutines.launch
 
 class ScriptFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentScriptBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var mediaController: MediaController
 
     private val adapter by lazy { ScriptAdapter() }
 
@@ -36,6 +46,7 @@ class ScriptFragment : Fragment() {
         return binding.root
     }
 
+    @UnstableApi
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?,
@@ -47,6 +58,7 @@ class ScriptFragment : Fragment() {
         setupRecyclerView()
         setupBackPressedHandler()
         observeViewModel()
+        connectToMediaController()
     }
 
     private fun setupWindowInsets() {
@@ -75,6 +87,23 @@ class ScriptFragment : Fragment() {
         viewModel.hearit.observe(viewLifecycleOwner) { hearit ->
             binding.hearit = hearit
             adapter.submitList(hearit.script)
+        }
+    }
+
+    @UnstableApi
+    private fun connectToMediaController() {
+        val sessionToken =
+            SessionToken(
+                requireContext(),
+                ComponentName(requireContext(), PlaybackService::class.java),
+            )
+
+        lifecycleScope.launch {
+            mediaController =
+                MediaController.Builder(requireContext(), sessionToken).buildAsync().await()
+
+            binding.playerView.player = mediaController
+            binding.baseController.setPlayer(mediaController)
         }
     }
 
