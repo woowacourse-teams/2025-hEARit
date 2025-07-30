@@ -50,16 +50,15 @@ class MainActivity :
     override fun onResume() {
         super.onResume()
         mediaController?.let { controller ->
-            val isReady = controller.playbackState == Player.STATE_READY
-            val isPlaying = controller.playWhenReady
-
-            if (isReady || isPlaying) {
+            if (controller.playWhenReady || controller.playbackState == Player.STATE_READY) {
                 showPlayerControlView()
-
-                binding.layoutBottomPlayerController.setTitle(
-                    controller.mediaMetadata.title?.toString() ?: "제목 없음",
-                )
-                binding.layoutBottomPlayerController.setDuration(controller.duration)
+                binding.layoutBottomPlayerController.apply {
+                    setTitle(
+                        controller.mediaMetadata.title?.toString()
+                            ?: getString(R.string.main_bottom_player_default_title),
+                    )
+                    setDuration(controller.duration)
+                }
             } else {
                 hidePlayerControlView()
             }
@@ -91,12 +90,7 @@ class MainActivity :
                         finish()
                     } else {
                         backPressedTime = currentTime
-                        Toast
-                            .makeText(
-                                this@MainActivity,
-                                "뒤로가기 버튼을 한 번 더 누르면 종료됩니다.",
-                                Toast.LENGTH_SHORT,
-                            ).show()
+                        showToast(getString(R.string.main_toast_finish_back_pressed))
                     }
                 }
             },
@@ -117,38 +111,23 @@ class MainActivity :
     }
 
     private fun setupNavigation() {
-        binding.layoutBottomNavigation.itemIconTintList = null
-        binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
-            if (item.itemId == currentSelectedItemId) {
-                return@setOnItemSelectedListener true
-            }
-            currentSelectedItemId = item.itemId
+        binding.layoutBottomNavigation.apply {
+            itemIconTintList = null
+            setOnItemSelectedListener { item ->
+                if (item.itemId == currentSelectedItemId) return@setOnItemSelectedListener true
+                currentSelectedItemId = item.itemId
 
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    showFragment(HomeFragment())
-                    true
-                }
+                val fragment =
+                    when (item.itemId) {
+                        R.id.nav_home -> HomeFragment()
+                        R.id.nav_search -> SearchFragment().also { showPlayerControlView() }
+                        R.id.nav_explore -> ExploreFragment().also { hidePlayerControlView() }
+                        R.id.nav_library -> LibraryFragment().also { showPlayerControlView() }
+                        else -> return@setOnItemSelectedListener false
+                    }
 
-                R.id.nav_search -> {
-                    showPlayerControlView()
-                    showFragment(SearchFragment())
-                    true
-                }
-
-                R.id.nav_explore -> {
-                    hidePlayerControlView()
-                    showFragment(ExploreFragment())
-                    true
-                }
-
-                R.id.nav_library -> {
-                    showPlayerControlView()
-                    showFragment(LibraryFragment())
-                    true
-                }
-
-                else -> false
+                showFragment(fragment)
+                true
             }
         }
     }
@@ -265,6 +244,8 @@ class MainActivity :
 
     override fun onDestroy() {
         super.onDestroy()
+        mediaController?.release()
+        mediaController = null
     }
 
     companion object {
