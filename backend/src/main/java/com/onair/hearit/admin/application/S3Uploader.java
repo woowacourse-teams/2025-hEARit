@@ -1,8 +1,10 @@
 package com.onair.hearit.admin.application;
 
+import com.onair.hearit.admin.exception.S3Exception;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,6 +12,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3Uploader {
@@ -46,7 +49,8 @@ public class S3Uploader {
             );
             return key;
         } catch (IOException e) {
-            throw new RuntimeException("파일 업로드 실패", e);
+            log.error("S3 파일 업로드 실패: " + multipartFile.getOriginalFilename(), e);
+            throw new S3Exception("S3 파일 업로드 실패", e);
         }
     }
 }
