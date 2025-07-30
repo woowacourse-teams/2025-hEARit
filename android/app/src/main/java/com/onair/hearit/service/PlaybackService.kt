@@ -22,6 +22,8 @@ class PlaybackService : MediaSessionService() {
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
 
+    private var playerListener: Player.Listener? = null
+
     private var isServiceStarted = false
 
     override fun onCreate() {
@@ -30,20 +32,20 @@ class PlaybackService : MediaSessionService() {
         createNotificationChannel()
 
         player = ExoPlayer.Builder(this).build()
-        player.addListener(
+        playerListener =
             object : Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     if (isPlaying) {
                         startServiceForeground()
                     }
                 }
-            },
-        )
+            }
+        player.addListener(playerListener!!)
 
         mediaSession =
             MediaSession
                 .Builder(this, player)
-                .setId("hearit_session")
+                .setId(SESSION_ID)
                 .build()
 
         setMediaNotificationProvider(
@@ -57,14 +59,10 @@ class PlaybackService : MediaSessionService() {
         startId: Int,
     ): Int {
         super.onStartCommand(intent, flags, startId)
-        createNotificationChannel()
 
-        val notification = buildNotification("히어릿 재생 준비 중", "재생을 준비하고 있어요.")
-        startForeground(1001, notification)
-
-        val audioUrl = intent?.getStringExtra(AUDIO_URL)
-        val title = intent?.getStringExtra(TITLE) ?: "hearit"
-        val hearitId = intent?.getLongExtra(HEARIT_ID, -1) ?: -1
+        val audioUrl = intent?.getStringExtra(EXTRA_AUDIO_URL)
+        val title = intent?.getStringExtra(EXTRA_TITLE) ?: "hearit"
+        val hearitId = intent?.getLongExtra(EXTRA_HEARIT_ID, -1L) ?: -1L
 
         if (!audioUrl.isNullOrEmpty() && hearitId != -1L) {
             val mediaItem =
@@ -86,19 +84,19 @@ class PlaybackService : MediaSessionService() {
     private fun createNotificationChannel() {
         val channel =
             NotificationChannel(
-                "hearit_channel",
-                "Hearit Playback",
+                CHANNEL_ID,
+                getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_LOW,
             )
-        val notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.createNotificationChannel(channel)
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
     }
 
     private fun buildNotification(
         title: String,
         content: String,
     ) = NotificationCompat
-        .Builder(this, "hearit_channel")
+        .Builder(this, CHANNEL_ID)
         .setContentTitle(title)
         .setContentText(content)
         .setSmallIcon(R.drawable.ic_mini_notification)
@@ -108,8 +106,11 @@ class PlaybackService : MediaSessionService() {
     private fun startServiceForeground() {
         if (!isServiceStarted) {
             val notification =
-                buildNotification("히어릿 재생 중", "음악이 재생되고 있어요.")
-            startForeground(1001, notification)
+                buildNotification(
+                    getString(R.string.notification_title_playing),
+                    getString(R.string.notification_text_playing),
+                )
+            startForeground(NOTIFICATION_ID, notification)
             isServiceStarted = true
         }
     }
@@ -118,14 +119,18 @@ class PlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         mediaSession.release()
+        playerListener?.let { player.removeListener(it) }
         player.release()
         super.onDestroy()
     }
 
     companion object {
-        private const val AUDIO_URL = "AUDIO_URL"
-        private const val TITLE = "TITLE"
-        private const val HEARIT_ID = "HEARIT_ID"
+        private const val NOTIFICATION_ID = 1001
+        private const val CHANNEL_ID = "hearit_channel"
+        private const val SESSION_ID = "hearit_session"
+        private const val EXTRA_AUDIO_URL = "AUDIO_URL"
+        private const val EXTRA_TITLE = "TITLE"
+        private const val EXTRA_HEARIT_ID = "HEARIT_ID"
 
         fun newIntent(
             context: Context,
@@ -134,9 +139,9 @@ class PlaybackService : MediaSessionService() {
             hearitId: Long,
         ): Intent =
             Intent(context, PlaybackService::class.java).apply {
-                putExtra(AUDIO_URL, audioUrl)
-                putExtra(TITLE, title)
-                putExtra(HEARIT_ID, hearitId)
+                putExtra(EXTRA_AUDIO_URL, audioUrl)
+                putExtra(EXTRA_TITLE, title)
+                putExtra(EXTRA_HEARIT_ID, hearitId)
             }
     }
 }
