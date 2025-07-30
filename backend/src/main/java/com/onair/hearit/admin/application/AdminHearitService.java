@@ -36,7 +36,7 @@ public class AdminHearitService {
     private final CategoryRepository categoryRepository;
     private final KeywordRepository keywordRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
-    private final S3Uploader s3Uploader;
+    private final FileStorageService fileStorageService;
 
     public PagedResponse<HearitAdminResponse> getHearits(PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(
@@ -70,9 +70,9 @@ public class AdminHearitService {
     @Transactional
     public void addHearit(HearitCreateRequest request) {
         FileValidator.validateAll(request.originalAudio(), request.shortAudio(), request.scriptFile());
-        String originalAudioPath = s3Uploader.uploadFile(request.originalAudio(), FileType.ORIGINAL);
-        String shortAudioPath = s3Uploader.uploadFile(request.shortAudio(), FileType.SHORT);
-        String scriptFilePath = s3Uploader.uploadFile(request.scriptFile(), FileType.SCRIPT);
+        String originalAudioPath = fileStorageService.uploadFile(request.originalAudio(), FileType.ORIGINAL);
+        String shortAudioPath = fileStorageService.uploadFile(request.shortAudio(), FileType.SHORT);
+        String scriptFilePath = fileStorageService.uploadFile(request.scriptFile(), FileType.SCRIPT);
 
         Category category = getCategoryById(request.categoryId());
         Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), originalAudioPath,

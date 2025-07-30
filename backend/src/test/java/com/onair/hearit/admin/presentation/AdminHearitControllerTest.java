@@ -3,9 +3,11 @@ package com.onair.hearit.admin.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-import com.onair.hearit.admin.application.S3Uploader;
+import com.onair.hearit.admin.application.FileStorageService;
+import com.onair.hearit.admin.domain.FileType;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
@@ -32,7 +34,8 @@ class AdminHearitControllerTest extends IntegrationTest {
     private HearitRepository hearitRepository;
 
     @MockitoBean
-    private S3Uploader s3Uploader;
+    private FileStorageService fileStorageService;
+
     @Test
     @DisplayName("히어릿 목록을 페이징 조회할 수 있다")
     void getPagedHearits() {
@@ -69,10 +72,9 @@ class AdminHearitControllerTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
 
-        given(s3Uploader.uploadOriginalAudio(any())).willReturn("mock/origin.mp3");
-        given(s3Uploader.uploadShortAudio(any())).willReturn("mock/short.mp3");
-        given(s3Uploader.uploadScriptFile(any())).willReturn("mock/script.json");
-
+        given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("mock/origin.mp3");
+        given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn("mock/short.mp3");
+        given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("mock/script.json");
         // when & then
         RestAssured.given().log().uri()
                 .cookie("JSESSIONID", csrfSession.sessionId())
