@@ -31,6 +31,8 @@ class SearchFragment : Fragment() {
     private val viewModel: SearchViewModel by viewModels {
         SearchViewModelFactory(CrashlyticsProvider.get())
     }
+    private val categoryFragment by lazy { SearchCategoryFragment.newInstance() }
+    private val recentFragment by lazy { SearchRecentFragment.newInstance() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,25 +49,45 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        navigateToSearchCategory()
+        showCategoryFragment()
         setupWindowInsets()
-        setupSearchEnterKey()
-        setupSearchBarClickListener()
-        setupSearchEndIcon()
+        setupSearchInput()
         observeViewModel()
+        setupFragmentResultListeners()
+        setupBackAndCancelButtons()
+        updateAppBarUIOnBackStackChanged()
+    }
 
-        binding.ivBack.setOnClickListener {
-            navigateToSearchCategory()
+    private fun setupSearchInput() {
+        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performSearchFromInput()
+            }
+            false
         }
 
-        binding.tvSearchCancel.setOnClickListener {
-            navigateToSearchCategory()
+        binding.tilSearch.setEndIconOnClickListener {
+            performSearchFromInput()
         }
 
-        childFragmentManager.addOnBackStackChangedListener {
-            updateAppBarUI()
+        binding.etSearch.setOnClickListener {
+            showRecentFragment()
         }
+    }
 
+    private fun performSearchFromInput() {
+        val searchTerm =
+            binding.etSearch.text
+                ?.toString()
+                ?.trim()
+                .orEmpty()
+        if (searchTerm.isNotBlank()) {
+            navigateToSearchResult(SearchInput.Keyword(searchTerm))
+            hideKeyboard()
+        }
+    }
+
+    private fun setupFragmentResultListeners() {
         childFragmentManager.setFragmentResultListener(
             "recent_keyword",
             viewLifecycleOwner,
@@ -78,10 +100,26 @@ class SearchFragment : Fragment() {
             "category",
             viewLifecycleOwner,
         ) { _, bundle ->
-            val keyword = bundle.getString("category").orEmpty()
-            navigateToSearchResult(SearchInput.Keyword(keyword))
+            val category = bundle.getString("category").orEmpty()
+            navigateToSearchResult(SearchInput.Keyword(category))
+        }
+    }
+
+    private fun setupBackAndCancelButtons() {
+        binding.ivBack.setOnClickListener {
+            showCategoryFragment()
         }
 
+        binding.tvSearchCancel.setOnClickListener {
+            binding.etSearch.text?.clear()
+            showCategoryFragment()
+        }
+    }
+
+    private fun updateAppBarUIOnBackStackChanged() {
+        childFragmentManager.addOnBackStackChangedListener {
+            updateAppBarUI()
+        }
         updateAppBarUI()
     }
 
@@ -110,6 +148,39 @@ class SearchFragment : Fragment() {
         }
     }
 
+    private fun showCategoryFragment() {
+        binding.etSearch.text?.clear()
+        replaceFragment(categoryFragment, TAG_SEARCH_CATEGORY)
+    }
+
+    private fun showRecentFragment() {
+        replaceFragment(recentFragment, TAG_SEARCH_RECENT)
+    }
+
+    private fun navigateToSearchResult(input: SearchInput) {
+        binding.etSearch.setText(input.term())
+        binding.etSearch.setSelection(binding.etSearch.text?.length ?: 0)
+        replaceFragment(SearchResultFragment.newInstance(input), TAG_SEARCH_RESULT)
+    }
+
+    private fun replaceFragment(
+        fragment: Fragment,
+        tag: String,
+    ) {
+        val existingFragment = childFragmentManager.findFragmentByTag(tag)
+        val transaction = childFragmentManager.beginTransaction()
+
+        if (existingFragment != null) {
+            transaction
+                .replace(R.id.fl_search_container, existingFragment, tag)
+        } else {
+            transaction
+                .replace(R.id.fl_search_container, fragment, tag)
+        }
+
+        transaction.addToBackStack(tag).commit()
+    }
+
     override fun onResume() {
         super.onResume()
         AnalyticsProvider.get().logScreenView(
@@ -126,43 +197,11 @@ class SearchFragment : Fragment() {
         }
     }
 
-    private fun setupSearchEnterKey() {
-        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val searchTerm =
-                    binding.etSearch.text
-                        .toString()
-                        .trim()
-                if (searchTerm.isNotBlank()) {
-                    navigateToSearchResult(SearchInput.Keyword(searchTerm))
-                    hideKeyboard()
-                }
-            }
-            false
-        }
-    }
-
-    private fun setupSearchEndIcon() {
-        binding.tilSearch.setEndIconOnClickListener {
-            val searchTerm =
-                binding.etSearch.text
-                    .toString()
-                    .trim()
-            if (searchTerm.isNotBlank()) {
-                hideKeyboard()
-                navigateToSearchResult(SearchInput.Keyword(searchTerm))
-            }
-        }
-    }
-
-    private fun setupSearchBarClickListener() {
-        binding.etSearch.setOnClickListener {
-            childFragmentManager
-                .beginTransaction()
-                .replace(R.id.fl_search_container, SearchRecentFragment())
-                .addToBackStack(null)
-                .commit()
-        }
+    private fun hideKeyboard() {
+        val inputMethodManager =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val view = requireActivity().currentFocus ?: binding.root
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun observeViewModel() {
@@ -171,34 +210,18 @@ class SearchFragment : Fragment() {
         }
     }
 
-    private fun navigateToSearchCategory() {
-        binding.etSearch.text?.clear()
-        childFragmentManager
-            .beginTransaction()
-            .replace(R.id.fl_search_container, SearchCategoryFragment())
-            .addToBackStack(null)
-            .commit()
-    }
-
-    private fun navigateToSearchResult(input: SearchInput) {
-        val fragment = SearchResultFragment.newInstance(input)
-        binding.etSearch.setText(input.term())
-        binding.etSearch.setSelection(binding.etSearch.text?.length ?: 0)
-        childFragmentManager
-            .beginTransaction()
-            .replace(R.id.fl_search_container, fragment)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    private fun hideKeyboard() {
-        val inputMethodManager =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val view = requireActivity().currentFocus ?: binding.root
-        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    companion object {
+        private const val TAG_SEARCH_CATEGORY = "SearchCategory"
+        private const val TAG_SEARCH_RECENT = "SearchRecent"
+        private const val TAG_SEARCH_RESULT = "SearchResult"
     }
 }

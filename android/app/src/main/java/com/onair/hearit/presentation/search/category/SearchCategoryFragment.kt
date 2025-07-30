@@ -94,4 +94,10 @@ class SearchCategoryFragment :
 
         navigateToSearchResult(SearchInput.Category(id, name))
     }
+
+    companion object {
+        const val TAG = "SearchCategory"
+
+        fun newInstance(): SearchCategoryFragment = SearchCategoryFragment()
+    }
 }

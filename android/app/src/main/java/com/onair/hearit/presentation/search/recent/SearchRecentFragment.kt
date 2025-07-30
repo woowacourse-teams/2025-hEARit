@@ -16,7 +16,6 @@ import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
-import com.onair.hearit.presentation.search.result.SearchResultFragment
 
 class SearchRecentFragment :
     Fragment(),
@@ -78,5 +77,11 @@ class SearchRecentFragment :
 
     override fun onKeywordClick(term: String) {
         navigateToSearchResult(SearchInput.Keyword(term))
+    }
+
+    companion object {
+        const val TAG = "SearchRecent"
+
+        fun newInstance(): SearchRecentFragment = SearchRecentFragment()
     }
 }
