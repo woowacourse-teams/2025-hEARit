@@ -1,16 +1,16 @@
 package com.onair.hearit.data
 
-import com.onair.hearit.data.database.RecentKeywordEntity
-import com.onair.hearit.domain.model.RecentKeyword
+import com.onair.hearit.data.database.SearchHistoryEntity
+import com.onair.hearit.domain.model.RecentSearch
 
-fun RecentKeywordEntity.toDomain(): RecentKeyword =
-    RecentKeyword(
+fun SearchHistoryEntity.toDomain(): RecentSearch =
+    RecentSearch(
         term = this.term,
         searchedAt = this.searchedAt,
     )
 
-fun RecentKeyword.toData(): RecentKeywordEntity =
-    RecentKeywordEntity(
+fun RecentSearch.toData(): SearchHistoryEntity =
+    SearchHistoryEntity(
         term = this.term,
         searchedAt = this.searchedAt,
     )

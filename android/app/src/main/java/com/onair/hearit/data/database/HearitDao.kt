@@ -14,11 +14,11 @@ interface HearitDao {
     suspend fun insertRecentHearit(entity: RecentHearitEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertKeyword(keyword: RecentKeywordEntity)
+    suspend fun insertKeyword(keyword: SearchHistoryEntity)
 
-    @Query("SELECT * FROM recent_keyword ORDER BY searchedAt DESC")
-    suspend fun getKeywords(): List<RecentKeywordEntity>
+    @Query("SELECT * FROM search_history ORDER BY searchedAt DESC")
+    suspend fun getKeywords(): List<SearchHistoryEntity>
 
-    @Query("DELETE FROM recent_keyword")
+    @Query("DELETE FROM search_history")
     suspend fun deleteKeywords()
 }

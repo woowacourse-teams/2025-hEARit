@@ -21,12 +21,12 @@ import com.onair.hearit.presentation.search.SearchViewModelFactory
 
 class SearchRecentFragment :
     Fragment(),
-    KeywordClickListener {
+    RecentSearchClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchRecentBinding? = null
     private val binding get() = _binding!!
 
-    private val recentKeywordAdapter by lazy { RecentKeywordAdapter(this) }
+    private val recentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
     private val viewModel: SearchViewModel by viewModels {
         SearchViewModelFactory(CrashlyticsProvider.get())
@@ -62,7 +62,7 @@ class SearchRecentFragment :
     }
 
     private fun setupRecyclerView() {
-        binding.rvRecentKeyword.adapter = recentKeywordAdapter
+        binding.rvRecentKeyword.adapter = recentSearchAdapter
     }
 
     private fun setupDeleteButton() {
@@ -73,7 +73,7 @@ class SearchRecentFragment :
 
     private fun observeViewModel() {
         viewModel.recentKeywords.observe(viewLifecycleOwner) { keywords ->
-            recentKeywordAdapter.submitList(keywords)
+            recentSearchAdapter.submitList(keywords)
         }
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
@@ -88,7 +88,7 @@ class SearchRecentFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onKeywordClick(term: String) {
+    override fun onRecentSearchClick(term: String) {
         navigateToSearchResult(SearchInput.Keyword(term))
     }
 

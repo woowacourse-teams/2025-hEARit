@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Paging
-import com.onair.hearit.domain.model.RecentKeyword
+import com.onair.hearit.domain.model.RecentSearch
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.presentation.SingleLiveData
@@ -20,8 +20,8 @@ class SearchViewModel(
     private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
     val categories: LiveData<List<Category>> = _categories
 
-    private val _recentKeywords: MutableLiveData<List<RecentKeyword>> = MutableLiveData()
-    val recentKeywords: LiveData<List<RecentKeyword>> = _recentKeywords
+    private val _recentKeywords: MutableLiveData<List<RecentSearch>> = MutableLiveData()
+    val recentKeywords: LiveData<List<RecentSearch>> = _recentKeywords
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage

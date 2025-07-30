@@ -7,18 +7,18 @@
 
         <variable
             name="item"
-            type="com.onair.hearit.domain.model.RecentKeyword" />
+            type="com.onair.hearit.domain.model.RecentSearch" />
 
         <variable
             name="listener"
-            type="com.onair.hearit.presentation.search.recent.KeywordClickListener" />
+            type="com.onair.hearit.presentation.search.recent.RecentSearchClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_category"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:onClick="@{() -> listener.onKeywordClick(item.term)}">
+        android:onClick="@{() -> listener.onRecentSearchClick(item.term)}">
 
         <ImageView
             android:id="@+id/iv_time"

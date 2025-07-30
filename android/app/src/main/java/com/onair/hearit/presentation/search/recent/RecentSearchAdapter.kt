@@ -3,18 +3,18 @@ package com.onair.hearit.presentation.search.recent
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.model.RecentKeyword
+import com.onair.hearit.domain.model.RecentSearch
 
-class RecentKeywordAdapter(
-    private val listener: KeywordClickListener,
-) : ListAdapter<RecentKeyword, RecentKeywordViewHolder>(DiffCallback) {
+class RecentSearchAdapter(
+    private val listener: RecentSearchClickListener,
+) : ListAdapter<RecentSearch, RecentSearchViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): RecentKeywordViewHolder = RecentKeywordViewHolder.create(parent, listener)
+    ): RecentSearchViewHolder = RecentSearchViewHolder.create(parent, listener)
 
     override fun onBindViewHolder(
-        holder: RecentKeywordViewHolder,
+        holder: RecentSearchViewHolder,
         position: Int,
     ) {
         holder.bind(getItem(position))
@@ -22,15 +22,15 @@ class RecentKeywordAdapter(
 
     companion object {
         private val DiffCallback =
-            object : DiffUtil.ItemCallback<RecentKeyword>() {
+            object : DiffUtil.ItemCallback<RecentSearch>() {
                 override fun areItemsTheSame(
-                    oldItem: RecentKeyword,
-                    newItem: RecentKeyword,
+                    oldItem: RecentSearch,
+                    newItem: RecentSearch,
                 ): Boolean = oldItem.term == newItem.term
 
                 override fun areContentsTheSame(
-                    oldItem: RecentKeyword,
-                    newItem: RecentKeyword,
+                    oldItem: RecentSearch,
+                    newItem: RecentSearch,
                 ): Boolean = oldItem == newItem
             }
     }

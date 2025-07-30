@@ -1,9 +1,9 @@
 package com.onair.hearit.domain.repository
 
-import com.onair.hearit.domain.model.RecentKeyword
+import com.onair.hearit.domain.model.RecentSearch
 
 interface RecentKeywordRepository {
-    suspend fun getKeywords(): Result<List<RecentKeyword>>
+    suspend fun getKeywords(): Result<List<RecentSearch>>
 
     suspend fun saveKeyword(keyword: String): Result<Unit>
 

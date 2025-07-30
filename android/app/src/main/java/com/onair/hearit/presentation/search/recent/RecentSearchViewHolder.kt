@@ -4,13 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemRecentKeywordBinding
-import com.onair.hearit.domain.model.RecentKeyword
+import com.onair.hearit.domain.model.RecentSearch
 
-class RecentKeywordViewHolder private constructor(
+class RecentSearchViewHolder private constructor(
     private val binding: ItemRecentKeywordBinding,
-    private val listener: KeywordClickListener,
+    private val listener: RecentSearchClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: RecentKeyword) {
+    fun bind(item: RecentSearch) {
         binding.item = item
         binding.listener = listener
     }
@@ -18,11 +18,11 @@ class RecentKeywordViewHolder private constructor(
     companion object {
         fun create(
             parent: ViewGroup,
-            listener: KeywordClickListener,
-        ): RecentKeywordViewHolder {
+            listener: RecentSearchClickListener,
+        ): RecentSearchViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemRecentKeywordBinding.inflate(inflater, parent, false)
-            return RecentKeywordViewHolder(binding, listener)
+            return RecentSearchViewHolder(binding, listener)
         }
     }
 }
