@@ -24,7 +24,6 @@ import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
-import com.onair.hearit.infrastructure.KeywordRepository;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,16 +49,15 @@ class HearitServiceTest {
     private BookmarkRepository bookmarkRepository;
 
     @Autowired
-    private CategoryRepository categoryRepository;
+    private HearitKeywordRepository hearitKeywordRepository;
 
     @Autowired
-    private HearitKeywordRepository hearitKeywordRepository;
+    private CategoryRepository categoryRepository;
 
     private HearitService hearitService;
 
     @BeforeEach
     void setup() {
-        hearitService = new HearitService(hearitRepository, bookmarkRepository, categoryRepository);
         hearitService = new HearitService(
                 hearitRepository,
                 bookmarkRepository,
