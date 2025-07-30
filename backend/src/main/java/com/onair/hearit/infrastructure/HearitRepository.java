@@ -1,6 +1,7 @@
 package com.onair.hearit.infrastructure;
 
 import com.onair.hearit.domain.Hearit;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface HearitRepository extends JpaRepository<Hearit, Long> {
+
+    @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id = :id")
+    Optional<Hearit> findWithCategoryById(Long id);
 
     @Query("SELECT h FROM Hearit h ORDER BY function('RAND')")
     Page<Hearit> findRandom(Pageable pageable);
