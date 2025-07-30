@@ -34,7 +34,8 @@ class AdminKeywordControllerTest extends IntegrationTest {
                 .get("/api/v1/admin/keywords")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .extract().as(new TypeRef<>() {});
+                .extract().as(new TypeRef<>() {
+                });
 
         // then
         assertAll(() -> {
@@ -58,7 +59,8 @@ class AdminKeywordControllerTest extends IntegrationTest {
                 .get("/api/v1/admin/keywords/all")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .extract().as(new TypeRef<>() {});
+                .extract().as(new TypeRef<>() {
+                });
 
         // then
         assertThat(response).hasSize(3);
