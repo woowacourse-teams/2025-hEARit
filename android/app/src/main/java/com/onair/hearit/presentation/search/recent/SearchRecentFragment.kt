@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.category
+package com.onair.hearit.presentation.search.recent
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,25 +9,20 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsEventNames
-import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.analytics.AnalyticsScreenInfo
-import com.onair.hearit.databinding.FragmentSearchCategoryBinding
-import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.databinding.FragmentSearchRecentBinding
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.result.SearchResultFragment
 
-class SearchCategoryFragment :
+class SearchRecentFragment :
     Fragment(),
-    CategoryClickListener {
+    KeywordClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
-    private var _binding: FragmentSearchCategoryBinding? = null
+    private var _binding: FragmentSearchRecentBinding? = null
     private val binding get() = _binding!!
-    private val categoryAdapter by lazy { CategoryAdapter(this) }
+    private val recentKeywordAdapter by lazy { RecentKeywordAdapter(this) }
     private val viewModel: SearchViewModel by viewModels {
         SearchViewModelFactory(CrashlyticsProvider.get())
     }
@@ -37,7 +32,7 @@ class SearchCategoryFragment :
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentSearchCategoryBinding.inflate(inflater, container, false)
+        _binding = FragmentSearchRecentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -47,9 +42,9 @@ class SearchCategoryFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
-        setupCategoryRecyclerView()
+        setupRecentKeywordRecyclerView()
+        viewModel.getRecentKeywords()
         observeViewModel()
-        viewModel.getCategories()
     }
 
     private fun setupWindowInsets() {
@@ -60,13 +55,13 @@ class SearchCategoryFragment :
         }
     }
 
-    private fun setupCategoryRecyclerView() {
-        binding.rvSearchCategories.adapter = categoryAdapter
+    private fun setupRecentKeywordRecyclerView() {
+        binding.rvRecentKeyword.adapter = recentKeywordAdapter
     }
 
     private fun observeViewModel() {
-        viewModel.categories.observe(viewLifecycleOwner) { categories ->
-            categoryAdapter.submitList(categories)
+        viewModel.recentKeywords.observe(viewLifecycleOwner) { keywords ->
+            recentKeywordAdapter.submitList(keywords)
         }
     }
 
@@ -75,7 +70,6 @@ class SearchCategoryFragment :
         parentFragmentManager
             .beginTransaction()
             .replace(R.id.fl_search_container, fragment)
-            .addToBackStack(null)
             .commit()
     }
 
@@ -84,18 +78,7 @@ class SearchCategoryFragment :
         _binding = null
     }
 
-    override fun onCategoryClick(
-        id: Long,
-        name: String,
-    ) {
-        AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
-            mapOf(
-                AnalyticsParamKeys.CATEGORY_NAME to name,
-                AnalyticsParamKeys.SCREEN_NAME to AnalyticsScreenInfo.Search.NAME,
-            ),
-        )
-
-        navigateToSearchResult(SearchInput.Category(id, name))
+    override fun onKeywordClick(term: String) {
+        navigateToSearchResult(SearchInput.Keyword(term))
     }
 }

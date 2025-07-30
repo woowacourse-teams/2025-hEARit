@@ -20,6 +20,7 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
+import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import com.onair.hearit.presentation.search.result.SearchResultFragment
 
 class SearchFragment : Fragment() {
@@ -52,8 +53,9 @@ class SearchFragment : Fragment() {
 
         setupWindowInsets()
         setupSearchEnterKey()
-        observeViewModel()
+        setupSearchBarClickListener()
         setupSearchEndIcon()
+        observeViewModel()
 
         binding.ivBack.setOnClickListener {
             childFragmentManager.popBackStack()
@@ -124,6 +126,15 @@ class SearchFragment : Fragment() {
         }
     }
 
+    private fun setupSearchBarClickListener() {
+        binding.etSearch.setOnClickListener {
+            childFragmentManager
+                .beginTransaction()
+                .replace(R.id.fl_search_container, SearchRecentFragment())
+                .commit()
+        }
+    }
+
     private fun observeViewModel() {
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
@@ -132,7 +143,6 @@ class SearchFragment : Fragment() {
 
     private fun navigateToSearchResult(input: SearchInput) {
         val fragment = SearchResultFragment.newInstance(input)
-
         childFragmentManager
             .beginTransaction()
             .replace(R.id.fl_search_container, fragment)

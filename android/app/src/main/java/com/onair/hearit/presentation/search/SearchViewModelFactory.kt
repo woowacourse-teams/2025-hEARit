@@ -4,9 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.data.datasource.CategoryRemoteDataSourceImpl
-import com.onair.hearit.data.datasource.KeywordRemoteDataSourceImpl
+import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
 import com.onair.hearit.data.repository.CategoryRepositoryImpl
-import com.onair.hearit.data.repository.KeywordRepositoryImpl
+import com.onair.hearit.data.repository.RecentKeywordRepositoryImpl
+import com.onair.hearit.di.DatabaseProvider
 import com.onair.hearit.di.NetworkProvider
 
 @Suppress("UNCHECKED_CAST")
@@ -17,8 +18,10 @@ class SearchViewModelFactory(
         val categoryDataSource = CategoryRemoteDataSourceImpl(NetworkProvider.categoryService)
         val categoryRepository = CategoryRepositoryImpl(categoryDataSource, crashlyticsLogger)
 
-        val keywordDataSource = KeywordRemoteDataSourceImpl(NetworkProvider.keywordService)
-        val keywordRepository = KeywordRepositoryImpl(keywordDataSource, crashlyticsLogger)
-        return SearchViewModel(categoryRepository, keywordRepository) as T
+        val recentKeywordDataSource =
+            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao, crashlyticsLogger)
+        val recentKeywordRepository =
+            RecentKeywordRepositoryImpl(recentKeywordDataSource, crashlyticsLogger)
+        return SearchViewModel(categoryRepository, recentKeywordRepository) as T
     }
 }

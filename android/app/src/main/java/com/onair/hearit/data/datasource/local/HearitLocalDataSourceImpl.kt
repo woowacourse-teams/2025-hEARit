@@ -3,6 +3,7 @@ package com.onair.hearit.data.datasource.local
 import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.data.database.HearitDao
 import com.onair.hearit.data.database.RecentHearitEntity
+import com.onair.hearit.data.database.RecentKeywordEntity
 import com.onair.hearit.data.repository.handleResult
 
 class HearitLocalDataSourceImpl(
@@ -13,4 +14,11 @@ class HearitLocalDataSourceImpl(
 
     override suspend fun saveRecentHearit(entity: RecentHearitEntity): Result<Unit> =
         handleResult(crashlyticsLogger) { hearitDao.insertRecentHearit(entity) }
+
+    override suspend fun getKeywords(): Result<List<RecentKeywordEntity>> = handleResult(crashlyticsLogger) { hearitDao.getKeywords() }
+
+    override suspend fun saveKeyword(keyword: RecentKeywordEntity): Result<Unit> =
+        handleResult(crashlyticsLogger) { hearitDao.insertKeyword(keyword) }
+
+    override suspend fun clearKeywords(): Result<Unit> = handleResult(crashlyticsLogger) { hearitDao.deleteKeywords() }
 }
