@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -20,6 +22,7 @@ import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.domain.model.SlideItem
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
@@ -43,7 +46,8 @@ class HomeFragment :
     }
     private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
     private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
-
+    private lateinit var indicatorContainer: LinearLayout
+    private val snapHelper = PagerSnapHelper()
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -68,12 +72,6 @@ class HomeFragment :
         binding.lifecycleOwner = this
         binding.recentClickListener = this
 
-        binding.tvHomeNoRecentHearitText.setOnClickListener {
-            (activity as? MainActivity)?.apply {
-                selectTab(R.id.nav_explore)
-            }
-        }
-        binding.ivHomeRecentPlay.setOnClickListener { }
         setupWindowInsets()
         setupListeners()
         setupRecommendRecyclerView()
@@ -105,20 +103,12 @@ class HomeFragment :
 
 //        CrashlyticsProvider.get().log("some debug log")
 //        CrashlyticsProvider.get().recordException(IllegalStateException("Something went wrong"))
-
-        binding.ivHomeAllCategory.setOnClickListener {
-            parentFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container_view, CategoryFragment())
-                .addToBackStack(null)
-                .commit()
-        }
     }
 
     private fun setupRecommendRecyclerView() {
-        val snapHelper = PagerSnapHelper()
-        snapHelper.attachToRecyclerView(binding.rvHomeRecommendHearit)
-        binding.rvHomeRecommendHearit.adapter = recommendAdapter
+        binding.rvHomeRecommend.apply {
+            adapter = recommendAdapter
+            snapHelper.attachToRecyclerView(this)
 
         // 중심 아이템 강조 효과
         binding.rvHomeRecommendHearit.addOnScrollListener(
@@ -136,6 +126,32 @@ class HomeFragment :
                 }
             },
         )
+            addOnScrollListener(
+                object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(
+                        recyclerView: RecyclerView,
+                        dx: Int,
+                        dy: Int,
+                    ) {
+                        val layoutManager =
+                            recyclerView.layoutManager as? LinearLayoutManager ?: return
+                        val snapView = snapHelper.findSnapView(layoutManager) ?: return
+                        val position = layoutManager.getPosition(snapView)
+                        updateCenterEffect(recyclerView)
+                    }
+                },
+            )
+        }
+    }
+
+    private fun updateCenterEffect(recyclerView: RecyclerView) {
+        val centerX = recyclerView.width / 2
+        for (i in 0 until recyclerView.childCount) {
+            val child = recyclerView.getChildAt(i) ?: continue
+            applyCenterScalingEffect(child, centerX, recyclerView)
+        }
+    }
+
     }
 
     private fun setupCategoryRecyclerView() {
@@ -162,8 +178,12 @@ class HomeFragment :
         child.translationX = translationX
 
         // 중심에 가까울수록 불투명, 멀수록 더 투명
-        child.z = (1 - d) * 10f
-        child.alpha = 0.5f + (1 - d) * 0.5f
+        child.z = (1 - d) * 20f
+        child.alpha = 0.3f + (1 - d) * 0.8f
+    }
+
+    private fun setupCategoryRecyclerView() {
+        binding.rvHomeCategory.adapter = categoryAdapter
     }
 
     private fun observeViewModel() {
@@ -176,8 +196,29 @@ class HomeFragment :
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
-            val repeatedItems = List(30) { index -> recommendItems[index % recommendItems.size] }
-            recommendAdapter.submitList(repeatedItems) {
+//            val repeatedItems = List(30) { index -> recommendItems[index % recommendItems.size] }
+//            recommendAdapter.submitList(repeatedItems) {
+//                scrollToMiddlePosition()
+//            }
+            val items =
+                listOf(
+                    SlideItem(0, "Android", "HTTP와 HTTPS의 차이", "#4D7C36".toColorInt()),
+                    SlideItem(
+                        1,
+                        "Android",
+                        "스프링 @EventListener와 @TransactionalEventListener",
+                        "#1A5A92".toColorInt(),
+                    ),
+                    SlideItem(2, "Android", "Room DB 어떻게 쓰나", "#9C3F3F".toColorInt()),
+                    SlideItem(
+                        3,
+                        "Android",
+                        "스프링 @EventListener와 @TransactionalEventListener",
+                        "#4D7C36".toColorInt(),
+                    ),
+                    SlideItem(4, "Android", "Jetpack Compose 알아보기", "#1A5A92".toColorInt()),
+                )
+            recommendAdapter.submitList(items) {
                 scrollToMiddlePosition()
             }
         }
@@ -193,10 +234,10 @@ class HomeFragment :
 
     // 리스트 중앙에 포지션 배치
     private fun scrollToMiddlePosition() {
-        binding.rvHomeRecommendHearit.post {
+        binding.rvHomeRecommend.post {
             val middlePosition = recommendAdapter.currentList.size / 2
-            val layoutManager = binding.rvHomeRecommendHearit.layoutManager as LinearLayoutManager
-            val recyclerViewCenter = binding.rvHomeRecommendHearit.width / 2
+            val layoutManager = binding.rvHomeRecommend.layoutManager as LinearLayoutManager
+            val recyclerViewCenter = binding.rvHomeRecommend.width / 2
             val itemWidth = (260 * resources.displayMetrics.density).toInt()
             val offset = recyclerViewCenter - (itemWidth / 2)
             layoutManager.scrollToPositionWithOffset(middlePosition, offset)

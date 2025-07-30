@@ -37,6 +37,7 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="16dp"
                 android:text="@string/app_name"
+                android:textSize="28sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,7 +46,7 @@
                 style="@style/pretendard_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:text="@string/home_logo_description"
                 android:textColor="@color/hearit_gray2"
                 app:layout_constraintStart_toStartOf="@id/tv_home_logo"
@@ -67,119 +68,52 @@
                 app:strokeWidth="2dp"
                 tools:src="@drawable/img_default_profile" />
 
-            <ImageView
-                android:id="@+id/iv_home_recent_hearit"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/bg_gradient_radius_8dp"
-                android:contentDescription="@null"
-                android:onClick="@{() -> recentClickListener.onClickRecentHearit(recentHearit.id)}"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
-
             <TextView
-                android:id="@+id/tv_home_recent_hearit_text"
-                style="@style/pretendard_body"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/home_recent_hearit_text"
-                android:textColor="@color/hearit_gray4"
-                app:layout_constraintStart_toStartOf="@id/iv_home_recent_hearit"
-                app:layout_constraintTop_toTopOf="@id/iv_home_recent_hearit" />
-
-            <TextView
-                android:id="@+id/tv_home_recent_hearit_title"
-                style="@style/pretendard_sub_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="8dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="@{recentHearit.title}"
-                app:layout_constraintEnd_toStartOf="@id/iv_home_recent_play"
-                app:layout_constraintStart_toStartOf="@id/iv_home_recent_hearit"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_recent_hearit_text"
-                tools:text="HTTP와 HTTPS의 차이" />
-
-            <ImageView
-                android:id="@+id/iv_home_recent_play"
-                android:layout_width="52dp"
-                android:layout_height="52dp"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@null"
-                android:src="@drawable/img_play"
-                app:layout_constraintBottom_toBottomOf="@id/iv_home_recent_hearit"
-                app:layout_constraintEnd_toEndOf="@id/iv_home_recent_hearit"
-                app:layout_constraintTop_toTopOf="@id/iv_home_recent_hearit" />
-
-            <androidx.constraintlayout.widget.Group
-                android:id="@+id/group_home_recent_hearit_exist"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:constraint_referenced_ids="tv_home_recent_hearit_title, tv_home_recent_hearit_text,iv_home_recent_play"
-                app:visibleIfNotNull="@{recentHearit}" />
-
-            <TextView
-                android:id="@+id/tv_home_no_recent_hearit_text"
-                style="@style/pretendard_sub_title"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginHorizontal="20dp"
-                android:gravity="center"
-                android:text="@string/home_no_recent_hearit_text"
-                app:layout_constraintBottom_toBottomOf="@id/iv_home_recent_hearit"
-                app:layout_constraintTop_toTopOf="@id/iv_home_recent_hearit"
-                app:visibleIfNull="@{recentHearit}" />
-
-            <TextView
-                android:id="@+id/tv_home_nickname"
+                android:id="@+id/tv_home_recommend"
                 style="@style/pretendard_main_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="20dp"
                 android:text="@string/home_recommend_hearit_text"
                 android:textColor="@color/hearit_gray4"
-                app:layout_constraintStart_toStartOf="@id/iv_home_recent_hearit"
-                app:layout_constraintTop_toBottomOf="@id/iv_home_recent_hearit" />
+                app:layout_constraintStart_toStartOf="@id/tv_home_description"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_recommend_hearit"
-                android:layout_width="0dp"
-                android:layout_height="256dp"
-                android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="20dp"
+                android:id="@+id/rv_home_recommend"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="12dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_recommend"
+                tools:itemCount="5"
+                tools:listitem="@layout/item_slide" />
+
+            <LinearLayout
+                android:id="@+id/indicator_container"
+                android:layout_width="160dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
+                android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_nickname"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_recommend_hearit" />
+                app:layout_constraintTop_toBottomOf="@id/rv_home_recommend" />
 
             <TextView
                 android:id="@+id/tv_home_category"
                 style="@style/pretendard_main_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="20dp"
                 android:text="@string/home_category_text"
                 app:layout_constraintStart_toStartOf="@id/tv_home_logo"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_recommend_hearit" />
-
-            <ImageView
-                android:id="@+id/iv_home_all_category"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_right"
-                app:layout_constraintBottom_toBottomOf="@id/tv_home_category"
-                app:layout_constraintStart_toEndOf="@id/tv_home_category"
-                app:layout_constraintTop_toTopOf="@id/tv_home_category" />
+                app:layout_constraintTop_toBottomOf="@id/indicator_container"
+                tools:text="Spring 카테고리의 팟캐스트" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_category"
@@ -189,11 +123,10 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="68dp"
                 android:nestedScrollingEnabled="false"
-                android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_category"
-                app:spanCount="2"
                 tools:itemCount="6"
                 tools:listitem="@layout/item_category" />
 
