@@ -1,5 +1,6 @@
 package com.onair.hearit.admin.application;
 
+import com.onair.hearit.admin.domain.FileType;
 import com.onair.hearit.admin.exception.S3Exception;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,18 +23,8 @@ public class S3Uploader {
     @Value("${aws.s3.bucket}")
     private String bucket;
 
-    public String uploadOriginalAudio(MultipartFile multipartFile) {
-        String key = "hearit/audio/original/" + multipartFile.getOriginalFilename();
-        return uploadToS3(multipartFile, key);
-    }
-
-    public String uploadShortAudio(MultipartFile multipartFile) {
-        String key = "hearit/audio/short/" + multipartFile.getOriginalFilename();
-        return uploadToS3(multipartFile, key);
-    }
-
-    public String uploadScriptFile(MultipartFile multipartFile) {
-        String key = "hearit/script/" + multipartFile.getOriginalFilename();
+    public String uploadFile(MultipartFile multipartFile, FileType fileType) {
+        String key = fileType.getUploadPath() + multipartFile.getOriginalFilename();
         return uploadToS3(multipartFile, key);
     }
 
