@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [RecentHearitEntity::class], version = 1)
+@Database(entities = [RecentHearitEntity::class, SearchHistoryEntity::class], version = 1)
 abstract class HearitDatabase : RoomDatabase() {
     abstract fun hearitDao(): HearitDao
 

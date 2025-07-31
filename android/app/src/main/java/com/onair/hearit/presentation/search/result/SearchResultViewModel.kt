@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search
+package com.onair.hearit.presentation.search.result
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,12 +8,15 @@ import com.onair.hearit.R
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
+import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.domain.term
 import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.search.SearchUiState
 import kotlinx.coroutines.launch
 
 class SearchResultViewModel(
+    private val recentKeywordRepository: RecentKeywordRepository,
     private val getSearchResultUseCase: GetSearchResultUseCase,
     initialInput: SearchInput,
 ) : ViewModel() {
@@ -32,11 +35,12 @@ class SearchResultViewModel(
 
     private var currentInput: SearchInput = initialInput
 
-    val currentSearchTerm: String
+    private val currentSearchTerm: String
         get() = currentInput.term()
 
     init {
         fetchData(isInitial = true)
+        saveRecentKeyword()
     }
 
     fun loadNextPageIfPossible() {
@@ -62,7 +66,7 @@ class SearchResultViewModel(
         viewModelScope.launch {
             try {
                 val page = if (isInitial) 0 else currentPage + 1
-                val result = getSearchResultUseCase(currentInput, page, DEFAULT_PAGE_SIZE)
+                val result = getSearchResultUseCase(currentInput, page)
 
                 result
                     .onSuccess { pageResult ->
@@ -96,7 +100,13 @@ class SearchResultViewModel(
             }
     }
 
-    companion object {
-        private const val DEFAULT_PAGE_SIZE = 20
+    private fun saveRecentKeyword() {
+        viewModelScope.launch {
+            recentKeywordRepository
+                .saveKeyword(currentSearchTerm)
+                .onFailure {
+                    _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
+                }
+        }
     }
 }

@@ -24,7 +24,8 @@ import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.search.SearchResultFragment
+import com.onair.hearit.presentation.search.category.CategoryAdapter
+import com.onair.hearit.presentation.search.result.SearchResultFragment
 import kotlin.math.abs
 
 class HomeFragment :
@@ -67,7 +68,6 @@ class HomeFragment :
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
         binding.recentClickListener = this
-
         binding.tvHomeNoRecentHearitText.setOnClickListener {
             (activity as? MainActivity)?.apply {
                 selectTab(R.id.nav_explore)
