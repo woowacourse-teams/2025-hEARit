@@ -49,7 +49,10 @@ class HearitControllerTest extends IntegrationTest {
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
+        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
+        Keyword keyword2 = dbHelper.insertKeyword(new Keyword("Spring"));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword2));
         // when & then
         HearitDetailResponse response = RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
@@ -80,7 +83,9 @@ class HearitControllerTest extends IntegrationTest {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
+        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
+        
         // when & then
         HearitDetailResponse response = RestAssured.given(this.spec)
                 .filter(document("hearit-read-detail-not-member",
@@ -117,9 +122,8 @@ class HearitControllerTest extends IntegrationTest {
 
         // when & then
         RestAssured.given()
-                .header("Authorization", "Bearer " + token)
                 .when()
-                .get("/api/v1/hearits/" + notFoundHearitId)
+                .get("/api/v1/hearits/{hearitId}", notFoundHearitId)
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }
@@ -191,10 +195,10 @@ class HearitControllerTest extends IntegrationTest {
                                 .responseFields(
                                         fieldWithPath("[].id").description("히어릿 ID"),
                                         fieldWithPath("[].title").description("히어릿 제목"),
-                                        fieldWithPath("[].summary").description("히어릿 요약"),
-                                        fieldWithPath("[].source").description("출처"),
                                         fieldWithPath("[].playTime").description("재생 시간(초)"),
-                                        fieldWithPath("[].createdAt").description("생성 일시")
+                                        fieldWithPath("[].createdAt").description("생성 일시"),
+                                        fieldWithPath("[].categoryName").description("카테고리 이름"),
+                                        fieldWithPath("[].categoryColor").description("카테고리 색상 코드")
                                 )
                                 .build())
                 ))
@@ -217,10 +221,10 @@ class HearitControllerTest extends IntegrationTest {
         Keyword keyword = dbHelper.insertKeyword(new Keyword("Spring"));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("noKeyword"));
 
-        Hearit hearit = saveHearitWithTitleAndKeyword("examplespring1", keyword);     // 제목 매칭
-        Hearit hearit1 = saveHearitWithTitleAndKeyword("SPRING1example", keyword1);   // 제목 매칭
-        Hearit hearit2 = saveHearitWithTitleAndKeyword("notitle", keyword);           // 키워드 매칭
-        Hearit hearit3 = saveHearitWithTitleAndKeyword("notitle", keyword1);          // 매칭 안됨
+        Hearit hearit = saveHearitWithTitleAndKeyword("examplespring1", keyword);
+        Hearit hearit1 = saveHearitWithTitleAndKeyword("SPRING1example", keyword1);
+        Hearit hearit2 = saveHearitWithTitleAndKeyword("notitle", keyword);
+        saveHearitWithTitleAndKeyword("notitle", keyword1);
 
         // when
         PagedResponse<HearitSearchResponse> pagedResponse = RestAssured.given(this.spec)
@@ -325,11 +329,11 @@ class HearitControllerTest extends IntegrationTest {
                                 .responseFields(
                                         fieldWithPath("[].categoryId").description("카테고리 ID"),
                                         fieldWithPath("[].categoryName").description("카테고리 이름"),
+                                        fieldWithPath("[].colorCode").description("카테고리 색상 코드"),
                                         fieldWithPath("[].hearits").description("해당 카테고리의 최신 히어릿 목록"),
                                         fieldWithPath("[].hearits[].hearitId").description("히어릿 ID"),
                                         fieldWithPath("[].hearits[].title").description("히어릿 제목"),
-                                        fieldWithPath("[].hearits[].summary").description("히어릿 요약"),
-                                        fieldWithPath("[].hearits[].playTime").description("히어릿 재생 시간(초)")
+                                        fieldWithPath("[].hearits[].createdAt").description("히어릿 생성 일시")
                                 )
                                 .build()))
                 )
@@ -379,7 +383,11 @@ class HearitControllerTest extends IntegrationTest {
                 fieldWithPath("playTime").type(JsonFieldType.NUMBER).description("재생 시간(초)"),
                 fieldWithPath("createdAt").type(JsonFieldType.STRING).description("생성 일시"),
                 fieldWithPath("isBookmarked").type(JsonFieldType.BOOLEAN).description("현재 사용자의 북마크 여부"),
-                fieldWithPath("bookmarkId").type(JsonFieldType.NUMBER).description("북마크 ID (북마크된 경우)").optional()
+                fieldWithPath("bookmarkId").type(JsonFieldType.NUMBER).description("북마크 ID (북마크된 경우)").optional(),
+                fieldWithPath("category").type(JsonFieldType.STRING).description("카테고리 이름"),
+                fieldWithPath("keywords").type(JsonFieldType.ARRAY).description("키워드 목록"),
+                fieldWithPath("keywords[].id").type(JsonFieldType.NUMBER).description("키워드 ID"),
+                fieldWithPath("keywords[].name").type(JsonFieldType.STRING).description("키워드 이름")
         };
     }
 }
