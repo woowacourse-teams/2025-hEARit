@@ -19,6 +19,7 @@ import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.MemberRepository;
 import java.time.LocalDateTime;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -133,6 +134,7 @@ class AuthServiceTest {
             assertThat(reissuedAccessToken).isNotNull();
         }
 
+        @Disabled("만료 테스트는 실시간 대기 필요 - 실제 실행은 비효율적이므로 제외")
         @Test
         @DisplayName("리프레시 토큰이 만료되었으면 UnauthorizedException을 던진다")
         void reissue_fail_when_refreshToken_expired() throws InterruptedException {

@@ -75,10 +75,9 @@ class AuthControllerTest extends IntegrationTest {
     void reissueToken_requestWithValidRefreshToken() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String validRefreshToken = jwtTokenProvider.createRefreshToken(member.getId());
-        refreshTokenRepository.save(new RefreshToken(member.getId(), validRefreshToken, LocalDateTime.now()));
+        RefreshToken validRefreshToken = createAndSaveRefreshTokenFrom(member);
 
-        TokenReissueRequest tokenReissueRequest = new TokenReissueRequest(validRefreshToken);
+        TokenReissueRequest tokenReissueRequest = new TokenReissueRequest(validRefreshToken.getToken());
 
         // when
         TokenReissueResponse response = RestAssured.given().log().all()
@@ -135,8 +134,7 @@ class AuthControllerTest extends IntegrationTest {
     void logout_then_deleteRefreshToken() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
-        refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
+        createAndSaveRefreshTokenFrom(member);
         assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
 
         String accessToken = jwtTokenProvider.createAccessToken(member.getId());
@@ -151,5 +149,11 @@ class AuthControllerTest extends IntegrationTest {
 
         // then
         assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+    }
+
+    private RefreshToken createAndSaveRefreshTokenFrom(Member member) {
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        LocalDateTime expiryDate = jwtTokenProvider.extractExpiry(refreshToken);
+        return refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, expiryDate));
     }
 }

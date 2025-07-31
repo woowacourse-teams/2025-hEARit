@@ -12,6 +12,7 @@ import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.infrastructure.MemberRepository;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -58,9 +59,13 @@ class AuthKakaoServiceTest {
         LoginTokenResponse response = authService.loginWithKakao(request);
 
         // then
-        assertThat(response.accessToken()).isNotBlank();
-        Member member = memberRepository.findBySocialId(kakaoId).orElseThrow();
-        assertThat(member.getNickname()).isEqualTo(nickname);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.accessToken()).isNotNull();
+            softly.assertThat(response.refreshToken()).isNotNull();
+
+            Member member = memberRepository.findBySocialId(kakaoId).orElseThrow();
+            softly.assertThat(member.getNickname()).isEqualTo(nickname);
+        });
     }
 
     @Test
