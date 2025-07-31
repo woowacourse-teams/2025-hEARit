@@ -81,7 +81,7 @@ public class HearitController {
     @Operation(summary = "홈화면용 고정 카테고리별 히어릿 조회", description = "고정된 3개 카테고리별로 최신 히어릿 5개를 반환합니다.")
     @GetMapping("/home-categories")
     public ResponseEntity<List<GroupedHearitsWithCategoryResponse>> readHomeHearits() {
-        List<GroupedHearitsWithCategoryResponse> responses = hearitService.getHomeCategoryHearits();
+        List<GroupedHearitsWithCategoryResponse> responses = hearitService.getGroupedHearitsByCategory();
         return ResponseEntity.ok(responses);
     }
 }

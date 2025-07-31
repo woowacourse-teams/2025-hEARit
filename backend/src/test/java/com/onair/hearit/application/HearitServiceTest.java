@@ -141,7 +141,7 @@ class HearitServiceTest {
 
     @Test
     @DisplayName("홈 카테고리의 히어릿들을 키워드와 함께 조회할 수 있다.")
-    void getHomeCategoryHearits() {
+    void getGroupedHearitsByCategory() {
         // given
         Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
@@ -157,7 +157,7 @@ class HearitServiceTest {
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
 
         // when
-        List<GroupedHearitsWithCategoryResponse> responses = hearitService.getHomeCategoryHearits();
+        List<GroupedHearitsWithCategoryResponse> responses = hearitService.getGroupedHearitsByCategory();
 
         // then
         assertAll(

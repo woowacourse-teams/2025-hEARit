@@ -73,14 +73,14 @@ public class HearitService {
     }
 
     //TODO 사용자에 맞는 카테고리 추천
-    public List<GroupedHearitsWithCategoryResponse> getHomeCategoryHearits() {
+    public List<GroupedHearitsWithCategoryResponse> getGroupedHearitsByCategory() {
         List<Category> categories = categoryRepository.findOldest(CATEGORY_COUNT);
         return categories.stream()
-                .map(this::createHomeCategoryResponse)
+                .map(this::mapToGroupedHearitsResponse)
                 .toList();
     }
 
-    private GroupedHearitsWithCategoryResponse createHomeCategoryResponse(Category category) {
+    private GroupedHearitsWithCategoryResponse mapToGroupedHearitsResponse(Category category) {
         List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_CATEGORY);
         return GroupedHearitsWithCategoryResponse.from(category, hearits);
     }
