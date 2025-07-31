@@ -70,7 +70,7 @@ class SearchFragment : Fragment() {
         binding.tilSearch.setEndIconOnClickListener {
             performSearchFromInput()
         }
-        binding.tilSearch.setOnTouchListener { _, event ->
+        binding.etSearch.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 showRecentFragment()
             }
@@ -92,10 +92,10 @@ class SearchFragment : Fragment() {
 
     private fun setupFragmentResultListeners() {
         childFragmentManager.setFragmentResultListener(
-            KEY_RECENT_SEARCH,
+            KEYWORD_KEY,
             viewLifecycleOwner,
         ) { _, bundle ->
-            val keyword = bundle.getString(KEY_RECENT_SEARCH).orEmpty()
+            val keyword = bundle.getString(KEYWORD_KEY).orEmpty()
             navigateToSearchResult(SearchInput.Keyword(keyword))
         }
 
@@ -221,6 +221,6 @@ class SearchFragment : Fragment() {
         private const val TAG_SEARCH_RECENT = "SearchRecent"
         private const val TAG_SEARCH_RESULT = "SearchResult"
         const val KEY_CATEGORY = "category"
-        const val KEY_RECENT_SEARCH = "recent_search"
+        const val KEYWORD_KEY = "keyword"
     }
 }
