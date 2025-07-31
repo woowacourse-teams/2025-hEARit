@@ -1,6 +1,7 @@
 package com.onair.hearit.infrastructure;
 
 import com.onair.hearit.domain.Hearit;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,9 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("SELECT h FROM Hearit h ORDER BY function('RAND')")
     Page<Hearit> findRandom(Pageable pageable);
 
+    @Query("SELECT h FROM Hearit h ORDER BY function('RAND') LIMIT :limit")
+    List<Hearit> findRandom(@Param("limit") int limit);
+
     Page<Hearit> findByCategoryIdOrderByCreatedAtDesc(Long categoryId, Pageable pageable);
 
     @Query(value = """
@@ -29,4 +33,13 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             ORDER BY h.created_at DESC
             """, nativeQuery = true)
     Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
+
+    @Query("""
+            SELECT h 
+            FROM Hearit h 
+            WHERE h.category.id = :categoryId 
+            ORDER BY h.createdAt DESC 
+            LIMIT :size
+            """)
+    List<Hearit> findByCategory(@Param("categoryId") Long categoryId, @Param("size") int size);
 }

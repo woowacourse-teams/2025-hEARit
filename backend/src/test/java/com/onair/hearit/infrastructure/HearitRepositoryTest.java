@@ -10,6 +10,7 @@ import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,27 @@ class HearitRepositoryTest {
             assertThat(hearits).hasSize(1);
             assertThat(hearitRepository.findAll()).hasSize(2);
         });
+    }
+
+    @Test
+    @DisplayName("원하는 개수만큼 랜덤 히어릿을 List로 조회할 수 있다.")
+    void findRandom_withLimit() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        int limit = 2;
+
+        // when
+        List<Hearit> result = hearitRepository.findRandom(limit);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(limit),
+                () -> assertThat(hearitRepository.findAll()).hasSize(3)
+        );
     }
 
     @Test
@@ -127,6 +149,33 @@ class HearitRepositoryTest {
         assertAll(
                 () -> assertThat(result.getContent()).hasSize(1),
                 () -> assertThat(result.getContent().get(0).getId()).isEqualTo(hearit.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("카테고리 ID로 원하는 개수의 히어릿을 조회한다.")
+    void findByCategory() {
+        // given
+        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        // category1에 6개 저장
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit4 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit5 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit6 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        // category2에 1개 저장
+        Hearit hearit7 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+
+        // when
+        List<Hearit> result = hearitRepository.findByCategory(category1.getId(), 5);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(5),
+                () -> assertThat(result).allMatch(hearit -> hearit.getCategory().getId().equals(category1.getId()))
         );
     }
 

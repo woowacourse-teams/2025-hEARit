@@ -28,11 +28,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException e, HttpServletRequest request) {
+    public ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException e,
+                                                                 HttpServletRequest request) {
         if (request.getRequestURI().contains("/.well-known/appspecific")) {
             return ResponseEntity.notFound().build();
         }
-        log.error("리소스를 찾을 수 없음", e);
         return ResponseEntity.status(404).build();
     }
 

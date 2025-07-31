@@ -2,14 +2,17 @@ package com.onair.hearit.application;
 
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Bookmark;
+import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
+import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import java.util.List;
@@ -25,10 +28,13 @@ import org.springframework.stereotype.Service;
 public class HearitService {
 
     private static final int RECOMMEND_HEARIT_COUNT = 5;
+    private static final int GROUPED_CATEGORY_COUNT = 3;
+    private static final int HEARITS_PER_GROUPED_CATEGORY = 5;
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
+    private final CategoryRepository categoryRepository;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, Long memberId) {
         Hearit hearit = getHearitById(hearitId);
@@ -61,9 +67,21 @@ public class HearitService {
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
-        Pageable pageable = PageRequest.of(0, RECOMMEND_HEARIT_COUNT);
-        return hearitRepository.findRandom(pageable).stream()
+        return hearitRepository.findRandom(RECOMMEND_HEARIT_COUNT).stream()
                 .map(RecommendHearitResponse::from)
                 .toList();
+    }
+
+    public List<GroupedHearitsWithCategoryResponse> getGroupedHearitsByCategory() {
+        //TODO 사용자에 맞는 카테고리 추천
+        List<Category> categories = categoryRepository.findOldest(GROUPED_CATEGORY_COUNT);
+        return categories.stream()
+                .map(this::mapToGroupedHearitsResponse)
+                .toList();
+    }
+
+    private GroupedHearitsWithCategoryResponse mapToGroupedHearitsResponse(Category category) {
+        List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_GROUPED_CATEGORY);
+        return GroupedHearitsWithCategoryResponse.from(category, hearits);
     }
 }
