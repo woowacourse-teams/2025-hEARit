@@ -16,6 +16,7 @@ import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.MemberRepository;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -205,5 +206,21 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(loginRequest))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("로그아웃 시 해당 member의 refreshToken을 삭제한다.")
+    void logout_then_deleteRefreshToken() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
+        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
+
+        // when
+        authService.logout(member.getId());
+
+        // then
+        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
     }
 }
