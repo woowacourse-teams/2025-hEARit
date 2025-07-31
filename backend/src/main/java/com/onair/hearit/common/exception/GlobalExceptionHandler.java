@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnhandledException(Exception ex, HttpServletRequest request) {
-        log.error("서버 내부 오류", ex);
+        log.error("서버 내부 오류 - " + ex.getMessage(), ex);
         return buildProblemDetail(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getTitle(), request);
     }
 

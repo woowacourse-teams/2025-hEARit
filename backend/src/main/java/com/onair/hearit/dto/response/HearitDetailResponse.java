@@ -16,10 +16,10 @@ public record HearitDetailResponse(
         Boolean isBookmarked,
         Long bookmarkId,
         String category,
-        List<KeywordNameResponse> keywords
+        List<KeywordResponse> keywords
 ) {
     public static HearitDetailResponse from(Hearit hearit, List<Keyword> keywords) {
-        List<KeywordNameResponse> keywordNames = getKeywordNames(keywords);
+        List<KeywordResponse> keywordNames = getKeywordNames(keywords);
         return new HearitDetailResponse(
                 hearit.getId(),
                 hearit.getTitle(),
@@ -34,7 +34,7 @@ public record HearitDetailResponse(
     }
 
     public static HearitDetailResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords) {
-        List<KeywordNameResponse> keywordNames = getKeywordNames(keywords);
+        List<KeywordResponse> keywordNames = getKeywordNames(keywords);
         return new HearitDetailResponse(
                 hearit.getId(),
                 hearit.getTitle(),
@@ -48,16 +48,20 @@ public record HearitDetailResponse(
                 keywordNames);
     }
 
-    private static List<KeywordNameResponse> getKeywordNames(List<Keyword> keywords) {
-        return keywords.stream().map(KeywordNameResponse::from).toList();
+    private static List<KeywordResponse> getKeywordNames(List<Keyword> keywords) {
+        return keywords.stream().map(KeywordResponse::from).toList();
     }
 
-    record KeywordNameResponse(
+    private record KeywordResponse(
+            Long id,
             String name
     ) {
 
-        public static KeywordNameResponse from(Keyword keyword) {
-            return new KeywordNameResponse(keyword.getName());
+        public static KeywordResponse from(Keyword keyword) {
+            return new KeywordResponse(
+                    keyword.getId(),
+                    keyword.getName()
+            );
         }
     }
 }
