@@ -1,4 +1,4 @@
-package com.onair.hearit.utils;
+package com.onair.hearit.docs;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -7,7 +7,7 @@ import com.epages.restdocs.apispec.HeaderDescriptorWithType;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-public class ApiDocumentUtils {
+public class ApiDocSnippets {
 
     public static HeaderDescriptorWithType[] getAuthorizationHeader() {
         return new HeaderDescriptorWithType[]{

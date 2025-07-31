@@ -10,6 +10,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -17,7 +18,6 @@ import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
-import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -71,7 +71,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)")
                                                 }),
-                                                Arrays.stream(ApiDocumentUtils.getCustomPagedResponseFields())
+                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
@@ -102,7 +102,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .tag("Bookmark API")
                                 .summary("북마크 목록 조회")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()
@@ -154,7 +154,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .tag("Bookmark API")
                                 .summary("북마크 목록 조회")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()
@@ -216,7 +216,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .tag("Bookmark API")
                                 .summary("북마크 생성")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()
@@ -273,7 +273,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .tag("Bookmark API")
                                 .summary("북마크 삭제")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()

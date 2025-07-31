@@ -11,10 +11,10 @@ import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.IntegrationTest;
-import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
@@ -99,7 +99,7 @@ class AuthControllerTest extends IntegrationTest {
                                 .tag("Auth API")
                                 .summary("일반 로그인")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()
@@ -176,7 +176,7 @@ class AuthControllerTest extends IntegrationTest {
                                 .tag("Auth API")
                                 .summary("회원가입")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()

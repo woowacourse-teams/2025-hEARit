@@ -10,6 +10,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
@@ -23,7 +24,6 @@ import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
-import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import java.util.Arrays;
@@ -125,7 +125,7 @@ class HearitControllerTest extends IntegrationTest {
                                 .tag("Hearit API")
                                 .summary("히어릿 상세 조회")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()
@@ -164,7 +164,7 @@ class HearitControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].bookmarkId").description(
                                                                 "북마크 ID (북마크된 경우)").optional()
                                                 }),
-                                                Arrays.stream(ApiDocumentUtils.getCustomPagedResponseFields())
+                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
@@ -256,7 +256,7 @@ class HearitControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)")
                                                 }),
-                                                Arrays.stream(ApiDocumentUtils.getCustomPagedResponseFields())
+                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
@@ -295,7 +295,7 @@ class HearitControllerTest extends IntegrationTest {
                                 .tag("Hearit API")
                                 .summary("히어릿 검색")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()

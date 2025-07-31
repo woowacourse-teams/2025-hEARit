@@ -9,11 +9,11 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.response.KeywordResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
-import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -117,7 +117,7 @@ class KeywordControllerTest extends IntegrationTest {
                                 .tag("Keyword API")
                                 .summary("단일 키워드 조회")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()

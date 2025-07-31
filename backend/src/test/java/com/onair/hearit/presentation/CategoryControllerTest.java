@@ -9,6 +9,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.CategoryResponse;
@@ -16,7 +17,6 @@ import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
-import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import java.util.Arrays;
@@ -60,7 +60,7 @@ class CategoryControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].name").description("카테고리 이름"),
                                                         fieldWithPath("content[].colorCode").description("카테고리 색상 코드")
                                                 }),
-                                                Arrays.stream(ApiDocumentUtils.getCustomPagedResponseFields())
+                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
@@ -120,7 +120,7 @@ class CategoryControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)")
                                                 }),
-                                                Arrays.stream(ApiDocumentUtils.getCustomPagedResponseFields())
+                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
@@ -158,7 +158,7 @@ class CategoryControllerTest extends IntegrationTest {
                                 .tag("Category API")
                                 .summary("카테고리별 히어릿 목록 조회")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()
@@ -179,7 +179,7 @@ class CategoryControllerTest extends IntegrationTest {
                                 .tag("Category API")
                                 .summary("전체 카테고리 목록 조회")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()
