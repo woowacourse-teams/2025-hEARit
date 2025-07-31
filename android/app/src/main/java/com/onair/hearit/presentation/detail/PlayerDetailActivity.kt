@@ -39,6 +39,7 @@ import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.script.ScriptFragment
+import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
