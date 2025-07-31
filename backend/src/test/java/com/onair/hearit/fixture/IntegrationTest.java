@@ -22,10 +22,10 @@ import org.springframework.test.context.jdbc.Sql;
 public abstract class IntegrationTest {
 
     @LocalServerPort
-    int port;
+    protected int port;
 
     @Autowired
-    public DbHelper dbHelper;
+    protected DbHelper dbHelper;
 
     protected RequestSpecification spec;
 

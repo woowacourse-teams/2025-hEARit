@@ -15,6 +15,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
@@ -292,6 +293,43 @@ class HearitControllerTest extends IntegrationTest {
                 .get("/api/v1/hearits/search")
                 .then().log().all()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, 3개의 카테고리와 히어릿들을 반환한다.")
+    void readHomeCategoriesHearit() {
+        // given
+        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+
+        Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+
+        Category category3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+
+        // when
+        List<GroupedHearitsWithCategoryResponse> responses = RestAssured.given()
+                .when().log().all()
+                .get("/api/v1/hearits/grouped-by-category")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .jsonPath()
+                .getList(".", GroupedHearitsWithCategoryResponse.class);
+
+        assertAll(
+                () -> assertThat(responses.size()).isEqualTo(3),
+                () -> assertThat(responses.get(0).hearits()).hasSize(3),
+                () -> assertThat(responses.get(1).hearits()).hasSize(3),
+                () -> assertThat(responses.get(2).hearits()).hasSize(3)
+        );
     }
 
     private String generateToken(Member member) {

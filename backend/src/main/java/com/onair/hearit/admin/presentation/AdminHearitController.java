@@ -1,17 +1,19 @@
 package com.onair.hearit.admin.presentation;
 
-import com.onair.hearit.admin.application.AdminAuthService;
 import com.onair.hearit.admin.application.AdminHearitService;
-import com.onair.hearit.admin.dto.request.AdminLoginRequest;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import java.net.URI;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,13 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/admin")
 public class AdminHearitController {
 
-    private final AdminAuthService adminAuthService;
     private final AdminHearitService adminHearitService;
-
-    @PostMapping("/login")
-    public void login(@RequestBody AdminLoginRequest request) {
-        adminAuthService.login(request);
-    }
 
     @GetMapping("/hearits")
     public ResponseEntity<PagedResponse<HearitAdminResponse>> readHearits(
@@ -42,10 +38,10 @@ public class AdminHearitController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/hearits")
-    public ResponseEntity<Void> createHearit(@RequestBody HearitCreateRequest request) {
+    @PostMapping(value = "/hearits", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> createHearit(@ModelAttribute @Valid HearitCreateRequest request) {
         adminHearitService.addHearit(request);
-        return ResponseEntity.created(URI.create("/")).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/hearits/{hearitId}")

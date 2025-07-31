@@ -8,6 +8,8 @@ import com.onair.hearit.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,7 +42,7 @@ public class BookmarkController {
             @PathVariable Long hearitId,
             @AuthenticationPrincipal CurrentMember member) {
         BookmarkInfoResponse response = bookmarkService.addBookmark(member, hearitId);
-        return ResponseEntity.created(URI.create("/")).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{bookmarkId}")

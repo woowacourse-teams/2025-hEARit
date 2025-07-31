@@ -8,6 +8,7 @@ import com.onair.hearit.dto.response.PagedResponse;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,8 +40,8 @@ public class AdminKeywordController {
     }
 
     @PostMapping
-    public ResponseEntity<KeywordInfoResponse> createKeyword(@RequestBody KeywordCreateRequest request) {
-        KeywordInfoResponse response = adminKeywordService.addKeyword(request);
-        return ResponseEntity.created(URI.create("/")).body(response);
+    public ResponseEntity<Void> createKeyword(@RequestBody KeywordCreateRequest request) {
+        adminKeywordService.addKeyword(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

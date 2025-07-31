@@ -36,14 +36,25 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'jakarta.validation:jakarta.validation-api'
+
+    // Thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+    // S3
+    implementation platform('software.amazon.awssdk:bom:2.25.30')
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'software.amazon.awssdk:auth'
+    implementation 'software.amazon.awssdk:regions'
 
     // Test
     testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner:4.2.1'
     testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.jsoup:jsoup:1.17.2' // HTML 파싱
 
     // REST Docs
     testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'

@@ -3,6 +3,7 @@ package com.onair.hearit.presentation;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
@@ -13,6 +14,8 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.utils.ApiDocumentUtils;
@@ -98,7 +101,7 @@ class BookmarkControllerTest extends IntegrationTest {
                 .when()
                 .get("/api/v1/bookmarks/hearits")
                 .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value()).log();
     }
 
     @ParameterizedTest
@@ -119,7 +122,7 @@ class BookmarkControllerTest extends IntegrationTest {
                 .when()
                 .get("/api/v1/bookmarks/hearits")
                 .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value()).log();
     }
 
     @Test
@@ -155,7 +158,7 @@ class BookmarkControllerTest extends IntegrationTest {
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when & then
-        RestAssured.given(this.spec)
+        BookmarkInfoResponse response =  RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .filter(document("bookmark-create",
                         resource(ResourceSnippetParameters.builder()
@@ -172,9 +175,12 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .post("/api/v1/bookmarks/hearits/{hearitId}", hearit.getId())
+                .post("/api/v1/bookmarks/hearits/" + hearit.getId())
                 .then()
-                .statusCode(HttpStatus.CREATED.value());
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().as(BookmarkInfoResponse.class);
+
+        assertThat(response.id()).isNotNull();
     }
 
     @Test
