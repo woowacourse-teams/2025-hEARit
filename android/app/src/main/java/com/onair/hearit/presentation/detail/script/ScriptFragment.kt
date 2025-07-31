@@ -35,6 +35,7 @@ class ScriptFragment : Fragment() {
     private var lastUserScrollTime = 0L
 
     private lateinit var mediaController: MediaController
+    private lateinit var updateRunnable: Runnable
 
     private val adapter by lazy { ScriptAdapter() }
 
@@ -141,7 +142,7 @@ class ScriptFragment : Fragment() {
     }
 
     private fun startScriptSync(controller: Player) {
-        val updateRunnable =
+        updateRunnable =
             object : Runnable {
                 override fun run() {
                     val now = System.currentTimeMillis()
@@ -182,6 +183,11 @@ class ScriptFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        handler.removeCallbacks(updateRunnable)
+        if (::mediaController.isInitialized) {
+            mediaController.release()
+        }
+        _binding = null
     }
 
     companion object {
