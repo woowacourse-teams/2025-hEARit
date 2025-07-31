@@ -19,59 +19,41 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:background="@drawable/bg_gray1_radius_8dp"
-        android:onClick="@{() -> listener.onClickHearitInfo(item.id)}">
+        android:onClick="@{() -> listener.onClickHearitInfo(item.id)}"
+        android:paddingVertical="16dp">
 
         <TextView
             android:id="@+id/tv_searched_hearit_title"
             style="@style/pretendard_sub_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="4dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
-            android:maxLines="1"
+            android:maxLines="2"
             android:text="@{item.title}"
             app:layout_constraintEnd_toStartOf="@id/tv_searched_hearit_time"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Intent란 무엇인가? 아주 긴 제목이 있을 수도 있음" />
+            tools:text="Intent란 무엇인가? 아주 긴 제목이 있을 수도 있음 2줄까지만 표시해볼까?" />
 
         <TextView
             android:id="@+id/tv_searched_hearit_time"
             style="@style/pretendard_sub_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:textColor="@color/hearit_gray2"
-            app:layout_constraintBottom_toBottomOf="@id/tv_searched_hearit_title"
-            app:layout_constraintEnd_toEndOf="@id/tv_searched_hearit_summary"
-            app:layout_constraintStart_toEndOf="@id/tv_searched_hearit_title"
+            app:layout_constraintEnd_toStartOf="@id/iv_searched_hearit"
             app:layout_constraintTop_toTopOf="@id/tv_searched_hearit_title"
             app:playTimeFormatted="@{item.playTime}"
             tools:text="00:00" />
 
-        <TextView
-            android:id="@+id/tv_searched_hearit_summary"
-            style="@style/pretendard_body"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="60dp"
-            android:layout_marginBottom="20dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:text="@{item.summary}"
-            android:textColor="@color/hearit_gray3"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_searched_hearit_title"
-            tools:text="Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나...(요약)" />
-
         <ImageView
+            android:id="@+id/iv_searched_hearit"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="8dp"
             android:contentDescription="@null"
             android:src="@drawable/ic_right"
             app:layout_constraintBottom_toBottomOf="parent"

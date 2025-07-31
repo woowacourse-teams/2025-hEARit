@@ -16,10 +16,8 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentSearchCategoryBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.CategoryClickListener
-import com.onair.hearit.presentation.search.SearchFragment.Companion.KEY_CATEGORY
+import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 
@@ -72,8 +70,17 @@ class SearchCategoryFragment :
         }
     }
 
-    private fun navigateToSearchResult(input: SearchInput) {
-        setFragmentResult(KEY_CATEGORY, bundleOf(KEY_CATEGORY to input.term()))
+    private fun navigateToSearchResult(
+        id: Long,
+        name: String,
+    ) {
+        setFragmentResult(
+            SearchFragment.KEY_CATEGORY,
+            bundleOf(
+                "category_id" to id,
+                "category_name" to name,
+            ),
+        )
     }
 
     override fun onDestroyView() {
@@ -93,7 +100,7 @@ class SearchCategoryFragment :
             ),
         )
 
-        navigateToSearchResult(SearchInput.Category(id, name))
+        navigateToSearchResult(id, name)
     }
 
     companion object {

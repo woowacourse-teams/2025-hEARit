@@ -26,12 +26,12 @@ class SearchResultFragment :
     private var _binding: FragmentSearchResultBinding? = null
     private val binding get() = _binding!!
 
-    private val input: SearchInput by lazy {
+    private val searchedTerm: SearchInput by lazy {
         SearchInput.from(requireArguments())
     }
 
     private val viewModel: SearchResultViewModel by viewModels {
-        SearchResultViewModelFactory(input, CrashlyticsProvider.get())
+        SearchResultViewModelFactory(searchedTerm, CrashlyticsProvider.get())
     }
     private val adapter by lazy { SearchedHearitAdapter(this) }
 
@@ -51,11 +51,9 @@ class SearchResultFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-
         setupWindowInsets()
         setupRecyclerView()
         observeViewModel()
-
         binding.nsvSearchResult.setOnTouchListener { _, _ ->
             hideKeyboard()
             false

@@ -15,30 +15,31 @@ sealed class SearchInput {
 
     fun toBundle(): Bundle =
         when (this) {
-            is Keyword -> bundleOf(KEYWORD_KEY to term)
+            is Keyword -> bundleOf(TYPE_KEY to "keyword", KEYWORD_KEY to this.term)
             is Category ->
                 bundleOf(
-                    CATEGORY_ID_KEY to id,
-                    CATEGORY_NAME_KEY to name,
+                    TYPE_KEY to "category",
+                    CATEGORY_ID_KEY to this.id,
+                    CATEGORY_NAME_KEY to this.name,
                 )
         }
 
     companion object {
+        private const val TYPE_KEY = "type"
         private const val KEYWORD_KEY = "keyword"
         private const val CATEGORY_ID_KEY = "categoryId"
         private const val CATEGORY_NAME_KEY = "categoryName"
         private const val ERROR_INVALID_TERM_MESSAGE = "유효하지 않은 검색어입니다"
 
         fun from(bundle: Bundle): SearchInput =
-            when {
-                bundle.containsKey(KEYWORD_KEY) ->
-                    Keyword(bundle.getString(KEYWORD_KEY) ?: "")
+            when (bundle.getString(TYPE_KEY)) {
+                "keyword" -> Keyword(bundle.getString(KEYWORD_KEY).orEmpty())
 
-                bundle.containsKey(CATEGORY_ID_KEY) && bundle.containsKey(CATEGORY_NAME_KEY) ->
-                    Category(
-                        bundle.getLong(CATEGORY_ID_KEY),
-                        bundle.getString(CATEGORY_NAME_KEY) ?: "",
-                    )
+                "category" -> {
+                    val id = bundle.getLong(CATEGORY_ID_KEY)
+                    val name = bundle.getString(CATEGORY_NAME_KEY) ?: ""
+                    Category(id, name)
+                }
 
                 else -> throw IllegalArgumentException(ERROR_INVALID_TERM_MESSAGE)
             }

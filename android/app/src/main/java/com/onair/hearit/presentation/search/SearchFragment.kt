@@ -100,8 +100,9 @@ class SearchFragment : Fragment() {
             KEY_CATEGORY,
             viewLifecycleOwner,
         ) { _, bundle ->
-            val category = bundle.getString(KEY_CATEGORY).orEmpty()
-            navigateToSearchResult(SearchInput.Keyword(category))
+            val id = bundle.getLong("category_id")
+            val name = bundle.getString("category_name").orEmpty()
+            navigateToSearchResult(SearchInput.Category(id, name))
         }
     }
 
@@ -167,18 +168,11 @@ class SearchFragment : Fragment() {
         fragment: Fragment,
         tag: String,
     ) {
-        val existingFragment = childFragmentManager.findFragmentByTag(tag)
-        val transaction = childFragmentManager.beginTransaction()
-
-        if (existingFragment != null) {
-            transaction
-                .replace(R.id.fl_search_container, existingFragment, tag)
-        } else {
-            transaction
-                .replace(R.id.fl_search_container, fragment, tag)
-        }
-
-        transaction.addToBackStack(tag).commit()
+        childFragmentManager
+            .beginTransaction()
+            .replace(R.id.fl_search_container, fragment, tag)
+            .addToBackStack(tag)
+            .commit()
     }
 
     override fun onResume() {
