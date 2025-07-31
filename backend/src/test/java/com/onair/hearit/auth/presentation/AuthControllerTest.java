@@ -9,6 +9,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.auth.dto.request.LoginRequest;
+import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
@@ -112,5 +113,60 @@ class AuthControllerTest extends IntegrationTest {
                 .post("/api/v1/auth/login")
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @Test
+    @DisplayName("회원가입 성공 시 201 CREATED를 반환한다.")
+    void signup_success() {
+        // given
+        SignupRequest request = new SignupRequest("newUser123", "newNickname", "password1234");
+
+        // when & then
+        RestAssured.given(this.spec)
+                .contentType(ContentType.JSON)
+                .body(request)
+                .filter(document("auth-signup",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("회원가입")
+                                .description("새로운 계정을 생성합니다.")
+                                .requestSchema(Schema.schema("SignupRequest"))
+                                .requestFields(
+                                        fieldWithPath("localId").description("사용자 아이디"),
+                                        fieldWithPath("nickname").description("닉네임"),
+                                        fieldWithPath("password").description("비밀번호")
+                                )
+                                .build())
+                ))
+                .when()
+                .post("/api/v1/auth/signup")
+                .then()
+                .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    @DisplayName("이미 존재하는 아이디로 회원가입 시 400 BAD REQUEST를 반환한다.")
+    void signup_fail_with_duplicate_id() {
+        // given
+        // 먼저 동일한 아이디의 사용자를 저장
+        Member existingMember = Member.createLocalUser(
+                "existingUser",
+                "existingNickname",
+                passwordEncoder.encode("password1234"),
+                "profile.jpg"
+        );
+        dbHelper.insertMember(existingMember);
+
+        // 동일한 아이디로 회원가입 요청
+        SignupRequest request = new SignupRequest("existingUser", "newNickname", "password1234");
+
+        // when & then
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post("/api/v1/auth/signup")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 }
