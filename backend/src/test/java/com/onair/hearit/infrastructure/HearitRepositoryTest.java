@@ -138,6 +138,7 @@ class HearitRepositoryTest {
         Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
+        // category1에 6개 저장
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
@@ -146,10 +147,9 @@ class HearitRepositoryTest {
         Hearit hearit6 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         // category2에 1개 저장
         Hearit hearit7 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        Pageable pageable = PageRequest.of(0, 5);
 
         // when
-        List<Hearit> result = hearitRepository.findByCategory(category1.getId(), pageable);
+        List<Hearit> result = hearitRepository.findByCategory(category1.getId(), 5);
 
         // then
         assertAll(

@@ -34,6 +34,12 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             """, nativeQuery = true)
     Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
 
-    @Query("SELECT h FROM Hearit h WHERE h.category.id = :categoryId ORDER BY h.createdAt DESC LIMIT :limit")
+    @Query("""
+            SELECT h 
+            FROM Hearit h 
+            WHERE h.category.id = :categoryId 
+            ORDER BY h.createdAt DESC 
+            LIMIT :limit
+            """)
     List<Hearit> findByCategory(@Param("categoryId") Long categoryId, @Param("limit") int limit);
 }
