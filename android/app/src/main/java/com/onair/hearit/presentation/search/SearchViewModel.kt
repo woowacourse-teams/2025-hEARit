@@ -30,7 +30,11 @@ class SearchViewModel(
     private var currentPage = 0
     private var isLastPage = false
 
-    fun getCategories() {
+    init {
+        getCategories()
+    }
+
+    private fun getCategories() {
         viewModelScope.launch {
             categoryRepository
                 .getCategories(page = 0)

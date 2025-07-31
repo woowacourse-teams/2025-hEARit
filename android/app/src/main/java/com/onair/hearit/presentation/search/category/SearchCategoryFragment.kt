@@ -28,7 +28,8 @@ class SearchCategoryFragment :
     private var _binding: FragmentSearchCategoryBinding? = null
     private val binding get() = _binding!!
     private val categoryAdapter by lazy { CategoryAdapter(this) }
-    private val viewModel: SearchViewModel by viewModels {
+
+    private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
         SearchViewModelFactory(CrashlyticsProvider.get())
     }
 
@@ -49,7 +50,6 @@ class SearchCategoryFragment :
         setupWindowInsets()
         setupCategoryRecyclerView()
         observeViewModel()
-        viewModel.getCategories()
     }
 
     private fun setupWindowInsets() {

@@ -26,7 +26,7 @@ class SearchRecentFragment :
 
     private val recentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
-    private val viewModel: SearchViewModel by viewModels {
+    private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
         SearchViewModelFactory(CrashlyticsProvider.get())
     }
 

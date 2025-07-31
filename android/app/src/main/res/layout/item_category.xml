@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/bg_purple3_radius_8dp"
+        android:background="@drawable/bg_gray1_radius_8dp"
         android:onClick="@{() -> listener.onCategoryClick(item.id, item.name)}"
         android:paddingVertical="24dp"
         app:categoryBackgroundColor="@{item.colorCode}">
