@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
@@ -48,7 +49,7 @@ class BookmarkControllerTest extends IntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .param("page", 0)
                 .param("size", 5)
-                .filter(document("bookmark-read-list", // 문서 조각의 고유 이름
+                .filter(document("bookmark-read-list",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
                                 .summary("북마크 목록 조회")
@@ -58,7 +59,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                         parameterWithName("page").description("페이지 번호 (0부터 시작)"),
                                         parameterWithName("size").description("페이지 당 항목 수 (기본 20)")
                                 )
-//                                .responseSchema(Schema.schema("PagedBookmarkHearitResponse"))
+                                .responseSchema(Schema.schema("PagedBookmarkHearitResponse"))
                                 .responseFields(
                                         Stream.concat(
                                                 Arrays.stream(new FieldDescriptor[]{
@@ -165,7 +166,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .pathParameters(
                                         parameterWithName("hearitId").description("북마크할 히어릿의 ID")
                                 )
-//                                .responseSchema(Schema.schema("BookmarkInfoResponse"))
+                                .responseSchema(Schema.schema("BookmarkInfoResponse"))
                                 .responseFields(
                                         fieldWithPath("id").description("생성된 북마크의 ID")
                                 )
