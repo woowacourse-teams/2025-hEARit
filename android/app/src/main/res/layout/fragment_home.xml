@@ -8,10 +8,6 @@
         <variable
             name="userInfo"
             type="com.onair.hearit.domain.model.UserInfo" />
-
-        <variable
-            name="recentClickListener"
-            type="com.onair.hearit.presentation.home.RecentHearitClickListener" />
     </data>
 
     <androidx.core.widget.NestedScrollView

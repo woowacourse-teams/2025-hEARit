@@ -7,13 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.GroupedCategory
-import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MemberRepository
-import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 
@@ -21,13 +19,9 @@ class HomeViewModel(
     private val dataStoreRepository: DataStoreRepository,
     private val hearitRepository: HearitRepository,
     private val memberRepository: MemberRepository,
-    private val recentHearitRepository: RecentHearitRepository,
 ) : ViewModel() {
     private val _userInfo: MutableLiveData<UserInfo> = MutableLiveData()
     val userInfo: LiveData<UserInfo> = _userInfo
-
-    private val _recentHearit: MutableLiveData<RecentHearit?> = MutableLiveData()
-    val recentHearit: LiveData<RecentHearit?> = _recentHearit
 
     private val _recommendHearits: MutableLiveData<List<RecommendHearit>> = MutableLiveData()
     val recommendHearits: LiveData<List<RecommendHearit>> = _recommendHearits
@@ -40,7 +34,6 @@ class HomeViewModel(
 
     init {
         fetchUserInfo()
-//        getRecentHearit()
         fetchData()
     }
 
@@ -62,18 +55,6 @@ class HomeViewModel(
                     _groupedCategory.value = groupedCategory
                 }.onFailure {
                     _toastMessage.value = R.string.home_toast_grouped_category_load_fail
-                }
-        }
-    }
-
-    fun getRecentHearit() {
-        viewModelScope.launch {
-            recentHearitRepository
-                .getRecentHearit()
-                .onSuccess { recentHearit ->
-                    _recentHearit.value = recentHearit
-                }.onFailure {
-                    _toastMessage.value = R.string.home_toast_recent_load_fail
                 }
         }
     }

@@ -10,15 +10,20 @@
             type="String" />
 
         <variable
-            name="recommendCategoryHearit"
+            name="categoryHearit"
             type="com.onair.hearit.domain.model.CategoryHearit" />
+
+        <variable
+            name="hearitClickListener"
+            type="com.onair.hearit.presentation.home.HearitClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="200dp"
         android:layout_height="152dp"
         android:layout_marginEnd="12dp"
-        android:background="@drawable/bg_gradient_black_gray_radius_8dp">
+        android:background="@drawable/bg_gradient_black_gray_radius_8dp"
+        android:onClick="@{() -> hearitClickListener.onClick(categoryHearit.hearitId)}">
 
         <TextView
             android:id="@+id/tv_recommend_category"
@@ -29,7 +34,7 @@
             android:layout_marginTop="20dp"
             android:ellipsize="end"
             android:maxLines="3"
-            android:text="@{recommendCategoryHearit.title}"
+            android:text="@{categoryHearit.title}"
             android:textColor="@color/hearit_gray4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

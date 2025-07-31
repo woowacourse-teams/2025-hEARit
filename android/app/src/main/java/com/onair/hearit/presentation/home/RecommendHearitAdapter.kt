@@ -6,12 +6,12 @@ import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.RecommendHearit
 
 class RecommendHearitAdapter(
-    private val recommendClickListener: RecommendClickListener,
+    private val hearitClickListener: HearitClickListener,
 ) : ListAdapter<RecommendHearit, RecommendViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): RecommendViewHolder = RecommendViewHolder.create(parent, recommendClickListener)
+    ): RecommendViewHolder = RecommendViewHolder.create(parent, hearitClickListener)
 
     override fun onBindViewHolder(
         holder: RecommendViewHolder,

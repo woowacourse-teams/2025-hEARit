@@ -1,13 +1,11 @@
 package com.onair.hearit.presentation.home
 
-import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -20,19 +18,13 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
-import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.search.result.SearchResultFragment
 import kotlin.math.abs
 
 class HomeFragment :
     Fragment(),
-    RecommendClickListener,
-    CategoryClickListener,
-    RecentHearitClickListener {
+    HearitClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -43,15 +35,9 @@ class HomeFragment :
         )
     }
     private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
-    private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy { GroupedCategoryAdapter() }
+    private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy { GroupedCategoryAdapter(this) }
     private lateinit var indicatorContainer: LinearLayout
     private val snapHelper = PagerSnapHelper()
-    private val playerDetailLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                viewModel.getRecentHearit()
-            }
-        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,13 +54,6 @@ class HomeFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
-        binding.recentClickListener = this
-        binding.tvHomeRecommend.setOnClickListener {
-            (activity as? MainActivity)?.apply {
-                selectTab(R.id.nav_explore)
-            }
-        }
-
         setupWindowInsets()
         setupListeners()
         setupRecommendRecyclerView()
@@ -84,7 +63,6 @@ class HomeFragment :
 
     override fun onResume() {
         super.onResume()
-        viewModel.getRecentHearit()
         AnalyticsProvider.get().logScreenView(
             screenName = AnalyticsScreenInfo.Home.NAME,
             screenClass = AnalyticsScreenInfo.Home.CLASS,
@@ -103,9 +81,6 @@ class HomeFragment :
         binding.ivProfile.setOnClickListener {
             (activity as? DrawerClickListener)?.openDrawer()
         }
-
-//        CrashlyticsProvider.get().log("some debug log")
-//        CrashlyticsProvider.get().recordException(IllegalStateException("Something went wrong"))
     }
 
     private fun setupRecommendRecyclerView() {
@@ -218,10 +193,6 @@ class HomeFragment :
             binding.userInfo = userInfo
         }
 
-        viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->
-//            binding.recentHearit = recentHearit
-        }
-
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
             recommendAdapter.submitList(recommendItems) {
                 scrollToMiddlePosition()
@@ -256,40 +227,11 @@ class HomeFragment :
 
     private fun navigateToPlayerDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        playerDetailLauncher.launch(intent)
+        startActivity(intent)
     }
 
-    private fun navigateToSearchResult(input: SearchInput) {
-        val fragment = SearchResultFragment.newInstance(input)
-
-        (activity as? MainActivity)?.apply {
-            selectTab(R.id.nav_search)
-        }
-
-        parentFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment_container_view, fragment)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    override fun onClickRecentHearit(hearitId: Long) {
+    override fun onClick(hearitId: Long) {
         navigateToPlayerDetail(hearitId)
-    }
-
-    override fun onClickRecommendHearit(
-        hearitId: Long,
-        title: String,
-    ) {
-        navigateToPlayerDetail(hearitId)
-        (requireActivity() as? MainActivity)?.showPlayerControlView()
-    }
-
-    override fun onCategoryClick(
-        id: Long,
-        name: String,
-    ) {
-        navigateToSearchResult(SearchInput.Category(id, name))
     }
 
     override fun onDestroyView() {

@@ -5,11 +5,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.GroupedCategory
 
-class GroupedCategoryAdapter : ListAdapter<GroupedCategory, GroupedCategoryViewHolder>(DiffCallback) {
+class GroupedCategoryAdapter(
+    private val hearitClickListener: HearitClickListener,
+) : ListAdapter<GroupedCategory, GroupedCategoryViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): GroupedCategoryViewHolder = GroupedCategoryViewHolder.create(parent)
+    ): GroupedCategoryViewHolder = GroupedCategoryViewHolder.create(parent, hearitClickListener)
 
     override fun onBindViewHolder(
         holder: GroupedCategoryViewHolder,

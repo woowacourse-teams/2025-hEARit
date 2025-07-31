@@ -7,11 +7,12 @@ import com.onair.hearit.domain.model.CategoryHearit
 
 class CategoryItemAdapter(
     private val color: String,
+    private val hearitClickListener: HearitClickListener,
 ) : ListAdapter<CategoryHearit, CategoryItemViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): CategoryItemViewHolder = CategoryItemViewHolder.create(parent, color)
+    ): CategoryItemViewHolder = CategoryItemViewHolder.create(parent, color, hearitClickListener)
 
     override fun onBindViewHolder(
         holder: CategoryItemViewHolder,

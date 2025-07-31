@@ -9,20 +9,23 @@ import com.onair.hearit.domain.model.CategoryHearit
 class CategoryItemViewHolder(
     private val color: String,
     private val binding: ItemCategoryHearitBinding,
+    private val hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(item: CategoryHearit) {
-        binding.recommendCategoryHearit = item
+        binding.categoryHearit = item
         binding.color = color
+        binding.hearitClickListener = hearitClickListener
     }
 
     companion object {
         fun create(
             parent: ViewGroup,
             color: String,
+            hearitClickListener: HearitClickListener,
         ): CategoryItemViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemCategoryHearitBinding.inflate(inflater, parent, false)
-            return CategoryItemViewHolder(color, binding)
+            return CategoryItemViewHolder(color, binding, hearitClickListener)
         }
     }
 }
