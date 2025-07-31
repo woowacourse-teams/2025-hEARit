@@ -14,6 +14,7 @@ import com.onair.hearit.auth.dto.response.TokenResponse;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
@@ -90,9 +91,17 @@ class AuthControllerTest extends IntegrationTest {
 
         // when
         // then
-        RestAssured.given()
+        RestAssured.given(this.spec)
                 .contentType(ContentType.JSON)
                 .body(request)
+                .filter(document("auth-login-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("일반 로그인")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .post("/api/v1/auth/login")
                 .then()
@@ -148,7 +157,6 @@ class AuthControllerTest extends IntegrationTest {
     @DisplayName("이미 존재하는 아이디로 회원가입 시 400 BAD REQUEST를 반환한다.")
     void signup_fail_with_duplicate_id() {
         // given
-        // 먼저 동일한 아이디의 사용자를 저장
         Member existingMember = Member.createLocalUser(
                 "existingUser",
                 "existingNickname",
@@ -157,13 +165,20 @@ class AuthControllerTest extends IntegrationTest {
         );
         dbHelper.insertMember(existingMember);
 
-        // 동일한 아이디로 회원가입 요청
         SignupRequest request = new SignupRequest("existingUser", "newNickname", "password1234");
 
         // when & then
-        RestAssured.given()
+        RestAssured.given(this.spec)
                 .contentType(ContentType.JSON)
                 .body(request)
+                .filter(document("auth-signup-bad-request",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("회원가입")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .post("/api/v1/auth/signup")
                 .then()
