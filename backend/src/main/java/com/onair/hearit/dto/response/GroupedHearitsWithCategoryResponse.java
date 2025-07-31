@@ -17,17 +17,17 @@ public record GroupedHearitsWithCategoryResponse(
                 category.getId(),
                 category.getName(),
                 category.getColorCode(),
-                getHearits(hearits)
+                mapToHearitResponses(hearits)
         );
     }
 
-    private static List<HearitResponse> getHearits(final List<Hearit> hearits) {
+    private static List<HearitResponse> mapToHearitResponses(final List<Hearit> hearits) {
         return hearits.stream()
                 .map(HearitResponse::from)
                 .toList();
     }
 
-    public record HearitResponse(
+    private record HearitResponse(
             Long hearitId,
             String title,
             LocalDateTime createdAt
