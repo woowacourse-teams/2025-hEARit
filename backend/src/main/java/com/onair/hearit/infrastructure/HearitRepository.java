@@ -39,7 +39,7 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             FROM Hearit h 
             WHERE h.category.id = :categoryId 
             ORDER BY h.createdAt DESC 
-            LIMIT :limit
+            LIMIT :size
             """)
-    List<Hearit> findByCategory(@Param("categoryId") Long categoryId, @Param("limit") int limit);
+    List<Hearit> findByCategory(@Param("categoryId") Long categoryId, @Param("limit") int size);
 }
