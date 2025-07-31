@@ -57,7 +57,6 @@ class MainActivity :
                         controller.mediaMetadata.title?.toString()
                             ?: getString(R.string.main_bottom_player_default_title),
                     )
-                    setDuration(controller.duration)
                 }
             } else {
                 hidePlayerControlView()
@@ -111,23 +110,38 @@ class MainActivity :
     }
 
     private fun setupNavigation() {
-        binding.layoutBottomNavigation.apply {
-            itemIconTintList = null
-            setOnItemSelectedListener { item ->
-                if (item.itemId == currentSelectedItemId) return@setOnItemSelectedListener true
-                currentSelectedItemId = item.itemId
+        binding.layoutBottomNavigation.itemIconTintList = null
+        binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
+            if (item.itemId == currentSelectedItemId) {
+                return@setOnItemSelectedListener true
+            }
+            currentSelectedItemId = item.itemId
 
-                val fragment =
-                    when (item.itemId) {
-                        R.id.nav_home -> HomeFragment()
-                        R.id.nav_search -> SearchFragment().also { showPlayerControlView() }
-                        R.id.nav_explore -> ExploreFragment().also { hidePlayerControlView() }
-                        R.id.nav_library -> LibraryFragment().also { showPlayerControlView() }
-                        else -> return@setOnItemSelectedListener false
-                    }
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    showFragment(HomeFragment())
+                    true
+                }
 
-                showFragment(fragment)
-                true
+                R.id.nav_search -> {
+                    showPlayerControlView()
+                    showFragment(SearchFragment())
+                    true
+                }
+
+                R.id.nav_explore -> {
+                    hidePlayerControlView()
+                    showFragment(ExploreFragment())
+                    true
+                }
+
+                R.id.nav_library -> {
+                    showPlayerControlView()
+                    showFragment(LibraryFragment())
+                    true
+                }
+
+                else -> false
             }
         }
     }
