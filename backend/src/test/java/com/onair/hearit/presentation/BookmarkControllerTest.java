@@ -211,7 +211,7 @@ class BookmarkControllerTest extends IntegrationTest {
         // when & then
         RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
-                .filter(document("bookmark-create-conflict",
+                .filter(document("bookmark-create",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
                                 .summary("북마크 생성")
