@@ -119,6 +119,7 @@ class MainActivity :
 
             when (item.itemId) {
                 R.id.nav_home -> {
+                    showPlayerControlView()
                     showFragment(HomeFragment())
                     true
                 }
