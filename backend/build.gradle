@@ -92,13 +92,12 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// 6. Swagger UI 생성 시, Authorization 헤더를 위한 설정 추가
-tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI.class) {
-    dependsOn 'openapi3' // openapi3 작업이 먼저 실행되어야 함
-    doFirst {
-        def swaggerUIFile = file("${openapi3.outputDirectory}/openapi3.yaml")
-    }
+
+// 2. GenerateSwaggerUI 태스크가 openapi3 태스크 이후에 실행되도록 설정
+tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI).configureEach {
+    dependsOn 'openapi3' // 'openapi3'가 먼저 실행되어야 함을 명시
 }
+
 
 // 7. bootJar 빌드 시, 생성된 Swagger UI를 static/swagger-ui에 포함
 tasks.named('bootJar') {
