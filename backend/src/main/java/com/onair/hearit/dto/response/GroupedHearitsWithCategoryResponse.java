@@ -5,15 +5,15 @@ import com.onair.hearit.domain.Hearit;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record HomeCategoryHearitResponse(
+public record GroupedHearitsWithCategoryResponse(
         Long categoryId,
         String categoryName,
         String colorCode,
         List<CategoryHearitResponse> hearits
 ) {
 
-    public static HomeCategoryHearitResponse from(Category category, List<Hearit> hearits) {
-        return new HomeCategoryHearitResponse(
+    public static GroupedHearitsWithCategoryResponse from(Category category, List<Hearit> hearits) {
+        return new GroupedHearitsWithCategoryResponse(
                 category.getId(),
                 category.getName(),
                 category.getColorCode(),

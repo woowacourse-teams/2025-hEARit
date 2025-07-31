@@ -6,8 +6,8 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
-import com.onair.hearit.dto.response.HomeCategoryHearitResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
@@ -72,15 +72,15 @@ public class HearitService {
                 .toList();
     }
 
-    public List<HomeCategoryHearitResponse> getHomeCategoryHearits() {
+    public List<GroupedHearitsWithCategoryResponse> getHomeCategoryHearits() {
         List<Category> categories = categoryRepository.findOldest(CATEGORY_COUNT);
         return categories.stream()
                 .map(this::createHomeCategoryResponse)
                 .toList();
     }
 
-    private HomeCategoryHearitResponse createHomeCategoryResponse(Category category) {
+    private GroupedHearitsWithCategoryResponse createHomeCategoryResponse(Category category) {
         List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_CATEGORY);
-        return HomeCategoryHearitResponse.from(category, hearits);
+        return GroupedHearitsWithCategoryResponse.from(category, hearits);
     }
 }

@@ -9,9 +9,9 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
-import com.onair.hearit.dto.response.HomeCategoryHearitResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
@@ -216,14 +216,14 @@ class HearitControllerTest extends IntegrationTest {
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
 
         // when
-        List<HomeCategoryHearitResponse> responses = RestAssured.given()
+        List<GroupedHearitsWithCategoryResponse> responses = RestAssured.given()
                 .when().log().all()
                 .get("/api/v1/hearits/home-categories")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .jsonPath()
-                .getList(".", HomeCategoryHearitResponse.class);
+                .getList(".", GroupedHearitsWithCategoryResponse.class);
 
         assertAll(
                 () -> assertThat(responses.size()).isEqualTo(3),
