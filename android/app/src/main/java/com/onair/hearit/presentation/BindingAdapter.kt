@@ -160,6 +160,20 @@ fun setCategoryBackgroundColor(
     }
 }
 
+@BindingAdapter("recommendCategoryBackgroundColor")
+fun setRecommendCategoryBackgroundColor(
+    view: View,
+    colorCode: String,
+) {
+    val drawable =
+        GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 0f
+            setColor(colorCode.toColorInt())
+        }
+    view.background = drawable
+}
+
 @BindingAdapter("visibleIfNoHearits")
 fun setVisibleIfNoHearits(
     view: View,
