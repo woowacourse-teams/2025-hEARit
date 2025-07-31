@@ -38,7 +38,7 @@ public class FileStorageService {
                             .build(),
                     RequestBody.fromInputStream(inputStream, multipartFile.getSize())
             );
-            return key;
+            return "/" + key;
         } catch (IOException e) {
             log.error("S3 파일 업로드 실패: " + multipartFile.getOriginalFilename(), e);
             throw new S3Exception("S3 파일 업로드 실패", e);
