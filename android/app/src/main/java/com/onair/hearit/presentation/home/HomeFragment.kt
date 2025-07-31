@@ -70,12 +70,11 @@ class HomeFragment :
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
         binding.recentClickListener = this
-        binding.tvHomeNoRecentHearitText.setOnClickListener {
+        binding.tvHomeRecommend.setOnClickListener {
             (activity as? MainActivity)?.apply {
                 selectTab(R.id.nav_explore)
             }
         }
-        binding.ivHomeRecentPlay.setOnClickListener { }
 
         setupWindowInsets()
         setupListeners()

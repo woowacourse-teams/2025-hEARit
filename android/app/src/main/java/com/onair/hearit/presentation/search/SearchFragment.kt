@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -58,6 +59,7 @@ class SearchFragment : Fragment() {
         updateAppBarUIOnBackStackChanged()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupSearchInput() {
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -65,13 +67,14 @@ class SearchFragment : Fragment() {
             }
             false
         }
-
         binding.tilSearch.setEndIconOnClickListener {
             performSearchFromInput()
         }
-
-        binding.etSearch.setOnClickListener {
-            showRecentFragment()
+        binding.tilSearch.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                showRecentFragment()
+            }
+            false
         }
     }
 
