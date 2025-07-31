@@ -6,9 +6,9 @@ import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Hidden;
-import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +43,6 @@ public class AdminKeywordController {
     @PostMapping
     public ResponseEntity<Void> createKeyword(@RequestBody KeywordCreateRequest request) {
         adminKeywordService.addKeyword(request);
-        return ResponseEntity.created(URI.create("/")).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

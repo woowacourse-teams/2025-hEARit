@@ -27,6 +27,11 @@ public class AdminViewController {
         return "admin/hearit-list";
     }
 
+    @GetMapping("/hearits-create")
+    public String hearitCreatePage() {
+        return "admin/hearit-create";
+    }
+
     @GetMapping("/categories")
     public String categoryListPage() {
         return "admin/category-list";
