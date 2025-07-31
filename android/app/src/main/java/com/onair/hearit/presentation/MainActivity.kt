@@ -49,19 +49,7 @@ class MainActivity :
 
     override fun onResume() {
         super.onResume()
-        mediaController?.let { controller ->
-            if (controller.playWhenReady || controller.playbackState == Player.STATE_READY) {
-                showPlayerControlView()
-                binding.layoutBottomPlayerController.apply {
-                    setTitle(
-                        controller.mediaMetadata.title?.toString()
-                            ?: getString(R.string.main_bottom_player_default_title),
-                    )
-                }
-            } else {
-                hidePlayerControlView()
-            }
-        }
+        setPlayerControlViewVisibility()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,13 +107,13 @@ class MainActivity :
 
             when (item.itemId) {
                 R.id.nav_home -> {
-                    showPlayerControlView()
+                    setPlayerControlViewVisibility()
                     showFragment(HomeFragment())
                     true
                 }
 
                 R.id.nav_search -> {
-                    showPlayerControlView()
+                    setPlayerControlViewVisibility()
                     showFragment(SearchFragment())
                     true
                 }
@@ -137,7 +125,7 @@ class MainActivity :
                 }
 
                 R.id.nav_library -> {
-                    showPlayerControlView()
+                    setPlayerControlViewVisibility()
                     showFragment(LibraryFragment())
                     true
                 }
@@ -192,6 +180,7 @@ class MainActivity :
                 mediaController = controllerFuture.get()
                 mediaController?.let {
                     binding.layoutBottomPlayerController.setPlayer(it)
+                    setPlayerControlViewVisibility()
                 }
             },
             ContextCompat.getMainExecutor(this),
@@ -199,18 +188,19 @@ class MainActivity :
     }
 
     private fun observeViewModel() {
-        playerViewModel.recentHearit.observe(this) { recent ->
-            if (recent != null) {
-                playerViewModel.preparePlayback(recent.id)
-                showPlayerControlView()
-            } else {
-                hidePlayerControlView()
-            }
+        playerViewModel.recentHearit.observe(this) {
+            setPlayerControlViewVisibility()
+            it?.let { playerViewModel.preparePlayback(it.id) }
         }
 
         playerViewModel.playbackInfo.observe(this) { playbackInfo ->
             startPlayback(playbackInfo.audioUrl, playbackInfo.title, playbackInfo.hearitId)
             showPlayerControlView()
+            val title =
+                playbackInfo.title.ifBlank {
+                    getString(R.string.main_bottom_player_default_title)
+                }
+            binding.layoutBottomPlayerController.setTitle(title)
         }
 
         playerViewModel.toastMessage.observe(this) { resId ->
@@ -233,7 +223,21 @@ class MainActivity :
         ContextCompat.startForegroundService(this, intent)
     }
 
+    private fun setPlayerControlViewVisibility() {
+        val controller = mediaController ?: return
+
+        val isRecentAvailable = playerViewModel.recentHearit.value != null
+        val isPlaying = controller.isPlaying || controller.playbackState == Player.STATE_READY
+
+        if (currentSelectedItemId != R.id.nav_explore && (isRecentAvailable || isPlaying)) {
+            showPlayerControlView()
+        } else {
+            hidePlayerControlView()
+        }
+    }
+
     override fun showPlayerControlView() {
+        if (binding.layoutBottomPlayerController.translationY == 0f) return
         binding.layoutBottomPlayerController
             .animate()
             .translationY(0f)
@@ -243,8 +247,12 @@ class MainActivity :
 
     override fun hidePlayerControlView() {
         binding.layoutBottomPlayerController.post {
-            binding.layoutBottomPlayerController.apply {
-                animate().translationY(height.toFloat()).setDuration(200).start()
+            if (binding.layoutBottomPlayerController.translationY != binding.layoutBottomPlayerController.height.toFloat()) {
+                binding.layoutBottomPlayerController
+                    .animate()
+                    .translationY(binding.layoutBottomPlayerController.height.toFloat())
+                    .setDuration(200)
+                    .start()
             }
         }
     }

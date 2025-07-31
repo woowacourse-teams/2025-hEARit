@@ -28,6 +28,14 @@ class PlayerViewModel(
         fetchRecentHearit()
     }
 
+    fun preparePlayback(hearitId: Long) {
+        viewModelScope.launch {
+            getPlaybackInfoUseCase(hearitId)
+                .onSuccess { _playbackInfo.value = it }
+                .onFailure { _toastMessage.value = R.string.main_toast_load_player_hearit_fail }
+        }
+    }
+
     private fun fetchRecentHearit() {
         viewModelScope.launch {
             recentHearitRepository
@@ -40,14 +48,6 @@ class PlayerViewModel(
                 }.onFailure {
                     _toastMessage.value = R.string.main_toast_recent_load_fail
                 }
-        }
-    }
-
-    fun preparePlayback(hearitId: Long) {
-        viewModelScope.launch {
-            getPlaybackInfoUseCase(hearitId)
-                .onSuccess { _playbackInfo.value = it }
-                .onFailure { _toastMessage.value = R.string.main_toast_load_player_hearit_fail }
         }
     }
 }
