@@ -91,7 +91,6 @@ class AdminCategoryControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.CREATED);
     }
 
-
     @Test
     @DisplayName("카테고리를 수정할 수 있다.")
     void updateCategory() {

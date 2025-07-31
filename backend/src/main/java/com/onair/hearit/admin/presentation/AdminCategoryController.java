@@ -49,12 +49,12 @@ public class AdminCategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{categoryId}")
     public ResponseEntity<Void> updateCategory(
-            @PathVariable Long id,
+            @PathVariable Long categoryId,
             @RequestBody CategoryUpdateRequest request
     ) {
-        adminCategoryService.updateCategory(id, request);
+        adminCategoryService.updateCategory(categoryId, request);
         return ResponseEntity.noContent().build();
     }
 }

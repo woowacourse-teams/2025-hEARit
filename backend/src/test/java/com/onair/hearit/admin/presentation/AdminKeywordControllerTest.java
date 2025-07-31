@@ -4,19 +4,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
+import com.onair.hearit.admin.dto.request.KeywordUpdateRequest;
 import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.infrastructure.KeywordRepository;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 class AdminKeywordControllerTest extends IntegrationTest {
+
+    @Autowired
+    private KeywordRepository keywordRepository;
 
     @Test
     @DisplayName("키워드를 페이징 조회할 수 있다")
@@ -83,6 +89,30 @@ class AdminKeywordControllerTest extends IntegrationTest {
                 .post("/api/v1/admin/keywords")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    @DisplayName("키워드를 수정할 수 있다.")
+    void updateKeyword() {
+        // given
+        CsrfSession csrf = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
+        Keyword keyword = dbHelper.insertKeyword(new Keyword("키워드"));
+
+        KeywordUpdateRequest keywordUpdateRequest = new KeywordUpdateRequest("수정된 키워드");
+        // when
+        RestAssured.given().log().all()
+                .cookie("JSESSIONID", csrf.sessionId())
+                .header("X-CSRF-TOKEN", csrf.csrfToken())
+                .contentType("application/json")
+                .body(keywordUpdateRequest)
+                .when()
+                .put("/api/v1/admin/keywords/" + keyword.getId())
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        Keyword updatedKeyword = keywordRepository.findById(keyword.getId()).orElseThrow();
+        assertThat(updatedKeyword.getName()).isEqualTo("수정된 키워드");
     }
 
     private void insertTestKeywords(int count) {
