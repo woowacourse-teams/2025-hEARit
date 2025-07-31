@@ -54,15 +54,13 @@
                     app:layout_constraintTop_toTopOf="@id/ib_player_detail_back"
                     tools:text="Network" />
 
-                <ImageView
-                    android:id="@+id/iv_player_detail_thumbnail"
+                <include
+                    android:id="@+id/layout_thumbnail"
+                    layout="@layout/layout_player_detail_thumbnail"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginHorizontal="36dp"
                     android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_gradient_radius_8dp"
-                    android:contentDescription="@null"
-                    app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/ib_player_detail_back" />
@@ -78,8 +76,8 @@
                     android:ellipsize="end"
                     android:text="@{hearit.title}"
                     app:layout_constraintBottom_toTopOf="@id/tv_hearit_player_date"
-                    app:layout_constraintEnd_toEndOf="@id/iv_player_detail_thumbnail"
-                    app:layout_constraintStart_toStartOf="@id/iv_player_detail_thumbnail"
+                    app:layout_constraintEnd_toEndOf="@id/layout_thumbnail"
+                    app:layout_constraintStart_toStartOf="@id/layout_thumbnail"
                     tools:text="HTTP와 HTTPS의 차이에 대해 알아볼까요" />
 
                 <TextView
@@ -88,12 +86,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginBottom="16dp"
                     android:elevation="2dp"
                     android:textColor="@color/hearit_gray2"
                     app:formattedDate="@{hearit.createdAt}"
-                    app:layout_constraintBottom_toBottomOf="@id/iv_player_detail_thumbnail"
-                    app:layout_constraintStart_toStartOf="@id/iv_player_detail_thumbnail"
+                    app:layout_constraintBottom_toBottomOf="@id/layout_thumbnail"
+                    app:layout_constraintStart_toStartOf="@id/layout_thumbnail"
                     tools:text="2025.07.28" />
 
                 <ImageView
@@ -105,8 +103,8 @@
                     android:background="@drawable/bookmark_selector"
                     android:contentDescription="@null"
                     android:onClick="@{() -> viewModel.toggleBookmark()}"
-                    app:layout_constraintEnd_toEndOf="@id/iv_player_detail_thumbnail"
-                    app:layout_constraintTop_toBottomOf="@id/iv_player_detail_thumbnail"
+                    app:layout_constraintEnd_toEndOf="@id/layout_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@id/layout_thumbnail"
                     app:setSelectedState="@{viewModel.isBookmarked}" />
 
                 <androidx.recyclerview.widget.RecyclerView

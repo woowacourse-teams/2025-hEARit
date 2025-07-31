@@ -54,6 +54,7 @@
     <string name="player_detail_toast_single_hearit_load_fail">단일 히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_hearit_load_fail">히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다.</string>
+    <string name="player_detail_keyword_name"># %s</string>
 
     <!-- ExploreFragment-->
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 골라 들으세요!</string>
