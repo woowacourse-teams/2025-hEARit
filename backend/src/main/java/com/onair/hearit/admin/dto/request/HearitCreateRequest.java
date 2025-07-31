@@ -9,9 +9,9 @@ public record HearitCreateRequest(
         @NotBlank String title,
         @NotBlank String summary,
         @NotNull Integer playTime,
-        MultipartFile originalAudio,
-        MultipartFile shortAudio,
-        MultipartFile scriptFile,
+        @NotNull MultipartFile originalAudio,
+        @NotNull MultipartFile shortAudio,
+        @NotNull MultipartFile scriptFile,
         @NotBlank String source,
         @NotNull Long categoryId,
         List<Long> keywordIds
