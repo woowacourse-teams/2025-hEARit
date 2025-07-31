@@ -29,7 +29,7 @@ public class HearitService {
 
     private static final int RECOMMEND_HEARIT_COUNT = 5;
     private static final int CATEGORY_COUNT = 3;
-    private static final int HEARITS_PER_CATEGORY_COUNT = 5;
+    private static final int HEARITS_PER_CATEGORY = 5;
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -80,10 +80,7 @@ public class HearitService {
     }
 
     private HomeCategoryHearitResponse createHomeCategoryResponse(Category category) {
-        List<Hearit> hearits = hearitRepository.findByCategory(
-                category.getId(),
-                HEARITS_PER_CATEGORY_COUNT
-        );
+        List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_CATEGORY);
         return HomeCategoryHearitResponse.from(category, hearits);
     }
 }
