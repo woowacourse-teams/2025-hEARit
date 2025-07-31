@@ -17,6 +17,9 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("SELECT h FROM Hearit h ORDER BY function('RAND')")
     Page<Hearit> findRandom(Pageable pageable);
 
+    @Query("SELECT h FROM Hearit h ORDER BY function('RAND') LIMIT :limit")
+    List<Hearit> findRandom(@Param("limit") int limit);
+
     Page<Hearit> findByCategoryIdOrderByCreatedAtDesc(Long categoryId, Pageable pageable);
 
     @Query(value = """
@@ -31,6 +34,6 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             """, nativeQuery = true)
     Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
 
-    @Query("SELECT h FROM Hearit h WHERE h.category.id = :categoryId ORDER BY h.createdAt DESC")
-    List<Hearit> findByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
+    @Query("SELECT h FROM Hearit h WHERE h.category.id = :categoryId ORDER BY h.createdAt DESC LIMIT :limit")
+    List<Hearit> findByCategory(@Param("categoryId") Long categoryId, @Param("limit") int limit);
 }

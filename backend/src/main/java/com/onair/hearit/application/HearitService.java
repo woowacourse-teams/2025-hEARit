@@ -28,7 +28,8 @@ import org.springframework.stereotype.Service;
 public class HearitService {
 
     private static final int RECOMMEND_HEARIT_COUNT = 5;
-    private static final int CATEGORY_HEARIT_COUNT = 5;
+    private static final int CATEGORY_COUNT = 3;
+    private static final int HEARITS_PER_CATEGORY_COUNT = 5;
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -66,20 +67,23 @@ public class HearitService {
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
-        Pageable pageable = PageRequest.of(0, RECOMMEND_HEARIT_COUNT);
-        return hearitRepository.findRandom(pageable).stream()
+        return hearitRepository.findRandom(RECOMMEND_HEARIT_COUNT).stream()
                 .map(RecommendHearitResponse::from)
                 .toList();
     }
 
     public List<HomeCategoryHearitResponse> getHomeCategoryHearits() {
-        Pageable pageable = PageRequest.of(0, CATEGORY_HEARIT_COUNT);
-        List<Category> categories = categoryRepository.findTop3ByOrderByIdAsc();
+        List<Category> categories = categoryRepository.findOldest(CATEGORY_COUNT);
         return categories.stream()
-                .map(category -> {
-                    List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), pageable);
-                    return HomeCategoryHearitResponse.from(category, hearits);
-                })
+                .map(this::createHomeCategoryResponse)
                 .toList();
+    }
+
+    private HomeCategoryHearitResponse createHomeCategoryResponse(Category category) {
+        List<Hearit> hearits = hearitRepository.findByCategory(
+                category.getId(),
+                HEARITS_PER_CATEGORY_COUNT
+        );
+        return HomeCategoryHearitResponse.from(category, hearits);
     }
 }
