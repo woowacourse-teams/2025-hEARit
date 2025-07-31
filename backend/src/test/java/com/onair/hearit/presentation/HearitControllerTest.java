@@ -220,7 +220,7 @@ class HearitControllerTest extends IntegrationTest {
         // when
         List<GroupedHearitsWithCategoryResponse> responses = RestAssured.given()
                 .when().log().all()
-                .get("/api/v1/hearits/home-categories")
+                .get("/api/v1/hearits/grouped-by-category")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
