@@ -16,6 +16,7 @@ import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -41,6 +42,7 @@ class AuthControllerTest extends IntegrationTest {
     @Test
     @DisplayName("로그인 성공 시 200 OK 및 accessToken + refreshToken을 반환한다.")
     void login_success() {
+        // given
         Member member = Member.createLocalUser(
                 "test123",
                 "testName",
@@ -51,6 +53,7 @@ class AuthControllerTest extends IntegrationTest {
 
         LoginRequest request = new LoginRequest("test123", "pass1234");
 
+        // when
         LoginTokenResponse loginTokenResponse = given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
@@ -60,6 +63,7 @@ class AuthControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(LoginTokenResponse.class);
 
+        // then
         assertAll(() -> {
             assertThat(loginTokenResponse.accessToken()).isNotNull();
             assertThat(loginTokenResponse.refreshToken()).isNotNull();
@@ -77,7 +81,7 @@ class AuthControllerTest extends IntegrationTest {
         TokenReissueRequest tokenReissueRequest = new TokenReissueRequest(validRefreshToken);
 
         // when
-        TokenReissueResponse response = given().log().all()
+        TokenReissueResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(tokenReissueRequest)
                 .when()
@@ -92,6 +96,7 @@ class AuthControllerTest extends IntegrationTest {
     @Test
     @DisplayName("비밀번호 틀리면 401 Unauthorized 반환한다.")
     void login_invalidPassword() {
+        // given
         Member member = Member.createLocalUser(
                 "test123",
                 "testName",
@@ -102,7 +107,7 @@ class AuthControllerTest extends IntegrationTest {
 
         LoginRequest request = new LoginRequest("test123", "wrong-pass");
 
-        given()
+        RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
@@ -116,12 +121,35 @@ class AuthControllerTest extends IntegrationTest {
     void login_nonexistentMember() {
         LoginRequest request = new LoginRequest("ghost123", "pass1234");
 
-        given()
+        RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
                 .post("/api/v1/auth/login")
-                .then()
+                .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @Test
+    @DisplayName("로그아웃 시 해당 회원의 리프레시토큰을 삭제한다.")
+    void logout_then_deleteRefreshToken() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
+        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
+
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId());
+
+        // when
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when()
+                .post("/api/v1/auth/logout")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
     }
 }

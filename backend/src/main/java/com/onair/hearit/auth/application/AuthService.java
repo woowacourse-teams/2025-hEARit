@@ -80,7 +80,7 @@ public class AuthService {
     }
 
     private LoginTokenResponse createTokenResponseFrom(Member member) {
-        String accessToken = jwtTokenProvider.createToken(member.getId());
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
         LocalDateTime expiryDate = jwtTokenProvider.extractExpiry(refreshToken);
         refreshTokenRepository.findByMemberId(member.getId())
@@ -101,7 +101,7 @@ public class AuthService {
                     return new UnauthorizedException("저장된 토큰이 없습니다.");
                 });
         validateRefreshTokenValue(refreshToken, stored);
-        return jwtTokenProvider.createToken(memberId);
+        return jwtTokenProvider.createAccessToken(memberId);
     }
 
     private void validateRefreshTokenExpired(String refreshToken) {

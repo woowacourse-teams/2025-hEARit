@@ -20,7 +20,7 @@ class JwtTokenProviderTest {
                 60000L
         );
 
-        String token = tokenProvider.createToken(1L);
+        String token = tokenProvider.createAccessToken(1L);
 
         // then
         assertThat(tokenProvider.validateToken(token)).isTrue();
