@@ -140,17 +140,19 @@ class HearitServiceTest {
     }
 
     @Test
-    @DisplayName("홈 카테고리의 히어릿들을 키워드와 함께 조회할 수 있다.")
+    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회할 수 있다.")
     void getGroupedHearitsByCategory() {
         // given
         Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+
         Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+
         Category category3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));

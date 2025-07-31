@@ -199,17 +199,19 @@ class HearitControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("홈 카테고리 히어릿 조회 시, 3개의 카테고리와 히어릿을 반환한다.")
+    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, 3개의 카테고리와 히어릿들을 반환한다.")
     void readHomeCategoriesHearit() {
         // given
         Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+
         Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+
         Category category3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
