@@ -2,10 +2,13 @@ package com.onair.hearit.admin.domain;
 
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
+@RequiredArgsConstructor
 public enum FileType {
+
     ORIGINAL("ORG", ".mp3", "hearit/audio/original/"),
     SHORT("SHR", ".mp3", "hearit/audio/short/"),
     SCRIPT("SCR", ".json", "hearit/script/");
@@ -13,12 +16,6 @@ public enum FileType {
     private final String prefix;
     private final String extension;
     private final String uploadPath;
-
-    FileType(String prefix, String extension, String uploadPath) {
-        this.prefix = prefix;
-        this.extension = extension;
-        this.uploadPath = uploadPath;
-    }
 
     public void validateFilename(MultipartFile multipartFile) {
         String filename = multipartFile.getOriginalFilename();
