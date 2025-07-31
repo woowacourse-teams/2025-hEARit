@@ -1,10 +1,12 @@
 package com.onair.hearit.presentation.explore
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -39,6 +41,16 @@ class ExploreFragment :
     private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
     private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
+
+    private val playerDetailLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                (activity as? PlayerControllerView)?.apply {
+                    pause()
+                    hidePlayerControlView()
+                }
+            }
+        }
 
     var currentPosition = 0
     var swipeCount = 0
@@ -168,7 +180,7 @@ class ExploreFragment :
 
     private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
+        playerDetailLauncher.launch(intent)
     }
 
     override fun onClickHearitInfo(hearitId: Long) {
