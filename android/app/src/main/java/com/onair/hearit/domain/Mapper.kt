@@ -1,6 +1,7 @@
 package com.onair.hearit.domain
 
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.domain.model.SearchInput
@@ -41,6 +42,17 @@ fun SingleHearit.toHearit(
         bookmarkId = this.bookmarkId,
         category = this.category,
         keywords = this.keywords,
+    )
+
+fun SingleHearit.toPlaybackInfo(
+    audioUrl: String,
+    title: String,
+): PlaybackInfo =
+    PlaybackInfo(
+        hearitId = this.id,
+        audioUrl = audioUrl,
+        title = title,
+        playTime = this.playTime,
     )
 
 fun SearchInput.term(): String =

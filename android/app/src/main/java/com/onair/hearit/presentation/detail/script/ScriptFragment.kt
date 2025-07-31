@@ -21,9 +21,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentScriptBinding
 import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.presentation.detail.PlaybackService
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
+import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 
 class ScriptFragment : Fragment() {

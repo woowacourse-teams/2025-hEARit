@@ -39,6 +39,7 @@ import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.script.ScriptFragment
+import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 
 class PlayerDetailActivity : AppCompatActivity() {
@@ -115,9 +116,6 @@ class PlayerDetailActivity : AppCompatActivity() {
 
     @OptIn(UnstableApi::class)
     private fun setupMediaController() {
-        val serviceIntent = Intent(this, PlaybackService::class.java)
-        startService(serviceIntent)
-
         val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
 
         lifecycleScope.launch {
@@ -127,22 +125,28 @@ class PlayerDetailActivity : AppCompatActivity() {
                     .buildAsync()
                     .await()
 
+            mediaController = controller
             binding.playerView.player = controller
-            controller.addListener(
-                object : Player.Listener {
-                    override fun onTimelineChanged(
-                        timeline: Timeline,
-                        reason: Int,
-                    ) {
-                        if (timeline.windowCount > 0) {
-                            binding.baseController.setPlayer(controller)
-                        }
-                    }
-                },
-            )
+            binding.baseController.setPlayer(controller)
 
-            controller.prepare()
-            controller.play()
+            val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
+            val isDifferentHearit = playingId != hearitId
+
+            if (isDifferentHearit) {
+                controller.addListener(
+                    object : Player.Listener {
+                        override fun onTimelineChanged(
+                            timeline: Timeline,
+                            reason: Int,
+                        ) {
+                            if (timeline.windowCount > 0) {
+                                controller.removeListener(this)
+                                controller.play()
+                            }
+                        }
+                    },
+                )
+            }
 
             startScriptSync(controller)
         }
@@ -197,10 +201,13 @@ class PlayerDetailActivity : AppCompatActivity() {
             binding.hearit = hearit
             scriptAdapter.submitList(hearit.script)
 
-            startPlaybackService(
-                audioUrl = hearit.audioUrl,
-                title = hearit.title,
-            )
+            val currentlyPlayingId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
+            if (currentlyPlayingId != hearit.id) {
+                startPlaybackService(
+                    audioUrl = hearit.audioUrl,
+                    title = hearit.title,
+                )
+            }
         }
 
         viewModel.keywords.observe(this) { keywords ->
@@ -243,10 +250,12 @@ class PlayerDetailActivity : AppCompatActivity() {
         title: String,
     ) {
         val serviceIntent =
-            Intent(this, PlaybackService::class.java).apply {
-                putExtra("AUDIO_URL", audioUrl)
-                putExtra("TITLE", title)
-            }
+            PlaybackService.newIntent(
+                context = this,
+                audioUrl = audioUrl,
+                title = title,
+                hearitId = hearitId,
+            )
         startService(serviceIntent)
     }
 
@@ -266,9 +275,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         mediaController?.release()
-
-        val stopIntent = Intent(this, PlaybackService::class.java)
-        stopService(stopIntent)
     }
 
     companion object {
