@@ -6,8 +6,8 @@
     <data>
 
         <variable
-            name="categorySection"
-            type="com.onair.hearit.domain.model.CategorySection" />
+            name="groupedCategory"
+            type="com.onair.hearit.domain.model.GroupedCategory" />
     </data>
 
     <LinearLayout
@@ -21,7 +21,7 @@
             style="@style/pretendard_main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{@string/home_category_text(categorySection.categoryName)}"
+            android:text="@{@string/home_grouped_category_text(groupedCategory.categoryName)}"
             tools:text="Spring 카테고리의 팟캐스트" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -33,6 +33,6 @@
             android:orientation="horizontal"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:itemCount="3"
-            tools:listitem="@layout/item_recommend_category" />
+            tools:listitem="@layout/item_category_hearit" />
     </LinearLayout>
 </layout>

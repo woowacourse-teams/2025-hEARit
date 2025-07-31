@@ -20,8 +20,6 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.domain.model.CategorySection
-import com.onair.hearit.domain.model.RecommendCategoryHearit
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.CategoryClickListener
 import com.onair.hearit.presentation.DrawerClickListener
@@ -45,7 +43,7 @@ class HomeFragment :
         )
     }
     private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
-    private val categoryAdapter: CategorySectionAdapter by lazy { CategorySectionAdapter() }
+    private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy { GroupedCategoryAdapter() }
     private lateinit var indicatorContainer: LinearLayout
     private val snapHelper = PagerSnapHelper()
     private val playerDetailLauncher =
@@ -212,7 +210,7 @@ class HomeFragment :
     }
 
     private fun setupCategoryRecyclerView() {
-        binding.rvHomeRecommendCategory.adapter = categoryAdapter
+        binding.rvHomeRecommendCategory.adapter = groupedCategoryAdapter
     }
 
     private fun observeViewModel() {
@@ -221,7 +219,7 @@ class HomeFragment :
         }
 
         viewModel.recentHearit.observe(viewLifecycleOwner) { recentHearit ->
-            binding.recentHearit = recentHearit
+//            binding.recentHearit = recentHearit
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
@@ -231,66 +229,8 @@ class HomeFragment :
             }
         }
 
-        viewModel.categories.observe(viewLifecycleOwner) { categories ->
-//            categoryAdapter.submitList(categories)
-            val dummyData =
-                listOf(
-                    CategorySection(
-                        categoryName = "Kotlin",
-                        items =
-                            listOf(
-                                RecommendCategoryHearit(
-                                    title = "Coroutine 완전 정복",
-                                    categoryColor = "#FF6F61",
-                                ),
-                                RecommendCategoryHearit(
-                                    title = "Flow vs LiveData",
-                                    categoryColor = "#6A5ACD",
-                                ),
-                                RecommendCategoryHearit(
-                                    title = "sealed class 실전 예제",
-                                    categoryColor = "#20B2AA",
-                                ),
-                            ),
-                    ),
-                    CategorySection(
-                        categoryName = "Android",
-                        items =
-                            listOf(
-                                RecommendCategoryHearit(
-                                    title = "Fragment vs Activity",
-                                    categoryColor = "#FFA500",
-                                ),
-                                RecommendCategoryHearit(
-                                    title = "Jetpack Compose 맛보기",
-                                    categoryColor = "#32CD32",
-                                ),
-                                RecommendCategoryHearit(
-                                    title = "ViewModel 생명주기",
-                                    categoryColor = "#FF1493",
-                                ),
-                            ),
-                    ),
-                    CategorySection(
-                        categoryName = "Network",
-                        items =
-                            listOf(
-                                RecommendCategoryHearit(
-                                    title = "Retrofit 사용법",
-                                    categoryColor = "#1E90FF",
-                                ),
-                                RecommendCategoryHearit(
-                                    title = "OkHttp Interceptor",
-                                    categoryColor = "#A52A2A",
-                                ),
-                                RecommendCategoryHearit(
-                                    title = "HTTPS 동작 방식",
-                                    categoryColor = "#8A2BE2",
-                                ),
-                            ),
-                    ),
-                )
-            categoryAdapter.submitList(dummyData)
+        viewModel.groupedCategory.observe(viewLifecycleOwner) { groupedCategory ->
+            groupedCategoryAdapter.submitList(groupedCategory)
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->

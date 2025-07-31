@@ -3,13 +3,15 @@ package com.onair.hearit.presentation.home
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.model.RecommendCategoryHearit
+import com.onair.hearit.domain.model.CategoryHearit
 
-class CategoryItemAdapter : ListAdapter<RecommendCategoryHearit, CategoryItemViewHolder>(DiffCallback) {
+class CategoryItemAdapter(
+    private val color: String,
+) : ListAdapter<CategoryHearit, CategoryItemViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): CategoryItemViewHolder = CategoryItemViewHolder.create(parent)
+    ): CategoryItemViewHolder = CategoryItemViewHolder.create(parent, color)
 
     override fun onBindViewHolder(
         holder: CategoryItemViewHolder,
@@ -20,15 +22,15 @@ class CategoryItemAdapter : ListAdapter<RecommendCategoryHearit, CategoryItemVie
 
     companion object {
         private val DiffCallback =
-            object : DiffUtil.ItemCallback<RecommendCategoryHearit>() {
+            object : DiffUtil.ItemCallback<CategoryHearit>() {
                 override fun areItemsTheSame(
-                    oldItem: RecommendCategoryHearit,
-                    newItem: RecommendCategoryHearit,
+                    oldItem: CategoryHearit,
+                    newItem: CategoryHearit,
                 ): Boolean = oldItem.title == newItem.title
 
                 override fun areContentsTheSame(
-                    oldItem: RecommendCategoryHearit,
-                    newItem: RecommendCategoryHearit,
+                    oldItem: CategoryHearit,
+                    newItem: CategoryHearit,
                 ): Boolean = oldItem == newItem
             }
     }

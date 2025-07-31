@@ -4,11 +4,9 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.onair.hearit.analytics.CrashlyticsLogger
-import com.onair.hearit.data.datasource.CategoryRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.HearitRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.MemberRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
-import com.onair.hearit.data.repository.CategoryRepositoryImpl
 import com.onair.hearit.data.repository.DataStoreRepositoryImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
 import com.onair.hearit.data.repository.MemberRepositoryImpl
@@ -22,8 +20,6 @@ class HomeViewModelFactory(
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val categoryDataSource = CategoryRemoteDataSourceImpl(NetworkProvider.categoryService)
-        val categoryRepository = CategoryRepositoryImpl(categoryDataSource, crashlyticsLogger)
         val dataStoreRepository = DataStoreRepositoryImpl(context, crashlyticsLogger)
         val hearitLocalDataSource =
             HearitLocalDataSourceImpl(DatabaseProvider.hearitDao, crashlyticsLogger)
@@ -34,7 +30,6 @@ class HomeViewModelFactory(
         val memberRemoteDataSource = MemberRemoteDataSourceImpl(NetworkProvider.memberService)
         val memberRepository = MemberRepositoryImpl(memberRemoteDataSource, crashlyticsLogger)
         return HomeViewModel(
-            categoryRepository,
             dataStoreRepository,
             hearitRepository,
             memberRepository,

@@ -6,12 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.UserNotRegisteredException
-import com.onair.hearit.domain.model.Category
-import com.onair.hearit.domain.model.Paging
+import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.UserInfo
-import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MemberRepository
@@ -20,7 +18,6 @@ import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val categoryRepository: CategoryRepository,
     private val dataStoreRepository: DataStoreRepository,
     private val hearitRepository: HearitRepository,
     private val memberRepository: MemberRepository,
@@ -35,19 +32,15 @@ class HomeViewModel(
     private val _recommendHearits: MutableLiveData<List<RecommendHearit>> = MutableLiveData()
     val recommendHearits: LiveData<List<RecommendHearit>> = _recommendHearits
 
-    private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
-    val categories: LiveData<List<Category>> = _categories
+    private val _groupedCategory: MutableLiveData<List<GroupedCategory>> = MutableLiveData()
+    val groupedCategory: LiveData<List<GroupedCategory>> = _groupedCategory
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private lateinit var paging: Paging
-    private var currentPage = 0
-    private var isLastPage = false
-
     init {
         fetchUserInfo()
-        getRecentHearit()
+//        getRecentHearit()
         fetchData()
     }
 
@@ -63,14 +56,12 @@ class HomeViewModel(
         }
 
         viewModelScope.launch {
-            categoryRepository
-                .getCategories(page = 0)
-                .onSuccess { pageCategories ->
-                    paging = pageCategories.paging
-                    _categories.value = pageCategories.items
-                    isLastPage = paging.isLast
+            hearitRepository
+                .getCategoryHearits()
+                .onSuccess { groupedCategory ->
+                    _groupedCategory.value = groupedCategory
                 }.onFailure {
-                    _toastMessage.value = R.string.all_toast_categories_load_fail
+                    _toastMessage.value = R.string.home_toast_grouped_category_load_fail
                 }
         }
     }

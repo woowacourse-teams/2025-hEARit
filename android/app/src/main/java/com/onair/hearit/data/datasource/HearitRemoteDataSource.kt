@@ -1,5 +1,6 @@
 package com.onair.hearit.data.datasource
 
+import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
@@ -20,4 +21,6 @@ interface HearitRemoteDataSource {
         page: Int?,
         size: Int?,
     ): Result<SearchHearitResponse>
+
+    suspend fun getCategoryHearits(): Result<List<GroupedCategoryHearitResponse>>
 }

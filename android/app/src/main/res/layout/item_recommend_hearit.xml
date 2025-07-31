@@ -20,7 +20,7 @@
         android:background="@drawable/bg_gray1_radius_8dp">
 
         <TextView
-            android:id="@+id/tv_slide_category"
+            android:id="@+id/tv_recommend_hearit_category"
             style="@style/pretendard_main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,30 +34,30 @@
             tools:text="Android" />
 
         <ImageView
-            android:id="@+id/iv_slide_disk"
+            android:id="@+id/iv_recommend_hearit_disk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:contentDescription="@null"
             android:scaleType="fitCenter"
             android:src="@drawable/img_home_record"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_slide_category" />
+            app:layout_constraintTop_toBottomOf="@id/tv_recommend_hearit_category" />
 
         <TextView
-            android:id="@+id/tv_slide_title"
-            style="@style/pretendard_main_title"
+            android:id="@+id/tv_recommend_hearit_title"
+            style="@style/pretendard_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginVertical="24dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="16dp"
             android:text="@{item.title}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/iv_slide_disk"
+            app:layout_constraintTop_toBottomOf="@id/iv_recommend_hearit_disk"
             tools:text="스프링 @EventListener와 @TransactionalEventListener" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

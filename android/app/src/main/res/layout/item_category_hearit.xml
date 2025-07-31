@@ -6,8 +6,12 @@
     <data>
 
         <variable
+            name="color"
+            type="String" />
+
+        <variable
             name="recommendCategoryHearit"
-            type="com.onair.hearit.domain.model.RecommendCategoryHearit" />
+            type="com.onair.hearit.domain.model.CategoryHearit" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -40,7 +44,7 @@
             android:background="@color/hearit_purple1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:recommendCategoryBackgroundColor="@{recommendCategoryHearit.categoryColor}" />
+            app:recommendCategoryBackgroundColor="@{color}" />
 
         <View
             android:layout_width="176dp"
@@ -49,7 +53,7 @@
             android:background="@color/hearit_purple1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/view_recommend_category_left"
-            app:recommendCategoryBackgroundColor="@{recommendCategoryHearit.categoryColor}" />
+            app:recommendCategoryBackgroundColor="@{color}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
