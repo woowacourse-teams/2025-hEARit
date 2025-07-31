@@ -55,7 +55,6 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .tag("Bookmark API")
                                 .summary("북마크 목록 조회")
                                 .description("사용자가 북마크한 히어릿 목록을 페이지별로 조회합니다.")
-                                .requestHeaders(ApiDocumentUtils.getAuthorizationHeader())
                                 .queryParameters(
                                         parameterWithName("page").description("페이지 번호 (0부터 시작)"),
                                         parameterWithName("size").description("페이지 당 항목 수 (기본 20)")
@@ -163,7 +162,6 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .tag("Bookmark API")
                                 .summary("북마크 생성")
                                 .description("로그인한 회원이 히어릿 ID로 북마크를 생성합니다.")
-                                .requestHeaders(ApiDocumentUtils.getAuthorizationHeader())
                                 .pathParameters(
                                         parameterWithName("hearitId").description("북마크할 히어릿의 ID")
                                 )
@@ -216,7 +214,6 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .tag("Bookmark API")
                                 .summary("북마크 삭제")
                                 .description("로그인한 히어릿 ID와 북마크 ID로 북마크를 삭제합니다.")
-                                .requestHeaders(ApiDocumentUtils.getAuthorizationHeader())
                                 .pathParameters(
                                         parameterWithName("bookmarkId").description("삭제할 북마크의 ID")
                                 )

@@ -57,7 +57,6 @@ class HearitControllerTest extends IntegrationTest {
                                 .tag("Hearit API")
                                 .summary("히어릿 상세 조회 (로그인)")
                                 .description("로그인한 사용자가 히어릿의 상세 정보를 조회합니다. 북마크 여부가 포함됩니다.")
-                                .requestHeaders(ApiDocumentUtils.getAuthorizationHeader())
                                 .pathParameters(
                                         parameterWithName("hearitId").description("조회할 히어릿의 ID")
                                 )

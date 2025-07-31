@@ -12,7 +12,6 @@ import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.MemberInfoResponse;
 import com.onair.hearit.fixture.IntegrationTest;
-import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +43,6 @@ class MemberControllerTest extends IntegrationTest {
                                 .tag("Member API")
                                 .summary("내 정보 조회")
                                 .description("현재 로그인한 사용자의 정보를 조회합니다.")
-                                .requestHeaders(ApiDocumentUtils.getAuthorizationHeader())
                                 .responseSchema(Schema.schema("MemberInfoResponse"))
                                 .responseFields(
                                         fieldWithPath("id").description("사용자 ID"),
