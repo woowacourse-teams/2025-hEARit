@@ -9,6 +9,7 @@ import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class PlayerViewModel(
@@ -23,6 +24,8 @@ class PlayerViewModel(
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
+
+    private var preparePlaybackJob: Job? = null
 
     init {
         fetchRecentHearit()
@@ -44,10 +47,12 @@ class PlayerViewModel(
     }
 
     fun preparePlayback(hearitId: Long) {
-        viewModelScope.launch {
-            getPlaybackInfoUseCase(hearitId)
-                .onSuccess { _playbackInfo.value = it }
-                .onFailure { _toastMessage.value = R.string.main_toast_load_player_hearit }
-        }
+        preparePlaybackJob?.cancel()
+        preparePlaybackJob =
+            viewModelScope.launch {
+                getPlaybackInfoUseCase(hearitId)
+                    .onSuccess { _playbackInfo.value = it }
+                    .onFailure { _toastMessage.value = R.string.main_toast_load_player_hearit }
+            }
     }
 }
