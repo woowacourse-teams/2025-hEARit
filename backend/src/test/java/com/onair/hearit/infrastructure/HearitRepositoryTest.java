@@ -157,8 +157,7 @@ class HearitRepositoryTest {
                 () -> assertThat(result).allMatch(hearit -> hearit.getCategory().getId().equals(category1.getId()))
         );
     }
-
-
+    
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = new Hearit(
