@@ -13,6 +13,7 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.response.KeywordResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
+import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -110,9 +111,17 @@ class KeywordControllerTest extends IntegrationTest {
     @DisplayName("존재하지 않는 키워드를 조회 시 404 NOT_FOUND를 반환한다.")
     void readNotFoundKeyword() {
         // when & then
-        RestAssured.given()
+        RestAssured.given(this.spec)
+                .filter(document("keyword-read-single-not-found",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Keyword API")
+                                .summary("단일 키워드 조회")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
-                .get("/api/v1/keywords/999")
+                .get("/api/v1/keywords/{keywordId}", 9999L)
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }
