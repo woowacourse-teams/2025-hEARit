@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search
+package com.onair.hearit.presentation.search.result
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.ViewCompat
@@ -27,12 +26,12 @@ class SearchResultFragment :
     private var _binding: FragmentSearchResultBinding? = null
     private val binding get() = _binding!!
 
-    private val input: SearchInput by lazy {
+    private val searchedTerm: SearchInput by lazy {
         SearchInput.from(requireArguments())
     }
 
     private val viewModel: SearchResultViewModel by viewModels {
-        SearchResultViewModelFactory(input, CrashlyticsProvider.get())
+        SearchResultViewModelFactory(searchedTerm, CrashlyticsProvider.get())
     }
     private val adapter by lazy { SearchedHearitAdapter(this) }
 
@@ -43,14 +42,6 @@ class SearchResultFragment :
     ): View {
         _binding = FragmentSearchResultBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
-
-        binding.etSearchResult.setText(
-            when (val input = input) {
-                is SearchInput.Keyword -> input.term
-                is SearchInput.Category -> input.name
-            },
-        )
-
         return binding.root
     }
 
@@ -60,13 +51,9 @@ class SearchResultFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-
         setupWindowInsets()
-        setupSearchEnterKey()
-        setupSearchEndIcon()
         setupRecyclerView()
         observeViewModel()
-
         binding.nsvSearchResult.setOnTouchListener { _, _ ->
             hideKeyboard()
             false
@@ -78,36 +65,6 @@ class SearchResultFragment :
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
-        }
-    }
-
-    private fun setupSearchEnterKey() {
-        binding.etSearchResult.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val term =
-                    binding.etSearchResult.text
-                        .toString()
-                        .trim()
-                if (term.isNotBlank() && term != viewModel.currentSearchTerm) {
-                    hideKeyboard()
-                    viewModel.search(term)
-                    return@setOnEditorActionListener true
-                }
-            }
-            false
-        }
-    }
-
-    private fun setupSearchEndIcon() {
-        binding.tilSearchResult.setEndIconOnClickListener {
-            val term =
-                binding.etSearchResult.text
-                    .toString()
-                    .trim()
-            if (term.isNotBlank()) {
-                hideKeyboard()
-                viewModel.search(term)
-            }
         }
     }
 
