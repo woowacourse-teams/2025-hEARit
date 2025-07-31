@@ -85,7 +85,7 @@ class HearitControllerTest extends IntegrationTest {
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
-        
+
         // when & then
         HearitDetailResponse response = RestAssured.given(this.spec)
                 .filter(document("hearit-read-detail-not-member",
@@ -116,12 +116,18 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("히어릿 단일 조회 시, 존재하지 않는 아이디인 경우 404 NOT_FOUND를 반환한다.")
     void readHearitWithNotFound() {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-        Long notFoundHearitId = 1L;
+        Long notFoundHearitId = 9999L;
 
         // when & then
-        RestAssured.given()
+        RestAssured.given(this.spec)
+                .filter(document("hearit-read-detail-not-found",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("히어릿 상세 조회")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .get("/api/v1/hearits/{hearitId}", notFoundHearitId)
                 .then()
@@ -280,22 +286,30 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")
     void searchHearitsWithInvalidParams() {
         // when & then
-        RestAssured.given()
-                .queryParam("searchTerm", "title1")
+        RestAssured.given(this.spec)
+                .queryParam("searchTerm", "spring")
                 .queryParam("page", -1)
                 .queryParam("size", 10)
+                .filter(document("hearit-search-bad-request",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("히어릿 검색")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .get("/api/v1/hearits/search")
-                .then().log().all()
+                .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
 
         RestAssured.given()
-                .queryParam("searchTerm", "title1")
+                .queryParam("searchTerm", "spring")
                 .queryParam("page", 0)
-                .queryParam("size", -5)
+                .queryParam("size", -1)
                 .when()
                 .get("/api/v1/hearits/search")
-                .then().log().all()
+                .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
