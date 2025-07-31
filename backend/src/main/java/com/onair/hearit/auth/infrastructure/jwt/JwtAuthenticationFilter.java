@@ -11,12 +11,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -31,13 +33,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         String token = extractTokenFromHeader(header);
 
-        // 화이트리스트면 토큰이 없어도 그냥 통과
-        if ((token == null || token.isBlank()) && isWhitelisted(request)) {
+        // 화이트리스트면 그냥 통과
+        if (isWhitelisted(request)) {
             chain.doFilter(request, response);
             return;
         }
 
         if (!jwtTokenProvider.validateToken(token)) {
+            log.warn("토큰 검증 실패 - 유효하지 않은 토큰");
             ProblemDetail problemDetail = buildProblemDetail(ErrorCode.UNAUTHORIZED, "유효하지 않은 토큰입니다.", request);
             writeProblemDetailResponse(response, problemDetail);
             return;
