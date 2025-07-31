@@ -26,4 +26,17 @@ public class ApiDocumentUtils {
                 fieldWithPath("isLast").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부")
         };
     }
+
+    public static FieldDescriptor[] getProblemDetailResponseFields() {
+        return new FieldDescriptor[]{
+                fieldWithPath("type").type(JsonFieldType.STRING).description("문제 유형을 식별하는 URI (요청 경로)"),
+                fieldWithPath("title").type(JsonFieldType.STRING).description("문제 유형에 대한 요약 (에러 코드 제목)"),
+                fieldWithPath("status").type(JsonFieldType.NUMBER).description("HTTP 상태 코드"),
+                fieldWithPath("detail").type(JsonFieldType.STRING).description("문제 발생에 대한 상세 설명"),
+                fieldWithPath("instance").type(JsonFieldType.STRING)
+                        .description("문제의 특정 발생을 식별하는 URI (현재는 사용되지 않아 null)").optional(),
+                fieldWithPath("properties").type(JsonFieldType.OBJECT)
+                        .description("문제 유형에 대한 추가 세부 정보 (현재는 사용되지 않아 null)").optional()
+        };
+    }
 }
