@@ -94,13 +94,21 @@ class BookmarkControllerTest extends IntegrationTest {
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
-        RestAssured.given()
+        RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .param("page", -1)
+                .filter(document("bookmark-read-list-bad-request",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Bookmark API")
+                                .summary("북마크 목록 조회")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .get("/api/v1/bookmarks/hearits")
                 .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value()).log();
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @ParameterizedTest
@@ -115,13 +123,13 @@ class BookmarkControllerTest extends IntegrationTest {
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
-        RestAssured.given()
+        RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .param("size", size)
                 .when()
                 .get("/api/v1/bookmarks/hearits")
                 .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value()).log();
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
@@ -137,10 +145,18 @@ class BookmarkControllerTest extends IntegrationTest {
         }
 
         // when & then
-        RestAssured.given()
+        RestAssured.given(this.spec)
                 .header("Authorization", "")
                 .param("page", 0)
                 .param("size", 20)
+                .filter(document("bookmark-read-list-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Bookmark API")
+                                .summary("북마크 목록 조회")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .get("/api/v1/bookmarks/hearits")
                 .then()
@@ -193,8 +209,16 @@ class BookmarkControllerTest extends IntegrationTest {
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
-        RestAssured.given()
+        RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
+                .filter(document("bookmark-create-conflict",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Bookmark API")
+                                .summary("북마크 생성")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .post("/api/v1/bookmarks/hearits/" + hearit.getId())
                 .then()
@@ -231,7 +255,7 @@ class BookmarkControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("자신의 북마크가 아닌 북마크 삭제 시, 403 UNAUTHORIZED를 반환한다.")
+    @DisplayName("자신의 북마크가 아닌 북마크 삭제 시, 401 UNAUTHORIZED를 반환한다.")
     void notFoundHearitId() {
         // given
         Member bookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -242,8 +266,16 @@ class BookmarkControllerTest extends IntegrationTest {
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(bookmarkMember, hearit));
 
         // when & then
-        RestAssured.given()
+        RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
+                .filter(document("bookmark-delete-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Bookmark API")
+                                .summary("북마크 삭제")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .delete("/api/v1/bookmarks/" + bookmark.getId())
                 .then()
