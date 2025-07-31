@@ -315,8 +315,25 @@ class HearitControllerTest extends IntegrationTest {
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
 
         // when
-        List<GroupedHearitsWithCategoryResponse> responses = RestAssured.given()
-                .when().log().all()
+        List<GroupedHearitsWithCategoryResponse> responses = RestAssured.given(this.spec)
+                .filter(document("hearit-read-grouped",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("카테고리별 그룹화된 히어릿 조회")
+                                .description("홈 화면에 표시될 카테고리별 최신 히어릿 목록을 조회합니다. (고정 3개 카테고리, 카테고리당 최신 5개)")
+                                .responseSchema(Schema.schema("GroupedHearitsWithCategoryResponseList"))
+                                .responseFields(
+                                        fieldWithPath("[].categoryId").description("카테고리 ID"),
+                                        fieldWithPath("[].categoryName").description("카테고리 이름"),
+                                        fieldWithPath("[].hearits").description("해당 카테고리의 최신 히어릿 목록"),
+                                        fieldWithPath("[].hearits[].hearitId").description("히어릿 ID"),
+                                        fieldWithPath("[].hearits[].title").description("히어릿 제목"),
+                                        fieldWithPath("[].hearits[].summary").description("히어릿 요약"),
+                                        fieldWithPath("[].hearits[].playTime").description("히어릿 재생 시간(초)")
+                                )
+                                .build()))
+                )
+                .when()
                 .get("/api/v1/hearits/grouped-by-category")
                 .then()
                 .statusCode(HttpStatus.OK.value())
@@ -324,8 +341,9 @@ class HearitControllerTest extends IntegrationTest {
                 .jsonPath()
                 .getList(".", GroupedHearitsWithCategoryResponse.class);
 
+        // then
         assertAll(
-                () -> assertThat(responses.size()).isEqualTo(3),
+                () -> assertThat(responses).hasSize(3),
                 () -> assertThat(responses.get(0).hearits()).hasSize(3),
                 () -> assertThat(responses.get(1).hearits()).hasSize(3),
                 () -> assertThat(responses.get(2).hearits()).hasSize(3)
