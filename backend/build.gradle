@@ -1,4 +1,3 @@
-// 1. 플러그인 버전 관리를 위한 buildscript 추가
 buildscript {
     ext {
         restdocsApiSpecVersion = '0.18.2'
@@ -54,7 +53,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'org.jsoup:jsoup:1.17.2' // HTML 파싱
+    testImplementation 'org.jsoup:jsoup:1.17.2'
 
     // REST Docs
     testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
@@ -81,7 +80,6 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 
-// 4. 생성될 OpenAPI 스펙 파일의 위치 지정
 swaggerSources {
     sample {
         setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
@@ -90,7 +88,8 @@ swaggerSources {
 
 openapi3 {
     servers = [
-            { url = "http://localhost"; description = "Local Server" }
+            { url = "http://localhost:80"; description = "로컬 서버" },
+            { url = "http://hearit.o-r.kr"; description = "운영 서버" }
     ]
     title = "Hearit API 문서"
     description = "Spring REST Docs와 Swagger UI를 이용한 API 명세서"
@@ -104,15 +103,13 @@ tasks.named('test') {
 }
 
 
-// 2. GenerateSwaggerUI 태스크가 openapi3 태스크 이후에 실행되도록 설정
 tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI).configureEach {
-    dependsOn 'openapi3' // 'openapi3'가 먼저 실행되어야 함을 명시
+    dependsOn 'openapi3'
 }
 
 
-// 7. bootJar 빌드 시, 생성된 Swagger UI를 static/swagger-ui에 포함
 tasks.named('bootJar') {
-    dependsOn 'generateSwaggerUISample' // Swagger UI 생성이 먼저 완료되어야 함
+    dependsOn 'generateSwaggerUISample'
     from("${tasks.generateSwaggerUISample.outputDir}") {
         into 'static/swagger-ui'
     }
