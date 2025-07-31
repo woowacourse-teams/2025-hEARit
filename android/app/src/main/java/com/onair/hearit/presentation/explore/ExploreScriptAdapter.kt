@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.ScriptLine
 
-class ScriptAdapter : ListAdapter<ScriptLine, ScriptViewHolder>((DiffCallback)) {
+class ExploreScriptAdapter : ListAdapter<ScriptLine, ExploreScriptViewHolder>((DiffCallback)) {
     private var highlightedId: Long? = null
 
     fun highlightSubtitle(id: Long?) {
@@ -24,10 +24,10 @@ class ScriptAdapter : ListAdapter<ScriptLine, ScriptViewHolder>((DiffCallback)) 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): ScriptViewHolder = ScriptViewHolder.create(parent)
+    ): ExploreScriptViewHolder = ExploreScriptViewHolder.create(parent)
 
     override fun onBindViewHolder(
-        holder: ScriptViewHolder,
+        holder: ExploreScriptViewHolder,
         position: Int,
     ) {
         val item = getItem(position)

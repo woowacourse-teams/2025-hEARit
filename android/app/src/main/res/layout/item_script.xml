@@ -20,31 +20,18 @@
         android:paddingBottom="20dp">
 
         <TextView
-            android:id="@+id/tv_script_time"
-            style="@style/pretendard_body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:lineSpacingExtra="4dp"
-            app:detailHighlightedStyle="@{isHighlighted}"
-            app:formattedMillisToTime="@{scriptLine.start}"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="00:00" />
-
-        <TextView
             android:id="@+id/tv_script_body"
             style="@style/pretendard_body"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
             android:ellipsize="end"
+            android:gravity="center"
             android:lineSpacingExtra="4dp"
             android:singleLine="false"
             android:text="@{scriptLine.text}"
             app:detailHighlightedStyle="@{isHighlighted}"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tv_script_time"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="안녕하세요. 오늘은 HTTP와 HTTPS에 대해서 알아볼까요? 저는 잘 모르겠네요~ 스크립트가 길어지면 어떻게 될까요? 두근두근" />
 

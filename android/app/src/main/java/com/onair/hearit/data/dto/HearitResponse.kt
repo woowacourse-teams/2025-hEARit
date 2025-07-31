@@ -21,6 +21,8 @@ data class HearitResponse(
     val isBookmarked: Boolean,
     @SerialName("bookmarkId")
     val bookmarkId: Long?,
+    @SerialName("category")
+    val category: String,
     @SerialName("keywords")
     val keywords: List<KeywordResponse>,
 )

@@ -40,6 +40,8 @@ fun SingleHearit.toHearit(
         createdAt = this.createdAt,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
+        category = this.category,
+        keywords = this.keywords,
     )
 
 fun SingleHearit.toPlaybackInfo(

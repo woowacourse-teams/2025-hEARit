@@ -24,7 +24,7 @@ class ShortsViewHolder(
     private var updateRunnable: Runnable? = null
 
     private var shortsHearit: ShortsHearit? = null
-    private val scriptAdapter = ScriptAdapter()
+    private val exploreScriptAdapter = ExploreScriptAdapter()
 
     init {
         binding.shortsClickListener = shortsClickListener
@@ -35,8 +35,8 @@ class ShortsViewHolder(
         this.shortsHearit = item
 
         binding.hearitItem = item
-        binding.rvExploreItemScript.adapter = scriptAdapter
-        scriptAdapter.submitList(item.script)
+        binding.rvExploreItemScript.adapter = exploreScriptAdapter
+        exploreScriptAdapter.submitList(item.script)
 
         binding.layoutExplorePlayer.player = player
 
@@ -73,7 +73,7 @@ class ShortsViewHolder(
         val currentId = currentSubtitle?.id
         val currentIndex = item.script.indexOfLast { it.start <= currentPositionMs }
 
-        scriptAdapter.highlightSubtitle(currentId)
+        exploreScriptAdapter.highlightSubtitle(currentId)
 
         val layoutManager = binding.rvExploreItemScript.layoutManager as? LinearLayoutManager
         layoutManager?.let {
