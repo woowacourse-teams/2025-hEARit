@@ -10,8 +10,6 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutBottomPlayerControllerBinding
-import java.util.Formatter
-import java.util.Locale
 
 @UnstableApi
 class BottomPlayerView
@@ -31,7 +29,6 @@ class BottomPlayerView
                 true,
             )
 
-        private val formatter = Formatter(StringBuilder(), Locale.getDefault())
         private val window = Timeline.Window()
         private val progressRunnable = Runnable { updateProgress() }
 
@@ -42,7 +39,7 @@ class BottomPlayerView
 
         fun setPlayer(newPlayer: Player): BottomPlayerView =
             apply {
-                releasePlayer()
+                detachPlayer()
                 player = newPlayer
                 listener = PlayerListener().also { newPlayer.addListener(it) }
                 refresh()
@@ -56,15 +53,6 @@ class BottomPlayerView
         private fun setupScrubListener() {
             binding.exoProgress.addListener(
                 object : TimeBar.OnScrubListener {
-                    override fun onScrubStop(
-                        timeBar: TimeBar,
-                        position: Long,
-                        canceled: Boolean,
-                    ) {
-                        player?.seekTo(position)
-                        updateProgress()
-                    }
-
                     override fun onScrubStart(
                         timeBar: TimeBar,
                         position: Long,
@@ -75,6 +63,15 @@ class BottomPlayerView
                         timeBar: TimeBar,
                         position: Long,
                     ) {
+                    }
+
+                    override fun onScrubStop(
+                        timeBar: TimeBar,
+                        position: Long,
+                        canceled: Boolean,
+                    ) {
+                        player?.seekTo(position)
+                        updateProgress()
                     }
                 },
             )
@@ -126,7 +123,7 @@ class BottomPlayerView
             }
         }
 
-        private fun releasePlayer() {
+        private fun detachPlayer() {
             listener?.let { player?.removeListener(it) }
             listener = null
             player = null
@@ -135,7 +132,7 @@ class BottomPlayerView
         override fun onDetachedFromWindow() {
             super.onDetachedFromWindow()
             removeCallbacks(progressRunnable)
-            releasePlayer()
+            detachPlayer()
         }
 
         private inner class PlayerListener : Player.Listener {
