@@ -25,10 +25,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class ApiSecurityConfig {
 
     private static final String[] AUTH_WHITELIST = {
-            "/api/v1/auth/**",
             "/api/v1/hearits/**",
             "/api/v1/categories/**",
             "/api/v1/keywords/**",
+            "/api/v1/auth/login",
+            "/api/v1/auth/kakao-login",
+            "/api/v1/auth/signup",
             "/api/v1/auth/token/refresh",
     };
 
