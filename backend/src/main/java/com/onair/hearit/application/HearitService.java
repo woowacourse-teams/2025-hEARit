@@ -28,8 +28,8 @@ import org.springframework.stereotype.Service;
 public class HearitService {
 
     private static final int RECOMMEND_HEARIT_COUNT = 5;
-    private static final int CATEGORY_COUNT = 3;
-    private static final int HEARITS_PER_CATEGORY = 5;
+    private static final int GROUPED_CATEGORY_COUNT = 3;
+    private static final int HEARITS_PER_GROUPED_CATEGORY = 5;
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -72,16 +72,16 @@ public class HearitService {
                 .toList();
     }
 
-    //TODO 사용자에 맞는 카테고리 추천
     public List<GroupedHearitsWithCategoryResponse> getGroupedHearitsByCategory() {
-        List<Category> categories = categoryRepository.findOldest(CATEGORY_COUNT);
+        //TODO 사용자에 맞는 카테고리 추천
+        List<Category> categories = categoryRepository.findOldest(GROUPED_CATEGORY_COUNT);
         return categories.stream()
                 .map(this::mapToGroupedHearitsResponse)
                 .toList();
     }
 
     private GroupedHearitsWithCategoryResponse mapToGroupedHearitsResponse(Category category) {
-        List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_CATEGORY);
+        List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_GROUPED_CATEGORY);
         return GroupedHearitsWithCategoryResponse.from(category, hearits);
     }
 }
