@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <!-- 환경 변수 설정 -->
+    <Properties>
+
+        <!-- 로그 패턴 설정 -->
+        <!-- %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} : 로그 발생 시간을 ISO 8601 형식으로 출력 -->
+        <!-- %-5level : 로그 레벨을 5자리로 맞추고 왼쪽 정렬 -->
+        <!-- %pid : 프로세스 ID를 출력 -->
+        <!-- %t : 로그를 발생시킨 스레드 이름 -->
+        <!-- %c : 로그를 발생시킨 클래스 이름의 마지막 부분만 풀 네임으로 출력 -->
+        <!-- %msg : 로그 메시지 -->
+        <!-- %n : 줄바꿈 문자 -->
+        <Property name="consoleLogPattern">
+            <!-- @formatter:off -->
+            %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %highlight{%-5level} %style{%pid}{magenta} --- [%15.15t] %style{%-40.40c{1.}}{cyan} : %msg%n
+            <!-- @formatter:on -->
+        </Property>
+
+        <Property name="fileLogPattern">
+            <!-- @formatter:off -->
+            %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level %pid --- [%15.15t] %-40.40c{1.} : %msg%n
+            <!-- @formatter:on -->
+        </Property>
+
+        <!-- 서비스 이름 설정 -->
+        <Property name="logDir">log</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 콘솔 출력 설정 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- 콘솔에 출력할 로그 패턴 설정 -->
+            <PatternLayout
+                    pattern="${consoleLogPattern}"
+                    disableAnsi="false"
+                    noConsoleNoAnsi="false"/>
+        </Console>
+
+        <!-- 파일 출력 설정 -->
+        <!-- INFO, WARN, ERROR, FATAL 로그 파일 -->
+        <!-- txt 파일로 저장 -->
+        <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/2025_08_07/log.zip) -->
+        <!-- 7개 파일 쌓이면 오래된 로그부터 삭제 -->
+        <RollingFile name="RollingFile">
+            <FileName>${logDir}/log.txt</FileName>
+            <FilePattern>${logDir}/archive/%d{yyyy_MM_dd}/log.zip</FilePattern>
+            <PatternLayout
+                    pattern="${fileLogPattern}"
+                    disableAnsi="true"
+                    charset="UTF-8"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+
+        <!-- ERROR, FATAL 로그 파일-->
+        <!-- json 파일로 저장 -->
+        <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/2025_08_07/error-log.zip) -->
+        <!-- 20개 파일 쌓이면 오래된 로그부터 삭제 -->
+        <RollingFile name="RollingErrorFile">ƒ
+            <FileName>${logDir}/error-log.json</FileName>
+            <FilePattern>${logDir}/archive/%d{yyyy_MM_dd}/error-log.zip</FilePattern>
+            <JsonLayout complete="false"
+                        compact="true"
+                        eventEol="true"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+
+        <!-- 최상위 로거 (모든 로그 이벤트 처리) -->
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingErrorFile" level="error"/>
+            <AppenderRef ref="RollingFile" level="info"/>
+        </Root>
+    </Loggers>
+</Configuration>
