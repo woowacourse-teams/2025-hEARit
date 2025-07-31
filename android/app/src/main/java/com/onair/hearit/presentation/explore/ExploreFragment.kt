@@ -21,6 +21,7 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 
 class ExploreFragment :
@@ -61,6 +62,8 @@ class ExploreFragment :
         setupWindowInsets()
         setupRecyclerView()
         observeViewModel()
+
+        (activity as? PlayerControllerView)?.pause()
 
         player.addListener(
             object : Player.Listener {
