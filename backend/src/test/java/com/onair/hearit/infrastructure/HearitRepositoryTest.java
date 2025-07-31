@@ -70,6 +70,27 @@ class HearitRepositoryTest {
     }
 
     @Test
+    @DisplayName("원하는 개수만큼 랜덤 히어릿을 List로 조회할 수 있다.")
+    void findRandom_withLimit() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        int limit = 2;
+
+        // when
+        List<Hearit> result = hearitRepository.findRandom(limit);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(limit),
+                () -> assertThat(hearitRepository.findAll()).hasSize(3)
+        );
+    }
+
+    @Test
     @DisplayName("전체 히어릿 개수 < 원하는 개수면 전체 히어릿을 모두 조회할 수 있다.")
     void findRandomWithAllHearits() {
         // given
@@ -157,7 +178,7 @@ class HearitRepositoryTest {
                 () -> assertThat(result).allMatch(hearit -> hearit.getCategory().getId().equals(category1.getId()))
         );
     }
-    
+
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = new Hearit(
