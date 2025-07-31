@@ -148,13 +148,17 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private fun setupClickListener() {
         binding.ibPlayerDetailBack.setOnClickListener {
             setResult(RESULT_OK)
             finish()
         }
 
+        setupGestureListener()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupGestureListener() {
         val gestureDetector =
             GestureDetector(
                 this,
@@ -170,7 +174,6 @@ class PlayerDetailActivity : AppCompatActivity() {
                         return true
                     }
 
-                    // 스크롤이면 이벤트 무시
                     override fun onScroll(
                         e1: MotionEvent?,
                         e2: MotionEvent,
