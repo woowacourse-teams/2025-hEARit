@@ -9,7 +9,6 @@ import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
-import com.onair.hearit.domain.repository.KeywordRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
@@ -20,7 +19,6 @@ class PlayerDetailViewModel(
     private val recentHearitRepository: RecentHearitRepository,
     private val getHearitUseCase: GetHearitUseCase,
     private val bookmarkRepository: BookmarkRepository,
-    private val keywordRepository: KeywordRepository,
 ) : ViewModel() {
     private val _hearit: MutableLiveData<Hearit> = MutableLiveData()
     val hearit: LiveData<Hearit> = _hearit
@@ -39,7 +37,6 @@ class PlayerDetailViewModel(
 
     init {
         fetchData()
-        getRecommendKeywords()
     }
 
     fun toggleBookmark() {
@@ -79,24 +76,13 @@ class PlayerDetailViewModel(
         }
     }
 
-    private fun getRecommendKeywords() {
-        viewModelScope.launch {
-            keywordRepository
-                .getRecommendKeywords()
-                .onSuccess { keywords ->
-                    _keywords.value = keywords
-                }.onFailure {
-                    _toastMessage.value = R.string.search_toast_keywords_load_fail
-                }
-        }
-    }
-
     private fun fetchData() {
         viewModelScope.launch {
             getHearitUseCase(hearitId)
                 .onSuccess {
                     _hearit.value = it
                     saveRecentHearit()
+                    _keywords.value = it.keywords
                     _isBookmarked.value = it.isBookmarked
                     _bookmarkId.value = it.bookmarkId
                 }.onFailure { it: Throwable ->

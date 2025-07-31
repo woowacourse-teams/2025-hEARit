@@ -41,6 +41,19 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <TextView
+                    android:id="@+id/tv_player_detail_category"
+                    style="@style/pretendard_main_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="56dp"
+                    android:text="@{hearit.category}"
+                    app:layout_constraintBottom_toBottomOf="@id/ib_player_detail_back"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/ib_player_detail_back"
+                    app:layout_constraintTop_toTopOf="@id/ib_player_detail_back"
+                    tools:text="Network" />
+
                 <ImageView
                     android:id="@+id/iv_player_detail_thumbnail"
                     android:layout_width="match_parent"
