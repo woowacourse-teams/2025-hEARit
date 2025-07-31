@@ -67,10 +67,29 @@ class MemberControllerTest extends IntegrationTest {
     @Test
     @DisplayName("로그인하지 않은 사용자가 사용자 정보 조회 시, 401 Unauthorized 예외를 반환한다.")
     void getMemberInfo_error_when_isNotLoginedMember() {
-        RestAssured.given().log().all()
+        RestAssured.given(this.spec)
+                .filter(document("member-read-me-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Member API")
+                                .summary("내 정보 조회")
+                                .description("현재 로그인한 사용자의 정보를 조회합니다.")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                // ✅ 아래 responseFields 부분을 수정합니다.
+                                .responseFields(
+                                        fieldWithPath("type").description("문제 유형을 식별하는 URI (요청 경로)"),
+                                        fieldWithPath("title").description("문제 유형에 대한 요약 (에러 코드 제목)"),
+                                        fieldWithPath("status").description("HTTP 상태 코드"),
+                                        fieldWithPath("detail").description("문제 발생에 대한 상세 설명"),
+                                        fieldWithPath("instance").description("문제의 특정 발생을 식별하는 URI (현재는 사용되지 않아 null)")
+                                                .optional(),
+                                        fieldWithPath("properties").description("문제 유형에 대한 추가 세부 정보 (현재는 사용되지 않아 null)")
+                                                .optional()
+                                )
+                                .build()))
+                )
                 .when()
                 .get("/api/v1/members/me")
-                .then().log().all()
+                .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
