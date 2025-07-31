@@ -9,4 +9,6 @@ data class SingleHearit(
     val createdAt: String,
     val isBookmarked: Boolean,
     val bookmarkId: Long?,
+    val category: String,
+    val keywords: List<Keyword>,
 )

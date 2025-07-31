@@ -47,10 +47,14 @@
     <string name="menu_library">라이브러리</string>
 
     <!-- PlayerDetailActivity-->
-    <string name="player_detail_script_title">스크립트</string>
+    <string name="player_detail_read_more_title">더보기</string>
+    <string name="player_detail_source_title">출처</string>
+    <string name="player_detail_summary_title">요약</string>
+    <string name="player_detail_keyword_title">키워드</string>
     <string name="player_detail_toast_single_hearit_load_fail">단일 히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_hearit_load_fail">히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다.</string>
+    <string name="player_detail_keyword_name"># %s</string>
 
     <!-- ExploreFragment-->
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 골라 들으세요!</string>
@@ -91,4 +95,20 @@
     <string name="login_with_hearit">회원가입 없이 <font color="#B677F3">히어릿</font>을 이용하고 싶어요</string>
     <string name="login_toast_kakao_login_fail">카카오 로그인에 실패했습니다.</string>
     <string name="login_toast_save_token_fail">토큰 저장에 실패했습니다.</string>
+
+    <!-- MainActivity-->
+    <string name="main_toast_recent_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
+    <string name="main_toast_load_player_hearit_fail">플레이어 설정에 실패했습니다.</string>
+    <string name="main_bottom_player_default_title">제목 없음</string>
+    <string name="main_toast_finish_back_pressed">뒤로가기 버튼을 한 번 더 누르면 종료됩니다.</string>
+
+    <!--    BottomPlayerView-->
+    <string name="bottom_player_view_default_duration">--:--</string>
+
+    <!--    PlaybackService-->
+    <string name="notification_channel_name">Hearit 재생 알림</string>
+    <string name="notification_title_preparing">히어릿 재생 준비 중</string>
+    <string name="notification_text_preparing">재생을 준비하고 있어요.</string>
+    <string name="notification_title_playing">히어릿 재생 중</string>
+    <string name="notification_text_playing">음악이 재생되고 있어요.</string>
 </resources>

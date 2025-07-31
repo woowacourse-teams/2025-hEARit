@@ -43,9 +43,7 @@ class BaseControllerView
         private val formatter = Formatter(formatBuilder, Locale.getDefault())
 
         private val window = Timeline.Window()
-
         private var playSpeedPosition = DEFAULT_SPEED_POSITION
-
         private val speedList = floatArrayOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
 
         private val progressRunnable = Runnable { updateProgress() }
@@ -71,7 +69,6 @@ class BaseControllerView
 
         private fun initView() {
             binding = LayoutControllerBinding.inflate(LayoutInflater.from(context), this, true)
-
             timeBar = binding.exoProgress
             playButton = binding.exoPlay
             rewindButton = binding.exoRew
@@ -88,7 +85,12 @@ class BaseControllerView
         }
 
         private fun updateTimeline() {
-            player.currentTimeline.getWindow(player.currentMediaItemIndex, window)
+            val timeline = player.currentTimeline
+            val index = player.currentMediaItemIndex
+
+            if (timeline.isEmpty || index >= timeline.windowCount) return
+
+            timeline.getWindow(index, window)
             timeBar.setDuration(window.durationMs)
             updateProgress()
         }
@@ -107,7 +109,6 @@ class BaseControllerView
             timeBar.setBufferedPosition(buf)
 
             removeCallbacks(progressRunnable)
-
             if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
                 postDelayed(progressRunnable, timeBar.preferredUpdateDelay)
             }
@@ -136,7 +137,7 @@ class BaseControllerView
             updatePlaySpeed()
         }
 
-        inner class CustomComponentListener :
+        private inner class CustomComponentListener :
             Player.Listener,
             TimeBar.OnScrubListener,
             OnClickListener {
@@ -196,6 +197,6 @@ class BaseControllerView
         }
 
         companion object {
-            const val DEFAULT_SPEED_POSITION = 3
+            private const val DEFAULT_SPEED_POSITION = 3
         }
     }

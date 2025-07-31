@@ -9,8 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/controller_view"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:background="@drawable/bg_gray1_radius_8dp">
+        android:layout_height="120dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_hearit_player_top_controller"
@@ -25,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="76dp"
+                android:layout_marginTop="8dp"
                 android:fadeScrollbars="false"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -68,9 +67,9 @@
             <ImageButton
                 android:id="@+id/exo_rew"
                 style="@style/ExoMediaButton.Rewind"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="20dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="24dp"
                 android:contentDescription="@null"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_rewind"
@@ -80,8 +79,8 @@
 
             <ImageButton
                 android:id="@+id/exo_play"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="@null"
                 android:padding="4dp"
@@ -95,9 +94,9 @@
             <ImageButton
                 android:id="@+id/exo_ffwd"
                 style="@style/ExoMediaButton.FastForward"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="20dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="24dp"
                 android:contentDescription="@null"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_fastforward"
@@ -109,7 +108,7 @@
                 android:id="@+id/play_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="35dp"
+                android:layout_marginEnd="16dp"
                 android:textColor="@color/hearit_gray4"
                 android:textSize="16sp"
                 android:textStyle="bold"

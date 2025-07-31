@@ -20,7 +20,7 @@
         android:theme="@style/Theme.HEARit"
         tools:targetApi="31">
         <service
-            android:name=".presentation.detail.PlaybackService"
+            android:name=".service.PlaybackService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback">

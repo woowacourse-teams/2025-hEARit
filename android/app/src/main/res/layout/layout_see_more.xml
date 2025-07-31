@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="hearit"
+            type="com.onair.hearit.domain.model.Hearit" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_gray1_radius_8dp"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tv_see_more_source_title"
+            style="@style/pretendard_sub_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/player_detail_source_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_see_more_source_body"
+            style="@style/pretendard_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@{hearit.source}"
+            android:textColor="@color/hearit_gray2"
+            app:layout_constraintTop_toBottomOf="@id/tv_see_more_source_title" />
+
+        <TextView
+            android:id="@+id/tv_see_more_summary_title"
+            style="@style/pretendard_sub_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="@string/player_detail_summary_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_see_more_source_body" />
+
+        <TextView
+            android:id="@+id/tv_see_more_summary_body"
+            style="@style/pretendard_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:ellipsize="end"
+            android:text="@{hearit.summary}"
+            android:textColor="@color/hearit_gray2"
+            app:layout_constraintTop_toBottomOf="@id/tv_see_more_summary_title"
+            tools:text="안녕하세요. 오늘은 HTTP와 HTTPS에 대해서 알아볼까요? 안녕하세요. 오늘은 HTTP와 HTTPS에 대해서 알아볼까요?" />
+
+        <TextView
+            android:id="@+id/tv_see_more_keyword_title"
+            style="@style/pretendard_sub_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="@string/player_detail_keyword_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_see_more_summary_body" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_keyword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="com.google.android.flexbox.FlexboxLayoutManager"
+            app:layout_constraintTop_toBottomOf="@id/tv_see_more_keyword_title"
+            tools:listitem="@layout/item_keyword" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
