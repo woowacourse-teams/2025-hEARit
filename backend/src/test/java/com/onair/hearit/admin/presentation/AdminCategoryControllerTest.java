@@ -4,19 +4,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
+import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
 import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.infrastructure.CategoryRepository;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.spec.internal.HttpStatus;
 
 class AdminCategoryControllerTest extends IntegrationTest {
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Test
     @DisplayName("카테고리 목록을 페이징 조회할 수 있다")
@@ -83,6 +89,35 @@ class AdminCategoryControllerTest extends IntegrationTest {
                 .post("/api/v1/admin/categories")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED);
+    }
+
+
+    @Test
+    @DisplayName("카테고리를 수정할 수 있다.")
+    void updateCategory() {
+        // given
+        CsrfSession csrf = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
+        Category category = dbHelper.insertCategory(new Category("카테고리", "#11111111"));
+
+        CategoryUpdateRequest updateRequest = new CategoryUpdateRequest("수정된 카테고리", "#22222222");
+
+        // when
+        RestAssured.given().log().all()
+                .cookie("JSESSIONID", csrf.sessionId())
+                .header("X-CSRF-TOKEN", csrf.csrfToken())
+                .contentType("application/json")
+                .body(updateRequest)
+                .when()
+                .put("/api/v1/admin/categories/" + category.getId())
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT);
+
+        // then
+        Category updatedCategory = categoryRepository.findById(category.getId()).orElseThrow();
+        assertAll(() -> {
+            assertThat(updatedCategory.getName()).isEqualTo("수정된 카테고리");
+            assertThat(updatedCategory.getColorCode()).isEqualTo("#22222222");
+        });
     }
 
     private void insertTestCategories(int count) {
