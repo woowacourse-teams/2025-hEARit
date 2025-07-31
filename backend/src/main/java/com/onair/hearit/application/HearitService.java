@@ -72,6 +72,7 @@ public class HearitService {
                 .toList();
     }
 
+    //TODO 사용자에 맞는 카테고리 추천
     public List<GroupedHearitsWithCategoryResponse> getHomeCategoryHearits() {
         List<Category> categories = categoryRepository.findOldest(CATEGORY_COUNT);
         return categories.stream()
