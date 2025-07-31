@@ -7,6 +7,7 @@ import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class AdminCategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createCategory(@RequestBody CategoryCreateRequest request) {
+    public ResponseEntity<Void> createCategory(@RequestBody @Valid CategoryCreateRequest request) {
         adminCategoryService.addCategory(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -52,7 +53,7 @@ public class AdminCategoryController {
     @PutMapping("/{categoryId}")
     public ResponseEntity<Void> updateCategory(
             @PathVariable Long categoryId,
-            @RequestBody CategoryUpdateRequest request
+            @RequestBody @Valid CategoryUpdateRequest request
     ) {
         adminCategoryService.updateCategory(categoryId, request);
         return ResponseEntity.noContent().build();

@@ -1,6 +1,8 @@
 package com.onair.hearit.admin.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record KeywordUpdateRequest(
-        String name
+        @NotBlank String name
 ) {
 }

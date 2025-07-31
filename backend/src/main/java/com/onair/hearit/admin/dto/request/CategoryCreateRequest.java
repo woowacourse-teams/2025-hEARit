@@ -1,7 +1,9 @@
 package com.onair.hearit.admin.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record CategoryCreateRequest(
-        String name,
-        String colorCode
+        @NotBlank String name,
+        @NotBlank String colorCode
 ) {
 }
