@@ -15,6 +15,7 @@ import com.onair.hearit.dto.response.ScriptResponse;
 import com.onair.hearit.dto.response.ShortAudioResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
+import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -128,11 +129,20 @@ class FileSourceControllerTest extends IntegrationTest {
     @DisplayName("존재하지 않은 hearit id로 url 요청 시, 404 NOT_FOUND를 반환한다.")
     void notFoundHearitId() {
         // given
-        Long notSavedHearitId = 1L;
+        Long notSavedHearitId = 9999L;
 
         // when & then
-        RestAssured.when()
-                .get("/api/v1/hearits/" + notSavedHearitId + "/script-url")
+        RestAssured.given(this.spec)
+                .filter(document("filesource-read-not-found",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("FileSource API")
+                                .summary("원본/미리듣기/스크립트 URL 조회")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocumentUtils.getProblemDetailResponseFields())
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/hearits/{hearitId}/script-url", notSavedHearitId)
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }
