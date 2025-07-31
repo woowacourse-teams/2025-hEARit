@@ -9,7 +9,7 @@ public record GroupedHearitsWithCategoryResponse(
         Long categoryId,
         String categoryName,
         String colorCode,
-        List<CategoryHearitResponse> hearits
+        List<HearitResponse> hearits
 ) {
 
     public static GroupedHearitsWithCategoryResponse from(Category category, List<Hearit> hearits) {
@@ -21,26 +21,22 @@ public record GroupedHearitsWithCategoryResponse(
         );
     }
 
-    private static List<CategoryHearitResponse> getHearits(final List<Hearit> hearits) {
+    private static List<HearitResponse> getHearits(final List<Hearit> hearits) {
         return hearits.stream()
-                .map(CategoryHearitResponse::from)
+                .map(HearitResponse::from)
                 .toList();
     }
 
-    public record CategoryHearitResponse(
+    public record HearitResponse(
             Long hearitId,
             String title,
-            LocalDateTime createdAt,
-            String categoryName,
-            String categoryColor
+            LocalDateTime createdAt
     ) {
-        public static CategoryHearitResponse from(Hearit hearit) {
-            return new CategoryHearitResponse(
+        public static HearitResponse from(Hearit hearit) {
+            return new HearitResponse(
                     hearit.getId(),
                     hearit.getTitle(),
-                    hearit.getCreatedAt(),
-                    hearit.getCategory().getName(),
-                    hearit.getCategory().getColorCode()
+                    hearit.getCreatedAt()
             );
         }
     }
