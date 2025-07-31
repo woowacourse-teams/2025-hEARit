@@ -14,7 +14,6 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
-import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
@@ -158,7 +157,7 @@ class BookmarkControllerTest extends IntegrationTest {
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when & then
-        BookmarkInfoResponse response =  RestAssured.given(this.spec)
+        BookmarkInfoResponse response = RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .filter(document("bookmark-create",
                         resource(ResourceSnippetParameters.builder()
@@ -175,7 +174,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .post("/api/v1/bookmarks/hearits/" + hearit.getId())
+                .post("/api/v1/bookmarks/hearits/{hearitId}", hearit.getId())
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .extract().as(BookmarkInfoResponse.class);
