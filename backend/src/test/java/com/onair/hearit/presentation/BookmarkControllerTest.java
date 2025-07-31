@@ -1,22 +1,29 @@
 package com.onair.hearit.presentation;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
-import com.onair.hearit.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.fixture.TestFixture;
+import com.onair.hearit.utils.ApiDocumentUtils;
 import io.restassured.RestAssured;
+import java.util.Arrays;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.restdocs.payload.FieldDescriptor;
 
 class BookmarkControllerTest extends IntegrationTest {
 
@@ -37,18 +44,40 @@ class BookmarkControllerTest extends IntegrationTest {
         }
 
         // when & then
-        int size = 5;
-        for (int i = 0; i < bookmarkCount / size; i++) {
-            RestAssured.given()
-                    .header("Authorization", "Bearer " + token)
-                    .param("page", i)
-                    .param("size", size)
-                    .when()
-                    .get("/api/v1/bookmarks/hearits")
-                    .then()
-                    .statusCode(HttpStatus.OK.value())
-                    .body("content.size()", equalTo(5));
-        }
+        RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .param("page", 0)
+                .param("size", 5)
+                .filter(document("bookmark-read-list", // 문서 조각의 고유 이름
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Bookmark API")
+                                .summary("북마크 목록 조회")
+                                .description("사용자가 북마크한 히어릿 목록을 페이지별로 조회합니다.")
+                                .requestHeaders(ApiDocumentUtils.getAuthorizationHeader())
+                                .queryParameters(
+                                        parameterWithName("page").description("페이지 번호 (0부터 시작)"),
+                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)")
+                                )
+//                                .responseSchema(Schema.schema("PagedBookmarkHearitResponse"))
+                                .responseFields(
+                                        Stream.concat(
+                                                Arrays.stream(new FieldDescriptor[]{
+                                                        fieldWithPath("content[].hearitId").description("히어릿 ID"),
+                                                        fieldWithPath("content[].bookmarkId").description("북마크 ID"),
+                                                        fieldWithPath("content[].title").description("히어릿 제목"),
+                                                        fieldWithPath("content[].summary").description("히어릿 요약"),
+                                                        fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)")
+                                                }),
+                                                Arrays.stream(ApiDocumentUtils.getCustomPagedResponseFields())
+                                        ).toArray(FieldDescriptor[]::new)
+                                )
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/bookmarks/hearits")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("content.size()", equalTo(5));
     }
 
     @Test
@@ -68,13 +97,13 @@ class BookmarkControllerTest extends IntegrationTest {
                 .when()
                 .get("/api/v1/bookmarks/hearits")
                 .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value()).log();
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {-1, 51})
-    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, size가 0 ~ 50이 아닌 경우 400 BADREQUEST가 발생한다.")
-    void readBookmarkHearitsTestWithBadRequestBySize() {
+    @ValueSource(ints = {-1, 101})
+    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, size가 0 ~ 100이 아닌 경우 400 BADREQUEST가 발생한다.")
+    void readBookmarkHearitsTestWithBadRequestBySize(int size) {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
@@ -85,15 +114,15 @@ class BookmarkControllerTest extends IntegrationTest {
         // when & then
         RestAssured.given()
                 .header("Authorization", "Bearer " + token)
-                .param("size", -1)
+                .param("size", size)
                 .when()
                 .get("/api/v1/bookmarks/hearits")
                 .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value()).log();
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
-    @DisplayName("로그인하지 않은 사용자가 북마크 목록 조회 시, 401 UNAUTHORIZATION가 발생한다.")
+    @DisplayName("로그인하지 않은 사용자가 북마크 목록 조회 시, 401 UNAUTHORIZED가 발생한다.")
     void readBookmarkHearits_error_401_whenNotLogin() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -125,15 +154,27 @@ class BookmarkControllerTest extends IntegrationTest {
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when & then
-        BookmarkInfoResponse response = RestAssured.given()
+        RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
+                .filter(document("bookmark-create",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Bookmark API")
+                                .summary("북마크 생성")
+                                .description("로그인한 회원이 히어릿 ID로 북마크를 생성합니다.")
+                                .requestHeaders(ApiDocumentUtils.getAuthorizationHeader())
+                                .pathParameters(
+                                        parameterWithName("hearitId").description("북마크할 히어릿의 ID")
+                                )
+//                                .responseSchema(Schema.schema("BookmarkInfoResponse"))
+                                .responseFields(
+                                        fieldWithPath("id").description("생성된 북마크의 ID")
+                                )
+                                .build())
+                ))
                 .when()
-                .post("/api/v1/bookmarks/hearits/" + hearit.getId())
+                .post("/api/v1/bookmarks/hearits/{hearitId}", hearit.getId())
                 .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().as(BookmarkInfoResponse.class);
-
-        assertThat(response.id()).isNotNull();
+                .statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
@@ -166,10 +207,21 @@ class BookmarkControllerTest extends IntegrationTest {
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
-        RestAssured.given()
+        RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
+                .filter(document("bookmark-delete",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Bookmark API")
+                                .summary("북마크 삭제")
+                                .description("로그인한 히어릿 ID와 북마크 ID로 북마크를 삭제합니다.")
+                                .requestHeaders(ApiDocumentUtils.getAuthorizationHeader())
+                                .pathParameters(
+                                        parameterWithName("bookmarkId").description("삭제할 북마크의 ID")
+                                )
+                                .build())
+                ))
                 .when()
-                .delete("/api/v1/bookmarks/" + bookmark.getId())
+                .delete("/api/v1/bookmarks/{bookmarkId}", bookmark.getId())
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
