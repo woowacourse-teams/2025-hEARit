@@ -18,27 +18,19 @@
             style="@style/pretendard_bottom_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="end"
+            android:layout_marginHorizontal="12dp"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
             android:maxLines="1"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/exo_duration"
+            app:layout_constraintEnd_toStartOf="@+id/exo_play"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="HTTP와 HTTPS의 차이" />
-
-        <TextView
-            android:id="@+id/exo_duration"
-            style="@style/pretendard_body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/exo_play"
-            app:layout_constraintStart_toEndOf="@id/tv_bottom_player_title"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="10:00" />
 
         <ImageButton
             android:id="@+id/exo_play"

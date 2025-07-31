@@ -7,7 +7,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.common.util.Util
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutBottomPlayerControllerBinding
@@ -50,16 +49,8 @@ class BottomPlayerView
             }
 
         fun setTitle(title: String) {
+            binding.tvBottomPlayerTitle.isSelected = true
             binding.tvBottomPlayerTitle.text = title
-        }
-
-        fun setDuration(durationMs: Long) {
-            binding.exoDuration.text =
-                if (durationMs > 0) {
-                    formatTime(durationMs)
-                } else {
-                    context.getString(R.string.bottom_player_view_default_duration)
-                }
         }
 
         private fun setupScrubListener() {
@@ -100,7 +91,6 @@ class BottomPlayerView
             val timeline = player.currentTimeline
             if (timeline.isEmpty) {
                 binding.exoProgress.setDuration(0)
-                setDuration(0)
                 return
             }
 
@@ -108,7 +98,6 @@ class BottomPlayerView
             val duration = window.durationMs
 
             binding.exoProgress.setDuration(duration)
-            setDuration(duration)
             updateProgress()
         }
 
@@ -137,8 +126,6 @@ class BottomPlayerView
             }
         }
 
-        private fun formatTime(millis: Long): String = Util.getStringForTime(StringBuilder(), formatter, millis)
-
         private fun releasePlayer() {
             listener?.let { player?.removeListener(it) }
             listener = null
@@ -159,7 +146,6 @@ class BottomPlayerView
                 if (events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)) {
                     player.mediaMetadata.title?.toString()?.takeIf { it.isNotBlank() }?.let {
                         setTitle(it)
-                        setDuration(player.duration)
                     }
                 }
                 if (events.contains(Player.EVENT_TIMELINE_CHANGED)) {
