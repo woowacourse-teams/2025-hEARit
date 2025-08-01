@@ -23,7 +23,9 @@ import androidx.media3.session.SessionToken
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
+import com.onair.hearit.presentation.home.HearitClickListener
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.search.SearchFragment
@@ -35,7 +37,8 @@ class MainActivity :
     AppCompatActivity(),
     DrawerClickListener,
     PlayerControllerView,
-    PlaybackPositionSaver {
+    PlaybackPositionSaver,
+    HearitClickListener {
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0L
     private val backPressInterval = 1000L
@@ -66,6 +69,9 @@ class MainActivity :
         observeViewModel()
 
         showFragment(HomeFragment())
+
+        binding.lifecycleOwner = this
+        binding.listener = this
     }
 
     private fun setupBackPressHandler() {
@@ -195,6 +201,7 @@ class MainActivity :
         }
 
         playerViewModel.playbackInfo.observe(this) { playbackInfo ->
+            binding.hearitId = playbackInfo.hearitId
             startPlayback(
                 playbackInfo.audioUrl,
                 playbackInfo.title,
@@ -292,6 +299,15 @@ class MainActivity :
         val hearitId = playerViewModel.recentHearit.value?.id ?: return
 
         playerViewModel.savePlaybackPosition(position, duration, hearitId)
+    }
+
+    override fun onClick(hearitId: Long) {
+        navigateToDetail(hearitId)
+    }
+
+    private fun navigateToDetail(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(this, hearitId)
+        startActivity(intent)
     }
 
     companion object {
