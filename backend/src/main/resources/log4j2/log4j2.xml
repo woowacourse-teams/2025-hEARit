@@ -24,7 +24,7 @@
             <!-- @formatter:on -->
         </Property>
 
-        <!-- 서비스 이름 설정 -->
+        <!-- 로그 파일 저장되는 디렉토리 -->
         <Property name="logDir">log</Property>
     </Properties>
 
@@ -60,12 +60,14 @@
         <!-- json 파일로 저장 -->
         <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/2025_08_07/error-log.zip) -->
         <!-- 20개 파일 쌓이면 오래된 로그부터 삭제 -->
-        <RollingFile name="RollingErrorFile">ƒ
+        <RollingFile name="RollingErrorFile">
             <FileName>${logDir}/error-log.json</FileName>
             <FilePattern>${logDir}/archive/%d{yyyy_MM_dd}/error-log.zip</FilePattern>
             <JsonLayout complete="false"
                         compact="true"
-                        eventEol="true"/>
+                        eventEol="true"
+                        objectMessageAsJsonObject="true"
+                        includeStacktrace="true"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
@@ -78,8 +80,12 @@
         <!-- 최상위 로거 (모든 로그 이벤트 처리) -->
         <Root level="info">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingErrorFile" level="error"/>
-            <AppenderRef ref="RollingFile" level="info"/>
+            <AppenderRef ref="RollingFile"/>
         </Root>
+
+        <!-- 에러 Logger-->
+        <Logger name="errorLogger" level="error" additivity="false">
+            <AppenderRef ref="RollingErrorFile"/>
+        </Logger>
     </Loggers>
 </Configuration>
