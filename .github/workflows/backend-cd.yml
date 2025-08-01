@@ -12,6 +12,25 @@ jobs:
     name: Build and Upload Artifact
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        ports:
+          - 13307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      TEST_MYSQL_PORT: ${{ secrets.TEST_MYSQL_PORT }}
+      DB_MYSQL_HOST: ${{ secrets.DB_MYSQL_HOST }}
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -22,9 +41,12 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Build bootJar
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build with Gradle
         working-directory: backend
-        run: ./gradlew bootJar
+        run: ./gradlew clean build
 
       - name: Rename jar to app.jar
         working-directory: backend/build/libs
