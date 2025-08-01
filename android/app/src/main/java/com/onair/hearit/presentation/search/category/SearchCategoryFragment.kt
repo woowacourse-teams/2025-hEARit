@@ -16,8 +16,10 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentSearchCategoryBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
+import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
+import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.CategoryClickListener
-import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 
@@ -75,10 +77,10 @@ class SearchCategoryFragment :
         name: String,
     ) {
         setFragmentResult(
-            SearchFragment.KEY_CATEGORY,
+            CATEGORY_KEY,
             bundleOf(
-                "category_id" to id,
-                "category_name" to name,
+                CATEGORY_ID_KEY to id,
+                CATEGORY_NAME_KEY to name,
             ),
         )
     }

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -19,10 +20,14 @@ import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.RecommendHearits
+import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
+import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
+import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
+import com.onair.hearit.presentation.search.SearchFragment
 import kotlin.math.abs
 
 class HomeFragment :
@@ -43,7 +48,12 @@ class HomeFragment :
             navigateClickListener = { navigateToExplore() },
         )
     }
-    private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy { GroupedCategoryAdapter(this) }
+    private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy {
+        GroupedCategoryAdapter(
+            this,
+            navigateClickListener = { id, name -> navigateToSearch(id, name) },
+        )
+    }
     private val snapHelper = PagerSnapHelper()
     private lateinit var indicatorContainer: LinearLayout
 
@@ -254,6 +264,28 @@ class HomeFragment :
             .commit()
 
         (requireActivity() as MainActivity).selectTab(R.id.nav_explore)
+    }
+
+    private fun navigateToSearch(
+        id: Long,
+        name: String,
+    ) {
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container_view, SearchFragment())
+            .addToBackStack(null)
+            .commit()
+
+        (requireActivity() as MainActivity).selectTab(R.id.nav_search)
+        parentFragmentManager.executePendingTransactions()
+
+        parentFragmentManager.setFragmentResult(
+            CATEGORY_KEY,
+            bundleOf(
+                CATEGORY_ID_KEY to id,
+                CATEGORY_NAME_KEY to name,
+            ),
+        )
     }
 
     private fun navigateToPlayerDetail(hearitId: Long) {

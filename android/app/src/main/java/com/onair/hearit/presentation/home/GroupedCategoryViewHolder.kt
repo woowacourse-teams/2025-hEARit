@@ -16,7 +16,11 @@ class GroupedCategoryViewHolder(
         binding.rvCategoryItems.adapter = itemAdapter
     }
 
-    fun bind(groupedCategory: GroupedCategory) {
+    fun bind(
+        groupedCategory: GroupedCategory,
+        clickListener: (Long, String) -> Unit,
+    ) {
+        binding.navigateClickListener = clickListener
         binding.groupedCategory = groupedCategory
         itemAdapter.updateColor(groupedCategory.colorCode)
         itemAdapter.submitList(groupedCategory.hearits)

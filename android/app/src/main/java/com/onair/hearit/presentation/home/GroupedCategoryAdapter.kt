@@ -7,6 +7,7 @@ import com.onair.hearit.domain.model.GroupedCategory
 
 class GroupedCategoryAdapter(
     private val hearitClickListener: HearitClickListener,
+    private val navigateClickListener: (Long, String) -> Unit,
 ) : ListAdapter<GroupedCategory, GroupedCategoryViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -17,7 +18,7 @@ class GroupedCategoryAdapter(
         holder: GroupedCategoryViewHolder,
         position: Int,
     ) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), navigateClickListener)
     }
 
     companion object {

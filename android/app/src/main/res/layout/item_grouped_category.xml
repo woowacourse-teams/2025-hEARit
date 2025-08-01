@@ -8,9 +8,13 @@
         <variable
             name="groupedCategory"
             type="com.onair.hearit.domain.model.GroupedCategory" />
+
+        <variable
+            name="navigateClickListener"
+            type="kotlin.jvm.functions.Function2&lt;Long, String, kotlin.Unit&gt;" />
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
@@ -22,7 +26,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{@string/home_grouped_category_text(groupedCategory.categoryName)}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="Spring 카테고리의 팟캐스트" />
+
+        <ImageButton
+            android:id="@+id/ib_navigate_to_search"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@color/transparent"
+            android:contentDescription="@null"
+            android:onClick="@{() -> navigateClickListener.invoke(groupedCategory.categoryId, groupedCategory.categoryName)}"
+            android:src="@drawable/ic_right"
+            app:layout_constraintBottom_toBottomOf="@id/tv_category_title"
+            app:layout_constraintStart_toEndOf="@id/tv_category_title"
+            app:layout_constraintTop_toTopOf="@id/tv_category_title" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_category_items"
@@ -32,7 +50,8 @@
             android:nestedScrollingEnabled="false"
             android:orientation="horizontal"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintTop_toBottomOf="@id/tv_category_title"
             tools:itemCount="3"
             tools:listitem="@layout/item_category_hearit" />
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
