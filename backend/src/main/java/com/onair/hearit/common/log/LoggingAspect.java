@@ -170,7 +170,7 @@ public class LoggingAspect {
 
     private void logServerError(RequestInfo requestInfo, HttpStatus httpStatus,
                                 ErrorDetail errorDetail, Optional<Throwable> throwable) {
-        ErrorLog errorLog = ErrorLog.of("Error", LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
+        ErrorLog errorLog = ErrorLog.of("ERROR", LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
         log.error(logMessageGenerator.convertToPrettyJson(errorLog));
         if (throwable.isPresent()) {
             errorLogger.error(errorLog, throwable.get());
@@ -180,7 +180,7 @@ public class LoggingAspect {
     }
 
     private void logClientError(ProblemDetail problemDetail, RequestInfo requestInfo, ErrorDetail errorDetail) {
-        ErrorLog errorLog = ErrorLog.of("Warn", LocalDateTime.now(), requestInfo,
+        ErrorLog errorLog = ErrorLog.of("WARN", LocalDateTime.now(), requestInfo,
                 HttpStatus.resolve(problemDetail.getStatus()),
                 errorDetail);
         log.warn(logMessageGenerator.convertToPrettyJson(errorLog));

@@ -8,8 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
@@ -20,22 +18,22 @@ import org.springframework.stereotype.Component;
 public class FilterErrorLogger {
 
     private final LogMessageGenerator logMessageGenerator;
-    private final Logger errorLogger = LogManager.getLogger("errorLogger");
 
     public void log(HttpServletRequest request, ProblemDetail problemDetail) {
         RequestInfo requestInfo = RequestInfo.from(request);
-
-        ErrorDetail errorDetail = new ErrorDetail(problemDetail.getDetail(), null, null, -1);
-
+        ErrorDetail errorDetail = new ErrorDetail(
+                problemDetail.getDetail(),
+                problemDetail.getTitle(),
+                null,
+                0);
         ErrorLog errorLog = ErrorLog.of(
-                "Warn",
+                "WARN",
                 LocalDateTime.now(),
                 requestInfo,
                 HttpStatus.resolve(problemDetail.getStatus()),
                 errorDetail
         );
 
-        errorLogger.warn(errorLog);
         log.warn(logMessageGenerator.convertToPrettyJson(errorLog));
     }
 }
