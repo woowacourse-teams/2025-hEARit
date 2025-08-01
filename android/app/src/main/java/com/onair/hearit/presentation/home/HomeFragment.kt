@@ -116,7 +116,7 @@ class HomeFragment :
     }
 
     private fun setupCategoryRecyclerView() {
-        binding.rvHomeRecommendCategory.adapter = groupedCategoryAdapter
+        binding.rvHomeGroupedCategory.adapter = groupedCategoryAdapter
     }
 
     private fun observeViewModel() {
