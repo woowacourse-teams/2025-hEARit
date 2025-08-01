@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -103,6 +104,7 @@ public class LoggingAspect {
 
     private Object extractRequestBody(JoinPoint joinPoint) {
         return Arrays.stream(joinPoint.getArgs())
+                .filter(Objects::nonNull)
                 .filter(arg -> !(arg instanceof HttpServletRequest) && !(arg instanceof HttpServletResponse))
                 .findFirst()
                 .orElse(null);
