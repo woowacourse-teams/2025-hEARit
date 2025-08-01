@@ -1,11 +1,11 @@
 package com.onair.hearit.common.log;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.common.log.message.ErrorLog;
-import com.onair.hearit.common.log.message.ErrorLog.ErrorDetail;
-import com.onair.hearit.common.log.message.RequestInfo;
-import com.onair.hearit.common.log.message.RequestLog;
-import com.onair.hearit.common.log.message.ResponseLog;
+import com.onair.hearit.common.log.message.LogMessageGenerator;
+import com.onair.hearit.common.log.message.dto.ErrorLog;
+import com.onair.hearit.common.log.message.dto.ErrorLog.ErrorDetail;
+import com.onair.hearit.common.log.message.dto.RequestInfo;
+import com.onair.hearit.common.log.message.dto.RequestLog;
+import com.onair.hearit.common.log.message.dto.ResponseLog;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -32,12 +34,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class LoggingAspect {
 
-    private final LogMessageGenerator logMessageGenerator;
+    private static final String START_TIME_KEY = "startTime";
 
-    private static long calculateTimeTakenMs() {
-        String startTime = MDC.get("startTime");
-        return System.currentTimeMillis() - Long.parseLong(startTime);
-    }
+    private final LogMessageGenerator logMessageGenerator;
+    private final Logger errorLogger = LogManager.getLogger("errorLogger");
 
     @Pointcut("@annotation(org.springframework.web.bind.annotation.GetMapping)")
     public void getMapping() {
@@ -70,11 +70,9 @@ public class LoggingAspect {
 
     @Before("allMapping()")
     public void logRequest(JoinPoint joinPoint) {
-        long startTime = System.currentTimeMillis();
-        MDC.put("startTime", String.valueOf(startTime));
+        MDC.put(START_TIME_KEY, String.valueOf(System.currentTimeMillis()));
         RequestLog requestLog = getRequestLog(joinPoint);
-
-        log.info("{}", logMessageGenerator.getLogMessage(requestLog));
+        log.info(logMessageGenerator.convertToPrettyJson(requestLog));
     }
 
     private RequestLog getRequestLog(JoinPoint joinPoint) {
@@ -89,11 +87,11 @@ public class LoggingAspect {
     }
 
     private HttpServletRequest getHttpServletRequest() {
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (servletRequestAttributes == null) {
-            throw new IllegalStateException("현재 스레드에 바인딩 된 request가 없습니다.");
-        }
-        return servletRequestAttributes.getRequest();
+        return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
+                .filter(ServletRequestAttributes.class::isInstance)
+                .map(ServletRequestAttributes.class::cast)
+                .map(ServletRequestAttributes::getRequest)
+                .orElseThrow(() -> new IllegalStateException("현재 스레드에 바인딩 된 request가 없습니다."));
     }
 
     private void putRequestInfoToMdc(RequestInfo requestInfo) {
@@ -106,50 +104,83 @@ public class LoggingAspect {
     private Object extractRequestBody(JoinPoint joinPoint) {
         return Arrays.stream(joinPoint.getArgs())
                 .filter(arg -> !(arg instanceof HttpServletRequest) && !(arg instanceof HttpServletResponse))
-                .map(this::maskSensitiveFields)
                 .findFirst()
                 .orElse(null);
     }
 
-    private Object maskSensitiveFields(Object requestBody) {
+    @AfterReturning(value = "allMapping()", returning = "responseEntity")
+    public void logResponse(ResponseEntity<?> responseEntity) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(requestBody);
-            // Mask password, pwd, pass fields
-            json = json.replaceAll("(?i)(\"password\"\\s*:\\s*\")[^\"]*(\")", "$1****$2");
-            json = json.replaceAll("(?i)(\"pwd\"\\s*:\\s*\")[^\"]*(\")", "$1****$2");
-            json = json.replaceAll("(?i)(\"pass\"\\s*:\\s*\")[^\"]*(\")", "$1****$2");
-            return objectMapper.readValue(json, Object.class);
-        } catch (Exception e) {
-            return requestBody;
+            RequestInfo requestInfo = RequestInfo.getCurrentHttpRequest();
+            ResponseLog responseLog = ResponseLog.of(
+                    LocalDateTime.now(),
+                    requestInfo,
+                    responseEntity,
+                    calculateTimeTakenMs());
+            log.info(logMessageGenerator.convertToPrettyJson(responseLog));
+        } finally {
+            MDC.clear();
         }
     }
 
-    @AfterReturning(value = "allMapping()", returning = "responseEntity")
-    public void logResponse(ResponseEntity<?> responseEntity) {
-        RequestInfo requestInfo = RequestInfo.getCurrentHttpRequest();
-        ResponseLog responseLog = ResponseLog.of(
-                LocalDateTime.now(),
-                requestInfo,
-                responseEntity,
-                calculateTimeTakenMs());
-
-        log.info("{}", logMessageGenerator.getLogMessage(responseLog));
-        MDC.clear();
+    private long calculateTimeTakenMs() {
+        return Optional.ofNullable(MDC.get(START_TIME_KEY))
+                .map(Long::parseLong)
+                .map(startTime -> System.currentTimeMillis() - startTime)
+                .orElseGet(() -> {
+                    log.warn("startTime이 MDC에 존재하지 않습니다. 처리 시간을 계산할 수 없습니다.");
+                    return -1L;
+                });
     }
 
     @AfterReturning(value = "exceptionHandler()", returning = "problemDetail")
-    public void logErrorResponse(JoinPoint joinPoint, ProblemDetail problemDetail) {
-        RequestInfo requestInfo = RequestInfo.getCurrentHttpRequest();
-        Optional<Throwable> optionalThrowable = Arrays.stream(joinPoint.getArgs())
+    public void logExceptionHandler(JoinPoint joinPoint, ProblemDetail problemDetail) {
+        try {
+            RequestInfo requestInfo = RequestInfo.getCurrentHttpRequest();
+            Optional<Throwable> throwable = extractThrowableFromArgs(joinPoint.getArgs());
+            ErrorDetail errorDetail = createErrorDetail(throwable);
+            HttpStatus httpStatus = HttpStatus.resolve(problemDetail.getStatus());
+
+            if (httpStatus == null || httpStatus.is5xxServerError()) {
+                logServerError(requestInfo, httpStatus, errorDetail, throwable);
+                return;
+            }
+
+            logClientError(problemDetail, requestInfo, errorDetail);
+        } catch (Exception e) {
+            log.error("Error 로깅 중 예외가 발생했습니다.", e);
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    private Optional<Throwable> extractThrowableFromArgs(Object[] args) {
+        return Arrays.stream(args)
                 .filter(Throwable.class::isInstance)
                 .map(Throwable.class::cast)
                 .findFirst();
-        ErrorDetail errorDetail = optionalThrowable.map(ErrorDetail::fromThrowable)
-                .orElseGet(ErrorDetail::emptyErrorDetail);
-        ErrorLog errorLog = ErrorLog.of(LocalDateTime.now(), requestInfo, HttpStatus.resolve(problemDetail.getStatus()),
-                errorDetail);
+    }
 
-        log.error("{}", logMessageGenerator.getLogMessage(errorLog));
+    private ErrorDetail createErrorDetail(Optional<Throwable> throwable) {
+        return throwable.map(ErrorDetail::fromThrowable)
+                .orElseGet(ErrorDetail::emptyErrorDetail);
+    }
+
+    private void logServerError(RequestInfo requestInfo, HttpStatus httpStatus,
+                                ErrorDetail errorDetail, Optional<Throwable> throwable) {
+        ErrorLog errorLog = ErrorLog.of("Error", LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
+        log.error(logMessageGenerator.convertToPrettyJson(errorLog));
+        if (throwable.isPresent()) {
+            errorLogger.error(errorLog, throwable.get());
+            return;
+        }
+        errorLogger.error(errorLog);
+    }
+
+    private void logClientError(ProblemDetail problemDetail, RequestInfo requestInfo, ErrorDetail errorDetail) {
+        ErrorLog errorLog = ErrorLog.of("Warn", LocalDateTime.now(), requestInfo,
+                HttpStatus.resolve(problemDetail.getStatus()),
+                errorDetail);
+        log.warn(logMessageGenerator.convertToPrettyJson(errorLog));
     }
 }
