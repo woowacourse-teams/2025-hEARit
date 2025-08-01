@@ -1,10 +1,15 @@
 name: Backend CD to EC2 for prod
 
+#on:
+#  push:
+#    branches: [ "release" ]
+#    paths:
+#      - 'backend/**'
+#  workflow_dispatch:
+
 on:
-  push:
-    branches: [ "release" ]
-    paths:
-      - 'backend/**'
+  pull_request:
+    branches: [ "develop-be", "ci-cd-test"]
   workflow_dispatch:
 
 jobs:
