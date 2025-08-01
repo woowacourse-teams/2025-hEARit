@@ -45,6 +45,14 @@ class ShortsViewHolder(
         player.prepare()
         player.playWhenReady = true
 
+        binding.btnExploreItemBookmark.setOnClickListener {
+            binding.btnExploreItemBookmark.isSelected =
+                binding.btnExploreItemBookmark.isSelected.not()
+            shortsClickListener.onClickBookmark(item.id)
+        }
+
+        binding.btnExploreItemBookmark.isSelected = item.isBookmarked
+
         startSubtitleSync()
     }
 
