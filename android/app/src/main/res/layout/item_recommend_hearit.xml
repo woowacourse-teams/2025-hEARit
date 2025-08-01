@@ -11,45 +11,56 @@
 
         <variable
             name="recommendClickListener"
-            type="com.onair.hearit.presentation.home.RecommendClickListener" />
+            type="com.onair.hearit.presentation.home.HearitClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="256dp"
-        android:layout_height="256dp"
-        android:background="@drawable/bg_gray1_stroke_radius_8dp"
-        android:onClick="@{() -> recommendClickListener.onClickRecommendHearit(item.id, item.title)}"
-        android:paddingVertical="32dp">
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_gray1_radius_8dp"
+        android:onClick="@{() -> recommendClickListener.onClick(item.id)}"
+        app:backgroundColor="@{item.categoryColor}">
 
         <TextView
-            android:id="@+id/tv_recommend_title"
+            android:id="@+id/tv_recommend_hearit_category"
             style="@style/pretendard_main_title"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:maxLines="2"
-            android:text="@{item.title}"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:text="@{item.categoryName}"
+            android:textSize="24sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="HTTP와 HTTPS의 차이 + 제목이 길어지면 어떻게 될까????" />
+            tools:text="Android" />
+
+        <ImageView
+            android:id="@+id/iv_recommend_hearit_disk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/img_home_record"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_recommend_hearit_category" />
 
         <TextView
-            style="@style/pretendard_body"
+            android:id="@+id/tv_recommend_hearit_title"
+            style="@style/pretendard_category"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="28dp"
-            android:ellipsize="end"
-            android:maxLines="6"
-            android:text="@{item.desc}"
-            android:textColor="@color/hearit_gray2"
+            android:layout_marginVertical="24dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="16dp"
+            android:text="@{item.title}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_recommend_title"
-            tools:text="Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나...Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나" />
+            app:layout_constraintTop_toBottomOf="@id/iv_recommend_hearit_disk"
+            tools:text="스프링 @EventListener와 @TransactionalEventListener" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

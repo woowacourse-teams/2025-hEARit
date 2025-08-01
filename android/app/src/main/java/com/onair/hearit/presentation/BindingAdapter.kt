@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation
 
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
@@ -86,22 +87,6 @@ fun setFormattedDate(
     }
 }
 
-@BindingAdapter("visibleIfNotNull")
-fun setVisibleIfNotNull(
-    view: View,
-    value: Any?,
-) {
-    view.isVisible = value != null
-}
-
-@BindingAdapter("visibleIfNull")
-fun setVisibleIfNull(
-    view: View,
-    value: Any?,
-) {
-    view.isVisible = value == null
-}
-
 @BindingAdapter("imageUrl")
 fun setImageUrl(
     view: ImageView,
@@ -139,14 +124,15 @@ fun setSelectedState(
     view.isSelected = condition == true
 }
 
-@BindingAdapter("categoryBackgroundColor")
-fun setCategoryBackgroundColor(
+@BindingAdapter("backgroundColor")
+fun setBackgroundColor(
     view: View,
     colorCode: String,
 ) {
-    val background = view.background?.mutate()
-    if (background is GradientDrawable) {
-        background.setColor(colorCode.toColorInt())
+    when (val background = view.background?.mutate()) {
+        is GradientDrawable -> background.setColor(colorCode.toColorInt())
+        is ColorDrawable -> background.color = colorCode.toColorInt()
+        else -> view.setBackgroundColor(colorCode.toColorInt())
     }
 }
 

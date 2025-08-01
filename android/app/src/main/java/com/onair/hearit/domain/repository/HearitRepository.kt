@@ -1,5 +1,6 @@
 package com.onair.hearit.domain.repository
 
+import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecommendHearit
@@ -21,4 +22,6 @@ interface HearitRepository {
         page: Int? = null,
         size: Int? = null,
     ): Result<PageResult<SearchedHearit>>
+
+    suspend fun getCategoryHearits(): Result<List<GroupedCategory>>
 }

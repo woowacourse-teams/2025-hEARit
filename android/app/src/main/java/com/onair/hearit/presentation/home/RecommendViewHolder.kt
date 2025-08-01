@@ -8,10 +8,10 @@ import com.onair.hearit.domain.model.RecommendHearit
 
 class RecommendViewHolder(
     private val binding: ItemRecommendHearitBinding,
-    private val recommendClickListener: RecommendClickListener,
+    hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     init {
-        binding.recommendClickListener = recommendClickListener
+        binding.recommendClickListener = hearitClickListener
     }
 
     fun bind(item: RecommendHearit) {
@@ -21,11 +21,11 @@ class RecommendViewHolder(
     companion object {
         fun create(
             parent: ViewGroup,
-            recommendClickListener: RecommendClickListener,
+            hearitClickListener: HearitClickListener,
         ): RecommendViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemRecommendHearitBinding.inflate(inflater, parent, false)
-            return RecommendViewHolder(binding, recommendClickListener)
+            return RecommendViewHolder(binding, hearitClickListener)
         }
     }
 }

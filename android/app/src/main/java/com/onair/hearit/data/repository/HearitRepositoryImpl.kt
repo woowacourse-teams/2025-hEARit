@@ -3,6 +3,7 @@ package com.onair.hearit.data.repository
 import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.data.datasource.HearitRemoteDataSource
 import com.onair.hearit.data.toDomain
+import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecommendHearit
@@ -41,5 +42,10 @@ class HearitRepositoryImpl(
     ): Result<PageResult<SearchedHearit>> =
         handleResult(crashlyticsLogger) {
             hearitRemoteDataSource.getSearchHearits(searchTerm, page, size).getOrThrow().toDomain()
+        }
+
+    override suspend fun getCategoryHearits(): Result<List<GroupedCategory>> =
+        handleResult(crashlyticsLogger) {
+            hearitRemoteDataSource.getCategoryHearits().getOrThrow().map { it.toDomain() }
         }
 }

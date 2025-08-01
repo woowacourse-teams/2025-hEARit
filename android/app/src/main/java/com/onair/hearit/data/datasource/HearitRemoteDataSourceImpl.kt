@@ -1,6 +1,7 @@
 package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.api.HearitService
+import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
@@ -55,6 +56,15 @@ class HearitRemoteDataSourceImpl(
             },
         )
 
+    override suspend fun getCategoryHearits(): Result<List<GroupedCategoryHearitResponse>> =
+        handleApiCall(
+            errorMessage = ERROR_CATEGORY_HEARIT_MESSAGE,
+            apiCall = { hearitService.getCategoryHearits() },
+            transform = { response ->
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
+            },
+        )
+
     private fun getAuthHeader(): String? {
         val token = TokenProvider.accessToken
         return if (token.isNullOrBlank()) {
@@ -69,6 +79,7 @@ class HearitRemoteDataSourceImpl(
         private const val ERROR_RECOMMEND_HEARIT_MESSAGE = "추천 히어릿 조회 실패"
         private const val ERROR_RANDOM_HEARIT_MESSAGE = "랜덤 히어릿 조회 실패"
         private const val ERROR_SEARCH_HEARIT_MESSAGE = "검색 히어릿 조회 실패"
+        private const val ERROR_CATEGORY_HEARIT_MESSAGE = "카테고리 별 히어릿 조회 실패"
         private const val ERROR_RESPONSE_BODY_NULL_MESSAGE = "응답 바디가 null입니다."
         private const val TOKEN = "Bearer %s"
     }

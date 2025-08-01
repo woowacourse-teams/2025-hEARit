@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="categoryColor"
+            type="String" />
+
+        <variable
+            name="categoryHearit"
+            type="com.onair.hearit.domain.model.CategoryHearit" />
+
+        <variable
+            name="hearitClickListener"
+            type="com.onair.hearit.presentation.home.HearitClickListener" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="200dp"
+        android:layout_height="152dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_gradient_black_gray_radius_8dp"
+        android:onClick="@{() -> hearitClickListener.onClick(categoryHearit.hearitId)}">
+
+        <TextView
+            android:id="@+id/tv_category_hearit"
+            style="@style/pretendard_sub_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="20dp"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:text="@{categoryHearit.title}"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Fragment replace, add 차이 에 대해 알아볼까요kasjdlaksjasd,asdasdasldlaksjdaskdjsalkdjal" />
+
+        <View
+            android:id="@+id/view_category_hearit_left"
+            android:layout_width="12dp"
+            android:layout_height="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/hearit_purple1"
+            app:backgroundColor="@{categoryColor}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <View
+            android:layout_width="176dp"
+            android:layout_height="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/hearit_purple1"
+            app:backgroundColor="@{categoryColor}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/view_category_hearit_left" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
