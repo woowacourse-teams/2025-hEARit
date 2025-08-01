@@ -128,11 +128,12 @@ class HomeFragment :
         repeat(size) { index ->
             val dot =
                 View(requireContext()).apply {
-                    val sizeInPx = (8 * resources.displayMetrics.density).toInt()
+                    val sizeInPx = (INDICATOR_SIZE_DP * resources.displayMetrics.density).toInt()
+                    val marginPx = (INDICATOR_MARGIN_DP * resources.displayMetrics.density).toInt()
                     layoutParams =
                         LinearLayout.LayoutParams(sizeInPx, sizeInPx).apply {
-                            marginStart = sizeInPx / 2
-                            marginEnd = sizeInPx / 2
+                            marginStart = marginPx
+                            marginEnd = marginPx
                         }
                     setBackgroundResource(R.drawable.indicator_unselected)
                     setOnClickListener { scrollToIndex(index) }
@@ -145,7 +146,7 @@ class HomeFragment :
     private fun scrollToIndex(index: Int) {
         val layoutManager = binding.rvHomeRecommend.layoutManager as? LinearLayoutManager ?: return
         val recyclerCenter = binding.rvHomeRecommend.width / 2
-        val itemWidth = (260 * resources.displayMetrics.density).toInt()
+        val itemWidth = (ITEM_WIDTH_DP * resources.displayMetrics.density).toInt()
         val offset = recyclerCenter - (itemWidth / 2)
 
         layoutManager.scrollToPositionWithOffset(index, offset)
@@ -168,20 +169,18 @@ class HomeFragment :
         val childCenterX = (child.left + child.right) / 2
         val distanceFromCenter = (centerX - childCenterX).toFloat()
         val d = abs(distanceFromCenter) / recyclerView.width.coerceAtLeast(1)
-
-        val scale = 0.85f + (1 - d).coerceIn(0f, 1f) * 0.15f
-        val translationX = distanceFromCenter * 0.2f
+        val scale = MIN_SCALE + (1 - d).coerceIn(0f, 1f) * MAX_SCALE_DELTA
+        val translationX = distanceFromCenter * TRANSLATION_FACTOR
 
         child.pivotY = child.height / 2f
         child.translationY = 0f
-
         child.scaleX = scale
         child.scaleY = scale
         child.translationX = translationX
 
         // 중심에 가까울수록 불투명, 멀수록 더 투명
-        child.z = (1 - d) * 20f
-        child.alpha = 0.3f + (1 - d) * 0.8f
+        child.z = (1 - d) * MAX_ELEVATION
+        child.alpha = MIN_ALPHA + (1 - d) * MAX_ALPHA_DELTA
     }
 
     private fun setupCategoryRecyclerView() {
@@ -237,5 +236,17 @@ class HomeFragment :
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private companion object {
+        private const val MIN_SCALE = 0.85f
+        private const val MAX_SCALE_DELTA = 0.15f
+        private const val TRANSLATION_FACTOR = 0.2f
+        private const val MAX_ELEVATION = 20f
+        private const val MIN_ALPHA = 0.3f
+        private const val MAX_ALPHA_DELTA = 0.8f
+        private const val ITEM_WIDTH_DP = 260
+        private const val INDICATOR_SIZE_DP = 8
+        private const val INDICATOR_MARGIN_DP = 4
     }
 }
