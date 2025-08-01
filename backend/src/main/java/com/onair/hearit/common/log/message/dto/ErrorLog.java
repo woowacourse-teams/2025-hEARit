@@ -1,22 +1,23 @@
-package com.onair.hearit.common.log.message;
+package com.onair.hearit.common.log.message.dto;
 
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 
 public record ErrorLog(
         String logType,
-        LocalDateTime timestamp,
+        String timestamp,
         RequestInfo requestInfo,
         HttpStatus httpStatus,
         ErrorDetail errorDetail
 ) {
 
     public static ErrorLog of(
+            String logType,
             LocalDateTime timestamp,
             RequestInfo requestInfo,
             HttpStatus httpStatus,
             ErrorDetail errorDetail) {
-        return new ErrorLog("ERROR", timestamp, requestInfo, httpStatus, errorDetail);
+        return new ErrorLog(logType, timestamp.toString(), requestInfo, httpStatus, errorDetail);
     }
 
     public record ErrorDetail(
@@ -31,7 +32,16 @@ public record ErrorLog(
         }
 
         public static ErrorDetail fromThrowable(Throwable throwable) {
-            StackTraceElement finalStackTraceElement = throwable.getStackTrace()[0];
+            StackTraceElement[] stackTrace = throwable.getStackTrace();
+            if (stackTrace.length == 0) {
+                return new ErrorDetail(
+                        throwable.getMessage(),
+                        throwable.getClass().getName(),
+                        "unknown",
+                        -1
+                );
+            }
+            StackTraceElement finalStackTraceElement = stackTrace[0];
             return new ErrorDetail(
                     throwable.getMessage(),
                     finalStackTraceElement.getClassName(),

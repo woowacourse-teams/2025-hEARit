@@ -1,4 +1,4 @@
-package com.onair.hearit.common.log.message;
+package com.onair.hearit.common.log.message.dto;
 
 import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;

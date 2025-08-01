@@ -1,4 +1,4 @@
-package com.onair.hearit.common.log.message;
+package com.onair.hearit.common.log.message.dto;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.UUID;
