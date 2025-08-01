@@ -53,11 +53,11 @@ class CategoryServiceTest {
     @DisplayName("카테고리 목록 조회 시 페이지네이션이 적용되어 반환된다.")
     void getCategories_withPagination() {
         // given
-        saveCategory("category1", "#111");
-        saveCategory("category2", "#222");
-        saveCategory("category3", "#333");
-        saveCategory("category4", "#444");
-        saveCategory("category5", "#555");
+        Category category = dbHelper.insertCategory(new Category("category1", "#111"));
+        Category category1 = dbHelper.insertCategory(new Category("category2", "#222"));
+        Category category2 = dbHelper.insertCategory(new Category("category3", "#333"));
+        Category category3 = dbHelper.insertCategory(new Category("category4", "#444"));
+        Category category4 = dbHelper.insertCategory(new Category("category5", "#555"));
 
         PagingRequest pagingRequest = new PagingRequest(1, 2);// page 1 (두 번째 페이지), size 2
 
@@ -78,8 +78,8 @@ class CategoryServiceTest {
     @DisplayName("히어릿 목록을 카테고리 조회 시 카테고리에 해당하는 히어릿만 반환한다.")
     void searchHearitsByCategory_onlyMatchingCategory() {
         // given
-        Category category1 = saveCategory("Spring", "#001");
-        Category category2 = saveCategory("Java", "#002");
+        Category category1 = dbHelper.insertCategory(new Category("Spring", "#001"));
+        Category category2 = dbHelper.insertCategory(new Category("Java", "#002"));
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
@@ -100,7 +100,7 @@ class CategoryServiceTest {
     @DisplayName("히어릿 목록을 카테고리 조회 시 각 히어릿에 키워드가 포함되어 반환된다.")
     void searchHearitsByCategory_includesKeywords() {
         // given
-        Category category = saveCategory("AI", "#999");
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
         Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
@@ -117,15 +117,13 @@ class CategoryServiceTest {
                 () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
                 () -> assertThat(result.content().get(0).keywords()).hasSize(2)
         );
-
     }
-
 
     @Test
     @DisplayName("히어릿 목록을 카테고리 조회 시 최신순으로 페이지네이션이 적용된다.")
     void searchHearitsByCategory_pagination() {
         // given
-        Category category = saveCategory("Spring", "#001");
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
@@ -139,10 +137,5 @@ class CategoryServiceTest {
                 () -> assertThat(result.content()).hasSize(1),
                 () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
         );
-    }
-
-    private Category saveCategory(String name, String color) {
-        Category category = new Category(name, color);
-        return dbHelper.insertCategory(category);
     }
 }
