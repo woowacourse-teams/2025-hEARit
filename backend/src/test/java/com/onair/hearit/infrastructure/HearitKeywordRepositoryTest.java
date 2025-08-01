@@ -53,10 +53,13 @@ class HearitKeywordRepositoryTest {
     void findKeywordsByHearitIdWithSize() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
         Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
         Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
         Keyword keyword3 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+
         HearitKeyword hearitKeyword1 = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
         HearitKeyword hearitKeyword2 = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword2));
         HearitKeyword hearitKeyword3 = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword3));
@@ -66,6 +69,5 @@ class HearitKeywordRepositoryTest {
 
         // then
         assertThat(keywords).hasSize(2);
-
     }
 }
