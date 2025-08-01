@@ -30,4 +30,9 @@ public class Category {
         this.name = name;
         this.colorCode = colorCode;
     }
+
+    public void update(String name, String colorCode) {
+        this.name = name;
+        this.colorCode = colorCode;
+    }
 }

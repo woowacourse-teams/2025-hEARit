@@ -26,4 +26,8 @@ public class Keyword {
     public Keyword(String name) {
         this.name = name;
     }
+
+    public void updateName(String newName) {
+        this.name = newName;
+    }
 }
