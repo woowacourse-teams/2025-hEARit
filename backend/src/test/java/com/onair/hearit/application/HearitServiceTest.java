@@ -13,6 +13,7 @@ import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
@@ -20,9 +21,9 @@ import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.BookmarkRepository;
+import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
-import com.onair.hearit.infrastructure.KeywordRepository;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +51,9 @@ class HearitServiceTest {
     @Autowired
     private HearitKeywordRepository hearitKeywordRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     private HearitService hearitService;
 
     @BeforeEach
@@ -57,7 +61,8 @@ class HearitServiceTest {
         hearitService = new HearitService(
                 hearitRepository,
                 bookmarkRepository,
-                hearitKeywordRepository);
+                hearitKeywordRepository,
+                categoryRepository);
     }
 
     @Test
@@ -132,5 +137,36 @@ class HearitServiceTest {
 
         // then
         assertThat(hearits).hasSize(5);
+    }
+
+    @Test
+    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회할 수 있다.")
+    void getGroupedHearitsByCategory() {
+        // given
+        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+
+        Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+
+        Category category3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+
+        // when
+        List<GroupedHearitsWithCategoryResponse> responses = hearitService.getGroupedHearitsByCategory();
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(3),
+                () -> assertThat(responses.get(0).hearits()).hasSize(3),
+                () -> assertThat(responses.get(1).hearits()).hasSize(3),
+                () -> assertThat(responses.get(2).hearits()).hasSize(3)
+        );
     }
 }
