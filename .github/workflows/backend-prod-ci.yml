@@ -1,15 +1,10 @@
 name: Backend CI for prod
 
-#on:
-#  pull_request:
-#    branches: [ "release" ]
-#    paths:
-#      - 'backend/**'
-#  workflow_dispatch:
-
 on:
   pull_request:
-    branches: [ "develop-be", "ci-cd-test"]
+    branches: [ "release" ]
+    paths:
+      - 'backend/**'
   workflow_dispatch:
 
 jobs:
