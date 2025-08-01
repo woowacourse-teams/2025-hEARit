@@ -211,7 +211,7 @@ class BookmarkControllerTest extends IntegrationTest {
         // when & then
         RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
-                .filter(document("bookmark-create",
+                .filter(document("bookmark-create-conflict",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
                                 .summary("북마크 생성")
@@ -220,7 +220,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .post("/api/v1/bookmarks/hearits/" + hearit.getId())
+                .post("/api/v1/bookmarks/hearits/{hearitId}", hearit.getId())
                 .then()
                 .statusCode(HttpStatus.CONFLICT.value());
     }
