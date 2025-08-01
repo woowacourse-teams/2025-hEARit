@@ -6,4 +6,9 @@ interface RecentHearitRepository {
     suspend fun getRecentHearit(): Result<RecentHearit?>
 
     suspend fun saveRecentHearit(recentHearit: RecentHearit): Result<Unit>
+
+    suspend fun updateRecentHearitPosition(
+        hearitId: Long,
+        position: Long,
+    ): Result<Unit>
 }

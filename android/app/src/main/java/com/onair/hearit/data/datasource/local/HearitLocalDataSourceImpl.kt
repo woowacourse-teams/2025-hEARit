@@ -21,4 +21,9 @@ class HearitLocalDataSourceImpl(
         handleResult(crashlyticsLogger) { hearitDao.insertKeyword(keyword) }
 
     override suspend fun clearKeywords(): Result<Unit> = handleResult(crashlyticsLogger) { hearitDao.deleteKeywords() }
+
+    override suspend fun updateRecentHearitPosition(
+        hearitId: Long,
+        position: Long,
+    ): Result<Unit> = handleResult(crashlyticsLogger) { hearitDao.updateLastPosition(hearitId, position) }
 }
