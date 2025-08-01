@@ -35,5 +35,4 @@ public class HearitSearchService {
                 KEYWORD_SIZE_PER_HEARIT);
         return HearitSearchResponse.from(hearit, keywords);
     }
-
 }

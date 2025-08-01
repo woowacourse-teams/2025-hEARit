@@ -2,12 +2,15 @@ package com.onair.hearit.application;
 
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.CategoryHearitResponse;
 import com.onair.hearit.dto.response.CategoryResponse;
-import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
+import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,8 +21,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CategoryService {
 
+    private static final int KEYWORDS_PER_HEARIT = 3;
+
     private final CategoryRepository categoryRepository;
     private final HearitRepository hearitRepository;
+    private final HearitKeywordRepository hearitKeywordRepository;
 
     public PagedResponse<CategoryResponse> getCategories(PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
@@ -28,10 +34,15 @@ public class CategoryService {
         return PagedResponse.from(categoryDtos);
     }
 
-    public PagedResponse<HearitSearchResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
+    public PagedResponse<CategoryHearitResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        Page<HearitSearchResponse> hearitDtos = hearits.map(HearitSearchResponse::from);
-        return PagedResponse.from(hearitDtos);
+        Page<CategoryHearitResponse> hearitResponses = hearits.map(this::toCategoryHearitResponse);
+        return PagedResponse.from(hearitResponses);
+    }
+
+    private CategoryHearitResponse toCategoryHearitResponse(Hearit hearit) {
+        List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(), KEYWORDS_PER_HEARIT);
+        return CategoryHearitResponse.from(hearit, keywords);
     }
 }

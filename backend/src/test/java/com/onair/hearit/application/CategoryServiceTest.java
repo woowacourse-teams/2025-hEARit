@@ -6,13 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.domain.HearitKeyword;
+import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.CategoryHearitResponse;
 import com.onair.hearit.dto.response.CategoryResponse;
-import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.CategoryRepository;
+import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,11 +39,14 @@ class CategoryServiceTest {
     @Autowired
     private HearitRepository hearitRepository;
 
+    @Autowired
+    private HearitKeywordRepository hearitKeywordRepository;
+
     private CategoryService categoryService;
 
     @BeforeEach
     void setup() {
-        categoryService = new CategoryService(categoryRepository, hearitRepository);
+        categoryService = new CategoryService(categoryRepository, hearitRepository, hearitKeywordRepository);
     }
 
     @Test
@@ -80,15 +86,40 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<HearitSearchResponse> result = categoryService.getHearitsByCategory(category1.getId(), request);
+        PagedResponse<CategoryHearitResponse> result = categoryService.getHearitsByCategory(category1.getId(), request);
 
         // then
         assertAll(() -> {
             assertThat(result.content()).hasSize(2);
-            assertThat(result.content()).extracting(HearitSearchResponse::id)
+            assertThat(result.content()).extracting(CategoryHearitResponse::id)
                     .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
         });
     }
+
+    @Test
+    @DisplayName("히어릿 목록을 카테고리 조회 시 각 히어릿에 키워드가 포함되어 반환된다.")
+    void searchHearitsByCategory_includesKeywords() {
+        // given
+        Category category = saveCategory("AI", "#999");
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword2));
+        PagingRequest request = new PagingRequest(0, 10);
+
+        // when
+        PagedResponse<CategoryHearitResponse> result = categoryService.getHearitsByCategory(category.getId(), request);
+
+        // then
+        assertAll(
+                () -> assertThat(result.content()).hasSize(1),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
+                () -> assertThat(result.content().get(0).keywords()).hasSize(2)
+        );
+
+    }
+
 
     @Test
     @DisplayName("히어릿 목록을 카테고리 조회 시 최신순으로 페이지네이션이 적용된다.")
@@ -101,7 +132,7 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(1, 2);
 
         // when
-        PagedResponse<HearitSearchResponse> result = categoryService.getHearitsByCategory(category.getId(), request);
+        PagedResponse<CategoryHearitResponse> result = categoryService.getHearitsByCategory(category.getId(), request);
 
         // then
         assertAll(
