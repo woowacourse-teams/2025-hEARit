@@ -23,9 +23,6 @@ class PlayerDetailViewModel(
     private val _hearit: MutableLiveData<Hearit> = MutableLiveData()
     val hearit: LiveData<Hearit> = _hearit
 
-    private val _isBookmarked: MutableLiveData<Boolean> = MutableLiveData(false)
-    val isBookmarked: LiveData<Boolean> = _isBookmarked
-
     private val _bookmarkId: MutableLiveData<Long?> = MutableLiveData()
     val bookmarkId: LiveData<Long?> = _bookmarkId
 
@@ -40,7 +37,7 @@ class PlayerDetailViewModel(
     }
 
     fun toggleBookmark() {
-        if (isBookmarked.value == true) {
+        if (bookmarkId.value != null) {
             deleteBookmark()
         } else {
             addBookmark()
@@ -54,7 +51,6 @@ class PlayerDetailViewModel(
                 bookmarkRepository
                     .deleteBookmark(id)
                     .onSuccess {
-                        _isBookmarked.value = false
                         _bookmarkId.value = null
                     }.onFailure {
                         _toastMessage.value = R.string.all_toast_delete_bookmark_fail
@@ -68,7 +64,6 @@ class PlayerDetailViewModel(
             bookmarkRepository
                 .addBookmark(hearitId)
                 .onSuccess { bookmarkId ->
-                    _isBookmarked.value = true
                     _bookmarkId.value = bookmarkId
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_add_bookmark_fail
@@ -83,7 +78,6 @@ class PlayerDetailViewModel(
                     _hearit.value = it
                     saveRecentHearit()
                     _keywords.value = it.keywords
-                    _isBookmarked.value = it.isBookmarked
                     _bookmarkId.value = it.bookmarkId
                 }.onFailure { it: Throwable ->
                     _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
