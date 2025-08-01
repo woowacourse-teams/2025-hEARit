@@ -31,7 +31,7 @@ class CategoryItemAdapter(
                 override fun areItemsTheSame(
                     oldItem: CategoryHearit,
                     newItem: CategoryHearit,
-                ): Boolean = oldItem.title == newItem.title
+                ): Boolean = oldItem.hearitId == newItem.hearitId
 
                 override fun areContentsTheSame(
                     oldItem: CategoryHearit,
