@@ -17,8 +17,8 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("SELECT h FROM Hearit h ORDER BY function('RAND')")
     Page<Hearit> findRandom(Pageable pageable);
 
-    @Query("SELECT h FROM Hearit h ORDER BY function('RAND') LIMIT :limit")
-    List<Hearit> findRandom(@Param("limit") int limit);
+    @Query("SELECT h FROM Hearit h ORDER BY function('RAND') LIMIT :size")
+    List<Hearit> findRandom(@Param("size") int size);
 
     Page<Hearit> findByCategoryIdOrderByCreatedAtDesc(Long categoryId, Pageable pageable);
 
