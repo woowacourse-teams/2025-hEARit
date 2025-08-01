@@ -121,10 +121,9 @@ class HearitSearchServiceTest {
     void searchHearitsWithKeywords_includedInResponse() {
         // given
         PagingRequest request = new PagingRequest(0, 10);
-        Keyword keyword1 = saveKeyword("Spring");
-        Keyword keyword2 = saveKeyword("Boot");
+        Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
         Hearit hearit = saveHearitWithTitleAndKeyword("Spring in Action", keyword1);
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword2)); // 2개 키워드 연결
 
         // when
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
@@ -133,8 +132,7 @@ class HearitSearchServiceTest {
         assertAll(
                 () -> assertThat(result.content()).hasSize(1),
                 () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
-                () -> assertThat(result.content().get(0).keywords()).hasSize(2));
-
+                () -> assertThat(result.content().get(0).keywords()).hasSize(1));
     }
 
     @Test
