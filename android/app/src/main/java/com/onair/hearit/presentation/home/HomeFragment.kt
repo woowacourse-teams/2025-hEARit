@@ -36,8 +36,8 @@ class HomeFragment :
     }
     private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
     private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy { GroupedCategoryAdapter(this) }
-    private lateinit var indicatorContainer: LinearLayout
     private val snapHelper = PagerSnapHelper()
+    private lateinit var indicatorContainer: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -88,37 +88,6 @@ class HomeFragment :
             adapter = recommendAdapter
             snapHelper.attachToRecyclerView(this)
 
-            addOnScrollListener(
-                object : RecyclerView.OnScrollListener() {
-                    override fun onScrolled(
-                        recyclerView: RecyclerView,
-                        dx: Int,
-                        dy: Int,
-                    ) {
-                        val layoutManager =
-                            recyclerView.layoutManager as? LinearLayoutManager ?: return
-                        val snapView = snapHelper.findSnapView(layoutManager) ?: return
-                        val position = layoutManager.getPosition(snapView)
-                        updateCenterEffect(recyclerView)
-                        updateIndicator(position)
-                    }
-                },
-            )
-        }
-    }
-
-    private fun updateCenterEffect(recyclerView: RecyclerView) {
-        val centerX = recyclerView.width / 2
-        for (i in 0 until recyclerView.childCount) {
-            val child = recyclerView.getChildAt(i) ?: continue
-            applyCenterScalingEffect(child, centerX, recyclerView)
-        }
-    }
-
-    private fun updateIndicator(position: Int) {
-        val count = indicatorContainer.childCount
-        if (count == 0) return
-        setCurrentIndicator(position % count)
             addOnScrollListener(
                 object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(
@@ -207,44 +176,6 @@ class HomeFragment :
         setCurrentIndicator(position % count)
     }
 
-    private fun setupIndicator(size: Int) {
-        indicatorContainer = binding.indicatorContainer
-        indicatorContainer.removeAllViews()
-
-        repeat(size) { index ->
-            val dot =
-                View(requireContext()).apply {
-                    val sizeInPx = (INDICATOR_SIZE_DP * resources.displayMetrics.density).toInt()
-                    val marginPx = (INDICATOR_MARGIN_DP * resources.displayMetrics.density).toInt()
-                    layoutParams =
-                        LinearLayout.LayoutParams(sizeInPx, sizeInPx).apply {
-                            marginStart = marginPx
-                            marginEnd = marginPx
-                        }
-                    setBackgroundResource(R.drawable.indicator_unselected)
-                    setOnClickListener { scrollToIndex(index) }
-                }
-            indicatorContainer.addView(dot)
-        }
-        setCurrentIndicator(0)
-    }
-
-    private fun scrollToIndex(index: Int) {
-        val layoutManager = binding.rvHomeRecommend.layoutManager as? LinearLayoutManager ?: return
-        val recyclerCenter = binding.rvHomeRecommend.width / 2
-        val itemWidth = (ITEM_WIDTH_DP * resources.displayMetrics.density).toInt()
-        val offset = recyclerCenter - (itemWidth / 2)
-
-        layoutManager.scrollToPositionWithOffset(index, offset)
-    }
-
-    private fun setCurrentIndicator(index: Int) {
-        for (i in 0 until indicatorContainer.childCount) {
-            val dot = indicatorContainer.getChildAt(i)
-            val drawableRes =
-                if (i == index) R.drawable.indicator_selected else R.drawable.indicator_unselected
-            dot.setBackgroundResource(drawableRes)
-        }
     private fun scrollToIndex(index: Int) {
         val layoutManager = binding.rvHomeRecommend.layoutManager as? LinearLayoutManager ?: return
         val recyclerCenter = binding.rvHomeRecommend.width / 2
@@ -285,40 +216,10 @@ class HomeFragment :
         child.alpha = MIN_ALPHA + (1 - d) * MAX_ALPHA_DELTA
     }
 
-    private fun setupCategoryRecyclerView() {
-        binding.rvHomeRecommendCategory.adapter = groupedCategoryAdapter
-    }
-
-    private fun observeViewModel() {
-        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
-            binding.userInfo = userInfo
-        }
-
-        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
-            recommendAdapter.submitList(recommendItems) {
-                scrollToMiddlePosition()
-                setupIndicator(recommendItems.size)
-            }
-        }
-
-        viewModel.groupedCategory.observe(viewLifecycleOwner) { groupedCategory ->
-            groupedCategoryAdapter.submitList(groupedCategory)
-        }
-
-        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
-        }
-        child.z = (1 - d) * MAX_ELEVATION
-        child.alpha = MIN_ALPHA + (1 - d) * MAX_ALPHA_DELTA
-    }
-
     // 리스트 중앙에 포지션 배치
     private fun scrollToMiddlePosition() {
         binding.rvHomeRecommend.post {
             val middlePosition = recommendAdapter.currentList.size / 2
-            val layoutManager = binding.rvHomeRecommend.layoutManager as LinearLayoutManager
-            val recyclerViewCenter = binding.rvHomeRecommend.width / 2
-            val itemWidth = (260 * resources.displayMetrics.density).toInt()
             val layoutManager = binding.rvHomeRecommend.layoutManager as LinearLayoutManager
             val recyclerViewCenter = binding.rvHomeRecommend.width / 2
             val itemWidth = (ITEM_WIDTH_DP * resources.displayMetrics.density).toInt()
