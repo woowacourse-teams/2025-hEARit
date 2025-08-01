@@ -4,5 +4,5 @@ data class PlaybackInfo(
     val hearitId: Long,
     val audioUrl: String,
     val title: String,
-    val playTime: Int,
+    val lastPosition: Long = 0L,
 )
