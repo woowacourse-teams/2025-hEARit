@@ -11,7 +11,6 @@ public record GroupedHearitsWithCategoryResponse(
         String colorCode,
         List<HearitResponse> hearits
 ) {
-
     public static GroupedHearitsWithCategoryResponse from(Category category, List<Hearit> hearits) {
         return new GroupedHearitsWithCategoryResponse(
                 category.getId(),
