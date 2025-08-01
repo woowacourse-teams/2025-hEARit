@@ -2,8 +2,8 @@ package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.CategoryService;
 import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.CategoryHearitResponse;
 import com.onair.hearit.dto.response.CategoryResponse;
-import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,12 +35,13 @@ public class CategoryController {
 
     @Operation(summary = "카테고리 id로 히어릿 카테고리로 조회", description = "히어릿의 카테고리 id, page 정보를 입력해 히어릿을 조회합니다. ")
     @GetMapping("/{categoryId}/hearits")
-    public ResponseEntity<PagedResponse<HearitSearchResponse>> searchHearitsByCategory(
+    public ResponseEntity<PagedResponse<CategoryHearitResponse>> searchHearitsByCategory(
             @PathVariable Long categoryId,
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "20") Integer size) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<HearitSearchResponse> response = categoryService.getHearitsByCategory(categoryId, pagingRequest);
+        PagedResponse<CategoryHearitResponse> response = categoryService.getHearitsByCategory(categoryId,
+                pagingRequest);
         return ResponseEntity.ok(response);
     }
 }
