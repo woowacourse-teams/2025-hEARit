@@ -18,8 +18,11 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.domain.model.RecommendHearits
 import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.explore.ExploreFragment
 import kotlin.math.abs
 
 class HomeFragment :
@@ -34,7 +37,12 @@ class HomeFragment :
             CrashlyticsProvider.get(),
         )
     }
-    private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
+    private val recommendAdapter: RecommendHearitAdapter by lazy {
+        RecommendHearitAdapter(
+            this,
+            navigateClickListener = { navigateToExplore() },
+        )
+    }
     private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy { GroupedCategoryAdapter(this) }
     private val snapHelper = PagerSnapHelper()
     private lateinit var indicatorContainer: LinearLayout
@@ -125,9 +133,15 @@ class HomeFragment :
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
-            recommendAdapter.submitList(recommendItems) {
+            val items =
+                buildList {
+                    add(RecommendHearits.LeftNavigateItem)
+                    addAll(recommendItems.map { RecommendHearits.Content(it) })
+                    add(RecommendHearits.RightNavigateItem)
+                }
+            recommendAdapter.submitList(items) {
                 scrollToMiddlePosition()
-                setupIndicator(recommendItems.size)
+                setupIndicator(items.size)
             }
         }
 
@@ -154,12 +168,11 @@ class HomeFragment :
                             marginStart = marginPx
                             marginEnd = marginPx
                         }
-                    setBackgroundResource(R.drawable.indicator_unselected)
                     setOnClickListener { scrollToIndex(index) }
                 }
             indicatorContainer.addView(dot)
         }
-        setCurrentIndicator(2)
+        setCurrentIndicator(3)
     }
 
     private fun updateCenterEffect(recyclerView: RecyclerView) {
@@ -183,6 +196,7 @@ class HomeFragment :
         val offset = recyclerCenter - (itemWidth / 2)
 
         layoutManager.scrollToPositionWithOffset(index, offset)
+        setCurrentIndicator(index)
     }
 
     private fun setCurrentIndicator(index: Int) {
@@ -230,6 +244,16 @@ class HomeFragment :
 
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun navigateToExplore() {
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container_view, ExploreFragment())
+            .addToBackStack(null)
+            .commit()
+
+        (requireActivity() as MainActivity).selectTab(R.id.nav_explore)
     }
 
     private fun navigateToPlayerDetail(hearitId: Long) {

@@ -18,7 +18,7 @@
     <!-- HomeFragment-->
     <string name="home_logo_description">IT를 쉽게 들을 수 있는 팟캐스트 , 히어릿</string>
     <string name="home_recent_hearit_text">최근에 들은 히어릿</string>
-    <string name="home_no_recent_hearit_text">최근에 들은 히어릿이 없어요.  들으러 가볼까요?</string>
+    <string name="home_navigate_to_explore_text">더 많은 히어릿을\n듣고 싶다면?</string>
     <string name="home_recommend_hearit_text">오늘 추천하는 팟캐스트</string>
     <string name="home_grouped_category_text">%s 카테고리의 팟캐스트</string>
     <string name="home_example_recommend_description">Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나</string>
