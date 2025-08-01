@@ -129,7 +129,7 @@
             android:id="@+id/layout_explore_player"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="-12dp"
+            android:layout_marginBottom="-18dp"
             app:controller_layout_id="@layout/explore_player_controller"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

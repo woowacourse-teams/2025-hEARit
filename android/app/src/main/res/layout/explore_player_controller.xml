@@ -17,6 +17,7 @@
         app:scrubber_disabled_size="0dp"
         app:scrubber_drawable="@null"
         app:scrubber_enabled_size="0dp"
+        app:touch_target_height="40dp"
         app:unplayed_color="@color/hearit_gray4" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
