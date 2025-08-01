@@ -44,10 +44,12 @@ class PlaybackService : MediaSessionService() {
         val audioUrl = intent?.getStringExtra(EXTRA_AUDIO_URL)
         val title = intent?.getStringExtra(EXTRA_TITLE) ?: "hearit"
         val hearitId = intent?.getLongExtra(EXTRA_HEARIT_ID, -1L) ?: -1L
+        val startPosition = intent?.getLongExtra(EXTRA_START_POSITION, 0L)
 
         if (!audioUrl.isNullOrEmpty() && hearitId != -1L) {
             player.setMediaItem(createMediaItem(audioUrl, title, hearitId))
             player.prepare()
+            player.seekTo(startPosition ?: 0L)
         }
 
         return START_STICKY
@@ -141,16 +143,19 @@ class PlaybackService : MediaSessionService() {
         private const val EXTRA_AUDIO_URL = "AUDIO_URL"
         private const val EXTRA_TITLE = "TITLE"
         private const val EXTRA_HEARIT_ID = "HEARIT_ID"
+        private const val EXTRA_START_POSITION = "START_POSITION"
 
         fun newIntent(
             context: Context,
             audioUrl: String,
             title: String,
             hearitId: Long,
+            startPosition: Long,
         ) = Intent(context, PlaybackService::class.java).apply {
             putExtra(EXTRA_AUDIO_URL, audioUrl)
             putExtra(EXTRA_TITLE, title)
             putExtra(EXTRA_HEARIT_ID, hearitId)
+            putExtra(EXTRA_START_POSITION, startPosition)
         }
     }
 }

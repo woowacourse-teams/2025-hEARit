@@ -35,6 +35,7 @@ class PlayerViewModelFactory(
             GetPlaybackInfoUseCase(
                 hearitRepository = hearitRepository,
                 mediaFileRepository = mediaFileRepository,
+                recentHearitRepository = recentHearitRepository,
             )
 
         return PlayerViewModel(recentHearitRepository, getPlaybackInfoUseCase) as T

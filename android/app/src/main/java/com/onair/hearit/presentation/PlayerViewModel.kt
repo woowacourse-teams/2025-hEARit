@@ -50,4 +50,23 @@ class PlayerViewModel(
                 }
         }
     }
+
+    fun savePlaybackPosition(
+        position: Long,
+        duration: Long,
+        hearitId: Long,
+    ) {
+        if (duration <= 0) return
+        val isFinished = position >= duration - 1000
+
+        viewModelScope.launch {
+            recentHearitRepository
+                .updateRecentHearitPosition(
+                    hearitId = hearitId,
+                    position = if (isFinished) 0L else position,
+                ).onFailure {
+                    _toastMessage.value = R.string.main_toast_player_last_position_save_fail
+                }
+        }
+    }
 }

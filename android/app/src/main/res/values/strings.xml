@@ -101,6 +101,7 @@
     <string name="main_toast_load_player_hearit_fail">플레이어 설정에 실패했습니다.</string>
     <string name="main_bottom_player_default_title">제목 없음</string>
     <string name="main_toast_finish_back_pressed">뒤로가기 버튼을 한 번 더 누르면 종료됩니다.</string>
+    <string name="main_toast_player_last_position_save_fail">마지막 포지션 저장에 실패했습니다.</string>
 
     <!--    BottomPlayerView-->
     <string name="bottom_player_view_default_duration">--:--</string>
