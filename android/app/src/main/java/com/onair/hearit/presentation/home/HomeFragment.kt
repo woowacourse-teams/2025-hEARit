@@ -36,8 +36,8 @@ class HomeFragment :
     }
     private val recommendAdapter: RecommendHearitAdapter by lazy { RecommendHearitAdapter(this) }
     private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy { GroupedCategoryAdapter(this) }
-    private lateinit var indicatorContainer: LinearLayout
     private val snapHelper = PagerSnapHelper()
+    private lateinit var indicatorContainer: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -95,30 +95,49 @@ class HomeFragment :
                         dx: Int,
                         dy: Int,
                     ) {
-                        val layoutManager =
-                            recyclerView.layoutManager as? LinearLayoutManager ?: return
-                        val snapView = snapHelper.findSnapView(layoutManager) ?: return
-                        val position = layoutManager.getPosition(snapView)
                         updateCenterEffect(recyclerView)
-                        updateIndicator(position)
+                    }
+
+                    override fun onScrollStateChanged(
+                        recyclerView: RecyclerView,
+                        newState: Int,
+                    ) {
+                        if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                            val layoutManager =
+                                recyclerView.layoutManager as? LinearLayoutManager ?: return
+                            val snapView = snapHelper.findSnapView(layoutManager) ?: return
+                            val position = layoutManager.getPosition(snapView)
+                            updateIndicator(position)
+                        }
                     }
                 },
             )
         }
     }
 
-    private fun updateCenterEffect(recyclerView: RecyclerView) {
-        val centerX = recyclerView.width / 2
-        for (i in 0 until recyclerView.childCount) {
-            val child = recyclerView.getChildAt(i) ?: continue
-            applyCenterScalingEffect(child, centerX, recyclerView)
-        }
+    private fun setupCategoryRecyclerView() {
+        binding.rvHomeGroupedCategory.adapter = groupedCategoryAdapter
     }
 
-    private fun updateIndicator(position: Int) {
-        val count = indicatorContainer.childCount
-        if (count == 0) return
-        setCurrentIndicator(position % count)
+    private fun observeViewModel() {
+        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
+            binding.userInfo = userInfo
+        }
+
+        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
+            recommendAdapter.submitList(recommendItems) {
+                scrollToMiddlePosition()
+                setupIndicator(recommendItems.size)
+            }
+        }
+
+        viewModel.groupedCategory.observe(viewLifecycleOwner) { groupedCategory ->
+            groupedCategoryAdapter.submitList(groupedCategory)
+        }
+
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
+        }
     }
 
     private fun setupIndicator(size: Int) {
@@ -140,7 +159,21 @@ class HomeFragment :
                 }
             indicatorContainer.addView(dot)
         }
-        setCurrentIndicator(0)
+        setCurrentIndicator(2)
+    }
+
+    private fun updateCenterEffect(recyclerView: RecyclerView) {
+        val centerX = recyclerView.width / 2
+        for (i in 0 until recyclerView.childCount) {
+            val child = recyclerView.getChildAt(i) ?: continue
+            applyCenterScalingEffect(child, centerX, recyclerView)
+        }
+    }
+
+    private fun updateIndicator(position: Int) {
+        val count = indicatorContainer.childCount
+        if (count == 0) return
+        setCurrentIndicator(position % count)
     }
 
     private fun scrollToIndex(index: Int) {
@@ -183,38 +216,13 @@ class HomeFragment :
         child.alpha = MIN_ALPHA + (1 - d) * MAX_ALPHA_DELTA
     }
 
-    private fun setupCategoryRecyclerView() {
-        binding.rvHomeRecommendCategory.adapter = groupedCategoryAdapter
-    }
-
-    private fun observeViewModel() {
-        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
-            binding.userInfo = userInfo
-        }
-
-        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
-            recommendAdapter.submitList(recommendItems) {
-                scrollToMiddlePosition()
-                setupIndicator(recommendItems.size)
-            }
-        }
-
-        viewModel.groupedCategory.observe(viewLifecycleOwner) { groupedCategory ->
-            groupedCategoryAdapter.submitList(groupedCategory)
-        }
-
-        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
-        }
-    }
-
     // 리스트 중앙에 포지션 배치
     private fun scrollToMiddlePosition() {
         binding.rvHomeRecommend.post {
             val middlePosition = recommendAdapter.currentList.size / 2
             val layoutManager = binding.rvHomeRecommend.layoutManager as LinearLayoutManager
             val recyclerViewCenter = binding.rvHomeRecommend.width / 2
-            val itemWidth = (260 * resources.displayMetrics.density).toInt()
+            val itemWidth = (ITEM_WIDTH_DP * resources.displayMetrics.density).toInt()
             val offset = recyclerViewCenter - (itemWidth / 2)
             layoutManager.scrollToPositionWithOffset(middlePosition, offset)
         }

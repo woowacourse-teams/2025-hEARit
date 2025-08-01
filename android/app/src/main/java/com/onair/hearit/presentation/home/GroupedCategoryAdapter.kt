@@ -26,7 +26,7 @@ class GroupedCategoryAdapter(
                 override fun areItemsTheSame(
                     oldItem: GroupedCategory,
                     newItem: GroupedCategory,
-                ): Boolean = oldItem.categoryName == newItem.categoryName
+                ): Boolean = oldItem.categoryId == newItem.categoryId
 
                 override fun areContentsTheSame(
                     oldItem: GroupedCategory,
