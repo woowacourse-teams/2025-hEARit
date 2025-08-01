@@ -18,7 +18,8 @@
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:background="@drawable/bg_gray1_radius_8dp"
-        android:onClick="@{() -> recommendClickListener.onClick(item.id)}">
+        android:onClick="@{() -> recommendClickListener.onClick(item.id)}"
+        app:backgroundColor="@{item.categoryColor}">
 
         <TextView
             android:id="@+id/tv_recommend_hearit_category"

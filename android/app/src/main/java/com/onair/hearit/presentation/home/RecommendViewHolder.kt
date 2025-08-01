@@ -1,9 +1,7 @@
 package com.onair.hearit.presentation.home
 
-import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemRecommendHearitBinding
 import com.onair.hearit.domain.model.RecommendHearit
@@ -18,8 +16,6 @@ class RecommendViewHolder(
 
     fun bind(item: RecommendHearit) {
         binding.item = item
-        val drawable = binding.root.background?.mutate() as? GradientDrawable
-        drawable?.setColor(item.categoryColor.toColorInt())
     }
 
     companion object {

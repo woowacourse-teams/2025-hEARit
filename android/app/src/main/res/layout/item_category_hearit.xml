@@ -47,18 +47,18 @@
             android:layout_height="20dp"
             android:layout_marginBottom="20dp"
             android:background="@color/hearit_purple1"
+            app:backgroundColor="@{color}"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:recommendCategoryBackgroundColor="@{color}" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <View
             android:layout_width="176dp"
             android:layout_height="20dp"
             android:layout_marginBottom="20dp"
             android:background="@color/hearit_purple1"
+            app:backgroundColor="@{color}"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/view_recommend_category_left"
-            app:recommendCategoryBackgroundColor="@{color}" />
+            app:layout_constraintTop_toTopOf="@id/view_recommend_category_left" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
