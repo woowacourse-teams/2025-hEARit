@@ -8,12 +8,17 @@ import com.onair.hearit.domain.model.GroupedCategory
 
 class GroupedCategoryViewHolder(
     private val binding: ItemGroupedCategoryBinding,
-    private val hearitClickListener: HearitClickListener,
+    hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(groupedCategory: GroupedCategory) {
-        val itemAdapter = CategoryItemAdapter(groupedCategory.colorCode, hearitClickListener)
-        binding.groupedCategory = groupedCategory
+    private val itemAdapter = CategoryItemAdapter(hearitClickListener, DEFAULT_COLOR)
+
+    init {
         binding.rvCategoryItems.adapter = itemAdapter
+    }
+
+    fun bind(groupedCategory: GroupedCategory) {
+        binding.groupedCategory = groupedCategory
+        itemAdapter.updateColor(groupedCategory.colorCode)
         itemAdapter.submitList(groupedCategory.hearits)
     }
 
@@ -26,5 +31,7 @@ class GroupedCategoryViewHolder(
             val binding = ItemGroupedCategoryBinding.inflate(inflater, parent, false)
             return GroupedCategoryViewHolder(binding, hearitClickListener)
         }
+
+        private const val DEFAULT_COLOR = "#000000"
     }
 }
