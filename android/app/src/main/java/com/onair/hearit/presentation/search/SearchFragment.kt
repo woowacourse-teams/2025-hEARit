@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -58,6 +59,7 @@ class SearchFragment : Fragment() {
         updateAppBarUIOnBackStackChanged()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupSearchInput() {
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -65,13 +67,14 @@ class SearchFragment : Fragment() {
             }
             false
         }
-
         binding.tilSearch.setEndIconOnClickListener {
             performSearchFromInput()
         }
-
-        binding.etSearch.setOnClickListener {
-            showRecentFragment()
+        binding.etSearch.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                showRecentFragment()
+            }
+            false
         }
     }
 
@@ -89,10 +92,10 @@ class SearchFragment : Fragment() {
 
     private fun setupFragmentResultListeners() {
         childFragmentManager.setFragmentResultListener(
-            KEY_RECENT_SEARCH,
+            KEYWORD_KEY,
             viewLifecycleOwner,
         ) { _, bundle ->
-            val keyword = bundle.getString(KEY_RECENT_SEARCH).orEmpty()
+            val keyword = bundle.getString(KEYWORD_KEY).orEmpty()
             navigateToSearchResult(SearchInput.Keyword(keyword))
         }
 
@@ -218,6 +221,6 @@ class SearchFragment : Fragment() {
         private const val TAG_SEARCH_RECENT = "SearchRecent"
         private const val TAG_SEARCH_RESULT = "SearchResult"
         const val KEY_CATEGORY = "category"
-        const val KEY_RECENT_SEARCH = "recent_search"
+        const val KEYWORD_KEY = "keyword"
     }
 }

@@ -1,5 +1,6 @@
 package com.onair.hearit.data.api
 
+import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
@@ -17,6 +18,13 @@ interface HearitService {
         @Path("hearitId") hearitId: Long,
     ): Response<HearitResponse>
 
+    @GET("hearits/search")
+    suspend fun getSearchHearits(
+        @Query("searchTerm") searchTerm: String,
+        @Query("page") page: Int?,
+        @Query("size") size: Int?,
+    ): Response<SearchHearitResponse>
+
     @GET("hearits/recommend")
     suspend fun getRecommendHearits(): Response<List<RecommendHearitResponse>>
 
@@ -27,10 +35,6 @@ interface HearitService {
         @Query("size") size: Int?,
     ): Response<RandomHearitResponse>
 
-    @GET("hearits/search")
-    suspend fun getSearchHearits(
-        @Query("searchTerm") searchTerm: String,
-        @Query("page") page: Int?,
-        @Query("size") size: Int?,
-    ): Response<SearchHearitResponse>
+    @GET("hearits/grouped-by-category")
+    suspend fun getCategoryHearits(): Response<List<GroupedCategoryHearitResponse>>
 }

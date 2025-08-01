@@ -1,12 +1,16 @@
 package com.onair.hearit.data
 
 import com.onair.hearit.data.database.RecentHearitEntity
+import com.onair.hearit.data.dto.CategoryHearitResponse
+import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 import com.onair.hearit.data.dto.UserInfoResponse
+import com.onair.hearit.domain.model.CategoryHearit
+import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
@@ -53,7 +57,8 @@ fun RecommendHearitResponse.toDomain(): RecommendHearit =
     RecommendHearit(
         id = this.id,
         title = this.title,
-        desc = this.summary,
+        categoryName = this.categoryName,
+        categoryColor = this.categoryColor,
     )
 
 fun RandomHearitResponse.toDomain(): PageResult<RandomHearit> =
@@ -107,4 +112,19 @@ fun SearchHearitResponse.toDomain(): PageResult<SearchedHearit> =
                 isFirst = isFirst,
                 isLast = isLast,
             ),
+    )
+
+fun GroupedCategoryHearitResponse.toDomain(): GroupedCategory =
+    GroupedCategory(
+        categoryId = this.categoryId,
+        categoryName = this.categoryName,
+        colorCode = this.colorCode,
+        hearits = this.categoryHearitResponses.map { it.toDomain() },
+    )
+
+fun CategoryHearitResponse.toDomain(): CategoryHearit =
+    CategoryHearit(
+        hearitId = this.hearitId,
+        title = this.title,
+        createdAt = this.createdAt,
     )
