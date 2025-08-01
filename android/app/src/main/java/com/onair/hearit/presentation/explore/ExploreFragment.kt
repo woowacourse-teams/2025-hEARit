@@ -52,8 +52,8 @@ class ExploreFragment :
             }
         }
 
-    var currentPosition = 0
-    var swipeCount = 0
+    private var currentPosition = 0
+    private var swipeCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -178,12 +178,16 @@ class ExploreFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun navigateToDetail(hearitId: Long) {
-        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
+    private fun navigateToDetail(
+        hearitId: Long,
+        lastPosition: Long = 0L,
+    ) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId, lastPosition)
         playerDetailLauncher.launch(intent)
     }
 
     override fun onClickHearitInfo(hearitId: Long) {
+        val lastPosition = player.currentPosition
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,
             mapOf(
@@ -192,7 +196,7 @@ class ExploreFragment :
             ),
         )
 
-        navigateToDetail(hearitId)
+        navigateToDetail(hearitId, lastPosition)
     }
 
     override fun onClickBookmark(hearitId: Long) {

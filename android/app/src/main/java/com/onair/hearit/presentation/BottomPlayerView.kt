@@ -37,11 +37,16 @@ class BottomPlayerView
             binding.exoPlay.setOnClickListener { togglePlayPause() }
         }
 
-        fun setPlayer(newPlayer: Player): BottomPlayerView =
+        fun setPlayer(
+            newPlayer: Player,
+            startPosition: Long = 0L,
+        ): BottomPlayerView =
             apply {
                 detachPlayer()
                 player = newPlayer
                 listener = PlayerListener().also { newPlayer.addListener(it) }
+
+                newPlayer.seekTo(startPosition)
                 refresh()
             }
 
@@ -72,6 +77,8 @@ class BottomPlayerView
                     ) {
                         player?.seekTo(position)
                         updateProgress()
+
+                        (context as? PlaybackPositionSaver)?.savePlaybackPosition()
                     }
                 },
             )
@@ -119,7 +126,12 @@ class BottomPlayerView
 
         private fun togglePlayPause() {
             player?.let {
-                if (it.playWhenReady) it.pause() else it.play()
+                if (it.playWhenReady) {
+                    it.pause()
+                    (context as? PlaybackPositionSaver)?.savePlaybackPosition()
+                } else {
+                    it.play()
+                }
             }
         }
 

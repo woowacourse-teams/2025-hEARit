@@ -34,7 +34,8 @@ import com.onair.hearit.service.PlaybackService
 class MainActivity :
     AppCompatActivity(),
     DrawerClickListener,
-    PlayerControllerView {
+    PlayerControllerView,
+    PlaybackPositionSaver {
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0L
     private val backPressInterval = 1000L
@@ -194,7 +195,12 @@ class MainActivity :
         }
 
         playerViewModel.playbackInfo.observe(this) { playbackInfo ->
-            startPlayback(playbackInfo.audioUrl, playbackInfo.title, playbackInfo.hearitId)
+            startPlayback(
+                playbackInfo.audioUrl,
+                playbackInfo.title,
+                playbackInfo.hearitId,
+                playbackInfo.lastPosition,
+            )
             showPlayerControlView()
             val title =
                 playbackInfo.title.ifBlank {
@@ -212,6 +218,7 @@ class MainActivity :
         audioUrl: String,
         title: String,
         hearitId: Long,
+        startPosition: Long = 0L,
     ) {
         val intent =
             PlaybackService.newIntent(
@@ -219,6 +226,7 @@ class MainActivity :
                 audioUrl = audioUrl,
                 title = title,
                 hearitId = hearitId,
+                startPosition = startPosition,
             )
         ContextCompat.startForegroundService(this, intent)
     }
@@ -259,16 +267,31 @@ class MainActivity :
 
     override fun pause() {
         mediaController?.pause()
+        savePlaybackPosition()
     }
 
     private fun showToast(message: String?) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
+    override fun onPause() {
+        super.onPause()
+        savePlaybackPosition()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         mediaController?.release()
         mediaController = null
+    }
+
+    override fun savePlaybackPosition() {
+        val controller = mediaController ?: return
+        val position = controller.currentPosition
+        val duration = controller.duration
+        val hearitId = playerViewModel.recentHearit.value?.id ?: return
+
+        playerViewModel.savePlaybackPosition(position, duration, hearitId)
     }
 
     companion object {
