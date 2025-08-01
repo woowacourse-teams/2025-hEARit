@@ -24,4 +24,14 @@ public interface HearitKeywordRepository extends JpaRepository<HearitKeyword, Lo
                 WHERE hk.hearit.id = :hearitId
             """)
     List<Keyword> findKeywordsByHearitId(@Param("hearitId") Long hearitId);
+
+    @Query("""
+                SELECT k
+                FROM HearitKeyword hk
+                JOIN hk.keyword k
+                WHERE hk.hearit.id = :hearitId
+                ORDER BY hk.id DESC
+                LIMIT :size
+            """)
+    List<Keyword> findKeywordsByHearitId(@Param("hearitId") Long hearitId, @Param("size") int size);
 }
