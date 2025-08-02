@@ -38,11 +38,11 @@ public class CategoryService {
                                                                         PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::buildHearitOfCategoryResponse);
+        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::toHearitOfCategoryResponse);
         return PagedResponse.from(hearitResponses);
     }
 
-    private HearitOfCategoryResponse buildHearitOfCategoryResponse(Hearit hearit) {
+    private HearitOfCategoryResponse toHearitOfCategoryResponse(Hearit hearit) {
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(), KEYWORDS_PER_HEARIT);
         return HearitOfCategoryResponse.from(hearit, keywords);
     }
