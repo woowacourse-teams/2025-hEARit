@@ -80,6 +80,10 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 
+tasks.named('jar') {
+    enabled = false
+}
+
 swaggerSources {
     sample {
         setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
@@ -96,7 +100,6 @@ openapi3 {
     version = project.version
     format = "yaml"
 }
-
 
 tasks.named('test') {
     useJUnitPlatform()
