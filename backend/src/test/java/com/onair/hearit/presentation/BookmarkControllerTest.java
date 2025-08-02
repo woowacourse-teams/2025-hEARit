@@ -277,7 +277,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .delete("/api/v1/bookmarks/" + bookmark.getId())
+                .delete("/api/v1/bookmarks/{bookmarkId}", bookmark.getId())
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }

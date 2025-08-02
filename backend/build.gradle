@@ -122,16 +122,29 @@ tasks.named('generateSwaggerUISample') {
 
         def content = indexFile.getText('UTF-8')
 
-        // 1. docExpansion이 이미 있다면 교체
-        if (content.contains('docExpansion')) {
-            content = content.replaceAll(/docExpansion\s*:\s*["'](full|list|none)["']/, 'docExpansion: "list"')
-        } else {
-            // 2. 없다면 SwaggerUIBundle({ 바로 뒤에 삽입
-            content = content.replaceFirst(
-                    /(?s)(SwaggerUIBundle\s*\(\s*\{)/,
-                    '$1\n  docExpansion: "list",'
-            )
-        }
+        // docExpansion, duration 등 설정 삽입
+        def swaggerOptions = [
+            'docExpansion: "list"',
+            'displayRequestDuration: true',
+            'operationsSorter: (a, b) => {\n' +
+            '    const order = ["get", "post", "put", "delete"];\n' +
+            '    return order.indexOf(a.get("method")) - order.indexOf(b.get("method"));\n' +
+            '}',
+            'tagsSorter: "alpha"'
+        ].join(',\n    ')
+
+        // 기존 옵션 제거
+        content = content
+                .replaceAll(/docExpansion\s*:\s*["'](full|list|none)["']\s*,?/, '')
+                .replaceAll(/displayRequestDuration\s*:\s*(true|false)\s*,?/, '')
+                .replaceAll(/operationsSorter\s*:\s*["'](alpha|method|none)["']\s*,?/, '')
+                .replaceAll(/tagsSorter\s*:\s*["'](alpha|method|none)["']\s*,?/, '')
+
+        // SwaggerUIBundle 내부에 삽입
+        content = content.replaceFirst(
+            /(?s)(SwaggerUIBundle\s*\(\s*\{)/,
+            "\$1\n    ${swaggerOptions},"
+        )
 
         indexFile.write(content, 'UTF-8')
     }
