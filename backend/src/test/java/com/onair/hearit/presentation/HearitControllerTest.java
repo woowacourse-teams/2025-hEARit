@@ -11,6 +11,7 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
@@ -247,19 +248,19 @@ class HearitControllerTest extends IntegrationTest {
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2)); // 다른 카테고리
 
         // when
-        PagedResponse<HearitSearchResponse> pagedResponse = RestAssured
+        PagedResponse<HearitOfCategoryResponse> pagedResponse = RestAssured
                 .given()
-                .pathParam("categoryId", category1.getId())
+                .queryParam("categoryId", category1.getId())
                 .queryParam("page", 0)
                 .queryParam("size", 10)
                 .when()
-                .get("/api/v1/categories/{categoryId}/hearits")
+                .get("/api/v1/hearits")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .as(new TypeRef<>() {
                 });
-        List<HearitSearchResponse> responses = pagedResponse.content();
+        List<HearitOfCategoryResponse> responses = pagedResponse.content();
 
         // then
         assertAll(
