@@ -34,15 +34,15 @@ public class CategoryService {
         return PagedResponse.from(categoryDtos);
     }
 
-    public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(Long categoryId,
+    public PagedResponse<HearitOfCategoryResponse> getHearitsOfCategory(Long categoryId,
                                                                         PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::toCategoryHearitResponse);
+        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::buildHearitOfCategoryResponse);
         return PagedResponse.from(hearitResponses);
     }
 
-    private HearitOfCategoryResponse toCategoryHearitResponse(Hearit hearit) {
+    private HearitOfCategoryResponse buildHearitOfCategoryResponse(Hearit hearit) {
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(), KEYWORDS_PER_HEARIT);
         return HearitOfCategoryResponse.from(hearit, keywords);
     }

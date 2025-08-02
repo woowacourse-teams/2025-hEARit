@@ -40,7 +40,7 @@ public class CategoryController {
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "20") Integer size) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<HearitOfCategoryResponse> response = categoryService.getHearitsByCategory(categoryId,
+        PagedResponse<HearitOfCategoryResponse> response = categoryService.getHearitsOfCategory(categoryId,
                 pagingRequest);
         return ResponseEntity.ok(response);
     }

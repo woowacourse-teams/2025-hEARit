@@ -84,7 +84,7 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<HearitOfCategoryResponse> result = categoryService.getHearitsByCategory(category1.getId(),
+        PagedResponse<HearitOfCategoryResponse> result = categoryService.getHearitsOfCategory(category1.getId(),
                 request);
 
         // then
@@ -108,7 +108,7 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<HearitOfCategoryResponse> result = categoryService.getHearitsByCategory(category.getId(),
+        PagedResponse<HearitOfCategoryResponse> result = categoryService.getHearitsOfCategory(category.getId(),
                 request);
 
         // then
@@ -130,7 +130,7 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(1, 2);
 
         // when
-        PagedResponse<HearitOfCategoryResponse> result = categoryService.getHearitsByCategory(category.getId(),
+        PagedResponse<HearitOfCategoryResponse> result = categoryService.getHearitsOfCategory(category.getId(),
                 request);
 
         // then
