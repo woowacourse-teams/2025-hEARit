@@ -1,14 +1,8 @@
-buildscript {
-    ext {
-        restdocsApiSpecVersion = '0.18.2'
-    }
-}
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.3'
     id 'io.spring.dependency-management' version '1.1.7'
-    id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
+    id 'com.epages.restdocs-api-spec' version '0.18.2'
     id 'org.hidetake.swagger.generator' version '2.18.2'
 }
 
@@ -59,8 +53,8 @@ dependencies {
     testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
 
     // restdocs-api-spec
-    testImplementation "com.epages:restdocs-api-spec-restassured:${restdocsApiSpecVersion}"
-    testImplementation "com.epages:restdocs-api-spec:${restdocsApiSpecVersion}"
+    testImplementation "com.epages:restdocs-api-spec-restassured:0.18.2"
+    testImplementation "com.epages:restdocs-api-spec:0.18.2"
 
     // Swagger UI
     swaggerUI 'org.webjars:swagger-ui:5.17.14'
