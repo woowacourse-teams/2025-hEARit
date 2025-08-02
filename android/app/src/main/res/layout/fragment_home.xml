@@ -101,7 +101,6 @@
                 android:id="@+id/rv_home_grouped_category"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="72dp"
                 android:nestedScrollingEnabled="false"
