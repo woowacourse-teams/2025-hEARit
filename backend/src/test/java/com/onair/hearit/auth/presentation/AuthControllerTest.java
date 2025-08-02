@@ -40,7 +40,7 @@ class AuthControllerTest extends IntegrationTest {
     RefreshTokenRepository refreshTokenRepository;
 
     @Test
-    @DisplayName("로그인 성공 시 200 OK 및 accessToken + refreshToken을 반환한다.")
+    @DisplayName("로그인 성공 시 200 OK 및 엑세스토큰 + 리프레시토큰을 반환한다.")
     void login_success() {
         // given
         Member member = Member.createLocalUser(
@@ -70,7 +70,7 @@ class AuthControllerTest extends IntegrationTest {
         });
     }
 
-    @DisplayName("유효한 리프레시 토큰으로 엑시스토큰 재발급 요청 시 새 accessToken을 반환한다.")
+    @DisplayName("유효한 리프레시토큰으로 엑세스토큰 재발급 요청 시 새 엑세스토큰을 반환한다.")
     @Test
     void reissueToken_requestWithValidRefreshToken() {
         // given

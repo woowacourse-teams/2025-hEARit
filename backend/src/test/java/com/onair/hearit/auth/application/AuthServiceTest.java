@@ -119,7 +119,7 @@ class AuthServiceTest {
     class Reissue {
 
         @Test
-        @DisplayName("리프레시 토큰이 유효하고 저장된 값과 일치하면 accessToken을 재발급한다")
+        @DisplayName("리프레시 토큰이 유효하고 저장된 값과 일치하면 엑세스토큰을 재발급한다")
         void reissue_success() {
             // given
             Member member = dbHelper.insertMember(
@@ -153,7 +153,7 @@ class AuthServiceTest {
         }
 
         @Test
-        @DisplayName("저장된 리프레시 토큰이 없으면 UnauthorizedException을 던진다")
+        @DisplayName("저장된 리프레시토큰이 없으면 UnauthorizedException을 던진다")
         void reissue_fail_when_refreshToken_not_found_in_db() {
             // given
             Member member = dbHelper.insertMember(
@@ -168,7 +168,7 @@ class AuthServiceTest {
         }
 
         @Test
-        @DisplayName("리프레시 토큰 값이 DB에 저장된 것과 다르면 UnauthorizedException을 던진다")
+        @DisplayName("리프레시토큰 값이 DB에 저장된 것과 다르면 UnauthorizedException을 던진다")
         void reissue_fail_when_refreshToken_mismatch() {
             // given
             Member member = dbHelper.insertMember(
@@ -211,7 +211,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("로그아웃 시 해당 member의 refreshToken을 삭제한다.")
+    @DisplayName("로그아웃 시 해당 member의 리프레시토큰을 삭제한다.")
     void logout_then_deleteRefreshToken() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
