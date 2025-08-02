@@ -1,6 +1,6 @@
 package com.onair.hearit.auth.infrastructure.jwt;
 
-import com.onair.hearit.common.log.message.LogMessageGenerator;
+import com.onair.hearit.common.log.message.JsonMaskingPrettyFormatter;
 import com.onair.hearit.common.log.message.dto.ErrorLog;
 import com.onair.hearit.common.log.message.dto.ErrorLog.ErrorDetail;
 import com.onair.hearit.common.log.message.dto.RequestInfo;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class FilterErrorLogger {
 
-    private final LogMessageGenerator logMessageGenerator;
+    private final JsonMaskingPrettyFormatter jsonMaskingPrettyFormatter;
 
     public void log(HttpServletRequest request, ProblemDetail problemDetail) {
         RequestInfo requestInfo = RequestInfo.from(request);
@@ -34,6 +34,6 @@ public class FilterErrorLogger {
                 errorDetail
         );
 
-        log.warn(logMessageGenerator.convertToPrettyJson(errorLog));
+        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(errorLog));
     }
 }

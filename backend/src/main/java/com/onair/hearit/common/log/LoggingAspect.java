@@ -1,6 +1,6 @@
 package com.onair.hearit.common.log;
 
-import com.onair.hearit.common.log.message.LogMessageGenerator;
+import com.onair.hearit.common.log.message.JsonMaskingPrettyFormatter;
 import com.onair.hearit.common.log.message.dto.ErrorLog;
 import com.onair.hearit.common.log.message.dto.ErrorLog.ErrorDetail;
 import com.onair.hearit.common.log.message.dto.RequestInfo;
@@ -37,7 +37,7 @@ public class LoggingAspect {
 
     private static final String START_TIME_KEY = "startTime";
 
-    private final LogMessageGenerator logMessageGenerator;
+    private final JsonMaskingPrettyFormatter jsonMaskingPrettyFormatter;
     private final Logger errorLogger = LogManager.getLogger("errorLogger");
 
     @Pointcut("@annotation(org.springframework.web.bind.annotation.GetMapping)")
@@ -73,18 +73,19 @@ public class LoggingAspect {
     public void logRequest(JoinPoint joinPoint) {
         MDC.put(START_TIME_KEY, String.valueOf(System.currentTimeMillis()));
         RequestLog requestLog = getRequestLog(joinPoint);
-        log.info(logMessageGenerator.convertToPrettyJson(requestLog));
+        log.info(jsonMaskingPrettyFormatter.convertToPrettyJson(requestLog));
     }
 
     private RequestLog getRequestLog(JoinPoint joinPoint) {
         HttpServletRequest request = getHttpServletRequest();
         RequestInfo requestInfo = RequestInfo.from(request);
         putRequestInfoToMdc(requestInfo);
+        Object requestBody = extractRequestBody(joinPoint);
         return RequestLog.of(
                 LocalDateTime.now(),
                 requestInfo,
                 request.getParameterMap(),
-                extractRequestBody(joinPoint));
+                requestBody);
     }
 
     private HttpServletRequest getHttpServletRequest() {
@@ -119,7 +120,7 @@ public class LoggingAspect {
                     requestInfo,
                     responseEntity,
                     calculateTimeTakenMs());
-            log.info(logMessageGenerator.convertToPrettyJson(responseLog));
+            log.info(jsonMaskingPrettyFormatter.convertToPrettyJson(responseLog));
         } finally {
             MDC.clear();
         }
@@ -147,7 +148,6 @@ public class LoggingAspect {
                 logServerError(requestInfo, httpStatus, errorDetail, throwable);
                 return;
             }
-
             logClientError(problemDetail, requestInfo, errorDetail);
         } catch (Exception e) {
             log.error("Error 로깅 중 예외가 발생했습니다.", e);
@@ -171,7 +171,7 @@ public class LoggingAspect {
     private void logServerError(RequestInfo requestInfo, HttpStatus httpStatus,
                                 ErrorDetail errorDetail, Optional<Throwable> throwable) {
         ErrorLog errorLog = ErrorLog.of("ERROR", LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
-        log.error(logMessageGenerator.convertToPrettyJson(errorLog));
+        log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(errorLog));
         if (throwable.isPresent()) {
             errorLogger.error(errorLog, throwable.get());
             return;
@@ -183,6 +183,6 @@ public class LoggingAspect {
         ErrorLog errorLog = ErrorLog.of("WARN", LocalDateTime.now(), requestInfo,
                 HttpStatus.resolve(problemDetail.getStatus()),
                 errorDetail);
-        log.warn(logMessageGenerator.convertToPrettyJson(errorLog));
+        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(errorLog));
     }
 }
