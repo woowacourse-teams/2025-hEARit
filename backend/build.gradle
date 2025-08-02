@@ -84,6 +84,7 @@ tasks.named('jar') {
     enabled = false
 }
 
+// 생성될 OpenAPI 스펙 파일의 위치 지정
 swaggerSources {
     sample {
         setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
@@ -105,12 +106,12 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-
+// GenerateSwaggerUI 태스크가 openapi3 태스크 이후에 실행되도록 설정
 tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI).configureEach {
     dependsOn 'openapi3'
 }
 
-
+//  bootJar 빌드 시, 생성된 Swagger UI를 static/swagger-ui에 포함
 tasks.named('bootJar') {
     dependsOn 'generateSwaggerUISample'
     from("${tasks.generateSwaggerUISample.outputDir}") {
@@ -127,13 +128,13 @@ tasks.named('generateSwaggerUISample') {
 
         // docExpansion, duration 등 설정 삽입
         def swaggerOptions = [
-            'docExpansion: "list"',
-            'displayRequestDuration: true',
-            'operationsSorter: (a, b) => {\n' +
-            '    const order = ["get", "post", "put", "delete"];\n' +
-            '    return order.indexOf(a.get("method")) - order.indexOf(b.get("method"));\n' +
-            '}',
-            'tagsSorter: "alpha"'
+                'docExpansion: "list"',
+                'displayRequestDuration: true',
+                'operationsSorter: (a, b) => {\n' +
+                        '    const order = ["get", "post", "put", "delete"];\n' +
+                        '    return order.indexOf(a.get("method")) - order.indexOf(b.get("method"));\n' +
+                        '}',
+                'tagsSorter: "alpha"'
         ].join(',\n    ')
 
         // 기존 옵션 제거
@@ -145,8 +146,8 @@ tasks.named('generateSwaggerUISample') {
 
         // SwaggerUIBundle 내부에 삽입
         content = content.replaceFirst(
-            /(?s)(SwaggerUIBundle\s*\(\s*\{)/,
-            "\$1\n    ${swaggerOptions},"
+                /(?s)(SwaggerUIBundle\s*\(\s*\{)/,
+                "\$1\n    ${swaggerOptions},"
         )
 
         indexFile.write(content, 'UTF-8')

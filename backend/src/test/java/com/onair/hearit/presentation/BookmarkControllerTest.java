@@ -58,8 +58,8 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .summary("북마크 목록 조회")
                                 .description("사용자가 북마크한 히어릿 목록을 페이지별로 조회합니다.")
                                 .queryParameters(
-                                        parameterWithName("page").description("페이지 번호 (0부터 시작)"),
-                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)")
+                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
+                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
                                 )
                                 .responseSchema(Schema.schema("PagedBookmarkHearitResponse"))
                                 .responseFields(
