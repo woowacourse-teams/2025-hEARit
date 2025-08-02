@@ -4,18 +4,24 @@ import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
-import com.onair.hearit.auth.dto.response.TokenResponse;
+import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.auth.infrastructure.jwt.RefreshToken;
+import com.onair.hearit.auth.infrastructure.jwt.RefreshTokenRepository;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.infrastructure.MemberRepository;
+import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -24,11 +30,13 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoUserInfoClient kakaoUserInfoClient;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${hearit.profile.default-image-url}")
     private String defaultProfileImage;
 
-    public TokenResponse login(LoginRequest request) {
+    @Transactional
+    public LoginTokenResponse login(LoginRequest request) {
         Member member = getMemberByLocalId(request.localId());
         validatePassword(request, member);
         return createTokenResponseFrom(member);
@@ -58,9 +66,9 @@ public class AuthService {
     }
 
     // 소셜 로그인의 경우 회원가입이 따로 없으며 로그인 시 자동으로 회원가입되도록 구현
-    public TokenResponse loginWithKakao(KakaoLoginRequest request) {
+    @Transactional
+    public LoginTokenResponse loginWithKakao(KakaoLoginRequest request) {
         KakaoUserInfoResponse kakaoUser = kakaoUserInfoClient.getUserInfo(request.accessToken());
-
         Member member = memberRepository.findBySocialId(kakaoUser.id())
                 .orElseGet(() -> signupWithKakao(kakaoUser));
         return createTokenResponseFrom(member);
@@ -71,8 +79,46 @@ public class AuthService {
         return memberRepository.save(member);
     }
 
-    private TokenResponse createTokenResponseFrom(Member member) {
-        String token = jwtTokenProvider.createToken(member.getId());
-        return new TokenResponse(token);
+    private LoginTokenResponse createTokenResponseFrom(Member member) {
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        LocalDateTime expiryDate = jwtTokenProvider.extractExpiry(refreshToken);
+        refreshTokenRepository.findByMemberId(member.getId())
+                .ifPresentOrElse(
+                        existing -> existing.update(refreshToken, expiryDate),
+                        () -> refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, expiryDate))
+                );
+        log.info("로그인 토큰 발급 완료 - memberId: {}", member.getId());
+        return new LoginTokenResponse(accessToken, refreshToken);
+    }
+
+    public String reissue(String refreshToken) {
+        validateRefreshTokenExpired(refreshToken);
+        Long memberId = jwtTokenProvider.getMemberId(refreshToken);
+        RefreshToken stored = refreshTokenRepository.findByMemberId(memberId)
+                .orElseThrow(() -> {
+                    log.warn("토큰 재발급 실패 - 저장된 리프레시 토큰 없음 memberId: {}", memberId);
+                    return new UnauthorizedException("저장된 토큰이 없습니다.");
+                });
+        validateRefreshTokenValue(refreshToken, stored);
+        return jwtTokenProvider.createAccessToken(memberId);
+    }
+
+    private void validateRefreshTokenExpired(String refreshToken) {
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            log.warn("리프레시토큰 검증 실패 - 만료된 토큰");
+            throw new UnauthorizedException("만료된 리프레시토큰입니다.");
+        }
+    }
+
+    private void validateRefreshTokenValue(String refreshToken, RefreshToken stored) {
+        if (!stored.getToken().equals(refreshToken)) {
+            log.warn("리프레시토큰 검증 실패 - 기존 토큰과 불일치");
+            throw new UnauthorizedException("리프레시 토큰이 불일치합니다.");
+        }
+    }
+
+    public void logout(Long memberId) {
+        refreshTokenRepository.deleteByMemberId(memberId);
     }
 }
