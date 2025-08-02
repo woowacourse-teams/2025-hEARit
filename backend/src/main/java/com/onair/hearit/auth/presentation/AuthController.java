@@ -5,10 +5,8 @@ import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.TokenResponse;
-import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,20 +26,12 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    //    @Operation(summary = "카카오 로그인", description = "카카오 액세스토큰으로 로그인 시 토큰을 발급받습니다.")
     @PostMapping("/kakao-login")
     public ResponseEntity<TokenResponse> loginWithKakao(@RequestBody KakaoLoginRequest request) {
         TokenResponse response = authService.loginWithKakao(request);
         return ResponseEntity.ok(response);
     }
 
-    //    @Operation(summary = "회원가입", description = "새로운 계정을 생성합니다.",
-//            responses = {
-//                    @ApiResponse(responseCode = "201", description = "회원가입 성공"),
-//                    @ApiResponse(responseCode = "400", description = "중복된 이메일",
-//                            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-//            })
-    //TODO 상태코드별 설명 붙이기
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@RequestBody SignupRequest request) {
         authService.signup(request);
