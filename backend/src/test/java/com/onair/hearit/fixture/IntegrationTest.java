@@ -17,8 +17,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(RestDocumentationExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class IntegrationTest {
 
     @LocalServerPort
