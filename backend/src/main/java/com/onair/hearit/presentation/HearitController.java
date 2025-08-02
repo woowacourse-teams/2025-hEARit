@@ -86,7 +86,7 @@ public class HearitController {
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "카테고리 id로 히어릿 카테고리로 조회", description = "히어릿의 카테고리 id, page 정보를 입력해 히어릿을 조회합니다. ")
+    @Operation(summary = "카테고리 id로 히어릿 조회", description = "히어릿의 카테고리 id, page 정보를 입력해 히어릿을 조회합니다. ")
     @GetMapping
     public ResponseEntity<PagedResponse<HearitOfCategoryResponse>> searchHearits(
             @RequestParam(name = "categoryId") Long categoryId,
