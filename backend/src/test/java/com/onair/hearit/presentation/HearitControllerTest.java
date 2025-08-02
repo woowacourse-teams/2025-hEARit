@@ -243,9 +243,9 @@ class HearitControllerTest extends IntegrationTest {
                                 .summary("히어릿 검색")
                                 .description("제목 또는 키워드에 검색어가 포함된 히어릿 목록을 페이지별로 조회합니다.")
                                 .queryParameters(
-                                        parameterWithName("searchTerm").description("검색어 (2자 이상)"),
-                                        parameterWithName("page").description("페이지 번호 (0부터 시작)"),
-                                        parameterWithName("size").description("페이지 당 항목 수")
+                                        parameterWithName("searchTerm").description("검색어"),
+                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
+                                        parameterWithName("size").description("페이지 당 항목 수").defaultValue("20")
                                 )
                                 .responseSchema(Schema.schema("PagedHearitSearchResponse"))
                                 .responseFields(

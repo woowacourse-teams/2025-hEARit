@@ -108,8 +108,8 @@ class CategoryControllerTest extends IntegrationTest {
                                         parameterWithName("categoryId").description("조회할 카테고리의 ID")
                                 )
                                 .queryParameters(
-                                        parameterWithName("page").description("페이지 번호 (0부터 시작)"),
-                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)")
+                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
+                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
                                 )
                                 .responseSchema(Schema.schema("PagedHearitSearchResponse"))
                                 .responseFields(
