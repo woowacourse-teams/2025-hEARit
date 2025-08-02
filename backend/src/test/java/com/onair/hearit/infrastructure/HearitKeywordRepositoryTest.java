@@ -47,4 +47,27 @@ class HearitKeywordRepositoryTest {
                 () -> assertThat(keywords.getFirst().getId()).isEqualTo(keyword.getId())
         );
     }
+
+    @Test
+    @DisplayName("히어릿 아이디로 원하는 개수만큼의 히어릿 키워드를 조회할 수 있다.")
+    void findKeywordsByHearitIdWithSize() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword3 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+
+        HearitKeyword hearitKeyword1 = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
+        HearitKeyword hearitKeyword2 = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword2));
+        HearitKeyword hearitKeyword3 = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword3));
+
+        // when
+        List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(), 2);
+
+        // then
+        assertThat(keywords).hasSize(2);
+    }
 }

@@ -13,6 +13,7 @@ import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
+import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,11 +34,14 @@ class HearitSearchServiceTest {
     @Autowired
     private HearitRepository hearitRepository;
 
+    @Autowired
+    private HearitKeywordRepository hearitKeywordRepository;
+
     private HearitSearchService hearitSearchService;
 
     @BeforeEach
     void setup() {
-        hearitSearchService = new HearitSearchService(hearitRepository);
+        hearitSearchService = new HearitSearchService(hearitRepository, hearitKeywordRepository);
     }
 
     @Test
@@ -110,6 +114,25 @@ class HearitSearchServiceTest {
                 () -> assertThat(result.content()).extracting(HearitSearchResponse::id)
                         .doesNotContain(neither.getId())
         );
+    }
+
+    @Test
+    @DisplayName("검색 결과에 각 히어릿에 연결된 키워드가 포함된다.")
+    void searchHearitsWithKeywords_includedInResponse() {
+        // given
+        PagingRequest request = new PagingRequest(0, 10);
+        Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Hearit hearit = saveHearitWithTitleAndKeyword("Spring in Action", keyword1);
+
+        // when
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
+
+        // then
+        assertAll(
+                () -> assertThat(result.content()).hasSize(1),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
+                () -> assertThat(result.content().get(0).keywords()).hasSize(1));
     }
 
     @Test

@@ -8,6 +8,7 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
@@ -30,6 +31,7 @@ public class HearitService {
     private static final int RECOMMEND_HEARIT_COUNT = 5;
     private static final int GROUPED_CATEGORY_COUNT = 3;
     private static final int HEARITS_PER_GROUPED_CATEGORY = 5;
+    private static final int KEYWORDS_PER_HEARIT = 3;
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -83,5 +85,17 @@ public class HearitService {
     private GroupedHearitsWithCategoryResponse mapToGroupedHearitsResponse(Category category) {
         List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_GROUPED_CATEGORY);
         return GroupedHearitsWithCategoryResponse.from(category, hearits);
+    }
+
+    public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
+        Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
+        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::mapToHearitOfCategoryResponse);
+        return PagedResponse.from(hearitResponses);
+    }
+
+    private HearitOfCategoryResponse mapToHearitOfCategoryResponse(Hearit hearit) {
+        List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(), KEYWORDS_PER_HEARIT);
+        return HearitOfCategoryResponse.from(hearit, keywords);
     }
 }

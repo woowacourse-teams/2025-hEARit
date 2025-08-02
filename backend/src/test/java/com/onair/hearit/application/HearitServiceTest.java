@@ -15,6 +15,7 @@ import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
@@ -167,6 +168,74 @@ class HearitServiceTest {
                 () -> assertThat(responses.get(0).hearits()).hasSize(3),
                 () -> assertThat(responses.get(1).hearits()).hasSize(3),
                 () -> assertThat(responses.get(2).hearits()).hasSize(3)
+        );
+    }
+
+    @Test
+    @DisplayName("히어릿 목록을 카테고리 조회 시 카테고리에 해당하는 히어릿만 반환한다.")
+    void searchHearitsByCategory_onlyMatchingCategory() {
+        // given
+        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        PagingRequest request = new PagingRequest(0, 10);
+
+        // when
+        PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category1.getId(),
+                request);
+
+        // then
+        assertAll(() -> {
+            assertThat(result.content()).hasSize(2);
+            assertThat(result.content()).extracting(HearitOfCategoryResponse::id)
+                    .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("카테고리 내의 히어릿들을 조회 시 각 히어릿에 키워드가 포함되어 반환된다.")
+    void searchHearitsByCategory_includesKeywords() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword2));
+        PagingRequest request = new PagingRequest(0, 10);
+
+        // when
+        PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
+                request);
+
+        // then
+        assertAll(
+                () -> assertThat(result.content()).hasSize(1),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
+                () -> assertThat(result.content().get(0).keywords()).hasSize(2)
+        );
+    }
+
+    @Test
+    @DisplayName("카테고리 내의 히어릿들을 조회 시 최신순으로 페이지네이션이 적용된다.")
+    void searchHearitsByCategory_pagination() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        PagingRequest request = new PagingRequest(1, 2);
+
+        // when
+        PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
+                request);
+
+        // then
+        assertAll(
+                () -> assertThat(result.content()).hasSize(1),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
         );
     }
 }
