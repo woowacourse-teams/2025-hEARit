@@ -1,19 +1,11 @@
 package com.onair.hearit.docs;
 
-import static com.epages.restdocs.apispec.ResourceDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
-import com.epages.restdocs.apispec.HeaderDescriptorWithType;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 public class ApiDocSnippets {
-
-    public static HeaderDescriptorWithType[] getAuthorizationHeader() {
-        return new HeaderDescriptorWithType[]{
-                headerWithName("Authorization").description("Bearer 인증 토큰")
-        };
-    }
 
     public static FieldDescriptor[] getCustomPagedResponseFields() {
         return new FieldDescriptor[]{
