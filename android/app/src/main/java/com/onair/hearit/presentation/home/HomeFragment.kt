@@ -143,15 +143,16 @@ class HomeFragment :
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
+            val contentItems = recommendItems.map { RecommendHearits.Content(it) }
             val items =
                 buildList {
                     add(RecommendHearits.LeftNavigateItem)
-                    addAll(recommendItems.map { RecommendHearits.Content(it) })
+                    addAll(contentItems)
                     add(RecommendHearits.RightNavigateItem)
                 }
             recommendAdapter.submitList(items) {
                 scrollToMiddlePosition()
-                setupIndicator(items.size)
+                setupIndicator(contentItems.size)
             }
         }
 
@@ -168,7 +169,7 @@ class HomeFragment :
         indicatorContainer = binding.indicatorContainer
         indicatorContainer.removeAllViews()
 
-        repeat(size) { index ->
+        repeat(size) {
             val dot =
                 View(requireContext()).apply {
                     val sizeInPx = (INDICATOR_SIZE_DP * resources.displayMetrics.density).toInt()
@@ -178,11 +179,10 @@ class HomeFragment :
                             marginStart = marginPx
                             marginEnd = marginPx
                         }
-                    setOnClickListener { scrollToIndex(index) }
                 }
             indicatorContainer.addView(dot)
         }
-        setCurrentIndicator(3)
+        setCurrentIndicator(2)
     }
 
     private fun updateCenterEffect(recyclerView: RecyclerView) {
@@ -196,17 +196,11 @@ class HomeFragment :
     private fun updateIndicator(position: Int) {
         val count = indicatorContainer.childCount
         if (count == 0) return
-        setCurrentIndicator(position % count)
-    }
 
-    private fun scrollToIndex(index: Int) {
-        val layoutManager = binding.rvHomeRecommend.layoutManager as? LinearLayoutManager ?: return
-        val recyclerCenter = binding.rvHomeRecommend.width / 2
-        val itemWidth = (ITEM_WIDTH_DP * resources.displayMetrics.density).toInt()
-        val offset = recyclerCenter - (itemWidth / 2)
-
-        layoutManager.scrollToPositionWithOffset(index, offset)
-        setCurrentIndicator(index)
+        val indicatorIndex = position - 1
+        if (indicatorIndex in 0 until count) {
+            setCurrentIndicator(indicatorIndex)
+        }
     }
 
     private fun setCurrentIndicator(index: Int) {
