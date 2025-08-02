@@ -114,3 +114,25 @@ tasks.named('bootJar') {
         into 'static/swagger-ui'
     }
 }
+
+tasks.named('generateSwaggerUISample') {
+    doLast {
+        def indexFile = file("${outputDir}/index.html")
+        if (!indexFile.exists()) return
+
+        def content = indexFile.getText('UTF-8')
+
+        // 1. docExpansion이 이미 있다면 교체
+        if (content.contains('docExpansion')) {
+            content = content.replaceAll(/docExpansion\s*:\s*["'](full|list|none)["']/, 'docExpansion: "list"')
+        } else {
+            // 2. 없다면 SwaggerUIBundle({ 바로 뒤에 삽입
+            content = content.replaceFirst(
+                    /(?s)(SwaggerUIBundle\s*\(\s*\{)/,
+                    '$1\n  docExpansion: "list",'
+            )
+        }
+
+        indexFile.write(content, 'UTF-8')
+    }
+}
