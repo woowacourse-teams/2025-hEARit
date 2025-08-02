@@ -20,6 +20,10 @@ import com.onair.hearit.databinding.FragmentSearchBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
+import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
+import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
+import com.onair.hearit.domain.model.SearchInput.Companion.KEYWORD_KEY
 import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
@@ -44,7 +48,6 @@ class SearchFragment : Fragment() {
         return binding.root
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?,
@@ -91,6 +94,17 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupFragmentResultListeners() {
+        parentFragmentManager.setFragmentResultListener(
+            CATEGORY_KEY,
+            viewLifecycleOwner,
+        ) { _, bundle ->
+            val id = bundle.getLong(CATEGORY_ID_KEY)
+            val name = bundle.getString(CATEGORY_NAME_KEY).orEmpty()
+            binding.root.post {
+                navigateToSearchResult(SearchInput.Category(id, name))
+            }
+        }
+
         childFragmentManager.setFragmentResultListener(
             KEYWORD_KEY,
             viewLifecycleOwner,
@@ -100,11 +114,11 @@ class SearchFragment : Fragment() {
         }
 
         childFragmentManager.setFragmentResultListener(
-            KEY_CATEGORY,
+            CATEGORY_KEY,
             viewLifecycleOwner,
         ) { _, bundle ->
-            val id = bundle.getLong("category_id")
-            val name = bundle.getString("category_name").orEmpty()
+            val id = bundle.getLong(CATEGORY_ID_KEY)
+            val name = bundle.getString(CATEGORY_NAME_KEY).orEmpty()
             navigateToSearchResult(SearchInput.Category(id, name))
         }
     }
@@ -220,7 +234,5 @@ class SearchFragment : Fragment() {
         private const val TAG_SEARCH_CATEGORY = "SearchCategory"
         private const val TAG_SEARCH_RECENT = "SearchRecent"
         private const val TAG_SEARCH_RESULT = "SearchResult"
-        const val KEY_CATEGORY = "category"
-        const val KEYWORD_KEY = "keyword"
     }
 }

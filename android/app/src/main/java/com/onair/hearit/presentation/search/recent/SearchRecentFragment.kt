@@ -13,7 +13,7 @@ import androidx.fragment.app.viewModels
 import com.onair.hearit.databinding.FragmentSearchRecentBinding
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.presentation.search.SearchFragment.Companion.KEYWORD_KEY
+import com.onair.hearit.domain.model.SearchInput.Companion.KEYWORD_KEY
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 
