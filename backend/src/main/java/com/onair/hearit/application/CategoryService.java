@@ -1,5 +1,6 @@
 package com.onair.hearit.application;
 
+import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.request.PagingRequest;
@@ -29,9 +30,16 @@ public class CategoryService {
     }
 
     public PagedResponse<HearitSearchResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
+        validateCategoryExists(categoryId);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
         Page<HearitSearchResponse> hearitDtos = hearits.map(HearitSearchResponse::from);
         return PagedResponse.from(hearitDtos);
+    }
+
+    private void validateCategoryExists(Long categoryId) {
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new NotFoundException("카테고리", String.valueOf(categoryId));
+        }
     }
 }

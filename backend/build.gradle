@@ -1,7 +1,15 @@
+buildscript {
+    ext {
+        restdocsApiSpecVersion = '0.18.2'
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
+    id 'org.hidetake.swagger.generator' version '2.18.2'
 }
 
 group = 'com.onair'
@@ -45,7 +53,17 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'org.jsoup:jsoup:1.17.2' // HTML 파싱
+    testImplementation 'org.jsoup:jsoup:1.17.2'
+
+    // REST Docs
+    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
+
+    // restdocs-api-spec
+    testImplementation "com.epages:restdocs-api-spec-restassured:${restdocsApiSpecVersion}"
+    testImplementation "com.epages:restdocs-api-spec:${restdocsApiSpecVersion}"
+
+    // Swagger UI
+    swaggerUI 'org.webjars:swagger-ui:5.17.14'
 
     // DB
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -60,15 +78,78 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+}
 
-    //Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+tasks.named('jar') {
+    enabled = false
+}
+
+// 생성될 OpenAPI 스펙 파일의 위치 지정
+swaggerSources {
+    sample {
+        setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
+    }
+}
+
+openapi3 {
+    servers = [
+            { url = "http://localhost:80"; description = "로컬 서버" },
+            { url = "http://hearit.o-r.kr"; description = "운영 서버" }
+    ]
+    title = "Hearit API 문서"
+    description = "Spring REST Docs와 Swagger UI를 이용한 API 명세서"
+    version = project.version
+    format = "yaml"
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('jar') {
-    enabled = false
+// GenerateSwaggerUI 태스크가 openapi3 태스크 이후에 실행되도록 설정
+tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI).configureEach {
+    dependsOn 'openapi3'
+}
+
+//  bootJar 빌드 시, 생성된 Swagger UI를 static/swagger-ui에 포함
+tasks.named('bootJar') {
+    dependsOn 'generateSwaggerUISample'
+    from("${tasks.generateSwaggerUISample.outputDir}") {
+        into 'static/swagger-ui'
+    }
+}
+
+tasks.named('generateSwaggerUISample') {
+    doLast {
+        def indexFile = file("${outputDir}/index.html")
+        if (!indexFile.exists()) return
+
+        def content = indexFile.getText('UTF-8')
+
+        // docExpansion, duration 등 설정 삽입
+        def swaggerOptions = [
+                'docExpansion: "list"',
+                'displayRequestDuration: true',
+                'operationsSorter: (a, b) => {\n' +
+                        '    const order = ["get", "post", "put", "delete"];\n' +
+                        '    return order.indexOf(a.get("method")) - order.indexOf(b.get("method"));\n' +
+                        '}',
+                'tagsSorter: "alpha"'
+        ].join(',\n    ')
+
+        // 기존 옵션 제거
+        content = content
+                .replaceAll(/docExpansion\s*:\s*["'](full|list|none)["']\s*,?/, '')
+                .replaceAll(/displayRequestDuration\s*:\s*(true|false)\s*,?/, '')
+                .replaceAll(/operationsSorter\s*:\s*["'](alpha|method|none)["']\s*,?/, '')
+                .replaceAll(/tagsSorter\s*:\s*["'](alpha|method|none)["']\s*,?/, '')
+
+        // SwaggerUIBundle 내부에 삽입
+        content = content.replaceFirst(
+                /(?s)(SwaggerUIBundle\s*\(\s*\{)/,
+                "\$1\n    ${swaggerOptions},"
+        )
+
+        indexFile.write(content, 'UTF-8')
+    }
 }

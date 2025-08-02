@@ -1,8 +1,15 @@
 package com.onair.hearit.presentation;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import com.epages.restdocs.apispec.Schema;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.CategoryResponse;
@@ -12,10 +19,13 @@ import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.restdocs.payload.FieldDescriptor;
 
 class CategoryControllerTest extends IntegrationTest {
 
@@ -30,9 +40,31 @@ class CategoryControllerTest extends IntegrationTest {
         Category category5 = dbHelper.insertCategory(new Category("category5", "#555"));
 
         // when
-        PagedResponse<CategoryResponse> result = RestAssured.given()
+        PagedResponse<CategoryResponse> result = RestAssured.given(this.spec)
                 .param("page", 1)
                 .param("size", 2)
+                .filter(document("category-read-list",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Category API")
+                                .summary("전체 카테고리 목록 조회")
+                                .description("전체 카테고리 목록을 페이지별로 조회합니다.")
+                                .queryParameters(
+                                        parameterWithName("page").description("페이지 번호 (0부터 시작)"),
+                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)")
+                                )
+                                .responseSchema(Schema.schema("PagedResponse"))
+                                .responseFields(
+                                        Stream.concat(
+                                                Arrays.stream(new FieldDescriptor[]{
+                                                        fieldWithPath("content[].id").description("카테고리 ID"),
+                                                        fieldWithPath("content[].name").description("카테고리 이름"),
+                                                        fieldWithPath("content[].colorCode").description("카테고리 색상 코드")
+                                                }),
+                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
+                                        ).toArray(FieldDescriptor[]::new)
+                                )
+                                .build())
+                ))
                 .when()
                 .get("/api/v1/categories")
                 .then()
@@ -60,14 +92,39 @@ class CategoryControllerTest extends IntegrationTest {
 
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2)); // 다른 카테고리
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2)); // 카테고리 2의 히어릿
 
         // when
-        PagedResponse<HearitSearchResponse> pagedResponse = RestAssured
-                .given()
+        PagedResponse<HearitSearchResponse> pagedResponse = RestAssured.given(this.spec)
                 .pathParam("categoryId", category1.getId())
                 .queryParam("page", 0)
                 .queryParam("size", 10)
+                .filter(document("category-search-hearits",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Category API")
+                                .summary("카테고리별 히어릿 목록 조회")
+                                .description("특정 카테고리에 속한 히어릿 목록을 페이지별로 조회합니다.")
+                                .pathParameters(
+                                        parameterWithName("categoryId").description("조회할 카테고리의 ID")
+                                )
+                                .queryParameters(
+                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
+                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
+                                )
+                                .responseSchema(Schema.schema("PagedHearitSearchResponse"))
+                                .responseFields(
+                                        Stream.concat(
+                                                Arrays.stream(new FieldDescriptor[]{
+                                                        fieldWithPath("content[].id").description("히어릿 ID"),
+                                                        fieldWithPath("content[].title").description("히어릿 제목"),
+                                                        fieldWithPath("content[].summary").description("히어릿 요약"),
+                                                        fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)")
+                                                }),
+                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
+                                        ).toArray(FieldDescriptor[]::new)
+                                )
+                                .build())
+                ))
                 .when()
                 .get("/api/v1/categories/{categoryId}/hearits")
                 .then()
@@ -83,5 +140,51 @@ class CategoryControllerTest extends IntegrationTest {
                 () -> assertThat(responses.get(0).id()).isEqualTo(hearit2.getId()), // 최신 hearit 먼저
                 () -> assertThat(responses.get(1).id()).isEqualTo(hearit1.getId())
         );
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 카테고리로 히어릿 검색 시 404 NOT_FOUND를 반환한다.")
+    void searchHearitsByCategoryWithNotFoundCategory() {
+        // given
+        Long notFoundCategoryId = 9999L;
+
+        // when & then
+        RestAssured.given(this.spec)
+                .pathParam("categoryId", notFoundCategoryId)
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .filter(document("category-search-hearits-not-found",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Category API")
+                                .summary("카테고리별 히어릿 목록 조회")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/categories/{categoryId}/hearits")
+                .then()
+                .statusCode(HttpStatus.NOT_FOUND.value());
+    }
+
+    @Test
+    @DisplayName("전체 카테고리 조회 시 유효하지 않은 페이지 번호를 보내면 400 BAD_REQUEST를 반환한다.")
+    void readAllCategoriesWithInvalidPage() {
+        // when & then
+        RestAssured.given(this.spec)
+                .param("page", -1)
+                .param("size", 10)
+                .filter(document("category-read-list-bad-request",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Category API")
+                                .summary("전체 카테고리 목록 조회")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/categories")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 }
