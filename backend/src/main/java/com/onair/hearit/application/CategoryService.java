@@ -4,8 +4,8 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.CategoryHearitResponse;
 import com.onair.hearit.dto.response.CategoryResponse;
+import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
@@ -34,15 +34,16 @@ public class CategoryService {
         return PagedResponse.from(categoryDtos);
     }
 
-    public PagedResponse<CategoryHearitResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
+    public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(Long categoryId,
+                                                                        PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        Page<CategoryHearitResponse> hearitResponses = hearits.map(this::toCategoryHearitResponse);
+        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::toCategoryHearitResponse);
         return PagedResponse.from(hearitResponses);
     }
 
-    private CategoryHearitResponse toCategoryHearitResponse(Hearit hearit) {
+    private HearitOfCategoryResponse toCategoryHearitResponse(Hearit hearit) {
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(), KEYWORDS_PER_HEARIT);
-        return CategoryHearitResponse.from(hearit, keywords);
+        return HearitOfCategoryResponse.from(hearit, keywords);
     }
 }

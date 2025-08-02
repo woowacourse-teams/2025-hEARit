@@ -9,8 +9,8 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.CategoryHearitResponse;
 import com.onair.hearit.dto.response.CategoryResponse;
+import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
@@ -84,12 +84,13 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<CategoryHearitResponse> result = categoryService.getHearitsByCategory(category1.getId(), request);
+        PagedResponse<HearitOfCategoryResponse> result = categoryService.getHearitsByCategory(category1.getId(),
+                request);
 
         // then
         assertAll(() -> {
             assertThat(result.content()).hasSize(2);
-            assertThat(result.content()).extracting(CategoryHearitResponse::id)
+            assertThat(result.content()).extracting(HearitOfCategoryResponse::id)
                     .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
         });
     }
@@ -107,7 +108,8 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<CategoryHearitResponse> result = categoryService.getHearitsByCategory(category.getId(), request);
+        PagedResponse<HearitOfCategoryResponse> result = categoryService.getHearitsByCategory(category.getId(),
+                request);
 
         // then
         assertAll(
@@ -128,7 +130,8 @@ class CategoryServiceTest {
         PagingRequest request = new PagingRequest(1, 2);
 
         // when
-        PagedResponse<CategoryHearitResponse> result = categoryService.getHearitsByCategory(category.getId(), request);
+        PagedResponse<HearitOfCategoryResponse> result = categoryService.getHearitsByCategory(category.getId(),
+                request);
 
         // then
         assertAll(
