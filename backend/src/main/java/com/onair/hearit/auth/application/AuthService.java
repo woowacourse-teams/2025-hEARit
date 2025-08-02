@@ -97,7 +97,7 @@ public class AuthService {
         Long memberId = jwtTokenProvider.getMemberId(refreshToken);
         RefreshToken stored = refreshTokenRepository.findByMemberId(memberId)
                 .orElseThrow(() -> {
-                    log.warn("토큰 재발급 실패 - 저장된 리프레시 토큰 없음");
+                    log.warn("토큰 재발급 실패 - 저장된 리프레시 토큰 없음 memberId: {}", memberId);
                     return new UnauthorizedException("저장된 토큰이 없습니다.");
                 });
         validateRefreshTokenValue(refreshToken, stored);
