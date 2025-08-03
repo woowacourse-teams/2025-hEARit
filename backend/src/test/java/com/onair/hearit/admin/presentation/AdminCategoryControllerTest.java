@@ -77,7 +77,7 @@ class AdminCategoryControllerTest extends IntegrationTest {
     void createCategory() {
         // given
         CsrfSession csrf = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
-        CategoryCreateRequest request = new CategoryCreateRequest("새 카테고리", "#12345678");
+        CategoryCreateRequest request = new CategoryCreateRequest("새 카테고리", "#123456");
 
         // when & then
         RestAssured.given().log().all()
@@ -96,9 +96,9 @@ class AdminCategoryControllerTest extends IntegrationTest {
     void updateCategory() {
         // given
         CsrfSession csrf = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
-        Category category = dbHelper.insertCategory(new Category("카테고리", "#11111111"));
+        Category category = dbHelper.insertCategory(new Category("카테고리", "#111111"));
 
-        CategoryUpdateRequest updateRequest = new CategoryUpdateRequest("수정된 카테고리", "#22222222");
+        CategoryUpdateRequest updateRequest = new CategoryUpdateRequest("수정된 카테고리", "#222222");
 
         // when
         RestAssured.given().log().all()
@@ -115,13 +115,13 @@ class AdminCategoryControllerTest extends IntegrationTest {
         Category updatedCategory = categoryRepository.findById(category.getId()).orElseThrow();
         assertAll(() -> {
             assertThat(updatedCategory.getName()).isEqualTo("수정된 카테고리");
-            assertThat(updatedCategory.getColorCode()).isEqualTo("#22222222");
+            assertThat(updatedCategory.getColorCode()).isEqualTo("#222222");
         });
     }
 
     private void insertTestCategories(int count) {
         for (int i = 0; i < count; i++) {
-            dbHelper.insertCategory(new Category("카테고리" + i, "#12345678"));
+            dbHelper.insertCategory(new Category("카테고리" + i, "#000000"));
         }
     }
 }

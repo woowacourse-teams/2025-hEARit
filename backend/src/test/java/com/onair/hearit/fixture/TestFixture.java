@@ -17,11 +17,11 @@ public class TestFixture {
     }
 
     public static Keyword createFixedKeyword() {
-        return new Keyword("name");
+        return new Keyword("AI");
     }
 
     public static Category createFixedCategory() {
-        return new Category("name", "colorCode");
+        return new Category("Spring", "#000000");
     }
 
     public static Hearit createFixedHearitWith(Category category) {

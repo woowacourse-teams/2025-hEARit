@@ -1,5 +1,6 @@
 package com.onair.hearit.domain;
 
+import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Keyword {
 
+    public static final int KEYWORD_NAME_MAX_LENGTH = 20;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,10 +26,18 @@ public class Keyword {
     private String name;
 
     public Keyword(String name) {
+        validate(name);
         this.name = name;
     }
 
+    private void validate(String name) {
+        if (name == null || name.length() > KEYWORD_NAME_MAX_LENGTH) {
+            throw new InvalidInputException("키워드 이름은 20자 이하여야 합니다.");
+        }
+    }
+
     public void updateName(String newName) {
+        validate(name);
         this.name = newName;
     }
 }
