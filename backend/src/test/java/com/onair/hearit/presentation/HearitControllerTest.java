@@ -238,10 +238,10 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("카테고리로 히어릿 검색 시 200 OK 및 해당 카테고리의 히어릿들을 최신순으로 반환한다.")
-    void readHearitsByCategoryByCategoryWithPagination() {
+    void searchHearitsByCategoryWithPagination() {
         // given
-        Category category1 = dbHelper.insertCategory(new Category("Spring", "#001"));
-        Category category2 = dbHelper.insertCategory(new Category("Java", "#002"));
+        Category category1 = dbHelper.insertCategory(new Category("Spring", "#000001"));
+        Category category2 = dbHelper.insertCategory(new Category("Java", "#000002"));
 
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
