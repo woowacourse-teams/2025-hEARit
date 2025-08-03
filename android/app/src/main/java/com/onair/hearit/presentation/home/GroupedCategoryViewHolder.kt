@@ -12,11 +12,15 @@ class GroupedCategoryViewHolder(
     hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     private val itemAdapter = CategoryItemAdapter(hearitClickListener, DEFAULT_COLOR)
+    private var decorationAdded = false
 
     init {
         binding.rvCategoryItems.apply {
             adapter = itemAdapter
-            addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(itemView.context)))
+            if (!decorationAdded) {
+                addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(itemView.context)))
+                decorationAdded = true
+            }
         }
     }
 
