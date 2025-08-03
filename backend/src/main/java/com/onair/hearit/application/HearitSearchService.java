@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HearitSearchService {
 
-    private static final int KEYWORD_SIZE_PER_HEARIT = 3;
+    private static final int KEYWORD_PER_HEARIT = 3;
 
     private final HearitRepository hearitRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
@@ -32,7 +32,7 @@ public class HearitSearchService {
 
     private HearitSearchResponse toHearitSearchResponseWithKeywords(Hearit hearit) {
         List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-                KEYWORD_SIZE_PER_HEARIT);
+                KEYWORD_PER_HEARIT);
         return HearitSearchResponse.from(hearit, keywords);
     }
 }
