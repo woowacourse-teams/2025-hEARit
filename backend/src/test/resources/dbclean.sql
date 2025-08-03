@@ -6,4 +6,5 @@ TRUNCATE TABLE category;
 TRUNCATE TABLE hearit_keyword;
 TRUNCATE TABLE keyword;
 TRUNCATE TABLE admin;
+TRUNCATE TABLE refresh_token;
 SET FOREIGN_KEY_CHECKS = 1;
