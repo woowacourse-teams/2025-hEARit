@@ -42,7 +42,7 @@ class CategoryServiceTest {
 
     @BeforeEach
     void setup() {
-        categoryService = new CategoryService(categoryRepository, hearitRepository, hearitKeywordRepository);
+        categoryService = new CategoryService(categoryRepository);
     }
 
     @Test
