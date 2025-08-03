@@ -37,7 +37,7 @@ public class Keyword {
     }
 
     public void updateName(String newName) {
-        validate(name);
+        validate(newName);
         this.name = newName;
     }
 }
