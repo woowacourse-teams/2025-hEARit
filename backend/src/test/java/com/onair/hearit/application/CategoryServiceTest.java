@@ -67,4 +67,51 @@ class CategoryServiceTest {
                     .containsExactly(category3.getId(), category4.getId());
         });
     }
+
+    @Test
+    @DisplayName("히어릿 목록을 카테고리 조회 시 카테고리에 해당하는 히어릿만 반환한다.")
+    void searchHearitsByCategory_onlyMatchingCategory() {
+        // given
+        Category category1 = saveCategory("Spring", "#111111");
+        Category category2 = saveCategory("Java", "#222222");
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        PagingRequest request = new PagingRequest(0, 10);
+
+        // when
+        PagedResponse<HearitSearchResponse> result = categoryService.getHearitsByCategory(category1.getId(), request);
+
+        // then
+        assertAll(() -> {
+            assertThat(result.content()).hasSize(2);
+            assertThat(result.content()).extracting(HearitSearchResponse::id)
+                    .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("히어릿 목록을 카테고리 조회 시 최신순으로 페이지네이션이 적용된다.")
+    void searchHearitsByCategory_pagination() {
+        // given
+        Category category = saveCategory("Spring", "#000000");
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        PagingRequest request = new PagingRequest(1, 2);
+
+        // when
+        PagedResponse<HearitSearchResponse> result = categoryService.getHearitsByCategory(category.getId(), request);
+
+        // then
+        assertAll(
+                () -> assertThat(result.content()).hasSize(1),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
+        );
+    }
+
+    private Category saveCategory(String name, String color) {
+        Category category = new Category(name, color);
+        return dbHelper.insertCategory(category);
+    }
 }

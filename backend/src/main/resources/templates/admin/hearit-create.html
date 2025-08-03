@@ -17,7 +17,7 @@
 
     <!-- 히어릿 추가 폼 -->
     <div id="upload-section" class="card card-body mb-4" style="display: block;">
-        <h2 class="mb-3">새 히어릿 업로드</h2>
+        <h2 class="mb-3">새 히어릿 추가</h2>
         <form id="upload-form">
             <div class="row">
                 <div class="col-md-6 mb-3"><label for="title" class="form-label">제목</label><input type="text" class="form-control" id="title" name="title"></div>
@@ -128,7 +128,7 @@
                     body: formData
                 });
                 if (response.ok) {
-                    alert('히어릿이 성공적으로 업로드되었습니다.');
+                    alert('히어릿이 성공적으로 추가되었습니다.');
                     form.reset();
                 } else {
                     const responseText = await response.text();
@@ -144,11 +144,11 @@
                                 .join('\n');
                         }
                     } catch (_) {}
-                    alert('업로드 실패:\n' + errorMessage);
+                    alert('추가 실패:\n' + errorMessage);
                 }
             } catch (error) {
                 console.error('Error uploading hearit:', error);
-                alert('업로드 중 오류가 발생했습니다.');
+                alert('추가 중 오류가 발생했습니다.');
             }
         });
     });
