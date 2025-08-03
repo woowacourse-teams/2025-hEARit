@@ -15,7 +15,7 @@ class PlayerViewModel(
     private val recentHearitRepository: RecentHearitRepository,
     private val getPlaybackInfoUseCase: GetPlaybackInfoUseCase,
 ) : ViewModel() {
-    private val _playbackInfo = MutableLiveData<PlaybackInfo>()
+    private val _playbackInfo = SingleLiveData<PlaybackInfo>()
     val playbackInfo: LiveData<PlaybackInfo> = _playbackInfo
 
     private val _recentHearit = MutableLiveData<RecentHearit?>()
@@ -42,9 +42,6 @@ class PlayerViewModel(
                 .getRecentHearit()
                 .onSuccess { recent ->
                     _recentHearit.value = recent
-                    if (recent != null) {
-                        preparePlayback(recent.id)
-                    }
                 }.onFailure {
                     _toastMessage.value = R.string.main_toast_recent_load_fail
                 }
