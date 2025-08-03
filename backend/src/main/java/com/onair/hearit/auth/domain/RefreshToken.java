@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.infrastructure.jwt;
+package com.onair.hearit.auth.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

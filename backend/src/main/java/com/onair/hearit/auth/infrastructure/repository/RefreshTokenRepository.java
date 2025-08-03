@@ -1,5 +1,6 @@
-package com.onair.hearit.auth.infrastructure.jwt;
+package com.onair.hearit.auth.infrastructure.repository;
 
+import com.onair.hearit.auth.domain.RefreshToken;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
