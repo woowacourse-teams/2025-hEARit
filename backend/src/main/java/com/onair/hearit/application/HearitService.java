@@ -78,11 +78,11 @@ public class HearitService {
         //TODO 사용자에 맞는 카테고리 추천
         List<Category> categories = categoryRepository.findOldest(GROUPED_CATEGORY_COUNT);
         return categories.stream()
-                .map(this::mapToGroupedHearitsResponse)
+                .map(this::toGroupedHearitsResponseByCategory)
                 .toList();
     }
 
-    private GroupedHearitsWithCategoryResponse mapToGroupedHearitsResponse(Category category) {
+    private GroupedHearitsWithCategoryResponse toGroupedHearitsResponseByCategory(Category category) {
         List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_GROUPED_CATEGORY);
         return GroupedHearitsWithCategoryResponse.from(category, hearits);
     }
@@ -90,11 +90,11 @@ public class HearitService {
     public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::mapToHearitOfCategoryResponse);
+        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::toHearitOfCategoryResponseByKeywords);
         return PagedResponse.from(hearitResponses);
     }
 
-    private HearitOfCategoryResponse mapToHearitOfCategoryResponse(Hearit hearit) {
+    private HearitOfCategoryResponse toHearitOfCategoryResponseByKeywords(Hearit hearit) {
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(), KEYWORDS_PER_HEARIT);
         return HearitOfCategoryResponse.from(hearit, keywords);
     }

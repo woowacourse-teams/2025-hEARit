@@ -26,11 +26,11 @@ public class HearitSearchService {
     public PagedResponse<HearitSearchResponse> search(String searchTerm, PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.searchByTerm(searchTerm, pageable);
-        Page<HearitSearchResponse> hearitDtos = hearits.map(this::toHearitSearchResponse);
+        Page<HearitSearchResponse> hearitDtos = hearits.map(this::toHearitSearchResponseWithKeywords);
         return PagedResponse.from(hearitDtos);
     }
 
-    private HearitSearchResponse toHearitSearchResponse(Hearit hearit) {
+    private HearitSearchResponse toHearitSearchResponseWithKeywords(Hearit hearit) {
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(),
                 KEYWORD_SIZE_PER_HEARIT);
         return HearitSearchResponse.from(hearit, keywords);
