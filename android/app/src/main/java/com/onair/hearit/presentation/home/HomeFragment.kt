@@ -19,6 +19,7 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.RecommendHearits
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
@@ -146,9 +147,9 @@ class HomeFragment :
             val contentItems = recommendItems.map { RecommendHearits.Content(it) }
             val items =
                 buildList {
-                    add(RecommendHearits.LeftNavigateItem)
+                    add(RecommendHearits.NavigateItem(direction = Direction.LEFT))
                     addAll(contentItems)
-                    add(RecommendHearits.RightNavigateItem)
+                    add(RecommendHearits.NavigateItem(direction = Direction.RIGHT))
                 }
             recommendAdapter.submitList(items) {
                 scrollToMiddlePosition()
