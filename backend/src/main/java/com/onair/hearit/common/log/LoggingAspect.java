@@ -1,8 +1,8 @@
 package com.onair.hearit.common.log;
 
 import com.onair.hearit.common.log.message.JsonMaskingPrettyFormatter;
-import com.onair.hearit.common.log.message.dto.ErrorLog;
-import com.onair.hearit.common.log.message.dto.ErrorLog.ErrorDetail;
+import com.onair.hearit.common.log.message.dto.ExceptionLog;
+import com.onair.hearit.common.log.message.dto.ExceptionLog.ErrorDetail;
 import com.onair.hearit.common.log.message.dto.RequestInfo;
 import com.onair.hearit.common.log.message.dto.RequestLog;
 import com.onair.hearit.common.log.message.dto.ResponseLog;
@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -97,10 +98,10 @@ public class LoggingAspect {
     }
 
     private void putRequestInfoToMdc(RequestInfo requestInfo) {
-        MDC.put("id", requestInfo.id());
-        MDC.put("ip", requestInfo.ip());
-        MDC.put("httpMethod", requestInfo.httpMethod());
-        MDC.put("requestUri", requestInfo.requestUri());
+        MDC.put("id", requestInfo.getId());
+        MDC.put("ip", requestInfo.getIp());
+        MDC.put("httpMethod", requestInfo.getHttpMethod());
+        MDC.put("requestUri", requestInfo.getRequestUri());
     }
 
     private Object extractRequestBody(JoinPoint joinPoint) {
@@ -114,7 +115,7 @@ public class LoggingAspect {
     @AfterReturning(value = "allMapping()", returning = "responseEntity")
     public void logResponse(ResponseEntity<?> responseEntity) {
         try {
-            RequestInfo requestInfo = RequestInfo.getCurrentHttpRequest();
+            RequestInfo requestInfo = RequestInfo.getCurrentRequestInfo();
             ResponseLog responseLog = ResponseLog.of(
                     LocalDateTime.now(),
                     requestInfo,
@@ -139,13 +140,18 @@ public class LoggingAspect {
     @AfterReturning(value = "exceptionHandler()", returning = "problemDetail")
     public void logExceptionHandler(JoinPoint joinPoint, ProblemDetail problemDetail) {
         try {
-            RequestInfo requestInfo = RequestInfo.getCurrentHttpRequest();
+            RequestInfo requestInfo = RequestInfo.getCurrentRequestInfo();
             Optional<Throwable> throwable = extractThrowableFromArgs(joinPoint.getArgs());
-            ErrorDetail errorDetail = createErrorDetail(throwable);
+            ErrorDetail errorDetail = throwable.map(ErrorDetail::fromThrowable)
+                    .orElseGet(ErrorDetail::emptyErrorDetail);
             HttpStatus httpStatus = HttpStatus.resolve(problemDetail.getStatus());
 
             if (httpStatus == null || httpStatus.is5xxServerError()) {
-                logServerError(requestInfo, httpStatus, errorDetail, throwable);
+                if (throwable.isPresent()) {
+                    logServerErrorWithStackTrace(requestInfo, httpStatus, errorDetail, throwable.get());
+                    return;
+                }
+                logServerErrorWithoutStackTrace(requestInfo, httpStatus, errorDetail);
                 return;
             }
             logClientError(problemDetail, requestInfo, errorDetail);
@@ -163,26 +169,24 @@ public class LoggingAspect {
                 .findFirst();
     }
 
-    private ErrorDetail createErrorDetail(Optional<Throwable> throwable) {
-        return throwable.map(ErrorDetail::fromThrowable)
-                .orElseGet(ErrorDetail::emptyErrorDetail);
+    private void logServerErrorWithStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
+                                              ErrorDetail errorDetail, Throwable throwable) {
+        ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
+        log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        errorLogger.error(exceptionLog, throwable);
     }
 
-    private void logServerError(RequestInfo requestInfo, HttpStatus httpStatus,
-                                ErrorDetail errorDetail, Optional<Throwable> throwable) {
-        ErrorLog errorLog = ErrorLog.of("ERROR", LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
-        log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(errorLog));
-        if (throwable.isPresent()) {
-            errorLogger.error(errorLog, throwable.get());
-            return;
-        }
-        errorLogger.error(errorLog);
+    private void logServerErrorWithoutStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
+                                                 ErrorDetail errorDetail) {
+        ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
+        log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        errorLogger.error(exceptionLog);
     }
 
     private void logClientError(ProblemDetail problemDetail, RequestInfo requestInfo, ErrorDetail errorDetail) {
-        ErrorLog errorLog = ErrorLog.of("WARN", LocalDateTime.now(), requestInfo,
+        ExceptionLog exceptionLog = ExceptionLog.warn(LocalDateTime.now(), requestInfo,
                 HttpStatus.resolve(problemDetail.getStatus()),
                 errorDetail);
-        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(errorLog));
+        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
     }
 }
