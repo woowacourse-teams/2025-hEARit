@@ -74,11 +74,29 @@
         const tbody = document.getElementById('keyword-list-body');
         tbody.innerHTML = '';
         if (!response.content.length) {
-            tbody.innerHTML = '<tr><td colspan="2" class="text-center">표시할 키워드가 없습니다.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center">표시할 키워드가 없습니다.</td></tr>';
         } else {
             response.content.forEach(kw => {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td>${kw.id}</td><td>${kw.name}</td>`;
+                if (window.__editingKeywordId === kw.id) {
+                    row.innerHTML = `
+                        <td>${kw.id}</td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm" id="edit-name-${kw.id}" value="${kw.name}">
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-success" onclick="submitEditKeyword(${kw.id})">저장</button>
+                        </td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td>${kw.id}</td>
+                        <td>${kw.name}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="startEditKeyword(${kw.id})">수정</button>
+                        </td>
+                    `;
+                }
                 tbody.appendChild(row);
             });
         }
@@ -154,6 +172,45 @@
         const b = parseInt(hex.slice(5, 7), 16);
         const a = parseInt(hex.slice(7, 9), 16) / 255;
         return `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})`;
+    }
+
+    // --- Inline Editing Functions ---
+    window.__editingKeywordId = null;
+
+    function startEditKeyword(id) {
+        window.__editingKeywordId = id;
+        fetchKeywordsForManage(currentPage, pageSize);
+    }
+
+    async function submitEditKeyword(id) {
+        const newName = document.getElementById(`edit-name-${id}`).value.trim();
+        if (!newName) {
+            alert("이름을 입력해주세요.");
+            return;
+        }
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        try {
+            const res = await fetch(`/api/v1/admin/keywords/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({ name: newName })
+            });
+
+            if (!res.ok) throw new Error("키워드 수정 실패");
+
+            window.__editingKeywordId = null;
+            alert("수정 성공");
+            fetchKeywordsForManage(currentPage, pageSize);
+        } catch (error) {
+            console.error(error);
+            alert("수정 중 오류 발생");
+        }
     }
 </script>
 </body>

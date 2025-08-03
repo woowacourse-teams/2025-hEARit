@@ -67,8 +67,9 @@ public class AuthService {
 
     // 소셜 로그인의 경우 회원가입이 따로 없으며 로그인 시 자동으로 회원가입되도록 구현
     @Transactional
-    public LoginTokenResponse loginWithKakao(KakaoLoginRequest request) {
+    public LoginTokenResponse loginOrSignupWithKakao(KakaoLoginRequest request) {
         KakaoUserInfoResponse kakaoUser = kakaoUserInfoClient.getUserInfo(request.accessToken());
+
         Member member = memberRepository.findBySocialId(kakaoUser.id())
                 .orElseGet(() -> signupWithKakao(kakaoUser));
         return createTokenResponseFrom(member);

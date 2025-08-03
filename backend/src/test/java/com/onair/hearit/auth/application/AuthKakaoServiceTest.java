@@ -39,7 +39,7 @@ class AuthKakaoServiceTest {
     MemberRepository memberRepository;
 
     @Test
-    @DisplayName("처음 카카오 로그인 시, 자동 회원가입 후 엑세스토큰 + 리프레시토큰을 발급한다")
+    @DisplayName("처음 카카오 로그인 시, 자동 회원가입 후 JWT를 발급한다")
     void signupIfNotExists_thenReturnJwt() {
         // given
         assertThat(memberRepository.findBySocialId("12345678")).isEmpty(); // 회원 정보가 없음을 확인
@@ -56,7 +56,7 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(accessToken);
 
         // when
-        LoginTokenResponse response = authService.loginWithKakao(request);
+        LoginTokenResponse response = authService.loginOrSignupWithKakao(request);
 
         // then
         SoftAssertions.assertSoftly(softly -> {
@@ -86,7 +86,7 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(accessToken);
 
         // when
-        LoginTokenResponse response = authService.loginWithKakao(request);
+        LoginTokenResponse response = authService.loginOrSignupWithKakao(request);
 
         // then
         assertThat(response.accessToken()).isNotBlank();
@@ -104,7 +104,7 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(invalidToken);
 
         // when & then
-        assertThatThrownBy(() -> authService.loginWithKakao(request))
+        assertThatThrownBy(() -> authService.loginOrSignupWithKakao(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("유효하지 않은 카카오 액세스 토큰");
     }
