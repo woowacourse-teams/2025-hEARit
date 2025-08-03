@@ -17,15 +17,16 @@ class HomeViewModelFactory(
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val dataStoreRepository = DataStoreRepositoryImpl(context, crashlyticsLogger)
+        val dataStoreRepository = DataStoreRepositoryImpl(context)
         val hearitRemoteDataSource = HearitRemoteDataSourceImpl(NetworkProvider.hearitService)
-        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource, crashlyticsLogger)
+        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource)
         val memberRemoteDataSource = MemberRemoteDataSourceImpl(NetworkProvider.memberService)
-        val memberRepository = MemberRepositoryImpl(memberRemoteDataSource, crashlyticsLogger)
+        val memberRepository = MemberRepositoryImpl(memberRemoteDataSource)
         return HomeViewModel(
             dataStoreRepository,
             hearitRepository,
             memberRepository,
+            crashlyticsLogger,
         ) as T
     }
 }

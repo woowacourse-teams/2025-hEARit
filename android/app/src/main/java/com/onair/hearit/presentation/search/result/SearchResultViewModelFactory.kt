@@ -23,19 +23,21 @@ class SearchResultViewModelFactory(
         val hearitRemoteDataSource = HearitRemoteDataSourceImpl(NetworkProvider.hearitService)
         val categoryRemoteDataSource = CategoryRemoteDataSourceImpl(NetworkProvider.categoryService)
         val recentKeywordDataSource =
-            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao, crashlyticsLogger)
+            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao)
 
-        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource, crashlyticsLogger)
-        val categoryRepository = CategoryRepositoryImpl(categoryRemoteDataSource, crashlyticsLogger)
+        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource)
+        val categoryRepository = CategoryRepositoryImpl(categoryRemoteDataSource)
         val recentKeywordRepository =
-            RecentKeywordRepositoryImpl(recentKeywordDataSource, crashlyticsLogger)
+            RecentKeywordRepositoryImpl(recentKeywordDataSource)
 
         val getSearchResultUseCase =
-            GetSearchResultUseCase(
-                hearitRepository = hearitRepository,
-                categoryRepository = categoryRepository,
-            )
+            GetSearchResultUseCase(hearitRepository, categoryRepository)
 
-        return SearchResultViewModel(recentKeywordRepository, getSearchResultUseCase, input) as T
+        return SearchResultViewModel(
+            recentKeywordRepository,
+            getSearchResultUseCase,
+            input,
+            crashlyticsLogger,
+        ) as T
     }
 }

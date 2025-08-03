@@ -1,6 +1,5 @@
 package com.onair.hearit.data.repository
 
-import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.data.datasource.MediaFileRemoteDataSource
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.OriginalAudioUrl
@@ -13,10 +12,9 @@ import kotlinx.serialization.json.Json
 
 class MediaFileRepositoryImpl(
     private val mediaFileRemoteDataSource: MediaFileRemoteDataSource,
-    private val crashlyticsLogger: CrashlyticsLogger,
 ) : MediaFileRepository {
     override suspend fun getShortAudioUrl(hearitId: Long): Result<ShortAudioUrl> =
-        handleResult(crashlyticsLogger) {
+        handleResult {
             val response =
                 mediaFileRemoteDataSource
                     .getShortAudioUrl(hearitId)
@@ -25,7 +23,7 @@ class MediaFileRepositoryImpl(
         }
 
     override suspend fun getScriptLines(hearitId: Long): Result<List<ScriptLine>> =
-        handleResult(crashlyticsLogger) {
+        handleResult {
             val scriptUrl =
                 mediaFileRemoteDataSource.getScriptUrl(hearitId).getOrElse { throw it }.url
             val responseBody =
@@ -35,7 +33,7 @@ class MediaFileRepositoryImpl(
         }
 
     override suspend fun getOriginalAudioUrl(hearitId: Long): Result<OriginalAudioUrl> =
-        handleResult(crashlyticsLogger) {
+        handleResult {
             val response =
                 mediaFileRemoteDataSource
                     .getOriginalAudioUrl(hearitId)
@@ -46,7 +44,7 @@ class MediaFileRepositoryImpl(
     override suspend fun getOriginalHearitItem(item: SingleHearit): Result<Hearit> = combineHearit(item)
 
     private suspend fun combineHearit(item: SingleHearit): Result<Hearit> =
-        handleResult(crashlyticsLogger) {
+        handleResult {
             val hearitId = item.id
 
             val audioUrl =

@@ -22,28 +22,29 @@ class PlayerDetailViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val hearitRemoteDataSource = HearitRemoteDataSourceImpl(NetworkProvider.hearitService)
-        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource, crashlyticsLogger)
+        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource)
 
         val hearitLocalDataSource =
-            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao, crashlyticsLogger)
+            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao)
         val recentHearitRepository =
-            RecentHearitRepositoryImpl(hearitLocalDataSource, crashlyticsLogger)
+            RecentHearitRepositoryImpl(hearitLocalDataSource)
 
         val mediaFileRemoteDataSource =
             MediaFileRemoteDataSourceImpl(NetworkProvider.mediaFileService)
         val mediaFileRepository =
-            MediaFileRepositoryImpl(mediaFileRemoteDataSource, crashlyticsLogger)
+            MediaFileRepositoryImpl(mediaFileRemoteDataSource)
 
         val getHearitUseCase = GetHearitUseCase(hearitRepository, mediaFileRepository)
 
         val bookmarkRemoteDataSource = BookmarkRemoteDataSourceImpl(NetworkProvider.bookmarkService)
-        val bookmarkRepository = BookmarkRepositoryImpl(bookmarkRemoteDataSource, crashlyticsLogger)
+        val bookmarkRepository = BookmarkRepositoryImpl(bookmarkRemoteDataSource)
 
         return PlayerDetailViewModel(
             hearitId,
             recentHearitRepository,
             getHearitUseCase,
             bookmarkRepository,
+            crashlyticsLogger,
         ) as T
     }
 }

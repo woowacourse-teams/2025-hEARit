@@ -16,8 +16,8 @@ class LoginViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val authRemoteDataSource = AuthRemoteDataSourceImpl(NetworkProvider.authService)
-        val authRepository = AuthRepositoryImpl(authRemoteDataSource, crashlyticsLogger)
-        val dataStoreRepository = DataStoreRepositoryImpl(context, crashlyticsLogger)
-        return LoginViewModel(authRepository, dataStoreRepository) as T
+        val authRepository = AuthRepositoryImpl(authRemoteDataSource)
+        val dataStoreRepository = DataStoreRepositoryImpl(context)
+        return LoginViewModel(authRepository, dataStoreRepository, crashlyticsLogger) as T
     }
 }

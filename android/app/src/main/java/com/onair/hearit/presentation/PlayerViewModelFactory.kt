@@ -19,24 +19,25 @@ class PlayerViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val hearitLocalDataSource =
-            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao, crashlyticsLogger)
+            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao)
         val recentHearitRepository =
-            RecentHearitRepositoryImpl(hearitLocalDataSource, crashlyticsLogger)
+            RecentHearitRepositoryImpl(hearitLocalDataSource)
 
         val hearitRemoteDataSource = HearitRemoteDataSourceImpl(NetworkProvider.hearitService)
-        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource, crashlyticsLogger)
+        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource)
 
         val mediaFileRemoteDataSource =
             MediaFileRemoteDataSourceImpl(NetworkProvider.mediaFileService)
         val mediaFileRepository =
-            MediaFileRepositoryImpl(mediaFileRemoteDataSource, crashlyticsLogger)
+            MediaFileRepositoryImpl(mediaFileRemoteDataSource)
 
         val getPlaybackInfoUseCase =
-            GetPlaybackInfoUseCase(
-                hearitRepository = hearitRepository,
-                mediaFileRepository = mediaFileRepository,
-            )
+            GetPlaybackInfoUseCase(hearitRepository, mediaFileRepository)
 
-        return PlayerViewModel(recentHearitRepository, getPlaybackInfoUseCase) as T
+        return PlayerViewModel(
+            recentHearitRepository,
+            getPlaybackInfoUseCase,
+            crashlyticsLogger,
+        ) as T
     }
 }

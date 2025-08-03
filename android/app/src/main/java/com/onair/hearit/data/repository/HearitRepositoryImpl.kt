@@ -1,6 +1,5 @@
 package com.onair.hearit.data.repository
 
-import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.data.datasource.HearitRemoteDataSource
 import com.onair.hearit.data.toDomain
 import com.onair.hearit.domain.model.GroupedCategory
@@ -13,16 +12,15 @@ import com.onair.hearit.domain.repository.HearitRepository
 
 class HearitRepositoryImpl(
     private val hearitRemoteDataSource: HearitRemoteDataSource,
-    private val crashlyticsLogger: CrashlyticsLogger,
 ) : HearitRepository {
     override suspend fun getHearit(hearitId: Long): Result<SingleHearit> =
-        handleResult(crashlyticsLogger) {
+        handleResult {
             val response = hearitRemoteDataSource.getHearit(hearitId).getOrThrow()
             response.toDomain()
         }
 
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =
-        handleResult(crashlyticsLogger) {
+        handleResult {
             val response = hearitRemoteDataSource.getRecommendHearits().getOrThrow()
             response.map { it.toDomain() }
         }
@@ -31,7 +29,7 @@ class HearitRepositoryImpl(
         page: Int?,
         size: Int?,
     ): Result<PageResult<RandomHearit>> =
-        handleResult(crashlyticsLogger) {
+        handleResult {
             hearitRemoteDataSource.getRandomHearits(page, size).getOrThrow().toDomain()
         }
 
@@ -40,12 +38,12 @@ class HearitRepositoryImpl(
         page: Int?,
         size: Int?,
     ): Result<PageResult<SearchedHearit>> =
-        handleResult(crashlyticsLogger) {
+        handleResult {
             hearitRemoteDataSource.getSearchHearits(searchTerm, page, size).getOrThrow().toDomain()
         }
 
     override suspend fun getCategoryHearits(): Result<List<GroupedCategory>> =
-        handleResult(crashlyticsLogger) {
+        handleResult {
             hearitRemoteDataSource.getCategoryHearits().getOrThrow().map { it.toDomain() }
         }
 }

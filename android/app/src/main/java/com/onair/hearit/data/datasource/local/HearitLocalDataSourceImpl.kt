@@ -8,17 +8,14 @@ import com.onair.hearit.data.repository.handleResult
 
 class HearitLocalDataSourceImpl(
     private val hearitDao: HearitDao,
-    private val crashlyticsLogger: CrashlyticsLogger,
 ) : HearitLocalDataSource {
-    override suspend fun getRecentHearit(): Result<RecentHearitEntity?> = handleResult(crashlyticsLogger) { hearitDao.getRecentHearit() }
+    override suspend fun getRecentHearit(): Result<RecentHearitEntity?> = handleResult { hearitDao.getRecentHearit() }
 
-    override suspend fun saveRecentHearit(entity: RecentHearitEntity): Result<Unit> =
-        handleResult(crashlyticsLogger) { hearitDao.insertRecentHearit(entity) }
+    override suspend fun saveRecentHearit(entity: RecentHearitEntity): Result<Unit> = handleResult { hearitDao.insertRecentHearit(entity) }
 
-    override suspend fun getKeywords(): Result<List<SearchHistoryEntity>> = handleResult(crashlyticsLogger) { hearitDao.getKeywords() }
+    override suspend fun getKeywords(): Result<List<SearchHistoryEntity>> = handleResult { hearitDao.getKeywords() }
 
-    override suspend fun saveKeyword(keyword: SearchHistoryEntity): Result<Unit> =
-        handleResult(crashlyticsLogger) { hearitDao.insertKeyword(keyword) }
+    override suspend fun saveKeyword(keyword: SearchHistoryEntity): Result<Unit> = handleResult { hearitDao.insertKeyword(keyword) }
 
-    override suspend fun clearKeywords(): Result<Unit> = handleResult(crashlyticsLogger) { hearitDao.deleteKeywords() }
+    override suspend fun clearKeywords(): Result<Unit> = handleResult { hearitDao.deleteKeywords() }
 }

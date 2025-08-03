@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.RecommendHearit
@@ -19,6 +20,7 @@ class HomeViewModel(
     private val dataStoreRepository: DataStoreRepository,
     private val hearitRepository: HearitRepository,
     private val memberRepository: MemberRepository,
+    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _userInfo: MutableLiveData<UserInfo> = MutableLiveData()
     val userInfo: LiveData<UserInfo> = _userInfo

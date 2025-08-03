@@ -16,12 +16,12 @@ class SearchViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val categoryDataSource = CategoryRemoteDataSourceImpl(NetworkProvider.categoryService)
-        val categoryRepository = CategoryRepositoryImpl(categoryDataSource, crashlyticsLogger)
+        val categoryRepository = CategoryRepositoryImpl(categoryDataSource)
 
         val recentKeywordDataSource =
-            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao, crashlyticsLogger)
+            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao)
         val recentKeywordRepository =
-            RecentKeywordRepositoryImpl(recentKeywordDataSource, crashlyticsLogger)
-        return SearchViewModel(categoryRepository, recentKeywordRepository) as T
+            RecentKeywordRepositoryImpl(recentKeywordDataSource)
+        return SearchViewModel(categoryRepository, recentKeywordRepository, crashlyticsLogger) as T
     }
 }

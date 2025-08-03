@@ -16,11 +16,11 @@ class LibraryViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val bookmarkRemoteDataSource =
             BookmarkRemoteDataSourceImpl(NetworkProvider.bookmarkService)
-        val bookmarkRepository = BookmarkRepositoryImpl(bookmarkRemoteDataSource, crashlyticsLogger)
+        val bookmarkRepository = BookmarkRepositoryImpl(bookmarkRemoteDataSource)
 
         val memberRemoteDataSource = MemberRemoteDataSourceImpl(NetworkProvider.memberService)
-        val memberRepository = MemberRepositoryImpl(memberRemoteDataSource, crashlyticsLogger)
+        val memberRepository = MemberRepositoryImpl(memberRemoteDataSource)
 
-        return LibraryViewModel(bookmarkRepository, memberRepository) as T
+        return LibraryViewModel(bookmarkRepository, memberRepository, crashlyticsLogger) as T
     }
 }

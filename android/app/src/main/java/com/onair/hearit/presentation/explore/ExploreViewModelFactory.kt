@@ -18,22 +18,23 @@ class ExploreViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val hearitRemoteDataSource = HearitRemoteDataSourceImpl(NetworkProvider.hearitService)
-        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource, crashlyticsLogger)
+        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource)
 
         val bookmarkRemoteDataSource = BookmarkRemoteDataSourceImpl(NetworkProvider.bookmarkService)
-        val bookmarkRepository = BookmarkRepositoryImpl(bookmarkRemoteDataSource, crashlyticsLogger)
+        val bookmarkRepository = BookmarkRepositoryImpl(bookmarkRemoteDataSource)
 
         val mediaFileRemoteDataSource =
             MediaFileRemoteDataSourceImpl(NetworkProvider.mediaFileService)
         val mediaFileRepository =
-            MediaFileRepositoryImpl(mediaFileRemoteDataSource, crashlyticsLogger)
+            MediaFileRepositoryImpl(mediaFileRemoteDataSource)
 
         val getShortsHearitUseCase = GetShortsHearitUseCase(mediaFileRepository)
 
         return ExploreViewModel(
-            hearitRepository = hearitRepository,
-            bookmarkRepository = bookmarkRepository,
-            getShortsHearitUseCase = getShortsHearitUseCase,
+            hearitRepository,
+            bookmarkRepository,
+            getShortsHearitUseCase,
+            crashlyticsLogger,
         ) as T
     }
 }

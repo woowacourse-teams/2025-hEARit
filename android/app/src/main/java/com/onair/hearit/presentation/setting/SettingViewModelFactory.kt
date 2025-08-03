@@ -12,7 +12,7 @@ class SettingViewModelFactory(
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val dataStoreRepository = DataStoreRepositoryImpl(context, crashlyticsLogger)
-        return SettingViewModel(dataStoreRepository) as T
+        val dataStoreRepository = DataStoreRepositoryImpl(context)
+        return SettingViewModel(dataStoreRepository, crashlyticsLogger) as T
     }
 }

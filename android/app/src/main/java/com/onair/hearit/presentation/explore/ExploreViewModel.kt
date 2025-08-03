@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RandomHearit
@@ -22,6 +23,7 @@ class ExploreViewModel(
     private val hearitRepository: HearitRepository,
     private val bookmarkRepository: BookmarkRepository,
     private val getShortsHearitUseCase: GetShortsHearitUseCase,
+    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _shortsHearits = MutableLiveData<List<ShortsHearit>>()
     val shortsHearits: LiveData<List<ShortsHearit>> = _shortsHearits
