@@ -14,6 +14,8 @@ import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.foldWithCrashlytics
+import com.onair.hearit.presentation.launchWithLogging
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
@@ -40,14 +42,14 @@ class HomeViewModel(
     }
 
     private fun fetchData() {
-        viewModelScope.launch {
+        viewModelScope.launchWithLogging(crashlyticsLogger) {
             hearitRepository
                 .getRecommendHearits()
-                .onSuccess { recommendHearits ->
-                    _recommendHearits.value = recommendHearits
-                }.onFailure {
-                    _toastMessage.value = R.string.home_toast_recommend_load_fail
-                }
+                .foldWithCrashlytics(
+                    crashlyticsLogger,
+                    onSuccess = { _recommendHearits.value = it },
+                    onFailure = { _toastMessage.value = R.string.home_toast_recommend_load_fail },
+                )
         }
 
         viewModelScope.launch {

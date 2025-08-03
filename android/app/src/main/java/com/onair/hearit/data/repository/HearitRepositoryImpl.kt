@@ -20,9 +20,8 @@ class HearitRepositoryImpl(
         }
 
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =
-        handleResult {
-            val response = hearitRemoteDataSource.getRecommendHearits().getOrThrow()
-            response.map { it.toDomain() }
+        hearitRemoteDataSource.getRecommendHearits().mapCatching { responseList ->
+            responseList.map { it.toDomain() }
         }
 
     override suspend fun getRandomHearits(
