@@ -2,14 +2,19 @@ package com.onair.hearit.common.log.message.dto;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.slf4j.MDC;
 
-public record RequestInfo(
-        String id,
-        String ip,
-        String httpMethod,
-        String requestUri
-) {
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class RequestInfo {
+
+    private final String id;
+    private final String ip;
+    private final String httpMethod;
+    private final String requestUri;
 
     public static RequestInfo from(HttpServletRequest request) {
         String id = UUID.randomUUID().toString();
@@ -19,7 +24,7 @@ public record RequestInfo(
         return new RequestInfo(id, ip, httpMethod, requestUri);
     }
 
-    public static RequestInfo getCurrentHttpRequest() {
+    public static RequestInfo getCurrentRequestInfo() {
         return new RequestInfo(
                 MDC.get("id"),
                 MDC.get("ip"),

@@ -24,7 +24,7 @@
             <!-- @formatter:on -->
         </Property>
 
-        <!-- 로그 파일 저장되는 디렉토리 -->
+        <!-- 로그 파일 저장되는 디렉토리(상대경로) -->
         <Property name="logDir">log</Property>
     </Properties>
 

@@ -5,14 +5,20 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.boot.logging.LogLevel;
 
-public record RequestLog(
-        String logType,
-        LocalDateTime timestamp,
-        RequestInfo requestInfo,
-        Map<String, List<String>> requestParameter,
-        Object requestBody
-) {
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class RequestLog {
+
+    private final String logType;
+    private final LocalDateTime timestamp;
+    private final RequestInfo requestInfo;
+    private final Map<String, List<String>> requestParameter;
+    private final Object requestBody;
 
     public static RequestLog of(
             LocalDateTime timestamp,

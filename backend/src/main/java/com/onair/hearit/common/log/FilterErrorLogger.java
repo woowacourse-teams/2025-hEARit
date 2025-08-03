@@ -1,8 +1,8 @@
-package com.onair.hearit.auth.infrastructure.jwt;
+package com.onair.hearit.common.log;
 
 import com.onair.hearit.common.log.message.JsonMaskingPrettyFormatter;
-import com.onair.hearit.common.log.message.dto.ErrorLog;
-import com.onair.hearit.common.log.message.dto.ErrorLog.ErrorDetail;
+import com.onair.hearit.common.log.message.dto.ExceptionLog;
+import com.onair.hearit.common.log.message.dto.ExceptionLog.ErrorDetail;
 import com.onair.hearit.common.log.message.dto.RequestInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -21,19 +21,18 @@ public class FilterErrorLogger {
 
     public void log(HttpServletRequest request, ProblemDetail problemDetail) {
         RequestInfo requestInfo = RequestInfo.from(request);
-        ErrorDetail errorDetail = new ErrorDetail(
+        ErrorDetail errorDetail = ErrorDetail.of(
                 problemDetail.getDetail(),
                 problemDetail.getTitle(),
                 null,
                 0);
-        ErrorLog errorLog = ErrorLog.of(
-                "WARN",
+        ExceptionLog exceptionLog = ExceptionLog.warn(
                 LocalDateTime.now(),
                 requestInfo,
                 HttpStatus.resolve(problemDetail.getStatus()),
                 errorDetail
         );
 
-        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(errorLog));
+        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
     }
 }

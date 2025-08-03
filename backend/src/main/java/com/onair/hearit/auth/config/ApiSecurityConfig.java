@@ -3,7 +3,7 @@ package com.onair.hearit.auth.config;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.auth.infrastructure.jwt.FilterErrorLogger;
+import com.onair.hearit.common.log.FilterErrorLogger;
 import com.onair.hearit.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import java.util.Arrays;

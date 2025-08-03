@@ -1,6 +1,7 @@
 package com.onair.hearit.common.log.message.dto;
 
 import java.time.LocalDateTime;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.http.ResponseEntity;
 
 public record ResponseLog(
@@ -10,7 +11,6 @@ public record ResponseLog(
         ResponseEntity<?> responseEntity,
         long timeTakenMs
 ) {
-
     public static ResponseLog of(
             LocalDateTime timestamp,
             RequestInfo requestInfo,
