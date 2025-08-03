@@ -138,7 +138,7 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("히어릿 검색 요청 시 200 OK 및 제목 또는 키워드에 검색어가 포함된 히어릿을 최신순으로 반환한다.")
-    void searchHearitsWithPagination() {
+    void readHearitsByCategoryWithPagination() {
         // given
         Keyword keyword = dbHelper.insertKeyword(new Keyword("Spring"));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("noKeyword"));
@@ -178,7 +178,7 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")
-    void searchHearitsWithInvalidParams() {
+    void readHearitsByCategoryWithInvalidParams() {
         // when & then
         RestAssured.given()
                 .queryParam("searchTerm", "title1")
@@ -238,7 +238,7 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("카테고리로 히어릿 검색 시 200 OK 및 해당 카테고리의 히어릿들을 최신순으로 반환한다.")
-    void searchHearitsByCategoryWithPagination() {
+    void readHearitsByCategoryByCategoryWithPagination() {
         // given
         Category category1 = dbHelper.insertCategory(new Category("Spring", "#001"));
         Category category2 = dbHelper.insertCategory(new Category("Java", "#002"));

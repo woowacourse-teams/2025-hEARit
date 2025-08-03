@@ -81,18 +81,17 @@ public class HearitController {
 
     @Operation(summary = "카테고리별로 그룹화된 히어릿들 조회", description = "고정된 3개 카테고리별로 최신 히어릿 5개를 반환합니다.")
     @GetMapping("/grouped-by-category")
-    public ResponseEntity<List<GroupedHearitsWithCategoryResponse>> readHomeHearits() {
+    public ResponseEntity<List<GroupedHearitsWithCategoryResponse>> readGroupedHearitsByCategory() {
         List<GroupedHearitsWithCategoryResponse> responses = hearitService.getGroupedHearitsByCategory();
         return ResponseEntity.ok(responses);
     }
 
     @Operation(summary = "카테고리 id로 히어릿 조회", description = "히어릿의 카테고리 id, page 정보를 입력해 히어릿을 조회합니다. ")
     @GetMapping
-    public ResponseEntity<PagedResponse<HearitOfCategoryResponse>> searchHearits(
+    public ResponseEntity<PagedResponse<HearitOfCategoryResponse>> readHearitsByCategory(
             @RequestParam(name = "categoryId") Long categoryId,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
-
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<HearitOfCategoryResponse> response = hearitService.getHearitsByCategory(categoryId,
                 pagingRequest);
