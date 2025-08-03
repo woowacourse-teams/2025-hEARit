@@ -106,6 +106,7 @@ class AuthServiceTest {
         // then
         String responseAccessToken = loginTokenResponse.accessToken();
         String responseRefreshToken = loginTokenResponse.refreshToken();
+
         assertAll(() -> {
             assertThat(responseAccessToken).isNotNull();
             assertThat(responseRefreshToken).isNotNull();
