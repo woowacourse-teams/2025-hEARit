@@ -25,7 +25,6 @@ import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
-import com.onair.hearit.presentation.home.HearitClickListener
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.search.SearchFragment
@@ -38,12 +37,13 @@ class MainActivity :
     DrawerClickListener,
     PlayerControllerView,
     PlaybackPositionSaver,
-    HearitClickListener {
+    PlaybackStarter {
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0L
     private val backPressInterval = 1000L
     private var mediaController: MediaController? = null
     private var currentSelectedItemId: Int = R.id.nav_home
+    private var pendingStart: Boolean = false
 
     private val playerViewModel: PlayerViewModel by viewModels {
         PlayerViewModelFactory(
@@ -53,6 +53,7 @@ class MainActivity :
 
     override fun onResume() {
         super.onResume()
+        attachController()
         setPlayerControlViewVisibility()
     }
 
@@ -62,7 +63,6 @@ class MainActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         setupBackPressHandler()
         setupWindowInsets()
-        setupPlayer()
         setupNavigation()
         setupDrawer()
 
@@ -70,8 +70,16 @@ class MainActivity :
 
         showFragment(HomeFragment())
 
-        binding.lifecycleOwner = this
-        binding.listener = this
+        binding.layoutBottomPlayerController.setOnClickListener {
+            val mediaId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
+            if (mediaId != null) {
+                navigateToDetail(mediaId)
+            } else {
+                playerViewModel.recentHearit.value
+                    ?.id
+                    ?.let { navigateToDetail(it) }
+            }
+        }
     }
 
     private fun setupBackPressHandler() {
@@ -177,16 +185,14 @@ class MainActivity :
         binding.drawerLayout.openDrawer(GravityCompat.END)
     }
 
-    @OptIn(UnstableApi::class)
-    private fun setupPlayer() {
+    private fun attachController() {
         val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
         val controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
-
         controllerFuture.addListener(
             {
                 mediaController = controllerFuture.get()
-                mediaController?.let {
-                    binding.layoutBottomPlayerController.setPlayer(it)
+                mediaController?.let { controller ->
+                    binding.layoutBottomPlayerController.setPlayer(controller)
                     setPlayerControlViewVisibility()
                 }
             },
@@ -200,42 +206,18 @@ class MainActivity :
             it?.let { playerViewModel.preparePlayback(it.id) }
         }
 
-        playerViewModel.playbackInfo.observe(this) { playbackInfo ->
-            binding.hearitId = playbackInfo.hearitId
-            startPlayback(
-                playbackInfo.audioUrl,
-                playbackInfo.title,
-                playbackInfo.hearitId,
-                playbackInfo.lastPosition,
-            )
+        playerViewModel.playbackInfo.observe(this) { info ->
             showPlayerControlView()
-            val title =
-                playbackInfo.title.ifBlank {
-                    getString(R.string.main_bottom_player_default_title)
-                }
-            binding.layoutBottomPlayerController.setTitle(title)
+            binding.layoutBottomPlayerController.showSnapshot(
+                title = info.title.ifBlank { getString(R.string.main_bottom_player_default_title) },
+                duration = info.duration,
+                position = info.lastPosition,
+            )
         }
 
         playerViewModel.toastMessage.observe(this) { resId ->
             showToast(getString(resId))
         }
-    }
-
-    private fun startPlayback(
-        audioUrl: String,
-        title: String,
-        hearitId: Long,
-        startPosition: Long = 0L,
-    ) {
-        val intent =
-            PlaybackService.newIntent(
-                context = this,
-                audioUrl = audioUrl,
-                title = title,
-                hearitId = hearitId,
-                startPosition = startPosition,
-            )
-        ContextCompat.startForegroundService(this, intent)
     }
 
     private fun setPlayerControlViewVisibility() {
@@ -301,13 +283,36 @@ class MainActivity :
         playerViewModel.savePlaybackPosition(position, duration, hearitId)
     }
 
-    override fun onClick(hearitId: Long) {
-        navigateToDetail(hearitId)
-    }
-
     private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(this, hearitId)
         startActivity(intent)
+    }
+
+    override fun startPlayback() {
+        val info = playerViewModel.playbackInfo.value
+        if (info == null) {
+            // 아직 준비 전이면 1) recent 있는지 확인하고 2) prepare 재요청 + pending 세팅
+            val recent = playerViewModel.recentHearit.value
+            if (recent != null) {
+                pendingStart = true
+                playerViewModel.preparePlayback(recent.id)
+            } else {
+                showToast(getString(R.string.main_toast_recent_load_fail))
+            }
+            return
+        }
+
+        // 준비 완료: 서비스 기동 + 컨트롤러 붙이기
+        val intent =
+            PlaybackService.newIntent(
+                context = this,
+                audioUrl = info.audioUrl,
+                title = info.title,
+                hearitId = info.hearitId,
+                startPosition = info.lastPosition,
+            )
+        ContextCompat.startForegroundService(this, intent)
+        attachController()
     }
 
     companion object {

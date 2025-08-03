@@ -50,6 +50,7 @@ class PlaybackService : MediaSessionService() {
             player.setMediaItem(createMediaItem(audioUrl, title, hearitId))
             player.prepare()
             player.seekTo(startPosition ?: 0L)
+            player.play()
         }
 
         return START_STICKY
