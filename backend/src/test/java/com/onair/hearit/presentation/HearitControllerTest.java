@@ -236,7 +236,7 @@ class HearitControllerTest extends IntegrationTest {
     }
 
     private String generateToken(Member member) {
-        return jwtTokenProvider.createToken(member.getId());
+        return jwtTokenProvider.createAccessToken(member.getId());
     }
 
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {

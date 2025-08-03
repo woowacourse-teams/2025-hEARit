@@ -5,13 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
-import com.onair.hearit.auth.dto.response.TokenResponse;
+import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.infrastructure.MemberRepository;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -38,7 +39,7 @@ class AuthKakaoServiceTest {
     MemberRepository memberRepository;
 
     @Test
-    @DisplayName("처음 카카오 로그인 시, 자동 회원가입 후 JWT를 발급한다")
+    @DisplayName("처음 카카오 로그인 시, 자동 회원가입 후 엑세스토큰 + 리프레시토큰을 발급한다")
     void signupIfNotExists_thenReturnJwt() {
         // given
         assertThat(memberRepository.findBySocialId("12345678")).isEmpty(); // 회원 정보가 없음을 확인
@@ -55,16 +56,20 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(accessToken);
 
         // when
-        TokenResponse response = authService.loginWithKakao(request);
+        LoginTokenResponse response = authService.loginWithKakao(request);
 
         // then
-        assertThat(response.accessToken()).isNotBlank();
-        Member member = memberRepository.findBySocialId(kakaoId).orElseThrow();
-        assertThat(member.getNickname()).isEqualTo(nickname);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.accessToken()).isNotNull();
+            softly.assertThat(response.refreshToken()).isNotNull();
+
+            Member member = memberRepository.findBySocialId(kakaoId).orElseThrow();
+            softly.assertThat(member.getNickname()).isEqualTo(nickname);
+        });
     }
 
     @Test
-    @DisplayName("이미 존재하는 회원은 JWT만 발급된다")
+    @DisplayName("이미 존재하는 회원은 로그인 시 엑세스토큰 + 리프레시토큰이 발급된다")
     void loginIfAlreadyExists_thenReturnJwtOnly() {
         // given
         String kakaoId = "12345678";
@@ -81,7 +86,7 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(accessToken);
 
         // when
-        TokenResponse response = authService.loginWithKakao(request);
+        LoginTokenResponse response = authService.loginWithKakao(request);
 
         // then
         assertThat(response.accessToken()).isNotBlank();
@@ -90,7 +95,7 @@ class AuthKakaoServiceTest {
     }
 
     @Test
-    @DisplayName("카카오 AccessToken이 유효하지 않으면 예외를 반환한다")
+    @DisplayName("카카오 엑세스토이 유효하지 않으면 예외를 반환한다")
     void invalidKakaoAccessToken_thenThrowException() {
         // given
         String invalidToken = "invalid-token";
