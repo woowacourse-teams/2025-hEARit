@@ -102,9 +102,6 @@ class AdminSecurityConfigTest extends IntegrationTest {
                 .header("Location", containsString("/admin/login?error"));
     }
 
-    private record CsrfSession(String csrfToken, String sessionId) {
-    }
-
     // 로그인 페이지 GET → CSRF 토큰 추출
     private CsrfSession extractCsrfAndSession() {
         Response response = RestAssured.given().log().all()
@@ -118,6 +115,9 @@ class AdminSecurityConfigTest extends IntegrationTest {
         String sessionId = response.getCookie("JSESSIONID");
 
         return new CsrfSession(csrfToken, sessionId);
+    }
+
+    private record CsrfSession(String csrfToken, String sessionId) {
     }
 
 }

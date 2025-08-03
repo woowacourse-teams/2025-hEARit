@@ -6,18 +6,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-<div th:replace="admin/navbar :: navbar"></div>
+<div th:insert="~{admin/navbar :: navbar}"></div>
 
 <div class="container mt-5">
     <div class="card text-center">
         <div class="card-header">
-            <h1>hEAR-it 관리자 페이지</h1>
+            <h1>hEARit 관리자 페이지</h1>
         </div>
         <div class="card-body">
             <p class="card-text">아래 메뉴를 선택하여 작업을 시작하세요.</p>
             <div class="list-group">
                 <a th:href="@{/admin/hearits}" class="list-group-item list-group-item-action">
-                    히어릿 관리 (조회, 추가, 삭제)
+                    히어릿 관리 (조회, 추가, 수정)
+                </a>
+                <a th:href="@{/admin/hearits-create}" class="list-group-item list-group-item-action">
+                    히어릿 업로드
                 </a>
                 <a th:href="@{/admin/categories}" class="list-group-item list-group-item-action">
                     카테고리 관리 (조회, 추가)
@@ -26,9 +29,6 @@
                     키워드 관리 (조회, 추가)
                 </a>
             </div>
-        </div>
-        <div class="card-footer text-muted">
-            Welcome, Administrator!
         </div>
     </div>
 </div>

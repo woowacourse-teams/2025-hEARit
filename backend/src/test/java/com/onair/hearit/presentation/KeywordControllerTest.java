@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.response.KeywordResponse;
+import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
 import java.util.List;

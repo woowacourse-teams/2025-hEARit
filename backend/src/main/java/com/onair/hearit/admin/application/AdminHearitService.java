@@ -1,5 +1,7 @@
 package com.onair.hearit.admin.application;
 
+import com.onair.hearit.admin.domain.FileType;
+import com.onair.hearit.admin.domain.FileValidator;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
@@ -34,6 +36,7 @@ public class AdminHearitService {
     private final CategoryRepository categoryRepository;
     private final KeywordRepository keywordRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
+    private final FileStorageService fileStorageService;
 
     public PagedResponse<HearitAdminResponse> getHearits(PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(
@@ -66,9 +69,14 @@ public class AdminHearitService {
 
     @Transactional
     public void addHearit(HearitCreateRequest request) {
+        FileValidator.validateAll(request.originalAudio(), request.shortAudio(), request.scriptFile());
+        String originalAudioPath = fileStorageService.uploadFile(request.originalAudio(), FileType.ORIGINAL);
+        String shortAudioPath = fileStorageService.uploadFile(request.shortAudio(), FileType.SHORT);
+        String scriptFilePath = fileStorageService.uploadFile(request.scriptFile(), FileType.SCRIPT);
+
         Category category = getCategoryById(request.categoryId());
-        Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), request.originalAudioUrl(),
-                request.shortAudioUrl(), request.scriptUrl(), request.source(), category);
+        Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), originalAudioPath,
+                shortAudioPath, scriptFilePath, request.source(), category);
         Hearit savedHearit = hearitRepository.save(hearit);
         saveHearitKeywords(request.keywordIds(), savedHearit);
     }

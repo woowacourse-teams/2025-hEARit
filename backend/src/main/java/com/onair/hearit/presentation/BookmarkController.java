@@ -11,8 +11,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.net.URI;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -54,7 +54,7 @@ public class BookmarkController {
             @PathVariable Long hearitId,
             @AuthenticationPrincipal CurrentMember member) {
         BookmarkInfoResponse response = bookmarkService.addBookmark(member, hearitId);
-        return ResponseEntity.created(URI.create("/")).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "북마크 삭제", description = "로그인한 히어릿 ID와 북마크 ID로 북마크를 삭제합니다.")

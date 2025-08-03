@@ -41,5 +41,6 @@ public class AdminSecurityTestHelper {
         return new CsrfSession(newSessionId, newCsrf);
     }
 
-    public record CsrfSession(String sessionId, String csrfToken) {}
+    public record CsrfSession(String sessionId, String csrfToken) {
+    }
 }

@@ -2,8 +2,12 @@ package com.onair.hearit.admin.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 
-import com.onair.hearit.admin.dto.request.HearitCreateRequest;
+import com.onair.hearit.admin.application.FileStorageService;
+import com.onair.hearit.admin.domain.FileType;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
@@ -16,16 +20,21 @@ import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.HearitRepository;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
+import java.io.File;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.spec.internal.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class AdminHearitControllerTest extends IntegrationTest {
 
     @Autowired
     private HearitRepository hearitRepository;
+
+    @MockitoBean
+    private FileStorageService fileStorageService;
 
     @Test
     @DisplayName("히어릿 목록을 페이징 조회할 수 있다")
@@ -62,17 +71,23 @@ class AdminHearitControllerTest extends IntegrationTest {
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-        HearitCreateRequest request = new HearitCreateRequest(
-                "히어릿 제목", "히어릿 요약", 100, "origin-audio", "short-audio",
-                "script-url", "출처", category.getId(), List.of(keyword.getId())
-        );
 
+        given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("mock/origin.mp3");
+        given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn("mock/short.mp3");
+        given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("mock/script.json");
         // when & then
-        RestAssured.given().log().all()
+        RestAssured.given().log().uri()
                 .cookie("JSESSIONID", csrfSession.sessionId())
                 .header("X-CSRF-TOKEN", csrfSession.csrfToken())
-                .contentType("application/json")
-                .body(request)
+                .multiPart("title", "히어릿 제목")
+                .multiPart("summary", "히어릿 요약")
+                .multiPart("playTime", "100")
+                .multiPart("originalAudio", new File("src/test/resources/ORG_test.mp3"))
+                .multiPart("shortAudio", new File("src/test/resources/SHR_test.mp3"))
+                .multiPart("scriptFile", new File("src/test/resources/SCR_test.json"))
+                .multiPart("source", "출처")
+                .multiPart("categoryId", category.getId().toString())
+                .multiPart("keywordIds", keyword.getId().toString())
                 .when()
                 .post("/api/v1/admin/hearits")
                 .then().log().all()

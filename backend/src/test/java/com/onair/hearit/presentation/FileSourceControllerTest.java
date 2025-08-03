@@ -7,6 +7,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.dto.response.OriginalAudioResponse;
 import com.onair.hearit.dto.response.ScriptResponse;
 import com.onair.hearit.dto.response.ShortAudioResponse;
+import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
