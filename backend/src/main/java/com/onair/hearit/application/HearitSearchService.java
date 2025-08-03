@@ -31,7 +31,7 @@ public class HearitSearchService {
     }
 
     private HearitSearchResponse toHearitSearchResponseWithKeywords(Hearit hearit) {
-        List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(),
+        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
                 KEYWORD_SIZE_PER_HEARIT);
         return HearitSearchResponse.from(hearit, keywords);
     }

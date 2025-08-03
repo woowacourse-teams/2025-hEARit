@@ -50,7 +50,7 @@ class HearitKeywordRepositoryTest {
 
     @Test
     @DisplayName("히어릿 아이디로 원하는 개수만큼의 히어릿 키워드를 조회할 수 있다.")
-    void findKeywordsByHearitIdWithSize() {
+    void findRecentKeywordsByHearitIdWithSize() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
@@ -65,7 +65,7 @@ class HearitKeywordRepositoryTest {
         HearitKeyword hearitKeyword3 = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword3));
 
         // when
-        List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(), 2);
+        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(), 2);
 
         // then
         assertThat(keywords).hasSize(2);

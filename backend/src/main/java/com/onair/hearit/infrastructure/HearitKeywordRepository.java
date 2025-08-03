@@ -33,5 +33,5 @@ public interface HearitKeywordRepository extends JpaRepository<HearitKeyword, Lo
                 ORDER BY hk.id DESC
                 LIMIT :size
             """)
-    List<Keyword> findKeywordsByHearitId(@Param("hearitId") Long hearitId, @Param("size") int size);
+    List<Keyword> findRecentKeywordsByHearitId(@Param("hearitId") Long hearitId, @Param("size") int size);
 }

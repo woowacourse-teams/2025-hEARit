@@ -95,7 +95,8 @@ public class HearitService {
     }
 
     private HearitOfCategoryResponse toHearitOfCategoryResponseByKeywords(Hearit hearit) {
-        List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId(), KEYWORDS_PER_HEARIT);
+        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
+                KEYWORDS_PER_HEARIT);
         return HearitOfCategoryResponse.from(hearit, keywords);
     }
 }
