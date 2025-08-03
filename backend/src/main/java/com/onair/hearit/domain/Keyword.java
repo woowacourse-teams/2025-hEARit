@@ -31,7 +31,7 @@ public class Keyword {
     }
 
     private void validate(String name) {
-        if (name == null || name.length() > KEYWORD_NAME_MAX_LENGTH) {
+        if (name == null || name.trim().isBlank() || name.length() > KEYWORD_NAME_MAX_LENGTH) {
             throw new InvalidInputException("키워드 이름은 20자 이하여야 합니다.");
         }
     }

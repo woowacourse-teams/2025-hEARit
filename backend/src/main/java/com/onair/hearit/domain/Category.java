@@ -43,7 +43,7 @@ public class Category {
     }
 
     private void validateName(String name) {
-        if (name == null || name.length() > CATEGORY_NAME_MAX_LENGTH) {
+        if (name == null || name.trim().isBlank() || name.length() > CATEGORY_NAME_MAX_LENGTH) {
             throw new InvalidInputException("카테고리 이름은 15자 이하여야 합니다.");
         }
     }
