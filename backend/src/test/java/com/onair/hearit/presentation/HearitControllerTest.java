@@ -11,6 +11,7 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
+import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
@@ -137,7 +138,7 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("히어릿 검색 요청 시 200 OK 및 제목 또는 키워드에 검색어가 포함된 히어릿을 최신순으로 반환한다.")
-    void searchHearitsWithPagination() {
+    void readHearitsByCategoryWithPagination() {
         // given
         Keyword keyword = dbHelper.insertKeyword(new Keyword("Spring"));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("noKeyword"));
@@ -177,7 +178,7 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")
-    void searchHearitsWithInvalidParams() {
+    void readHearitsByCategoryWithInvalidParams() {
         // when & then
         RestAssured.given()
                 .queryParam("searchTerm", "title1")
@@ -235,8 +236,42 @@ class HearitControllerTest extends IntegrationTest {
         );
     }
 
+    @Test
+    @DisplayName("카테고리로 히어릿 검색 시 200 OK 및 해당 카테고리의 히어릿들을 최신순으로 반환한다.")
+    void searchHearitsByCategoryWithPagination() {
+        // given
+        Category category1 = dbHelper.insertCategory(new Category("Spring", "#000001"));
+        Category category2 = dbHelper.insertCategory(new Category("Java", "#000002"));
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2)); // 다른 카테고리
+
+        // when
+        PagedResponse<HearitOfCategoryResponse> pagedResponse = RestAssured
+                .given()
+                .queryParam("categoryId", category1.getId())
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v1/hearits")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(new TypeRef<>() {
+                });
+        List<HearitOfCategoryResponse> responses = pagedResponse.content();
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).id()).isEqualTo(hearit2.getId()), // 최신 hearit 먼저
+                () -> assertThat(responses.get(1).id()).isEqualTo(hearit1.getId())
+        );
+    }
+
     private String generateToken(Member member) {
-        return jwtTokenProvider.createToken(member.getId());
+        return jwtTokenProvider.createAccessToken(member.getId());
     }
 
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {

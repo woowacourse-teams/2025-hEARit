@@ -48,7 +48,7 @@ public class AdminHearitController {
     @PutMapping("/hearits/{hearitId}")
     public ResponseEntity<Void> updateHearitById(
             @PathVariable Long hearitId,
-            @RequestBody HearitUpdateRequest request) {
+            @RequestBody @Valid HearitUpdateRequest request) {
         adminHearitService.modifyHearit(hearitId, request);
         return ResponseEntity.noContent().build();
     }

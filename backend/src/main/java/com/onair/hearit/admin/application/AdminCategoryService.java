@@ -1,11 +1,14 @@
 package com.onair.hearit.admin.application;
 
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
+import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
 import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
+import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,5 +40,12 @@ public class AdminCategoryService {
     public void addCategory(CategoryCreateRequest request) {
         Category category = new Category(request.name(), request.colorCode());
         categoryRepository.save(category);
+    }
+
+    @Transactional
+    public void updateCategory(Long categoryId, CategoryUpdateRequest request) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("categoryId", categoryId.toString()));
+        category.update(request.name(), request.colorCode());
     }
 }
