@@ -55,7 +55,7 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(accessToken);
 
         // when
-        TokenResponse response = authService.loginWithKakao(request);
+        TokenResponse response = authService.loginOrSignupWithKakao(request);
 
         // then
         assertThat(response.accessToken()).isNotBlank();
@@ -81,7 +81,7 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(accessToken);
 
         // when
-        TokenResponse response = authService.loginWithKakao(request);
+        TokenResponse response = authService.loginOrSignupWithKakao(request);
 
         // then
         assertThat(response.accessToken()).isNotBlank();
@@ -99,7 +99,7 @@ class AuthKakaoServiceTest {
         KakaoLoginRequest request = new KakaoLoginRequest(invalidToken);
 
         // when & then
-        assertThatThrownBy(() -> authService.loginWithKakao(request))
+        assertThatThrownBy(() -> authService.loginOrSignupWithKakao(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("유효하지 않은 카카오 액세스 토큰");
     }

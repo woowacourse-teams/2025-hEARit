@@ -37,7 +37,7 @@ public class AuthController {
     @Operation(summary = "카카오 로그인", description = "카카오 액세스토큰으로 로그인 시 토큰을 발급받습니다.")
     @PostMapping("/kakao-login")
     public ResponseEntity<TokenResponse> loginWithKakao(@RequestBody KakaoLoginRequest request) {
-        TokenResponse response = authService.loginWithKakao(request);
+        TokenResponse response = authService.loginOrSignupWithKakao(request);
         return ResponseEntity.ok(response);
     }
 
