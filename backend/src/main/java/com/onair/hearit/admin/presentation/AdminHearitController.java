@@ -6,7 +6,6 @@ import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
-import java.net.URI;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

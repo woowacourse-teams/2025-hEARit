@@ -5,7 +5,6 @@ import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
 import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
-import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
