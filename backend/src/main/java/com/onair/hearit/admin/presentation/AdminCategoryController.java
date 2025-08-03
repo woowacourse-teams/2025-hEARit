@@ -53,8 +53,7 @@ public class AdminCategoryController {
     @PutMapping("/{categoryId}")
     public ResponseEntity<Void> updateCategory(
             @PathVariable Long categoryId,
-            @RequestBody @Valid CategoryUpdateRequest request
-    ) {
+            @RequestBody @Valid CategoryUpdateRequest request) {
         adminCategoryService.updateCategory(categoryId, request);
         return ResponseEntity.noContent().build();
     }

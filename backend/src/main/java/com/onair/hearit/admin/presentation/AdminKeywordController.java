@@ -54,8 +54,7 @@ public class AdminKeywordController {
     @PutMapping("/{keywordId}")
     public ResponseEntity<Void> updateKeyword(
             @PathVariable Long keywordId,
-            @RequestBody @Valid KeywordUpdateRequest request
-    ) {
+            @RequestBody @Valid KeywordUpdateRequest request) {
         adminKeywordService.updateKeyword(keywordId, request);
         return ResponseEntity.noContent().build();
     }

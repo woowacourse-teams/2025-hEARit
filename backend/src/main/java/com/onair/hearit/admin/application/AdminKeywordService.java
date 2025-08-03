@@ -42,7 +42,6 @@ public class AdminKeywordService {
         keywordRepository.save(keyword);
     }
 
-
     @Transactional
     public void updateKeyword(Long keywordId, KeywordUpdateRequest request) {
         Keyword keyword = keywordRepository.findById(keywordId)
