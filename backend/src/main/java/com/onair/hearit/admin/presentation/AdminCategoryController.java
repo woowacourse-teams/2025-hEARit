@@ -6,6 +6,7 @@ import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
 import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
