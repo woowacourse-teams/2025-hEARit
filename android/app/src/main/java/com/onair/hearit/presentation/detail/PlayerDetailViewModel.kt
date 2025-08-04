@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.model.Hearit
-import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
@@ -25,14 +24,8 @@ class PlayerDetailViewModel(
     private val _hearit: MutableLiveData<Hearit> = MutableLiveData()
     val hearit: LiveData<Hearit> = _hearit
 
-    private val _isBookmarked: MutableLiveData<Boolean> = MutableLiveData(false)
-    val isBookmarked: LiveData<Boolean> = _isBookmarked
-
     private val _bookmarkId: MutableLiveData<Long?> = MutableLiveData()
     val bookmarkId: LiveData<Long?> = _bookmarkId
-
-    private val _keywords: MutableLiveData<List<Keyword>> = MutableLiveData()
-    val keywords: LiveData<List<Keyword>> = _keywords
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -42,7 +35,7 @@ class PlayerDetailViewModel(
     }
 
     fun toggleBookmark() {
-        if (isBookmarked.value == true) {
+        if (bookmarkId.value != null) {
             deleteBookmark()
         } else {
             addBookmark()
@@ -56,7 +49,6 @@ class PlayerDetailViewModel(
                 bookmarkRepository
                     .deleteBookmark(id)
                     .onSuccess {
-                        _isBookmarked.value = false
                         _bookmarkId.value = null
                     }.onFailure {
                         _toastMessage.value = R.string.all_toast_delete_bookmark_fail
@@ -65,12 +57,11 @@ class PlayerDetailViewModel(
         }
     }
 
-    fun addBookmark() {
+    private fun addBookmark() {
         viewModelScope.launch {
             bookmarkRepository
                 .addBookmark(hearitId)
                 .onSuccess { bookmarkId ->
-                    _isBookmarked.value = true
                     _bookmarkId.value = bookmarkId
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_add_bookmark_fail
@@ -84,10 +75,8 @@ class PlayerDetailViewModel(
                 .onSuccess {
                     _hearit.value = it
                     saveRecentHearit()
-                    _keywords.value = it.keywords
-                    _isBookmarked.value = it.isBookmarked
                     _bookmarkId.value = it.bookmarkId
-                }.onFailure { it: Throwable ->
+                }.onFailure {
                     _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
                 }
         }

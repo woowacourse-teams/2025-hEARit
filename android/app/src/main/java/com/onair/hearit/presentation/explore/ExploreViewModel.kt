@@ -28,6 +28,9 @@ class ExploreViewModel(
     private val _shortsHearits = MutableLiveData<List<ShortsHearit>>()
     val shortsHearits: LiveData<List<ShortsHearit>> = _shortsHearits
 
+    private val _bookmarkId = MutableLiveData<Map<Long, Long?>>()
+    val bookmarkId: LiveData<Map<Long, Long?>> = _bookmarkId
+
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
@@ -46,42 +49,38 @@ class ExploreViewModel(
     }
 
     fun toggleBookmark(hearitId: Long) {
-        val currentList = _shortsHearits.value.orEmpty().toMutableList()
-        val index = currentList.indexOfFirst { it.id == hearitId }
-        if (index == -1) return
+        val currentBookmarkIdMap = _bookmarkId.value.orEmpty().toMutableMap()
 
-        val item = currentList[index]
-        if (item.isBookmarked && item.bookmarkId != null) {
-            deleteBookmark(item.bookmarkId, index)
+        val bookmarkId = currentBookmarkIdMap[hearitId]
+
+        if (bookmarkId != null) {
+            deleteBookmark(hearitId, bookmarkId)
         } else {
-            addBookmark(item.id, index)
+            addBookmark(hearitId)
         }
     }
 
     private fun deleteBookmark(
+        hearitId: Long,
         bookmarkId: Long,
-        index: Int,
     ) {
         viewModelScope.launch {
             bookmarkRepository
                 .deleteBookmark(bookmarkId)
                 .onSuccess {
-                    updateBookmarkState(index, isBookmarked = false, bookmarkId = null)
+                    updateBookmarkState(hearitId, null)
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_delete_bookmark_fail
                 }
         }
     }
 
-    private fun addBookmark(
-        hearitId: Long,
-        index: Int,
-    ) {
+    private fun addBookmark(hearitId: Long) {
         viewModelScope.launch {
             bookmarkRepository
                 .addBookmark(hearitId)
                 .onSuccess { newBookmarkId ->
-                    updateBookmarkState(index, isBookmarked = true, bookmarkId = newBookmarkId)
+                    updateBookmarkState(hearitId, newBookmarkId)
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_add_bookmark_fail
                 }
@@ -89,19 +88,12 @@ class ExploreViewModel(
     }
 
     private fun updateBookmarkState(
-        index: Int,
-        isBookmarked: Boolean,
+        hearitId: Long,
         bookmarkId: Long?,
     ) {
-        val currentList = _shortsHearits.value.orEmpty().toMutableList()
-        val target = currentList.getOrNull(index) ?: return
-
-        currentList[index] =
-            target.copy(
-                isBookmarked = isBookmarked,
-                bookmarkId = bookmarkId,
-            )
-        _shortsHearits.value = currentList
+        val currentBookmarkId = _bookmarkId.value.orEmpty().toMutableMap()
+        currentBookmarkId[hearitId] = bookmarkId
+        _bookmarkId.value = currentBookmarkId
     }
 
     private fun fetchData(
@@ -148,6 +140,17 @@ class ExploreViewModel(
                 newItems
             } else {
                 _shortsHearits.value.orEmpty() + newItems
+            }
+
+        _bookmarkId.value =
+            if (isInitial) {
+                newItems.associate { it.id to it.bookmarkId }
+            } else {
+                _bookmarkId.value.orEmpty().toMutableMap().apply {
+                    newItems.forEach { item ->
+                        this[item.id] = item.bookmarkId
+                    }
+                }
             }
     }
 }
