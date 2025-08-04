@@ -77,7 +77,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         setKeywordRecyclerView()
         observeViewModel()
         setupMediaController()
-        setupClickListener()
 
         val previousScreen = intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: "unknown"
         AnalyticsProvider.get().logScreenView(
@@ -100,12 +99,30 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     private fun setupBackPressHandler() {
+        val backAction = {
+            if (previousScreen == EXPLORE_SCREEN_ID) {
+                viewModel.bookmarkId.value?.let { bookmarkId ->
+                    intent =
+                        Intent().apply {
+                            putExtra(HEARIT_ID, hearitId)
+                            putExtra(BOOKMARK_ID, bookmarkId)
+                        }
+                }
+            }
+            setResult(RESULT_OK, intent)
+            finish()
+        }
+
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() = Unit
+                override fun handleOnBackPressed() = backAction()
             },
         )
+
+        binding.ibPlayerDetailBack.setOnClickListener {
+            backAction()
+        }
     }
 
     private fun setupWindowInsets() {
@@ -155,25 +172,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupClickListener() {
-        binding.ibPlayerDetailBack.setOnClickListener {
-            if (previousScreen == EXPLORE_SCREEN_ID) {
-                viewModel.bookmarkId.value?.let { bookmarkId ->
-                    intent =
-                        Intent().apply {
-                            putExtra(HEARIT_ID, hearitId)
-                            putExtra(BOOKMARK_ID, bookmarkId)
-                        }
-                }
-            }
-
-            setResult(RESULT_OK, intent)
-            finish()
-        }
-
-        setupGestureListener()
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     private fun setupGestureListener() {
         val gestureDetector =
@@ -207,6 +205,7 @@ class PlayerDetailActivity : AppCompatActivity() {
 
     private fun setupScriptRecyclerView() {
         binding.rvScript.adapter = scriptAdapter
+        setupGestureListener()
     }
 
     private fun observeViewModel() {
