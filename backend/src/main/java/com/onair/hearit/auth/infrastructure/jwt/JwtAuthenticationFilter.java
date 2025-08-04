@@ -3,6 +3,7 @@ package com.onair.hearit.auth.infrastructure.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.common.exception.ErrorCode;
+import com.onair.hearit.common.log.FilterErrorLogger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,18 +12,22 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final List<String> whitelist;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
+    private final List<String> whitelist;
+    private final ObjectMapper objectMapper;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final FilterErrorLogger filterErrorLogger;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -31,14 +36,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         String token = extractTokenFromHeader(header);
 
-        // 화이트리스트면 토큰이 없어도 그냥 통과
-        if ((token == null || token.isBlank()) && isWhitelisted(request)) {
+        // 화이트리스트면 그냥 통과
+        if (isWhitelisted(request)) {
             chain.doFilter(request, response);
             return;
         }
 
         if (!jwtTokenProvider.validateToken(token)) {
+            log.warn("토큰 검증 실패 - 유효하지 않은 토큰");
             ProblemDetail problemDetail = buildProblemDetail(ErrorCode.UNAUTHORIZED, "유효하지 않은 토큰입니다.", request);
+            filterErrorLogger.log(request, problemDetail);
             writeProblemDetailResponse(response, problemDetail);
             return;
         }
@@ -77,8 +84,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setStatus(problemDetail.getStatus());
         response.setContentType("application/problem+json");
         response.setCharacterEncoding("UTF-8");
-
-        ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(problemDetail);
         response.getWriter().write(body);
     }
