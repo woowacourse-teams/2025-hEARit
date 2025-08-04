@@ -7,11 +7,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 import com.onair.hearit.admin.application.FileStorageService;
-import com.onair.hearit.admin.domain.FileType;
-import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitMetaDataUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Category;
+import com.onair.hearit.domain.FileType;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.response.PagedResponse;
@@ -75,6 +75,7 @@ class AdminHearitControllerTest extends IntegrationTest {
         given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("mock/origin.mp3");
         given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn("mock/short.mp3");
         given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("mock/script.json");
+
         // when & then
         RestAssured.given().log().uri()
                 .cookie("JSESSIONID", csrfSession.sessionId())
@@ -95,17 +96,16 @@ class AdminHearitControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("히어릿을 수정할 수 있다")
-    void updateHearit() {
+    @DisplayName("히어릿 메타데이터를 수정할 수 있다")
+    void updateMetaDataHearit() {
         // given
         CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        HearitUpdateRequest request = new HearitUpdateRequest(
-                "수정 제목", "수정 요약", 100, "origin-audio", "short-audio",
-                "script-url", "출처", category.getId(), List.of()
+        HearitMetaDataUpdateRequest request = new HearitMetaDataUpdateRequest(
+                "수정 제목", "수정 요약", 100, "출처", category.getId(), List.of()
         );
 
         // when & then
@@ -123,6 +123,93 @@ class AdminHearitControllerTest extends IntegrationTest {
         assertAll(() -> {
             assertThat(updatedHearit.getTitle()).isEqualTo("수정 제목");
             assertThat(updatedHearit.getSummary()).isEqualTo("수정 요약");
+        });
+    }
+
+    @Test
+    @DisplayName("히어릿 Original 음원 파일을 수정할 수 있다")
+    void updateHearitOriginalFile() {
+        // given
+        CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(
+                new Hearit("title", "summary",
+                        10, "ORG_test.mp3",
+                        "SHR_test.mp3", "SCR_test.json",
+                        "source", category));
+        given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("/mock/origin.mp3");
+
+        // when & then
+        RestAssured.given().log().all()
+                .cookie("JSESSIONID", csrfSession.sessionId())
+                .header("X-CSRF-TOKEN", csrfSession.csrfToken())
+                .multiPart("file", new File("src/test/resources/ORG_test.mp3"))
+                .when()
+                .put("/api/v1/admin/hearits/" + hearit.getId() + "/original-audio")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT);
+
+        Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
+        assertAll(() -> {
+            assertThat(updatedHearit.getOriginalAudioUrl()).isEqualTo("/mock/origin.mp3");
+        });
+    }
+
+    @Test
+    @DisplayName("히어릿 Short 음원 파일을 수정할 수 있다")
+    void updateHearitShortFile() {
+        // given
+        CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(
+                new Hearit("title", "summary",
+                        10, "ORG_test.mp3",
+                        "SHR_test.mp3", "SCR_test.json",
+                        "source", category));
+        given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn("/mock/origin.mp3");
+
+        // when & then
+        RestAssured.given().log().all()
+                .cookie("JSESSIONID", csrfSession.sessionId())
+                .header("X-CSRF-TOKEN", csrfSession.csrfToken())
+                .multiPart("file", new File("src/test/resources/SHR_test.mp3"))
+                .when()
+                .put("/api/v1/admin/hearits/" + hearit.getId() + "/short-audio")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT);
+
+        Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
+        assertAll(() -> {
+            assertThat(updatedHearit.getShortAudioUrl()).isEqualTo("/mock/origin.mp3");
+        });
+    }
+
+    @Test
+    @DisplayName("히어릿 Script 파일을 수정할 수 있다")
+    void updateHearitScriptFile() {
+        // given
+        CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(
+                new Hearit("title", "summary",
+                        10, "ORG_test.mp3",
+                        "SHR_test.mp3", "SCR_test.json",
+                        "source", category));
+        given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("/mock/origin.json");
+
+        // when & then
+        RestAssured.given().log().all()
+                .cookie("JSESSIONID", csrfSession.sessionId())
+                .header("X-CSRF-TOKEN", csrfSession.csrfToken())
+                .multiPart("file", new File("src/test/resources/SCR_test.json"))
+                .when()
+                .put("/api/v1/admin/hearits/" + hearit.getId() + "/script")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT);
+
+        Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
+        assertAll(() -> {
+            assertThat(updatedHearit.getScriptUrl()).isEqualTo("/mock/origin.json");
         });
     }
 
