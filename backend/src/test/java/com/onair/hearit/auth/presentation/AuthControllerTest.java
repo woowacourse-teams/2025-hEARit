@@ -111,7 +111,7 @@ class AuthControllerTest extends IntegrationTest {
                                 .tag("Auth API")
                                 .summary("엑세스토큰 재발급 요청")
                                 .description("리프레시토큰으로 엑세스토큰 재발급 요청해 새 엑세스토큰을 반환받습니다.")
-                                .requestSchema(Schema.schema("LoginRequest"))
+                                .requestSchema(Schema.schema("TokenReissueResponse"))
                                 .requestFields(
                                         fieldWithPath("refreshToken").description("리프레시 토큰")
                                 )
@@ -149,7 +149,7 @@ class AuthControllerTest extends IntegrationTest {
         RestAssured.given(this.spec)
                 .contentType(ContentType.JSON)
                 .body(request)
-                .filter(document("auth-login-unauthorized",
+                .filter(document("auth-login-unauthorized-wrong-password",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
                                 .summary("일반 로그인")
@@ -172,7 +172,7 @@ class AuthControllerTest extends IntegrationTest {
         RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
-                .filter(document("auth-login-unauthorized",
+                .filter(document("auth-login-unauthorized-nonexistent-membe",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
                                 .summary("일반 로그인")
