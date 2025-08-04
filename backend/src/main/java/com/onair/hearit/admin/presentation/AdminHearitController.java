@@ -2,8 +2,10 @@ package com.onair.hearit.admin.presentation;
 
 import com.onair.hearit.admin.application.AdminHearitService;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest;
-import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitMetaDataUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
+import com.onair.hearit.domain.FileType;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -48,8 +50,32 @@ public class AdminHearitController {
     @PutMapping("/hearits/{hearitId}")
     public ResponseEntity<Void> updateHearitById(
             @PathVariable Long hearitId,
-            @RequestBody @Valid HearitUpdateRequest request) {
-        adminHearitService.modifyHearit(hearitId, request);
+            @RequestBody @Valid HearitMetaDataUpdateRequest request) {
+        adminHearitService.modifyHearitMetaData(hearitId, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/hearits/{hearitId}/original-audio")
+    public ResponseEntity<Void> updateHearitOriginalAudio(
+            @PathVariable Long hearitId,
+            @ModelAttribute @Valid HearitFileUpdateRequest request) {
+        adminHearitService.modifyHearitFile(hearitId, request, FileType.ORIGINAL);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/hearits/{hearitId}/short-audio")
+    public ResponseEntity<Void> updateHearitShortAudio(
+            @PathVariable Long hearitId,
+            @ModelAttribute @Valid HearitFileUpdateRequest request) {
+        adminHearitService.modifyHearitFile(hearitId, request, FileType.SHORT);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/hearits/{hearitId}/script")
+    public ResponseEntity<Void> updateHearitScript(
+            @PathVariable Long hearitId,
+            @ModelAttribute @Valid HearitFileUpdateRequest request) {
+        adminHearitService.modifyHearitFile(hearitId, request, FileType.SCRIPT);
         return ResponseEntity.noContent().build();
     }
 }

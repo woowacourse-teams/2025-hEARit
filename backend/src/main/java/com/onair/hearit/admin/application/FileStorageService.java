@@ -1,7 +1,7 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.domain.FileType;
 import com.onair.hearit.admin.exception.S3Exception;
+import com.onair.hearit.domain.FileType;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +42,17 @@ public class FileStorageService {
         } catch (IOException e) {
             log.error("S3 파일 업로드 실패: " + multipartFile.getOriginalFilename(), e);
             throw new S3Exception("S3 파일 업로드 실패", e);
+        }
+    }
+
+    public void deleteFile(String filePath) {
+        String key = filePath.startsWith("/") ? filePath.substring(1) : filePath;
+
+        try {
+            s3Client.deleteObject(builder -> builder.bucket(bucket).key(key).build());
+        } catch (S3Exception e) {
+            log.error("S3 삭제 실패: " + key, e);
+            throw new S3Exception("S3 삭제 실패", e);
         }
     }
 }
