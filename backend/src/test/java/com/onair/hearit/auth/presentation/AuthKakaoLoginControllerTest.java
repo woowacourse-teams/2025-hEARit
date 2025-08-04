@@ -18,6 +18,7 @@ import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.fixture.IntegrationTest;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -64,7 +65,7 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
                                 """)));
 
         KakaoLoginRequest kakaoLoginRequest = new KakaoLoginRequest("accessToken-test-example");
-        LoginTokenResponse loginTokenResponse = given(this.spec).log().all()
+        LoginTokenResponse loginTokenResponse = RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(kakaoLoginRequest)
                 .filter(document("auth-kakao-login",
@@ -78,7 +79,8 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
                                 )
                                 .responseSchema(Schema.schema("TokenResponse"))
                                 .responseFields(
-                                        fieldWithPath("accessToken").description("발급된 서비스 액세스 토큰")
+                                        fieldWithPath("accessToken").description("발급된 서비스 액세스 토큰"),
+                                        fieldWithPath("refreshToken").description("발급된 리프레시 토큰")
                                 )
                                 .build())
                 ))

@@ -4,25 +4,23 @@ package com.onair.hearit.auth.presentation;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
-import com.onair.hearit.auth.dto.response.TokenResponse;
-import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.auth.dto.request.TokenReissueRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.IntegrationTest;
-import io.restassured.RestAssured;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -62,7 +60,7 @@ class AuthControllerTest extends IntegrationTest {
         LoginRequest request = new LoginRequest("test123", "pass1234");
 
         // when
-        LoginTokenResponse loginTokenResponse = given(this.spec).log().all()
+        LoginTokenResponse loginTokenResponse = RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .filter(document("auth-login",
@@ -75,9 +73,10 @@ class AuthControllerTest extends IntegrationTest {
                                         fieldWithPath("localId").description("사용자 아이디"),
                                         fieldWithPath("password").description("비밀번호")
                                 )
-                                .responseSchema(Schema.schema("TokenResponse"))
+                                .responseSchema(Schema.schema("LoginTokenResponse"))
                                 .responseFields(
-                                        fieldWithPath("accessToken").description("발급된 액세스 토큰")
+                                        fieldWithPath("accessToken").description("발급된 액세스 토큰"),
+                                        fieldWithPath("refreshToken").description("발급된 리프레시 토큰")
                                 )
                                 .build())
                 ))
@@ -104,9 +103,24 @@ class AuthControllerTest extends IntegrationTest {
         TokenReissueRequest tokenReissueRequest = new TokenReissueRequest(validRefreshToken.getToken());
 
         // when
-        TokenReissueResponse response = RestAssured.given().log().all()
+        TokenReissueResponse response = RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(tokenReissueRequest)
+                .filter(document("auth-login",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("엑세스토큰 재발급 요청")
+                                .description("리프레시토큰으로 엑세스토큰 재발급 요청해 새 엑세스토큰을 반환받습니다.")
+                                .requestSchema(Schema.schema("LoginRequest"))
+                                .requestFields(
+                                        fieldWithPath("refreshToken").description("리프레시 토큰")
+                                )
+                                .responseSchema(Schema.schema("LoginTokenResponse"))
+                                .responseFields(
+                                        fieldWithPath("accessToken").description("발급된 액세스 토큰")
+                                )
+                                .build())
+                ))
                 .when()
                 .post("/api/v1/auth/token/refresh")
                 .then().log().all()
@@ -155,9 +169,17 @@ class AuthControllerTest extends IntegrationTest {
         // given
         LoginRequest request = new LoginRequest("ghost123", "pass1234");
 
-        RestAssured.given().log().all()
+        RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
+                .filter(document("auth-login-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("일반 로그인")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .post("/api/v1/auth/login")
                 .then().log().all()
@@ -236,8 +258,15 @@ class AuthControllerTest extends IntegrationTest {
         String accessToken = jwtTokenProvider.createAccessToken(member.getId());
 
         // when
-        RestAssured.given().log().all()
+        RestAssured.given(this.spec).log().all()
                 .header("Authorization", "Bearer " + accessToken)
+                .filter(document("auth-logout",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("로그아웃")
+                                .description("로그아웃 시 리프레시토큰을 삭제합니다.")
+                                .build())
+                ))
                 .when()
                 .post("/api/v1/auth/logout")
                 .then().log().all()
