@@ -16,7 +16,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/hearit_black1">
 
         <ImageButton
             android:id="@+id/ib_back"
@@ -121,14 +122,14 @@
             app:layout_constraintBottom_toTopOf="@id/tv_setting_app_email"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="앱 버전 v1.0.03" />
+            tools:text="앱 버전 v1.0.05-DEBUG" />
 
         <TextView
             android:id="@+id/tv_setting_app_email"
             style="@style/pretendard_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
+            android:layout_marginBottom="72dp"
             android:text="@string/all_hearit_email"
             android:textColor="@color/hearit_gray4"
             app:layout_constraintBottom_toBottomOf="parent"
