@@ -22,6 +22,7 @@ import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
+import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.ServiceProvider
 import com.onair.hearit.domain.model.PlaybackInfo
 import kotlinx.coroutines.CoroutineScope
@@ -221,8 +222,7 @@ class PlaybackService : MediaSessionService() {
     // 최근 들은 히어릿을 서비스 내에서 불러오기 위한 코드
     private suspend fun loadRecentInfo(): PlaybackInfo? =
         withContext(Dispatchers.IO) {
-            ServiceProvider
-                .recentHearitRepository()
+            RepositoryProvider.recentHearitRepository
                 .getRecentHearit()
                 .getOrNull()
                 ?.let { recent ->
