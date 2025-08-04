@@ -125,43 +125,4 @@ class KeywordControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
     }
-
-    @Test
-    @DisplayName("추천 키워드 조회 시 200 OK 및 요청 개수만큼의 키워드를 반환한다.")
-    void readRecommendedKeywords() {
-        // given
-        dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-        dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-        dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-        int size = 2;
-
-        // when
-        List<KeywordResponse> result = RestAssured.given(this.spec)
-                .param("size", size)
-                .filter(document("keyword-read-recommend",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Keyword API")
-                                .summary("추천 키워드 조회")
-                                .description("추천 키워드를 요청한 개수만큼 랜덤으로 조회합니다.")
-                                .queryParameters(
-                                        parameterWithName("size").description("조회할 키워드 개수 (기본 9)")
-                                )
-                                .responseSchema(Schema.schema("KeywordResponseList"))
-                                .responseFields(
-                                        fieldWithPath("[].id").description("키워드 ID"),
-                                        fieldWithPath("[].name").description("키워드 이름")
-                                )
-                                .build())
-                ))
-                .when()
-                .get("/api/v1/keywords/recommend")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .jsonPath()
-                .getList(".", KeywordResponse.class);
-
-        // then
-        assertThat(result).hasSize(size);
-    }
 }

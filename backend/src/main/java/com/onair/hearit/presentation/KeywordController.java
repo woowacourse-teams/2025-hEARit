@@ -33,11 +33,4 @@ public class KeywordController {
         KeywordResponse response = keywordService.getKeyword(keywordId);
         return ResponseEntity.ok(response);
     }
-
-    @GetMapping("/recommend")
-    public ResponseEntity<List<KeywordResponse>> readRecommendedKeywords(
-            @RequestParam(name = "size", defaultValue = "9") int size) {
-        List<KeywordResponse> responses = keywordService.getRecommendedKeywords(size);
-        return ResponseEntity.ok(responses);
-    }
 }

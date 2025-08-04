@@ -85,46 +85,4 @@ class KeywordServiceTest {
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("keywordId");
     }
-
-    @Test
-    @DisplayName("오늘의 추천 키워드를 지정한 개수만큼 조회할 수 있다.")
-    void getRecommendedKeywords() {
-        // given
-        dbHelper.insertKeyword(new Keyword("keyword1"));
-        dbHelper.insertKeyword(new Keyword("keyword2"));
-        dbHelper.insertKeyword(new Keyword("keyword3"));
-        dbHelper.insertKeyword(new Keyword("keyword4"));
-        dbHelper.insertKeyword(new Keyword("keyword5"));
-
-        int size = 3;
-
-        // when
-        List<KeywordResponse> result = keywordService.getRecommendedKeywords(size);
-
-        // then
-        assertThat(result).hasSize(size);
-    }
-
-    @Test
-    @DisplayName("같은 날 호출하면 추천 키워드 결과는 항상 동일하다.")
-    void getRecommendedKeywords_shouldBeDeterministicForSameSeed() {
-        // given
-        dbHelper.insertKeyword(new Keyword("keyword1"));
-        dbHelper.insertKeyword(new Keyword("keyword2"));
-        dbHelper.insertKeyword(new Keyword("keyword3"));
-        dbHelper.insertKeyword(new Keyword("keyword4"));
-        dbHelper.insertKeyword(new Keyword("keyword5"));
-        dbHelper.insertKeyword(new Keyword("keyword6"));
-        int size = 3;
-
-        // when
-        List<KeywordResponse> first = keywordService.getRecommendedKeywords(size);
-        List<KeywordResponse> second = keywordService.getRecommendedKeywords(size);
-
-        // then
-        assertThat(first).extracting(KeywordResponse::id)
-                .containsExactlyElementsOf(
-                        second.stream().map(KeywordResponse::id).toList()
-                );
-    }
 } 
