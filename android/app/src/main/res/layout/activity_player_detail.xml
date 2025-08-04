@@ -118,7 +118,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/btn_hearit_player_bookmark"
-                    tools:listitem="@layout/item_script" />
+                    tools:listitem="@layout/item_detail_script" />
 
                 <androidx.media3.ui.PlayerView
                     android:id="@+id/player_view"
