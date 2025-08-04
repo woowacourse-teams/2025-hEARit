@@ -19,6 +19,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentScriptBinding
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
@@ -105,14 +106,26 @@ class ScriptFragment : Fragment() {
     }
 
     private fun setupBackPressedHandler() {
+        val popAction = {
+            parentFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(0, R.anim.slide_down)
+                .remove(this)
+                .commit()
+        }
+
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    parentFragmentManager.popBackStack()
+                    popAction()
                 }
             },
         )
+
+        binding.ibScriptDown.setOnClickListener {
+            popAction()
+        }
     }
 
     private fun observeViewModel() {
