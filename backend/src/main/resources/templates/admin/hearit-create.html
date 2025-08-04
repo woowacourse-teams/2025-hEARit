@@ -112,9 +112,20 @@
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
-            const formData = new FormData(form);
-            formData.set("shortAudio", document.getElementById("shortAudio").files[0]);
-            formData.set("scriptFile", document.getElementById("scriptFile").files[0]);
+            const formData = new FormData();
+
+            formData.append("title", form.title.value);
+            formData.append("source", form.source.value);
+            formData.append("summary", form.summary.value);
+            formData.append("originalAudio", document.getElementById("originalAudio").files[0]);
+            formData.append("shortAudio", document.getElementById("shortAudio").files[0]);
+            formData.append("scriptFile", document.getElementById("scriptFile").files[0]);
+            formData.append("playTime", form.playTime.value);
+            formData.append("categoryId", form.categoryId.value);
+
+            document.querySelectorAll("input[name='keywordIds']:checked").forEach(cb => {
+                formData.append("keywordIds", cb.value);
+            });
 
             const csrfToken = document.querySelector('meta[name="_csrf"]').content;
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
