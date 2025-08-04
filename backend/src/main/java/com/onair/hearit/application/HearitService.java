@@ -31,7 +31,7 @@ public class HearitService {
     private static final int RECOMMEND_HEARIT_COUNT = 5;
     private static final int GROUPED_CATEGORY_COUNT = 3;
     private static final int HEARITS_PER_GROUPED_CATEGORY = 5;
-    private static final int KEYWORDS_PER_HEARIT_FOR_CATEGORY = 3;
+    private static final int KEYWORDS_PER_CATEGORIZED_HEARIT = 3;
     private static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
 
     private final HearitRepository hearitRepository;
@@ -100,7 +100,7 @@ public class HearitService {
 
     private HearitOfCategoryResponse toHearitOfCategoryResponse(Hearit hearit) {
         List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-                KEYWORDS_PER_HEARIT_FOR_CATEGORY);
+                KEYWORDS_PER_CATEGORIZED_HEARIT);
         return HearitOfCategoryResponse.from(hearit, keywords);
     }
 }
