@@ -139,9 +139,14 @@ class HearitControllerTest extends IntegrationTest {
     void readRandomHearits() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Keyword keyword = dbHelper.insertKeyword(new Keyword("Keyword"));
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
 
         // when
         PagedResponse<RandomHearitResponse> responses = RestAssured.given(this.spec)
@@ -156,13 +161,13 @@ class HearitControllerTest extends IntegrationTest {
                                                 Arrays.stream(new FieldDescriptor[]{
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
-                                                        fieldWithPath("content[].summary").description("히어릿 요약"),
-                                                        fieldWithPath("content[].source").description("출처"),
-                                                        fieldWithPath("content[].playTime").description("재생 시간(초)"),
-                                                        fieldWithPath("content[].createdAt").description("생성 일시"),
                                                         fieldWithPath("content[].isBookmarked").description("북마크 여부"),
                                                         fieldWithPath("content[].bookmarkId").description(
-                                                                "북마크 ID (북마크된 경우)").optional()
+                                                                "북마크 ID (북마크된 경우)").optional(),
+                                                        fieldWithPath("content[].keywords").description(
+                                                                "히어릿에 포함된 키워드 목록"),
+                                                        fieldWithPath("content[].keywords[].id").description("키워드 ID"),
+                                                        fieldWithPath("content[].keywords[].name").description("키워드 이름")
                                                 }),
                                                 Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
