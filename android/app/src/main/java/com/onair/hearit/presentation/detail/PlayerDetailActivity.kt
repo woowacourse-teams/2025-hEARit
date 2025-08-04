@@ -181,6 +181,7 @@ class PlayerDetailActivity : AppCompatActivity() {
                     override fun onSingleTapUp(e: MotionEvent): Boolean {
                         supportFragmentManager
                             .beginTransaction()
+                            .setCustomAnimations(R.anim.slide_up, 0)
                             .replace(
                                 R.id.fragment_container_view,
                                 ScriptFragment.newInstance(hearitId),
