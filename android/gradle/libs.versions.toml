@@ -1,6 +1,7 @@
 [versions]
 agp = "8.9.1"
 coil = "2.5.0"
+concurrentFuturesKtx = "1.3.0"
 datastorePreferences = "1.1.7"
 firebaseBom = "33.16.0"
 flexbox = "3.0.0"
@@ -29,6 +30,7 @@ v2User = "2.21.4"
 room-runtime = "2.7.2"
 
 [libraries]
+androidx-concurrent-futures-ktx = { module = "androidx.concurrent:concurrent-futures-ktx", version.ref = "concurrentFuturesKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentTesting" }
