@@ -3,7 +3,7 @@ package com.onair.hearit.auth.infrastructure.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.common.exception.ErrorCode;
-import com.onair.hearit.common.log.FilterErrorLogger;
+import com.onair.hearit.common.log.FilterExceptionLogger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final List<String> whitelist;
     private final ObjectMapper objectMapper;
     private final JwtTokenProvider jwtTokenProvider;
-    private final FilterErrorLogger filterErrorLogger;
+    private final FilterExceptionLogger filterExceptionLogger;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -43,10 +43,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (!jwtTokenProvider.validateToken(token)) {
-            log.warn("토큰 검증 실패 - 유효하지 않은 토큰");
             ProblemDetail problemDetail = buildProblemDetail(ErrorCode.UNAUTHORIZED, "유효하지 않은 토큰입니다.", request);
-            filterErrorLogger.log(request, problemDetail);
             writeProblemDetailResponse(response, problemDetail);
+            filterExceptionLogger.warn(problemDetail);
             return;
         }
 

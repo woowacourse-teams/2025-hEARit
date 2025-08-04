@@ -18,7 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -35,8 +34,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 @RequiredArgsConstructor
 public class LoggingAspect {
-
-    private static final String START_TIME_KEY = "startTime";
 
     private final JsonMaskingPrettyFormatter jsonMaskingPrettyFormatter;
     private final Logger errorLogger = LogManager.getLogger("errorLogger");
@@ -72,15 +69,13 @@ public class LoggingAspect {
 
     @Before("allMapping()")
     public void logRequest(JoinPoint joinPoint) {
-        MDC.put(START_TIME_KEY, String.valueOf(System.currentTimeMillis()));
         RequestLog requestLog = getRequestLog(joinPoint);
         log.info(jsonMaskingPrettyFormatter.convertToPrettyJson(requestLog));
     }
 
     private RequestLog getRequestLog(JoinPoint joinPoint) {
         HttpServletRequest request = getHttpServletRequest();
-        RequestInfo requestInfo = RequestInfo.from(request);
-        putRequestInfoToMdc(requestInfo);
+        RequestInfo requestInfo = RequestInfo.fromMdc();
         Object requestBody = extractRequestBody(joinPoint);
         return RequestLog.of(
                 LocalDateTime.now(),
@@ -97,13 +92,6 @@ public class LoggingAspect {
                 .orElseThrow(() -> new IllegalStateException("현재 스레드에 바인딩 된 request가 없습니다."));
     }
 
-    private void putRequestInfoToMdc(RequestInfo requestInfo) {
-        MDC.put("id", requestInfo.getId());
-        MDC.put("ip", requestInfo.getIp());
-        MDC.put("httpMethod", requestInfo.getHttpMethod());
-        MDC.put("requestUri", requestInfo.getRequestUri());
-    }
-
     private Object extractRequestBody(JoinPoint joinPoint) {
         return Arrays.stream(joinPoint.getArgs())
                 .filter(Objects::nonNull)
@@ -114,21 +102,18 @@ public class LoggingAspect {
 
     @AfterReturning(value = "allMapping()", returning = "responseEntity")
     public void logResponse(ResponseEntity<?> responseEntity) {
-        try {
-            RequestInfo requestInfo = RequestInfo.getCurrentRequestInfo();
-            ResponseLog responseLog = ResponseLog.of(
-                    LocalDateTime.now(),
-                    requestInfo,
-                    responseEntity,
-                    calculateTimeTakenMs());
-            log.info(jsonMaskingPrettyFormatter.convertToPrettyJson(responseLog));
-        } finally {
-            MDC.clear();
-        }
+        RequestInfo requestInfo = RequestInfo.fromMdc();
+        ResponseLog responseLog = ResponseLog.of(
+                LocalDateTime.now(),
+                requestInfo,
+                responseEntity,
+                calculateTimeTakenMs());
+        log.info(jsonMaskingPrettyFormatter.convertToPrettyJson(responseLog));
+
     }
 
     private long calculateTimeTakenMs() {
-        return Optional.ofNullable(MDC.get(START_TIME_KEY))
+        return Optional.ofNullable(MDC.get("startTime"))
                 .map(Long::parseLong)
                 .map(startTime -> System.currentTimeMillis() - startTime)
                 .orElseGet(() -> {
@@ -140,7 +125,7 @@ public class LoggingAspect {
     @AfterReturning(value = "exceptionHandler()", returning = "problemDetail")
     public void logExceptionHandler(JoinPoint joinPoint, ProblemDetail problemDetail) {
         try {
-            RequestInfo requestInfo = RequestInfo.getCurrentRequestInfo();
+            RequestInfo requestInfo = RequestInfo.fromMdc();
             Optional<Throwable> throwable = extractThrowableFromArgs(joinPoint.getArgs());
             ErrorDetail errorDetail = throwable.map(ErrorDetail::fromThrowable)
                     .orElseGet(ErrorDetail::emptyErrorDetail);
@@ -157,8 +142,6 @@ public class LoggingAspect {
             logClientError(problemDetail, requestInfo, errorDetail);
         } catch (Exception e) {
             log.error("Error 로깅 중 예외가 발생했습니다.", e);
-        } finally {
-            MDC.clear();
         }
     }
 
