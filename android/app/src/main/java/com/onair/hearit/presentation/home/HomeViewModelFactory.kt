@@ -4,12 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.onair.hearit.analytics.CrashlyticsLogger
-import com.onair.hearit.data.datasource.HearitRemoteDataSourceImpl
-import com.onair.hearit.data.datasource.MemberRemoteDataSourceImpl
-import com.onair.hearit.data.repository.DataStoreRepositoryImpl
-import com.onair.hearit.data.repository.HearitRepositoryImpl
-import com.onair.hearit.data.repository.MemberRepositoryImpl
-import com.onair.hearit.di.NetworkProvider
+import com.onair.hearit.di.RepositoryProvider
 
 @Suppress("UNCHECKED_CAST")
 class HomeViewModelFactory(
@@ -17,11 +12,9 @@ class HomeViewModelFactory(
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val dataStoreRepository = DataStoreRepositoryImpl(context)
-        val hearitRemoteDataSource = HearitRemoteDataSourceImpl(NetworkProvider.hearitService)
-        val hearitRepository = HearitRepositoryImpl(hearitRemoteDataSource)
-        val memberRemoteDataSource = MemberRemoteDataSourceImpl(NetworkProvider.memberService)
-        val memberRepository = MemberRepositoryImpl(memberRemoteDataSource)
+        val dataStoreRepository = RepositoryProvider.dataStoreRepository
+        val hearitRepository = RepositoryProvider.hearitRepository
+        val memberRepository = RepositoryProvider.memberRepository
         return HomeViewModel(
             dataStoreRepository,
             hearitRepository,

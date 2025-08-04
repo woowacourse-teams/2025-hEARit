@@ -17,10 +17,7 @@ class SettingFragment : Fragment() {
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SettingViewModel by viewModels {
-        SettingViewModelFactory(
-            requireContext(),
-            CrashlyticsProvider.get(),
-        )
+        SettingViewModelFactory(CrashlyticsProvider.get())
     }
 
     override fun onCreateView(

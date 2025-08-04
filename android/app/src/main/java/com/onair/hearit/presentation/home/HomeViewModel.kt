@@ -48,7 +48,17 @@ class HomeViewModel(
                 .foldWithCrashlytics(
                     crashlyticsLogger,
                     onSuccess = { _recommendHearits.value = it },
-                    onFailure = { _toastMessage.value = R.string.home_toast_recommend_load_fail },
+                    onFailure = { throwable ->
+                        when (throwable) {
+                            is UserNotRegisteredException -> {
+                                // ui
+                            }
+
+                            else -> {
+                                _toastMessage.value = R.string.home_toast_recommend_load_fail
+                            }
+                        }
+                    },
                 )
         }
 
