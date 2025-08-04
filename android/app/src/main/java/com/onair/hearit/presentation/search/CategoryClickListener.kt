@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation
+package com.onair.hearit.presentation.search
 
 interface CategoryClickListener {
     fun onCategoryClick(

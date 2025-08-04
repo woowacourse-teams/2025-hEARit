@@ -1,6 +1,6 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Base.Theme.HEARit" parent="Theme.AppCompat.NoActionBar">
+    <style name="Base.Theme.HEARit" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:statusBarColor">@color/hearit_gray4</item>
         <item name="android:navigationBarColor">@color/hearit_gray1</item>
         <item name="android:windowLightStatusBar">false</item>
