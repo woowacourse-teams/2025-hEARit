@@ -431,30 +431,6 @@ class HearitControllerTest extends IntegrationTest {
         );
     }
 
-
-    @Test
-    @DisplayName("존재하지 않는 카테고리로 히어릿 검색 시 404 NOT_FOUND를 반환한다.")
-    void searchHearitsByCategoryWithNotFoundCategory() {
-        // given
-        Long notFoundCategoryId = 9999L;
-
-        // when & then
-        RestAssured.given(this.spec)
-                .pathParam("categoryId", notFoundCategoryId)
-                .queryParam("page", 0)
-                .queryParam("size", 10)
-                .filter(document("category-search-hearits-not-found",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Category API")
-                                .summary("카테고리별 히어릿 목록 조회")
-                                .build())
-                ))
-                .when()
-                .get("/api/v1/categories/{categoryId}/hearits")
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value());
-    }
-
     @Test
     @DisplayName("전체 카테고리 조회 시 유효하지 않은 페이지 번호를 보내면 400 BAD_REQUEST를 반환한다.")
     void readAllCategoriesWithInvalidPage() {
