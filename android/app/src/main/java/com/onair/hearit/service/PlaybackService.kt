@@ -18,6 +18,7 @@ import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
@@ -61,7 +62,7 @@ class PlaybackService : MediaSessionService() {
         if (!audioUrl.isNullOrEmpty() && hearitId != -1L) {
             player.setMediaItem(createMediaItem(audioUrl, title, hearitId))
             player.prepare()
-            player.seekTo(startPosition)
+            player.seekTo(startPosition.coerceAtLeast(0L))
             player.play()
         }
         return START_STICKY
@@ -112,10 +113,14 @@ class PlaybackService : MediaSessionService() {
                             return CallbackToFutureAdapter.getFuture { completer ->
                                 val job =
                                     serviceScope.launch {
-                                        loadRecentInfo()?.let { info ->
-                                            prepareIfNeeded(info)
+                                        try {
+                                            loadRecentInfo()?.let { info ->
+                                                prepareIfNeeded(info)
+                                            }
+                                            completer.set(SessionResult(SessionResult.RESULT_SUCCESS))
+                                        } catch (_: Exception) {
+                                            completer.set(SessionResult(SessionError.ERROR_UNKNOWN))
                                         }
-                                        completer.set(SessionResult(SessionResult.RESULT_SUCCESS))
                                     }
                                 completer.addCancellationListener({ job.cancel() }, Runnable::run)
                                 "preload_recent_command"
@@ -129,15 +134,25 @@ class PlaybackService : MediaSessionService() {
                             CallbackToFutureAdapter.getFuture { completer ->
                                 val job =
                                     serviceScope.launch {
-                                        val info = loadRecentInfo()
-                                        val result =
-                                            info?.let { toItemsWithStart(it) }
-                                                ?: MediaSession.MediaItemsWithStartPosition(
+                                        try {
+                                            val info = loadRecentInfo()
+                                            val result =
+                                                info?.let { toItemsWithStart(it) }
+                                                    ?: MediaSession.MediaItemsWithStartPosition(
+                                                        emptyList(),
+                                                        0,
+                                                        0L,
+                                                    )
+                                            completer.set(result)
+                                        } catch (_: Exception) {
+                                            completer.set(
+                                                MediaSession.MediaItemsWithStartPosition(
                                                     emptyList(),
                                                     0,
                                                     0L,
-                                                )
-                                        completer.set(result)
+                                                ),
+                                            )
+                                        }
                                     }
                                 completer.addCancellationListener({ job.cancel() }, Runnable::run)
                                 "onPlaybackResumption"
@@ -242,10 +257,10 @@ class PlaybackService : MediaSessionService() {
         )
 
     override fun onDestroy() {
+        serviceScope.cancel()
         super.onDestroy()
         mediaSession.release()
         player.release()
-        serviceScope.coroutineContext.cancel()
     }
 
     companion object {

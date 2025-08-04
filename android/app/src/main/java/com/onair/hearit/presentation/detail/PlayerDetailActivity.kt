@@ -327,9 +327,7 @@ class PlayerDetailActivity :
         val controller = mediaController ?: return
         val position = controller.currentPosition
         val duration = controller.duration
-        val hearitId = playerViewModel.recentHearit.value?.id ?: return
-
-        playerViewModel.savePlaybackPosition(position, duration, hearitId)
+        playerViewModel.savePlaybackPosition(position, duration, this.hearitId)
     }
 
     companion object {
