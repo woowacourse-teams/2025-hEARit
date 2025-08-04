@@ -7,9 +7,9 @@ interface BookmarkRemoteDataSource {
     suspend fun getBookmarks(
         page: Int?,
         size: Int?,
-    ): Result<BookmarkResponse>
+    ): Result<NetworkResult<BookmarkResponse>>
 
-    suspend fun addBookmark(hearitId: Long): Result<BookmarkIdResponse>
+    suspend fun addBookmark(hearitId: Long): Result<NetworkResult<BookmarkIdResponse>>
 
-    suspend fun deleteBookmark(bookmarkId: Long): Result<Unit>
+    suspend fun deleteBookmark(bookmarkId: Long): Result<NetworkResult<Unit>>
 }

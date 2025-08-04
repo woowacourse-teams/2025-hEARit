@@ -8,52 +8,45 @@ import okhttp3.ResponseBody
 
 class MediaFileRemoteDataSourceImpl(
     private val mediaFileService: MediaFileService,
+    private val errorResponseHandler: ErrorResponseHandler,
 ) : MediaFileRemoteDataSource {
-    override suspend fun getShortAudioUrl(hearitId: Long): Result<ShortAudioUrlResponse> =
+    override suspend fun getShortAudioUrl(hearitId: Long): Result<NetworkResult<ShortAudioUrlResponse>> =
         handleApiCall(
-            errorMessage = ERROR_AUDIO_FILE_LOAD_MESSAGE,
             apiCall = { mediaFileService.getShortAudioUrl(hearitId) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
+            errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getScriptUrl(hearitId: Long): Result<ScriptUrlResponse> =
+    override suspend fun getScriptUrl(hearitId: Long): Result<NetworkResult<ScriptUrlResponse>> =
         handleApiCall(
-            errorMessage = ERROR_SCRIPT_FILE_LOAD_MESSAGE,
             apiCall = { mediaFileService.getScriptUrl(hearitId) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
+            errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getOriginalAudioUrl(hearitId: Long): Result<OriginalAudioUrlResponse> =
+    override suspend fun getOriginalAudioUrl(hearitId: Long): Result<NetworkResult<OriginalAudioUrlResponse>> =
         handleApiCall(
-            errorMessage = ERROR_AUDIO_FILE_LOAD_MESSAGE,
             apiCall = { mediaFileService.getOriginalAudioUrl(hearitId) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
+            errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getScriptJson(scriptUrl: String): Result<ResponseBody> =
-        runCatching {
-            val response = mediaFileService.getScriptJson(scriptUrl)
-
-            if (!response.isSuccessful) {
-                throw Exception("ERROR_SCRIPT_JSON_REQUEST_MESSAGE ${response.code()} ${response.message()}")
-            }
-
-            response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
-        }.fold(
-            onSuccess = { Result.success(it) },
-            onFailure = { Result.failure(Exception(ERROR_SCRIPT_JSON_REQUEST_MESSAGE, it)) },
+    override suspend fun getScriptJson(scriptUrl: String): Result<NetworkResult<ResponseBody>> =
+        handleApiCall(
+            apiCall = { mediaFileService.getScriptJson(scriptUrl) },
+            transform = { response ->
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
+            },
+            errorHandler = errorResponseHandler,
         )
 
     companion object {
-        private const val ERROR_AUDIO_FILE_LOAD_MESSAGE = "오디오 파일 조회 실패"
-        private const val ERROR_SCRIPT_FILE_LOAD_MESSAGE = "스크립트 파일 조회 실패"
-        private const val ERROR_SCRIPT_JSON_REQUEST_MESSAGE = "스크립트 JSON 요청 실패"
         private const val ERROR_RESPONSE_BODY_NULL_MESSAGE = "응답 바디가 null입니다."
     }
 }

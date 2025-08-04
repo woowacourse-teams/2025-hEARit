@@ -7,11 +7,11 @@ interface CategoryRemoteDataSource {
     suspend fun getCategories(
         page: Int?,
         size: Int?,
-    ): Result<CategoryResponse>
+    ): Result<NetworkResult<CategoryResponse>>
 
     suspend fun getHearitsByCategoryId(
         categoryId: Long,
         page: Int?,
         size: Int?,
-    ): Result<SearchHearitResponse>
+    ): Result<NetworkResult<SearchHearitResponse>>
 }

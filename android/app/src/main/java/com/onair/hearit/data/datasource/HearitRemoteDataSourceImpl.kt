@@ -10,59 +10,60 @@ import com.onair.hearit.di.TokenProvider
 
 class HearitRemoteDataSourceImpl(
     private val hearitService: HearitService,
+    private val errorResponseHandler: ErrorResponseHandler,
 ) : HearitRemoteDataSource {
-    override suspend fun getHearit(hearitId: Long): Result<HearitResponse> =
+    override suspend fun getHearit(hearitId: Long): Result<NetworkResult<HearitResponse>> =
         handleApiCall(
-            errorMessage = ERROR_HEARIT_MESSAGE,
             apiCall = { hearitService.getHearit(getAuthHeader(), hearitId) },
             transform = { response ->
                 response.body() ?: throw java.lang.IllegalStateException(
                     ERROR_RESPONSE_BODY_NULL_MESSAGE,
                 )
             },
+            errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getRecommendHearits(): Result<List<RecommendHearitResponse>> =
+    override suspend fun getRecommendHearits(): Result<NetworkResult<List<RecommendHearitResponse>>> =
         handleApiCall(
-            errorMessage = ERROR_RECOMMEND_HEARIT_MESSAGE,
             apiCall = { hearitService.getRecommendHearits() },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
+            errorHandler = errorResponseHandler,
         )
 
     override suspend fun getRandomHearits(
         page: Int?,
         size: Int?,
-    ): Result<RandomHearitResponse> =
+    ): Result<NetworkResult<RandomHearitResponse>> =
         handleApiCall(
-            errorMessage = ERROR_RANDOM_HEARIT_MESSAGE,
             apiCall = { hearitService.getRandomHearits(getAuthHeader(), page, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
+            errorHandler = errorResponseHandler,
         )
 
     override suspend fun getSearchHearits(
         searchTerm: String,
         page: Int?,
         size: Int?,
-    ): Result<SearchHearitResponse> =
+    ): Result<NetworkResult<SearchHearitResponse>> =
         handleApiCall(
-            errorMessage = ERROR_SEARCH_HEARIT_MESSAGE,
             apiCall = { hearitService.getSearchHearits(searchTerm, page, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
+            errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getCategoryHearits(): Result<List<GroupedCategoryHearitResponse>> =
+    override suspend fun getCategoryHearits(): Result<NetworkResult<List<GroupedCategoryHearitResponse>>> =
         handleApiCall(
-            errorMessage = ERROR_CATEGORY_HEARIT_MESSAGE,
             apiCall = { hearitService.getCategoryHearits() },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
+            errorHandler = errorResponseHandler,
         )
 
     private fun getAuthHeader(): String? {
@@ -75,11 +76,6 @@ class HearitRemoteDataSourceImpl(
     }
 
     companion object {
-        private const val ERROR_HEARIT_MESSAGE = "히어릿 조회 실패"
-        private const val ERROR_RECOMMEND_HEARIT_MESSAGE = "추천 히어릿 조회 실패"
-        private const val ERROR_RANDOM_HEARIT_MESSAGE = "랜덤 히어릿 조회 실패"
-        private const val ERROR_SEARCH_HEARIT_MESSAGE = "검색 히어릿 조회 실패"
-        private const val ERROR_CATEGORY_HEARIT_MESSAGE = "카테고리 별 히어릿 조회 실패"
         private const val ERROR_RESPONSE_BODY_NULL_MESSAGE = "응답 바디가 null입니다."
         private const val TOKEN = "Bearer %s"
     }
