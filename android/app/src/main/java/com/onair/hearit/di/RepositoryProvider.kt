@@ -26,6 +26,7 @@ object RepositoryProvider {
     private lateinit var appContext: Context
 
     fun init(context: Context) {
+        if (::appContext.isInitialized) return
         appContext = context.applicationContext
     }
 
