@@ -140,6 +140,15 @@ class ExploreViewModel(
                 _shortsHearits.value.orEmpty() + newItems
             }
 
-        _bookmarkId.value = newItems.associate { it.id to it.bookmarkId }
+        _bookmarkId.value =
+            if (isInitial) {
+                newItems.associate { it.id to it.bookmarkId }
+            } else {
+                _bookmarkId.value.orEmpty().toMutableMap().apply {
+                    newItems.forEach { item ->
+                        this[item.id] = item.bookmarkId
+                    }
+                }
+            }
     }
 }
