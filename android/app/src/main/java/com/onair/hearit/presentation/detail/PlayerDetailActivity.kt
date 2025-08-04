@@ -97,7 +97,12 @@ class PlayerDetailActivity :
         setupMediaController()
         setupClickListener()
 
-        logAnalytics()
+        val previousScreen = intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: "unknown"
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsScreenInfo.Detail.NAME,
+            screenClass = AnalyticsScreenInfo.Detail.CLASS,
+            previousScreen = previousScreen,
+        )
 
         supportFragmentManager.addOnBackStackChangedListener {
             val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view)
@@ -116,7 +121,7 @@ class PlayerDetailActivity :
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {}
+                override fun handleOnBackPressed() = Unit
             },
         )
     }
@@ -132,20 +137,21 @@ class PlayerDetailActivity :
 
     private fun setupClickListener() {
         binding.ibPlayerDetailBack.setOnClickListener {
-            setResult(RESULT_OK)
+            if (previousScreen == EXPLORE_SCREEN_ID) {
+                viewModel.bookmarkId.value?.let { bookmarkId ->
+                    intent =
+                        Intent().apply {
+                            putExtra(HEARIT_ID, hearitId)
+                            putExtra(BOOKMARK_ID, bookmarkId)
+                        }
+                }
+            }
+
+            setResult(RESULT_OK, intent)
             finish()
         }
 
         setupGestureListener()
-    }
-
-    private fun logAnalytics() {
-        val previousScreen = intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: "unknown"
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Detail.NAME,
-            screenClass = AnalyticsScreenInfo.Detail.CLASS,
-            previousScreen = previousScreen,
-        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
