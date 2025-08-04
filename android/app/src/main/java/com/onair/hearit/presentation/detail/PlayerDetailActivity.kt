@@ -38,11 +38,18 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.presentation.PlaybackPositionSaver
+import com.onair.hearit.presentation.PlayerViewModel
+import com.onair.hearit.presentation.PlayerViewModelFactory
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
-class PlayerDetailActivity : AppCompatActivity() {
+class PlayerDetailActivity :
+    AppCompatActivity(),
+    PlaybackPositionSaver {
     private lateinit var binding: ActivityPlayerDetailBinding
     private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
@@ -55,8 +62,19 @@ class PlayerDetailActivity : AppCompatActivity() {
     private val hearitId: Long by lazy {
         intent.getLongExtra(HEARIT_ID, -1)
     }
+
+    private val lastPosition: Long by lazy {
+        intent.getLongExtra(LAST_POSITION, 0)
+    }
+
     private val viewModel: PlayerDetailViewModel by viewModels {
         PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
+    }
+
+    private val playerViewModel: PlayerViewModel by viewModels {
+        PlayerViewModelFactory(
+            CrashlyticsProvider.get(),
+        )
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -74,7 +92,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         setupBackPressHandler()
         setupWindowInsets()
         setupScriptRecyclerView()
-        setKeywordRecyclerView()
+        setupKeywordRecyclerView()
         observeViewModel()
         setupMediaController()
         setupClickListener()
@@ -115,44 +133,6 @@ class PlayerDetailActivity : AppCompatActivity() {
             insets
         }
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
-    }
-
-    @OptIn(UnstableApi::class)
-    private fun setupMediaController() {
-        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
-
-        lifecycleScope.launch {
-            val controller =
-                MediaController
-                    .Builder(this@PlayerDetailActivity, sessionToken)
-                    .buildAsync()
-                    .await()
-
-            mediaController = controller
-            binding.playerView.player = controller
-            binding.baseController.setPlayer(controller)
-
-            val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
-            val isDifferentHearit = playingId != hearitId
-
-            if (isDifferentHearit) {
-                controller.addListener(
-                    object : Player.Listener {
-                        override fun onTimelineChanged(
-                            timeline: Timeline,
-                            reason: Int,
-                        ) {
-                            if (timeline.windowCount > 0) {
-                                controller.removeListener(this)
-                                controller.play()
-                            }
-                        }
-                    },
-                )
-            }
-
-            startScriptSync(controller)
-        }
     }
 
     private fun setupClickListener() {
@@ -210,23 +190,8 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.hearit.observe(this) { hearit ->
-            binding.hearit = hearit
-            scriptAdapter.submitList(hearit.script)
-            keywordAdapter.submitList(hearit.keywords)
-
-            val currentlyPlayingId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
-            if (currentlyPlayingId != hearit.id) {
-                startPlaybackService(
-                    audioUrl = hearit.audioUrl,
-                    title = hearit.title,
-                )
-            }
-        }
-
-        viewModel.toastMessage.observe(this) { msgResId ->
-            Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
-        }
+        observeHearit()
+        observeToast()
     }
 
     private fun startScriptSync(controller: Player) {
@@ -255,21 +220,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         handler.post(updateRunnable)
     }
 
-    private fun startPlaybackService(
-        audioUrl: String,
-        title: String,
-    ) {
-        val serviceIntent =
-            PlaybackService.newIntent(
-                context = this,
-                audioUrl = audioUrl,
-                title = title,
-                hearitId = hearitId,
-            )
-        startService(serviceIntent)
-    }
-
-    private fun setKeywordRecyclerView() {
+    private fun setupKeywordRecyclerView() {
         val layoutManager =
             FlexboxLayoutManager(this).apply {
                 flexDirection = FlexDirection.ROW
@@ -281,10 +232,102 @@ class PlayerDetailActivity : AppCompatActivity() {
         binding.layoutSeeMore.rvKeyword.adapter = keywordAdapter
     }
 
+    private fun observeHearit() {
+        viewModel.hearit.observe(this) { hearit ->
+            binding.hearit = hearit
+            scriptAdapter.submitList(hearit.script)
+            handlePlayback(hearit)
+        }
+    }
+
+    private fun handlePlayback(hearit: Hearit) {
+        val controller = mediaController ?: return
+        val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
+        val isDifferentHearit = currentlyPlayingId != hearit.id
+        val shouldResume = intent.hasExtra(LAST_POSITION) && lastPosition > 0L
+        val startPosition = if (shouldResume) lastPosition else 0L
+
+        if (isDifferentHearit) {
+            startPlaybackService(hearit.audioUrl, hearit.title, startPosition)
+        } else {
+            if (!controller.isPlaying) controller.play()
+            if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
+                controller.seekTo(startPosition)
+            }
+        }
+    }
+
+    private fun observeToast() {
+        viewModel.toastMessage.observe(this) { msgResId ->
+            Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun setupMediaController() {
+        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+
+        lifecycleScope.launch {
+            val controller =
+                MediaController
+                    .Builder(this@PlayerDetailActivity, sessionToken)
+                    .buildAsync()
+                    .await()
+
+            mediaController = controller
+            binding.playerView.player = controller
+            binding.baseController.setPlayer(controller)
+
+            val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
+            val isDifferentHearit = playingId != hearitId
+
+            if (isDifferentHearit) {
+                controller.addListener(
+                    object : Player.Listener {
+                        override fun onTimelineChanged(
+                            timeline: Timeline,
+                            reason: Int,
+                        ) {
+                            if (timeline.windowCount > 0) {
+                                controller.removeListener(this)
+                                controller.play()
+                            }
+                        }
+                    },
+                )
+            }
+
+            startScriptSync(controller)
+        }
+    }
+
+    private fun startPlaybackService(
+        audioUrl: String,
+        title: String,
+        startPosition: Long = 0L,
+    ) {
+        val serviceIntent =
+            PlaybackService.newIntent(
+                context = this,
+                audioUrl = audioUrl,
+                title = title,
+                hearitId = hearitId,
+                startPosition = startPosition,
+            )
+        startService(serviceIntent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         mediaController?.release()
+    }
+
+    override fun savePlaybackPosition() {
+        val controller = mediaController ?: return
+        val position = controller.currentPosition
+        val duration = controller.duration
+        playerViewModel.savePlaybackPosition(position, duration, this.hearitId)
     }
 
     companion object {
@@ -292,13 +335,16 @@ class PlayerDetailActivity : AppCompatActivity() {
         const val EXPLORE_SCREEN_ID = "explore"
         const val HEARIT_ID = "hearit_id"
         const val BOOKMARK_ID = "bookmark_id"
+        const val LAST_POSITION = "last_position"
 
         fun newIntent(
             context: Context,
             hearitId: Long,
+            lastPosition: Long? = null,
         ): Intent =
             Intent(context, PlayerDetailActivity::class.java).apply {
                 putExtra(HEARIT_ID, hearitId)
+                lastPosition?.let { putExtra(LAST_POSITION, it) }
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
     }

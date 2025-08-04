@@ -43,6 +43,7 @@ class BottomPlayerView
                 player = newPlayer
                 listener = PlayerListener().also { newPlayer.addListener(it) }
                 refresh()
+                post { updateProgress() }
             }
 
         fun setTitle(title: String) {
@@ -70,8 +71,11 @@ class BottomPlayerView
                         position: Long,
                         canceled: Boolean,
                     ) {
-                        player?.seekTo(position)
-                        updateProgress()
+                        player?.let {
+                            it.seekTo(position)
+                            updateProgress()
+                            (context as? PlaybackPositionSaver)?.savePlaybackPosition()
+                        }
                     }
                 },
             )
@@ -90,23 +94,24 @@ class BottomPlayerView
                 binding.exoProgress.setDuration(0)
                 return
             }
-
             timeline.getWindow(player.currentMediaItemIndex, window)
-            val duration = window.durationMs
-
+            val duration = window.durationMs.coerceAtLeast(0)
             binding.exoProgress.setDuration(duration)
             updateProgress()
         }
 
         private fun updateProgress() {
             if (!isAttachedToWindow) return
-            val current = player ?: return
-
-            binding.exoProgress.setPosition(current.currentPosition)
-            binding.exoProgress.setBufferedPosition(current.bufferedPosition)
+            val p = player ?: return
 
             removeCallbacks(progressRunnable)
-            if (current.playWhenReady && current.playbackState == Player.STATE_READY) {
+
+            if (p.playbackState == Player.STATE_READY) {
+                binding.exoProgress.setPosition(p.currentPosition)
+                binding.exoProgress.setBufferedPosition(p.bufferedPosition)
+            }
+
+            if (p.playWhenReady && p.playbackState == Player.STATE_READY) {
                 postDelayed(progressRunnable, binding.exoProgress.preferredUpdateDelay)
             }
         }
@@ -118,8 +123,16 @@ class BottomPlayerView
         }
 
         private fun togglePlayPause() {
-            player?.let {
-                if (it.playWhenReady) it.pause() else it.play()
+            val p = player
+            if (p == null) {
+                (context as? PlaybackStarter)?.startPlayback()
+                return
+            }
+            if (p.isPlaying) {
+                p.pause()
+                (context as? PlaybackPositionSaver)?.savePlaybackPosition()
+            } else {
+                p.play()
             }
         }
 
@@ -141,9 +154,10 @@ class BottomPlayerView
                 events: Player.Events,
             ) {
                 if (events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)) {
-                    player.mediaMetadata.title?.toString()?.takeIf { it.isNotBlank() }?.let {
-                        setTitle(it)
-                    }
+                    player.mediaMetadata.title
+                        ?.toString()
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { setTitle(it) }
                 }
                 if (events.contains(Player.EVENT_TIMELINE_CHANGED)) {
                     updateTimeline(player)

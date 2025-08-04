@@ -23,6 +23,7 @@ import androidx.media3.session.SessionToken
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
@@ -34,21 +35,25 @@ import com.onair.hearit.service.PlaybackService
 class MainActivity :
     AppCompatActivity(),
     DrawerClickListener,
-    PlayerControllerView {
+    PlayerControllerView,
+    PlaybackPositionSaver,
+    PlaybackStarter {
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0L
     private val backPressInterval = 1000L
+
     private var mediaController: MediaController? = null
     private var currentSelectedItemId: Int = R.id.nav_home
 
+    private var hasSentPreload = false
+
     private val playerViewModel: PlayerViewModel by viewModels {
-        PlayerViewModelFactory(
-            CrashlyticsProvider.get(),
-        )
+        PlayerViewModelFactory(CrashlyticsProvider.get())
     }
 
     override fun onResume() {
         super.onResume()
+        attachController()
         setPlayerControlViewVisibility()
     }
 
@@ -56,15 +61,25 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
         setupBackPressHandler()
         setupWindowInsets()
-        setupPlayer()
         setupNavigation()
         setupDrawer()
-
         observeViewModel()
 
         showFragment(HomeFragment())
+
+        binding.layoutBottomPlayerController.setOnClickListener {
+            val mediaId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
+            if (mediaId != null) {
+                navigateToDetail(mediaId)
+            } else {
+                playerViewModel.recentHearit.value
+                    ?.id
+                    ?.let { navigateToDetail(it) }
+            }
+        }
     }
 
     private fun setupBackPressHandler() {
@@ -100,11 +115,8 @@ class MainActivity :
     private fun setupNavigation() {
         binding.layoutBottomNavigation.itemIconTintList = null
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
-            if (item.itemId == currentSelectedItemId) {
-                return@setOnItemSelectedListener true
-            }
+            if (item.itemId == currentSelectedItemId) return@setOnItemSelectedListener true
             currentSelectedItemId = item.itemId
-
             when (item.itemId) {
                 R.id.nav_home -> {
                     setPlayerControlViewVisibility()
@@ -140,14 +152,8 @@ class MainActivity :
             showFragment(SettingFragment(), addToBackStack = true)
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
-
-        binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener {
-            openUrl(PRIVACY_POLICY_URL)
-        }
-
-        binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener {
-            openUrl(TERMS_OF_USE_URL)
-        }
+        binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
+        binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
     }
 
     private fun openUrl(url: String) {
@@ -170,17 +176,20 @@ class MainActivity :
         binding.drawerLayout.openDrawer(GravityCompat.END)
     }
 
-    @OptIn(UnstableApi::class)
-    private fun setupPlayer() {
-        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
-        val controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
-
-        controllerFuture.addListener(
+    private fun attachController() {
+        if (mediaController != null) {
+            maybePreloadRecent()
+            return
+        }
+        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        val future = MediaController.Builder(this, token).buildAsync()
+        future.addListener(
             {
-                mediaController = controllerFuture.get()
-                mediaController?.let {
-                    binding.layoutBottomPlayerController.setPlayer(it)
+                mediaController = future.get()
+                mediaController?.let { controller ->
+                    binding.layoutBottomPlayerController.setPlayer(controller)
                     setPlayerControlViewVisibility()
+                    maybePreloadRecent()
                 }
             },
             ContextCompat.getMainExecutor(this),
@@ -190,17 +199,7 @@ class MainActivity :
     private fun observeViewModel() {
         playerViewModel.recentHearit.observe(this) {
             setPlayerControlViewVisibility()
-            it?.let { playerViewModel.preparePlayback(it.id) }
-        }
-
-        playerViewModel.playbackInfo.observe(this) { playbackInfo ->
-            startPlayback(playbackInfo.audioUrl, playbackInfo.title, playbackInfo.hearitId)
-            showPlayerControlView()
-            val title =
-                playbackInfo.title.ifBlank {
-                    getString(R.string.main_bottom_player_default_title)
-                }
-            binding.layoutBottomPlayerController.setTitle(title)
+            maybePreloadRecent()
         }
 
         playerViewModel.toastMessage.observe(this) { resId ->
@@ -208,28 +207,27 @@ class MainActivity :
         }
     }
 
-    private fun startPlayback(
-        audioUrl: String,
-        title: String,
-        hearitId: Long,
-    ) {
-        val intent =
-            PlaybackService.newIntent(
-                context = this,
-                audioUrl = audioUrl,
-                title = title,
-                hearitId = hearitId,
-            )
-        ContextCompat.startForegroundService(this, intent)
+    private fun maybePreloadRecent() {
+        val controller = mediaController ?: return
+        if (hasSentPreload) return
+
+        val hasRecent = playerViewModel.recentHearit.value != null
+        val preparedOrHasItem =
+            (controller.playbackState == Player.STATE_READY) || (controller.mediaItemCount > 0)
+
+        if (hasRecent && !preparedOrHasItem) {
+            hasSentPreload = true
+            controller.sendCustomCommand(PlaybackService.PRELOAD_RECENT_COMMAND, Bundle.EMPTY)
+        }
     }
 
     private fun setPlayerControlViewVisibility() {
-        val controller = mediaController ?: return
+        val controller = mediaController
+        val isPreparedOrPlaying =
+            controller?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
+        val hasRecent = playerViewModel.recentHearit.value != null
 
-        val isRecentAvailable = playerViewModel.recentHearit.value != null
-        val isPlaying = controller.isPlaying || controller.playbackState == Player.STATE_READY
-
-        if (currentSelectedItemId != R.id.nav_explore && (isRecentAvailable || isPlaying)) {
+        if (currentSelectedItemId != R.id.nav_explore && (hasRecent || isPreparedOrPlaying)) {
             showPlayerControlView()
         } else {
             hidePlayerControlView()
@@ -247,10 +245,11 @@ class MainActivity :
 
     override fun hidePlayerControlView() {
         binding.layoutBottomPlayerController.post {
-            if (binding.layoutBottomPlayerController.translationY != binding.layoutBottomPlayerController.height.toFloat()) {
+            val target = binding.layoutBottomPlayerController.height.toFloat()
+            if (binding.layoutBottomPlayerController.translationY != target) {
                 binding.layoutBottomPlayerController
                     .animate()
-                    .translationY(binding.layoutBottomPlayerController.height.toFloat())
+                    .translationY(target)
                     .setDuration(200)
                     .start()
             }
@@ -259,16 +258,57 @@ class MainActivity :
 
     override fun pause() {
         mediaController?.pause()
+        savePlaybackPosition()
     }
 
     private fun showToast(message: String?) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
+    override fun onPause() {
+        super.onPause()
+        savePlaybackPosition()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         mediaController?.release()
         mediaController = null
+    }
+
+    override fun savePlaybackPosition() {
+        val controller = mediaController ?: return
+        val pos = controller.currentPosition
+        val dur = controller.duration
+        val hearitId = playerViewModel.recentHearit.value?.id ?: return
+        playerViewModel.savePlaybackPosition(pos, dur, hearitId)
+    }
+
+    private fun navigateToDetail(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(this, hearitId)
+        startActivity(intent)
+    }
+
+    override fun startPlayback() {
+        val controller = mediaController
+        if (controller != null) {
+            controller.play()
+            return
+        }
+
+        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        val future = MediaController.Builder(this, token).buildAsync()
+        future.addListener(
+            {
+                mediaController =
+                    future.get().also {
+                        binding.layoutBottomPlayerController.setPlayer(it)
+                        it.play()
+                    }
+                setPlayerControlViewVisibility()
+            },
+            ContextCompat.getMainExecutor(this),
+        )
     }
 
     companion object {

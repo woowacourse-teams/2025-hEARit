@@ -51,6 +51,7 @@ fun RecentHearitEntity.toDomain(): RecentHearit =
     RecentHearit(
         id = this.hearitId,
         title = this.title,
+        lastPosition = this.lastPosition,
     )
 
 fun RecommendHearitResponse.toDomain(): RecommendHearit =

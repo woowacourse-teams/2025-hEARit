@@ -186,9 +186,12 @@ class ExploreFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun navigateToDetail(hearitId: Long) {
+    private fun navigateToDetail(
+        hearitId: Long,
+        lastPosition: Long = 0L,
+    ) {
         val intent =
-            PlayerDetailActivity.newIntent(requireActivity(), hearitId).apply {
+            PlayerDetailActivity.newIntent(requireActivity(), hearitId, lastPosition).apply {
                 putExtra(AnalyticsParamKeys.SOURCE, PlayerDetailActivity.EXPLORE_SCREEN_ID)
             }
         playerDetailLauncher.launch(intent)
@@ -213,6 +216,7 @@ class ExploreFragment :
     }
 
     override fun onClickHearitInfo(hearitId: Long) {
+        val lastPosition = player.currentPosition
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,
             mapOf(
@@ -221,7 +225,7 @@ class ExploreFragment :
             ),
         )
 
-        navigateToDetail(hearitId)
+        navigateToDetail(hearitId, lastPosition)
     }
 
     override fun onClickBookmark(hearitId: Long) {

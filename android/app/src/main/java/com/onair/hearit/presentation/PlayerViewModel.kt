@@ -9,7 +9,6 @@ import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.RecentHearitRepository
-import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 import kotlinx.coroutines.launch
 
 class PlayerViewModel(
@@ -17,9 +16,6 @@ class PlayerViewModel(
     private val getPlaybackInfoUseCase: GetPlaybackInfoUseCase,
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
-    private val _playbackInfo = MutableLiveData<PlaybackInfo>()
-    val playbackInfo: LiveData<PlaybackInfo> = _playbackInfo
-
     private val _recentHearit = MutableLiveData<RecentHearit?>()
     val recentHearit: LiveData<RecentHearit?> = _recentHearit
 
@@ -30,25 +26,33 @@ class PlayerViewModel(
         fetchRecentHearit()
     }
 
-    fun preparePlayback(hearitId: Long) {
-        viewModelScope.launch {
-            getPlaybackInfoUseCase(hearitId)
-                .onSuccess { _playbackInfo.value = it }
-                .onFailure { _toastMessage.value = R.string.main_toast_load_player_hearit_fail }
-        }
-    }
-
     private fun fetchRecentHearit() {
         viewModelScope.launch {
             recentHearitRepository
                 .getRecentHearit()
                 .onSuccess { recent ->
                     _recentHearit.value = recent
-                    if (recent != null) {
-                        preparePlayback(recent.id)
-                    }
                 }.onFailure {
                     _toastMessage.value = R.string.main_toast_recent_load_fail
+                }
+        }
+    }
+
+    fun savePlaybackPosition(
+        position: Long,
+        duration: Long,
+        hearitId: Long,
+    ) {
+        if (duration <= 0) return
+        val isFinished = position >= duration - 1000
+
+        viewModelScope.launch {
+            recentHearitRepository
+                .updateRecentHearitPosition(
+                    hearitId = hearitId,
+                    position = if (isFinished) 0L else position,
+                ).onFailure {
+                    _toastMessage.value = R.string.main_toast_player_last_position_save_fail
                 }
         }
     }

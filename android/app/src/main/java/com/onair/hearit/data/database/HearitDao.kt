@@ -21,4 +21,10 @@ interface HearitDao {
 
     @Query("DELETE FROM search_history")
     suspend fun deleteKeywords()
+
+    @Query("UPDATE recent_hearit SET lastPosition = :position WHERE hearitId = :hearitId")
+    suspend fun updateLastPosition(
+        hearitId: Long,
+        position: Long,
+    )
 }

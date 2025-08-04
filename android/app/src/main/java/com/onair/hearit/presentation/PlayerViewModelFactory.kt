@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
+import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
+import com.onair.hearit.data.repository.RecentHearitRepositoryImpl
+import com.onair.hearit.di.DatabaseProvider
 
 @Suppress("UNCHECKED_CAST")
 class PlayerViewModelFactory(
@@ -22,5 +25,11 @@ class PlayerViewModelFactory(
             getPlaybackInfoUseCase,
             crashlyticsLogger,
         ) as T
+        val hearitLocalDataSource =
+            HearitLocalDataSourceImpl(DatabaseProvider.hearitDao, crashlyticsLogger)
+        val recentHearitRepository =
+            RecentHearitRepositoryImpl(hearitLocalDataSource, crashlyticsLogger)
+
+        return PlayerViewModel(recentHearitRepository) as T
     }
 }

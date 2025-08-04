@@ -15,6 +15,7 @@ import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutControllerBinding
+import com.onair.hearit.presentation.PlaybackPositionSaver
 import java.util.Formatter
 import java.util.Locale
 
@@ -127,7 +128,12 @@ class BaseControllerView
         }
 
         private fun dispatchPlayPause() {
-            if (player.playWhenReady) player.pause() else player.play()
+            if (player.playWhenReady) {
+                player.pause()
+                (context as? PlaybackPositionSaver)?.savePlaybackPosition()
+            } else {
+                player.play()
+            }
         }
 
         private fun setNextSpeed() {
@@ -184,6 +190,8 @@ class BaseControllerView
             ) {
                 player.seekTo(position)
                 updateProgress()
+
+                (context as? PlaybackPositionSaver)?.savePlaybackPosition()
             }
 
             override fun onClick(v: View?) {

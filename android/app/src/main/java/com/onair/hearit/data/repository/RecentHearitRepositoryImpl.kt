@@ -13,4 +13,15 @@ class RecentHearitRepositoryImpl(
 
     override suspend fun saveRecentHearit(recentHearit: RecentHearit): Result<Unit> =
         hearitLocalDataSource.saveRecentHearit(recentHearit.toData())
+        handleResult(crashlyticsLogger) {
+            hearitLocalDataSource.saveRecentHearit(recentHearit.toData())
+        }
+
+    override suspend fun updateRecentHearitPosition(
+        hearitId: Long,
+        position: Long,
+    ): Result<Unit> =
+        handleResult(crashlyticsLogger) {
+            hearitLocalDataSource.updateRecentHearitPosition(hearitId, position)
+        }
 }
