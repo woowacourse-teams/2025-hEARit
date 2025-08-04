@@ -186,7 +186,10 @@ class ExploreFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun navigateToDetail(hearitId: Long, lastPosition: Long = 0L,) {
+    private fun navigateToDetail(
+        hearitId: Long,
+        lastPosition: Long = 0L,
+    ) {
         val intent =
             PlayerDetailActivity.newIntent(requireActivity(), hearitId, lastPosition).apply {
                 putExtra(AnalyticsParamKeys.SOURCE, PlayerDetailActivity.EXPLORE_SCREEN_ID)
