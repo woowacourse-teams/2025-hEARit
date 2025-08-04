@@ -1,7 +1,7 @@
 package com.onair.hearit.data.repository
 
 import com.onair.hearit.data.datasource.HearitRemoteDataSource
-import com.onair.hearit.data.toDomain
+import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RandomHearit
@@ -14,35 +14,25 @@ class HearitRepositoryImpl(
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
     override suspend fun getHearit(hearitId: Long): Result<SingleHearit> =
-        handleResult {
-            val response = hearitRemoteDataSource.getHearit(hearitId).getOrThrow()
-            response.toDomain()
-        }
+        hearitRemoteDataSource.getHearit(hearitId).mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =
-        hearitRemoteDataSource.getRecommendHearits().mapCatching { responseList ->
-            responseList.map { it.toDomain() }
-        }
+        hearitRemoteDataSource.getRecommendHearits().mapListOrThrowDomain { it.toDomain() }
 
     override suspend fun getRandomHearits(
         page: Int?,
         size: Int?,
-    ): Result<PageResult<RandomHearit>> =
-        handleResult {
-            hearitRemoteDataSource.getRandomHearits(page, size).getOrThrow().toDomain()
-        }
+    ): Result<PageResult<RandomHearit>> = hearitRemoteDataSource.getRandomHearits(page, size).mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getSearchHearits(
         searchTerm: String,
         page: Int?,
         size: Int?,
     ): Result<PageResult<SearchedHearit>> =
-        handleResult {
-            hearitRemoteDataSource.getSearchHearits(searchTerm, page, size).getOrThrow().toDomain()
-        }
+        hearitRemoteDataSource
+            .getSearchHearits(searchTerm, page, size)
+            .mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getCategoryHearits(): Result<List<GroupedCategory>> =
-        handleResult {
-            hearitRemoteDataSource.getCategoryHearits().getOrThrow().map { it.toDomain() }
-        }
+        hearitRemoteDataSource.getCategoryHearits().mapListOrThrowDomain { it.toDomain() }
 }

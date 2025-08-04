@@ -1,7 +1,7 @@
 package com.onair.hearit.data.repository
 
 import com.onair.hearit.data.datasource.CategoryRemoteDataSource
-import com.onair.hearit.data.toDomain
+import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.SearchedHearit
@@ -13,20 +13,14 @@ class CategoryRepositoryImpl(
     override suspend fun getCategories(
         page: Int?,
         size: Int?,
-    ): Result<PageResult<Category>> =
-        handleResult {
-            categoryDataSource.getCategories(page, size).getOrThrow().toDomain()
-        }
+    ): Result<PageResult<Category>> = categoryDataSource.getCategories(page, size).mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getHearitsByCategoryId(
         categoryId: Long,
         page: Int?,
         size: Int?,
     ): Result<PageResult<SearchedHearit>> =
-        handleResult {
-            categoryDataSource
-                .getHearitsByCategoryId(categoryId, page, size)
-                .getOrThrow()
-                .toDomain()
-        }
+        categoryDataSource
+            .getHearitsByCategoryId(categoryId, page, size)
+            .mapOrThrowDomain { it.toDomain() }
 }

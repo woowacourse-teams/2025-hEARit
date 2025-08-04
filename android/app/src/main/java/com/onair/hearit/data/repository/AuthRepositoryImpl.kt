@@ -8,9 +8,7 @@ class AuthRepositoryImpl(
     private val authRemoteDataSource: AuthRemoteDataSource,
 ) : AuthRepository {
     override suspend fun kakaoLogin(accessToken: String): Result<String> =
-        handleResult {
-            val response =
-                authRemoteDataSource.kakaoLogin(KakaoLoginRequest(accessToken)).getOrThrow()
-            response.accessToken
-        }
+        authRemoteDataSource
+            .kakaoLogin(KakaoLoginRequest(accessToken))
+            .mapOrThrowDomain { it.accessToken }
 }

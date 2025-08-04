@@ -14,48 +14,40 @@ class MediaFileRepositoryImpl(
     private val mediaFileRemoteDataSource: MediaFileRemoteDataSource,
 ) : MediaFileRepository {
     override suspend fun getShortAudioUrl(hearitId: Long): Result<ShortAudioUrl> =
-        handleResult {
-            val response =
-                mediaFileRemoteDataSource
-                    .getShortAudioUrl(hearitId)
-                    .getOrElse { throw it }
-            ShortAudioUrl(id = response.id, url = response.url)
-        }
+        mediaFileRemoteDataSource
+            .getShortAudioUrl(hearitId)
+            .mapOrThrowDomain { response -> ShortAudioUrl(id = response.id, url = response.url) }
 
     override suspend fun getScriptLines(hearitId: Long): Result<List<ScriptLine>> =
-        handleResult {
-            val scriptUrl =
-                mediaFileRemoteDataSource.getScriptUrl(hearitId).getOrElse { throw it }.url
-            val responseBody =
-                mediaFileRemoteDataSource.getScriptJson(scriptUrl).getOrElse { throw it }
-            val jsonString = responseBody.string()
-            Json.decodeFromString(jsonString)
-        }
+        mediaFileRemoteDataSource
+            .getScriptUrl(hearitId)
+            .mapOrThrowDomain { it.url }
+            .flatMap { scriptUrl ->
+                mediaFileRemoteDataSource
+                    .getScriptJson(scriptUrl)
+                    .mapOrThrowDomain { responseBody ->
+                        val jsonString = responseBody.string()
+                        Json.decodeFromString(jsonString)
+                    }
+            }
 
     override suspend fun getOriginalAudioUrl(hearitId: Long): Result<OriginalAudioUrl> =
-        handleResult {
-            val response =
-                mediaFileRemoteDataSource
-                    .getOriginalAudioUrl(hearitId)
-                    .getOrElse { throw it }
-            OriginalAudioUrl(id = response.id, url = response.url)
-        }
+        mediaFileRemoteDataSource
+            .getOriginalAudioUrl(hearitId)
+            .mapOrThrowDomain { response -> OriginalAudioUrl(id = response.id, url = response.url) }
 
     override suspend fun getOriginalHearitItem(item: SingleHearit): Result<Hearit> = combineHearit(item)
 
     private suspend fun combineHearit(item: SingleHearit): Result<Hearit> =
-        handleResult {
-            val hearitId = item.id
+        getOriginalAudioUrl(item.id)
+            .mapCatching {
+                it.url
+            }.flatMap { audioUrl ->
+                getScriptLines(item.id).mapCatching { scriptLines ->
+                    item.toHearit(audioUrl, scriptLines)
+                }
+            }
 
-            val audioUrl =
-                getOriginalAudioUrl(hearitId)
-                    .getOrElse { throw it }
-                    .url
-
-            val scriptList =
-                getScriptLines(hearitId)
-                    .getOrElse { throw it }
-
-            item.toHearit(audioUrl, scriptList)
-        }
+    private inline fun <T, R> Result<T>.flatMap(transform: (T) -> Result<R>): Result<R> =
+        fold(onSuccess = { transform(it) }, onFailure = { Result.failure(it) })
 }
