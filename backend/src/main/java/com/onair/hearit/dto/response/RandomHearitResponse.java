@@ -10,7 +10,7 @@ public record RandomHearitResponse(
         String title,
         Boolean isBookmarked,
         Long bookmarkId,
-        List<RandomHearitResponse.KeywordResponse> keywords
+        List<KeywordResponse> keywords
 ) {
     public static RandomHearitResponse from(Hearit hearit, List<Keyword> keywords) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
@@ -34,9 +34,9 @@ public record RandomHearitResponse(
         );
     }
 
-    private static List<RandomHearitResponse.KeywordResponse> getKeywordNames(List<Keyword> keywords) {
+    private static List<KeywordResponse> getKeywordNames(List<Keyword> keywords) {
         return keywords.stream()
-                .map(RandomHearitResponse.KeywordResponse::from)
+                .map(KeywordResponse::from)
                 .toList();
     }
 
@@ -44,8 +44,8 @@ public record RandomHearitResponse(
             Long id,
             String name
     ) {
-        public static RandomHearitResponse.KeywordResponse from(Keyword keyword) {
-            return new RandomHearitResponse.KeywordResponse(
+        public static KeywordResponse from(Keyword keyword) {
+            return new KeywordResponse(
                     keyword.getId(),
                     keyword.getName()
             );
