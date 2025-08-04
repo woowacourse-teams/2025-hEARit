@@ -16,9 +16,7 @@ class HearitRemoteDataSourceImpl(
         handleApiCall(
             apiCall = { hearitService.getHearit(getAuthHeader(), hearitId) },
             transform = { response ->
-                response.body() ?: throw java.lang.IllegalStateException(
-                    ERROR_RESPONSE_BODY_NULL_MESSAGE,
-                )
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
             errorHandler = errorResponseHandler,
         )

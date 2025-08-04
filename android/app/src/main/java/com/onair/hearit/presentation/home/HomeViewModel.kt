@@ -1,12 +1,12 @@
 package com.onair.hearit.presentation.home
 
-import android.security.keystore.UserNotAuthenticatedException
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.CrashlyticsLogger
+import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.UserInfo
@@ -86,7 +86,7 @@ class HomeViewModel(
                     _userInfo.value = userInfo
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotAuthenticatedException -> {
+                        is UserNotRegisteredException -> {
                             // 등록되지 않은 유저인 경우 (정상 응답)
                             val defaultUserInfo =
                                 UserInfo(

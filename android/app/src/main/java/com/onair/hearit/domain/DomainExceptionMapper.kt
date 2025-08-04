@@ -1,6 +1,5 @@
 package com.onair.hearit.domain
 
-import android.security.keystore.UserNotAuthenticatedException
 import com.onair.hearit.data.datasource.NetworkResult
 
 object DomainExceptionMapper {
@@ -15,7 +14,7 @@ object DomainExceptionMapper {
             is NetworkResult.Failure.Unknown ->
                 IllegalStateException(ERROR_NETWORK_MESSAGE)
 
-            NetworkResult.Failure.UnAuthorized -> UserNotAuthenticatedException()
+            NetworkResult.Failure.UnAuthorized -> UserNotRegisteredException()
         }
 
     private const val ERROR_NETWORK_MESSAGE = "알 수 없는 네트워크 오류"
