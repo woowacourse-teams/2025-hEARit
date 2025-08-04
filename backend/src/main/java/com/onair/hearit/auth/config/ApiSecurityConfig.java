@@ -3,7 +3,7 @@ package com.onair.hearit.auth.config;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.common.log.FilterErrorLogger;
+import com.onair.hearit.common.log.FilterExceptionLogger;
 import com.onair.hearit.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import java.util.Arrays;
@@ -38,7 +38,7 @@ public class ApiSecurityConfig {
 
     private final ObjectMapper objectMapper;
     private final JwtTokenProvider jwtTokenProvider;
-    private final FilterErrorLogger filterErrorLogger;
+    private final FilterExceptionLogger filterExceptionLogger;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -57,7 +57,7 @@ public class ApiSecurityConfig {
                         .anyRequest().authenticated()
                 ).addFilterBefore(
                         new JwtAuthenticationFilter(Arrays.stream(AUTH_WHITELIST).toList(), objectMapper,
-                                jwtTokenProvider, filterErrorLogger),
+                                jwtTokenProvider, filterExceptionLogger),
                         UsernamePasswordAuthenticationFilter.class
                 ).build();
     }
