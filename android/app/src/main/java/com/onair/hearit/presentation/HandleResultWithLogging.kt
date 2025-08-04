@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation
 
+import com.onair.hearit.BuildConfig
 import com.onair.hearit.analytics.CrashlyticsLogger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -22,17 +23,15 @@ inline fun <T> Result<T>.foldWithCrashlytics(
     logger: CrashlyticsLogger,
     onSuccess: (T) -> Unit,
     onFailure: (Throwable) -> Unit,
-): Result<T> =
-    this.fold(
-        onSuccess = {
-            onSuccess(it)
-            Result.success(it)
-        },
-        onFailure = {
-            if (it !is IOException) {
-                logger.recordException(it)
-            }
-            onFailure(it)
-            Result.failure(it)
-        },
-    )
+) = this.fold(
+    onSuccess = { onSuccess(it) },
+    onFailure = {
+        if (BuildConfig.DEBUG) {
+            it.printStackTrace()
+        }
+        if (it !is IOException) {
+            logger.recordException(it)
+        }
+        onFailure(it)
+    },
+)
