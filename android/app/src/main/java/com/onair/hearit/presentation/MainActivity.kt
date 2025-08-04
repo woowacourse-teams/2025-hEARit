@@ -101,8 +101,8 @@ class MainActivity :
 
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.customDrawer) { v, insets ->
-            val sys = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, sys.top, 0, sys.bottom)
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, systemBars.top, 0, systemBars.bottom)
             insets
         }
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
@@ -222,9 +222,9 @@ class MainActivity :
     }
 
     private fun setPlayerControlViewVisibility() {
-        val c = mediaController
+        val controller = mediaController
         val isPreparedOrPlaying =
-            c?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
+            controller?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
         val hasRecent = playerViewModel.recentHearit.value != null
 
         if (currentSelectedItemId != R.id.nav_explore && (hasRecent || isPreparedOrPlaying)) {
@@ -277,9 +277,9 @@ class MainActivity :
     }
 
     override fun savePlaybackPosition() {
-        val c = mediaController ?: return
-        val pos = c.currentPosition
-        val dur = c.duration
+        val controller = mediaController ?: return
+        val pos = controller.currentPosition
+        val dur = controller.duration
         val hearitId = playerViewModel.recentHearit.value?.id ?: return
         playerViewModel.savePlaybackPosition(pos, dur, hearitId)
     }
