@@ -92,7 +92,8 @@ swaggerSources {
 openapi3 {
     servers = [
             { url = "http://localhost:80"; description = "로컬 서버" },
-            { url = "http://hearit.o-r.kr"; description = "운영 서버" }
+            { url = "http://hearit.o-r.kr"; description = "운영 서버" },
+            { url = "http://hearit-dev.o-r.kr"; description = "개발 서버" }
     ]
     title = "Hearit API 문서"
     description = "Spring REST Docs와 Swagger UI를 이용한 API 명세서"
