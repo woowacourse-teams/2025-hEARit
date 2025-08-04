@@ -9,7 +9,6 @@ class MemberRemoteDataSourceImpl(
     private val errorResponseHandler: ErrorResponseHandler,
 ) : MemberRemoteDataSource {
     override suspend fun getUserInfo(): Result<NetworkResult<UserInfoResponse>> =
-
         handleApiCall(
             apiCall = { memberService.getUserInfo(getAuthHeader()) },
             transform = { response ->
