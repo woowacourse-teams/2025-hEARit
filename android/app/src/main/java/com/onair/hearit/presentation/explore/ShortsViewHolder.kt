@@ -46,8 +46,7 @@ class ShortsViewHolder(
         player.playWhenReady = true
 
         binding.btnExploreItemBookmark.setOnClickListener {
-            binding.btnExploreItemBookmark.isSelected =
-                binding.btnExploreItemBookmark.isSelected.not()
+            binding.btnExploreItemBookmark.isSelected = !binding.btnExploreItemBookmark.isSelected
             shortsClickListener.onClickBookmark(item.id)
         }
 

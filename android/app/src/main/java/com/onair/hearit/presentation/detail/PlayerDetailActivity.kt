@@ -49,6 +49,9 @@ class PlayerDetailActivity : AppCompatActivity() {
 
     private var mediaController: MediaController? = null
 
+    private val previousScreen by lazy {
+        intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: UNKNOWN_SCREEN_ID
+    }
     private val hearitId: Long by lazy {
         intent.getLongExtra(HEARIT_ID, -1)
     }
@@ -100,7 +103,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {}
+                override fun handleOnBackPressed() = Unit
             },
         )
     }
@@ -154,7 +157,17 @@ class PlayerDetailActivity : AppCompatActivity() {
 
     private fun setupClickListener() {
         binding.ibPlayerDetailBack.setOnClickListener {
-            setResult(RESULT_OK)
+            if (previousScreen == EXPLORE_SCREEN_ID) {
+                viewModel.bookmarkId.value?.let { bookmarkId ->
+                    intent =
+                        Intent().apply {
+                            putExtra(HEARIT_ID, hearitId)
+                            putExtra(BOOKMARK_ID, bookmarkId)
+                        }
+                }
+            }
+
+            setResult(RESULT_OK, intent)
             finish()
         }
 
@@ -200,6 +213,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         viewModel.hearit.observe(this) { hearit ->
             binding.hearit = hearit
             scriptAdapter.submitList(hearit.script)
+            keywordAdapter.submitList(hearit.keywords)
 
             val currentlyPlayingId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
             if (currentlyPlayingId != hearit.id) {
@@ -208,10 +222,6 @@ class PlayerDetailActivity : AppCompatActivity() {
                     title = hearit.title,
                 )
             }
-        }
-
-        viewModel.keywords.observe(this) { keywords ->
-            keywordAdapter.submitList(keywords)
         }
 
         viewModel.toastMessage.observe(this) { msgResId ->
@@ -278,7 +288,10 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     companion object {
+        const val UNKNOWN_SCREEN_ID = "unknown"
+        const val EXPLORE_SCREEN_ID = "explore"
         const val HEARIT_ID = "hearit_id"
+        const val BOOKMARK_ID = "bookmark_id"
 
         fun newIntent(
             context: Context,
