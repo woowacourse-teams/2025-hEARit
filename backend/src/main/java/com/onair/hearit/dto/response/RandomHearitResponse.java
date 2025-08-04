@@ -19,7 +19,8 @@ public record RandomHearitResponse(
                 hearit.getTitle(),
                 false,
                 null,
-                keywordResponses);
+                keywordResponses
+        );
     }
 
     public static RandomHearitResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords) {
@@ -29,11 +30,14 @@ public record RandomHearitResponse(
                 hearit.getTitle(),
                 true,
                 bookmark.getId(),
-                keywordResponses);
+                keywordResponses
+        );
     }
 
     private static List<RandomHearitResponse.KeywordResponse> getKeywordNames(List<Keyword> keywords) {
-        return keywords.stream().map(RandomHearitResponse.KeywordResponse::from).toList();
+        return keywords.stream()
+                .map(RandomHearitResponse.KeywordResponse::from)
+                .toList();
     }
 
     private record KeywordResponse(
