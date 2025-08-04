@@ -110,7 +110,7 @@ class BaseControllerView
 
             removeCallbacks(progressRunnable)
             if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-                postDelayed(progressRunnable, timeBar.preferredUpdateDelay)
+                postDelayed(progressRunnable, 1000L)
             }
         }
 
