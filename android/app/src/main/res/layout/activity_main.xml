@@ -4,13 +4,6 @@
 
     <data>
 
-        <variable
-            name="listener"
-            type="com.onair.hearit.presentation.home.HearitClickListener" />
-
-        <variable
-            name="hearitId"
-            type="Long" />
     </data>
 
     <androidx.drawerlayout.widget.DrawerLayout
@@ -40,7 +33,6 @@
                 android:layout_marginHorizontal="12dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:onClick="@{() -> listener.onClick(hearitId)}"
                 app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
                 app:show_timeout="0" />
 
