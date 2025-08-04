@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.boot.logging.LogLevel;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
