@@ -7,10 +7,6 @@ import java.time.LocalDateTime;
 public record RandomHearitResponse(
         Long id,
         String title,
-        String summary,
-        String source,
-        Integer playTime,
-        LocalDateTime createdAt,
         Boolean isBookmarked,
         Long bookmarkId
 ) {
@@ -18,10 +14,6 @@ public record RandomHearitResponse(
         return new RandomHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
-                hearit.getSummary(),
-                hearit.getSource(),
-                hearit.getPlayTime(),
-                hearit.getCreatedAt(),
                 false,
                 null);
     }
@@ -30,10 +22,6 @@ public record RandomHearitResponse(
         return new RandomHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
-                hearit.getSummary(),
-                hearit.getSource(),
-                hearit.getPlayTime(),
-                hearit.getCreatedAt(),
                 true,
                 bookmark.getId());
     }
