@@ -9,7 +9,7 @@ name: Backend CD to EC2 for dev
 
 on:
   pull_request:
-    branches: [ "fix/#241-hearit-create-filecountlimitexceededexception" ]
+    branches: [ "develop-be", "fix/#241-hearit-create-filecountlimitexceededexception" ]
   workflow_dispatch:
 
 jobs:
