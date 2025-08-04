@@ -18,7 +18,6 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
-import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
@@ -254,8 +253,11 @@ class HearitControllerTest extends IntegrationTest {
                                                 Arrays.stream(new FieldDescriptor[]{
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
-                                                        fieldWithPath("content[].summary").description("히어릿 요약"),
-                                                        fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)")
+                                                        fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
+                                                        fieldWithPath("content[].keywords").description(
+                                                                "히어릿에 포함된 키워드 목록"),
+                                                        fieldWithPath("content[].keywords[].id").description("키워드 ID"),
+                                                        fieldWithPath("content[].keywords[].name").description("키워드 이름")
                                                 }),
                                                 Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
@@ -339,7 +341,7 @@ class HearitControllerTest extends IntegrationTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("카테고리별 그룹화된 히어릿 조회")
-                                .description("홈 화면에 표시될 카테고리별 최신 히어릿 목록을 조회합니다. (고정 3개 카테고리, 카테고리당 최신 5개)")
+                                .description("카테고리와 카테고리별로 그룹화된 히어릿들을 목록을 조회합니다. (고정 3개 카테고리, 카테고리당 최신 5개)")
                                 .responseSchema(Schema.schema("GroupedHearitsWithCategoryResponseList"))
                                 .responseFields(
                                         fieldWithPath("[].categoryId").description("카테고리 ID"),
@@ -376,16 +378,42 @@ class HearitControllerTest extends IntegrationTest {
         Category category1 = dbHelper.insertCategory(new Category("Spring", "#000001"));
         Category category2 = dbHelper.insertCategory(new Category("Java", "#000002"));
 
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2)); // 다른 카테고리
+        Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Hearit hearit1 = saveHearitWithCategoryAndKeyword(category1, keyword);
+        Hearit hearit2 = saveHearitWithCategoryAndKeyword(category1, keyword);
+        Hearit hearit3 = saveHearitWithCategoryAndKeyword(category2, keyword); // 카테고리 2의 히어릿
 
         // when
-        PagedResponse<HearitOfCategoryResponse> pagedResponse = RestAssured
-                .given()
+        PagedResponse<HearitSearchResponse> pagedResponse = RestAssured.given(this.spec)
                 .queryParam("categoryId", category1.getId())
                 .queryParam("page", 0)
                 .queryParam("size", 10)
+                .filter(document("category-search-hearits",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Category API")
+                                .summary("카테고리별 히어릿 목록 조회")
+                                .description("특정 카테고리에 속한 히어릿 목록을 페이지별로 조회합니다.")
+                                .queryParameters(
+                                        parameterWithName("categoryId").description("조회할 카테고리의 ID"),
+                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
+                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
+                                )
+                                .responseSchema(Schema.schema("PagedHearitSearchResponse"))
+                                .responseFields(
+                                        Stream.concat(
+                                                Arrays.stream(new FieldDescriptor[]{
+                                                        fieldWithPath("content[].id").description("히어릿 ID"),
+                                                        fieldWithPath("content[].title").description("히어릿 제목"),
+                                                        fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
+                                                        fieldWithPath("content[].keywords").description("관련 키워드 목록"),
+                                                        fieldWithPath("content[].keywords[].id").description("키워드 ID"),
+                                                        fieldWithPath("content[].keywords[].name").description("키워드 이름")
+                                                }),
+                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
+                                        ).toArray(FieldDescriptor[]::new)
+                                )
+                                .build())
+                ))
                 .when()
                 .get("/api/v1/hearits")
                 .then()
@@ -393,7 +421,7 @@ class HearitControllerTest extends IntegrationTest {
                 .extract()
                 .as(new TypeRef<>() {
                 });
-        List<HearitOfCategoryResponse> responses = pagedResponse.content();
+        List<HearitSearchResponse> responses = pagedResponse.content();
 
         // then
         assertAll(
@@ -401,6 +429,51 @@ class HearitControllerTest extends IntegrationTest {
                 () -> assertThat(responses.get(0).id()).isEqualTo(hearit2.getId()), // 최신 hearit 먼저
                 () -> assertThat(responses.get(1).id()).isEqualTo(hearit1.getId())
         );
+    }
+
+
+    @Test
+    @DisplayName("존재하지 않는 카테고리로 히어릿 검색 시 404 NOT_FOUND를 반환한다.")
+    void searchHearitsByCategoryWithNotFoundCategory() {
+        // given
+        Long notFoundCategoryId = 9999L;
+
+        // when & then
+        RestAssured.given(this.spec)
+                .pathParam("categoryId", notFoundCategoryId)
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .filter(document("category-search-hearits-not-found",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Category API")
+                                .summary("카테고리별 히어릿 목록 조회")
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/categories/{categoryId}/hearits")
+                .then()
+                .statusCode(HttpStatus.NOT_FOUND.value());
+    }
+
+    @Test
+    @DisplayName("전체 카테고리 조회 시 유효하지 않은 페이지 번호를 보내면 400 BAD_REQUEST를 반환한다.")
+    void readAllCategoriesWithInvalidPage() {
+        // when & then
+        RestAssured.given(this.spec)
+                .param("page", -1)
+                .param("size", 10)
+                .filter(document("category-read-list-bad-request",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Category API")
+                                .summary("전체 카테고리 목록 조회")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/categories")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     private String generateToken(Member member) {
@@ -411,6 +484,21 @@ class HearitControllerTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = new Hearit(
                 title,
+                "summary",
+                100,
+                "originalAudioUrl",
+                "shortAudioUrl",
+                "scriptUrl",
+                "source",
+                category);
+        Hearit savedHearit = dbHelper.insertHearit(hearit);
+        dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
+        return savedHearit;
+    }
+
+    private Hearit saveHearitWithCategoryAndKeyword(Category category, Keyword keyword) {
+        Hearit hearit = new Hearit(
+                "title",
                 "summary",
                 100,
                 "originalAudioUrl",
