@@ -1,6 +1,5 @@
 package com.onair.hearit.application;
 
-import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CategoryResponse;
