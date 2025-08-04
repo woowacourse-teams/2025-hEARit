@@ -165,6 +165,8 @@ class ScriptFragment : Fragment() {
                         adapter.currentList.firstOrNull { pos in it.start until it.end }
                     val currentIndex = adapter.currentList.indexOf(currentItem)
 
+                    // 사용자가 스크롤을 멈춘 시점을 체크함
+                    // 사용자가 스크롤을 멈춤 + 하이라이트 부분을 보고 있을 때 3초 후에 다시 포커싱함
                     if (isUserScrolling) {
                         val isVisible = isItemVisible(currentIndex)
 
@@ -173,9 +175,13 @@ class ScriptFragment : Fragment() {
                         }
                     }
 
-                    if (!isUserScrolling && currentItem != null) {
+                    // 하이라이트는 항상 진행하도록 함
+                    if (currentItem != null) {
                         adapter.highlightScriptLine(currentItem.id)
+                    }
 
+                    // 스크롤 이동은 사용자가 스크롤 중이 아닐 때만
+                    if (!isUserScrolling && currentItem != null) {
                         val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
                         (binding.rvScript.layoutManager as LinearLayoutManager)
                             .scrollToPositionWithOffset(currentIndex, centerOffset)
