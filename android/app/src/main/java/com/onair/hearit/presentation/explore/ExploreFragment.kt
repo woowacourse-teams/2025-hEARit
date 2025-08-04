@@ -48,12 +48,20 @@ class ExploreFragment :
                 (activity as? PlayerControllerView)?.apply {
                     pause()
                     hidePlayerControlView()
+
+                    val hearitId = result.data?.getLongExtra(HEARIT_ID, -1) ?: -1
+                    val bookmarkId =
+                        result.data?.getLongExtra(BOOKMARK_ID, -1L).takeIf { it != -1L }
+
+                    if (hearitId != -1L) {
+                        updateBookmarkState(hearitId, bookmarkId)
+                    }
                 }
             }
         }
 
-    private var currentPosition = 0
-    private var swipeCount = 0
+    var currentPosition = 0
+    var swipeCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -178,12 +186,30 @@ class ExploreFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun navigateToDetail(
-        hearitId: Long,
-        lastPosition: Long = 0L,
-    ) {
-        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId, lastPosition)
+    private fun navigateToDetail(hearitId: Long, lastPosition: Long = 0L,) {
+        val intent =
+            PlayerDetailActivity.newIntent(requireActivity(), hearitId, lastPosition).apply {
+                putExtra(AnalyticsParamKeys.SOURCE, PlayerDetailActivity.EXPLORE_SCREEN_ID)
+            }
         playerDetailLauncher.launch(intent)
+    }
+
+    private fun updateBookmarkState(
+        hearitId: Long,
+        bookmarkId: Long?,
+    ) {
+        val updatedList =
+            adapter.currentList.map { item ->
+                if (item.id == hearitId) {
+                    item.copy(
+                        bookmarkId = bookmarkId,
+                        isBookmarked = bookmarkId != null,
+                    )
+                } else {
+                    item
+                }
+            }
+        adapter.submitList(updatedList)
     }
 
     override fun onClickHearitInfo(hearitId: Long) {
@@ -191,7 +217,7 @@ class ExploreFragment :
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,
             mapOf(
-                AnalyticsParamKeys.SOURCE to "explore",
+                AnalyticsParamKeys.SOURCE to EXPLORE_SCREEN_ID,
                 AnalyticsParamKeys.ITEM_ID to hearitId.toString(),
             ),
         )
@@ -216,5 +242,11 @@ class ExploreFragment :
     override fun onDestroy() {
         super.onDestroy()
         player.release()
+    }
+
+    companion object {
+        const val EXPLORE_SCREEN_ID = "explore"
+        const val HEARIT_ID = "hearit_id"
+        const val BOOKMARK_ID = "bookmark_id"
     }
 }

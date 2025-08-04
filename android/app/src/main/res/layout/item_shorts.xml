@@ -31,11 +31,9 @@
             android:layout_marginBottom="230dp"
             android:background="@drawable/bookmark_selector"
             android:contentDescription="@null"
-            android:onClick="@{() -> shortsClickListener.onClickBookmark(hearitItem.id)}"
             app:layout_constraintBottom_toBottomOf="@id/layout_sound_wave"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:setSelectedState="@{hearitItem.isBookmarked}" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_top_5"

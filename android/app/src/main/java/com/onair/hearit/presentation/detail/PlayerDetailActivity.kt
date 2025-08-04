@@ -56,6 +56,9 @@ class PlayerDetailActivity :
 
     private var mediaController: MediaController? = null
 
+    private val previousScreen by lazy {
+        intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: UNKNOWN_SCREEN_ID
+    }
     private val hearitId: Long by lazy {
         intent.getLongExtra(HEARIT_ID, -1)
     }
@@ -331,7 +334,10 @@ class PlayerDetailActivity :
     }
 
     companion object {
+        const val UNKNOWN_SCREEN_ID = "unknown"
+        const val EXPLORE_SCREEN_ID = "explore"
         const val HEARIT_ID = "hearit_id"
+        const val BOOKMARK_ID = "bookmark_id"
         const val LAST_POSITION = "last_position"
 
         fun newIntent(
