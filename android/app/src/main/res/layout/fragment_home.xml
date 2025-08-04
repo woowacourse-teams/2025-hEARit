@@ -56,8 +56,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage"
-                app:strokeColor="@color/hearit_black1"
-                app:strokeWidth="2dp"
                 tools:src="@drawable/img_default_profile" />
 
             <TextView
