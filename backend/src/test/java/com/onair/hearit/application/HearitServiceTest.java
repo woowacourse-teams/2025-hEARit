@@ -142,6 +142,7 @@ class HearitServiceTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit2));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword1));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword2));
 
         PagingRequest pagingRequest = new PagingRequest(0, 10);
 
@@ -152,7 +153,7 @@ class HearitServiceTest {
         assertAll(
                 () -> assertThat(result.content()).hasSize(2),
                 () -> assertThat(result.content().get(0).keywords()).hasSize(2),
-                () -> assertThat(result.content().get(1).keywords()).hasSize(1)
+                () -> assertThat(result.content().get(1).keywords()).hasSize(2)
         );
     }
 
