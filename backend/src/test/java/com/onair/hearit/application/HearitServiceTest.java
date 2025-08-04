@@ -126,6 +126,37 @@ class HearitServiceTest {
     }
 
     @Test
+    @DisplayName("랜덤 히어릿 조회 시 각 히어릿에 키워드가 포함되어 반환된다.")
+    void getRandomHearitsWithKeywords() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword1));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword2));
+
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit2));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword1));
+
+        PagingRequest pagingRequest = new PagingRequest(0, 10);
+
+        // when
+        PagedResponse<RandomHearitResponse> result = hearitService.getRandomHearits(member.getId(), pagingRequest);
+
+        // then
+        assertAll(
+                () -> assertThat(result.content()).hasSize(2),
+                () -> assertThat(result.content().get(0).keywords()).hasSize(2),
+                () -> assertThat(result.content().get(1).keywords()).hasSize(1)
+        );
+    }
+
+    @Test
     @DisplayName("최대 5개의 추천 히어릿을 조회할 수 있다.")
     void getRecommendedHearits() {
         // given
