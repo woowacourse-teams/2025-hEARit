@@ -64,7 +64,6 @@ public class HearitService {
     private RandomHearitResponse toRandomHearitResponse(Hearit hearit, Long memberId) {
         List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
                 KEYWORDS_PER_HEARIT_FOR_RANDOM);
-
         Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(hearit.getId(), memberId);
         if (bookmarkOptional.isPresent()) {
             return RandomHearitResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
