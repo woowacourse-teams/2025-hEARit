@@ -185,7 +185,6 @@ class PlayerDetailActivity :
 
     private fun observeViewModel() {
         observeHearit()
-        observeKeyword()
         observeToast()
     }
 
@@ -249,12 +248,6 @@ class PlayerDetailActivity :
             if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
                 controller.seekTo(startPosition)
             }
-        }
-    }
-
-    private fun observeKeyword() {
-        viewModel.keywords.observe(this) { keywords ->
-            keywordAdapter.submitList(keywords)
         }
     }
 
