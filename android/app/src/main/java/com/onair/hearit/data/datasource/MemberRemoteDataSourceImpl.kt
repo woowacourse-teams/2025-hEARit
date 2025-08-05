@@ -1,6 +1,7 @@
 package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.api.MemberService
+import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NULL_MESSAGE
 import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.di.TokenProvider
 
@@ -12,9 +13,7 @@ class MemberRemoteDataSourceImpl(
         handleApiCall(
             apiCall = { memberService.getUserInfo(getAuthHeader()) },
             transform = { response ->
-                response.body() ?: throw IllegalStateException(
-                    ERROR_RESPONSE_BODY_NULL_MESSAGE,
-                )
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
             errorHandler = errorResponseHandler,
         )
@@ -29,7 +28,6 @@ class MemberRemoteDataSourceImpl(
     }
 
     companion object {
-        private const val ERROR_RESPONSE_BODY_NULL_MESSAGE = "응답 바디가 null입니다."
         private const val TOKEN = "Bearer %s"
     }
 }

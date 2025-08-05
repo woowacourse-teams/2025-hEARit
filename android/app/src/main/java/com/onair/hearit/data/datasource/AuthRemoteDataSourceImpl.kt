@@ -1,6 +1,7 @@
 package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.api.AuthService
+import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NULL_MESSAGE
 import com.onair.hearit.data.dto.KakaoLoginRequest
 import com.onair.hearit.data.dto.KakaoLoginResponse
 
@@ -12,7 +13,7 @@ class AuthRemoteDataSourceImpl(
         handleApiCall(
             apiCall = { authService.postLogin(kakaoLoginRequest) },
             transform = { response ->
-                response.body() ?: throw IllegalStateException("응답 바디가 null입니다.")
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
             errorHandler = errorResponseHandler,
         )

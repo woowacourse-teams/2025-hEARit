@@ -1,6 +1,7 @@
 package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.api.CategoryService
+import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NULL_MESSAGE
 import com.onair.hearit.data.dto.CategoryResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 
@@ -15,7 +16,8 @@ class CategoryRemoteDataSourceImpl(
         handleApiCall(
             apiCall = { categoryService.getCategories(page, size) },
             transform = { response ->
-                response.body() ?: throw IllegalStateException("응답 바디가 null입니다.")
+                response.body()
+                    ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
             errorHandler = errorResponseHandler,
         )
@@ -28,7 +30,7 @@ class CategoryRemoteDataSourceImpl(
         handleApiCall(
             apiCall = { categoryService.getHearitsByCategoryId(categoryId, page, size) },
             transform = { response ->
-                response.body() ?: throw IllegalStateException("응답 바디가 null입니다.")
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
             errorHandler = errorResponseHandler,
         )

@@ -1,6 +1,7 @@
 package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.api.BookmarkService
+import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NULL_MESSAGE
 import com.onair.hearit.data.dto.BookmarkIdResponse
 import com.onair.hearit.data.dto.BookmarkResponse
 import com.onair.hearit.di.TokenProvider
@@ -47,7 +48,6 @@ class BookmarkRemoteDataSourceImpl(
     }
 
     companion object {
-        private const val ERROR_RESPONSE_BODY_NULL_MESSAGE = "응답 바디가 null입니다."
         private const val TOKEN = "Bearer %s"
     }
 }

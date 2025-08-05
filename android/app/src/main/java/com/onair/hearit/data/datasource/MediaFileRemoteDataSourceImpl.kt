@@ -1,6 +1,7 @@
 package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.api.MediaFileService
+import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NULL_MESSAGE
 import com.onair.hearit.data.dto.OriginalAudioUrlResponse
 import com.onair.hearit.data.dto.ScriptUrlResponse
 import com.onair.hearit.data.dto.ShortAudioUrlResponse
@@ -45,8 +46,4 @@ class MediaFileRemoteDataSourceImpl(
             },
             errorHandler = errorResponseHandler,
         )
-
-    companion object {
-        private const val ERROR_RESPONSE_BODY_NULL_MESSAGE = "응답 바디가 null입니다."
-    }
 }

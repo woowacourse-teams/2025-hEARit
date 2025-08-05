@@ -1,6 +1,7 @@
 package com.onair.hearit.data.datasource
 
 import com.onair.hearit.data.api.KeywordService
+import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NULL_MESSAGE
 import com.onair.hearit.data.dto.KeywordResponse
 
 class KeywordRemoteDataSourceImpl(
@@ -11,7 +12,7 @@ class KeywordRemoteDataSourceImpl(
         handleApiCall(
             apiCall = { keywordService.getRecommendKeywords(size) },
             transform = { response ->
-                response.body() ?: throw IllegalStateException("응답 바디가 null입니다.")
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
             errorHandler = errorResponseHandler,
         )
