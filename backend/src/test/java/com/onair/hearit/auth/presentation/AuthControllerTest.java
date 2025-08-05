@@ -172,7 +172,7 @@ class AuthControllerTest extends IntegrationTest {
         RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
-                .filter(document("auth-login-unauthorized-nonexistent-membe",
+                .filter(document("auth-login-unauthorized-nonexistent-member",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
                                 .summary("일반 로그인")
@@ -257,7 +257,6 @@ class AuthControllerTest extends IntegrationTest {
 
         // when & then
         RestAssured.given(this.spec)
-                .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + validAccessToken)
                 .filter(document("auth-check",
                         resource(ResourceSnippetParameters.builder()
@@ -280,7 +279,6 @@ class AuthControllerTest extends IntegrationTest {
 
         // when & then
         RestAssured.given(this.spec)
-                .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + invalidAccessToken)
                 .filter(document("auth-check-unauthorized",
                         resource(ResourceSnippetParameters.builder()
