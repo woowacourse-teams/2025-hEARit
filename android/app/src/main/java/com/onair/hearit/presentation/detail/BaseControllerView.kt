@@ -139,7 +139,8 @@ class BaseControllerView
         }
 
         private fun updateSpeedLabel() {
-            binding.playSpeed.text = "${speedOptions[playSpeedIndex]}x"
+            val speed = player.playbackParameters.speed
+            binding.playSpeed.text = "${speed}x"
         }
 
         private inner class ComponentListener :
@@ -160,6 +161,7 @@ class BaseControllerView
                         Player.EVENT_TIMELINE_CHANGED,
                         Player.EVENT_PLAYBACK_STATE_CHANGED,
                         Player.EVENT_IS_PLAYING_CHANGED,
+                        Player.EVENT_PLAYBACK_PARAMETERS_CHANGED,
                     )
                 ) {
                     updateUI()
