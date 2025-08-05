@@ -26,8 +26,10 @@ class MediaFileRepositoryImpl(
                 mediaFileRemoteDataSource
                     .getScriptJson(scriptUrl)
                     .mapOrThrowDomain { responseBody ->
-                        val jsonString = responseBody.string()
-                        Json.decodeFromString(jsonString)
+                        responseBody.use { body ->
+                            val jsonString = body.string()
+                            Json.decodeFromString(jsonString)
+                        }
                     }
             }
 
