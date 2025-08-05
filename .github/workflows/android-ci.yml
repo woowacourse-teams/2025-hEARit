@@ -45,7 +45,7 @@ jobs:
         run: ./gradlew test
         
       - name: Clean Project and Build with Gradle
-        run: ./gradlew cleanBuild
+        run: ./gradlew clean build
         
       - name: If Success, Send notification on Slack
         if: ${{success()}}
