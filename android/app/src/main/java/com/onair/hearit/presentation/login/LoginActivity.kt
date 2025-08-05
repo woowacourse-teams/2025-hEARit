@@ -117,6 +117,11 @@ class LoginActivity : AppCompatActivity() {
                         showToast("카카오 로그인에 실패했습니다.")
                     }
                 }
+
+                else -> {
+                    // 에러도 없고 토큰도 없음 - 예상치 못한 상황
+                    showToast("카카오 로그인 중 문제가 발생했습니다.")
+                }
             }
         }
     }

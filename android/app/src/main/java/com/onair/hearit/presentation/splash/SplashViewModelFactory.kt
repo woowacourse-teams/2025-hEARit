@@ -10,7 +10,8 @@ class SplashViewModelFactory(
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        val authRepository = RepositoryProvider.authRepository
         val dataStoreRepository = RepositoryProvider.dataStoreRepository
-        return SplashViewModel(dataStoreRepository, crashlyticsLogger) as T
+        return SplashViewModel(authRepository, dataStoreRepository, crashlyticsLogger) as T
     }
 }

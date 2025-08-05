@@ -4,9 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class KakaoLoginResponse(
+data class TokenReissueResponse(
     @SerialName("accessToken")
     val accessToken: String,
-    @SerialName("refreshToken")
-    val refreshToken: String,
 )

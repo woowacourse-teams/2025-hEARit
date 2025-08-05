@@ -33,7 +33,7 @@ class SplashActivity : AppCompatActivity() {
         setupWindowInsets()
         observeViewModel()
         Handler(Looper.getMainLooper()).postDelayed({
-            viewModel.checkAccessToken()
+            viewModel.checkValidAccessToken()
         }, 1000)
     }
 

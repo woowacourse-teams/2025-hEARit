@@ -1,13 +1,11 @@
 package com.onair.hearit.presentation.login
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.CrashlyticsLogger
-import com.onair.hearit.di.TokenProvider
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.presentation.SingleLiveData
@@ -29,9 +27,7 @@ class LoginViewModel(
             authRepository
                 .kakaoLogin(accessToken)
                 .onSuccess { appToken ->
-                    Log.d("meeple_log", "$appToken")
-                    TokenProvider.accessToken = appToken
-                    saveAccessToken(appToken)
+                    saveToken(appToken.accessToken, appToken.refreshToken)
                 }.onFailure {
                     _toastMessage.value = R.string.login_toast_kakao_login_fail
                     _loginState.value = false
@@ -39,15 +35,24 @@ class LoginViewModel(
         }
     }
 
-    private fun saveAccessToken(appToken: String) {
+    private fun saveToken(
+        accessToken: String,
+        refreshToken: String,
+    ) {
         viewModelScope.launch {
-            dataStoreRepository
-                .saveAccessToken(appToken)
+            val result =
+                runCatching {
+                    dataStoreRepository.saveAccessToken(accessToken).getOrThrow()
+                    dataStoreRepository.saveRefreshToken(refreshToken).getOrThrow()
+                }
+
+            result
                 .onSuccess {
                     _loginState.value = true
                 }.onFailure {
                     _toastMessage.value = R.string.login_toast_save_token_fail
                     _loginState.value = false
+                    crashlyticsLogger.recordException(it)
                 }
         }
     }
