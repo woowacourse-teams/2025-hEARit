@@ -4,7 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.OptIn
 import androidx.media3.common.Player
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.onair.hearit.di.RepositoryProvider
 import kotlinx.coroutines.CoroutineScope
@@ -82,11 +81,7 @@ class PlaybackStateSaver(
                 .updateRecentHearitPosition(
                     hearitId = mediaId,
                     position = lastPosition,
-                ).onSuccess {
-                    Log.d("save success", "$mediaId $lastPosition")
-                }.onFailure {
-                    Log.d("save fail", "$mediaId $lastPosition")
-                }
+                )
         }
     }
 }
