@@ -18,6 +18,5 @@ class BookmarkRepositoryImpl(
 
     override suspend fun addBookmark(hearitId: Long): Result<Long> = bookmarkDataSource.addBookmark(hearitId).mapOrThrowDomain { it.id }
 
-    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> =
-        kotlin.runCatching { bookmarkDataSource.deleteBookmark(bookmarkId) }
+    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> = runCatching { bookmarkDataSource.deleteBookmark(bookmarkId) }
 }
