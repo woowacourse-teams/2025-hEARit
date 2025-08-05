@@ -161,6 +161,7 @@ class HearitControllerTest extends IntegrationTest {
                                                 Arrays.stream(new FieldDescriptor[]{
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
+                                                        fieldWithPath("content[].categoryColorCode").description("카테고리 색상"),
                                                         fieldWithPath("content[].isBookmarked").description("북마크 여부"),
                                                         fieldWithPath("content[].bookmarkId").description(
                                                                 "북마크 ID (북마크된 경우)").optional(),
