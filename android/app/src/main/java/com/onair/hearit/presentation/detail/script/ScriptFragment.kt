@@ -8,10 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.OptIn
 import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -43,7 +44,7 @@ class ScriptFragment : Fragment() {
     private val hearitId: Long by lazy {
         requireArguments().getLong(HEARIT_ID)
     }
-    private val viewModel: PlayerDetailViewModel by viewModels {
+    private val viewModel: PlayerDetailViewModel by activityViewModels {
         PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
     }
 
@@ -77,6 +78,7 @@ class ScriptFragment : Fragment() {
         setupBackPressedHandler()
         observeViewModel()
         connectToMediaController()
+        setupBaseControllerBookmark()
     }
 
     private fun setupWindowInsets() {
@@ -132,6 +134,16 @@ class ScriptFragment : Fragment() {
         viewModel.hearit.observe(viewLifecycleOwner) { hearit ->
             binding.hearit = hearit
             adapter.submitList(hearit.script)
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun setupBaseControllerBookmark() {
+        viewModel.bookmarkId.observe(viewLifecycleOwner) { bookmarkId ->
+            binding.baseController.setBookmarkSelected(bookmarkId != null)
+        }
+        binding.baseController.setOnBookmarkClickListener {
+            viewModel.toggleBookmark()
         }
     }
 
