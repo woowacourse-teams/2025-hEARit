@@ -23,7 +23,9 @@ import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.di.RepositoryProvider
+import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
 import com.onair.hearit.domain.model.PlaybackInfo
+import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -221,11 +223,15 @@ class PlaybackService : MediaSessionService() {
     // 최근 들은 히어릿을 서비스 내에서 불러오기 위한 코드
     private suspend fun loadRecentInfo(): PlaybackInfo? =
         withContext(Dispatchers.IO) {
+            val token = dataStoreRepository.getAccessToken().getOrNull() ?: return@withContext null
+
             RepositoryProvider.recentHearitRepository
                 .getRecentHearit()
                 .getOrNull()
                 ?.let { recent ->
-                    RepositoryProvider.getPlaybackInfoUseCase(recent.id).getOrNull()
+                    RepositoryProvider
+                        .getPlaybackInfoUseCase(token.toBearerToken(), recent.id)
+                        .getOrNull()
                 }
         }
 

@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.login
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,6 +29,7 @@ class LoginViewModel(
             authRepository
                 .kakaoLogin(accessToken)
                 .onSuccess { appToken ->
+                    Log.d("meeple_log", "$appToken")
                     TokenProvider.accessToken = appToken
                     saveAccessToken(appToken)
                 }.onFailure {

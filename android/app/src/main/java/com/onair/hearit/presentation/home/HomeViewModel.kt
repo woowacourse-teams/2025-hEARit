@@ -16,6 +16,7 @@ import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.foldWithCrashlytics
 import com.onair.hearit.presentation.launchWithLogging
+import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
@@ -79,8 +80,14 @@ class HomeViewModel(
 
     private fun fetchUserInfo() {
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+            if (token == null) {
+                _toastMessage.value = R.string.setting_toast_user_info_load_fail
+                return@launch
+            }
+
             memberRepository
-                .getUserInfo()
+                .getUserInfo(token.toBearerToken())
                 .onSuccess { userInfo ->
                     saveUserInfo(userInfo)
                     _userInfo.value = userInfo

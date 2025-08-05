@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.CrashlyticsLogger
+import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RandomHearit
@@ -14,6 +15,7 @@ import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -65,8 +67,14 @@ class ExploreViewModel(
         bookmarkId: Long,
     ) {
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+            if (token == null) {
+                _toastMessage.value = R.string.setting_toast_user_info_load_fail
+                return@launch
+            }
+
             bookmarkRepository
-                .deleteBookmark(bookmarkId)
+                .deleteBookmark(token.toBearerToken(), bookmarkId)
                 .onSuccess {
                     updateBookmarkState(hearitId, null)
                 }.onFailure {
@@ -77,8 +85,14 @@ class ExploreViewModel(
 
     private fun addBookmark(hearitId: Long) {
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+            if (token == null) {
+                _toastMessage.value = R.string.setting_toast_user_info_load_fail
+                return@launch
+            }
+
             bookmarkRepository
-                .addBookmark(hearitId)
+                .addBookmark(token.toBearerToken(), hearitId)
                 .onSuccess { newBookmarkId ->
                     updateBookmarkState(hearitId, newBookmarkId)
                 }.onFailure {
@@ -102,8 +116,14 @@ class ExploreViewModel(
     ) {
         isLoading = true
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+            if (token == null) {
+                _toastMessage.value = R.string.setting_toast_user_info_load_fail
+                return@launch
+            }
+
             try {
-                val result = hearitRepository.getRandomHearits(0)
+                val result = hearitRepository.getRandomHearits(token.toBearerToken(), 0)
                 result
                     .onSuccess { randomItems ->
                         paging = randomItems.paging

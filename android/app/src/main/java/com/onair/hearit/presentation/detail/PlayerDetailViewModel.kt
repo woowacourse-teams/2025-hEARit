@@ -6,12 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.CrashlyticsLogger
+import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
 
 class PlayerDetailViewModel(
@@ -43,24 +45,35 @@ class PlayerDetailViewModel(
     }
 
     private fun deleteBookmark() {
-        val id = _bookmarkId.value
-        if (id != null) {
-            viewModelScope.launch {
-                bookmarkRepository
-                    .deleteBookmark(id)
-                    .onSuccess {
-                        _bookmarkId.value = null
-                    }.onFailure {
-                        _toastMessage.value = R.string.all_toast_delete_bookmark_fail
-                    }
+        val id = _bookmarkId.value ?: return
+
+        viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+            if (token == null) {
+                _toastMessage.value = R.string.setting_toast_user_info_load_fail
+                return@launch
             }
+
+            bookmarkRepository
+                .deleteBookmark(token.toBearerToken(), id)
+                .onSuccess {
+                    _bookmarkId.value = null
+                }.onFailure {
+                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                }
         }
     }
 
     private fun addBookmark() {
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+            if (token == null) {
+                _toastMessage.value = R.string.setting_toast_user_info_load_fail
+                return@launch
+            }
+
             bookmarkRepository
-                .addBookmark(hearitId)
+                .addBookmark(token.toBearerToken(), hearitId)
                 .onSuccess { bookmarkId ->
                     _bookmarkId.value = bookmarkId
                 }.onFailure {
@@ -71,11 +84,17 @@ class PlayerDetailViewModel(
 
     private fun fetchData() {
         viewModelScope.launch {
-            getHearitUseCase(hearitId)
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+            if (token == null) {
+                _toastMessage.value = R.string.setting_toast_user_info_load_fail
+                return@launch
+            }
+
+            getHearitUseCase(token.toBearerToken(), hearitId)
                 .onSuccess {
                     _hearit.value = it
-                    saveRecentHearit()
                     _bookmarkId.value = it.bookmarkId
+                    saveRecentHearit()
                 }.onFailure {
                     _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
                 }
