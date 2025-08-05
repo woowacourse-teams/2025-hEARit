@@ -37,8 +37,6 @@ class ShortsViewHolder(
     @OptIn(UnstableApi::class)
     fun bind(item: ShortsHearit) {
         this.shortsHearit = item
-        binding.tvExploreItemContentTitle.isSelected = true
-
         binding.hearitItem = item
         binding.rvExploreItemScript.adapter = exploreScriptAdapter
         exploreScriptAdapter.submitList(item.script)
