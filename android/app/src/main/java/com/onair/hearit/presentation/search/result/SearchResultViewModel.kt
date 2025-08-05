@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
@@ -19,6 +20,7 @@ class SearchResultViewModel(
     private val recentKeywordRepository: RecentKeywordRepository,
     private val getSearchResultUseCase: GetSearchResultUseCase,
     initialInput: SearchInput,
+    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _uiState = MutableLiveData<SearchUiState>()
     val uiState: LiveData<SearchUiState> = _uiState

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RecentSearch
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 class SearchViewModel(
     private val categoryRepository: CategoryRepository,
     private val recentKeywordRepository: RecentKeywordRepository,
+    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
     val categories: LiveData<List<Category>> = _categories

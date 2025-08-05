@@ -1,4 +1,4 @@
-package com.onair.hearit.data
+package com.onair.hearit.data.mapper
 
 import com.onair.hearit.data.dto.BookmarkResponse
 import com.onair.hearit.domain.model.Bookmark

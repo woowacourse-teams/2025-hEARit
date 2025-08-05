@@ -5,12 +5,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import kotlinx.coroutines.launch
 
 class PlayerViewModel(
     private val recentHearitRepository: RecentHearitRepository,
+    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _recentHearit = MutableLiveData<RecentHearit?>()
     val recentHearit: LiveData<RecentHearit?> = _recentHearit
