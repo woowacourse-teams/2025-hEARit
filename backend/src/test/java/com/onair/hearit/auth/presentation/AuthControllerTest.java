@@ -12,6 +12,7 @@ import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
+import com.onair.hearit.auth.dto.request.TokenCheckRequest;
 import com.onair.hearit.auth.dto.request.TokenReissueRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
@@ -245,6 +246,66 @@ class AuthControllerTest extends IntegrationTest {
                 .post("/api/v1/auth/signup")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @DisplayName("엑세스토큰 유효성 검증 성공 시 200 OK를 반환한다.")
+    void check_success() {
+        // given
+        Member member = dbHelper.insertMember(
+                Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
+        String validAccessToken = jwtTokenProvider.createAccessToken(member.getId());
+
+        TokenCheckRequest tokenCheckRequest = new TokenCheckRequest(validAccessToken);
+
+        // when & then
+        RestAssured.given(this.spec)
+                .contentType(ContentType.JSON)
+                .body(tokenCheckRequest)
+                .filter(document("auth-check",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("엑세스토큰 유효성 검증")
+                                .description("엑세스토큰의 유효성을 검증합니다.")
+                                .requestSchema(Schema.schema("TokenCheckRequest"))
+                                .requestFields(
+                                        fieldWithPath("accessToken").description("엑세스토큰")
+                                )
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/auth/check")
+                .then()
+                .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    @DisplayName("엑세스토큰 유효성 검증 실패 시 401 Unauthorized를 반환한다.")
+    void check_unauthorized() {
+        // given
+        String invalidAccessToken = "invalid-access-token";
+
+        TokenCheckRequest tokenCheckRequest = new TokenCheckRequest(invalidAccessToken);
+
+        // when & then
+        RestAssured.given(this.spec)
+                .contentType(ContentType.JSON)
+                .body(tokenCheckRequest)
+                .filter(document("auth-check-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("엑세스토큰 유효성 검증")
+                                .description("엑세스토큰의 유효성을 검증합니다.")
+                                .requestSchema(Schema.schema("TokenCheckRequest"))
+                                .requestFields(
+                                        fieldWithPath("accessToken").description("엑세스토큰")
+                                )
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/auth/check")
+                .then()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Test

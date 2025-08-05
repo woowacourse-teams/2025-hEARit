@@ -34,6 +34,7 @@ public class ApiSecurityConfig {
             "/api/v1/auth/kakao-login",
             "/api/v1/auth/signup",
             "/api/v1/auth/token/refresh",
+            "/api/v1/auth/check",
     };
 
     private final ObjectMapper objectMapper;

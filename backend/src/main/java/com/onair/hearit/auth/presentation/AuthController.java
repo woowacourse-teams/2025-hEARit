@@ -5,6 +5,7 @@ import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
+import com.onair.hearit.auth.dto.request.TokenCheckRequest;
 import com.onair.hearit.auth.dto.request.TokenReissueRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +48,12 @@ public class AuthController {
     public ResponseEntity<TokenReissueResponse> reissue(@RequestBody TokenReissueRequest request) {
         String newAccessToken = authService.reissue(request.refreshToken());
         return ResponseEntity.ok(new TokenReissueResponse(newAccessToken));
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<Void> checkAccessToken(@RequestBody TokenCheckRequest request) {
+        authService.checkAccessToken(request);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/logout")
