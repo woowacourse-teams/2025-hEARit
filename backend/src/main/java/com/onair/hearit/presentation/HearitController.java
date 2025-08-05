@@ -63,7 +63,7 @@ public class HearitController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<PagedResponse<HearitSearchResponse>> searchHearitsByTitle(
+    public ResponseEntity<PagedResponse<HearitSearchResponse>> readSearchedHHearits(
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
