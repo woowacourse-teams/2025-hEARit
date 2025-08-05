@@ -1,6 +1,6 @@
 package com.onair.hearit.data.repository
 
-import com.onair.hearit.data.datasource.CategoryRemoteDataSource
+import com.onair.hearit.data.datasource.remote.CategoryRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.PageResult

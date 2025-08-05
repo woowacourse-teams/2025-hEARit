@@ -1,7 +1,10 @@
-package com.onair.hearit.data.datasource
+package com.onair.hearit.data.datasource.remote
 
 import com.onair.hearit.data.api.HearitService
 import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NULL_MESSAGE
+import com.onair.hearit.data.datasource.ErrorResponseHandler
+import com.onair.hearit.data.datasource.NetworkResult
+import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse

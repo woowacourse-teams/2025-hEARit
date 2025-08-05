@@ -1,6 +1,6 @@
 package com.onair.hearit.data.repository
 
-import com.onair.hearit.data.datasource.KeywordRemoteDataSource
+import com.onair.hearit.data.datasource.remote.KeywordRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.repository.KeywordRepository

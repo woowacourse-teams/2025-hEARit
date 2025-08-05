@@ -1,6 +1,6 @@
 package com.onair.hearit.data.repository
 
-import com.onair.hearit.data.datasource.MemberRemoteDataSource
+import com.onair.hearit.data.datasource.remote.MemberRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.MemberRepository
