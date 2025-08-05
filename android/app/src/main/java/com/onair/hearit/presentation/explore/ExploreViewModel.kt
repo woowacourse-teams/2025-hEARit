@@ -101,14 +101,15 @@ class ExploreViewModel(
         isLoading = true
         viewModelScope.launch {
             try {
-                val result = hearitRepository.getRandomHearits(page)
+                val result = hearitRepository.getRandomHearits(0)
                 result
                     .onSuccess { randomItems ->
                         paging = randomItems.paging
                         val shortsList = buildShortsHearit(randomItems)
                         updateShortsHearit(shortsList, isInitial)
-                        currentPage++
-                        isLastPage = paging.isLast
+
+                        // currentPage++
+                        // isLastPage = paging.isLast
                     }.onFailure {
                         _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
                     }

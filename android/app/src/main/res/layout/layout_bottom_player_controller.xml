@@ -48,13 +48,14 @@
             android:id="@+id/exo_progress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="-12dp"
+            android:layout_marginBottom="-8dp"
             android:fadeScrollbars="false"
             android:paddingStart="-10dp"
             android:paddingEnd="-10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:played_color="@color/hearit_purple3"
             app:scrubber_color="@android:color/transparent"
+            app:touch_target_height="20dp"
             app:unplayed_color="@color/hearit_gray4" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
