@@ -12,7 +12,6 @@ import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
-import com.onair.hearit.auth.dto.request.TokenCheckRequest;
 import com.onair.hearit.auth.dto.request.TokenReissueRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
@@ -256,21 +255,15 @@ class AuthControllerTest extends IntegrationTest {
                 Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
         String validAccessToken = jwtTokenProvider.createAccessToken(member.getId());
 
-        TokenCheckRequest tokenCheckRequest = new TokenCheckRequest(validAccessToken);
-
         // when & then
         RestAssured.given(this.spec)
                 .contentType(ContentType.JSON)
-                .body(tokenCheckRequest)
+                .header("Authorization", "Bearer " + validAccessToken)
                 .filter(document("auth-check",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
                                 .summary("엑세스토큰 유효성 검증")
                                 .description("엑세스토큰의 유효성을 검증합니다.")
-                                .requestSchema(Schema.schema("TokenCheckRequest"))
-                                .requestFields(
-                                        fieldWithPath("accessToken").description("엑세스토큰")
-                                )
                                 .build())
                 ))
                 .when()
@@ -285,21 +278,17 @@ class AuthControllerTest extends IntegrationTest {
         // given
         String invalidAccessToken = "invalid-access-token";
 
-        TokenCheckRequest tokenCheckRequest = new TokenCheckRequest(invalidAccessToken);
-
         // when & then
         RestAssured.given(this.spec)
                 .contentType(ContentType.JSON)
-                .body(tokenCheckRequest)
+                .header("Authorization", "Bearer " + invalidAccessToken)
                 .filter(document("auth-check-unauthorized",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
                                 .summary("엑세스토큰 유효성 검증")
                                 .description("엑세스토큰의 유효성을 검증합니다.")
-                                .requestSchema(Schema.schema("TokenCheckRequest"))
-                                .requestFields(
-                                        fieldWithPath("accessToken").description("엑세스토큰")
-                                )
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()

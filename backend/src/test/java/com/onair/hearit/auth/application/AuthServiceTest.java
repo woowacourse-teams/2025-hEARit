@@ -3,12 +3,10 @@ package com.onair.hearit.auth.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
-import com.onair.hearit.auth.dto.request.TokenCheckRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
@@ -20,11 +18,7 @@ import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.infrastructure.MemberRepository;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import java.time.LocalDateTime;
-import java.util.Date;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -215,66 +209,6 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(loginRequest))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
-    }
-
-    @Nested
-    @DisplayName("엑세스토큰 유효성 검증")
-    class CheckAccessToken {
-        
-        @Test
-        @DisplayName("엑세스토큰이 유효한지 검증한다.")
-        void checkAccessToken_success() {
-            // given
-            Member member = dbHelper.insertMember(
-                    Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
-            String validAccessToken = jwtTokenProvider.createAccessToken(member.getId());
-
-            TokenCheckRequest tokenCheckRequest = new TokenCheckRequest(validAccessToken);
-
-            // when & then
-            assertDoesNotThrow(() -> authService.checkAccessToken(tokenCheckRequest));
-        }
-
-        @Test
-        @DisplayName("만료된 엑세스토큰의 유효성 검증 시 UnauthorizedException을 던진다.")
-        void checkAccessToken_expiredToken() {
-            // given
-            Member member = dbHelper.insertMember(
-                    Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
-            String expiredAccessToken = createExpiredAccessToken(member.getId());
-
-            TokenCheckRequest tokenCheckRequest = new TokenCheckRequest(expiredAccessToken);
-
-            // when & then
-            assertThatThrownBy(() -> authService.checkAccessToken(tokenCheckRequest))
-                    .isInstanceOf(UnauthorizedException.class)
-                    .hasMessageContaining("유효하지 않은 엑세스토큰입니다.");
-        }
-
-        @Test
-        @DisplayName("유효하지않은 엑세스토큰의 유효성 검증 시 UnauthorizedException을 던진다.")
-        void checkAccessToken_invalidToken() {
-            // given
-            String invalidAccessToken = "invalid-access-token";
-            TokenCheckRequest tokenCheckRequest = new TokenCheckRequest(invalidAccessToken);
-
-            // when & then
-            assertThatThrownBy(() -> authService.checkAccessToken(tokenCheckRequest))
-                    .isInstanceOf(UnauthorizedException.class)
-                    .hasMessageContaining("유효하지 않은 엑세스토큰입니다.");
-        }
-    }
-    
-    private String createExpiredAccessToken(Long memberId) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() - 1); // expiry가 현재시간 보다 전으로 설정되어 만료된 토큰 취급
-
-        return Jwts.builder()
-                .setSubject(String.valueOf(memberId))
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(Keys.secretKeyFor(SignatureAlgorithm.HS256))
-                .compact();
     }
 
     @Test

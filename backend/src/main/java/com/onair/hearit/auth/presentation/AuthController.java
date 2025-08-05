@@ -5,7 +5,6 @@ import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
-import com.onair.hearit.auth.dto.request.TokenCheckRequest;
 import com.onair.hearit.auth.dto.request.TokenReissueRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
@@ -51,8 +50,7 @@ public class AuthController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<Void> checkAccessToken(@RequestBody TokenCheckRequest request) {
-        authService.checkAccessToken(request);
+    public ResponseEntity<Void> checkAccessToken() {
         return ResponseEntity.ok().build();
     }
 

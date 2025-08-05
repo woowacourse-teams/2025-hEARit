@@ -1,14 +1,13 @@
 package com.onair.hearit.auth.application;
 
+import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
-import com.onair.hearit.auth.dto.request.TokenCheckRequest;
 import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
@@ -122,12 +121,5 @@ public class AuthService {
 
     public void logout(Long memberId) {
         refreshTokenRepository.deleteByMemberId(memberId);
-    }
-
-    public void checkAccessToken(TokenCheckRequest request) {
-        if(!jwtTokenProvider.validateToken(request.accessToken())) {
-            log.warn("유효하지않은 엑세스토큰: {}", request.accessToken());
-            throw new UnauthorizedException("유효하지 않은 엑세스토큰입니다.");
-        }
     }
 }
