@@ -39,6 +39,7 @@ private fun RandomHearitResponse.Content.toDomain(): RandomHearit =
     RandomHearit(
         id = this.id,
         title = this.title,
+        categoryColorCode = this.categoryColorCode,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
         keywords =

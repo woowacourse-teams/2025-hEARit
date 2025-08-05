@@ -26,6 +26,8 @@ data class RandomHearitResponse(
         val id: Long,
         @SerialName("title")
         val title: String,
+        @SerialName("categoryColorCode")
+        val categoryColorCode: String,
         @SerialName("isBookmarked")
         val isBookmarked: Boolean,
         @SerialName("bookmarkId")
