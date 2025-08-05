@@ -267,8 +267,8 @@ class PlayerDetailActivity :
                 justifyContent = JustifyContent.FLEX_START
             }
 
-        binding.layoutSeeMore.rvKeyword.layoutManager = layoutManager
-        binding.layoutSeeMore.rvKeyword.adapter = keywordAdapter
+        binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
+        binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
     }
 
     private fun observeHearit() {
