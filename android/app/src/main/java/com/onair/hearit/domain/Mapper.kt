@@ -15,14 +15,11 @@ fun RandomHearit.toHearitShorts(
     ShortsHearit(
         id = this.id,
         title = this.title,
-        summary = this.summary,
-        source = this.source,
         audioUrl = audioUrl,
         script = script,
-        playTime = this.playTime,
-        createdAt = this.createdAt,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
+        keywords = this.keywords,
     )
 
 fun SingleHearit.toHearit(
