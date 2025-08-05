@@ -13,7 +13,8 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/hearit_black1">
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nsv_search_result"

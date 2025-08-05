@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.RecommendHearit
@@ -13,12 +14,15 @@ import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.foldWithCrashlytics
+import com.onair.hearit.presentation.launchWithLogging
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val dataStoreRepository: DataStoreRepository,
     private val hearitRepository: HearitRepository,
     private val memberRepository: MemberRepository,
+    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _userInfo: MutableLiveData<UserInfo> = MutableLiveData()
     val userInfo: LiveData<UserInfo> = _userInfo
@@ -38,14 +42,14 @@ class HomeViewModel(
     }
 
     private fun fetchData() {
-        viewModelScope.launch {
+        viewModelScope.launchWithLogging(crashlyticsLogger) {
             hearitRepository
                 .getRecommendHearits()
-                .onSuccess { recommendHearits ->
-                    _recommendHearits.value = recommendHearits
-                }.onFailure {
-                    _toastMessage.value = R.string.home_toast_recommend_load_fail
-                }
+                .foldWithCrashlytics(
+                    crashlyticsLogger,
+                    onSuccess = { _recommendHearits.value = it },
+                    onFailure = { _toastMessage.value = R.string.home_toast_recommend_load_fail },
+                )
         }
 
         viewModelScope.launch {

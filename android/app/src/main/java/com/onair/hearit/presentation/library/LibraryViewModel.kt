@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.NoBookmarkException
+import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 class LibraryViewModel(
     private val bookmarkRepository: BookmarkRepository,
     private val memberRepository: MemberRepository,
+    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _bookmarks: MutableLiveData<List<Bookmark>> = MutableLiveData()
     val bookmarks: LiveData<List<Bookmark>> = _bookmarks
@@ -44,7 +45,7 @@ class LibraryViewModel(
                     _bookmarks.value = it
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is NoBookmarkException -> {
+                        is UserNotRegisteredException -> {
                             _uiState.value = BookmarkUiState.NotLoggedIn
                         }
 

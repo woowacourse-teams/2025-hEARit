@@ -1,34 +1,40 @@
-package com.onair.hearit.data.datasource
+package com.onair.hearit.data.datasource.remote
 
 import com.onair.hearit.data.api.CategoryService
+import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NULL_MESSAGE
+import com.onair.hearit.data.datasource.ErrorResponseHandler
+import com.onair.hearit.data.datasource.NetworkResult
+import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.CategoryResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 
 class CategoryRemoteDataSourceImpl(
     private val categoryService: CategoryService,
+    private val errorResponseHandler: ErrorResponseHandler,
 ) : CategoryRemoteDataSource {
     override suspend fun getCategories(
         page: Int?,
         size: Int?,
-    ): Result<CategoryResponse> =
+    ): Result<NetworkResult<CategoryResponse>> =
         handleApiCall(
-            errorMessage = "카테고리 조회 실패",
             apiCall = { categoryService.getCategories(page, size) },
             transform = { response ->
-                response.body() ?: throw IllegalStateException("응답 바디가 null입니다.")
+                response.body()
+                    ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
+            errorHandler = errorResponseHandler,
         )
 
     override suspend fun getHearitsByCategoryId(
         categoryId: Long,
         page: Int?,
         size: Int?,
-    ): Result<SearchHearitResponse> =
+    ): Result<NetworkResult<SearchHearitResponse>> =
         handleApiCall(
-            errorMessage = "카테고리별 히어릿 조회 실패",
             apiCall = { categoryService.getHearitsByCategoryId(categoryId, page, size) },
             transform = { response ->
-                response.body() ?: throw IllegalStateException("응답 바디가 null입니다.")
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
+            errorHandler = errorResponseHandler,
         )
 }
