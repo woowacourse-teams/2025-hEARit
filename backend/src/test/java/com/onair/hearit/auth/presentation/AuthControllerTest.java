@@ -106,7 +106,7 @@ class AuthControllerTest extends IntegrationTest {
         TokenReissueResponse response = RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(tokenReissueRequest)
-                .filter(document("auth-login",
+                .filter(document("auth-login-reissue",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
                                 .summary("엑세스토큰 재발급 요청")
