@@ -172,7 +172,7 @@ class AuthControllerTest extends IntegrationTest {
         RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
-                .filter(document("auth-login-unauthorized-nonexistent-membe",
+                .filter(document("auth-login-unauthorized-nonexistent-member",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
                                 .summary("일반 로그인")
@@ -245,6 +245,54 @@ class AuthControllerTest extends IntegrationTest {
                 .post("/api/v1/auth/signup")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @DisplayName("엑세스토큰 유효성 검증 성공 시 200 OK를 반환한다.")
+    void check_success() {
+        // given
+        Member member = dbHelper.insertMember(
+                Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
+        String validAccessToken = jwtTokenProvider.createAccessToken(member.getId());
+
+        // when & then
+        RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + validAccessToken)
+                .filter(document("auth-check",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("엑세스토큰 유효성 검증")
+                                .description("엑세스토큰의 유효성을 검증합니다.")
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/auth/check")
+                .then()
+                .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    @DisplayName("엑세스토큰 유효성 검증 실패 시 401 Unauthorized를 반환한다.")
+    void check_unauthorized() {
+        // given
+        String invalidAccessToken = "invalid-access-token";
+
+        // when & then
+        RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + invalidAccessToken)
+                .filter(document("auth-check-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("엑세스토큰 유효성 검증")
+                                .description("엑세스토큰의 유효성을 검증합니다.")
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/auth/check")
+                .then()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Test
