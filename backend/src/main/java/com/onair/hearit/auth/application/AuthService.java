@@ -126,6 +126,7 @@ public class AuthService {
 
     public void checkAccessToken(TokenCheckRequest request) {
         if(!jwtTokenProvider.validateToken(request.accessToken())) {
+            log.warn("유효하지않은 엑세스토큰: {}", request.accessToken());
             throw new UnauthorizedException("유효하지 않은 엑세스토큰입니다.");
         }
     }
