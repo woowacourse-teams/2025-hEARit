@@ -236,6 +236,7 @@ class PlayerDetailActivity :
         viewModel.hearit.observe(this) { hearit ->
             binding.hearit = hearit
             scriptAdapter.submitList(hearit.script)
+            keywordAdapter.submitList(hearit.keywords)
             handlePlayback(hearit)
         }
     }
