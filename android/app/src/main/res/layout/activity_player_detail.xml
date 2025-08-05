@@ -94,30 +94,18 @@
                     app:layout_constraintStart_toStartOf="@id/layout_thumbnail"
                     tools:text="2025.07.28" />
 
-                <ImageView
-                    android:id="@+id/btn_hearit_player_bookmark"
-                    android:layout_width="42dp"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bookmark_selector"
-                    android:contentDescription="@null"
-                    android:onClick="@{() -> viewModel.toggleBookmark()}"
-                    app:layout_constraintEnd_toEndOf="@id/layout_thumbnail"
-                    app:layout_constraintTop_toBottomOf="@id/layout_thumbnail"
-                    app:setSelectedState="@{viewModel.bookmarkId != null}" />
-
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_script"
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
                     android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="24dp"
                     android:nestedScrollingEnabled="false"
                     android:padding="16dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/btn_hearit_player_bookmark"
+                    app:layout_constraintTop_toBottomOf="@id/layout_thumbnail"
                     tools:listitem="@layout/item_detail_script" />
 
                 <androidx.media3.ui.PlayerView
@@ -144,7 +132,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="24dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="24dp"
                     app:hearit="@{hearit}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

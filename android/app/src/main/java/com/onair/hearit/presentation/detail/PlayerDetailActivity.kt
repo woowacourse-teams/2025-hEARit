@@ -96,6 +96,7 @@ class PlayerDetailActivity :
         setupKeywordRecyclerView()
         observeViewModel()
         setupMediaController()
+        setupBaseControllerBookmark()
 
         val previousScreen = intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: "unknown"
         AnalyticsProvider.get().logScreenView(
@@ -277,6 +278,16 @@ class PlayerDetailActivity :
             scriptAdapter.submitList(hearit.script)
             keywordAdapter.submitList(hearit.keywords)
             handlePlayback(hearit)
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun setupBaseControllerBookmark() {
+        viewModel.bookmarkId.observe(this) { bookmarkId ->
+            binding.baseController.setBookmarkSelected(bookmarkId != null)
+        }
+        binding.baseController.setOnBookmarkClickListener {
+            viewModel.toggleBookmark()
         }
     }
 
