@@ -2,6 +2,7 @@ package com.onair.hearit.admin.dto.request;
 
 import com.onair.hearit.domain.Source;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +14,7 @@ public record HearitCreateRequest(
         @NotNull MultipartFile originalAudio,
         @NotNull MultipartFile shortAudio,
         @NotNull MultipartFile scriptFile,
-        @NotBlank List<SourceRequest> sources,
+        @NotEmpty List<SourceRequest> sources,
         @NotNull Long categoryId,
         List<Long> keywordIds
 ) {
