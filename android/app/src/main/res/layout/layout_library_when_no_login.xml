@@ -5,7 +5,7 @@
     <data>
 
         <variable
-            name="uiState"
+            name="loginState"
             type="com.onair.hearit.presentation.library.BookmarkUiState" />
     </data>
 
@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/hearit_black1"
-        app:visibleIfNotLogin="@{uiState}">
+        app:visibleBookmarkIfNotLogin="@{loginState}">
 
         <TextView
             android:id="@+id/library_guide_when_no_login"

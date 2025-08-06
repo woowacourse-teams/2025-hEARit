@@ -3,7 +3,6 @@ package com.onair.hearit.presentation
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -18,6 +17,7 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -166,15 +166,6 @@ class MainActivity :
     }
 
     private fun observeViewModel() {
-        playerViewModel.isLoggedIn.observe(this) { isLoggedIn ->
-            binding.layoutDrawer.tvDrawerLogin.visibility =
-                if (isLoggedIn) View.GONE else View.VISIBLE
-            binding.layoutDrawer.tvDrawerLogout.visibility =
-                if (isLoggedIn) View.VISIBLE else View.GONE
-            binding.layoutDrawer.tvDrawerWithdrawal.visibility =
-                if (isLoggedIn) View.VISIBLE else View.GONE
-        }
-
         playerViewModel.recentHearit.observe(this) {
             setPlayerControlViewVisibility()
             maybePreloadRecent()
