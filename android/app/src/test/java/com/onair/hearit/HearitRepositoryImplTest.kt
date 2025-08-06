@@ -14,7 +14,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert
+import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -49,8 +50,8 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getHearit(hearitId)
 
             // Then
-            assert(result.isSuccess)
-            assert(result.getOrNull() == expectedDomainModel)
+            assertThat(result.isSuccess, `is`(true))
+            assertThat(result.getOrNull(), `is`(expectedDomainModel))
         }
 
     @Test
@@ -68,8 +69,8 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getHearit(hearitId)
 
             // Then
-            Assert.assertTrue(result.isFailure)
-            Assert.assertEquals(expectedException, result.exceptionOrNull())
+            assertThat(result.isFailure, `is`(true))
+            assertThat(result.exceptionOrNull(), `is`(expectedException))
         }
 
     @Test
@@ -86,8 +87,8 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getRecommendHearits()
 
             // Then
-            Assert.assertTrue(result.isSuccess)
-            Assert.assertEquals(expectedDomainList, result.getOrNull())
+            assertThat(result.isSuccess, `is`(true))
+            assertThat(result.getOrNull(), `is`(expectedDomainList))
         }
 
     @Test
@@ -104,8 +105,8 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getRecommendHearits()
 
             // Then
-            Assert.assertTrue(result.isFailure)
-            Assert.assertEquals(expectedException, result.exceptionOrNull())
+            assertThat(result.isFailure, `is`(true))
+            assertThat(result.exceptionOrNull(), `is`(expectedException))
         }
 
     @Test
@@ -122,8 +123,8 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getRandomHearits(1, 10)
 
             // Then
-            Assert.assertTrue(result.isSuccess)
-            Assert.assertEquals(expectedDomainResult, result.getOrNull())
+            assertThat(result.isSuccess, `is`(true))
+            assertThat(result.getOrNull(), `is`(expectedDomainResult))
         }
 
     @Test
@@ -140,8 +141,8 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getRandomHearits(1, 10)
 
             // Then
-            Assert.assertTrue(result.isFailure)
-            Assert.assertEquals(expectedException, result.exceptionOrNull())
+            assertThat(result.isFailure, `is`(true))
+            assertThat(result.exceptionOrNull(), `is`(expectedException))
         }
 
     @Test
@@ -163,8 +164,8 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getSearchHearits("test", 1, 10)
 
             // Then
-            Assert.assertTrue(result.isSuccess)
-            Assert.assertEquals(expectedDomainResult, result.getOrNull())
+            assertThat(result.isSuccess, `is`(true))
+            assertThat(result.getOrNull(), `is`(expectedDomainResult))
         }
 
     @Test
@@ -184,8 +185,8 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getSearchHearits("test", 1, 10)
 
             // Then
-            Assert.assertTrue(result.isFailure)
-            Assert.assertEquals(expectedException, result.exceptionOrNull())
+            assertThat(result.isFailure, `is`(true))
+            assertThat(result.exceptionOrNull(), `is`(expectedException))
         }
 
     @Test
@@ -202,8 +203,8 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getCategoryHearits()
 
             // Then
-            Assert.assertTrue(result.isSuccess)
-            Assert.assertEquals(expectedDomainList, result.getOrNull())
+            assertThat(result.isSuccess, `is`(true))
+            assertThat(result.getOrNull(), `is`(expectedDomainList))
         }
 
     @Test
@@ -220,7 +221,7 @@ class HearitRepositoryImplTest {
             val result = hearitRepository.getCategoryHearits()
 
             // Then
-            Assert.assertTrue(result.isFailure)
-            Assert.assertEquals(expectedException, result.exceptionOrNull())
+            assertThat(result.isFailure, `is`(true))
+            assertThat(result.exceptionOrNull(), `is`(expectedException))
         }
 }
