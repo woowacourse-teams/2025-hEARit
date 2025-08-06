@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.withContext
 
 @OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
@@ -102,47 +103,6 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession = mediaSession
-
-    // 최근 들은 히어릿을 서비스 내에서 불러오기 위한 코드
-    private suspend fun loadRecentInfo(): PlaybackInfo? =
-        withContext(Dispatchers.IO) {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
-            RepositoryProvider.recentHearitRepository
-                .getRecentHearit()
-                .getOrNull()
-                ?.let { recent ->
-                    UseCaseProvider
-                        .getPlaybackInfoUseCase(token?.toBearerToken(), recent.id)
-                        .getOrNull()
-                }
-        }
-
-    // 미디어 아이템 구현
-    private fun buildMediaItem(info: PlaybackInfo): MediaItem =
-        createMediaItem(
-            url = info.audioUrl,
-            title = info.title,
-            id = info.hearitId,
-        )
-
-    private fun prepareIfNeeded(info: PlaybackInfo) {
-        val item = buildMediaItem(info)
-        val sameItem = player.currentMediaItem?.mediaId == item.mediaId
-        val preparedOrBuffering =
-            player.playbackState == Player.STATE_READY || player.playbackState == Player.STATE_BUFFERING
-        if (!(sameItem && preparedOrBuffering)) {
-            player.setMediaItems(listOf(item), 0, info.lastPosition)
-            player.prepare()
-        }
-    }
-
-    private fun toItemsWithStart(info: PlaybackInfo): MediaSession.MediaItemsWithStartPosition =
-        MediaSession.MediaItemsWithStartPosition(
-            listOf(buildMediaItem(info)),
-            0,
-            info.lastPosition,
-        )
 
     override fun onDestroy() {
         serviceScope.cancel()

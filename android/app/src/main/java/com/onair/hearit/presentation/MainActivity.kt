@@ -329,23 +329,10 @@ class MainActivity :
         mediaController?.pause()
     }
 
-    override fun onPause() {
-        super.onPause()
-        savePlaybackPosition()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         mediaController?.release()
         mediaController = null
-    }
-
-    override fun savePlaybackPosition() {
-        val controller = mediaController ?: return
-        val pos = controller.currentPosition
-        val dur = controller.duration
-        val hearitId = playerViewModel.recentHearit.value?.id ?: return
-        playerViewModel.savePlaybackPosition(pos, dur, hearitId)
     }
 
     override fun startPlayback() {

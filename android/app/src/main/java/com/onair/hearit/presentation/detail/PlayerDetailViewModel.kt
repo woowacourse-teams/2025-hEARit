@@ -46,9 +46,7 @@ class PlayerDetailViewModel(
 
     private fun fetchData() {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
-            getHearitUseCase(token?.toBearerToken(), hearitId)
+            getHearitUseCase(hearitId)
                 .onSuccess {
                     _hearit.value = it
                     _bookmarkId.value = it.bookmarkId
