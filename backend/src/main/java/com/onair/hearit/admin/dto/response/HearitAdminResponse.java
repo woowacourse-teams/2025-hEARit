@@ -13,13 +13,14 @@ public record HearitAdminResponse(
         String originalAudioUrl,
         String shortAudioUrl,
         String scriptUrl,
-        List<Source> sources,
+        List<SourceInHearit> sources,
         Integer playTime,
         LocalDateTime createdAt,
         CategoryInfoResponse category,
         List<KeywordInHearit> keywords
 ) {
     public static HearitAdminResponse from(Hearit hearit, Map<Long, List<KeywordInHearit>> keywordMap) {
+        List<SourceInHearit> sources = getSources(hearit.getSources());
         return new HearitAdminResponse(
                 hearit.getId(),
                 hearit.getTitle(),
@@ -27,7 +28,7 @@ public record HearitAdminResponse(
                 hearit.getOriginalAudioUrl(),
                 hearit.getShortAudioUrl(),
                 hearit.getScriptUrl(),
-                hearit.getSources(),
+                sources,
                 hearit.getPlayTime(),
                 hearit.getCreatedAt(),
                 CategoryInfoResponse.from(hearit.getCategory()),
@@ -35,8 +36,25 @@ public record HearitAdminResponse(
         );
     }
 
+    private static List<SourceInHearit> getSources(List<Source> sources) {
+        return sources.stream().map(SourceInHearit::from).toList();
+    }
+
     public record KeywordInHearit(
             String name
     ) {
+    }
+
+    public record SourceInHearit(
+            String sourceName,
+            String sourceUrl
+    ) {
+
+        public static SourceInHearit from(Source source) {
+            return new SourceInHearit(
+                    source.getSourceName(),
+                    source.getSourceUrl()
+            );
+        }
     }
 }
