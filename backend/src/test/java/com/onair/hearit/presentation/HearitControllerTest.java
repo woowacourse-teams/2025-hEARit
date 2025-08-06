@@ -20,7 +20,7 @@ import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
-import com.onair.hearit.dto.response.RandomHearitResponse;
+import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
@@ -149,7 +149,7 @@ class HearitControllerTest extends IntegrationTest {
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
 
         // when
-        PagedResponse<RandomHearitResponse> responses = RestAssured.given(this.spec)
+        PagedResponse<ExploredHearitResponse> responses = RestAssured.given(this.spec)
                 .filter(document("hearit-read-random",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")

@@ -7,6 +7,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.domain.MemberExploreScore;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Component;
@@ -59,5 +60,11 @@ public class DbHelper {
         em.persist(hearitKeyword);
         em.flush();
         return hearitKeyword;
+    }
+
+    public MemberExploreScore insertMemberExploreScore(MemberExploreScore memberExploreScore) {
+        em.persist(memberExploreScore);
+        em.flush();
+        return memberExploreScore;
     }
 }
