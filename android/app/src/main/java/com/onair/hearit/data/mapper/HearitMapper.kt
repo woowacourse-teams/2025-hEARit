@@ -32,7 +32,7 @@ private fun SearchHearitResponse.Content.toDomain(): SearchedHearit =
         id = this.id,
         title = this.title,
         playTime = this.playTime,
-        summary = this.summary,
+        keywords = this.keywords.map { it.toDomain() },
     )
 
 private fun RandomHearitResponse.Content.toDomain(): RandomHearit =

@@ -19,14 +19,14 @@
     <string name="logout_fail">로그아웃에 실패했습니다.</string>
     <string name="withdraw_success">회원탈퇴에 성공했습니다.</string>
     <string name="withdraw_fail">회원탈퇴에 실패했습니다.</string>
+    <string name="all_keyword_name"># %s</string>
 
     <!-- HomeFragment-->
-    <string name="home_logo_description">IT를 쉽게 들을 수 있는 팟캐스트 , 히어릿</string>
+    <string name="home_logo_description">IT를 쉽게 들을 수 있는 팟캐스트, 히어릿</string>
     <string name="home_recent_hearit_text">최근에 들은 히어릿</string>
     <string name="home_navigate_to_explore_text">더 많은 히어릿을\n듣고 싶다면?</string>
     <string name="home_recommend_hearit_text">오늘 추천하는 팟캐스트</string>
     <string name="home_grouped_category_text">%s 카테고리의 팟캐스트</string>
-    <string name="home_example_recommend_description">Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나Intent란 안드로이드의 구성요소 4가지 사이에서 데이터를 전달하거나 말거나</string>
     <string name="home_toast_recommend_load_fail">추천 히어릿 목록 조회에 실패했습니다.</string>
     <string name="home_toast_recent_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
     <string name="home_toast_grouped_category_load_fail">카테고리별 히어릿 조회에 실패했습니다.</string>
@@ -60,7 +60,6 @@
     <string name="player_detail_toast_single_hearit_load_fail">단일 히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_hearit_load_fail">히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다.</string>
-    <string name="player_detail_keyword_name"># %s</string>
 
     <!-- ExploreFragment-->
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 찾아보세요!</string>
@@ -79,6 +78,7 @@
     <string name="library_bookmarked_hearit_title">내가 북마크한 히어릿</string>
     <string name="library_guide_when_no_bookmark">북마크한 <font color="#B677F3">히어릿</font>이 없어요!\n히어릿과 함께 IT 트렌드를 모아볼까요?</string>
     <string name="library_guide_when_no_login"><font color="#B677F3">히어릿</font>을 모아서 듣고 싶다면,\n로그인을 해주세요!</string>
+    <string name="library_login_button_text">로그인 하러가기</string>
     <string name="library_toast_bookmark_load_fail">북마크 조회에 실패했습니다.</string>
 
     <!-- SearchFragment-->

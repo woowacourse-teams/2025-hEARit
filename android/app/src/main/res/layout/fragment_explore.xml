@@ -36,8 +36,6 @@
             android:gravity="center"
             android:text="@string/explore_hearit_guide"
             android:textColor="@color/hearit_gray4"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_explore_logo" />
 
         <androidx.recyclerview.widget.RecyclerView

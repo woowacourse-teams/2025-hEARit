@@ -133,4 +133,9 @@ dependencies {
 
     // coil
     implementation(libs.coil)
+
+    // test
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.assertj.core)
 }

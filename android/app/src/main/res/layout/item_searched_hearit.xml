@@ -10,8 +10,8 @@
             type="com.onair.hearit.domain.model.SearchedHearit" />
 
         <variable
-            name="listener"
-            type="com.onair.hearit.presentation.search.result.SearchResultClickListener" />
+            name="clickListener"
+            type="com.onair.hearit.presentation.home.HearitClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,15 +19,15 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:background="@drawable/bg_gray1_radius_8dp"
-        android:onClick="@{() -> listener.onClickHearitInfo(item.id)}"
-        android:paddingVertical="16dp">
+        android:onClick="@{() -> clickListener.onClick(item.id)}"
+        android:paddingVertical="20dp">
 
         <TextView
             android:id="@+id/tv_searched_hearit_title"
             style="@style/pretendard_sub_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="20dp"
             android:layout_marginEnd="8dp"
             android:ellipsize="end"
             android:maxLines="2"
@@ -49,6 +49,7 @@
             app:playTimeFormatted="@{item.playTime}"
             tools:text="00:00" />
 
+
         <ImageView
             android:id="@+id/iv_searched_hearit"
             android:layout_width="36dp"
@@ -59,5 +60,19 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_keyword"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:nestedScrollingEnabled="false"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintStart_toStartOf="@id/tv_searched_hearit_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_searched_hearit_title"
+            tools:itemCount="3"
+            tools:listitem="@layout/item_keyword" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
