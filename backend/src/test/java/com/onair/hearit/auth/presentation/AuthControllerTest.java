@@ -300,7 +300,7 @@ class AuthControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("로그아웃 시 해당 회원의 리프레시토큰을 삭제하고 회원탈퇴 시간이 기록된다.")
+    @DisplayName("회원탈퇴 시 해당 회원의 리프레시토큰을 삭제하고 회원탈퇴 시간이 기록된다.")
     void withdraw() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -312,11 +312,11 @@ class AuthControllerTest extends IntegrationTest {
         // when
         RestAssured.given(this.spec).log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .filter(document("auth-logout",
+                .filter(document("auth-withdraw",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
-                                .summary("로그아웃")
-                                .description("로그아웃 시 리프레시토큰을 삭제합니다.")
+                                .summary("회원탈퇴")
+                                .description("회원탈퇴 시 서버에서 회원을 탈퇴처리합니다.")
                                 .build())
                 ))
                 .when()
