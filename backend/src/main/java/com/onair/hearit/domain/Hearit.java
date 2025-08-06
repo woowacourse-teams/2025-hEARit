@@ -1,6 +1,8 @@
 package com.onair.hearit.domain;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -11,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,8 +49,12 @@ public class Hearit {
     @Column(name = "script_url", nullable = false)
     private String scriptUrl;
 
-    @Column(name = "source")
-    private String source;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "hearit_source",
+            joinColumns = @JoinColumn(name = "hearit_id")
+    )
+    private List<Source> sources;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -58,26 +65,26 @@ public class Hearit {
     private Category category;
 
     public Hearit(String title, String summary, Integer playTime, String originalAudioUrl,
-                  String shortAudioUrl, String scriptUrl, String source, Category category) {
+                  String shortAudioUrl, String scriptUrl, List<Source> sources, Category category) {
         this.title = title;
         this.summary = summary;
         this.playTime = playTime;
         this.originalAudioUrl = originalAudioUrl;
         this.shortAudioUrl = shortAudioUrl;
         this.scriptUrl = scriptUrl;
-        this.source = source;
+        this.sources = sources;
         this.category = category;
     }
 
     public void update(String title, String summary, Integer playTime, String originalAudioUrl,
-                       String shortAudioUrl, String scriptUrl, String source, Category category) {
+                       String shortAudioUrl, String scriptUrl, List<Source> sources, Category category) {
         this.title = title;
         this.summary = summary;
         this.playTime = playTime;
         this.originalAudioUrl = originalAudioUrl;
         this.shortAudioUrl = shortAudioUrl;
         this.scriptUrl = scriptUrl;
-        this.source = source;
+        this.sources = sources;
         this.category = category;
     }
 }
