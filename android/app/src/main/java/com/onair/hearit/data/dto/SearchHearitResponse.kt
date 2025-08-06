@@ -24,11 +24,11 @@ data class SearchHearitResponse(
     data class Content(
         @SerialName("id")
         val id: Long,
-        @SerialName("playTime")
-        val playTime: Int,
-        @SerialName("summary")
-        val summary: String,
         @SerialName("title")
         val title: String,
+        @SerialName("playTime")
+        val playTime: Int,
+        @SerialName("keywords")
+        val keywords: List<KeywordResponse>,
     )
 }

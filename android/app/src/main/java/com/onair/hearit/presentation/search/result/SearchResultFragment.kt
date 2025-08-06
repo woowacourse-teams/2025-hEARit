@@ -18,10 +18,11 @@ import com.onair.hearit.databinding.FragmentSearchResultBinding
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.home.HearitClickListener
 
 class SearchResultFragment :
     Fragment(),
-    SearchResultClickListener {
+    HearitClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchResultBinding? = null
     private val binding get() = _binding!!
@@ -106,7 +107,7 @@ class SearchResultFragment :
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    override fun onClickHearitInfo(hearitId: Long) {
+    override fun onClick(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         startActivity(intent)
     }

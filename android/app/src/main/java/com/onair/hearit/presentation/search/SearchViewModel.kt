@@ -45,6 +45,7 @@ class SearchViewModel(
                     _categories.value = pageCategories.items
                     isLastPage = paging.isLast
                 }.onFailure {
+                    crashlyticsLogger.recordException(it)
                     _toastMessage.value = R.string.all_toast_categories_load_fail
                 }
         }
@@ -57,6 +58,7 @@ class SearchViewModel(
                 .onSuccess { keywords ->
                     _recentKeywords.value = keywords
                 }.onFailure {
+                    crashlyticsLogger.recordException(it)
                     _toastMessage.value = R.string.search_toast_recent_keyword_load_fail
                 }
         }
@@ -70,6 +72,7 @@ class SearchViewModel(
                     _recentKeywords.value = emptyList()
                     _toastMessage.value = R.string.search_toast_recent_keyword_delete_success
                 }.onFailure {
+                    crashlyticsLogger.recordException(it)
                     _toastMessage.value = R.string.search_toast_recent_keyword_delete_fail
                 }
         }
