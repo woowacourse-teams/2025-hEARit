@@ -39,7 +39,6 @@ import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.Hearit
-import com.onair.hearit.presentation.PlaybackPositionSaver
 import com.onair.hearit.presentation.PlayerViewModel
 import com.onair.hearit.presentation.PlayerViewModelFactory
 import com.onair.hearit.presentation.detail.script.ScriptFragment
@@ -47,9 +46,7 @@ import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-class PlayerDetailActivity :
-    AppCompatActivity(),
-    PlaybackPositionSaver {
+class PlayerDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerDetailBinding
     private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
@@ -59,6 +56,7 @@ class PlayerDetailActivity :
     private val previousScreen by lazy {
         intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: UNKNOWN_SCREEN_ID
     }
+
     private val hearitId: Long by lazy {
         intent.getLongExtra(HEARIT_ID, -1)
     }
@@ -95,7 +93,7 @@ class PlayerDetailActivity :
         setupKeywordRecyclerView()
         observeViewModel()
         setupMediaController()
-        setupClickListener()
+        setupBaseControllerBookmark()
 
         val previousScreen = intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: "unknown"
         AnalyticsProvider.get().logScreenView(
@@ -118,12 +116,30 @@ class PlayerDetailActivity :
     }
 
     private fun setupBackPressHandler() {
+        val backAction = {
+            if (previousScreen == EXPLORE_SCREEN_ID) {
+                viewModel.bookmarkId.value?.let { bookmarkId ->
+                    intent =
+                        Intent().apply {
+                            putExtra(HEARIT_ID, hearitId)
+                            putExtra(BOOKMARK_ID, bookmarkId)
+                        }
+                }
+            }
+            setResult(RESULT_OK, intent)
+            finish()
+        }
+
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() = Unit
+                override fun handleOnBackPressed() = backAction()
             },
         )
+
+        binding.ibPlayerDetailBack.setOnClickListener {
+            backAction()
+        }
     }
 
     private fun setupWindowInsets() {
@@ -135,23 +151,42 @@ class PlayerDetailActivity :
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
-    private fun setupClickListener() {
-        binding.ibPlayerDetailBack.setOnClickListener {
-            if (previousScreen == EXPLORE_SCREEN_ID) {
-                viewModel.bookmarkId.value?.let { bookmarkId ->
-                    intent =
-                        Intent().apply {
-                            putExtra(HEARIT_ID, hearitId)
-                            putExtra(BOOKMARK_ID, bookmarkId)
+    @OptIn(UnstableApi::class)
+    private fun setupMediaController() {
+        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+
+        lifecycleScope.launch {
+            val controller =
+                MediaController
+                    .Builder(this@PlayerDetailActivity, sessionToken)
+                    .buildAsync()
+                    .await()
+
+            mediaController = controller
+            binding.playerView.player = controller
+            binding.baseController.setPlayer(controller)
+
+            val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
+            val isDifferentHearit = playingId != hearitId
+
+            if (isDifferentHearit) {
+                controller.addListener(
+                    object : Player.Listener {
+                        override fun onTimelineChanged(
+                            timeline: Timeline,
+                            reason: Int,
+                        ) {
+                            if (timeline.windowCount > 0) {
+                                controller.removeListener(this)
+                                controller.play()
+                            }
                         }
-                }
+                    },
+                )
             }
 
-            setResult(RESULT_OK, intent)
-            finish()
+            startScriptSync(controller)
         }
-
-        setupGestureListener()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -163,6 +198,7 @@ class PlayerDetailActivity :
                     override fun onSingleTapUp(e: MotionEvent): Boolean {
                         supportFragmentManager
                             .beginTransaction()
+                            .setCustomAnimations(R.anim.slide_up, 0)
                             .replace(
                                 R.id.fragment_container_view,
                                 ScriptFragment.newInstance(hearitId),
@@ -187,6 +223,7 @@ class PlayerDetailActivity :
 
     private fun setupScriptRecyclerView() {
         binding.rvScript.adapter = scriptAdapter
+        setupGestureListener()
     }
 
     private fun observeViewModel() {
@@ -228,8 +265,8 @@ class PlayerDetailActivity :
                 justifyContent = JustifyContent.FLEX_START
             }
 
-        binding.layoutSeeMore.rvKeyword.layoutManager = layoutManager
-        binding.layoutSeeMore.rvKeyword.adapter = keywordAdapter
+        binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
+        binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
     }
 
     private fun observeHearit() {
@@ -238,6 +275,16 @@ class PlayerDetailActivity :
             scriptAdapter.submitList(hearit.script)
             keywordAdapter.submitList(hearit.keywords)
             handlePlayback(hearit)
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun setupBaseControllerBookmark() {
+        viewModel.bookmarkId.observe(this) { bookmarkId ->
+            binding.baseController.setBookmarkSelected(bookmarkId != null)
+        }
+        binding.baseController.setOnBookmarkClickListener {
+            viewModel.toggleBookmark()
         }
     }
 
@@ -264,44 +311,6 @@ class PlayerDetailActivity :
         }
     }
 
-    @OptIn(UnstableApi::class)
-    private fun setupMediaController() {
-        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
-
-        lifecycleScope.launch {
-            val controller =
-                MediaController
-                    .Builder(this@PlayerDetailActivity, sessionToken)
-                    .buildAsync()
-                    .await()
-
-            mediaController = controller
-            binding.playerView.player = controller
-            binding.baseController.setPlayer(controller)
-
-            val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
-            val isDifferentHearit = playingId != hearitId
-
-            if (isDifferentHearit) {
-                controller.addListener(
-                    object : Player.Listener {
-                        override fun onTimelineChanged(
-                            timeline: Timeline,
-                            reason: Int,
-                        ) {
-                            if (timeline.windowCount > 0) {
-                                controller.removeListener(this)
-                                controller.play()
-                            }
-                        }
-                    },
-                )
-            }
-
-            startScriptSync(controller)
-        }
-    }
-
     private fun startPlaybackService(
         audioUrl: String,
         title: String,
@@ -322,13 +331,6 @@ class PlayerDetailActivity :
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         mediaController?.release()
-    }
-
-    override fun savePlaybackPosition() {
-        val controller = mediaController ?: return
-        val position = controller.currentPosition
-        val duration = controller.duration
-        playerViewModel.savePlaybackPosition(position, duration, this.hearitId)
     }
 
     companion object {

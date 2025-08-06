@@ -30,13 +30,13 @@ import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.service.PlaybackService
+import com.onair.hearit.service.PlaybackSessionCallback
 
 @OptIn(UnstableApi::class)
 class MainActivity :
     AppCompatActivity(),
     DrawerClickListener,
     PlayerControllerView,
-    PlaybackPositionSaver,
     PlaybackStarter {
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0L
@@ -217,7 +217,10 @@ class MainActivity :
 
         if (hasRecent && !preparedOrHasItem) {
             hasSentPreload = true
-            controller.sendCustomCommand(PlaybackService.PRELOAD_RECENT_COMMAND, Bundle.EMPTY)
+            controller.sendCustomCommand(
+                PlaybackSessionCallback.PRELOAD_RECENT_COMMAND,
+                Bundle.EMPTY,
+            )
         }
     }
 
@@ -258,30 +261,16 @@ class MainActivity :
 
     override fun pause() {
         mediaController?.pause()
-        savePlaybackPosition()
     }
 
     private fun showToast(message: String?) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onPause() {
-        super.onPause()
-        savePlaybackPosition()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         mediaController?.release()
         mediaController = null
-    }
-
-    override fun savePlaybackPosition() {
-        val controller = mediaController ?: return
-        val pos = controller.currentPosition
-        val dur = controller.duration
-        val hearitId = playerViewModel.recentHearit.value?.id ?: return
-        playerViewModel.savePlaybackPosition(pos, dur, hearitId)
     }
 
     private fun navigateToDetail(hearitId: Long) {

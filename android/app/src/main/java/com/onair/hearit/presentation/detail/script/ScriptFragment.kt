@@ -8,10 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.OptIn
 import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -19,6 +20,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentScriptBinding
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
@@ -42,7 +44,7 @@ class ScriptFragment : Fragment() {
     private val hearitId: Long by lazy {
         requireArguments().getLong(HEARIT_ID)
     }
-    private val viewModel: PlayerDetailViewModel by viewModels {
+    private val viewModel: PlayerDetailViewModel by activityViewModels {
         PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
     }
 
@@ -76,6 +78,7 @@ class ScriptFragment : Fragment() {
         setupBackPressedHandler()
         observeViewModel()
         connectToMediaController()
+        setupBaseControllerBookmark()
     }
 
     private fun setupWindowInsets() {
@@ -105,20 +108,42 @@ class ScriptFragment : Fragment() {
     }
 
     private fun setupBackPressedHandler() {
+        val popAction = {
+            parentFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(0, R.anim.slide_down)
+                .remove(this)
+                .commit()
+        }
+
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    parentFragmentManager.popBackStack()
+                    popAction()
                 }
             },
         )
+
+        binding.ibScriptDown.setOnClickListener {
+            popAction()
+        }
     }
 
     private fun observeViewModel() {
         viewModel.hearit.observe(viewLifecycleOwner) { hearit ->
             binding.hearit = hearit
             adapter.submitList(hearit.script)
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun setupBaseControllerBookmark() {
+        viewModel.bookmarkId.observe(viewLifecycleOwner) { bookmarkId ->
+            binding.baseController.setBookmarkSelected(bookmarkId != null)
+        }
+        binding.baseController.setOnBookmarkClickListener {
+            viewModel.toggleBookmark()
         }
     }
 
@@ -152,6 +177,8 @@ class ScriptFragment : Fragment() {
                         adapter.currentList.firstOrNull { pos in it.start until it.end }
                     val currentIndex = adapter.currentList.indexOf(currentItem)
 
+                    // 사용자가 스크롤을 멈춘 시점을 체크함
+                    // 사용자가 스크롤을 멈춤 + 하이라이트 부분을 보고 있을 때 3초 후에 다시 포커싱함
                     if (isUserScrolling) {
                         val isVisible = isItemVisible(currentIndex)
 
@@ -160,9 +187,13 @@ class ScriptFragment : Fragment() {
                         }
                     }
 
-                    if (!isUserScrolling && currentItem != null) {
+                    // 하이라이트는 항상 진행하도록 함
+                    if (currentItem != null) {
                         adapter.highlightScriptLine(currentItem.id)
+                    }
 
+                    // 스크롤 이동은 사용자가 스크롤 중이 아닐 때만
+                    if (!isUserScrolling && currentItem != null) {
                         val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
                         (binding.rvScript.layoutManager as LinearLayoutManager)
                             .scrollToPositionWithOffset(currentIndex, centerOffset)
