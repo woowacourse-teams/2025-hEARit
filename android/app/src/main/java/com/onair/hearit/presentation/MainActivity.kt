@@ -8,6 +8,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -20,6 +21,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.di.CrashlyticsProvider
@@ -27,16 +29,17 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
+import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.service.PlaybackService
+import com.onair.hearit.service.PlaybackSessionCallback
 
 @OptIn(UnstableApi::class)
 class MainActivity :
     AppCompatActivity(),
     DrawerClickListener,
     PlayerControllerView,
-    PlaybackPositionSaver,
     PlaybackStarter {
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0L
@@ -44,17 +47,10 @@ class MainActivity :
 
     private var mediaController: MediaController? = null
     private var currentSelectedItemId: Int = R.id.nav_home
-
     private var hasSentPreload = false
 
     private val playerViewModel: PlayerViewModel by viewModels {
         PlayerViewModelFactory(CrashlyticsProvider.get())
-    }
-
-    override fun onResume() {
-        super.onResume()
-        attachController()
-        setPlayerControlViewVisibility()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,17 +65,13 @@ class MainActivity :
         observeViewModel()
 
         showFragment(HomeFragment())
+        setupBottomControllerClick()
+    }
 
-        binding.layoutBottomPlayerController.setOnClickListener {
-            val mediaId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
-            if (mediaId != null) {
-                navigateToDetail(mediaId)
-            } else {
-                playerViewModel.recentHearit.value
-                    ?.id
-                    ?.let { navigateToDetail(it) }
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+        attachController()
+        setPlayerControlViewVisibility()
     }
 
     private fun setupBackPressHandler() {
@@ -154,6 +146,82 @@ class MainActivity :
         }
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
         binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
+        binding.layoutDrawer.tvDrawerLogout.setOnClickListener { performLogout() }
+        binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
+    }
+
+    private fun setupBottomControllerClick() {
+        binding.layoutBottomPlayerController.setOnClickListener {
+            val mediaId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
+            if (mediaId != null) {
+                navigateToDetail(mediaId)
+            } else {
+                playerViewModel.recentHearit.value
+                    ?.id
+                    ?.let { navigateToDetail(it) }
+            }
+        }
+    }
+
+    private fun observeViewModel() {
+        playerViewModel.recentHearit.observe(this) {
+            setPlayerControlViewVisibility()
+            maybePreloadRecent()
+        }
+
+        playerViewModel.toastMessage.observe(this) { resId ->
+            showToast(getString(resId))
+        }
+    }
+
+    private fun performLogout() {
+        UserApiClient.instance.logout { error ->
+            if (error != null) {
+                showToast("로그아웃에 실패했습니다. 다시 시도해주세요.")
+            } else {
+                showToast("로그아웃 되었습니다.")
+                clearAccessTokenAndNavigateToLogin()
+            }
+        }
+    }
+
+    private fun confirmAndWithdraw() {
+        AlertDialog
+            .Builder(this)
+            .setTitle("회원탈퇴")
+            .setMessage("정말 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제됩니다.")
+            .setPositiveButton("탈퇴") { _, _ ->
+                UserApiClient.instance.unlink { error ->
+                    if (error != null) {
+                        showToast("카카오 계정 연결 해제에 실패했어요.")
+                    } else {
+                        showToast("카카오 연결 해제 성공")
+                        requestAppUnregisterAndCleanup()
+                    }
+                }
+            }.setNegativeButton("취소", null)
+            .show()
+    }
+
+    private fun requestAppUnregisterAndCleanup() {
+//        playerViewModel.requestAppUnregister(
+//            onSuccess = {
+//                clearAccessTokenAndNavigateToLogin()
+//            },
+//            onFailure = { errorMsg ->
+//                showToast(errorMsg ?: "회원탈퇴 중 오류가 발생했습니다.")
+//            },
+//        )
+    }
+
+    private fun clearAccessTokenAndNavigateToLogin() {
+        playerViewModel.clearAccessToken()
+        val intent =
+            Intent(this, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+        startActivity(intent)
+        finish()
     }
 
     private fun openUrl(url: String) {
@@ -196,17 +264,6 @@ class MainActivity :
         )
     }
 
-    private fun observeViewModel() {
-        playerViewModel.recentHearit.observe(this) {
-            setPlayerControlViewVisibility()
-            maybePreloadRecent()
-        }
-
-        playerViewModel.toastMessage.observe(this) { resId ->
-            showToast(getString(resId))
-        }
-    }
-
     private fun maybePreloadRecent() {
         val controller = mediaController ?: return
         if (hasSentPreload) return
@@ -217,7 +274,10 @@ class MainActivity :
 
         if (hasRecent && !preparedOrHasItem) {
             hasSentPreload = true
-            controller.sendCustomCommand(PlaybackService.PRELOAD_RECENT_COMMAND, Bundle.EMPTY)
+            controller.sendCustomCommand(
+                PlaybackSessionCallback.PRELOAD_RECENT_COMMAND,
+                Bundle.EMPTY,
+            )
         }
     }
 
@@ -232,6 +292,15 @@ class MainActivity :
         } else {
             hidePlayerControlView()
         }
+    }
+
+    private fun navigateToDetail(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(this, hearitId)
+        startActivity(intent)
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     override fun showPlayerControlView() {
@@ -258,35 +327,12 @@ class MainActivity :
 
     override fun pause() {
         mediaController?.pause()
-        savePlaybackPosition()
-    }
-
-    private fun showToast(message: String?) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        savePlaybackPosition()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mediaController?.release()
         mediaController = null
-    }
-
-    override fun savePlaybackPosition() {
-        val controller = mediaController ?: return
-        val pos = controller.currentPosition
-        val dur = controller.duration
-        val hearitId = playerViewModel.recentHearit.value?.id ?: return
-        playerViewModel.savePlaybackPosition(pos, dur, hearitId)
-    }
-
-    private fun navigateToDetail(hearitId: Long) {
-        val intent = PlayerDetailActivity.newIntent(this, hearitId)
-        startActivity(intent)
     }
 
     override fun startPlayback() {

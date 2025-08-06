@@ -7,10 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.model.RecentHearit
+import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import kotlinx.coroutines.launch
 
 class PlayerViewModel(
+    private val dataStoreRepository: DataStoreRepository,
     private val recentHearitRepository: RecentHearitRepository,
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
@@ -52,6 +54,14 @@ class PlayerViewModel(
                 ).onFailure {
                     _toastMessage.value = R.string.main_toast_player_last_position_save_fail
                 }
+        }
+    }
+
+    fun clearAccessToken() {
+        viewModelScope.launch {
+            dataStoreRepository
+                .clearData()
+                .onFailure { _toastMessage.value = R.string.main_toast_clear_token_fail }
         }
     }
 }

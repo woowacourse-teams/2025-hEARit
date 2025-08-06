@@ -7,4 +7,13 @@ data class UserInfo(
     val id: Long,
     val nickname: String,
     val profileImage: String?,
-)
+) {
+    companion object {
+        fun default() =
+            UserInfo(
+                id = -1,
+                nickname = "hEARit",
+                profileImage = "",
+            )
+    }
+}

@@ -74,7 +74,6 @@ class BottomPlayerView
                         player?.let {
                             it.seekTo(position)
                             updateProgress()
-                            (context as? PlaybackPositionSaver)?.savePlaybackPosition()
                         }
                     }
                 },
@@ -123,16 +122,16 @@ class BottomPlayerView
         }
 
         private fun togglePlayPause() {
-            val p = player
-            if (p == null) {
+            val currentPlayer = player
+            if (currentPlayer == null) {
                 (context as? PlaybackStarter)?.startPlayback()
                 return
             }
-            if (p.isPlaying) {
-                p.pause()
-                (context as? PlaybackPositionSaver)?.savePlaybackPosition()
+
+            if (currentPlayer.isPlaying) {
+                currentPlayer.pause()
             } else {
-                p.play()
+                currentPlayer.play()
             }
         }
 

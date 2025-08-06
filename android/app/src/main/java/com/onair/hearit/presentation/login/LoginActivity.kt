@@ -2,7 +2,6 @@ package com.onair.hearit.presentation.login
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -13,8 +12,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.kakao.sdk.auth.model.OAuthToken
-import com.kakao.sdk.common.model.ClientError
-import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityLoginBinding
@@ -27,7 +24,7 @@ class LoginActivity : AppCompatActivity() {
     private val factory by lazy { LoginViewModelFactory(CrashlyticsProvider.get()) }
     private val viewModel by lazy { ViewModelProvider(this, factory)[LoginViewModel::class.java] }
 
-    private var isKakaoTalkLogin = true
+    private lateinit var kakaoLoginHelper: KakaoLoginHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +56,19 @@ class LoginActivity : AppCompatActivity() {
             .start()
     }
 
+    private fun setupKakaoLogin() {
+        kakaoLoginHelper =
+            KakaoLoginHelper(
+                activity = this,
+                onSuccess = { token -> handleKakaoLoginSuccess(token) },
+                onError = { showToast("카카오 로그인에 실패했습니다.") },
+            )
+
+        binding.btnLoginKakao.setOnClickListener {
+            kakaoLoginHelper.startLogin()
+        }
+    }
+
     private fun setupListeners() {
         binding.tvLoginHearit.setOnClickListener {
             navigateToMain()
@@ -73,51 +83,6 @@ class LoginActivity : AppCompatActivity() {
         }
         viewModel.toastMessage.observe(this) { resId ->
             showToast(getString(resId))
-        }
-    }
-
-    private fun setupKakaoLogin() {
-        binding.btnLoginKakao.setOnClickListener {
-            if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
-                isKakaoTalkLogin = true
-                loginWithKakaoTalk()
-            } else {
-                isKakaoTalkLogin = false
-                loginWithKakaoAccount()
-            }
-        }
-    }
-
-    private fun loginWithKakaoTalk() {
-        UserApiClient.instance.loginWithKakaoTalk(this, callback = kakaoCallback())
-    }
-
-    private fun loginWithKakaoAccount() {
-        UserApiClient.instance.loginWithKakaoAccount(this, callback = kakaoCallback())
-    }
-
-    private fun kakaoCallback(): (OAuthToken?, Throwable?) -> Unit {
-        return callback@{ token, error ->
-            when {
-                token != null -> {
-                    handleKakaoLoginSuccess(token)
-                }
-
-                error != null -> {
-                    Log.e("kakao login", "카카오 로그인 실패", error)
-
-                    if (error is ClientError && error.reason == ClientErrorCause.Cancelled) {
-                        return@callback
-                    }
-
-                    if (isKakaoTalkLogin) {
-                        isKakaoTalkLogin = false
-                        loginWithKakaoAccount()
-                    } else {
-                        showToast("카카오 로그인에 실패했습니다.")
-                    }
-                }
-            }
         }
     }
 

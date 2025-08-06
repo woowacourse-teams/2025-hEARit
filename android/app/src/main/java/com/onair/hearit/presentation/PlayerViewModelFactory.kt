@@ -10,7 +10,8 @@ class PlayerViewModelFactory(
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        val dataStoreRepository = RepositoryProvider.dataStoreRepository
         val recentHearitRepository = RepositoryProvider.recentHearitRepository
-        return PlayerViewModel(recentHearitRepository, crashlyticsLogger) as T
+        return PlayerViewModel(dataStoreRepository, recentHearitRepository, crashlyticsLogger) as T
     }
 }

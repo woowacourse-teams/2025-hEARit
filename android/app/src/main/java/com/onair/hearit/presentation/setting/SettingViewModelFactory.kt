@@ -11,6 +11,7 @@ class SettingViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val dataStoreRepository = RepositoryProvider.dataStoreRepository
-        return SettingViewModel(dataStoreRepository, crashlyticsLogger) as T
+        val memberRepository = RepositoryProvider.memberRepository
+        return SettingViewModel(dataStoreRepository, memberRepository, crashlyticsLogger) as T
     }
 }
