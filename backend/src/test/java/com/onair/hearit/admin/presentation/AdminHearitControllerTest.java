@@ -8,15 +8,14 @@ import static org.mockito.BDDMockito.given;
 
 import com.onair.hearit.admin.application.FileStorageService;
 import com.onair.hearit.admin.dto.request.HearitMetaDataUpdateRequest;
-import com.onair.hearit.admin.domain.FileType;
-import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
-import com.onair.hearit.admin.dto.request.HearitUpdateRequest.SourceUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitMetaDataUpdateRequest.SourceUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.FileType;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
+import com.onair.hearit.domain.Source;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
@@ -143,7 +142,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 new Hearit("title", "summary",
                         10, "ORG_test.mp3",
                         "SHR_test.mp3", "SCR_test.json",
-                        "source", category));
+                        List.of(new Source("출처", "url")), category));
         given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("/mock/origin.mp3");
 
         // when & then
@@ -172,7 +171,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 new Hearit("title", "summary",
                         10, "ORG_test.mp3",
                         "SHR_test.mp3", "SCR_test.json",
-                        "source", category));
+                        List.of(new Source("출처", "url")), category));
         given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn("/mock/origin.mp3");
 
         // when & then
@@ -201,7 +200,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 new Hearit("title", "summary",
                         10, "ORG_test.mp3",
                         "SHR_test.mp3", "SCR_test.json",
-                        "source", category));
+                        List.of(new Source("출처", "url")), category));
         given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("/mock/origin.json");
 
         // when & then

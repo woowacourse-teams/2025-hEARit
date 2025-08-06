@@ -1,5 +1,6 @@
 package com.onair.hearit.domain;
 
+import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
@@ -17,7 +18,21 @@ public class Source {
     private String sourceUrl;
 
     public Source(String sourceName, String sourceUrl) {
+        validate(sourceName, sourceUrl);
         this.sourceName = sourceName;
         this.sourceUrl = sourceUrl;
+    }
+
+    private void validate(String sourceName, String sourceUrl) {
+        if (isInvalid(sourceName)) {
+            throw new InvalidInputException("출처명(sourceName)은 250자 이하의 유효한 문자열이어야 합니다.");
+        }
+        if (isInvalid(sourceUrl)) {
+            throw new InvalidInputException("출처 URL(sourceUrl)은 250자 이하의 유효한 문자열이어야 합니다.");
+        }
+    }
+
+    private boolean isInvalid(String value) {
+        return value == null || value.isBlank() || value.length() > 250;
     }
 }
