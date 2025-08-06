@@ -10,6 +10,7 @@ import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
+import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.infrastructure.MemberRepository;
@@ -119,7 +120,11 @@ public class AuthService {
         }
     }
 
-    public void logout(Long memberId) {
+    @Transactional
+    public void withdraw(Long memberId) {
         refreshTokenRepository.deleteByMemberId(memberId);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
+        member.withdraw();
     }
 }

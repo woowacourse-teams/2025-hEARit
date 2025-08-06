@@ -17,7 +17,6 @@ import com.onair.hearit.fixture.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

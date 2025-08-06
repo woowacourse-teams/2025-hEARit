@@ -22,6 +22,7 @@ import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
+import com.onair.hearit.infrastructure.MemberRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDateTime;
@@ -44,6 +45,9 @@ class AuthControllerTest extends IntegrationTest {
 
     @Autowired
     RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
+    MemberRepository memberRepository;
 
     @Test
     @DisplayName("로그인 성공 시 200 OK 및 엑세스토큰 + 리프레시토큰을 반환한다.")
@@ -296,8 +300,8 @@ class AuthControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("로그아웃 시 해당 회원의 리프레시토큰을 삭제한다.")
-    void logout_then_deleteRefreshToken() {
+    @DisplayName("회원탈퇴 시 해당 회원의 리프레시토큰을 삭제하고 회원탈퇴 시간이 기록된다.")
+    void withdraw() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         createAndSaveRefreshTokenFrom(member);
@@ -308,20 +312,23 @@ class AuthControllerTest extends IntegrationTest {
         // when
         RestAssured.given(this.spec).log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .filter(document("auth-logout",
+                .filter(document("auth-withdraw",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
-                                .summary("로그아웃")
-                                .description("로그아웃 시 리프레시토큰을 삭제합니다.")
+                                .summary("회원탈퇴")
+                                .description("회원탈퇴 시 서버에서 회원을 탈퇴처리합니다.")
                                 .build())
                 ))
                 .when()
-                .post("/api/v1/auth/logout")
+                .delete("/api/v1/auth/withdraw")
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
 
         // then
-        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+        assertAll(() -> {
+            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+            assertThat(memberRepository.findById(member.getId()).orElseThrow().getDeletedAt()).isNotNull();
+        });
     }
 
     private RefreshToken createAndSaveRefreshTokenFrom(Member member) {

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
-public record HearitUpdateRequest(
+public record HearitMetaDataUpdateRequest(
         @NotBlank String title,
         @NotBlank String summary,
         @NotNull Integer playTime,

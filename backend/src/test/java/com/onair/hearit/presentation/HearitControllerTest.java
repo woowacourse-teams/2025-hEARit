@@ -57,11 +57,13 @@ class HearitControllerTest extends IntegrationTest {
         // when & then
         HearitDetailResponse response = RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
-                .filter(document("hearit-read-detail-member",
+                .filter(document("hearit-read-detail",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
-                                .summary("히어릿 상세 조회 (로그인)")
-                                .description("로그인한 사용자가 히어릿의 상세 정보를 조회합니다. 북마크 여부가 포함됩니다.")
+                                .summary("히어릿 상세 조회")
+                                .description("히어릿의 상세 정보를 조회합니다. \n\n"
+                                        + "로그인한 사용자의 경우, `isBookmarked`와 `bookmarkId` 필드가 사용자의 북마크 상태를 반영하여 반환됩니다. \n\n"
+                                        + "비로그인 사용자의 경우, `isBookmarked`는 항상 `false`이며 `bookmarkId`는 `null` 입니다.")
                                 .pathParameters(
                                         parameterWithName("hearitId").description("조회할 히어릿의 ID")
                                 )
@@ -89,18 +91,6 @@ class HearitControllerTest extends IntegrationTest {
 
         // when & then
         HearitDetailResponse response = RestAssured.given(this.spec)
-                .filter(document("hearit-read-detail-not-member",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Hearit API")
-                                .summary("히어릿 상세 조회 (비로그인)")
-                                .description("비로그인 사용자가 히어릿의 상세 정보를 조회합니다. 북마크 여부는 항상 false입니다.")
-                                .pathParameters(
-                                        parameterWithName("hearitId").description("조회할 히어릿의 ID")
-                                )
-                                .responseSchema(Schema.schema("HearitDetailResponse"))
-                                .responseFields(getHearitDetailResponseFields())
-                                .build())
-                ))
                 .when()
                 .get("/api/v1/hearits/{hearitId}", hearit.getId())
                 .then()
@@ -398,7 +388,7 @@ class HearitControllerTest extends IntegrationTest {
                 .queryParam("size", 10)
                 .filter(document("category-search-hearits",
                         resource(ResourceSnippetParameters.builder()
-                                .tag("Category API")
+                                .tag("Hearit API")
                                 .summary("카테고리별 히어릿 목록 조회")
                                 .description("특정 카테고리에 속한 히어릿 목록을 페이지별로 조회합니다.")
                                 .queryParameters(
