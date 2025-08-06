@@ -39,12 +39,13 @@ private fun RandomHearitResponse.Content.toDomain(): RandomHearit =
     RandomHearit(
         id = this.id,
         title = this.title,
-        summary = this.summary,
-        source = this.source,
-        playTime = this.playTime,
-        createdAt = this.createdAt,
+        categoryColorCode = this.categoryColorCode,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
+        keywords =
+            this.keywords.map {
+                it.toDomain()
+            },
     )
 
 fun RecentHearitEntity.toDomain(): RecentHearit =

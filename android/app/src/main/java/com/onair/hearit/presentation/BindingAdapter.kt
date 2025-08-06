@@ -13,6 +13,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import coil.load
 import com.onair.hearit.R
+import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.library.BookmarkUiState
 import com.onair.hearit.presentation.search.SearchUiState
 import java.text.SimpleDateFormat
@@ -142,4 +143,12 @@ fun setVisibleIfHearitsExist(
     state: SearchUiState?,
 ) {
     view.isVisible = state is SearchUiState.HearitsExist
+}
+
+@BindingAdapter("setKeywords")
+fun setExploreKeywords(
+    textView: TextView,
+    keywords: List<Keyword>,
+) {
+    textView.text = keywords.joinToString(" ") { "#${it.name}" }
 }
