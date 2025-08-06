@@ -58,61 +58,97 @@ class AuthServiceTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Test
-    @DisplayName("아이디와 비밀번호로 회원가입할 수 있으며, 기본 프로필 이미지로 저장된다.")
-    void signup_success() {
-        // given
-        SignupRequest request = new SignupRequest("localId", "nickname", "password123");
+    @Nested
+    @DisplayName("회원가입")
+    class Signup {
 
-        // when
-        authService.signup(request);
+        @Test
+        @DisplayName("아이디와 비밀번호로 회원가입할 수 있으며, 기본 프로필 이미지로 저장된다.")
+        void signup_success() {
+            // given
+            SignupRequest request = new SignupRequest("localId", "nickname", "password123");
 
-        // then
-        Member saved = memberRepository.findByLocalId("localId").orElseThrow();
-        assertAll(() -> {
-            assertThat(saved.getNickname()).isEqualTo("nickname");
-            assertThat(passwordEncoder.matches("password123", saved.getPassword())).isTrue();
-            assertThat(saved.getProfileImage()).isNotNull();
-        });
+            // when
+            authService.signup(request);
+
+            // then
+            Member saved = memberRepository.findByLocalId("localId").orElseThrow();
+            assertAll(() -> {
+                assertThat(saved.getNickname()).isEqualTo("nickname");
+                assertThat(passwordEncoder.matches("password123", saved.getPassword())).isTrue();
+                assertThat(saved.getProfileImage()).isNotNull();
+            });
+        }
+
+        @Test
+        @DisplayName("이미 존재하는 아이디로 회원가입 시 예외가 발생한다.")
+        void signup_duplicate_id() {
+            // given
+            dbHelper.insertMember(
+                    Member.createLocalUser("sameId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
+
+            SignupRequest signupRequest = new SignupRequest("sameId", "another", "password");
+
+            // when & then
+            assertThatThrownBy(() -> authService.signup(signupRequest))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("이미 존재하는 아이디입니다.");
+        }
     }
 
-    @Test
-    @DisplayName("이미 존재하는 아이디로 회원가입 시 예외가 발생한다.")
-    void signup_duplicate_id() {
-        // given
-        dbHelper.insertMember(
-                Member.createLocalUser("sameId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
+    @Nested
+    @DisplayName("로그인")
+    class Login {
 
-        SignupRequest signupRequest = new SignupRequest("sameId", "another", "password");
+        @Test
+        @DisplayName("로그인 성공 시 엑세스토큰 + 리프래시토큰을 발급한다.")
+        void login_success() {
+            // given
+            dbHelper.insertMember(
+                    Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
 
-        // when & then
-        assertThatThrownBy(() -> authService.signup(signupRequest))
-                .isInstanceOf(InvalidInputException.class)
-                .hasMessageContaining("이미 존재하는 아이디입니다.");
-    }
+            LoginRequest loginRequest = new LoginRequest("localId", "password");
 
-    @Test
-    @DisplayName("로그인 성공 시 엑세스토큰 + 리프래시토큰을 발급한다.")
-    void login_success() {
-        // given
-        dbHelper.insertMember(
-                Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
+            // when
+            LoginTokenResponse loginTokenResponse = authService.login(loginRequest);
 
-        LoginRequest loginRequest = new LoginRequest("localId", "password");
+            // then
+            String responseAccessToken = loginTokenResponse.accessToken();
+            String responseRefreshToken = loginTokenResponse.refreshToken();
 
-        // when
-        LoginTokenResponse loginTokenResponse = authService.login(loginRequest);
+            assertAll(() -> {
+                assertThat(responseAccessToken).isNotNull();
+                assertThat(responseRefreshToken).isNotNull();
+                RefreshToken refreshToken = refreshTokenRepository.findByToken(responseRefreshToken).orElseThrow();
+                assertThat(refreshToken.getToken()).isEqualTo(responseRefreshToken);
+            });
+        }
 
-        // then
-        String responseAccessToken = loginTokenResponse.accessToken();
-        String responseRefreshToken = loginTokenResponse.refreshToken();
+        @Test
+        @DisplayName("아이디가 존재하지 않을 경우 인증예외가 발생한다")
+        void login_fail_member_not_found() {
+            // given
+            LoginRequest request = new LoginRequest("nonexistent", "password");
 
-        assertAll(() -> {
-            assertThat(responseAccessToken).isNotNull();
-            assertThat(responseRefreshToken).isNotNull();
-            RefreshToken refreshToken = refreshTokenRepository.findByToken(responseRefreshToken).orElseThrow();
-            assertThat(refreshToken.getToken()).isEqualTo(responseRefreshToken);
-        });
+            // when & then
+            assertThatThrownBy(() -> authService.login(request))
+                    .isInstanceOf(UnauthorizedException.class)
+                    .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
+        }
+
+        @Test
+        @DisplayName("비밀번호가 틀릴 경우 인증예외가 발생한다")
+        void login_fail_wrong_password() {
+            // given
+            dbHelper.insertMember(Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
+
+            LoginRequest loginRequest = new LoginRequest("localId", "wrongpassword");
+
+            // when & then
+            assertThatThrownBy(() -> authService.login(loginRequest))
+                    .isInstanceOf(UnauthorizedException.class)
+                    .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
+        }
     }
 
     @Nested
@@ -186,33 +222,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("아이디가 존재하지 않을 경우 인증예외가 발생한다")
-    void login_fail_member_not_found() {
-        // given
-        LoginRequest request = new LoginRequest("nonexistent", "password");
-
-        // when & then
-        assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
-    }
-
-    @Test
-    @DisplayName("비밀번호가 틀릴 경우 인증예외가 발생한다")
-    void login_fail_wrong_password() {
-        // given
-        dbHelper.insertMember(Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
-
-        LoginRequest loginRequest = new LoginRequest("localId", "wrongpassword");
-
-        // when & then
-        assertThatThrownBy(() -> authService.login(loginRequest))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
-    }
-
-    @Test
-    @DisplayName("로그아웃 시 해당 member의 리프레시토큰을 삭제한다.")
+    @DisplayName("회원탈퇴 시 리프레시토큰 제거 및 회원탈퇴한시각을 기록한다.")
     void logout_then_deleteRefreshToken() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -221,9 +231,11 @@ class AuthServiceTest {
         assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
 
         // when
-        authService.logout(member.getId());
+        authService.withdraw(member.getId());
 
         // then
         assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+        Member withdrawnMember = memberRepository.findById(member.getId()).orElseThrow();
+        assertThat(withdrawnMember.getDeletedAt()).isNotNull();
     }
 }
