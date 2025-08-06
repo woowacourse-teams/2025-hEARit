@@ -82,4 +82,8 @@ public class Member {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    public void withdraw() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }
