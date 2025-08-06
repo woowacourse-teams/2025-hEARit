@@ -85,11 +85,6 @@ public class AdminHearitService {
         saveHearitKeywords(request.keywordIds(), savedHearit);
     }
 
-    private Category getCategoryById(Long categoryId) {
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("categoryId", categoryId.toString()));
-    }
-
     private void saveHearitKeywords(List<Long> keywordIds, Hearit savedHearit) {
         if (!existsKeywords(keywordIds)) {
             return;
@@ -127,6 +122,11 @@ public class AdminHearitService {
         fileStorageService.deleteFile(hearit.getFileUrl(fileType));
         String uploadFilePath = fileStorageService.uploadFile(request.file(), fileType);
         hearit.updateFileUrl(uploadFilePath, fileType);
+    }
+
+    private Category getCategoryById(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("categoryId", categoryId.toString()));
     }
 
     private Hearit getHearitById(Long hearitId) {

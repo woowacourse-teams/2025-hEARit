@@ -48,6 +48,7 @@ public enum FileType {
     private final String uploadPath;
 
     public abstract void updateFileUrl(Hearit hearit, String newUrl);
+
     public abstract String getFileUrl(Hearit hearit);
 
     public void validateFilename(String filename) {
