@@ -96,9 +96,9 @@ class PlaybackService : MediaSessionService() {
     override fun onDestroy() {
         serviceScope.cancel()
         stateSaver.release()
-        super.onDestroy()
         mediaSession.release()
         player.release()
+        super.onDestroy()
     }
 
     companion object {
