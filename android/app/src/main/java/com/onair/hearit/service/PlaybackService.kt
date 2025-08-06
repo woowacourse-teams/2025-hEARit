@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
+import com.onair.hearit.di.UseCaseProvider
 import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.CoroutineScope
@@ -229,7 +230,7 @@ class PlaybackService : MediaSessionService() {
                 .getRecentHearit()
                 .getOrNull()
                 ?.let { recent ->
-                    RepositoryProvider
+                    UseCaseProvider
                         .getPlaybackInfoUseCase(token.toBearerToken(), recent.id)
                         .getOrNull()
                 }
