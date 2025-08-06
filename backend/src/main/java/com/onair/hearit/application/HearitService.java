@@ -32,8 +32,8 @@ import org.springframework.stereotype.Service;
 public class HearitService {
 
     private static final int RECOMMEND_HEARIT_COUNT = 5;
-    private static final int GROUPED_CATEGORY_COUNT = 3;
-    private static final int HEARITS_PER_GROUPED_CATEGORY = 5;
+    private static final int RECOMMEND_CATEGORY_COUNT = 3;
+    private static final int HEARITS_PER_RECOMMENDED_CATEGORY = 5;
     private static final int KEYWORDS_PER_CATEGORIZED_HEARIT = 3;
     private static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
 
@@ -82,15 +82,15 @@ public class HearitService {
 
     public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(Long memberId) {
         List<Category> recommendCategories =
-            categoryRepository.findTopCategoriesByMemberBookmarks(memberId, GROUPED_CATEGORY_COUNT);
-        if (recommendCategories.size() < GROUPED_CATEGORY_COUNT) {
+            categoryRepository.findTopCategoriesByMemberBookmarks(memberId, RECOMMEND_CATEGORY_COUNT);
+        if (recommendCategories.size() < RECOMMEND_CATEGORY_COUNT) {
             List<Long> randomCategoryIds = pickTodayRandomCategoryIds(recommendCategories,
-                GROUPED_CATEGORY_COUNT - recommendCategories.size());
+                RECOMMEND_CATEGORY_COUNT - recommendCategories.size());
             List<Category> randomCategories = categoryRepository.findAllByIdIn(randomCategoryIds);
             recommendCategories.addAll(randomCategories);
         }
         return recommendCategories.stream()
-            .map(this::toGroupedHearitsResponseByCategory)
+            .map(this::toHearitsWithRecommendedWithCategory)
             .toList();
     }
 
@@ -108,8 +108,8 @@ public class HearitService {
         return categoryIds;
     }
 
-    private HearitsWithRecommendCategoryResponse toGroupedHearitsResponseByCategory(Category category) {
-        List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_GROUPED_CATEGORY);
+    private HearitsWithRecommendCategoryResponse toHearitsWithRecommendedWithCategory(Category category) {
+        List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_RECOMMENDED_CATEGORY);
         return HearitsWithRecommendCategoryResponse.from(category, hearits);
     }
 
