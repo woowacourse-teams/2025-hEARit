@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.BuildConfig
 import com.onair.hearit.R
 import com.onair.hearit.analytics.CrashlyticsLogger
+import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.MemberRepository
@@ -35,7 +36,7 @@ class SettingViewModel(
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
             if (token == null) {
-                _toastMessage.value = R.string.setting_toast_user_info_load_fail
+                _userInfo.value = defaultUserInfo()
                 return@launch
             }
 
@@ -43,10 +44,25 @@ class SettingViewModel(
                 .getUserInfo(token.toBearerToken())
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo
-                }.onFailure {
-                    crashlyticsLogger.recordException(it)
-                    _toastMessage.value = R.string.setting_toast_user_info_load_fail
+                }.onFailure { throwable ->
+                    when (throwable) {
+                        is UserNotRegisteredException -> {
+                            _userInfo.value = defaultUserInfo()
+                        }
+
+                        else -> {
+                            crashlyticsLogger.recordException(throwable)
+                            _toastMessage.value = R.string.all_toast_user_info_load_fail
+                        }
+                    }
                 }
         }
     }
+
+    private fun defaultUserInfo(): UserInfo =
+        UserInfo(
+            id = -1,
+            nickname = "hEARit",
+            profileImage = "",
+        )
 }
