@@ -31,7 +31,7 @@ class ExploreDataStoreRepositoryImpl(
     override suspend fun clearExploreCount(): Result<Boolean> =
         runCatching {
             exploreDataStore.edit { preferences ->
-                preferences.clear()
+                preferences.remove(EXPLORE_COUNT)
             }
             true
         }

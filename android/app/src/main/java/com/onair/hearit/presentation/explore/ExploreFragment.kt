@@ -175,7 +175,7 @@ class ExploreFragment :
             adapter.submitList(shortsHearits)
 
             if (isFirstLoad && shortsHearits.isNotEmpty()) {
-                viewModel.shouldPlayAnimation.value?.let { isEnabled ->
+                viewModel.shouldPlayAnimation.observe(viewLifecycleOwner) { isEnabled ->
                     if (isEnabled) {
                         startSwipeAnimation()
                         isFirstLoad = false

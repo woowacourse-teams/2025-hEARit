@@ -70,15 +70,19 @@ class ExploreViewModel(
 
     private fun setAnimation() {
         viewModelScope.launch {
-            val currentCount = exploreDataStoreRepository.getExploreCount().getOrNull()
-
-            if (currentCount == null || currentCount < 2) {
-                val newCount = (currentCount ?: 0) + 1
-                exploreDataStoreRepository.updateExploreCount(newCount)
-                _shouldPlayAnimation.value = true
-            } else {
-                _shouldPlayAnimation.value = false
-            }
+            exploreDataStoreRepository
+                .getExploreCount()
+                .onSuccess { currentCount ->
+                    if (currentCount < MAX_ANIMATION_COUNT) {
+                        val newCount = currentCount + 1
+                        exploreDataStoreRepository.updateExploreCount(newCount)
+                        _shouldPlayAnimation.value = true
+                    } else {
+                        _shouldPlayAnimation.value = false
+                    }
+                }.onFailure {
+                    _shouldPlayAnimation.value = false
+                }
         }
     }
 
@@ -181,5 +185,9 @@ class ExploreViewModel(
                     }
                 }
             }
+    }
+
+    companion object {
+        private const val MAX_ANIMATION_COUNT = 2
     }
 }
