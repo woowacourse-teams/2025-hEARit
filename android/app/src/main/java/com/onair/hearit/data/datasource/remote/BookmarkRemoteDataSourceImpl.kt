@@ -13,7 +13,7 @@ class BookmarkRemoteDataSourceImpl(
     private val errorResponseHandler: ErrorResponseHandler,
 ) : BookmarkRemoteDataSource {
     override suspend fun getBookmarks(
-        token: String,
+        token: String?,
         page: Int?,
         size: Int?,
     ): Result<NetworkResult<BookmarkResponse>> =
@@ -26,7 +26,7 @@ class BookmarkRemoteDataSourceImpl(
         )
 
     override suspend fun addBookmark(
-        token: String,
+        token: String?,
         hearitId: Long,
     ): Result<NetworkResult<BookmarkIdResponse>> =
         handleApiCall(
@@ -38,7 +38,7 @@ class BookmarkRemoteDataSourceImpl(
         )
 
     override suspend fun deleteBookmark(
-        token: String,
+        token: String?,
         bookmarkId: Long,
     ): Result<NetworkResult<Unit>> =
         handleApiCall(

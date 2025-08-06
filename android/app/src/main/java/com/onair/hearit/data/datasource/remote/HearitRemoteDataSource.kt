@@ -9,14 +9,14 @@ import com.onair.hearit.data.dto.SearchHearitResponse
 
 interface HearitRemoteDataSource {
     suspend fun getHearit(
-        token: String,
+        token: String?,
         hearitId: Long,
     ): Result<NetworkResult<HearitResponse>>
 
     suspend fun getRecommendHearits(): Result<NetworkResult<List<RecommendHearitResponse>>>
 
     suspend fun getRandomHearits(
-        token: String,
+        token: String?,
         page: Int?,
         size: Int?,
     ): Result<NetworkResult<RandomHearitResponse>>

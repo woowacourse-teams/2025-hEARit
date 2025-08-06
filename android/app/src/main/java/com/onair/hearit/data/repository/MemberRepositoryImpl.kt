@@ -8,6 +8,6 @@ import com.onair.hearit.domain.repository.MemberRepository
 class MemberRepositoryImpl(
     private val memberRemoteDataSource: MemberRemoteDataSource,
 ) : MemberRepository {
-    override suspend fun getUserInfo(token: String): Result<UserInfo> =
+    override suspend fun getUserInfo(token: String?): Result<UserInfo> =
         memberRemoteDataSource.getUserInfo(token).mapOrThrowDomain { it.toDomain() }
 }

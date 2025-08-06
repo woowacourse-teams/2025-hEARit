@@ -12,7 +12,7 @@ class GetPlaybackInfoUseCase(
     private val recentHearitRepository: RecentHearitRepository,
 ) {
     suspend operator fun invoke(
-        token: String,
+        token: String?,
         hearitId: Long,
     ): Result<PlaybackInfo> =
         runCatching {

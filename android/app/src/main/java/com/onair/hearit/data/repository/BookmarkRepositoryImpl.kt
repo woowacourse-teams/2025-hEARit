@@ -9,7 +9,7 @@ class BookmarkRepositoryImpl(
     private val bookmarkDataSource: BookmarkRemoteDataSource,
 ) : BookmarkRepository {
     override suspend fun getBookmarks(
-        token: String,
+        token: String?,
         page: Int?,
         size: Int?,
     ): Result<List<Bookmark>> =
@@ -18,12 +18,12 @@ class BookmarkRepositoryImpl(
         }
 
     override suspend fun addBookmark(
-        token: String,
+        token: String?,
         hearitId: Long,
     ): Result<Long> = bookmarkDataSource.addBookmark(token, hearitId).mapOrThrowDomain { it.id }
 
     override suspend fun deleteBookmark(
-        token: String,
+        token: String?,
         bookmarkId: Long,
     ): Result<Unit> = runCatching { bookmarkDataSource.deleteBookmark(token, bookmarkId) }
 }

@@ -42,13 +42,9 @@ class LibraryViewModel(
     fun fetchData(page: Int) {
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
-            if (token == null) {
-                _toastMessage.value = R.string.setting_toast_user_info_load_fail
-                return@launch
-            }
 
             bookmarkRepository
-                .getBookmarks(token.toBearerToken(), page = page, size = null)
+                .getBookmarks(token?.toBearerToken(), page = page, size = null)
                 .onSuccess {
                     _uiState.value = BookmarkUiState.LoggedIn
                     _bookmarks.value = it
@@ -71,13 +67,9 @@ class LibraryViewModel(
     private fun getUserInfo() {
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
-            if (token == null) {
-                _toastMessage.value = R.string.setting_toast_user_info_load_fail
-                return@launch
-            }
 
             memberRepository
-                .getUserInfo(token.toBearerToken())
+                .getUserInfo(token?.toBearerToken())
                 .onSuccess { userInfo ->
                     _uiState.value = BookmarkUiState.LoggedIn
                     _userInfo.value = userInfo

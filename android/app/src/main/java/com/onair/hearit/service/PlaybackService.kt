@@ -224,14 +224,14 @@ class PlaybackService : MediaSessionService() {
     // 최근 들은 히어릿을 서비스 내에서 불러오기 위한 코드
     private suspend fun loadRecentInfo(): PlaybackInfo? =
         withContext(Dispatchers.IO) {
-            val token = dataStoreRepository.getAccessToken().getOrNull() ?: return@withContext null
+            val token = dataStoreRepository.getAccessToken().getOrNull()
 
             RepositoryProvider.recentHearitRepository
                 .getRecentHearit()
                 .getOrNull()
                 ?.let { recent ->
                     UseCaseProvider
-                        .getPlaybackInfoUseCase(token.toBearerToken(), recent.id)
+                        .getPlaybackInfoUseCase(token?.toBearerToken(), recent.id)
                         .getOrNull()
                 }
         }

@@ -10,7 +10,7 @@ class GetHearitUseCase(
     private val mediaFileRepository: MediaFileRepository,
 ) {
     suspend operator fun invoke(
-        token: String,
+        token: String?,
         hearitId: Long,
     ): Result<Hearit> =
         runCatching {

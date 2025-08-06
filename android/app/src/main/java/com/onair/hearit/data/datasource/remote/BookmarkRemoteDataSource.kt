@@ -6,18 +6,18 @@ import com.onair.hearit.data.dto.BookmarkResponse
 
 interface BookmarkRemoteDataSource {
     suspend fun getBookmarks(
-        token: String,
+        token: String?,
         page: Int?,
         size: Int?,
     ): Result<NetworkResult<BookmarkResponse>>
 
     suspend fun addBookmark(
-        token: String,
+        token: String?,
         hearitId: Long,
     ): Result<NetworkResult<BookmarkIdResponse>>
 
     suspend fun deleteBookmark(
-        token: String,
+        token: String?,
         bookmarkId: Long,
     ): Result<NetworkResult<Unit>>
 }

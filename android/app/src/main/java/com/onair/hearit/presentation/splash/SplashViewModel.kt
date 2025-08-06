@@ -10,7 +10,6 @@ import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
 
 class SplashViewModel(
@@ -33,7 +32,7 @@ class SplashViewModel(
                 return@launch
             }
 
-            val result = authRepository.checkAccessToken(accessToken.toBearerToken())
+            val result = authRepository.checkAccessToken("Bearer $accessToken")
             result
                 .onSuccess {
                     _checkToken.value = true

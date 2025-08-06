@@ -11,7 +11,7 @@ class MemberRemoteDataSourceImpl(
     private val memberService: MemberService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : MemberRemoteDataSource {
-    override suspend fun getUserInfo(token: String): Result<NetworkResult<UserInfoResponse>> =
+    override suspend fun getUserInfo(token: String?): Result<NetworkResult<UserInfoResponse>> =
         handleApiCall(
             apiCall = { memberService.getUserInfo(token) },
             transform = { response ->

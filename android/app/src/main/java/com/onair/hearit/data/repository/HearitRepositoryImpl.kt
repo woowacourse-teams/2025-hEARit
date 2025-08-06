@@ -14,7 +14,7 @@ class HearitRepositoryImpl(
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
     override suspend fun getHearit(
-        token: String,
+        token: String?,
         hearitId: Long,
     ): Result<SingleHearit> = hearitRemoteDataSource.getHearit(token, hearitId).mapOrThrowDomain { it.toDomain() }
 
@@ -22,7 +22,7 @@ class HearitRepositoryImpl(
         hearitRemoteDataSource.getRecommendHearits().mapListOrThrowDomain { it.toDomain() }
 
     override suspend fun getRandomHearits(
-        token: String,
+        token: String?,
         page: Int?,
         size: Int?,
     ): Result<PageResult<RandomHearit>> =

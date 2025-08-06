@@ -16,7 +16,7 @@ class HearitRemoteDataSourceImpl(
     private val errorResponseHandler: ErrorResponseHandler,
 ) : HearitRemoteDataSource {
     override suspend fun getHearit(
-        token: String,
+        token: String?,
         hearitId: Long,
     ): Result<NetworkResult<HearitResponse>> =
         handleApiCall(
@@ -37,7 +37,7 @@ class HearitRemoteDataSourceImpl(
         )
 
     override suspend fun getRandomHearits(
-        token: String,
+        token: String?,
         page: Int?,
         size: Int?,
     ): Result<NetworkResult<RandomHearitResponse>> =
