@@ -30,6 +30,8 @@ class ShortsViewHolder(
     private var shortsHearit: ShortsHearit? = null
     private val exploreScriptAdapter = ExploreScriptAdapter()
 
+    private var rotateAnimator: ObjectAnimator? = null
+
     init {
         binding.shortsClickListener = shortsClickListener
     }
@@ -54,6 +56,8 @@ class ShortsViewHolder(
                 repeatCount = ValueAnimator.INFINITE
                 interpolator = LinearInterpolator()
             }
+        rotateAnimator?.cancel()
+        rotateAnimator = rotate
         rotate.start()
 
         binding.btnExploreItemBookmark.setOnClickListener {
