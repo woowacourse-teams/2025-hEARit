@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation;
 
+import com.onair.hearit.application.HearitExploreService;
 import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.auth.dto.CurrentMember;
@@ -9,7 +10,7 @@ import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
-import com.onair.hearit.dto.response.RandomHearitResponse;
+import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HearitController {
 
     private final HearitService hearitService;
+    private final HearitExploreService hearitExploreService;
     private final HearitSearchService hearitSearchService;
 
     @GetMapping("/{hearitId}")
@@ -38,14 +40,13 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/random")
-    public ResponseEntity<PagedResponse<RandomHearitResponse>> readRandomHearits(
+    @GetMapping("/explore")
+    public ResponseEntity<List<ExploredHearitResponse>> readPersonalHearits(
             @AuthenticationPrincipal CurrentMember member,
-            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "cursorId", defaultValue = "0") Long cursorId,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Long memberId = extractMemberId(member);
-        PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<RandomHearitResponse> responses = hearitService.getRandomHearits(memberId, pagingRequest);
+        List<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(memberId, cursorId, size);
         return ResponseEntity.ok(responses);
     }
 

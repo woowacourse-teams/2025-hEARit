@@ -26,4 +26,11 @@ public class MemberExploreScore {
     private Double score;
 
     private Long cursor_id;
+
+    public MemberExploreScore(Long memberId, Long hearitId, Double score, Long cursor_id) {
+        this.memberId = memberId;
+        this.hearitId = hearitId;
+        this.score = score;
+        this.cursor_id = cursor_id;
+    }
 }
