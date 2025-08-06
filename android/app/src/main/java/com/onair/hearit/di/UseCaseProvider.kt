@@ -1,8 +1,5 @@
 package com.onair.hearit.di
 
-import com.onair.hearit.di.RepositoryProvider.hearitRepository
-import com.onair.hearit.di.RepositoryProvider.mediaFileRepository
-import com.onair.hearit.di.RepositoryProvider.recentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 import com.onair.hearit.domain.usecase.GetSearchResultUseCase
@@ -18,20 +15,20 @@ object UseCaseProvider {
 
     val getPlaybackInfoUseCase: GetPlaybackInfoUseCase by lazy {
         GetPlaybackInfoUseCase(
-            hearitRepository = hearitRepository,
-            mediaFileRepository = mediaFileRepository,
-            recentHearitRepository = recentHearitRepository,
+            hearitRepository = RepositoryProvider.hearitRepository,
+            mediaFileRepository = RepositoryProvider.mediaFileRepository,
+            recentHearitRepository = RepositoryProvider.recentHearitRepository,
         )
     }
 
     val getSearchResultUseCase: GetSearchResultUseCase by lazy {
         GetSearchResultUseCase(
-            hearitRepository = hearitRepository,
+            hearitRepository = RepositoryProvider.hearitRepository,
             categoryRepository = RepositoryProvider.categoryRepository,
         )
     }
 
     val getShortsHearitUseCase: GetShortsHearitUseCase by lazy {
-        GetShortsHearitUseCase(mediaFileRepository = mediaFileRepository)
+        GetShortsHearitUseCase(mediaFileRepository = RepositoryProvider.mediaFileRepository)
     }
 }

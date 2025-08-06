@@ -10,7 +10,6 @@ import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
-import com.onair.hearit.di.TokenProvider
 
 class HearitRemoteDataSourceImpl(
     private val hearitService: HearitService,
