@@ -1,5 +1,6 @@
 package com.onair.hearit.service
 
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -10,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PlaybackStateSaver(
     private val player: Player,
@@ -18,7 +20,6 @@ class PlaybackStateSaver(
     private var saveJob: Job? = null
 
     // 30초에 한번씩 마지막 재생 위치를 저장하기 위해서 runnable과 handler를 돌림
-
     val listener =
         @UnstableApi
         object : Player.Listener {
@@ -75,7 +76,6 @@ class PlaybackStateSaver(
         savePlaybackPosition(finished)
     }
 
-    // 리소스 정리: 주기적인 저장 작업 중단
     fun release() {
         saveJob?.cancel()
         savePlaybackPosition()
@@ -83,20 +83,30 @@ class PlaybackStateSaver(
 
     @OptIn(UnstableApi::class)
     private fun savePlaybackPosition(finished: Boolean = false) {
-        val mediaId = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return
-        val duration = player.duration
-        val position = player.currentPosition
-
-        val lastPosition =
-            if (finished || (duration > 0 && position >= duration - 1_000)) 0L else position
-
-        // 코루틴 내에서 직접 I/O 작업을 수행
         serviceScope.launch(Dispatchers.IO) {
-            RepositoryProvider.recentHearitRepository
-                .updateRecentHearitPosition(
-                    hearitId = mediaId,
-                    position = lastPosition,
-                )
+            var mediaId: Long? = null
+            var lastPosition = 0L
+
+            // player 접근은 Main 스레드에서 수행
+            withContext(Dispatchers.Main) {
+                mediaId = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return@withContext
+                val duration = player.duration
+                val position = player.currentPosition
+                lastPosition =
+                    if (finished || (duration > 0 && position >= duration - 1_000)) 0L else position
+            }
+
+            mediaId?.let {
+                runCatching {
+                    RepositoryProvider.recentHearitRepository
+                        .updateRecentHearitPosition(
+                            hearitId = it,
+                            position = lastPosition,
+                        )
+                }.onFailure {
+                    Log.w("PlaybackSaver", "위치 저장 실패: ${it.message}")
+                }
+            }
         }
     }
 }

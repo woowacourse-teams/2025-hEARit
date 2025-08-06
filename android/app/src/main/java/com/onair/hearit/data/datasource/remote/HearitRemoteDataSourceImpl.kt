@@ -10,15 +10,17 @@ import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
-import com.onair.hearit.di.TokenProvider
 
 class HearitRemoteDataSourceImpl(
     private val hearitService: HearitService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : HearitRemoteDataSource {
-    override suspend fun getHearit(hearitId: Long): Result<NetworkResult<HearitResponse>> =
+    override suspend fun getHearit(
+        token: String?,
+        hearitId: Long,
+    ): Result<NetworkResult<HearitResponse>> =
         handleApiCall(
-            apiCall = { hearitService.getHearit(getAuthHeader(), hearitId) },
+            apiCall = { hearitService.getHearit(token, hearitId) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
@@ -35,11 +37,12 @@ class HearitRemoteDataSourceImpl(
         )
 
     override suspend fun getRandomHearits(
+        token: String?,
         page: Int?,
         size: Int?,
     ): Result<NetworkResult<RandomHearitResponse>> =
         handleApiCall(
-            apiCall = { hearitService.getRandomHearits(getAuthHeader(), page, size) },
+            apiCall = { hearitService.getRandomHearits(token, page, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
@@ -67,17 +70,4 @@ class HearitRemoteDataSourceImpl(
             },
             errorHandler = errorResponseHandler,
         )
-
-    private fun getAuthHeader(): String? {
-        val token = TokenProvider.accessToken
-        return if (token.isNullOrBlank()) {
-            null
-        } else {
-            TOKEN.format(token)
-        }
-    }
-
-    companion object {
-        private const val TOKEN = "Bearer %s"
-    }
 }

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.di.RepositoryProvider
-import com.onair.hearit.domain.usecase.GetHearitUseCase
+import com.onair.hearit.di.UseCaseProvider
 
 @Suppress("UNCHECKED_CAST")
 class PlayerDetailViewModelFactory(
@@ -12,11 +12,9 @@ class PlayerDetailViewModelFactory(
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val hearitRepository = RepositoryProvider.hearitRepository
-        val recentHearitRepository = RepositoryProvider.recentHearitRepository
-        val mediaFileRepository = RepositoryProvider.mediaFileRepository
         val bookmarkRepository = RepositoryProvider.bookmarkRepository
-        val getHearitUseCase = GetHearitUseCase(hearitRepository, mediaFileRepository)
+        val recentHearitRepository = RepositoryProvider.recentHearitRepository
+        val getHearitUseCase = UseCaseProvider.getHearitUseCase
 
         return PlayerDetailViewModel(
             hearitId,

@@ -17,6 +17,7 @@
             style="@style/pretendard_drawer"
             android:layout_width="match_parent"
             android:layout_height="72dp"
+            android:layout_marginTop="24dp"
             android:gravity="center_vertical"
             android:paddingHorizontal="24dp"
             android:text="@string/all_account_info"
@@ -40,12 +41,14 @@
             android:gravity="center_vertical"
             android:paddingHorizontal="24dp"
             android:text="@string/all_terms_of_use"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/tv_drawer_privacy_policy" />
 
         <com.google.android.material.divider.MaterialDivider
             android:id="@+id/divider2"
             android:layout_width="match_parent"
             android:layout_height="1dp"
+            android:layout_marginTop="4dp"
             app:dividerColor="@color/hearit_gray4"
             app:layout_constraintTop_toBottomOf="@id/tv_drawer_terms_of_use" />
 
@@ -54,6 +57,7 @@
             style="@style/pretendard_drawer"
             android:layout_width="match_parent"
             android:layout_height="72dp"
+            android:layout_marginTop="4dp"
             android:gravity="center_vertical"
             android:paddingHorizontal="24dp"
             android:text="@string/all_logout"

@@ -8,11 +8,15 @@ import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
 
 interface HearitRepository {
-    suspend fun getHearit(hearitId: Long): Result<SingleHearit>
+    suspend fun getHearit(
+        token: String?,
+        hearitId: Long,
+    ): Result<SingleHearit>
 
     suspend fun getRecommendHearits(): Result<List<RecommendHearit>>
 
     suspend fun getRandomHearits(
+        token: String?,
         page: Int? = null,
         size: Int? = null,
     ): Result<PageResult<RandomHearit>>

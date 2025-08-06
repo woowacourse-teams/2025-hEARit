@@ -21,7 +21,6 @@ import com.onair.hearit.domain.repository.MediaFileRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
-import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 
 object RepositoryProvider {
     private lateinit var appContext: Context
@@ -69,13 +68,5 @@ object RepositoryProvider {
 
     val recentKeywordRepository: RecentKeywordRepository by lazy {
         RecentKeywordRepositoryImpl(hearitLocalDataSource = DataSourceProvider.hearitLocalDataSource)
-    }
-
-    val getPlaybackInfoUseCase: GetPlaybackInfoUseCase by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        GetPlaybackInfoUseCase(
-            hearitRepository = hearitRepository,
-            mediaFileRepository = mediaFileRepository,
-            recentHearitRepository = recentHearitRepository,
-        )
     }
 }
