@@ -68,9 +68,11 @@ class SearchViewModel(
         viewModelScope.launch {
             recentKeywordRepository
                 .clearKeywords()
-                .onSuccess {
-                    _recentKeywords.value = emptyList()
-                    _toastMessage.value = R.string.search_toast_recent_keyword_delete_success
+                .onSuccess { count ->
+                    if (count > 0) {
+                        _recentKeywords.value = emptyList()
+                        _toastMessage.value = R.string.search_toast_recent_keyword_delete_success
+                    }
                 }.onFailure {
                     crashlyticsLogger.recordException(it)
                     _toastMessage.value = R.string.search_toast_recent_keyword_delete_fail
