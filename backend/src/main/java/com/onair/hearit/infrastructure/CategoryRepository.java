@@ -10,4 +10,18 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("SELECT c FROM Category c ORDER BY c.id ASC LIMIT :size")
     List<Category> findOldest(@Param("size") int size);
+
+    @Query("SELECT c.id FROM Category c")
+    List<Long> findAllIds();
+
+    List<Category> findAllByIdIn(List<Long> selectedIds);
+
+    @Query("""
+        SELECT b.hearit.category AS category, COUNT(b) AS bookmarkCount
+        FROM Bookmark b
+        WHERE b.member.id = :memberId
+        GROUP BY b.hearit.category
+        ORDER BY bookmarkCount DESC
+        LIMIT :size""")
+    List<Category> findTopCategoriesByMemberBookmarks(@Param("memberId") Long memberId, @Param("size") int size);
 }
