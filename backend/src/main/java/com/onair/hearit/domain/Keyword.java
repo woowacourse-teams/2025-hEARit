@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class Keyword {
 
     public static final int KEYWORD_NAME_MAX_LENGTH = 20;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
