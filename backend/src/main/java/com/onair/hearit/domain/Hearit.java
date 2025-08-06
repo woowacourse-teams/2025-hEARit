@@ -1,5 +1,6 @@
 package com.onair.hearit.domain;
 
+import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -59,6 +60,7 @@ public class Hearit {
 
     public Hearit(String title, String summary, Integer playTime, String originalAudioUrl,
                   String shortAudioUrl, String scriptUrl, String source, Category category) {
+        validateMetaData(title, summary, playTime, source, category);
         this.title = title;
         this.summary = summary;
         this.playTime = playTime;
@@ -69,15 +71,54 @@ public class Hearit {
         this.category = category;
     }
 
-    public void update(String title, String summary, Integer playTime, String originalAudioUrl,
-                       String shortAudioUrl, String scriptUrl, String source, Category category) {
+    public void updateMetaData(String title, String summary, Integer playTime, String source, Category category) {
+        validateMetaData(title, summary, playTime, source, category);
         this.title = title;
         this.summary = summary;
         this.playTime = playTime;
-        this.originalAudioUrl = originalAudioUrl;
-        this.shortAudioUrl = shortAudioUrl;
-        this.scriptUrl = scriptUrl;
         this.source = source;
         this.category = category;
+    }
+
+    private void validateMetaData(String title, String summary, Integer playTime, String source, Category category) {
+        if (isEmptyString(title) || title.length() > 35) {
+            throw new InvalidInputException("제목은 35자 이하의 문자열이어야합니다.");
+        }
+        if (isEmptyString(summary) || summary.length() > 250) {
+            throw new InvalidInputException("요약은 250자 이하의 문자열이어야합니다.");
+        }
+        if (playTime == null || playTime < 1) {
+            throw new InvalidInputException("총 길이는 1초 이상의 숫자여야합니다.");
+        }
+        if (isEmptyString(source) || source.length() > 250) {
+            throw new InvalidInputException("출처는 250자 이하의 문자열이어야합니다.");
+        }
+        if (category == null) {
+            throw new InvalidInputException("카테고리는 반드시 입력해야합니다.");
+        }
+    }
+
+    private boolean isEmptyString(String title) {
+        return title == null || title.isBlank();
+    }
+
+    public void updateFileUrl(String fileUrl, FileType fileType) {
+        fileType.updateFileUrl(this, fileUrl);
+    }
+
+    void updateOriginalAudioUrl(String originalAudioUrl) {
+        this.originalAudioUrl = originalAudioUrl;
+    }
+
+    void updateShortAudioUrl(String shortAudioUrl) {
+        this.shortAudioUrl = shortAudioUrl;
+    }
+
+    void updateScriptUrl(String scriptUrl) {
+        this.scriptUrl = scriptUrl;
+    }
+
+    public String getFileUrl(FileType fileType) {
+        return fileType.getFileUrl(this);
     }
 }

@@ -1,7 +1,7 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.domain.FileType;
-import com.onair.hearit.admin.exception.S3Exception;
+import com.onair.hearit.admin.exception.AdminFileException;
+import com.onair.hearit.domain.FileType;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Slf4j
 @Service
@@ -40,8 +41,21 @@ public class FileStorageService {
             );
             return "/" + key;
         } catch (IOException e) {
-            log.error("S3 파일 업로드 실패: " + multipartFile.getOriginalFilename(), e);
-            throw new S3Exception("S3 파일 업로드 실패", e);
+            throw new AdminFileException("업로드 된 파일을 읽어오는데 실패했습니다.", e);
+        } catch (S3Exception e) {
+            throw new AdminFileException("S3 파일 업로드 실패했습니다.", e);
+        }
+    }
+
+    public void deleteFile(String filePath) {
+        if(filePath.startsWith("/")) {
+            filePath = filePath.substring(1);
+        }
+        String key = filePath;
+        try {
+            s3Client.deleteObject(builder -> builder.bucket(bucket).key(key).build());
+        } catch (S3Exception e) {
+            throw new AdminFileException("S3 삭제 실패했습니다.", e);
         }
     }
 }

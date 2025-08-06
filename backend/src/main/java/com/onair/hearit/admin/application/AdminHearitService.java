@@ -1,13 +1,14 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.domain.FileType;
-import com.onair.hearit.admin.domain.FileValidator;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest;
-import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitMetaDataUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse.KeywordInHearit;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
+import com.onair.hearit.admin.domain.FileNameValidator;
+import com.onair.hearit.domain.FileType;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
@@ -69,7 +70,10 @@ public class AdminHearitService {
 
     @Transactional
     public void addHearit(HearitCreateRequest request) {
-        FileValidator.validateAll(request.originalAudio(), request.shortAudio(), request.scriptFile());
+        FileNameValidator.validateAll(
+                request.originalAudio().getOriginalFilename(),
+                request.shortAudio().getOriginalFilename(),
+                request.scriptFile().getOriginalFilename());
         String originalAudioPath = fileStorageService.uploadFile(request.originalAudio(), FileType.ORIGINAL);
         String shortAudioPath = fileStorageService.uploadFile(request.shortAudio(), FileType.SHORT);
         String scriptFilePath = fileStorageService.uploadFile(request.scriptFile(), FileType.SCRIPT);
@@ -79,11 +83,6 @@ public class AdminHearitService {
                 shortAudioPath, scriptFilePath, request.source(), category);
         Hearit savedHearit = hearitRepository.save(hearit);
         saveHearitKeywords(request.keywordIds(), savedHearit);
-    }
-
-    private Category getCategoryById(Long categoryId) {
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("categoryId", categoryId.toString()));
     }
 
     private void saveHearitKeywords(List<Long> keywordIds, Hearit savedHearit) {
@@ -109,12 +108,29 @@ public class AdminHearitService {
     }
 
     @Transactional
-    public void modifyHearit(Long hearitId, HearitUpdateRequest request) {
+    public void modifyHearitMetaData(Long hearitId, HearitMetaDataUpdateRequest request) {
         Category category = getCategoryById(request.categoryId());
-        Hearit hearit = hearitRepository.findById(hearitId)
-                .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
+        Hearit hearit = getHearitById(hearitId);
 
-        hearit.update(request.title(), request.summary(), request.playTime(), request.originalAudioUrl(),
-                request.shortAudioUrl(), request.scriptUrl(), request.source(), category);
+        hearit.updateMetaData(request.title(), request.summary(), request.playTime(), request.source(), category);
+    }
+
+    @Transactional
+    public void modifyHearitFile(Long hearitId, HearitFileUpdateRequest request, FileType fileType) {
+        Hearit hearit = getHearitById(hearitId);
+        FileNameValidator.validateFileUrl(request.file().getOriginalFilename(), fileType, hearit);
+        fileStorageService.deleteFile(hearit.getFileUrl(fileType));
+        String uploadFilePath = fileStorageService.uploadFile(request.file(), fileType);
+        hearit.updateFileUrl(uploadFilePath, fileType);
+    }
+
+    private Category getCategoryById(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("categoryId", categoryId.toString()));
+    }
+
+    private Hearit getHearitById(Long hearitId) {
+        return hearitRepository.findById(hearitId)
+                .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
     }
 }
