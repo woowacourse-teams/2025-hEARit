@@ -11,7 +11,7 @@ class AuthRepositoryImpl(
     private val authRemoteDataSource: AuthRemoteDataSource,
 ) : AuthRepository {
     override suspend fun checkAccessToken(accessToken: String): Result<Unit> =
-        runCatching { authRemoteDataSource.checkAccessToken(accessToken) }
+        authRemoteDataSource.checkAccessToken(accessToken).mapOrThrowDomain { }
 
     override suspend fun kakaoLogin(accessToken: String): Result<LoginToken> =
         authRemoteDataSource

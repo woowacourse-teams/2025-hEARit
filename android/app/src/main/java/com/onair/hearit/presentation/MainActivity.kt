@@ -17,7 +17,6 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -58,13 +57,14 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding.layoutDrawer.viewModel = playerViewModel
+        binding.lifecycleOwner = this
 
         setupBackPressHandler()
         setupWindowInsets()
         setupNavigation()
         setupDrawer()
         observeViewModel()
-
         showFragment(HomeFragment())
         setupBottomControllerClick()
     }
