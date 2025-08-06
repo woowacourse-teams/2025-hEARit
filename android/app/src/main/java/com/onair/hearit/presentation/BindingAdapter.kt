@@ -116,14 +116,6 @@ fun setVisibleIfLogin(
     view.isVisible = state is BookmarkUiState.LoggedIn
 }
 
-@BindingAdapter("setSelectedState")
-fun setSelectedState(
-    view: ImageView,
-    condition: Boolean?,
-) {
-    view.isSelected = condition == true
-}
-
 @BindingAdapter("backgroundColor")
 fun setBackgroundColor(
     view: View,
