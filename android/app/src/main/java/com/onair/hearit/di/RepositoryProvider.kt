@@ -5,6 +5,7 @@ import com.onair.hearit.data.repository.AuthRepositoryImpl
 import com.onair.hearit.data.repository.BookmarkRepositoryImpl
 import com.onair.hearit.data.repository.CategoryRepositoryImpl
 import com.onair.hearit.data.repository.DataStoreRepositoryImpl
+import com.onair.hearit.data.repository.ExploreDataStoreRepositoryImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
 import com.onair.hearit.data.repository.KeywordRepositoryImpl
 import com.onair.hearit.data.repository.MediaFileRepositoryImpl
@@ -15,6 +16,7 @@ import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.DataStoreRepository
+import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.KeywordRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
@@ -44,6 +46,10 @@ object RepositoryProvider {
 
     val dataStoreRepository: DataStoreRepository by lazy {
         DataStoreRepositoryImpl(context = appContext)
+    }
+
+    val exploreDataStoreRepository: ExploreDataStoreRepository by lazy {
+        ExploreDataStoreRepositoryImpl(context = appContext)
     }
 
     val hearitRepository: HearitRepository by lazy {

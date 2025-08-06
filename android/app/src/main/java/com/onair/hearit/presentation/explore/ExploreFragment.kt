@@ -1,5 +1,8 @@
 package com.onair.hearit.presentation.explore
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -81,6 +84,7 @@ class ExploreFragment :
 
         setupWindowInsets()
         setupRecyclerView()
+        setupAnimationObserver()
         observeViewModel()
 
         (activity as? PlayerControllerView)?.pause()
@@ -166,6 +170,29 @@ class ExploreFragment :
         )
     }
 
+    private fun setupAnimationObserver() {
+        adapter.registerAdapterDataObserver(
+            object : RecyclerView.AdapterDataObserver() {
+                override fun onItemRangeInserted(
+                    positionStart: Int,
+                    itemCount: Int,
+                ) {
+                    super.onItemRangeInserted(positionStart, itemCount)
+
+                    if (positionStart == 0 && itemCount > 0) {
+                        viewModel.shouldPlayAnimation.value?.let { isEnabled ->
+                            if (isEnabled) {
+                                binding.rvExplore.post {
+                                    startSwipeAnimation()
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+        )
+    }
+
     private fun observeViewModel() {
         viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
             adapter.submitList(shortsHearits)
@@ -174,6 +201,28 @@ class ExploreFragment :
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
+    }
+
+    private fun startSwipeAnimation() {
+        binding.lavExploreSwipeUp.visibility = View.VISIBLE
+
+        val animator =
+            ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
+                duration = 1300
+                repeatCount = 1
+                repeatMode = ObjectAnimator.RESTART
+            }
+
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    super.onAnimationEnd(animation)
+                    binding.lavExploreSwipeUp.visibility = View.INVISIBLE
+                }
+            },
+        )
+
+        animator.start()
     }
 
     private fun checkAndLoadNextPage(position: Int) {

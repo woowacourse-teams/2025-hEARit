@@ -12,6 +12,7 @@ import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.ShortsHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
+import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
 class ExploreViewModel(
     private val hearitRepository: HearitRepository,
     private val bookmarkRepository: BookmarkRepository,
+    private val exploreDataStoreRepository: ExploreDataStoreRepository,
     private val getShortsHearitUseCase: GetShortsHearitUseCase,
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
@@ -36,12 +38,16 @@ class ExploreViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    private val _shouldPlayAnimation = MutableLiveData<Boolean>()
+    val shouldPlayAnimation: LiveData<Boolean> = _shouldPlayAnimation
+
     private lateinit var paging: Paging
     private var currentPage = 0
     private var isLastPage = false
     private var isLoading = false
 
     init {
+        setAnimation()
         fetchData(page = 0, isInitial = true)
     }
 
@@ -59,6 +65,20 @@ class ExploreViewModel(
             deleteBookmark(hearitId, bookmarkId)
         } else {
             addBookmark(hearitId)
+        }
+    }
+
+    private fun setAnimation() {
+        viewModelScope.launch {
+            val currentCount = exploreDataStoreRepository.getExploreCount().getOrNull()
+
+            if (currentCount == null || currentCount < 2) {
+                val newCount = (currentCount ?: 0) + 1
+                exploreDataStoreRepository.updateExploreCount(newCount)
+                _shouldPlayAnimation.value = true
+            } else {
+                _shouldPlayAnimation.value = false
+            }
         }
     }
 
