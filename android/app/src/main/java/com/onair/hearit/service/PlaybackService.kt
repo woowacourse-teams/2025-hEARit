@@ -30,7 +30,6 @@ class PlaybackService : MediaSessionService() {
         notificationManager = NotificationManager(this)
         initializePlayer()
         initializeMediaSession()
-        initializeAndStartForeground()
         stateSaver = PlaybackStateSaver(player, serviceScope)
         player.addListener(stateSaver.listener)
     }
@@ -40,6 +39,7 @@ class PlaybackService : MediaSessionService() {
         flags: Int,
         startId: Int,
     ): Int {
+        initializeAndStartForeground()
         super.onStartCommand(intent, flags, startId)
         val audioUrl = intent?.getStringExtra(EXTRA_AUDIO_URL)
         val title = intent?.getStringExtra(EXTRA_TITLE) ?: "hearit"
@@ -84,7 +84,6 @@ class PlaybackService : MediaSessionService() {
                     .build(),
             ).build()
 
-    //
     private fun initializeAndStartForeground() {
         if (isServiceStarted) return
         val notification = notificationManager.buildForegroundNotification()

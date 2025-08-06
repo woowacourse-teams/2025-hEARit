@@ -1,28 +1,23 @@
 package com.onair.hearit.service
 
-import android.os.Handler
-import android.os.Looper
 import androidx.annotation.OptIn
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import com.onair.hearit.di.RepositoryProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class PlaybackStateSaver(
     private val player: Player,
     private val serviceScope: CoroutineScope,
 ) {
+    private var saveJob: Job? = null
+
     // 30초에 한번씩 마지막 재생 위치를 저장하기 위해서 runnable과 handler를 돌림
-    private val saveHandler = Handler(Looper.getMainLooper())
-    private val saveRunnable =
-        object : Runnable {
-            override fun run() {
-                savePlaybackPosition()
-                saveHandler.postDelayed(this, 30_000L)
-            }
-        }
 
     val listener =
         @UnstableApi
@@ -31,12 +26,11 @@ class PlaybackStateSaver(
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) {
                     // 재생 시작: 30초마다 위치를 저장하는 주기적인 작업 시작
-                    saveHandler.post(saveRunnable)
+                    startSavingPosition()
                 } else {
                     // 재생 중단: 주기적인 저장 작업을 멈추고 마지막 위치를 한 번 저장
                     // 현재 플레이어가 실행중이지 않은 경우 runnable을 멈추고, playbackPosition을 저장
-                    saveHandler.removeCallbacks(saveRunnable)
-                    savePlaybackPosition()
+                    stopSavingPosition()
                 }
             }
 
@@ -46,8 +40,7 @@ class PlaybackStateSaver(
              */
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) {
-                    saveHandler.removeCallbacks(saveRunnable)
-                    savePlaybackPosition(finished = true)
+                    stopSavingPosition(finished = true)
                 }
             }
 
@@ -60,9 +53,31 @@ class PlaybackStateSaver(
             }
         }
 
-    // 리소스 정리 및 서비스 종료 시에 호출됨. 주기적인 저장 멈추도록 하고 마지막 위치 정보를 저장함
+    // 재생 시작 시 호출: 주기적인 저장 코루틴을 시작
+    private fun startSavingPosition() {
+        // 기존 작업이 있다면 취소
+        saveJob?.cancel()
+
+        // 30초마다 위치를 저장하는 코루틴을 시작
+        saveJob =
+            serviceScope.launch(Dispatchers.IO) {
+                // 코루틴이 시작되면 Active상태, 코루틴이 멈추면 Completed 상태
+                while (isActive) {
+                    delay(30_000L) // 30초 대기
+                    savePlaybackPosition()
+                }
+            }
+    }
+
+    // 재생 중단 또는 종료 시 호출: 주기적인 저장 작업을 멈추고 마지막 위치를 한 번 저장
+    private fun stopSavingPosition(finished: Boolean = false) {
+        saveJob?.cancel()
+        savePlaybackPosition(finished)
+    }
+
+    // 리소스 정리: 주기적인 저장 작업 중단
     fun release() {
-        saveHandler.removeCallbacks(saveRunnable)
+        saveJob?.cancel()
         savePlaybackPosition()
     }
 
@@ -72,10 +87,10 @@ class PlaybackStateSaver(
         val duration = player.duration
         val position = player.currentPosition
 
-        // 플레이어가 끝났거나, 트랙의 마지막 1초 이내에 도달한 경우 위치를 0으로 초기화 함
         val lastPosition =
             if (finished || (duration > 0 && position >= duration - 1_000)) 0L else position
 
+        // 코루틴 내에서 직접 I/O 작업을 수행
         serviceScope.launch(Dispatchers.IO) {
             RepositoryProvider.recentHearitRepository
                 .updateRecentHearitPosition(
