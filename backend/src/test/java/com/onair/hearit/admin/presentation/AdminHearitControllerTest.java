@@ -9,6 +9,7 @@ import static org.mockito.BDDMockito.given;
 import com.onair.hearit.admin.application.FileStorageService;
 import com.onair.hearit.admin.domain.FileType;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitUpdateRequest.SourceUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Category;
@@ -105,7 +106,7 @@ class AdminHearitControllerTest extends IntegrationTest {
 
         HearitUpdateRequest request = new HearitUpdateRequest(
                 "수정 제목", "수정 요약", 100, "origin-audio", "short-audio",
-                "script-url", "출처", category.getId(), List.of()
+                "script-url", List.of(new SourceUpdateRequest("출처", "url")), category.getId(), List.of()
         );
 
         // when & then
@@ -137,7 +138,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                     "origin-audio" + i,
                     "short-audio-url" + i,
                     "script-url" + i,
-                    "source" + i,
+                    TestFixture.createFixedSources(),
                     category
             );
             dbHelper.insertHearit(hearit);

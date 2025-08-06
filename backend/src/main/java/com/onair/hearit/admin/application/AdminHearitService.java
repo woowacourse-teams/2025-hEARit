@@ -3,7 +3,9 @@ package com.onair.hearit.admin.application;
 import com.onair.hearit.admin.domain.FileType;
 import com.onair.hearit.admin.domain.FileValidator;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest;
+import com.onair.hearit.admin.dto.request.HearitCreateRequest.SourceRequest;
 import com.onair.hearit.admin.dto.request.HearitUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitUpdateRequest.SourceUpdateRequest;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse;
 import com.onair.hearit.admin.dto.response.HearitAdminResponse.KeywordInHearit;
 import com.onair.hearit.common.exception.custom.NotFoundException;
@@ -11,6 +13,7 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
+import com.onair.hearit.domain.Source;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.CategoryRepository;
@@ -74,9 +77,14 @@ public class AdminHearitService {
         String shortAudioPath = fileStorageService.uploadFile(request.shortAudio(), FileType.SHORT);
         String scriptFilePath = fileStorageService.uploadFile(request.scriptFile(), FileType.SCRIPT);
 
+        List<Source> sources = request.sources()
+                .stream()
+                .map(SourceRequest::toSource)
+                .toList();
+
         Category category = getCategoryById(request.categoryId());
         Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), originalAudioPath,
-                shortAudioPath, scriptFilePath, request.source(), category);
+                shortAudioPath, scriptFilePath, sources, category);
         Hearit savedHearit = hearitRepository.save(hearit);
         saveHearitKeywords(request.keywordIds(), savedHearit);
     }
@@ -114,7 +122,12 @@ public class AdminHearitService {
         Hearit hearit = hearitRepository.findById(hearitId)
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
 
+        List<Source> sources = request.sources()
+                .stream()
+                .map(SourceUpdateRequest::toSource)
+                .toList();
+        
         hearit.update(request.title(), request.summary(), request.playTime(), request.originalAudioUrl(),
-                request.shortAudioUrl(), request.scriptUrl(), request.source(), category);
+                request.shortAudioUrl(), request.scriptUrl(), sources, category);
     }
 }

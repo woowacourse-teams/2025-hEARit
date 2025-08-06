@@ -16,6 +16,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.domain.Source;
 import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
@@ -161,7 +162,8 @@ class HearitControllerTest extends IntegrationTest {
                                                 Arrays.stream(new FieldDescriptor[]{
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
-                                                        fieldWithPath("content[].categoryColorCode").description("카테고리 색상"),
+                                                        fieldWithPath("content[].categoryColorCode").description(
+                                                                "카테고리 색상"),
                                                         fieldWithPath("content[].isBookmarked").description("북마크 여부"),
                                                         fieldWithPath("content[].bookmarkId").description(
                                                                 "북마크 ID (북마크된 경우)").optional(),
@@ -471,7 +473,7 @@ class HearitControllerTest extends IntegrationTest {
                 "originalAudioUrl",
                 "shortAudioUrl",
                 "scriptUrl",
-                "source",
+                List.of(new Source("출처", "url")),
                 category);
         Hearit savedHearit = dbHelper.insertHearit(hearit);
         dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
@@ -486,7 +488,7 @@ class HearitControllerTest extends IntegrationTest {
                 "originalAudioUrl",
                 "shortAudioUrl",
                 "scriptUrl",
-                "source",
+                List.of(new Source("출처", "url")),
                 category);
         Hearit savedHearit = dbHelper.insertHearit(hearit);
         dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));

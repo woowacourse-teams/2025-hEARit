@@ -1,6 +1,7 @@
 package com.onair.hearit.admin.dto.response;
 
 import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.domain.Source;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,7 @@ public record HearitAdminResponse(
         String originalAudioUrl,
         String shortAudioUrl,
         String scriptUrl,
-        String source,
+        List<Source> sources,
         Integer playTime,
         LocalDateTime createdAt,
         CategoryInfoResponse category,
@@ -26,7 +27,7 @@ public record HearitAdminResponse(
                 hearit.getOriginalAudioUrl(),
                 hearit.getShortAudioUrl(),
                 hearit.getScriptUrl(),
-                hearit.getSource(),
+                hearit.getSources(),
                 hearit.getPlayTime(),
                 hearit.getCreatedAt(),
                 CategoryInfoResponse.from(hearit.getCategory()),

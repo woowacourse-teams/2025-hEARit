@@ -5,6 +5,8 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.domain.Source;
+import java.util.List;
 
 public class TestFixture {
 
@@ -32,11 +34,18 @@ public class TestFixture {
                 "originalAudioUrl",
                 "shortAudioUrl",
                 "scriptUrl",
-                "source",
+                createFixedSources(),
                 category);
     }
 
     public static Bookmark createFixedBookmark(Member member, Hearit hearit) {
         return new Bookmark(member, hearit);
+    }
+
+    public static List<Source> createFixedSources() {
+        return List.of(
+                new Source("출처1", "https://example.com/1"),
+                new Source("출처2", "https://example.com/2")
+        );
     }
 }
