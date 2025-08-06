@@ -42,22 +42,27 @@ object HearitFixtures {
                 RandomHearitResponse.Content(
                     id = 1L,
                     title = "첫 번째 히어릿",
-                    summary = "이것은 첫 번째 히어릿의 요약입니다.",
-                    source = "출처 A",
-                    playTime = 180,
-                    createdAt = "2025-08-06T10:00:00Z",
+                    categoryColorCode = "#FF5733",
                     isBookmarked = false,
                     bookmarkId = null,
+                    keywords =
+                        listOf(
+                            KeywordResponse(0, "키워드1"),
+                            KeywordResponse(1, "키워드2"),
+                        ),
                 ),
                 RandomHearitResponse.Content(
                     id = 2L,
                     title = "두 번째 히어릿",
-                    summary = "두 번째 히어릿 내용 요약입니다.",
-                    source = "출처 B",
-                    playTime = 240,
-                    createdAt = "2025-08-05T15:30:00Z",
+                    categoryColorCode = "#33C1FF",
                     isBookmarked = true,
                     bookmarkId = 12345L,
+                    keywords =
+                        listOf(
+                            KeywordResponse(0, "키워드3"),
+                            KeywordResponse(1, "키워드4"),
+                            KeywordResponse(2, "키워드5"),
+                        ),
                 ),
             )
 

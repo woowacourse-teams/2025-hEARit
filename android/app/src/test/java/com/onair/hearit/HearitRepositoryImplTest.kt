@@ -41,10 +41,10 @@ class HearitRepositoryImplTest {
             val mockDto = createFakeHearit(hearitId)
             val expectedDomainModel = mockDto.toDomain()
 
-            coEvery { mockHearitRemoteDataSource.getHearit(hearitId) } returns
+            coEvery { mockHearitRemoteDataSource.getHearit(null, hearitId) } returns
                 Result.success(NetworkResult.Success(mockDto))
 
-            val result = hearitRepository.getHearit(hearitId)
+            val result = hearitRepository.getHearit(null, hearitId)
 
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrNull()).isEqualTo(expectedDomainModel)
@@ -56,10 +56,10 @@ class HearitRepositoryImplTest {
             val hearitId = 1L
             val expectedException = RuntimeException("네트워크 오류")
 
-            coEvery { mockHearitRemoteDataSource.getHearit(hearitId) } returns
+            coEvery { mockHearitRemoteDataSource.getHearit(null, hearitId) } returns
                 Result.failure(expectedException)
 
-            val result = hearitRepository.getHearit(hearitId)
+            val result = hearitRepository.getHearit(null, hearitId)
 
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isEqualTo(expectedException)
@@ -100,10 +100,10 @@ class HearitRepositoryImplTest {
             val mockPageResultDto = createFakeRandomHearit()
             val expectedDomainResult = mockPageResultDto.toDomain()
 
-            coEvery { mockHearitRemoteDataSource.getRandomHearits(1, 10) } returns
+            coEvery { mockHearitRemoteDataSource.getRandomHearits(null, 1, 10) } returns
                 Result.success(NetworkResult.Success(mockPageResultDto))
 
-            val result = hearitRepository.getRandomHearits(1, 10)
+            val result = hearitRepository.getRandomHearits(null, 1, 10)
 
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrNull()).isEqualTo(expectedDomainResult)
@@ -114,10 +114,10 @@ class HearitRepositoryImplTest {
         runTest {
             val expectedException = RuntimeException("랜덤 데이터 오류")
 
-            coEvery { mockHearitRemoteDataSource.getRandomHearits(1, 10) } returns
+            coEvery { mockHearitRemoteDataSource.getRandomHearits(null, 1, 10) } returns
                 Result.failure(expectedException)
 
-            val result = hearitRepository.getRandomHearits(1, 10)
+            val result = hearitRepository.getRandomHearits(null, 1, 10)
 
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isEqualTo(expectedException)
