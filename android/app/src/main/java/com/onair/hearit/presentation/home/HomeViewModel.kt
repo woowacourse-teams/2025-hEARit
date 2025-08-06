@@ -16,6 +16,7 @@ import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.foldWithCrashlytics
 import com.onair.hearit.presentation.launchWithLogging
+import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
@@ -63,54 +64,28 @@ class HomeViewModel(
         }
     }
 
-    private fun checkUserLogin() {
-        viewModelScope.launch {
-            dataStoreRepository
-                .getUserInfo()
-                .onSuccess { userInfo ->
-                    // DataStore에 저장된 유저정보가 있으면 바로 사용
-                    _userInfo.value = userInfo
-                }.onFailure {
-                    // DataStore에 유저정보 없으면 서버에서 조회
-                    fetchUserInfo()
-                }
-        }
-    }
-
     private fun fetchUserInfo() {
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+            if (token == null) {
+                _userInfo.value = UserInfo.default()
+                return@launch
+            }
+
             memberRepository
-                .getUserInfo()
+                .getUserInfo(token.toBearerToken())
                 .onSuccess { userInfo ->
-                    saveUserInfo(userInfo)
                     _userInfo.value = userInfo
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegisteredException -> {
-                            // 등록되지 않은 유저인 경우 (정상 응답)
-                            val defaultUserInfo =
-                                UserInfo(
-                                    id = -1,
-                                    nickname = "hEARit",
-                                    profileImage = "",
-                                )
-                            saveUserInfo(defaultUserInfo)
+                            _userInfo.value = UserInfo.default()
                         }
 
                         else -> {
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }
-                }
-        }
-    }
-
-    private fun saveUserInfo(userInfo: UserInfo) {
-        viewModelScope.launch {
-            dataStoreRepository
-                .saveUserInfo(userInfo)
-                .onFailure {
-                    _toastMessage.value = R.string.all_toast_save_user_info_fail
                 }
         }
     }

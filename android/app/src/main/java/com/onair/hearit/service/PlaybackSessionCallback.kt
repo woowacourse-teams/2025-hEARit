@@ -10,6 +10,7 @@ import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.di.RepositoryProvider
+import com.onair.hearit.di.UseCaseProvider
 import com.onair.hearit.domain.model.PlaybackInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -113,7 +114,7 @@ class PlaybackSessionCallback(
                 .getRecentHearit()
                 .getOrNull()
                 ?.let { recent ->
-                    RepositoryProvider.getPlaybackInfoUseCase(recent.id).getOrNull()
+                    UseCaseProvider.getPlaybackInfoUseCase(recent.id).getOrNull()
                 }
         }
 

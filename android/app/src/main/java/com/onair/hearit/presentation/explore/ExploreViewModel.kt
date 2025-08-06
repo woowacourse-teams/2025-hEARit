@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.CrashlyticsLogger
+import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RandomHearit
@@ -14,6 +15,7 @@ import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -60,50 +62,16 @@ class ExploreViewModel(
         }
     }
 
-    private fun deleteBookmark(
-        hearitId: Long,
-        bookmarkId: Long,
-    ) {
-        viewModelScope.launch {
-            bookmarkRepository
-                .deleteBookmark(bookmarkId)
-                .onSuccess {
-                    updateBookmarkState(hearitId, null)
-                }.onFailure {
-                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
-                }
-        }
-    }
-
-    private fun addBookmark(hearitId: Long) {
-        viewModelScope.launch {
-            bookmarkRepository
-                .addBookmark(hearitId)
-                .onSuccess { newBookmarkId ->
-                    updateBookmarkState(hearitId, newBookmarkId)
-                }.onFailure {
-                    _toastMessage.value = R.string.all_toast_add_bookmark_fail
-                }
-        }
-    }
-
-    private fun updateBookmarkState(
-        hearitId: Long,
-        bookmarkId: Long?,
-    ) {
-        val currentBookmarkId = _bookmarkId.value.orEmpty().toMutableMap()
-        currentBookmarkId[hearitId] = bookmarkId
-        _bookmarkId.value = currentBookmarkId
-    }
-
     private fun fetchData(
         page: Int,
         isInitial: Boolean,
     ) {
         isLoading = true
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
             try {
-                val result = hearitRepository.getRandomHearits(0)
+                val result = hearitRepository.getRandomHearits(token?.toBearerToken(), 0)
                 result
                     .onSuccess { randomItems ->
                         paging = randomItems.paging
@@ -121,6 +89,46 @@ class ExploreViewModel(
                 isLoading = false
             }
         }
+    }
+
+    private fun addBookmark(hearitId: Long) {
+        viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
+            bookmarkRepository
+                .addBookmark(token?.toBearerToken(), hearitId)
+                .onSuccess { newBookmarkId ->
+                    updateBookmarkState(hearitId, newBookmarkId)
+                }.onFailure {
+                    _toastMessage.value = R.string.all_toast_add_bookmark_fail
+                }
+        }
+    }
+
+    private fun deleteBookmark(
+        hearitId: Long,
+        bookmarkId: Long,
+    ) {
+        viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
+            bookmarkRepository
+                .deleteBookmark(token?.toBearerToken(), bookmarkId)
+                .onSuccess {
+                    updateBookmarkState(hearitId, null)
+                }.onFailure {
+                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                }
+        }
+    }
+
+    private fun updateBookmarkState(
+        hearitId: Long,
+        bookmarkId: Long?,
+    ) {
+        val currentBookmarkId = _bookmarkId.value.orEmpty().toMutableMap()
+        currentBookmarkId[hearitId] = bookmarkId
+        _bookmarkId.value = currentBookmarkId
     }
 
     private suspend fun buildShortsHearit(pageItems: PageResult<RandomHearit>): List<ShortsHearit> =

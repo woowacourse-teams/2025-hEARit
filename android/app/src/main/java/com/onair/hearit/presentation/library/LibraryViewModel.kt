@@ -10,12 +10,15 @@ import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
+import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
 
 class LibraryViewModel(
     private val bookmarkRepository: BookmarkRepository,
+    private val dataStoreRepository: DataStoreRepository,
     private val memberRepository: MemberRepository,
     private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
@@ -38,8 +41,10 @@ class LibraryViewModel(
 
     fun fetchData(page: Int) {
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
             bookmarkRepository
-                .getBookmarks(page = page, size = null)
+                .getBookmarks(token?.toBearerToken(), page = page, size = null)
                 .onSuccess {
                     _uiState.value = BookmarkUiState.LoggedIn
                     _bookmarks.value = it
@@ -61,8 +66,10 @@ class LibraryViewModel(
 
     private fun getUserInfo() {
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
             memberRepository
-                .getUserInfo()
+                .getUserInfo(token?.toBearerToken())
                 .onSuccess { userInfo ->
                     _uiState.value = BookmarkUiState.LoggedIn
                     _userInfo.value = userInfo

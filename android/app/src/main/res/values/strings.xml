@@ -93,6 +93,11 @@
     <string name="search_toast_searched_hearits_load_fail">검색 히어릿 목록 조회에 실패했습니다.</string>
     <string name="search_toast_recent_hearit_save_fail">최근 검색어 저장에 실패했습니다.</string>
 
+    <!-- SplashActivity-->
+    <string name="splash_toast_access_token_load_fail">저장된 토큰 조회에 실패했습니다</string>
+    <string name="splash_toast_token_check_fail">토큰 유효성 검사에 실패했습니다</string>
+    <string name="splash_toast_refresh_token_fail">새로운 토큰 생성에 실패했습니다</string>
+
     <!-- LoginActivity-->
     <string name="login_with_hearit">회원가입 없이 <font color="#B677F3">히어릿</font>을 이용하고 싶어요</string>
     <string name="login_toast_kakao_login_fail">카카오 로그인에 실패했습니다.</string>
@@ -104,11 +109,12 @@
     <string name="main_bottom_player_default_title">제목 없음</string>
     <string name="main_toast_finish_back_pressed">뒤로가기 버튼을 한 번 더 누르면 종료됩니다.</string>
     <string name="main_toast_player_last_position_save_fail">마지막 포지션 저장에 실패했습니다.</string>
+    <string name="main_toast_clear_token_fail">액세스 토큰 삭제에 실패했습니다.</string>
 
-    <!--    BottomPlayerView-->
+    <!-- BottomPlayerView-->
     <string name="bottom_player_view_default_duration">--:--</string>
 
-    <!--    PlaybackService-->
+    <!-- PlaybackService-->
     <string name="notification_channel_name">Hearit 재생 알림</string>
     <string name="notification_title_preparing">히어릿 재생 준비 중</string>
     <string name="notification_text_preparing">재생을 준비하고 있어요.</string>
