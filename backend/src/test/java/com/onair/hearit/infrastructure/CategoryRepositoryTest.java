@@ -32,9 +32,9 @@ class CategoryRepositoryTest {
     @DisplayName("가장 오래된 순으로 지정된 개수만큼 카테고리를 조회한다.")
     void findOldest() {
         // given
-        Category c1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
-        Category c2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
-        Category c3 = dbHelper.insertCategory(new Category("React", "#0000FF"));
+        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
+        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
+        Category category3 = dbHelper.insertCategory(new Category("React", "#0000FF"));
 
         // when
         List<Category> result = categoryRepository.findOldest(2);
@@ -42,8 +42,8 @@ class CategoryRepositoryTest {
         // then
         assertAll(
             () -> assertThat(result).hasSize(2),
-            () -> assertThat(result.get(0).getId()).isEqualTo(c1.getId()),
-            () -> assertThat(result.get(1).getId()).isEqualTo(c2.getId())
+            () -> assertThat(result.get(0).getId()).isEqualTo(category1.getId()),
+            () -> assertThat(result.get(1).getId()).isEqualTo(category2.getId())
         );
     }
 
@@ -53,16 +53,16 @@ class CategoryRepositoryTest {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
-        Category c1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
-        Category c2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
-        Category c3 = dbHelper.insertCategory(new Category("React", "#0000FF"));
+        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
+        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
+        Category category3 = dbHelper.insertCategory(new Category("React", "#0000FF"));
 
-        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        Hearit hearit21 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
-        Hearit hearit22 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
-        Hearit hearit31 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
+        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit21 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        Hearit hearit22 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        Hearit hearit31 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
 
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit11));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit12));
@@ -77,9 +77,9 @@ class CategoryRepositoryTest {
         // then
         assertAll(() -> {
             assertThat(result).hasSize(3);
-            assertThat(result.get(0).getId()).isEqualTo(c1.getId());
-            assertThat(result.get(1).getId()).isEqualTo(c2.getId());
-            assertThat(result.get(2).getId()).isEqualTo(c3.getId());
+            assertThat(result.get(0).getId()).isEqualTo(category1.getId());
+            assertThat(result.get(1).getId()).isEqualTo(category2.getId());
+            assertThat(result.get(2).getId()).isEqualTo(category3.getId());
         });
     }
 

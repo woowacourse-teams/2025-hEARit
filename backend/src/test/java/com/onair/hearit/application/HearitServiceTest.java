@@ -218,15 +218,15 @@ class HearitServiceTest {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
-        Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Category c2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Category c3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Category c4 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Category c5 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category4 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category5 = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
-        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
+        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
 
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit11));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit12));
@@ -240,8 +240,8 @@ class HearitServiceTest {
 
         // then
         assertAll(() -> {
-            assertThat(firstResponses.get(0).categoryId()).isEqualTo(c1.getId());
-            assertThat(secondResponses.get(0).categoryId()).isEqualTo(c1.getId());
+            assertThat(firstResponses.get(0).categoryId()).isEqualTo(category1.getId());
+            assertThat(secondResponses.get(0).categoryId()).isEqualTo(category1.getId());
             assertThat(firstResponses.get(1).categoryId()).isEqualTo(secondResponses.get(1).categoryId());
             assertThat(firstResponses.get(2).categoryId()).isEqualTo(secondResponses.get(2).categoryId());
         });

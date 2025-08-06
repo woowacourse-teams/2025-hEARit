@@ -320,20 +320,19 @@ class HearitControllerTest extends IntegrationTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
 
-        Category c1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
-        Category c2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
-        Category c3 = dbHelper.insertCategory(new Category("React1", "#0000FF"));
-        Category c4 = dbHelper.insertCategory(new Category("React2", "#0000FF"));
-        Category c5 = dbHelper.insertCategory(new Category("React3", "#0000FF"));
-        Category c6 = dbHelper.insertCategory(new Category("React4", "#0000FF"));
+        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
+        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
+        Category category3 = dbHelper.insertCategory(new Category("React1", "#0000FF"));
+        Category category4 = dbHelper.insertCategory(new Category("React2", "#0000FF"));
+        Category category5 = dbHelper.insertCategory(new Category("React3", "#0000FF"));
+        Category category6 = dbHelper.insertCategory(new Category("React4", "#0000FF"));
 
-
-        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        Hearit hearit21 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
-        Hearit hearit22 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
-        Hearit hearit31 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
+        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit21 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        Hearit hearit22 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        Hearit hearit31 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
 
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit11));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit12));
@@ -348,7 +347,7 @@ class HearitControllerTest extends IntegrationTest {
             .filter(document("hearit-recommend-category",
                 resource(ResourceSnippetParameters.builder()
                     .tag("Hearit API")
-                    .summary("카테고리별 그룹화된 히어릿 조회")
+                    .summary("추천 카테고리별 그룹화된 히어릿 조회")
                     .description(
                         "추천하는 3개 카테고리와 카테고리별로 그룹화된 히어릿 5개 목록을 조회합니다. (현재 추천 기준 : 북마크 많은 카테고리 순, 북마크가 없는 경우 하루마다 랜덤 카테고리 추천)")
                     .responseSchema(Schema.schema("HearitsWithRecommendCategoryResponse"))
@@ -377,9 +376,9 @@ class HearitControllerTest extends IntegrationTest {
             assertThat(responses.get(0).hearits()).hasSize(3);
             assertThat(responses.get(1).hearits()).hasSize(2);
             assertThat(responses.get(2).hearits()).hasSize(1);
-            assertThat(responses.get(0).categoryId()).isEqualTo(c1.getId());
-            assertThat(responses.get(1).categoryId()).isEqualTo(c2.getId());
-            assertThat(responses.get(2).categoryId()).isEqualTo(c3.getId());
+            assertThat(responses.get(0).categoryId()).isEqualTo(category1.getId());
+            assertThat(responses.get(1).categoryId()).isEqualTo(category2.getId());
+            assertThat(responses.get(2).categoryId()).isEqualTo(category3.getId());
         });
 
 
