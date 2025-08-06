@@ -33,6 +33,6 @@ public class Source {
     }
 
     private boolean isInvalid(String value) {
-        return value == null || value.isBlank() || value.length() > 250;
+        return value.length() > 250;
     }
 }
