@@ -22,6 +22,9 @@ class PlayerViewModel(
     private val _recentHearit = MutableLiveData<RecentHearit?>()
     val recentHearit: LiveData<RecentHearit?> = _recentHearit
 
+    private val _isLoggedIn = MutableLiveData<Boolean>()
+    val isLoggedIn: LiveData<Boolean> = _isLoggedIn
+
     private val _isLoggingOut = MutableLiveData<Boolean>()
     val isLoggingOut: LiveData<Boolean> = _isLoggingOut
 
@@ -35,17 +38,8 @@ class PlayerViewModel(
         fetchRecentHearit()
     }
 
-    private fun fetchRecentHearit() {
-        viewModelScope.launch {
-            recentHearitRepository
-                .getRecentHearit()
-                .onSuccess { recent ->
-                    _recentHearit.value = recent
-                }.onFailure {
-                    crashlyticsLogger.recordException(it)
-                    _toastMessage.value = R.string.main_toast_recent_load_fail
-                }
-        }
+    fun updateLoginState(isLoggedIn: Boolean) {
+        _isLoggedIn.value = isLoggedIn
     }
 
     fun performLogout() {
@@ -87,6 +81,19 @@ class PlayerViewModel(
                     crashlyticsLogger.recordException(it)
                     _withdrawState.value = false
                     _toastMessage.value = R.string.withdraw_fail
+                }
+        }
+    }
+
+    private fun fetchRecentHearit() {
+        viewModelScope.launch {
+            recentHearitRepository
+                .getRecentHearit()
+                .onSuccess { recent ->
+                    _recentHearit.value = recent
+                }.onFailure {
+                    crashlyticsLogger.recordException(it)
+                    _toastMessage.value = R.string.main_toast_recent_load_fail
                 }
         }
     }

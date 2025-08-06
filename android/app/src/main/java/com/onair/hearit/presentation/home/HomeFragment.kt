@@ -10,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -26,6 +27,7 @@ import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
+import com.onair.hearit.presentation.PlayerViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.search.SearchFragment
@@ -37,12 +39,9 @@ class HomeFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels {
-        HomeViewModelFactory(
-            requireContext(),
-            CrashlyticsProvider.get(),
-        )
-    }
+    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory(CrashlyticsProvider.get()) }
+    private val playerViewModel: PlayerViewModel by activityViewModels()
+
     private val recommendAdapter: RecommendHearitAdapter by lazy {
         RecommendHearitAdapter(
             this,
@@ -141,6 +140,10 @@ class HomeFragment :
     private fun observeViewModel() {
         viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
             binding.userInfo = userInfo
+        }
+
+        viewModel.isLoggedIn.observe(viewLifecycleOwner) { isLoggedIn ->
+            playerViewModel.updateLoginState(isLoggedIn)
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->

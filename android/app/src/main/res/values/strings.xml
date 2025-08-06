@@ -9,11 +9,16 @@
     <string name="all_privacy_policy">개인정보처리방침</string>
     <string name="all_terms_of_use">이용 약관</string>
     <string name="all_account_info">설정 및 계정 정보</string>
+    <string name="all_login_button_text">로그인 하러가기</string>
     <string name="all_toast_categories_load_fail">카테고리 조회에 실패했습니다.</string>
     <string name="all_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
     <string name="all_toast_save_user_info_fail">유저 정보 저장에 실패했습니다.</string>
     <string name="all_toast_add_bookmark_fail">북마크 저장에 실패했습니다.</string>
     <string name="all_toast_delete_bookmark_fail">북마크 삭제에 실패했습니다.</string>
+    <string name="logout_success">로그아웃 되었습니다.</string>
+    <string name="logout_fail">로그아웃에 실패했습니다.</string>
+    <string name="withdraw_success">회원탈퇴에 성공했습니다.</string>
+    <string name="withdraw_fail">회원탈퇴에 실패했습니다.</string>
 
     <!-- HomeFragment-->
     <string name="home_logo_description">IT를 쉽게 들을 수 있는 팟캐스트 , 히어릿</string>
@@ -74,7 +79,6 @@
     <string name="library_bookmarked_hearit_title">내가 북마크한 히어릿</string>
     <string name="library_guide_when_no_bookmark">북마크한 <font color="#B677F3">히어릿</font>이 없어요!\n히어릿과 함께 IT 트렌드를 모아볼까요?</string>
     <string name="library_guide_when_no_login"><font color="#B677F3">히어릿</font>을 모아서 듣고 싶다면,\n로그인을 해주세요!</string>
-    <string name="library_login_button_text">로그인 하러가기</string>
     <string name="library_toast_bookmark_load_fail">북마크 조회에 실패했습니다.</string>
 
     <!-- SearchFragment-->
@@ -120,4 +124,5 @@
     <string name="notification_text_preparing">재생을 준비하고 있어요.</string>
     <string name="notification_title_playing">히어릿 재생 중</string>
     <string name="notification_text_playing">음악이 재생되고 있어요.</string>
+
 </resources>
