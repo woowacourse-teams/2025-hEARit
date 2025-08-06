@@ -33,13 +33,13 @@ import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.service.PlaybackService
+import com.onair.hearit.service.PlaybackSessionCallback
 
 @OptIn(UnstableApi::class)
 class MainActivity :
     AppCompatActivity(),
     DrawerClickListener,
     PlayerControllerView,
-    PlaybackPositionSaver,
     PlaybackStarter {
     private lateinit var binding: ActivityMainBinding
     private var backPressedTime: Long = 0L
@@ -274,7 +274,10 @@ class MainActivity :
 
         if (hasRecent && !preparedOrHasItem) {
             hasSentPreload = true
-            controller.sendCustomCommand(PlaybackService.PRELOAD_RECENT_COMMAND, Bundle.EMPTY)
+            controller.sendCustomCommand(
+                PlaybackSessionCallback.PRELOAD_RECENT_COMMAND,
+                Bundle.EMPTY,
+            )
         }
     }
 
@@ -324,7 +327,6 @@ class MainActivity :
 
     override fun pause() {
         mediaController?.pause()
-        savePlaybackPosition()
     }
 
     override fun onPause() {
