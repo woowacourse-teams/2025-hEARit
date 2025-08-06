@@ -387,7 +387,7 @@ class HearitControllerTest extends IntegrationTest {
                 .queryParam("size", 10)
                 .filter(document("category-search-hearits",
                         resource(ResourceSnippetParameters.builder()
-                                .tag("Category API")
+                                .tag("Hearit API")
                                 .summary("카테고리별 히어릿 목록 조회")
                                 .description("특정 카테고리에 속한 히어릿 목록을 페이지별로 조회합니다.")
                                 .queryParameters(
