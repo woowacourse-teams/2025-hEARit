@@ -59,7 +59,7 @@ class LoginActivity : AppCompatActivity() {
     private fun setupKakaoLogin() {
         kakaoLoginHelper =
             KakaoLoginHelper(
-                context = this,
+                activity = this,
                 onSuccess = { token -> handleKakaoLoginSuccess(token) },
                 onError = { showToast("카카오 로그인에 실패했습니다.") },
             )
