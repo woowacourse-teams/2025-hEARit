@@ -2,6 +2,7 @@ package com.onair.hearit.analytics
 
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.onair.hearit.BuildConfig
 
 class FirebaseAnalyticsLogger(
     private val firebaseAnalytics: FirebaseAnalytics,
@@ -10,6 +11,7 @@ class FirebaseAnalyticsLogger(
         name: String,
         params: Map<String, String>,
     ) {
+        if (BuildConfig.DEBUG) return
         val bundle =
             Bundle().apply {
                 params.forEach { (key, value) -> putString(key, value) }
@@ -22,6 +24,7 @@ class FirebaseAnalyticsLogger(
         screenClass: String,
         previousScreen: String?,
     ) {
+        if (BuildConfig.DEBUG) return
         val bundle =
             Bundle().apply {
                 putString(AnalyticsParamKeys.SCREEN_NAME, screenName)
