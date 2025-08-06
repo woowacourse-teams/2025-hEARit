@@ -21,7 +21,7 @@
         android:gravity="center"
         android:paddingHorizontal="16dp"
         android:paddingVertical="6dp"
-        android:text="@{@string/player_detail_keyword_name(keyword.name)}"
+        android:text="@{@string/all_keyword_name(keyword.name)}"
         android:textColor="@color/hearit_gray4"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

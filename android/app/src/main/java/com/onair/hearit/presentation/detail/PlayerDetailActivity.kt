@@ -69,12 +69,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
     }
 
-    private val playerViewModel: PlayerViewModel by viewModels {
-        PlayerViewModelFactory(
-            CrashlyticsProvider.get(),
-        )
-    }
-
     private val handler = Handler(Looper.getMainLooper())
     private val updateInterval = 300L
 
@@ -226,9 +220,22 @@ class PlayerDetailActivity : AppCompatActivity() {
         setupGestureListener()
     }
 
+    @OptIn(UnstableApi::class)
     private fun observeViewModel() {
-        observeHearit()
-        observeToast()
+        viewModel.hearit.observe(this) { hearit ->
+            binding.hearit = hearit
+            scriptAdapter.submitList(hearit.script)
+            keywordAdapter.submitList(hearit.keywords)
+            handlePlayback(hearit)
+        }
+
+        viewModel.bookmarkId.observe(this) { bookmarkId ->
+            binding.baseController.setBookmarkSelected(bookmarkId != null)
+        }
+
+        viewModel.toastMessage.observe(this) { msgResId ->
+            Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun startScriptSync(controller: Player) {
@@ -269,20 +276,8 @@ class PlayerDetailActivity : AppCompatActivity() {
         binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
     }
 
-    private fun observeHearit() {
-        viewModel.hearit.observe(this) { hearit ->
-            binding.hearit = hearit
-            scriptAdapter.submitList(hearit.script)
-            keywordAdapter.submitList(hearit.keywords)
-            handlePlayback(hearit)
-        }
-    }
-
     @OptIn(UnstableApi::class)
     private fun setupBaseControllerBookmark() {
-        viewModel.bookmarkId.observe(this) { bookmarkId ->
-            binding.baseController.setBookmarkSelected(bookmarkId != null)
-        }
         binding.baseController.setOnBookmarkClickListener {
             viewModel.toggleBookmark()
         }
@@ -302,12 +297,6 @@ class PlayerDetailActivity : AppCompatActivity() {
             if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
                 controller.seekTo(startPosition)
             }
-        }
-    }
-
-    private fun observeToast() {
-        viewModel.toastMessage.observe(this) { msgResId ->
-            Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
         }
     }
 
