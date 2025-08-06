@@ -9,4 +9,6 @@ data class KakaoLoginResponse(
     val accessToken: String,
     @SerialName("refreshToken")
     val refreshToken: String,
-)
+) {
+    override fun toString(): String = "KakaoLoginResponse(accessToken=****, refreshToken=****)"
+}
