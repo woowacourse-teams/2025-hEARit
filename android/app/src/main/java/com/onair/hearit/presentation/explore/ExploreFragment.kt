@@ -44,6 +44,7 @@ class ExploreFragment :
     private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
     private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
+    private var isFirstLoad = true
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -84,7 +85,6 @@ class ExploreFragment :
 
         setupWindowInsets()
         setupRecyclerView()
-        setupAnimationObserver()
         observeViewModel()
 
         (activity as? PlayerControllerView)?.pause()
@@ -170,32 +170,18 @@ class ExploreFragment :
         )
     }
 
-    private fun setupAnimationObserver() {
-        adapter.registerAdapterDataObserver(
-            object : RecyclerView.AdapterDataObserver() {
-                override fun onItemRangeInserted(
-                    positionStart: Int,
-                    itemCount: Int,
-                ) {
-                    super.onItemRangeInserted(positionStart, itemCount)
-
-                    if (positionStart == 0 && itemCount > 0) {
-                        viewModel.shouldPlayAnimation.value?.let { isEnabled ->
-                            if (isEnabled) {
-                                binding.rvExplore.post {
-                                    startSwipeAnimation()
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-        )
-    }
-
     private fun observeViewModel() {
         viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
             adapter.submitList(shortsHearits)
+
+            if (isFirstLoad && shortsHearits.isNotEmpty()) {
+                viewModel.shouldPlayAnimation.value?.let { isEnabled ->
+                    if (isEnabled) {
+                        startSwipeAnimation()
+                        isFirstLoad = false
+                    }
+                }
+            }
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
