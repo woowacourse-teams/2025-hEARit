@@ -64,6 +64,10 @@ public class Member {
         return new Member(null, null, socialId, nickname, profileImage);
     }
 
+    public void withdraw() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -81,9 +85,5 @@ public class Member {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    public void withdraw() {
-        this.deletedAt = LocalDateTime.now();
     }
 }
