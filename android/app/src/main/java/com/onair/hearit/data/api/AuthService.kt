@@ -22,7 +22,7 @@ interface AuthService {
     ): Response<TokenReissueResponse>
 
     @GET("auth/check")
-    suspend fun postCheckAccessToken(
+    suspend fun getAuthCheck(
         @Header("Authorization") token: String,
     ): Response<Unit>
 }

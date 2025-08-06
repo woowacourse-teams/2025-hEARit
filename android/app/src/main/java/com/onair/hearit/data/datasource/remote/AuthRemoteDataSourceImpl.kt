@@ -34,7 +34,7 @@ class AuthRemoteDataSourceImpl(
 
     override suspend fun checkAccessToken(token: String): Result<NetworkResult<Unit>> =
         handleApiCall(
-            apiCall = { authService.postCheckAccessToken(token) },
+            apiCall = { authService.getAuthCheck(token) },
             transform = { },
             errorHandler = errorResponseHandler,
         )
