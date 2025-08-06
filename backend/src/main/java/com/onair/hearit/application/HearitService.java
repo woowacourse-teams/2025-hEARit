@@ -31,7 +31,8 @@ public class HearitService {
     private static final int RECOMMEND_HEARIT_COUNT = 5;
     private static final int GROUPED_CATEGORY_COUNT = 3;
     private static final int HEARITS_PER_GROUPED_CATEGORY = 5;
-    private static final int KEYWORDS_PER_HEARIT = 3;
+    private static final int KEYWORDS_PER_CATEGORIZED_HEARIT = 3;
+    private static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -61,11 +62,13 @@ public class HearitService {
     }
 
     private RandomHearitResponse toRandomHearitResponse(Hearit hearit, Long memberId) {
+        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
+                KEYWORDS_PER_HEARIT_FOR_RANDOM);
         Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(hearit.getId(), memberId);
         if (bookmarkOptional.isPresent()) {
-            return RandomHearitResponse.fromWithBookmark(hearit, bookmarkOptional.get());
+            return RandomHearitResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
         }
-        return RandomHearitResponse.from(hearit);
+        return RandomHearitResponse.from(hearit, keywords);
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
@@ -90,13 +93,13 @@ public class HearitService {
     public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::toHearitOfCategoryResponseByKeywords);
+        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::toHearitOfCategoryResponse);
         return PagedResponse.from(hearitResponses);
     }
 
-    private HearitOfCategoryResponse toHearitOfCategoryResponseByKeywords(Hearit hearit) {
+    private HearitOfCategoryResponse toHearitOfCategoryResponse(Hearit hearit) {
         List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-                KEYWORDS_PER_HEARIT);
+                KEYWORDS_PER_CATEGORIZED_HEARIT);
         return HearitOfCategoryResponse.from(hearit, keywords);
     }
 }

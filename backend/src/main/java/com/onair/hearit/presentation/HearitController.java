@@ -11,8 +11,6 @@ import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/hearits")
-@Tag(name = "Hearit", description = "히어릿")
 public class HearitController {
 
     private final HearitService hearitService;
     private final HearitSearchService hearitSearchService;
 
-    @Operation(summary = "단일 히어릿 상세 조회", description = "히어릿ID룰 통해 하나의 히어릿 상세 정보를 조회합니다.")
     @GetMapping("/{hearitId}")
     public ResponseEntity<HearitDetailResponse> readHearit(
             @PathVariable Long hearitId,
@@ -42,7 +38,6 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "랜덤 히어릿 조회", description = "랜덤 히어릿을 page, size로 목록을 조회합니다.")
     @GetMapping("/random")
     public ResponseEntity<PagedResponse<RandomHearitResponse>> readRandomHearits(
             @AuthenticationPrincipal CurrentMember member,
@@ -61,16 +56,14 @@ public class HearitController {
         return member.memberId();
     }
 
-    @Operation(summary = "추천 히어릿 5개 조회", description = "추천 히어릿을 5개 조회합니다.")
     @GetMapping("/recommend")
     public ResponseEntity<List<RecommendHearitResponse>> readRecommendedHearits() {
         List<RecommendHearitResponse> responses = hearitService.getRecommendedHearits();
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "검색어를 입력해 히어릿을 검색", description = "검색어를 포함하는 제목 또는 키워드를 가진 히어릿을 검색합니다. ")
     @GetMapping("/search")
-    public ResponseEntity<PagedResponse<HearitSearchResponse>> searchHearitsByTitle(
+    public ResponseEntity<PagedResponse<HearitSearchResponse>> readSearchedHearits(
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
@@ -79,14 +72,12 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "카테고리별로 그룹화된 히어릿들 조회", description = "고정된 3개 카테고리별로 최신 히어릿 5개를 반환합니다.")
     @GetMapping("/grouped-by-category")
     public ResponseEntity<List<GroupedHearitsWithCategoryResponse>> readGroupedHearitsByCategory() {
         List<GroupedHearitsWithCategoryResponse> responses = hearitService.getGroupedHearitsByCategory();
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "카테고리 id로 히어릿 조회", description = "히어릿의 카테고리 id, page 정보를 입력해 히어릿을 조회합니다. ")
     @GetMapping
     public ResponseEntity<PagedResponse<HearitOfCategoryResponse>> readHearitsByCategory(
             @RequestParam(name = "categoryId") Long categoryId,

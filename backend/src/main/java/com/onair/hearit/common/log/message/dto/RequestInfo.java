@@ -1,7 +1,5 @@
 package com.onair.hearit.common.log.message.dto;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,15 +14,7 @@ public class RequestInfo {
     private final String httpMethod;
     private final String requestUri;
 
-    public static RequestInfo from(HttpServletRequest request) {
-        String id = UUID.randomUUID().toString();
-        String ip = request.getRemoteAddr();
-        String httpMethod = request.getMethod();
-        String requestUri = request.getRequestURI();
-        return new RequestInfo(id, ip, httpMethod, requestUri);
-    }
-
-    public static RequestInfo getCurrentRequestInfo() {
+    public static RequestInfo fromMdc() {
         return new RequestInfo(
                 MDC.get("id"),
                 MDC.get("ip"),
