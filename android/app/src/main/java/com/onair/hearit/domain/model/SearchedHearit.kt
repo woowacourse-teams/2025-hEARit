@@ -4,5 +4,5 @@ data class SearchedHearit(
     val id: Long,
     val title: String,
     val playTime: Int,
-    val summary: String,
+    val keywords: List<Keyword>,
 )
