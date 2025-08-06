@@ -177,7 +177,7 @@ class MainActivity :
     private fun performLogout() {
         UserApiClient.instance.logout { error ->
             if (error != null) {
-                showToast("로그아웃 실패: ${error.message}")
+                showToast("로그아웃에 실패했습니다. 다시 시도해주세요.")
             } else {
                 showToast("로그아웃 되었습니다.")
                 clearAccessTokenAndNavigateToLogin()
