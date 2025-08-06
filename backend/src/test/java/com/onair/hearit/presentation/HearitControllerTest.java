@@ -135,8 +135,8 @@ class HearitControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("랜덤 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
-    void readRandomHearits() {
+    @DisplayName("탐색 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
+    void readExploredHearits() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Keyword keyword = dbHelper.insertKeyword(new Keyword("Keyword"));
@@ -149,34 +149,37 @@ class HearitControllerTest extends IntegrationTest {
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
 
         // when
-        PagedResponse<ExploredHearitResponse> responses = RestAssured.given(this.spec)
-                .filter(document("hearit-read-random",
+        List<ExploredHearitResponse> responses = RestAssured.given(this.spec)
+                .queryParam("cursorId", 0)
+                .queryParam("size", 10)
+                .filter(document("hearit-read-explore",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
-                                .summary("랜덤 히어릿 목록 조회")
-                                .description("랜덤으로 최대 10개의 히어릿 목록을 조회합니다.")
-                                .responseSchema(Schema.schema("PagedRandomHearitResponse"))
+                                .summary("탐색 히어릿 목록 조회")
+                                .description("사용자 별 최대 10개의 히어릿 목록을 조회합니다.")
+                                .queryParameters(
+                                        parameterWithName("cursorId").description("마지막 Cursor ID").defaultValue("0"),
+                                        parameterWithName("size").description("필요한 히어릿 항목 수").defaultValue("10")
+                                )
+                                .responseSchema(Schema.schema("ExploredHearitResponse"))
                                 .responseFields(
-                                        Stream.concat(
-                                                Arrays.stream(new FieldDescriptor[]{
-                                                        fieldWithPath("content[].id").description("히어릿 ID"),
-                                                        fieldWithPath("content[].title").description("히어릿 제목"),
-                                                        fieldWithPath("content[].categoryColorCode").description("카테고리 색상"),
-                                                        fieldWithPath("content[].isBookmarked").description("북마크 여부"),
-                                                        fieldWithPath("content[].bookmarkId").description(
-                                                                "북마크 ID (북마크된 경우)").optional(),
-                                                        fieldWithPath("content[].keywords").description(
-                                                                "히어릿에 포함된 키워드 목록"),
-                                                        fieldWithPath("content[].keywords[].id").description("키워드 ID"),
-                                                        fieldWithPath("content[].keywords[].name").description("키워드 이름")
-                                                }),
-                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
-                                        ).toArray(FieldDescriptor[]::new)
+                                        fieldWithPath("[].id").description("히어릿 ID"),
+                                        fieldWithPath("[].title").description("히어릿 제목"),
+                                        fieldWithPath("[].categoryColorCode").description("카테고리 색상"),
+                                        fieldWithPath("[].isBookmarked").description("북마크 여부"),
+                                        fieldWithPath("[].bookmarkId").description(
+                                                "북마크 ID (북마크된 경우)").optional(),
+                                        fieldWithPath("[].keywords").description(
+                                                "히어릿에 포함된 키워드 목록"),
+                                        fieldWithPath("[].keywords[].id").description("키워드 ID"),
+                                        fieldWithPath("[].keywords[].name").description("키워드 이름"),
+                                        fieldWithPath("[].cursorId").description(
+                                                "Cursor ID (마지막 제공 컨텐츠)")
                                 )
                                 .build())
                 ))
                 .when()
-                .get("/api/v1/hearits/random")
+                .get("/api/v1/hearits/explore")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
@@ -184,7 +187,7 @@ class HearitControllerTest extends IntegrationTest {
                 });
 
         // then
-        assertThat(responses.content()).hasSize(3);
+        assertThat(responses).hasSize(3);
     }
 
     @Test

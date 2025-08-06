@@ -18,11 +18,13 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
-@Import({MemberHearitScoreCommandRepository.class, DbHelper.class, TestJpaAuditingConfig.class})
+@Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+@Import({MemberHearitScoreCommandRepository.class, DbHelper.class, TestJpaAuditingConfig.class})
 class MemberHearitScoreQueryRepositoryTest {
 
     @Autowired
