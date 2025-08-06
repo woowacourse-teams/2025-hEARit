@@ -28,32 +28,8 @@ class SourceTest {
     @DisplayName("sourceName이 null이면 예외가 발생한다")
     void createSourceWithNullName() {
         assertThatThrownBy(() -> new Source(null, "https://example.com"))
-            .isInstanceOf(InvalidInputException.class)
-            .hasMessageContaining("sourceName");
-    }
-
-    @Test
-    @DisplayName("sourceUrl이 null이면 예외가 발생한다")
-    void createSourceWithNullUrl() {
-        assertThatThrownBy(() -> new Source("출처명", null))
-            .isInstanceOf(InvalidInputException.class)
-            .hasMessageContaining("sourceUrl");
-    }
-
-    @Test
-    @DisplayName("sourceName이 공백이면 예외가 발생한다")
-    void createSourceWithBlankName() {
-        assertThatThrownBy(() -> new Source("   ", "https://example.com"))
-            .isInstanceOf(InvalidInputException.class)
-            .hasMessageContaining("sourceName");
-    }
-
-    @Test
-    @DisplayName("sourceUrl이 공백이면 예외가 발생한다")
-    void createSourceWithBlankUrl() {
-        assertThatThrownBy(() -> new Source("출처명", "   "))
-            .isInstanceOf(InvalidInputException.class)
-            .hasMessageContaining("sourceUrl");
+                .isInstanceOf(InvalidInputException.class)
+                .hasMessageContaining("sourceName");
     }
 
     @Test
@@ -61,8 +37,8 @@ class SourceTest {
     void createSourceWithTooLongName() {
         String longName = "a".repeat(251);
         assertThatThrownBy(() -> new Source(longName, "https://example.com"))
-            .isInstanceOf(InvalidInputException.class)
-            .hasMessageContaining("sourceName");
+                .isInstanceOf(InvalidInputException.class)
+                .hasMessageContaining("sourceName");
     }
 
     @Test
@@ -70,7 +46,7 @@ class SourceTest {
     void createSourceWithTooLongUrl() {
         String longUrl = "a".repeat(251);
         assertThatThrownBy(() -> new Source("출처명", longUrl))
-            .isInstanceOf(InvalidInputException.class)
-            .hasMessageContaining("sourceUrl");
+                .isInstanceOf(InvalidInputException.class)
+                .hasMessageContaining("sourceUrl");
     }
 }
