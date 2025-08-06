@@ -35,11 +35,14 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
 
     @Query("""
-            SELECT h 
-            FROM Hearit h 
-            WHERE h.category.id = :categoryId 
-            ORDER BY h.createdAt DESC 
+            SELECT h
+            FROM Hearit h
+            WHERE h.category.id = :categoryId
+            ORDER BY h.createdAt DESC
             LIMIT :size
             """)
     List<Hearit> findByCategory(@Param("categoryId") Long categoryId, @Param("size") int size);
+
+    @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id IN :hearitIds")
+    List<Hearit> findAllByIdInWithCategory(@Param("hearitIds") List<Long> hearitIds);
 }

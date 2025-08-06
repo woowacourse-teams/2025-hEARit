@@ -38,6 +38,7 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final CategoryRepository categoryRepository;
+    private final RecommendHearitProvider recommendHearitProvider;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, Long memberId) {
         Hearit hearit = getHearitById(hearitId);
@@ -72,7 +73,8 @@ public class HearitService {
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
-        return hearitRepository.findRandom(RECOMMEND_HEARIT_COUNT).stream()
+        List<Hearit> recommendHearits = recommendHearitProvider.getRecommendHearit(RECOMMEND_HEARIT_COUNT);
+        return recommendHearits.stream()
                 .map(RecommendHearitResponse::from)
                 .toList();
     }
