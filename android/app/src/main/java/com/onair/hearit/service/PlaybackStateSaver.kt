@@ -20,7 +20,6 @@ class PlaybackStateSaver(
     private var saveJob: Job? = null
 
     // 30초에 한번씩 마지막 재생 위치를 저장하기 위해서 runnable과 handler를 돌림
-
     val listener =
         @UnstableApi
         object : Player.Listener {

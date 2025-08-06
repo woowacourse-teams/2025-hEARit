@@ -10,21 +10,10 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import androidx.media3.session.SessionCommand
-import androidx.media3.session.SessionError
-import androidx.media3.session.SessionResult
-import com.google.common.util.concurrent.ListenableFuture
-import com.onair.hearit.R
-import com.onair.hearit.di.RepositoryProvider
-import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
-import com.onair.hearit.di.UseCaseProvider
-import com.onair.hearit.domain.model.PlaybackInfo
-import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.withContext
 
 @OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
