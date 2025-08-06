@@ -308,7 +308,7 @@
             if (response.ok) {
                 alert(`파일이 성공적으로 수정되었습니다.`);
                 fetchHearits(currentPage);
-                d
+
             } else {
                 const err = await response.json();
                 alert('파일 수정 실패: ' + (err.detail || '서버 오류 발생'));
