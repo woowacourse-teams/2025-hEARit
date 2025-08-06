@@ -36,7 +36,7 @@ class SettingViewModel(
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
             if (token == null) {
-                _userInfo.value = defaultUserInfo()
+                _userInfo.value = UserInfo.default()
                 return@launch
             }
 
@@ -47,7 +47,7 @@ class SettingViewModel(
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegisteredException -> {
-                            _userInfo.value = defaultUserInfo()
+                            _userInfo.value = UserInfo.default()
                         }
 
                         else -> {
@@ -58,11 +58,4 @@ class SettingViewModel(
                 }
         }
     }
-
-    private fun defaultUserInfo(): UserInfo =
-        UserInfo(
-            id = -1,
-            nickname = "hEARit",
-            profileImage = "",
-        )
 }
