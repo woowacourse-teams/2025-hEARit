@@ -94,31 +94,19 @@
                     app:layout_constraintStart_toStartOf="@id/layout_thumbnail"
                     tools:text="2025.07.28" />
 
-                <ImageView
-                    android:id="@+id/btn_hearit_player_bookmark"
-                    android:layout_width="42dp"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bookmark_selector"
-                    android:contentDescription="@null"
-                    android:onClick="@{() -> viewModel.toggleBookmark()}"
-                    app:layout_constraintEnd_toEndOf="@id/layout_thumbnail"
-                    app:layout_constraintTop_toBottomOf="@id/layout_thumbnail"
-                    app:setSelectedState="@{viewModel.bookmarkId != null}" />
-
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_script"
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
                     android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="24dp"
                     android:nestedScrollingEnabled="false"
                     android:padding="16dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/btn_hearit_player_bookmark"
-                    tools:listitem="@layout/item_script" />
+                    app:layout_constraintTop_toBottomOf="@id/layout_thumbnail"
+                    tools:listitem="@layout/item_detail_script" />
 
                 <androidx.media3.ui.PlayerView
                     android:id="@+id/player_view"
@@ -138,31 +126,29 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/player_view" />
 
-                <TextView
-                    android:id="@+id/tv_player_detail_see_more_title"
-                    style="@style/pretendard_main_title"
-                    android:layout_width="wrap_content"
+                <include
+                    android:id="@+id/layout_detail_source"
+                    layout="@layout/layout_detail_source"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/player_detail_read_more_title"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="24dp"
+                    app:hearit="@{hearit}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/base_controller" />
 
                 <include
-                    android:id="@+id/layout_see_more"
-                    layout="@layout/layout_see_more"
+                    android:id="@+id/layout_detail_summary_keywords"
+                    layout="@layout/layout_detail_summary_keywords"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="24dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="24dp"
                     android:layout_marginBottom="60dp"
                     app:hearit="@{hearit}"
                     app:layout_constraintBaseline_toBottomOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_player_detail_see_more_title" />
+                    app:layout_constraintTop_toBottomOf="@id/layout_detail_source" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>

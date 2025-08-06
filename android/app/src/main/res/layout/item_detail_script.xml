@@ -17,7 +17,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="24dp">
+        android:paddingBottom="20dp">
 
         <TextView
             android:id="@+id/tv_script_body"
@@ -25,7 +25,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:lineSpacingMultiplier="1.3"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
             android:singleLine="false"
             android:text="@{scriptLine.text}"
             app:detailHighlightedStyle="@{isHighlighted}"
