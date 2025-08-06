@@ -39,7 +39,6 @@ import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.Hearit
-import com.onair.hearit.presentation.PlaybackPositionSaver
 import com.onair.hearit.presentation.PlayerViewModel
 import com.onair.hearit.presentation.PlayerViewModelFactory
 import com.onair.hearit.presentation.detail.script.ScriptFragment
@@ -47,9 +46,7 @@ import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-class PlayerDetailActivity :
-    AppCompatActivity(),
-    PlaybackPositionSaver {
+class PlayerDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerDetailBinding
     private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
@@ -334,13 +331,6 @@ class PlayerDetailActivity :
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         mediaController?.release()
-    }
-
-    override fun savePlaybackPosition() {
-        val controller = mediaController ?: return
-        val position = controller.currentPosition
-        val duration = controller.duration
-        playerViewModel.savePlaybackPosition(position, duration, this.hearitId)
     }
 
     companion object {
