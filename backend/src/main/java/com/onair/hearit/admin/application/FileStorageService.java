@@ -48,8 +48,10 @@ public class FileStorageService {
     }
 
     public void deleteFile(String filePath) {
-        String key = filePath.startsWith("/") ? filePath.substring(1) : filePath;
-
+        if(filePath.startsWith("/")) {
+            filePath = filePath.substring(1);
+        }
+        String key = filePath;
         try {
             s3Client.deleteObject(builder -> builder.bucket(bucket).key(key).build());
         } catch (S3Exception e) {
