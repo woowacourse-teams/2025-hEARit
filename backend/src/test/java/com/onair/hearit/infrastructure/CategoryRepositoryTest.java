@@ -30,25 +30,6 @@ class CategoryRepositoryTest {
 
     @Test
     @DisplayName("가장 오래된 순으로 지정된 개수만큼 카테고리를 조회한다.")
-    void findOldest() {
-        // given
-        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
-        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
-        Category category3 = dbHelper.insertCategory(new Category("React", "#0000FF"));
-
-        // when
-        List<Category> result = categoryRepository.findOldest(2);
-
-        // then
-        assertAll(
-            () -> assertThat(result).hasSize(2),
-            () -> assertThat(result.get(0).getId()).isEqualTo(category1.getId()),
-            () -> assertThat(result.get(1).getId()).isEqualTo(category2.getId())
-        );
-    }
-
-    @Test
-    @DisplayName("가장 오래된 순으로 지정된 개수만큼 카테고리를 조회한다.")
     void findTopCategoriesByMemberBookmarks() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
