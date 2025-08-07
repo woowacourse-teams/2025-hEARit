@@ -32,6 +32,9 @@ import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
+import com.onair.hearit.presentation.splash.SplashActivity
+import com.onair.hearit.presentation.splash.SplashViewModel
+import com.onair.hearit.presentation.splash.SplashViewModelFactory
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
 
@@ -51,6 +54,10 @@ class MainActivity :
 
     private val playerViewModel: PlayerViewModel by viewModels {
         PlayerViewModelFactory(CrashlyticsProvider.get())
+    }
+
+    private val splashViewModel: SplashViewModel by viewModels {
+        SplashViewModelFactory(CrashlyticsProvider.get())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -355,6 +362,24 @@ class MainActivity :
             },
             ContextCompat.getMainExecutor(this),
         )
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        splashViewModel.checkToken.observe(this) { isLoggedIn ->
+            if (!isLoggedIn) {
+                navigateToSplash()
+            }
+        }
+        super.onNewIntent(intent)
+    }
+
+    private fun navigateToSplash() {
+        val intent =
+            Intent(this, SplashActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+        startActivity(intent)
+        finish()
     }
 
     companion object {

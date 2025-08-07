@@ -32,9 +32,6 @@ class SplashActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_splash)
         setupWindowInsets()
         observeViewModel()
-        Handler(Looper.getMainLooper()).postDelayed({
-            viewModel.checkValidAccessToken()
-        }, 1000)
     }
 
     private fun setupWindowInsets() {
