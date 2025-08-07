@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
 import com.onair.hearit.domain.UserNotRegisteredException
-import com.onair.hearit.domain.model.PageResult
-import com.onair.hearit.domain.model.Paging
+import com.onair.hearit.domain.model.CursorInfo
+import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.ShortsHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
@@ -44,19 +44,17 @@ class ExploreViewModel(
     private val _shouldPlayAnimation = MutableLiveData<Boolean>()
     val shouldPlayAnimation: LiveData<Boolean> = _shouldPlayAnimation
 
-    private lateinit var paging: Paging
-    private var currentPage = 0
-    private var isLastPage = false
+    private lateinit var cursorInfo: CursorInfo
     private var isLoading = false
 
     init {
         setAnimation()
-        fetchData(page = 0, isInitial = true)
+        fetchData(cursorId = 0)
     }
 
     fun fetchNextPage() {
-        if (isLoading || isLastPage) return
-        fetchData(page = currentPage, isInitial = false)
+        if (cursorInfo.isEmpty || isLoading) return
+        fetchData(cursorInfo.cursorId)
     }
 
     fun toggleBookmark(
@@ -90,24 +88,21 @@ class ExploreViewModel(
         }
     }
 
-    private fun fetchData(
-        page: Int,
-        isInitial: Boolean,
-    ) {
+    private fun fetchData(cursorId: Long) {
+        if (isLoading) return
         isLoading = true
+
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
 
             try {
-                val result = hearitRepository.getRandomHearits(token?.toBearerToken(), 0)
+                val result =
+                    hearitRepository.getRandomHearits(token?.toBearerToken(), cursorId)
                 result
                     .onSuccess { randomItems ->
-                        paging = randomItems.paging
+                        cursorInfo = randomItems.cursorInfo
                         val shortsList = buildShortsHearit(randomItems)
-                        updateShortsHearit(shortsList, isInitial)
-
-                        // currentPage++
-                        // isLastPage = paging.isLast
+                        updateShortsHearit(shortsList)
                     }.onFailure { throwable ->
                         Timber.w(throwable)
                         _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
@@ -132,6 +127,7 @@ class ExploreViewModel(
                 .addBookmark(token?.toBearerToken(), hearitId)
                 .onSuccess { newBookmarkId ->
                     updateBookmarkState(hearitId, newBookmarkId)
+                    onFinished(newBookmarkId)
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegisteredException -> {
@@ -161,6 +157,7 @@ class ExploreViewModel(
                 .deleteBookmark(token?.toBearerToken(), bookmarkId)
                 .onSuccess {
                     updateBookmarkState(hearitId, null)
+                    onFinished(bookmarkId)
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.all_toast_delete_bookmark_fail
@@ -178,34 +175,22 @@ class ExploreViewModel(
         _bookmarkId.value = currentBookmarkId
     }
 
-    private suspend fun buildShortsHearit(pageItems: PageResult<RandomHearit>): List<ShortsHearit> =
+    private suspend fun buildShortsHearit(cursorItems: CursorResult<RandomHearit>): List<ShortsHearit> =
         coroutineScope {
-            pageItems.items
+            cursorItems.items
                 .map { item ->
                     async { getShortsHearitUseCase(item).getOrNull() }
                 }.awaitAll()
                 .mapNotNull { it }
         }
 
-    private fun updateShortsHearit(
-        newItems: List<ShortsHearit>,
-        isInitial: Boolean,
-    ) {
-        _shortsHearits.value =
-            if (isInitial) {
-                newItems
-            } else {
-                _shortsHearits.value.orEmpty() + newItems
-            }
+    private fun updateShortsHearit(newItems: List<ShortsHearit>) {
+        _shortsHearits.value = _shortsHearits.value.orEmpty() + newItems
 
         _bookmarkId.value =
-            if (isInitial) {
-                newItems.associate { it.id to it.bookmarkId }
-            } else {
-                _bookmarkId.value.orEmpty().toMutableMap().apply {
-                    newItems.forEach { item ->
-                        this[item.id] = item.bookmarkId
-                    }
+            _bookmarkId.value.orEmpty().toMutableMap().apply {
+                newItems.forEach { item ->
+                    this[item.id] = item.bookmarkId
                 }
             }
     }

@@ -16,7 +16,12 @@ class MediaFileRepositoryImpl(
     override suspend fun getShortAudioUrl(hearitId: Long): Result<ShortAudioUrl> =
         mediaFileRemoteDataSource
             .getShortAudioUrl(hearitId)
-            .mapOrThrowDomain { response -> ShortAudioUrl(id = response.id, url = response.url) }
+            .mapOrThrowDomain { response ->
+                ShortAudioUrl(
+                    id = response.id,
+                    url = response.url,
+                )
+            }
 
     override suspend fun getScriptLines(hearitId: Long): Result<List<ScriptLine>> =
         mediaFileRemoteDataSource

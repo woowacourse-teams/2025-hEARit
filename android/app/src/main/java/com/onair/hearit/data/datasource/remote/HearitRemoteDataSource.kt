@@ -17,7 +17,7 @@ interface HearitRemoteDataSource {
 
     suspend fun getRandomHearits(
         token: String?,
-        page: Int?,
+        cursorId: Long?,
         size: Int?,
     ): Result<NetworkResult<RandomHearitResponse>>
 

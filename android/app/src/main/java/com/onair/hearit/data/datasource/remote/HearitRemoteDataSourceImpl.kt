@@ -38,11 +38,11 @@ class HearitRemoteDataSourceImpl(
 
     override suspend fun getRandomHearits(
         token: String?,
-        page: Int?,
+        cursorId: Long?,
         size: Int?,
     ): Result<NetworkResult<RandomHearitResponse>> =
         handleApiCall(
-            apiCall = { hearitService.getRandomHearits(token, page, size) },
+            apiCall = { hearitService.getRandomHearits(token, cursorId, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },

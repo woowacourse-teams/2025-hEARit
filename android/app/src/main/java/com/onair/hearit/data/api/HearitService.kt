@@ -17,10 +17,10 @@ interface HearitService {
         @Header("Authorization") token: String?,
     ): Response<List<GroupedCategoryHearitResponse>>
 
-    @GET("hearits/random")
+    @GET("hearits/explore")
     suspend fun getRandomHearits(
         @Header("Authorization") token: String?,
-        @Query("page") page: Int?,
+        @Query("cursorId") cursorId: Long?,
         @Query("size") size: Int?,
     ): Response<RandomHearitResponse>
 
