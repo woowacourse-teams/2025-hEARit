@@ -12,7 +12,7 @@ interface HearitLocalDataSource {
 
     suspend fun saveKeyword(keyword: SearchHistoryEntity): Result<Unit>
 
-    suspend fun clearKeywords(): Result<Unit>
+    suspend fun clearKeywords(): Result<Int>
 
     suspend fun updateRecentHearitPosition(
         hearitId: Long,

@@ -5,11 +5,9 @@ import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.analytics.FirebaseCrashlyticsLogger
 
 object CrashlyticsProvider {
-    private var logger: CrashlyticsLogger? = null
-
-    fun init() {
-        logger = FirebaseCrashlyticsLogger(FirebaseCrashlytics.getInstance())
+    private val logger: CrashlyticsLogger by lazy {
+        FirebaseCrashlyticsLogger(FirebaseCrashlytics.getInstance())
     }
 
-    fun get(): CrashlyticsLogger = logger ?: throw IllegalStateException("CrashlyticsProvider not initialized")
+    fun get(): CrashlyticsLogger = logger
 }

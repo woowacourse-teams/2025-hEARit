@@ -7,5 +7,5 @@ interface RecentKeywordRepository {
 
     suspend fun saveKeyword(keyword: String): Result<Unit>
 
-    suspend fun clearKeywords(): Result<Unit>
+    suspend fun clearKeywords(): Result<Int>
 }

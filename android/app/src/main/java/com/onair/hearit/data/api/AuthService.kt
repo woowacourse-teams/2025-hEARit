@@ -6,11 +6,17 @@ import com.onair.hearit.data.dto.TokenReissueRequest
 import com.onair.hearit.data.dto.TokenReissueResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface AuthService {
+    @GET("auth/check")
+    suspend fun getAuthCheck(
+        @Header("Authorization") token: String,
+    ): Response<Unit>
+
     @POST("auth/kakao-login")
     suspend fun postLogin(
         @Body kakaoLoginRequest: KakaoLoginRequest,
@@ -21,8 +27,8 @@ interface AuthService {
         @Body tokenReissueRequest: TokenReissueRequest,
     ): Response<TokenReissueResponse>
 
-    @GET("auth/check")
-    suspend fun getAuthCheck(
+    @DELETE("auth/withdraw")
+    suspend fun deleteAccount(
         @Header("Authorization") token: String,
     ): Response<Unit>
 }

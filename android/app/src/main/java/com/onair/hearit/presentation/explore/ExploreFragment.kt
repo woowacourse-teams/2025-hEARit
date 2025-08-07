@@ -1,5 +1,8 @@
 package com.onair.hearit.presentation.explore
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -41,6 +44,7 @@ class ExploreFragment :
     private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
     private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
+    private var isFirstLoad = true
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -169,11 +173,42 @@ class ExploreFragment :
     private fun observeViewModel() {
         viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
             adapter.submitList(shortsHearits)
+
+            if (isFirstLoad && shortsHearits.isNotEmpty()) {
+                viewModel.shouldPlayAnimation.observe(viewLifecycleOwner) { isEnabled ->
+                    if (isEnabled) {
+                        startSwipeAnimation()
+                        isFirstLoad = false
+                    }
+                }
+            }
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
+    }
+
+    private fun startSwipeAnimation() {
+        binding.lavExploreSwipeUp.visibility = View.VISIBLE
+
+        val animator =
+            ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
+                duration = 1300
+                repeatCount = 1
+                repeatMode = ObjectAnimator.RESTART
+            }
+
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    super.onAnimationEnd(animation)
+                    binding.lavExploreSwipeUp.visibility = View.INVISIBLE
+                }
+            },
+        )
+
+        animator.start()
     }
 
     private fun checkAndLoadNextPage(position: Int) {
