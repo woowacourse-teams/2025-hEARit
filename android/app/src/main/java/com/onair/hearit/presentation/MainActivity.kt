@@ -53,10 +53,7 @@ class MainActivity :
     private var hasSentPreload = false
 
     private val mainViewModel: MainViewModel by viewModels { MainViewModelFactory() }
-
-    private val splashViewModel: SplashViewModel by viewModels {
-        SplashViewModelFactory(CrashlyticsProvider.get())
-    }
+    private val splashViewModel: SplashViewModel by viewModels { SplashViewModelFactory() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
