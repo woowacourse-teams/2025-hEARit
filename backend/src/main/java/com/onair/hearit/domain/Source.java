@@ -24,15 +24,8 @@ public class Source {
     }
 
     private void validate(String sourceName, String sourceUrl) {
-        if (((sourceName == null) || (sourceName.isBlank()) || isInvalidLength(sourceName))) {
+        if (((sourceName == null) || (sourceName.isBlank()) || (sourceName.length() > 250))) {
             throw new InvalidInputException("출처명(sourceName)은 250자 이하의 유효한 문자열이어야 합니다.");
         }
-        if (isInvalidLength(sourceUrl)) {
-            throw new InvalidInputException("출처 URL(sourceUrl)은 250자 이하의 유효한 문자열이어야 합니다.");
-        }
-    }
-
-    private boolean isInvalidLength(String value) {
-        return value.length() > 250;
     }
 }

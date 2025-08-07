@@ -40,13 +40,4 @@ class SourceTest {
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("sourceName");
     }
-
-    @Test
-    @DisplayName("sourceUrl이 250자를 초과하면 예외가 발생한다")
-    void createSourceWithTooLongUrl() {
-        String longUrl = "a".repeat(251);
-        assertThatThrownBy(() -> new Source("출처명", longUrl))
-                .isInstanceOf(InvalidInputException.class)
-                .hasMessageContaining("sourceUrl");
-    }
 }
