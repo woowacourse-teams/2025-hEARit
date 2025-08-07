@@ -1,6 +1,7 @@
 package com.onair.hearit.presentation.detail.script
 
 import android.content.ComponentName
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -8,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.annotation.OptIn
 import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
@@ -23,8 +23,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentScriptBinding
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.presentation.LoginRequiredDialogFragment
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
+import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 
@@ -130,18 +133,24 @@ class ScriptFragment : Fragment() {
         }
     }
 
+    @UnstableApi
     private fun observeViewModel() {
         viewModel.hearit.observe(viewLifecycleOwner) { hearit ->
             binding.hearit = hearit
             adapter.submitList(hearit.script)
         }
-    }
 
-    @OptIn(UnstableApi::class)
-    private fun setupBaseControllerBookmark() {
         viewModel.bookmarkId.observe(viewLifecycleOwner) { bookmarkId ->
             binding.baseController.setBookmarkSelected(bookmarkId != null)
         }
+
+        viewModel.showLoginDialog.observe(viewLifecycleOwner) {
+            showLoginRequiredDialog()
+        }
+    }
+
+    @UnstableApi
+    private fun setupBaseControllerBookmark() {
         binding.baseController.setOnBookmarkClickListener {
             viewModel.toggleBookmark()
         }
@@ -210,6 +219,27 @@ class ScriptFragment : Fragment() {
         val first = layoutManager.findFirstVisibleItemPosition()
         val last = layoutManager.findLastVisibleItemPosition()
         return position in first..last
+    }
+
+    private fun showLoginRequiredDialog() {
+        LoginRequiredDialogFragment {
+            navigateToLogin()
+        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+    }
+
+    private fun navigateToLogin() {
+        val intent = LoginActivity.newIntent(requireContext())
+        startActivity(intent)
+
+        // PlaybackService 종료 (선택)
+        val serviceIntent = Intent(requireContext(), PlaybackService::class.java)
+        requireContext().stopService(serviceIntent)
+
+        // 현재 프래그먼트 종료
+        parentFragmentManager
+            .beginTransaction()
+            .remove(this)
+            .commit()
     }
 
     override fun onDestroyView() {
