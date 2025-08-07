@@ -38,7 +38,9 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.script.ScriptFragment
+import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -86,7 +88,6 @@ class PlayerDetailActivity : AppCompatActivity() {
         setupMediaController()
         setupBaseControllerBookmark()
 
-        val previousScreen = intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: "unknown"
         AnalyticsProvider.get().logScreenView(
             screenName = AnalyticsScreenInfo.Detail.NAME,
             screenClass = AnalyticsScreenInfo.Detail.CLASS,
@@ -233,6 +234,10 @@ class PlayerDetailActivity : AppCompatActivity() {
         viewModel.toastMessage.observe(this) { msgResId ->
             Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
         }
+
+        viewModel.showLoginDialog.observe(this) {
+            showLoginRequiredDialog()
+        }
     }
 
     private fun startScriptSync(controller: Player) {
@@ -297,6 +302,12 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun showLoginRequiredDialog() {
+        LoginRequiredDialogFragment {
+            navigateToLogin()
+        }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+    }
+
     private fun startPlaybackService(
         audioUrl: String,
         title: String,
@@ -313,6 +324,16 @@ class PlayerDetailActivity : AppCompatActivity() {
         startService(serviceIntent)
     }
 
+    private fun navigateToLogin() {
+        val intent = LoginActivity.newIntent(this)
+        startActivity(intent)
+
+        val serviceIntent = Intent(this, PlaybackService::class.java)
+        this.stopService(serviceIntent)
+
+        finish()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
@@ -322,6 +343,7 @@ class PlayerDetailActivity : AppCompatActivity() {
     companion object {
         const val UNKNOWN_SCREEN_ID = "unknown"
         const val EXPLORE_SCREEN_ID = "explore"
+        const val LOGIN_REQUIRED_DIALOG_ID = "login_required_dialog"
         const val HEARIT_ID = "hearit_id"
         const val BOOKMARK_ID = "bookmark_id"
         const val LAST_POSITION = "last_position"

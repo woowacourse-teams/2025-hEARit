@@ -61,8 +61,12 @@ class ShortsViewHolder(
         rotate.start()
 
         binding.btnExploreItemBookmark.setOnClickListener {
-            binding.btnExploreItemBookmark.isSelected = !binding.btnExploreItemBookmark.isSelected
-            shortsClickListener.onClickBookmark(item.id)
+            shortsClickListener.onClickBookmark(item.id) { bookmarkId ->
+                if (bookmarkId != -1L) {
+                    binding.btnExploreItemBookmark.isSelected =
+                        !binding.btnExploreItemBookmark.isSelected
+                }
+            }
         }
 
         binding.btnExploreItemBookmark.isSelected = item.isBookmarked

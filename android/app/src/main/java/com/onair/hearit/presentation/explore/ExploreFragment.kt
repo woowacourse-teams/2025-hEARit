@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,8 +26,12 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
+import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.service.PlaybackService
 
 class ExploreFragment :
     Fragment(),
@@ -168,6 +173,10 @@ class ExploreFragment :
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
+
+        viewModel.showLoginDialog.observe(viewLifecycleOwner) {
+            showLoginRequiredDialog()
+        }
     }
 
     private fun startSwipeAnimation() {
@@ -213,6 +222,27 @@ class ExploreFragment :
         playerDetailLauncher.launch(intent)
     }
 
+    private fun showLoginRequiredDialog() {
+        LoginRequiredDialogFragment {
+            navigateToLogin()
+        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+    }
+
+    private fun navigateToLogin() {
+        val intent = LoginActivity.newIntent(requireContext())
+        startActivity(intent)
+
+        // PlaybackService 종료 (선택)
+        val serviceIntent = Intent(requireContext(), PlaybackService::class.java)
+        requireContext().stopService(serviceIntent)
+
+        // 현재 프래그먼트 종료
+        parentFragmentManager
+            .beginTransaction()
+            .remove(this)
+            .commit()
+    }
+
     private fun updateBookmarkState(
         hearitId: Long,
         bookmarkId: Long?,
@@ -241,8 +271,16 @@ class ExploreFragment :
         navigateToDetail(hearitId, lastPosition)
     }
 
-    override fun onClickBookmark(hearitId: Long) {
-        viewModel.toggleBookmark(hearitId)
+    override fun onClickBookmark(
+        hearitId: Long,
+        callback: (bookmarkId: Long?) -> Unit,
+    ) {
+        viewModel.toggleBookmark(
+            hearitId = hearitId,
+            onFinished = { bookmarkId ->
+                callback(bookmarkId)
+            },
+        )
     }
 
     override fun onPause() {

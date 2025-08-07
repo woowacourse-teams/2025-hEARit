@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
+import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
@@ -31,6 +32,9 @@ class PlayerDetailViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    private val _showLoginDialog = SingleLiveData<Unit>()
+    val showLoginDialog: LiveData<Unit> = _showLoginDialog
+
     init {
         fetchData()
     }
@@ -40,6 +44,22 @@ class PlayerDetailViewModel(
             deleteBookmark()
         } else {
             addBookmark()
+        }
+    }
+
+    private fun deleteBookmark() {
+        val id = _bookmarkId.value ?: return
+        viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
+            bookmarkRepository
+                .deleteBookmark(token?.toBearerToken(), id)
+                .onSuccess {
+                    _bookmarkId.value = null
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                }
         }
     }
 
@@ -66,25 +86,13 @@ class PlayerDetailViewModel(
                 .onSuccess { bookmarkId ->
                     _bookmarkId.value = bookmarkId
                 }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.all_toast_add_bookmark_fail
-                }
-        }
-    }
-
-    private fun deleteBookmark() {
-        val id = _bookmarkId.value ?: return
-
-        viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
-            bookmarkRepository
-                .deleteBookmark(token?.toBearerToken(), id)
-                .onSuccess {
-                    _bookmarkId.value = null
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                    when (throwable) {
+                        is UserNotRegisteredException -> _showLoginDialog.call()
+                        else -> {
+                            Timber.w(throwable)
+                            _toastMessage.value = R.string.all_toast_add_bookmark_fail
+                        }
+                    }
                 }
         }
     }
