@@ -7,5 +7,5 @@ TRUNCATE TABLE hearit_keyword;
 TRUNCATE TABLE keyword;
 TRUNCATE TABLE admin;
 TRUNCATE TABLE refresh_token;
-TRUNCATE TABLE member_explore_score;
+TRUNCATE TABLE explore_score;
 SET FOREIGN_KEY_CHECKS = 1;

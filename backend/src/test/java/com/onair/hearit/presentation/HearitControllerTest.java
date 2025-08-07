@@ -137,7 +137,7 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("탐색 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
-    void readExploredHearits() {
+    void readExploredHearits_byGuest() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Keyword keyword = dbHelper.insertKeyword(new Keyword("Keyword"));
@@ -153,11 +153,80 @@ class HearitControllerTest extends IntegrationTest {
         CursorResponse<ExploredHearitResponse> responses = RestAssured.given(this.spec)
                 .queryParam("cursorId", 0)
                 .queryParam("size", 10)
-                .filter(document("hearit-read-explore",
+                .filter(document("hearit-read-explore-guest",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("탐색 히어릿 목록 조회")
-                                .description("사용자 별 최대 10개의 히어릿 목록을 조회합니다.")
+                                .description("비회원 - 최대 10개의 히어릿 목록을 조회합니다.(중복 히어릿 허용)")
+                                .queryParameters(
+                                        parameterWithName("cursorId").description("시작 Cursor ID").defaultValue("0"),
+                                        parameterWithName("size").description("필요한 히어릿 항목 수").defaultValue("10")
+                                )
+                                .responseSchema(Schema.schema("CursorExploredHearitResponse"))
+                                .responseFields(
+                                        Stream.concat(
+                                                Arrays.stream(new FieldDescriptor[]{
+                                                        fieldWithPath("content[].id").description("히어릿 ID"),
+                                                        fieldWithPath("content[].title").description("히어릿 제목"),
+                                                        fieldWithPath("content[].categoryColorCode").description(
+                                                                "카테고리 색상"),
+                                                        fieldWithPath("content[].isBookmarked").description("북마크 여부"),
+                                                        fieldWithPath("content[].bookmarkId").description(
+                                                                "북마크 ID (북마크된 경우)").optional(),
+                                                        fieldWithPath("content[].keywords").description(
+                                                                "히어릿에 포함된 키워드 목록"),
+                                                        fieldWithPath("content[].keywords[].id").description("키워드 ID"),
+                                                        fieldWithPath("content[].keywords[].name").description(
+                                                                "키워드 이름")
+                                                }),
+                                                Arrays.stream(ApiDocSnippets.getCustomCursorResponseFields())
+                                        ).toArray(FieldDescriptor[]::new)
+                                )
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/hearits/explore")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(new TypeRef<>() {
+                });
+
+        // then
+        assertAll(() -> {
+            assertThat(responses.content()).hasSize(3);
+            assertThat(responses.isEmpty()).isFalse();
+            assertThat(responses.cursorId()).isEqualTo(3);
+        });
+    }
+
+    @Test
+    @DisplayName("회원이 탐색 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
+    void readExploredHearits_byMember() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Keyword keyword = dbHelper.insertKeyword(new Keyword("Keyword"));
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
+
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
+
+        // when
+        CursorResponse<ExploredHearitResponse> responses = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .queryParam("cursorId", 0)
+                .queryParam("size", 10)
+                .filter(document("hearit-read-explore-member",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("탐색 히어릿 목록 조회")
+                                .description("로그인된 사용자 별 최대 10개의 히어릿 목록을 조회합니다.")
                                 .queryParameters(
                                         parameterWithName("cursorId").description("시작 Cursor ID").defaultValue("0"),
                                         parameterWithName("size").description("필요한 히어릿 항목 수").defaultValue("10")
