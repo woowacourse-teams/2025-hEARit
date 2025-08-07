@@ -13,5 +13,5 @@ interface AuthRemoteDataSource {
 
     suspend fun refreshAccessToken(reissueRequest: TokenReissueRequest): Result<NetworkResult<TokenReissueResponse>>
 
-    suspend fun withdraw(token: String?): Result<NetworkResult<Unit>>
+    suspend fun withdraw(token: String): Result<NetworkResult<Unit>>
 }

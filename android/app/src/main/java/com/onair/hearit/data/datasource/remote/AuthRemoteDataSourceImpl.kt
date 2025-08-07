@@ -39,7 +39,7 @@ class AuthRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun withdraw(token: String?): Result<NetworkResult<Unit>> =
+    override suspend fun withdraw(token: String): Result<NetworkResult<Unit>> =
         handleApiCall(
             apiCall = { authService.deleteAccount(token) },
             transform = { },

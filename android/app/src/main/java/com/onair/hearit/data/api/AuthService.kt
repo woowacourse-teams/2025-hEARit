@@ -29,6 +29,6 @@ interface AuthService {
 
     @DELETE("auth/withdraw")
     suspend fun deleteAccount(
-        @Header("Authorization") token: String?,
+        @Header("Authorization") token: String,
     ): Response<Unit>
 }

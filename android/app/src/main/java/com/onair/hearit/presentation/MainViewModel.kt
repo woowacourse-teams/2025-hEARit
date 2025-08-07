@@ -61,9 +61,14 @@ class MainViewModel(
     fun withdraw() {
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
+            if (token == null) {
+                _toastMessage.value = R.string.withdraw_fail
+                _withdrawState.value = false
+                return@launch
+            }
 
             authRepository
-                .withdraw(token?.toBearerToken())
+                .withdraw("Bearer $token")
                 .onSuccess {
                     UserApiClient.instance.unlink { error ->
                         if (error != null) {
