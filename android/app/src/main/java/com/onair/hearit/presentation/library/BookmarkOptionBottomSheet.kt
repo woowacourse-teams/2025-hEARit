@@ -4,21 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.onair.hearit.databinding.BottomSheetBookmarkOptionBinding
-import com.onair.hearit.di.CrashlyticsProvider
 
 class BookmarkOptionBottomSheet : BottomSheetDialogFragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: BottomSheetBookmarkOptionBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: LibraryViewModel by activityViewModels {
-        LibraryViewModelFactory(
-            CrashlyticsProvider.get(),
-        )
-    }
+    private val viewModel: LibraryViewModel by viewModels({ requireParentFragment() })
     private val bookmarkId: Long by lazy {
         requireArguments().getLong(BOOKMARK_KEY)
     }

@@ -108,7 +108,7 @@ class LibraryFragment :
 
     override fun onClickOption(bookmarkId: Long) {
         val sheet = BookmarkOptionBottomSheet.newInstance(bookmarkId)
-        sheet.show(parentFragmentManager, sheet.tag)
+        sheet.show(childFragmentManager, sheet.tag)
     }
 
     override fun onClickBookmarkedHearit(hearitId: Long) {
