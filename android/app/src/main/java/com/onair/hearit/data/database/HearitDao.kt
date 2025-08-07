@@ -20,7 +20,7 @@ interface HearitDao {
     suspend fun getKeywords(): List<SearchHistoryEntity>
 
     @Query("DELETE FROM search_history")
-    suspend fun deleteKeywords()
+    suspend fun deleteKeywords(): Int
 
     @Query("UPDATE recent_hearit SET lastPosition = :position WHERE hearitId = :hearitId")
     suspend fun updateLastPosition(

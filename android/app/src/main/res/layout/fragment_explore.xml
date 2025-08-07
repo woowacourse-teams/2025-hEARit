@@ -50,5 +50,16 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:listitem="@layout/item_shorts" />
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lav_explore_swipe_up"
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/swipe_up" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

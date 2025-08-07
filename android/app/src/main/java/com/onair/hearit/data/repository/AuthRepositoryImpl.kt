@@ -10,6 +10,9 @@ import com.onair.hearit.domain.repository.AuthRepository
 class AuthRepositoryImpl(
     private val authRemoteDataSource: AuthRemoteDataSource,
 ) : AuthRepository {
+    override suspend fun checkAccessToken(accessToken: String): Result<Unit> =
+        authRemoteDataSource.checkAccessToken(accessToken).mapOrThrowDomain { }
+
     override suspend fun kakaoLogin(accessToken: String): Result<LoginToken> =
         authRemoteDataSource
             .kakaoLogin(KakaoLoginRequest(accessToken))
@@ -20,8 +23,5 @@ class AuthRepositoryImpl(
             .refreshAccessToken(TokenReissueRequest(refreshToken))
             .mapOrThrowDomain { it.accessToken }
 
-    override suspend fun checkAccessToken(accessToken: String): Result<Unit> =
-        authRemoteDataSource
-            .checkAccessToken(accessToken)
-            .mapOrThrowDomain { }
+    override suspend fun withdraw(token: String): Result<Unit> = runCatching { authRemoteDataSource.withdraw(token) }
 }

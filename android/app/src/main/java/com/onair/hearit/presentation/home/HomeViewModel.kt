@@ -28,6 +28,9 @@ class HomeViewModel(
     private val _userInfo: MutableLiveData<UserInfo> = MutableLiveData()
     val userInfo: LiveData<UserInfo> = _userInfo
 
+    private val _isLoggedIn: MutableLiveData<Boolean> = MutableLiveData()
+    val isLoggedIn: LiveData<Boolean> = _isLoggedIn
+
     private val _recommendHearits: MutableLiveData<List<RecommendHearit>> = MutableLiveData()
     val recommendHearits: LiveData<List<RecommendHearit>> = _recommendHearits
 
@@ -49,7 +52,10 @@ class HomeViewModel(
                 .foldWithCrashlytics(
                     crashlyticsLogger,
                     onSuccess = { _recommendHearits.value = it },
-                    onFailure = { _toastMessage.value = R.string.home_toast_recommend_load_fail },
+                    onFailure = {
+                        crashlyticsLogger.recordException(it)
+                        _toastMessage.value = R.string.home_toast_recommend_load_fail
+                    },
                 )
         }
 
@@ -59,6 +65,7 @@ class HomeViewModel(
                 .onSuccess { groupedCategory ->
                     _groupedCategory.value = groupedCategory
                 }.onFailure {
+                    crashlyticsLogger.recordException(it)
                     _toastMessage.value = R.string.home_toast_grouped_category_load_fail
                 }
         }
@@ -67,22 +74,22 @@ class HomeViewModel(
     private fun fetchUserInfo() {
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
-            if (token == null) {
-                _userInfo.value = UserInfo.default()
-                return@launch
-            }
 
             memberRepository
-                .getUserInfo(token.toBearerToken())
+                .getUserInfo(token?.toBearerToken())
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo
+                    _isLoggedIn.value = true
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegisteredException -> {
                             _userInfo.value = UserInfo.default()
+                            _isLoggedIn.value = false
                         }
 
                         else -> {
+                            _isLoggedIn.value = false
+                            crashlyticsLogger.recordException(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }

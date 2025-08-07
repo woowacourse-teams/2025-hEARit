@@ -101,20 +101,28 @@ fun setImageUrl(
         }
 }
 
-@BindingAdapter("visibleIfNotLogin")
-fun setVisibleIfNotLogin(
-    view: View,
-    state: BookmarkUiState?,
-) {
-    view.isVisible = state is BookmarkUiState.NotLoggedIn
-}
-
 @BindingAdapter("visibleIfLogin")
 fun setVisibleIfLogin(
+    view: View,
+    condition: Boolean,
+) {
+    view.isVisible = condition
+}
+
+@BindingAdapter("visibleBookmarkIfLogin")
+fun setBookmarkVisibleIfLogin(
     view: View,
     state: BookmarkUiState?,
 ) {
     view.isVisible = state is BookmarkUiState.LoggedIn
+}
+
+@BindingAdapter("visibleBookmarkIfNotLogin")
+fun setBookmarkVisibleIfNotLogin(
+    view: View,
+    state: BookmarkUiState?,
+) {
+    view.isVisible = state is BookmarkUiState.NotLoggedIn
 }
 
 @BindingAdapter("backgroundColor")
