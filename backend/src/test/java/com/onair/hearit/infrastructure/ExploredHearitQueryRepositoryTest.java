@@ -55,7 +55,7 @@ class ExploredHearitQueryRepositoryTest {
     @DisplayName("비회원의 점수 기반 히어릿을 커서 이후부터 조회한다")
     void findExploredHearits_byGuest() {
         // given
-        List<ExploreScore> exploreScores = insertTestExploreScoreByMemberIdAndCount(null, 5);
+        List<ExploreScore> exploreScores = insertTestExploreScoreByMemberIdAndCount(-1L, 5);
         List<Long> exploreScoreHearitIds = exploreScores.stream()
                 .map(ExploreScore::getHearitId)
                 .toList();

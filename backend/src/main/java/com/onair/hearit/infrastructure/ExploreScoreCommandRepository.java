@@ -42,6 +42,7 @@ public class ExploreScoreCommandRepository {
      * @param memberId 사용자 ID (null인 경우 기본 점수)
      */
     public void updateCursorIds(Long memberId) {
+        long resolvedMemberId = (memberId == null) ? -1L : memberId;
         String updateCursorSql = """
                 UPDATE explore_score
                 SET cursor_id = (
@@ -50,13 +51,13 @@ public class ExploreScoreCommandRepository {
                             id,
                             RANK() OVER (ORDER BY score DESC, hearit_id DESC) as rank_num
                         FROM explore_score
-                        WHERE (member_id = ? OR (member_id IS NULL AND ? IS NULL))
+                        WHERE member_id = ?
                     ) ranked
                     WHERE ranked.id = explore_score.id
                 )
-                WHERE (member_id = ? OR (member_id IS NULL AND ? IS NULL))
+                WHERE member_id = ?
                 """;
 
-        jdbcTemplate.update(updateCursorSql, memberId, memberId, memberId, memberId);
+        jdbcTemplate.update(updateCursorSql, resolvedMemberId, resolvedMemberId);
     }
 }

@@ -25,7 +25,7 @@ public interface ExploredHearitQueryRepository extends JpaRepository<Hearit, Lon
             SELECT h.*
             FROM explore_score es
             JOIN hearit h ON es.hearit_id = h.id
-            WHERE es.member_id IS NULL
+            WHERE es.member_id = -1
               AND es.cursor_id > :cursorId
             ORDER BY es.cursor_id ASC
             LIMIT :size
