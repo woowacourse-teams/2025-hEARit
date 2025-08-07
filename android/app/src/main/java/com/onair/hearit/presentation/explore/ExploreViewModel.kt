@@ -109,7 +109,7 @@ class ExploreViewModel(
                         _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
                     }
             } catch (e: Exception) {
-                Timber.w(e.message)
+                Timber.w(e)
                 _toastMessage.value = R.string.explore_toast_shorts_hearits_load_fail
             } finally {
                 isLoading = false

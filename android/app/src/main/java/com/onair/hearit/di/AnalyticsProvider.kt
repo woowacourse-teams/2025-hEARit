@@ -15,5 +15,5 @@ object AnalyticsProvider {
 
     fun get(): AnalyticsLogger =
         instance
-            ?: throw IllegalStateException("AnalyticsProvider must be initialized before use.")
+            ?: throw IllegalStateException("AnalyticsProvider가 초기화되지 않았습니다.")
 }

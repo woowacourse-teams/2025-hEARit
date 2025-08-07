@@ -55,7 +55,7 @@ class HearitApplication : Application() {
                 if (priority == Log.ERROR) {
                     CrashlyticsProvider.get().recordException(t)
                 } else if (priority == Log.WARN) {
-                    CrashlyticsProvider.get().log(t.message.toString())
+                    CrashlyticsProvider.get().log(t.message ?: "알 수 없는 Error")
                 }
             }
         }

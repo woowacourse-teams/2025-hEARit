@@ -261,7 +261,6 @@ class ExploreFragment :
     }
 
     companion object {
-        const val EXPLORE_SCREEN_ID = "explore"
         const val HEARIT_ID = "hearit_id"
         const val BOOKMARK_ID = "bookmark_id"
     }
