@@ -7,6 +7,7 @@ import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.data.dto.SourceResponse
 
 object HearitFixtures {
     fun createFakeHearit(hearitId: Long): HearitResponse =
@@ -14,7 +15,11 @@ object HearitFixtures {
             id = hearitId,
             title = "테스트용 히어릿",
             summary = "요약",
-            source = "출처",
+            source =
+                listOf(
+                    SourceResponse(sourceName = "출처1", sourceUrl = "출처링크1"),
+                    SourceResponse(sourceName = "출처2", sourceUrl = "출처링크2"),
+                ),
             playTime = 120,
             createdAt = "2025-08-05T12:00:00Z",
             isBookmarked = true,
@@ -83,13 +88,23 @@ object HearitFixtures {
                 SearchHearitResponse.Content(
                     id = 1L,
                     playTime = 150,
-                    summary = "이것은 첫 번째 검색 결과 요약입니다.",
+                    keywords =
+                        listOf(
+                            KeywordResponse(0, "키워드3"),
+                            KeywordResponse(1, "키워드4"),
+                            KeywordResponse(2, "키워드5"),
+                        ),
                     title = "첫 번째 test 히어릿",
                 ),
                 SearchHearitResponse.Content(
                     id = 2L,
                     playTime = 210,
-                    summary = "두 번째 검색 결과 요약입니다.",
+                    keywords =
+                        listOf(
+                            KeywordResponse(0, "키워드3"),
+                            KeywordResponse(1, "키워드4"),
+                            KeywordResponse(2, "키워드5"),
+                        ),
                     title = "두 번째 test 히어릿",
                 ),
             )

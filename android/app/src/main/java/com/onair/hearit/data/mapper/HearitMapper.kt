@@ -8,6 +8,7 @@ import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.data.dto.SourceResponse
 import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.domain.model.CategoryHearit
 import com.onair.hearit.domain.model.GroupedCategory
@@ -19,6 +20,7 @@ import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
+import com.onair.hearit.domain.model.Source
 import com.onair.hearit.domain.model.UserInfo
 
 fun RecentHearit.toData(): RecentHearitEntity =
@@ -81,7 +83,7 @@ fun HearitResponse.toDomain(): SingleHearit =
         id = this.id,
         title = this.title,
         summary = this.summary,
-        source = this.source,
+        source = this.source.map { it.toDomain() },
         playTime = this.playTime,
         createdAt = this.createdAt,
         isBookmarked = this.isBookmarked,
@@ -95,6 +97,12 @@ fun UserInfoResponse.toDomain(): UserInfo =
         id = this.id,
         nickname = this.nickname,
         profileImage = this.profileImage,
+    )
+
+fun SourceResponse.toDomain(): Source =
+    Source(
+        name = this.sourceName,
+        url = this.sourceUrl,
     )
 
 fun KeywordResponse.toDomain(): Keyword =

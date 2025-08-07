@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="scriptLine"
+            type="com.onair.hearit.domain.model.ScriptLine" />
+
+        <variable
+            name="isHighlighted"
+            type="Boolean" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp">
+
+        <TextView
+            android:id="@+id/tv_detail_source"
+            style="@style/pretendard_body"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:lineSpacingMultiplier="1.3"
+            android:singleLine="false"
+            android:text="@{scriptLine.text}"
+            app:detailHighlightedStyle="@{isHighlighted}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="원본은 쿠버네티스 공식 문서를 기반으로 만들어졌습니다. 저작권자는 Kubernetes Author입니다." />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

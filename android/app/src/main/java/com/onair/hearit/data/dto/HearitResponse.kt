@@ -12,7 +12,7 @@ data class HearitResponse(
     @SerialName("summary")
     val summary: String,
     @SerialName("source")
-    val source: String,
+    val source: List<SourceResponse>,
     @SerialName("playTime")
     val playTime: Int,
     @SerialName("createdAt")
