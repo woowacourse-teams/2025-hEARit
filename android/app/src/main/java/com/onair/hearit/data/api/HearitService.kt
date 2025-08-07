@@ -13,7 +13,9 @@ import retrofit2.http.Query
 
 interface HearitService {
     @GET("hearits/recommend-category")
-    suspend fun getCategoryHearits(): Response<List<GroupedCategoryHearitResponse>>
+    suspend fun getCategoryHearits(
+        @Header("Authorization") token: String?,
+    ): Response<List<GroupedCategoryHearitResponse>>
 
     @GET("hearits/random")
     suspend fun getRandomHearits(
