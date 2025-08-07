@@ -5,7 +5,9 @@ import com.onair.hearit.domain.Hearit;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ExploreScoreCalculator {
 
     public Map<Long, Double> calculateTotalScores(Long memberId, List<Hearit> hearits, List<ScoreFactor> scoreFactors) {

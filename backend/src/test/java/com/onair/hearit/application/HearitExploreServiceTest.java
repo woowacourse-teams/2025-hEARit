@@ -28,8 +28,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
+@Sql("/dbclean.sql")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, ExploreScoreCommandRepository.class,
         ExploreScoreCalculator.class, BookmarkScoreFactor.class, RecencyScoreFactor.class, RandomScoreFactor.class})
 @ActiveProfiles("integration-test")

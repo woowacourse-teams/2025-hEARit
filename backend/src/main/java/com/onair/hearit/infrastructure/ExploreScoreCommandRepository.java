@@ -27,6 +27,7 @@ public class ExploreScoreCommandRepository {
                     cursor_id = NULL
                 """;
 
+        // TODO: Custom DTO 생성
         List<Object[]> batchArgs = scores.entrySet().stream()
                 .map(entry -> new Object[]{memberId, entry.getKey(), entry.getValue()})
                 .toList();
