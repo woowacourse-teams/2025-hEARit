@@ -83,13 +83,23 @@ object HearitFixtures {
                 SearchHearitResponse.Content(
                     id = 1L,
                     playTime = 150,
-                    summary = "이것은 첫 번째 검색 결과 요약입니다.",
+                    keywords =
+                        listOf(
+                            KeywordResponse(0, "키워드3"),
+                            KeywordResponse(1, "키워드4"),
+                            KeywordResponse(2, "키워드5"),
+                        ),
                     title = "첫 번째 test 히어릿",
                 ),
                 SearchHearitResponse.Content(
                     id = 2L,
                     playTime = 210,
-                    summary = "두 번째 검색 결과 요약입니다.",
+                    keywords =
+                        listOf(
+                            KeywordResponse(0, "키워드3"),
+                            KeywordResponse(1, "키워드4"),
+                            KeywordResponse(2, "키워드5"),
+                        ),
                     title = "두 번째 test 히어릿",
                 ),
             )

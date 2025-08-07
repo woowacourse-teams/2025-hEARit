@@ -15,7 +15,7 @@ class HearitLocalDataSourceImpl(
 
     override suspend fun saveKeyword(keyword: SearchHistoryEntity): Result<Unit> = runCatching { hearitDao.insertKeyword(keyword) }
 
-    override suspend fun clearKeywords(): Result<Unit> = runCatching { hearitDao.deleteKeywords() }
+    override suspend fun clearKeywords(): Result<Int> = runCatching { hearitDao.deleteKeywords() }
 
     override suspend fun updateRecentHearitPosition(
         hearitId: Long,
