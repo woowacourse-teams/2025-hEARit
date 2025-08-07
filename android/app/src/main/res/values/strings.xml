@@ -83,6 +83,7 @@
     <string name="library_guide_when_no_login"><font color="#B677F3">히어릿</font>을 모아서 듣고 싶다면,\n로그인을 해주세요!</string>
     <string name="library_login_button_text">로그인 하러가기</string>
     <string name="library_toast_bookmark_load_fail">북마크 조회에 실패했습니다.</string>
+    <string name="library_bottom_sheet_bookmark_delete">북마크에서 삭제하기</string>
 
     <!-- SearchFragment-->
     <string name="search_category_text">카테고리</string>
