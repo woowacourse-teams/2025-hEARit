@@ -106,8 +106,8 @@ class LibraryFragment :
         }
     }
 
-    override fun onClickOption() {
-        val sheet = BookmarkOptionBottomSheet()
+    override fun onClickOption(bookmarkId: Long) {
+        val sheet = BookmarkOptionBottomSheet.newInstance(bookmarkId)
         sheet.show(parentFragmentManager, sheet.tag)
     }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.CrashlyticsLogger
+import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
@@ -60,6 +61,21 @@ class LibraryViewModel(
                     }
                     val defaultUserInfo = UserInfo(-1, "hEARit", null)
                     _userInfo.value = defaultUserInfo
+                }
+        }
+    }
+
+    fun deleteBookmark(bookmarkId: Long) {
+        viewModelScope.launch {
+            val token = RepositoryProvider.dataStoreRepository.getAccessToken().getOrNull()
+
+            bookmarkRepository
+                .deleteBookmark(token?.toBearerToken(), bookmarkId)
+                .onSuccess {
+                    _bookmarks.value =
+                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }
+                }.onFailure {
+                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
                 }
         }
     }
