@@ -33,6 +33,16 @@ class BookmarkOptionBottomSheet : BottomSheetDialogFragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        observeViewModel()
+    }
+
+    private fun observeViewModel() {
+        viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarkList ->
+            val targetBookmark = bookmarkList.find { it.bookmarkId == bookmarkId }
+            if (targetBookmark != null) {
+                binding.bookmark = targetBookmark
+            }
+        }
         binding.tvBookmarkOptionDeleteBookmark.setOnClickListener {
             viewModel.deleteBookmark(bookmarkId)
             dismiss()
