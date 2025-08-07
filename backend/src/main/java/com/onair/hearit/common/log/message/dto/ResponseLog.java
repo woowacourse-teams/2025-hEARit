@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 
 public record ResponseLog(
         String logType,
-        LocalDateTime timestamp,
+        String timestamp,
         RequestInfo requestInfo,
         ResponseEntity<?> responseEntity,
         long timeTakenMs
@@ -17,7 +17,7 @@ public record ResponseLog(
             long timeTakenMs) {
         return new ResponseLog(
                 "RESPONSE",
-                timestamp,
+                timestamp.toString(),
                 requestInfo,
                 responseEntity,
                 timeTakenMs);
