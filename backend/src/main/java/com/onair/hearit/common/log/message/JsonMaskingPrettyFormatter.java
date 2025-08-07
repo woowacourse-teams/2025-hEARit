@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.message.ObjectMessage;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,15 +42,15 @@ public class JsonMaskingPrettyFormatter {
                 value.substring(value.length() - visible);
     }
 
-    public String convertToPrettyJson(Object object) {
+    public ObjectMessage convertToPrettyJson(Object object) {
         try {
             String json = objectMapper.writeValueAsString(object);
             JsonNode root = objectMapper.readTree(json);
             applyMasking(root);
-            return "\n" + objectMapper.writer(defaultPrettyPrinter).writeValueAsString(root);
+            return new ObjectMessage(root);
         } catch (JsonProcessingException e) {
             // JSON 직렬화 실패 시, 에러 메시지를 포함한 객체의 toString() 결과를 반환하여 로깅 흐름이 끊기지 않도록 함
-            return "Object to Json 직렬화 실패: " + object.toString();
+            return new ObjectMessage("Object to Json 직렬화 실패: " + object.toString());
         }
     }
 

@@ -32,10 +32,12 @@
         <!-- 콘솔 출력 설정 -->
         <Console name="Console" target="SYSTEM_OUT">
             <!-- 콘솔에 출력할 로그 패턴 설정 -->
-            <PatternLayout
-                    pattern="${consoleLogPattern}"
-                    disableAnsi="false"
-                    noConsoleNoAnsi="false"/>
+            <JsonLayout
+                pretty="true"
+                complete="false"
+                eventEol="true"
+                objectMessageAsJsonObject="true"
+                charset="UTF-8"/>
         </Console>
 
         <!-- 파일 출력 설정 -->
@@ -44,12 +46,14 @@
         <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/2025_08_07/log.zip) -->
         <!-- 7개 파일 쌓이면 오래된 로그부터 삭제 -->
         <RollingFile name="RollingFile">
-            <FileName>${logDir}/log.txt</FileName>
-            <FilePattern>${logDir}/archive/%d{yyyy_MM_dd}/log.zip</FilePattern>
-            <PatternLayout
-                    pattern="${fileLogPattern}"
-                    disableAnsi="true"
-                    charset="UTF-8"/>
+            <FileName>${logDir}/all-level.log</FileName>
+            <FilePattern>${logDir}/archive/%d{yyyy_MM_dd}/all-level.zip</FilePattern>
+            <JsonLayout
+                complete="false"
+                compact="true"
+                eventEol="true"
+                objectMessageAsJsonObject="true"
+                charset="UTF-8"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
@@ -61,8 +65,8 @@
         <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/2025_08_07/error-log.zip) -->
         <!-- 20개 파일 쌓이면 오래된 로그부터 삭제 -->
         <RollingFile name="RollingErrorFile">
-            <FileName>${logDir}/error-log.json</FileName>
-            <FilePattern>${logDir}/archive/%d{yyyy_MM_dd}/error-log.zip</FilePattern>
+            <FileName>${logDir}/error.log</FileName>
+            <FilePattern>${logDir}/archive/%d{yyyy_MM_dd}/error.zip</FilePattern>
             <JsonLayout complete="false"
                         compact="true"
                         eventEol="true"

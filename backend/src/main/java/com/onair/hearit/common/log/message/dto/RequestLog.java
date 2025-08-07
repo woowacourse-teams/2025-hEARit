@@ -14,7 +14,7 @@ import lombok.Getter;
 public class RequestLog {
 
     private final String logType;
-    private final LocalDateTime timestamp;
+    private final String timestamp;
     private final RequestInfo requestInfo;
     private final Map<String, List<String>> requestParameter;
     private final Object requestBody;
@@ -29,6 +29,6 @@ public class RequestLog {
                         Map.Entry::getKey,
                         entry -> Arrays.asList(entry.getValue())
                 ));
-        return new RequestLog("REQUEST", timestamp, requestInfo, parameters, body);
+        return new RequestLog("REQUEST", timestamp.toString(), requestInfo, parameters, body);
     }
 }
