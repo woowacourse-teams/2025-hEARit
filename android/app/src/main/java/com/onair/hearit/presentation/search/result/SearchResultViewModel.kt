@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
@@ -15,12 +14,12 @@ import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.search.SearchUiState
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class SearchResultViewModel(
     private val recentKeywordRepository: RecentKeywordRepository,
     private val getSearchResultUseCase: GetSearchResultUseCase,
     initialInput: SearchInput,
-    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _uiState = MutableLiveData<SearchUiState>()
     val uiState: LiveData<SearchUiState> = _uiState
@@ -84,7 +83,8 @@ class SearchResultViewModel(
 
                         _searchedHearits.value = updatedList
                         updateUiState(updatedList)
-                    }.onFailure {
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
                         _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
                     }
             } finally {
@@ -106,7 +106,8 @@ class SearchResultViewModel(
         viewModelScope.launch {
             recentKeywordRepository
                 .saveKeyword(currentSearchTerm)
-                .onFailure {
+                .onFailure { throwable ->
+                    Timber.w(throwable)
                     _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
                 }
         }

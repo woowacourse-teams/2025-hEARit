@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentScriptBinding
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
 import com.onair.hearit.service.PlaybackService
@@ -45,7 +44,7 @@ class ScriptFragment : Fragment() {
         requireArguments().getLong(HEARIT_ID)
     }
     private val viewModel: PlayerDetailViewModel by activityViewModels {
-        PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
+        PlayerDetailViewModelFactory(hearitId)
     }
 
     private val handler = Handler(Looper.getMainLooper())
