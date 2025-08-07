@@ -31,7 +31,8 @@ class HearitApplication : Application() {
     private fun plantDebugTimberTree() {
         Timber.plant(
             object : Timber.DebugTree() {
-                override fun createStackElementTag(element: StackTraceElement): String = "${element.fileName}: ${element.lineNumber}"
+                override fun createStackElementTag(element: StackTraceElement): String =
+                    "$TIMBER_LOG_PREFIX ${element.fileName}: ${element.lineNumber}"
             },
         )
     }
@@ -55,9 +56,14 @@ class HearitApplication : Application() {
                 if (priority == Log.ERROR) {
                     CrashlyticsProvider.get().recordException(t)
                 } else if (priority == Log.WARN) {
-                    CrashlyticsProvider.get().log(t.message ?: "알 수 없는 Error")
+                    CrashlyticsProvider.get().log(t.message ?: ERROR_UNKNOWN_MESSAGE)
                 }
             }
         }
+    }
+
+    companion object {
+        private const val TIMBER_LOG_PREFIX = "hEARit_LOG"
+        private const val ERROR_UNKNOWN_MESSAGE = "알 수 없는 Error"
     }
 }

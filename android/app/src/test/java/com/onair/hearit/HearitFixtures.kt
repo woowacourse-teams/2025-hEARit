@@ -15,7 +15,7 @@ object HearitFixtures {
             id = hearitId,
             title = "테스트용 히어릿",
             summary = "요약",
-            source =
+            sources =
                 listOf(
                     SourceResponse(sourceName = "출처1", sourceUrl = "출처링크1"),
                     SourceResponse(sourceName = "출처2", sourceUrl = "출처링크2"),
