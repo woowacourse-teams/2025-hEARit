@@ -34,7 +34,10 @@ public class TestFixture {
                 "originalAudioUrl",
                 "shortAudioUrl",
                 "scriptUrl",
-                createFixedSources(),
+                List.of(
+                        new Source("출처1", "https://example.com/1"),
+                        new Source("출처2", "https://example.com/2")
+                ),
                 category);
     }
 
