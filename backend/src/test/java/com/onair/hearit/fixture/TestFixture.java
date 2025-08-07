@@ -5,6 +5,8 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.domain.Source;
+import java.util.List;
 
 public class TestFixture {
 
@@ -32,11 +34,23 @@ public class TestFixture {
                 "originalAudioUrl",
                 "shortAudioUrl",
                 "scriptUrl",
-                "source",
+                List.of(
+                        new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
+                                "https://example.com/1"),
+                        new Source("원본은 CC BY 4.0 라이선스를 따릅니다.", "https://example.com/2")
+                ),
                 category);
     }
 
     public static Bookmark createFixedBookmark(Member member, Hearit hearit) {
         return new Bookmark(member, hearit);
+    }
+
+    public static List<Source> createFixedSources() {
+        return List.of(
+                new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
+                        "https://example.com/1"),
+                new Source("원본은 CC BY 4.0 라이선스를 따릅니다.", "https://example.com/2")
+        );
     }
 }
