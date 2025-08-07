@@ -37,7 +37,6 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.service.PlaybackService
@@ -64,7 +63,7 @@ class PlayerDetailActivity : AppCompatActivity() {
     }
 
     private val viewModel: PlayerDetailViewModel by viewModels {
-        PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
+        PlayerDetailViewModelFactory(hearitId)
     }
 
     private val handler = Handler(Looper.getMainLooper())

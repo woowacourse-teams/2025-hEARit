@@ -14,7 +14,6 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentSearchCategoryBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
@@ -31,7 +30,7 @@ class SearchCategoryFragment :
     private val categoryAdapter by lazy { CategoryAdapter(this) }
 
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
-        SearchViewModelFactory(CrashlyticsProvider.get())
+        SearchViewModelFactory()
     }
 
     override fun onCreateView(

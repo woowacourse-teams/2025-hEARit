@@ -5,12 +5,12 @@ import android.os.Bundle
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
@@ -21,8 +21,7 @@ import com.onair.hearit.presentation.MainActivity
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
-    private val factory by lazy { LoginViewModelFactory(CrashlyticsProvider.get()) }
-    private val viewModel by lazy { ViewModelProvider(this, factory)[LoginViewModel::class.java] }
+    private val viewModel: LoginViewModel by viewModels { LoginViewModelFactory() }
 
     private lateinit var kakaoLoginHelper: KakaoLoginHelper
 
