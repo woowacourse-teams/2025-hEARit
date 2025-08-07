@@ -17,7 +17,6 @@ import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.domain.Source;
-import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.HearitsWithRecommendCategoryResponse;
@@ -345,32 +344,32 @@ class HearitControllerTest extends IntegrationTest {
 
         // when
         List<HearitsWithRecommendCategoryResponse> responses = RestAssured.given(this.spec)
-            .header("Authorization", "Bearer " + token)
-            .filter(document("hearit-recommend-category",
-                resource(ResourceSnippetParameters.builder()
-                    .tag("Hearit API")
-                    .summary("추천 카테고리별 그룹화된 히어릿 조회")
-                    .description(
-                        "추천하는 3개 카테고리와 카테고리별로 그룹화된 히어릿 5개 목록을 조회합니다. (현재 추천 기준 : 북마크 많은 카테고리 순, 북마크가 없는 경우 하루마다 랜덤 카테고리 추천)")
-                    .responseSchema(Schema.schema("HearitsWithRecommendCategoryResponse"))
-                    .responseFields(
-                        fieldWithPath("[].categoryId").description("카테고리 ID"),
-                        fieldWithPath("[].categoryName").description("카테고리 이름"),
-                        fieldWithPath("[].colorCode").description("카테고리 색상 코드"),
-                        fieldWithPath("[].hearits").description("해당 카테고리의 최신 히어릿 목록"),
-                        fieldWithPath("[].hearits[].hearitId").description("히어릿 ID"),
-                        fieldWithPath("[].hearits[].title").description("히어릿 제목"),
-                        fieldWithPath("[].hearits[].createdAt").description("히어릿 생성 일시")
-                    )
-                    .build()))
-            )
-            .when()
-            .get("/api/v1/hearits/recommend-category")
-            .then()
-            .statusCode(HttpStatus.OK.value())
-            .extract()
-            .jsonPath()
-            .getList(".", HearitsWithRecommendCategoryResponse.class);
+                .header("Authorization", "Bearer " + token)
+                .filter(document("hearit-recommend-category",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("추천 카테고리별 그룹화된 히어릿 조회")
+                                .description(
+                                        "추천하는 3개 카테고리와 카테고리별로 그룹화된 히어릿 5개 목록을 조회합니다. (현재 추천 기준 : 북마크 많은 카테고리 순, 북마크가 없는 경우 하루마다 랜덤 카테고리 추천)")
+                                .responseSchema(Schema.schema("HearitsWithRecommendCategoryResponse"))
+                                .responseFields(
+                                        fieldWithPath("[].categoryId").description("카테고리 ID"),
+                                        fieldWithPath("[].categoryName").description("카테고리 이름"),
+                                        fieldWithPath("[].colorCode").description("카테고리 색상 코드"),
+                                        fieldWithPath("[].hearits").description("해당 카테고리의 최신 히어릿 목록"),
+                                        fieldWithPath("[].hearits[].hearitId").description("히어릿 ID"),
+                                        fieldWithPath("[].hearits[].title").description("히어릿 제목"),
+                                        fieldWithPath("[].hearits[].createdAt").description("히어릿 생성 일시")
+                                )
+                                .build()))
+                )
+                .when()
+                .get("/api/v1/hearits/recommend-category")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .jsonPath()
+                .getList(".", HearitsWithRecommendCategoryResponse.class);
 
         // then
         assertAll(() -> {
