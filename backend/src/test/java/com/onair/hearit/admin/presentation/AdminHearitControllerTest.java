@@ -133,6 +133,44 @@ class AdminHearitControllerTest extends IntegrationTest {
     }
 
     @Test
+    @DisplayName("히어릿 메타데이터-출처를 수정할 수 있다")
+    void updateSourceDataHearit() {
+        // given
+        CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
+
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        HearitMetaDataUpdateRequest request = new HearitMetaDataUpdateRequest(
+                "수정 제목", "수정 요약", 100, "origin-audio", "short-audio",
+                "script-url",
+                List.of(
+                        new SourceUpdateRequest("수정출처1", "수정 url1"),
+                        new SourceUpdateRequest("수정출처2", "수정 url2")
+                ), category.getId(), List.of()
+        );
+
+        // when & then
+        RestAssured.given().log().all()
+                .cookie("JSESSIONID", csrfSession.sessionId())
+                .header("X-CSRF-TOKEN", csrfSession.csrfToken())
+                .contentType("application/json")
+                .body(request)
+                .when()
+                .put("/api/v1/admin/hearits/" + hearit.getId())
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT);
+
+        Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
+        assertAll(() -> {
+            assertThat(updatedHearit.getSources().get(0).getSourceName()).isEqualTo("수정출처1");
+            assertThat(updatedHearit.getSources().get(1).getSourceName()).isEqualTo("수정출처2");
+            assertThat(updatedHearit.getSources().get(0).getSourceUrl()).isEqualTo("수정 url1");
+            assertThat(updatedHearit.getSources().get(1).getSourceUrl()).isEqualTo("수정 url2");
+        });
+    }
+
+    @Test
     @DisplayName("히어릿 Original 음원 파일을 수정할 수 있다")
     void updateHearitOriginalFile() {
         // given
