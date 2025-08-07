@@ -44,9 +44,11 @@ public class HearitExploreService {
 
         List<Hearit> exploredHearits = findExploredHearits(memberId, cursorId, size);
         List<ExploredHearitResponse> exploredHearitsDto = exploredHearits.stream()
-                .map(hearit -> toExploredHearitResponse(hearit, memberId, cursorId))
+                .map(hearit -> toExploredHearitResponse(hearit, memberId))
                 .toList();
-        return CursorResponse.from(exploredHearitsDto);
+
+        long updatedCursorId = cursorId + exploredHearits.size();
+        return CursorResponse.from(exploredHearitsDto, updatedCursorId);
     }
 
     private boolean isFirstExploreRequest(Long cursorId) {
@@ -76,15 +78,15 @@ public class HearitExploreService {
         return exploredHearitQueryRepository.findExploredHearits(memberId, cursorId, size);
     }
 
-    private ExploredHearitResponse toExploredHearitResponse(Hearit hearit, Long memberId, Long cursorId) {
+    private ExploredHearitResponse toExploredHearitResponse(Hearit hearit, Long memberId) {
         List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(
                 hearit.getId(), KEYWORDS_PER_HEARIT_FOR_RANDOM);
 
         Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(
                 hearit.getId(), memberId);
         if (bookmarkOptional.isPresent()) {
-            return ExploredHearitResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords, cursorId);
+            return ExploredHearitResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
         }
-        return ExploredHearitResponse.from(hearit, keywords, cursorId);
+        return ExploredHearitResponse.from(hearit, keywords);
     }
 }

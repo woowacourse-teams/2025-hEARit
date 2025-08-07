@@ -11,10 +11,9 @@ public record ExploredHearitResponse(
         String categoryColorCode,
         Boolean isBookmarked,
         Long bookmarkId,
-        List<KeywordResponse> keywords,
-        Long cursorId
+        List<KeywordResponse> keywords
 ) {
-    public static ExploredHearitResponse from(Hearit hearit, List<Keyword> keywords, Long cursorId) {
+    public static ExploredHearitResponse from(Hearit hearit, List<Keyword> keywords) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         return new ExploredHearitResponse(
                 hearit.getId(),
@@ -22,13 +21,11 @@ public record ExploredHearitResponse(
                 hearit.getCategory().getColorCode(),
                 false,
                 null,
-                keywordResponses,
-                cursorId
+                keywordResponses
         );
     }
 
-    public static ExploredHearitResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords,
-                                                          Long cursorId) {
+    public static ExploredHearitResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         return new ExploredHearitResponse(
                 hearit.getId(),
@@ -36,8 +33,7 @@ public record ExploredHearitResponse(
                 hearit.getCategory().getColorCode(),
                 true,
                 bookmark.getId(),
-                keywordResponses,
-                cursorId
+                keywordResponses
         );
     }
 

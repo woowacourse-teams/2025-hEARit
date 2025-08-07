@@ -22,7 +22,8 @@ public class ApiDocSnippets {
     public static FieldDescriptor[] getCustomCursorResponseFields() {
         return new FieldDescriptor[]{
                 fieldWithPath("content").description("페이지의 실제 컨텐츠 목록"),
-                fieldWithPath("isEmpty").type(JsonFieldType.BOOLEAN).description("컨텐츠 존재 여부")
+                fieldWithPath("isEmpty").type(JsonFieldType.BOOLEAN).description("컨텐츠 존재 여부"),
+                fieldWithPath("cursorId").type(JsonFieldType.NUMBER).description("마지막 컨텐츠의 CursorId")
         };
     }
 

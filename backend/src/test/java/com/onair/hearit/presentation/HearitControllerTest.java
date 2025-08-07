@@ -159,7 +159,7 @@ class HearitControllerTest extends IntegrationTest {
                                 .summary("탐색 히어릿 목록 조회")
                                 .description("사용자 별 최대 10개의 히어릿 목록을 조회합니다.")
                                 .queryParameters(
-                                        parameterWithName("cursorId").description("마지막 Cursor ID").defaultValue("0"),
+                                        parameterWithName("cursorId").description("시작 Cursor ID").defaultValue("0"),
                                         parameterWithName("size").description("필요한 히어릿 항목 수").defaultValue("10")
                                 )
                                 .responseSchema(Schema.schema("CursorExploredHearitResponse"))
@@ -177,9 +177,7 @@ class HearitControllerTest extends IntegrationTest {
                                                                 "히어릿에 포함된 키워드 목록"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description(
-                                                                "키워드 이름"),
-                                                        fieldWithPath("content[].cursorId").description(
-                                                                "Cursor ID (마지막 제공 컨텐츠)")
+                                                                "키워드 이름")
                                                 }),
                                                 Arrays.stream(ApiDocSnippets.getCustomCursorResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
@@ -198,6 +196,7 @@ class HearitControllerTest extends IntegrationTest {
         assertAll(() -> {
             assertThat(responses.content()).hasSize(3);
             assertThat(responses.isEmpty()).isFalse();
+            assertThat(responses.cursorId()).isEqualTo(3);
         });
     }
 
