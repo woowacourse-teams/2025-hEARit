@@ -9,4 +9,5 @@ TRUNCATE TABLE admin;
 TRUNCATE TABLE refresh_token;
 TRUNCATE TABLE recommend_hearit;
 TRUNCATE TABLE hearit_source;
+TRUNCATE TABLE explore_score;
 SET FOREIGN_KEY_CHECKS = 1;

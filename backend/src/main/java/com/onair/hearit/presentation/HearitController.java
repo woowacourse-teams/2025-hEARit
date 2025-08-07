@@ -2,14 +2,16 @@ package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
+import com.onair.hearit.application.explore.HearitExploreService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.CursorResponse;
+import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.dto.response.PagedResponse;
-import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,25 +29,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class HearitController {
 
     private final HearitService hearitService;
+    private final HearitExploreService hearitExploreService;
     private final HearitSearchService hearitSearchService;
 
     @GetMapping("/{hearitId}")
     public ResponseEntity<HearitDetailResponse> readHearit(
-        @PathVariable Long hearitId,
-        @AuthenticationPrincipal CurrentMember member) {
+            @PathVariable Long hearitId,
+            @AuthenticationPrincipal CurrentMember member) {
         Long memberId = extractMemberId(member);
         HearitDetailResponse response = hearitService.getHearitDetail(hearitId, memberId);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/random")
-    public ResponseEntity<PagedResponse<RandomHearitResponse>> readRandomHearits(
-        @AuthenticationPrincipal CurrentMember member,
-        @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "10") int size) {
+    @GetMapping("/explore")
+    public ResponseEntity<CursorResponse<ExploredHearitResponse>> readExploredHearits(
+            @AuthenticationPrincipal CurrentMember member,
+            @RequestParam(name = "cursorId", defaultValue = "0") Long cursorId,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
         Long memberId = extractMemberId(member);
-        PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<RandomHearitResponse> responses = hearitService.getRandomHearits(memberId, pagingRequest);
+        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(memberId, cursorId,
+                size);
         return ResponseEntity.ok(responses);
     }
 
@@ -64,9 +67,9 @@ public class HearitController {
 
     @GetMapping("/search")
     public ResponseEntity<PagedResponse<HearitSearchResponse>> readSearchedHearits(
-        @RequestParam(name = "searchTerm") String searchTerm,
-        @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "20") int size) {
+            @RequestParam(name = "searchTerm") String searchTerm,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<HearitSearchResponse> response = hearitSearchService.search(searchTerm, pagingRequest);
         return ResponseEntity.ok(response);
@@ -74,7 +77,7 @@ public class HearitController {
 
     @GetMapping("/recommend-category")
     public ResponseEntity<List<HearitsWithRecommendCategoryResponse>> readHearitsWithRecommendCategory(
-        @AuthenticationPrincipal CurrentMember member) {
+            @AuthenticationPrincipal CurrentMember member) {
         Long memberId = extractMemberId(member);
         List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(memberId);
         return ResponseEntity.ok(responses);
@@ -82,12 +85,12 @@ public class HearitController {
 
     @GetMapping
     public ResponseEntity<PagedResponse<HearitOfCategoryResponse>> readHearitsByCategory(
-        @RequestParam(name = "categoryId") Long categoryId,
-        @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "20") int size) {
+            @RequestParam(name = "categoryId") Long categoryId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<HearitOfCategoryResponse> response = hearitService.getHearitsByCategory(categoryId,
-            pagingRequest);
+                pagingRequest);
         return ResponseEntity.ok(response);
     }
 }

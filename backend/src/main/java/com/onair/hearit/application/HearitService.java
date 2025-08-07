@@ -10,7 +10,6 @@ import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.dto.response.PagedResponse;
-import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.CategoryRepository;
@@ -36,7 +35,6 @@ public class HearitService {
     private static final int RECOMMEND_CATEGORY_COUNT = 3;
     private static final int HEARITS_PER_RECOMMENDED_CATEGORY = 5;
     private static final int KEYWORDS_PER_CATEGORIZED_HEARIT = 3;
-    private static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
 
     private final HearitRepository hearitRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -57,23 +55,6 @@ public class HearitService {
     private Hearit getHearitById(Long hearitId) {
         return hearitRepository.findWithCategoryById(hearitId)
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
-    }
-
-    public PagedResponse<RandomHearitResponse> getRandomHearits(Long memberId, PagingRequest pagingRequest) {
-        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<Hearit> hearits = hearitRepository.findRandom(pageable);
-        Page<RandomHearitResponse> hearitDtos = hearits.map(hearit -> toRandomHearitResponse(hearit, memberId));
-        return PagedResponse.from(hearitDtos);
-    }
-
-    private RandomHearitResponse toRandomHearitResponse(Hearit hearit, Long memberId) {
-        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-                KEYWORDS_PER_HEARIT_FOR_RANDOM);
-        Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(hearit.getId(), memberId);
-        if (bookmarkOptional.isPresent()) {
-            return RandomHearitResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
-        }
-        return RandomHearitResponse.from(hearit, keywords);
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
