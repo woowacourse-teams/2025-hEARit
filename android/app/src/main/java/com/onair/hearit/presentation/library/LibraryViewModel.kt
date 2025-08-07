@@ -5,8 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.analytics.CrashlyticsLogger
-import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
@@ -68,7 +66,7 @@ class LibraryViewModel(
 
     fun deleteBookmark(bookmarkId: Long) {
         viewModelScope.launch {
-            val token = RepositoryProvider.dataStoreRepository.getAccessToken().getOrNull()
+            val token = dataStoreRepository.getAccessToken().getOrNull()
 
             bookmarkRepository
                 .deleteBookmark(token?.toBearerToken(), bookmarkId)
