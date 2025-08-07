@@ -27,7 +27,8 @@ public record ExploredHearitResponse(
         );
     }
 
-    public static ExploredHearitResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords, Long cursorId) {
+    public static ExploredHearitResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords,
+                                                          Long cursorId) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         return new ExploredHearitResponse(
                 hearit.getId(),
