@@ -18,6 +18,7 @@ import com.onair.hearit.databinding.ActivityLoginBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.MainActivity
+import timber.log.Timber
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -60,7 +61,10 @@ class LoginActivity : AppCompatActivity() {
             KakaoLoginHelper(
                 activity = this,
                 onSuccess = { token -> handleKakaoLoginSuccess(token) },
-                onError = { showToast("카카오 로그인에 실패했습니다.") },
+                onError = { throwable ->
+                    showToast(getString(R.string.login_toast_kakao_login_fail))
+                    Timber.w(throwable)
+                },
             )
 
         binding.btnLoginKakao.setOnClickListener {
