@@ -6,7 +6,7 @@ import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.MemberExploreScore;
+import com.onair.hearit.domain.ExploreScore;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
@@ -24,11 +24,11 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({MemberHearitScoreCommandRepository.class, DbHelper.class, TestJpaAuditingConfig.class})
-class MemberHearitScoreQueryRepositoryTest {
+@Import({ExploreScoreCommandRepository.class, DbHelper.class, TestJpaAuditingConfig.class})
+class ExploredHearitQueryRepositoryTest {
 
     @Autowired
-    private MemberHearitScoreQueryRepository memberHearitScoreQueryRepository;
+    private ExploredHearitQueryRepository exploredHearitQueryRepository;
 
     @Autowired
     private DbHelper dbHelper;
@@ -39,7 +39,7 @@ class MemberHearitScoreQueryRepositoryTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         insertTestExploreScoreByMemberIdAndCount(member.getId(), 5);
 
-        List<Hearit> result = memberHearitScoreQueryRepository.findExploredHearits(member.getId(), 2L, 3);
+        List<Hearit> result = exploredHearitQueryRepository.findExploredHearits(member.getId(), 2L, 3);
 
         assertThat(result).hasSize(3);
         assertThat(result).extracting(Hearit::getId).contains(3L, 4L, 5L); //2L 이후 3L부터 size만큼 조회
@@ -51,7 +51,7 @@ class MemberHearitScoreQueryRepositoryTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         insertTestExploreScoreByMemberIdAndCount(null, 5);
 
-        List<Hearit> result = memberHearitScoreQueryRepository.findExploredHearitsForGuest(2L, 3);
+        List<Hearit> result = exploredHearitQueryRepository.findExploredHearitsForGuest(2L, 3);
 
         assertThat(result).hasSize(3);
         assertThat(result).extracting(Hearit::getId).contains(3L, 4L, 5L); //2L 이후 3L부터 size만큼 조회
@@ -64,8 +64,8 @@ class MemberHearitScoreQueryRepositoryTest {
             Hearit hearit = dbHelper.insertHearit(
                     new Hearit("title" + i, "summary", 100, "...", "...", "...", "source", category));
 
-            MemberExploreScore score = dbHelper.insertMemberExploreScore(
-                    new MemberExploreScore(memberId, hearit.getId(), i * 10.0, (long) i)); // cursorId = i
+            ExploreScore score = dbHelper.insertMemberExploreScore(
+                    new ExploreScore(memberId, hearit.getId(), i * 10.0, (long) i)); // cursorId = i
         }
     }
 }
