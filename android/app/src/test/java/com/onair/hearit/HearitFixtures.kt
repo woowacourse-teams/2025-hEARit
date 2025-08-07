@@ -73,12 +73,8 @@ object HearitFixtures {
 
         return RandomHearitResponse(
             content = fakeContents,
-            page = 1,
-            size = fakeContents.size,
-            totalPages = 10,
-            totalElements = 20,
-            isFirst = true,
-            isLast = false,
+            isEmpty = false,
+            cursorId = 0L,
         )
     }
 
