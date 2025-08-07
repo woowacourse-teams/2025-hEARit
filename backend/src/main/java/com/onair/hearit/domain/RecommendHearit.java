@@ -23,6 +23,7 @@ public class RecommendHearit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //TODO 히어릿으로 변경해야함
     @JoinColumn(name = "hearit_id", nullable = false)
     private Long hearitId;
 

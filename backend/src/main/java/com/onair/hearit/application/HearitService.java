@@ -80,7 +80,6 @@ public class HearitService {
     }
 
     public List<GroupedHearitsWithCategoryResponse> getGroupedHearitsByCategory() {
-        //TODO 사용자에 맞는 카테고리 추천
         List<Category> categories = categoryRepository.findOldest(GROUPED_CATEGORY_COUNT);
         return categories.stream()
                 .map(this::toGroupedHearitsResponseByCategory)

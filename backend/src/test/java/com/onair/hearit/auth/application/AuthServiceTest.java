@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
@@ -115,6 +115,48 @@ class AuthServiceTest {
         });
     }
 
+    @Test
+    @DisplayName("아이디가 존재하지 않을 경우 인증예외가 발생한다")
+    void login_fail_member_not_found() {
+        // given
+        LoginRequest request = new LoginRequest("nonexistent", "password");
+
+        // when & then
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("비밀번호가 틀릴 경우 인증예외가 발생한다")
+    void login_fail_wrong_password() {
+        // given
+        dbHelper.insertMember(Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
+
+        LoginRequest loginRequest = new LoginRequest("localId", "wrongpassword");
+
+        // when & then
+        assertThatThrownBy(() -> authService.login(loginRequest))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("로그아웃 시 해당 member의 리프레시토큰을 삭제한다.")
+    void logout_then_deleteRefreshToken() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
+        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
+
+        // when
+        authService.logout(member.getId());
+
+        // then
+        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+    }
+
     @Nested
     @DisplayName("토큰 재발급")
     class Reissue {
@@ -183,47 +225,5 @@ class AuthServiceTest {
                     .isInstanceOf(UnauthorizedException.class)
                     .hasMessage("리프레시 토큰이 불일치합니다.");
         }
-    }
-
-    @Test
-    @DisplayName("아이디가 존재하지 않을 경우 인증예외가 발생한다")
-    void login_fail_member_not_found() {
-        // given
-        LoginRequest request = new LoginRequest("nonexistent", "password");
-
-        // when & then
-        assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
-    }
-
-    @Test
-    @DisplayName("비밀번호가 틀릴 경우 인증예외가 발생한다")
-    void login_fail_wrong_password() {
-        // given
-        dbHelper.insertMember(Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
-
-        LoginRequest loginRequest = new LoginRequest("localId", "wrongpassword");
-
-        // when & then
-        assertThatThrownBy(() -> authService.login(loginRequest))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
-    }
-
-    @Test
-    @DisplayName("로그아웃 시 해당 member의 리프레시토큰을 삭제한다.")
-    void logout_then_deleteRefreshToken() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
-        refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
-        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
-
-        // when
-        authService.logout(member.getId());
-
-        // then
-        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
     }
 }

@@ -45,4 +45,14 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
 
     @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id IN :hearitIds")
     List<Hearit> findAllByIdInWithCategory(@Param("hearitIds") List<Long> hearitIds);
+
+    @Query("""
+            SELECT h
+            FROM Hearit h
+            JOIN FETCH h.category
+            ORDER BY h.createdAt DESC
+            """)
+    Page<Hearit> findAll(Pageable pageable);
+
+    List<Hearit> findAllByIdIn(List<Long> hearitIds);
 }
