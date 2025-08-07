@@ -12,7 +12,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface HearitService {
-    @GET("hearits/grouped-by-category")
+    @GET("hearits/recommend-category")
     suspend fun getCategoryHearits(): Response<List<GroupedCategoryHearitResponse>>
 
     @GET("hearits/random")
