@@ -28,5 +28,5 @@ interface HearitRepository {
         size: Int? = null,
     ): Result<PageResult<SearchedHearit>>
 
-    suspend fun getCategoryHearits(): Result<List<GroupedCategory>>
+    suspend fun getCategoryHearits(token: String?): Result<List<GroupedCategory>>
 }

@@ -17,6 +17,7 @@ import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.concurrent.futures.await
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -43,12 +44,16 @@ import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import kotlin.math.abs
 
-class PlayerDetailActivity : AppCompatActivity() {
+class PlayerDetailActivity :
+    AppCompatActivity(),
+    PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
+    private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
+    private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
     private var mediaController: MediaController? = null
 
@@ -82,8 +87,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         bindLayout()
         setupBackPressHandler()
         setupWindowInsets()
-        setupScriptRecyclerView()
-        setupKeywordRecyclerView()
+        setupRecyclerView()
         observeViewModel()
         setupMediaController()
         setupBaseControllerBookmark()
@@ -213,17 +217,28 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupScriptRecyclerView() {
+    private fun setupRecyclerView() {
         binding.rvScript.adapter = scriptAdapter
         setupGestureListener()
+        val layoutManager =
+            FlexboxLayoutManager(this).apply {
+                flexDirection = FlexDirection.ROW
+                flexWrap = FlexWrap.WRAP
+                justifyContent = JustifyContent.FLEX_START
+            }
+
+        binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
+        binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
+        binding.layoutDetailSource.rvDetailSource.adapter = sourceAdapter
     }
 
     @OptIn(UnstableApi::class)
     private fun observeViewModel() {
         viewModel.hearit.observe(this) { hearit ->
             binding.hearit = hearit
-            scriptAdapter.submitList(hearit.script)
             keywordAdapter.submitList(hearit.keywords)
+            scriptAdapter.submitList(hearit.script)
+            sourceAdapter.submitList(hearit.sources)
             handlePlayback(hearit)
         }
 
@@ -264,18 +279,6 @@ class PlayerDetailActivity : AppCompatActivity() {
             }
 
         handler.post(updateRunnable)
-    }
-
-    private fun setupKeywordRecyclerView() {
-        val layoutManager =
-            FlexboxLayoutManager(this).apply {
-                flexDirection = FlexDirection.ROW
-                flexWrap = FlexWrap.WRAP
-                justifyContent = JustifyContent.FLEX_START
-            }
-
-        binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
-        binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
     }
 
     @OptIn(UnstableApi::class)
@@ -334,6 +337,27 @@ class PlayerDetailActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun showToast(message: String?) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onClickSource(sourceUrl: String) {
+        try {
+            val uri = sourceUrl.toUri()
+            if (uri.scheme !in listOf("http", "https")) {
+                Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
+                showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
+                return
+            }
+
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Timber.w(e)
+            showToast(ERROR_INVALID_LINK_MESSAGE)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
@@ -347,6 +371,8 @@ class PlayerDetailActivity : AppCompatActivity() {
         const val HEARIT_ID = "hearit_id"
         const val BOOKMARK_ID = "bookmark_id"
         const val LAST_POSITION = "last_position"
+        private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
+        private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
 
         fun newIntent(
             context: Context,

@@ -160,10 +160,10 @@ class HearitRepositoryImplTest {
             val mockDtoList = listOf(createGroupedCategory())
             val expectedDomainList = mockDtoList.map { it.toDomain() }
 
-            coEvery { mockHearitRemoteDataSource.getCategoryHearits() } returns
+            coEvery { mockHearitRemoteDataSource.getCategoryHearits(null) } returns
                 Result.success(NetworkResult.Success(mockDtoList))
 
-            val result = hearitRepository.getCategoryHearits()
+            val result = hearitRepository.getCategoryHearits(null)
 
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrNull()).isEqualTo(expectedDomainList)
@@ -174,10 +174,10 @@ class HearitRepositoryImplTest {
         runTest {
             val expectedException = RuntimeException("카테고리 오류")
 
-            coEvery { mockHearitRemoteDataSource.getCategoryHearits() } returns
+            coEvery { mockHearitRemoteDataSource.getCategoryHearits(null) } returns
                 Result.failure(expectedException)
 
-            val result = hearitRepository.getCategoryHearits()
+            val result = hearitRepository.getCategoryHearits(null)
 
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isEqualTo(expectedException)

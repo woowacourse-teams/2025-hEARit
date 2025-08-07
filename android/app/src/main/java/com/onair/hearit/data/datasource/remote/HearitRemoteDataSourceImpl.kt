@@ -62,9 +62,9 @@ class HearitRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getCategoryHearits(): Result<NetworkResult<List<GroupedCategoryHearitResponse>>> =
+    override suspend fun getCategoryHearits(token: String?): Result<NetworkResult<List<GroupedCategoryHearitResponse>>> =
         handleApiCall(
-            apiCall = { hearitService.getCategoryHearits() },
+            apiCall = { hearitService.getCategoryHearits(token) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },

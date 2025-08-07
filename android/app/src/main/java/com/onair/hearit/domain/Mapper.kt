@@ -31,7 +31,7 @@ fun SingleHearit.toHearit(
         id = this.id,
         title = this.title,
         summary = this.summary,
-        source = this.source,
+        sources = this.sources,
         audioUrl = audioUrl,
         script = script,
         playTime = this.playTime,

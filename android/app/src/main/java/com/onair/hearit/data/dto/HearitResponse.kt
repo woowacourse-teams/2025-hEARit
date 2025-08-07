@@ -11,8 +11,8 @@ data class HearitResponse(
     val title: String,
     @SerialName("summary")
     val summary: String,
-    @SerialName("source")
-    val source: String,
+    @SerialName("sources")
+    val sources: List<SourceResponse>,
     @SerialName("playTime")
     val playTime: Int,
     @SerialName("createdAt")
