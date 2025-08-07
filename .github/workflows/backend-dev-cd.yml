@@ -1,0 +1,79 @@
+name: Backend CD to EC2 for dev
+
+on:
+  push:
+    branches: [ "develop-be" ]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Upload Artifact
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        ports:
+          - 13307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      TEST_MYSQL_PORT: ${{ secrets.TEST_MYSQL_PORT }}
+      DB_MYSQL_HOST: ${{ secrets.DB_MYSQL_HOST }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build with Gradle
+        working-directory: backend
+        run: ./gradlew clean build
+
+      - name: Rename jar to app.jar
+        working-directory: backend/build/libs
+        run: |
+          JAR_NAME=$(ls *.jar | head -n 1)
+          mv "$JAR_NAME" app.jar
+
+      - name: Upload jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/build/libs/app.jar
+
+  deploy:
+    name: Deploy on EC2 for dev
+    needs: build
+    runs-on: [ self-hosted, backend-dev, Linux, ARM64 ]
+
+    steps:
+      - name: Download jar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jar
+          path: ~/hearit
+
+      - name: Make deploy script executable
+        run: chmod +x ~/hearit/deploy.sh
+
+      - name: Run deploy script with sudo
+        run: sudo bash ~/hearit/deploy.sh

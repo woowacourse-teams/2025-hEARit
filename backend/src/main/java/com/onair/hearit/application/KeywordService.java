@@ -5,10 +5,7 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.KeywordResponse;
 import com.onair.hearit.infrastructure.KeywordRepository;
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,22 +24,6 @@ public class KeywordService {
         return keywords.stream()
                 .map(KeywordResponse::from)
                 .toList();
-    }
-
-    public List<KeywordResponse> getRecommendedKeywords(int size) {
-        long seed = LocalDate.now().toEpochDay();
-        List<Long> allIds = keywordRepository.findAllIds();
-        List<Long> selectedIds = pickRandomIds(allIds, seed, size);
-        List<Keyword> keywords = keywordRepository.findAllByIdIn(selectedIds);
-        return keywords.stream()
-                .map(KeywordResponse::from)
-                .toList();
-    }
-
-    private List<Long> pickRandomIds(List<Long> allIds, long seed, int size) {
-        int fetchSize = Math.min(size, allIds.size());
-        Collections.shuffle(allIds, new Random(seed));
-        return allIds.subList(0, fetchSize);
     }
 
     public KeywordResponse getKeyword(final Long id) {

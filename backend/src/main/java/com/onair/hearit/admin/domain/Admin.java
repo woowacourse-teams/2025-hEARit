@@ -1,6 +1,7 @@
 package com.onair.hearit.admin.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,15 +24,15 @@ public class Admin {
     @Column(name = "login_id", nullable = false, unique = true)
     private String loginId;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+    @Embedded
+    private Password password;
 
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
-    public Admin(String loginId, String password, String nickname) {
+    public Admin(String loginId, String rawPassword, String nickname) {
         this.loginId = loginId;
-        this.password = password;
+        this.password = new Password(rawPassword);
         this.nickname = nickname;
     }
 }

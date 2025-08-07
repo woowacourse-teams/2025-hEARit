@@ -1,11 +1,14 @@
 package com.onair.hearit.fixture;
 
+import com.onair.hearit.admin.domain.Admin;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
+import com.onair.hearit.domain.ExploreScore;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.domain.RecommendHearit;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Component;
@@ -22,6 +25,12 @@ public class DbHelper {
         em.persist(member);
         em.flush();
         return member;
+    }
+
+    public Admin insertAdmin(Admin admin) {
+        em.persist(admin);
+        em.flush();
+        return admin;
     }
 
     public Hearit insertHearit(Hearit hearit) {
@@ -52,5 +61,17 @@ public class DbHelper {
         em.persist(hearitKeyword);
         em.flush();
         return hearitKeyword;
+    }
+
+    public RecommendHearit insertRecommendHearit(RecommendHearit recommendHearit) {
+        em.persist(recommendHearit);
+        em.flush();
+        return recommendHearit;
+    }
+
+    public ExploreScore insertMemberExploreScore(ExploreScore exploreScore) {
+        em.persist(exploreScore);
+        em.flush();
+        return exploreScore;
     }
 }
