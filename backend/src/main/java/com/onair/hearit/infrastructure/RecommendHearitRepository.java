@@ -10,16 +10,22 @@ import org.springframework.data.repository.query.Param;
 
 public interface RecommendHearitRepository extends JpaRepository<RecommendHearit, Long> {
 
-    @Query("SELECT rh FROM RecommendHearit rh WHERE rh.recommendDate <= :recommendDate ORDER BY rh.recommendDate DESC LIMIT :size")
+    @Query("""
+        SELECT rh
+        FROM RecommendHearit rh
+        WHERE rh.recommendDate <= :recommendDate
+        ORDER BY rh.recommendDate DESC
+        LIMIT :size
+    """)
     List<RecommendHearit> findByRecentRecommendDateLimitN(@Param("recommendDate") LocalDate recommendDate,
                                                           @Param("size") int size);
 
     @Query("""
-            SELECT rh FROM RecommendHearit rh
-            WHERE rh.hearitId = :hearitId
-            ORDER BY rh.recommendDate DESC
-            LIMIT 1
-            """)
+        SELECT rh FROM RecommendHearit rh
+        WHERE rh.hearitId = :hearitId
+        ORDER BY rh.recommendDate DESC
+        LIMIT 1
+    """)
     Optional<RecommendHearit> findRecentByHearitId(Long hearitId);
 
     List<RecommendHearit> findByRecommendDateIsBetween(LocalDate recommendDateAfter, LocalDate recommendDateBefore);
