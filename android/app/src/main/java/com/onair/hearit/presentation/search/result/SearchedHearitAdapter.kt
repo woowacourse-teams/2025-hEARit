@@ -4,14 +4,15 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.SearchedHearit
+import com.onair.hearit.presentation.home.HearitClickListener
 
 class SearchedHearitAdapter(
-    private val searchResultClickListener: SearchResultClickListener,
+    private val clickListener: HearitClickListener,
 ) : ListAdapter<SearchedHearit, SearchedHearitViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): SearchedHearitViewHolder = SearchedHearitViewHolder.create(parent, searchResultClickListener)
+    ): SearchedHearitViewHolder = SearchedHearitViewHolder.create(parent, clickListener)
 
     override fun onBindViewHolder(
         holder: SearchedHearitViewHolder,

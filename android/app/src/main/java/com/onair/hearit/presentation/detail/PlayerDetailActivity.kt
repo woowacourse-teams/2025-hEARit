@@ -39,8 +39,6 @@ import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.Hearit
-import com.onair.hearit.presentation.PlayerViewModel
-import com.onair.hearit.presentation.PlayerViewModelFactory
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
@@ -67,12 +65,6 @@ class PlayerDetailActivity : AppCompatActivity() {
 
     private val viewModel: PlayerDetailViewModel by viewModels {
         PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
-    }
-
-    private val playerViewModel: PlayerViewModel by viewModels {
-        PlayerViewModelFactory(
-            CrashlyticsProvider.get(),
-        )
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -226,9 +218,22 @@ class PlayerDetailActivity : AppCompatActivity() {
         setupGestureListener()
     }
 
+    @OptIn(UnstableApi::class)
     private fun observeViewModel() {
-        observeHearit()
-        observeToast()
+        viewModel.hearit.observe(this) { hearit ->
+            binding.hearit = hearit
+            scriptAdapter.submitList(hearit.script)
+            keywordAdapter.submitList(hearit.keywords)
+            handlePlayback(hearit)
+        }
+
+        viewModel.bookmarkId.observe(this) { bookmarkId ->
+            binding.baseController.setBookmarkSelected(bookmarkId != null)
+        }
+
+        viewModel.toastMessage.observe(this) { msgResId ->
+            Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun startScriptSync(controller: Player) {
@@ -269,20 +274,8 @@ class PlayerDetailActivity : AppCompatActivity() {
         binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
     }
 
-    private fun observeHearit() {
-        viewModel.hearit.observe(this) { hearit ->
-            binding.hearit = hearit
-            scriptAdapter.submitList(hearit.script)
-            keywordAdapter.submitList(hearit.keywords)
-            handlePlayback(hearit)
-        }
-    }
-
     @OptIn(UnstableApi::class)
     private fun setupBaseControllerBookmark() {
-        viewModel.bookmarkId.observe(this) { bookmarkId ->
-            binding.baseController.setBookmarkSelected(bookmarkId != null)
-        }
         binding.baseController.setOnBookmarkClickListener {
             viewModel.toggleBookmark()
         }
@@ -302,12 +295,6 @@ class PlayerDetailActivity : AppCompatActivity() {
             if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
                 controller.seekTo(startPosition)
             }
-        }
-    }
-
-    private fun observeToast() {
-        viewModel.toastMessage.observe(this) { msgResId ->
-            Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
         }
     }
 
