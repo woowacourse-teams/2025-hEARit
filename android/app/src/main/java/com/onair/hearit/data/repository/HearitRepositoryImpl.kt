@@ -39,6 +39,6 @@ class HearitRepositoryImpl(
             .getSearchHearits(searchTerm, page, size)
             .mapOrThrowDomain { it.toDomain() }
 
-    override suspend fun getCategoryHearits(): Result<List<GroupedCategory>> =
-        hearitRemoteDataSource.getCategoryHearits().mapListOrThrowDomain { it.toDomain() }
+    override suspend fun getCategoryHearits(token: String?): Result<List<GroupedCategory>> =
+        hearitRemoteDataSource.getCategoryHearits(token).mapListOrThrowDomain { it.toDomain() }
 }

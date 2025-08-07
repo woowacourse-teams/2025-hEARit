@@ -55,8 +55,10 @@ class HomeViewModel(
         }
 
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
             hearitRepository
-                .getCategoryHearits()
+                .getCategoryHearits(token?.toBearerToken())
                 .onSuccess { groupedCategory ->
                     _groupedCategory.value = groupedCategory
                 }.onFailure { throwable ->

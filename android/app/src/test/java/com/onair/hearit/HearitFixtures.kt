@@ -7,6 +7,7 @@ import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.data.dto.SourceResponse
 
 object HearitFixtures {
     fun createFakeHearit(hearitId: Long): HearitResponse =
@@ -14,7 +15,11 @@ object HearitFixtures {
             id = hearitId,
             title = "테스트용 히어릿",
             summary = "요약",
-            source = "출처",
+            sources =
+                listOf(
+                    SourceResponse(sourceName = "출처1", sourceUrl = "출처링크1"),
+                    SourceResponse(sourceName = "출처2", sourceUrl = "출처링크2"),
+                ),
             playTime = 120,
             createdAt = "2025-08-05T12:00:00Z",
             isBookmarked = true,
