@@ -1,0 +1,33 @@
+<nav class="navbar navbar-expand-lg purple"
+     style="background-color: #B677F3"
+     th:fragment="navbar">
+    <div class="container-fluid">
+        <a class="navbar-brand me-3" href="/admin">hEARit Admin</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/hearits}">Hearits</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/hearits-create}">Hearits 추가</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/categories}">Categories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/keywords}">Keywords</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/recommend-hearit}">오늘의 추천 히어릿</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <form class="d-inline" method="post" th:action="@{/admin/logout}">
+                        <button class="btn btn-outline-light btn-sm" type="submit">로그아웃</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

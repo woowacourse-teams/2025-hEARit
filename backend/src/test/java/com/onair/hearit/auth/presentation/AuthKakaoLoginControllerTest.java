@@ -1,17 +1,25 @@
 package com.onair.hearit.auth.presentation;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import com.epages.restdocs.apispec.Schema;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
-import com.onair.hearit.auth.dto.response.TokenResponse;
+import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.fixture.IntegrationTest;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -57,18 +65,35 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
                                 """)));
 
         KakaoLoginRequest kakaoLoginRequest = new KakaoLoginRequest("accessToken-test-example");
-        TokenResponse tokenResponse = given().log().all()
+        LoginTokenResponse loginTokenResponse = RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(kakaoLoginRequest)
+                .filter(document("auth-kakao-login",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("카카오 로그인")
+                                .description("카카오 액세스토큰으로 로그인하여 서비스 토큰을 발급받습니다.")
+                                .requestSchema(Schema.schema("KakaoLoginRequest"))
+                                .requestFields(
+                                        fieldWithPath("accessToken").description("카카오에서 발급받은 Access Token")
+                                )
+                                .responseSchema(Schema.schema("TokenResponse"))
+                                .responseFields(
+                                        fieldWithPath("accessToken").description("발급된 서비스 액세스 토큰"),
+                                        fieldWithPath("refreshToken").description("발급된 리프레시 토큰")
+                                )
+                                .build())
+                ))
                 .when()
                 .post("/api/v1/auth/kakao-login")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .extract().as(TokenResponse.class);
+                .extract().as(LoginTokenResponse.class);
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(tokenResponse).isNotNull();
-            softly.assertThat(tokenResponse.accessToken()).isNotNull();
+        assertAll(() -> {
+            assertThat(loginTokenResponse).isNotNull();
+            assertThat(loginTokenResponse.accessToken()).isNotNull();
+            assertThat(loginTokenResponse.refreshToken()).isNotNull();
         });
     }
 
@@ -88,18 +113,30 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
                                 """)));
 
         KakaoLoginRequest kakaoLoginRequest = new KakaoLoginRequest("accessToken-test-example");
-        ProblemDetail problemDetail = given().log().all()
+        ProblemDetail problemDetail = given(this.spec)
                 .contentType(ContentType.JSON)
                 .body(kakaoLoginRequest)
+                .filter(document("auth-kakao-login",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("카카오 로그인")
+                                .requestSchema(Schema.schema("KakaoLoginRequest"))
+                                .requestFields(
+                                        fieldWithPath("accessToken").description("카카오에서 발급받은 Access Token")
+                                )
+                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ))
                 .when()
                 .post("/api/v1/auth/kakao-login")
-                .then().log().all()
+                .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value())
                 .extract().as(ProblemDetail.class);
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(problemDetail).isNotNull();
-            softly.assertThat(problemDetail.getDetail()).isEqualTo("this access token is already expired");
+        assertAll(() -> {
+            assertThat(problemDetail).isNotNull();
+            assertThat(problemDetail.getDetail()).isEqualTo("this access token is already expired");
         });
     }
 
