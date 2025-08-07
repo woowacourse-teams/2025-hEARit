@@ -78,7 +78,7 @@
         sourceRow.className = 'input-group mb-2';
         sourceRow.innerHTML = `
             <input type="text" name="sources[${sourceIndex}].sourceName" class="form-control" placeholder="출처 이름 (예: 테코톡)" required>
-            <input type="text" name="sources[${sourceIndex}].sourceUrl" class="form-control" placeholder="URL (예: https://...)" required>
+            <input type="text" name="sources[${sourceIndex}].sourceUrl" class="form-control" placeholder="URL (예: https://...)" >
             <button type="button" class="btn btn-outline-danger remove-source-btn">삭제</button>
         `;
         sourcesContainer.appendChild(sourceRow);
@@ -160,15 +160,15 @@
             const form = e.target;
             const formData = new FormData(form);
 
-            const entriesToDelete = [];
+            const keysToDelete = [];
             for (const [key, value] of formData.entries()) {
-                if (key.endsWith('.sourceUrl') && value.trim() === '') {
-                    entriesToDelete.push(key);
+                if (key.endsWith('].sourceUrl') && typeof value === 'string' && value.trim() === '') {
+                    keysToDelete.push(key);
                 }
             }
-            entriesToDelete.forEach(k => formData.delete(k));
+            keysToDelete.forEach(key => formData.delete(key));
 
-            
+
             formData.set("shortAudio", document.getElementById("shortAudio").files[0]);
             formData.set("scriptFile", document.getElementById("scriptFile").files[0]);
 

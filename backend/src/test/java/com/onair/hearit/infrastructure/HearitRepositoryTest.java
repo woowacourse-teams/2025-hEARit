@@ -143,6 +143,28 @@ class HearitRepositoryTest {
         );
     }
 
+    @Test
+    @DisplayName("히어릿 아이디들로 히어릿 리스트를 카테고리와 함께 조회한다.")
+    void findAllByIdInWithCategoryTest() {
+        // given
+        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        List<Long> hearitIds = List.of(hearit1.getId(), hearit2.getId(), hearit3.getId());
+
+        // when
+        List<Hearit> hearits = hearitRepository.findAllByIdInWithCategory(hearitIds);
+
+        // then
+        assertAll(() -> {
+            assertThat(hearits).hasSize(3);
+            assertThat(hearits.get(0).getId()).isEqualTo(hearit1.getId());
+            assertThat(hearits.get(1).getId()).isEqualTo(hearit2.getId());
+            assertThat(hearits.get(2).getId()).isEqualTo(hearit3.getId());
+        });
+    }
+
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = new Hearit(
