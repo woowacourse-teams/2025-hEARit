@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,8 +16,10 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.concurrent.futures.await
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -36,6 +39,7 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
+import com.onair.hearit.databinding.DialogLoginRequiredBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.Hearit
@@ -234,6 +238,10 @@ class PlayerDetailActivity : AppCompatActivity() {
         viewModel.toastMessage.observe(this) { msgResId ->
             Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
         }
+
+        viewModel.showLoginDialog.observe(this) {
+            showLoginRequiredDialog()
+        }
     }
 
     private fun startScriptSync(controller: Player) {
@@ -296,6 +304,28 @@ class PlayerDetailActivity : AppCompatActivity() {
                 controller.seekTo(startPosition)
             }
         }
+    }
+
+    private fun showLoginRequiredDialog() {
+        val binding = DialogLoginRequiredBinding.inflate(layoutInflater)
+
+        val dialog =
+            AlertDialog
+                .Builder(this)
+                .setView(binding.root)
+                .create()
+
+        binding.tvDialogCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        binding.tvDialogLoginPositive.setOnClickListener {
+            dialog.dismiss()
+//        navigateToLogin()
+        }
+
+        dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+        dialog.show()
     }
 
     private fun startPlaybackService(

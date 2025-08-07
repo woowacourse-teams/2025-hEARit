@@ -33,6 +33,9 @@ class PlayerDetailViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    private val _showLoginDialog = SingleLiveData<Unit>()
+    val showLoginDialog: LiveData<Unit> = _showLoginDialog
+
     init {
         fetchData()
     }
@@ -54,11 +57,8 @@ class PlayerDetailViewModel(
                 .deleteBookmark(token?.toBearerToken(), id)
                 .onSuccess {
                     _bookmarkId.value = null
-                }.onFailure { throwable ->
-                    when (throwable) {
-                        is UserNotRegisteredException -> {}
-                        else -> _toastMessage.value = R.string.all_toast_delete_bookmark_fail
-                    }
+                }.onFailure {
+                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
                 }
         }
     }
@@ -86,7 +86,7 @@ class PlayerDetailViewModel(
                     _bookmarkId.value = bookmarkId
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegisteredException -> {}
+                        is UserNotRegisteredException -> _showLoginDialog.call()
                         else -> _toastMessage.value = R.string.all_toast_add_bookmark_fail
                     }
                 }
