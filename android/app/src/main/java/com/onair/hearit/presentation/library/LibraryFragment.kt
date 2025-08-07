@@ -13,7 +13,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 
@@ -55,6 +57,14 @@ class LibraryFragment :
         observeViewModel()
     }
 
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsScreenInfo.Library.NAME,
+            screenClass = AnalyticsScreenInfo.Library.CLASS,
+        )
+    }
+
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -91,9 +101,9 @@ class LibraryFragment :
         }
     }
 
-    override fun onClickOption() {
-        val sheet = BookmarkOptionBottomSheet()
-        sheet.show(parentFragmentManager, sheet.tag)
+    override fun onClickOption(bookmarkId: Long) {
+        val sheet = BookmarkOptionBottomSheet.newInstance(bookmarkId)
+        sheet.show(childFragmentManager, sheet.tag)
     }
 
     override fun onClickBookmarkedHearit(hearitId: Long) {

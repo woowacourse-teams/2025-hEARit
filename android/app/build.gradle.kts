@@ -7,6 +7,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.gms.google-services")
     id("org.jlleitschuh.gradle.ktlint")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -17,18 +18,33 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1004
-        versionName = "1.0.04"
+        versionCode = 1007
+        versionName = "1.0.07"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+
+            manifestPlaceholders["enableCrashReporting"] = "true"
+        }
+
+        debug {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
+            resValue("string", "app_name", "hEARit (Dev)")
+
+            manifestPlaceholders["enableCrashReporting"] = "false"
         }
     }
     compileOptions {
@@ -79,6 +95,11 @@ dependencies {
     // LiveData
     implementation(libs.androidx.lifecycle.livedata.ktx)
 
+    // test
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.assertj.core)
+
     // android test
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.rules)
@@ -96,6 +117,7 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.common)
     implementation(libs.androidx.media3.session)
+    implementation(libs.androidx.concurrent.futures.ktx)
 
     // lottie
     implementation(libs.lottie)
@@ -106,6 +128,7 @@ dependencies {
     // firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics.ndk)
 
     // kakao SDK
     implementation(libs.v2.user)
@@ -119,4 +142,7 @@ dependencies {
 
     // coil
     implementation(libs.coil)
+
+    // timber
+    implementation(libs.timber)
 }

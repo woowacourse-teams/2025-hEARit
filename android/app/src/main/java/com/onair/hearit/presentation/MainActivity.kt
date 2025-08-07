@@ -1,51 +1,80 @@
 package com.onair.hearit.presentation
 
+import android.content.ComponentName
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.OptIn
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
+import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
+import com.onair.hearit.presentation.splash.SplashActivity
+import com.onair.hearit.presentation.splash.SplashViewModel
+import com.onair.hearit.presentation.splash.SplashViewModelFactory
+import com.onair.hearit.service.PlaybackService
+import com.onair.hearit.service.PlaybackSessionCallback
 
+@OptIn(UnstableApi::class)
 class MainActivity :
     AppCompatActivity(),
     DrawerClickListener,
-    PlayerControllerView {
+    PlayerControllerView,
+    PlaybackStarter {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var player: ExoPlayer
-    private var backPressedTime: Long = 0L
     private val backPressInterval = 1000L
+    private var backPressedTime: Long = 0L
+    private var loadingDialog: AlertDialog? = null
+    private var mediaController: MediaController? = null
+    private var currentSelectedItemId: Int = R.id.nav_home
+    private var hasSentPreload = false
+
+    private val mainViewModel: MainViewModel by viewModels { MainViewModelFactory() }
+    private val splashViewModel: SplashViewModel by viewModels { SplashViewModelFactory() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding.layoutDrawer.viewModel = mainViewModel
+        binding.lifecycleOwner = this
+
         setupBackPressHandler()
         setupWindowInsets()
-        setupPlayer()
         setupNavigation()
         setupDrawer()
+        observeViewModel()
+        showFragment(HomeFragment())
+        setupBottomControllerClick()
+    }
 
-        if (savedInstanceState == null) {
-            showFragment(HomeFragment())
-            hidePlayerControlView()
-        }
+    override fun onResume() {
+        super.onResume()
+        attachController()
+        setPlayerControlViewVisibility()
     }
 
     private fun setupBackPressHandler() {
@@ -58,12 +87,7 @@ class MainActivity :
                         finish()
                     } else {
                         backPressedTime = currentTime
-                        Toast
-                            .makeText(
-                                this@MainActivity,
-                                "뒤로가기 버튼을 한 번 더 누르면 종료됩니다.",
-                                Toast.LENGTH_SHORT,
-                            ).show()
+                        showToast(getString(R.string.main_toast_finish_back_pressed))
                     }
                 }
             },
@@ -83,29 +107,20 @@ class MainActivity :
         binding.layoutBottomNavigation.selectedItemId = itemId
     }
 
-    @OptIn(UnstableApi::class)
-    private fun setupPlayer() {
-        player =
-            ExoPlayer.Builder(this).build().apply {
-//                val uri = "android.resource://$packageName/${R.raw.test_audio2}".toUri()
-//                setMediaItem(MediaItem.fromUri(uri))
-                prepare()
-                playWhenReady = false
-            }
-        binding.layoutBottomPlayerController.player = player
-    }
-
     private fun setupNavigation() {
         binding.layoutBottomNavigation.itemIconTintList = null
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
+            if (item.itemId == currentSelectedItemId) return@setOnItemSelectedListener true
+            currentSelectedItemId = item.itemId
             when (item.itemId) {
                 R.id.nav_home -> {
+                    setPlayerControlViewVisibility()
                     showFragment(HomeFragment())
                     true
                 }
 
                 R.id.nav_search -> {
-                    showPlayerControlView()
+                    setPlayerControlViewVisibility()
                     showFragment(SearchFragment())
                     true
                 }
@@ -117,7 +132,7 @@ class MainActivity :
                 }
 
                 R.id.nav_library -> {
-                    showPlayerControlView()
+                    setPlayerControlViewVisibility()
                     showFragment(LibraryFragment())
                     true
                 }
@@ -132,14 +147,62 @@ class MainActivity :
             showFragment(SettingFragment(), addToBackStack = true)
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
+        binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
+        binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
+        binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
+        binding.layoutDrawer.tvDrawerLogout.setOnClickListener { mainViewModel.performLogout() }
+        binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
+    }
 
-        binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener {
-            openUrl(PRIVACY_POLICY_URL)
+    private fun setupBottomControllerClick() {
+        binding.layoutBottomPlayerController.setOnClickListener {
+            val mediaId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
+            if (mediaId != null) {
+                navigateToDetail(mediaId)
+            } else {
+                mainViewModel.recentHearit.value
+                    ?.id
+                    ?.let { navigateToDetail(it) }
+            }
+        }
+    }
+
+    private fun observeViewModel() {
+        mainViewModel.recentHearit.observe(this) {
+            setPlayerControlViewVisibility()
+            maybePreloadRecent()
         }
 
-        binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener {
-            openUrl(TERMS_OF_USE_URL)
+        mainViewModel.isLoggingOut.observe(this) { isLoading ->
+            if (isLoading) {
+                showLoadingDialog()
+            } else {
+                hideLoadingDialog()
+                navigateToLogin()
+            }
         }
+
+        mainViewModel.withdrawState.observe(this) { state ->
+            if (state) {
+                navigateToLogin()
+            } else {
+                showToast(getString(R.string.withdraw_fail))
+            }
+        }
+
+        mainViewModel.toastMessage.observe(this) { resId ->
+            showToast(getString(resId))
+        }
+    }
+
+    private fun confirmAndWithdraw() {
+        AlertDialog
+            .Builder(this)
+            .setTitle(R.string.dialog_withdraw_title)
+            .setMessage(R.string.dialog_withdraw_message)
+            .setPositiveButton(R.string.dialog_withdraw) { _, _ -> mainViewModel.withdraw() }
+            .setNegativeButton(R.string.all_cancel, null)
+            .show()
     }
 
     private fun openUrl(url: String) {
@@ -158,21 +221,99 @@ class MainActivity :
             }.commit()
     }
 
+    private fun showLoadingDialog() {
+        if (loadingDialog?.isShowing == true) return
+
+        val dialogView = layoutInflater.inflate(R.layout.dialog_logout, null)
+        loadingDialog =
+            AlertDialog
+                .Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+        loadingDialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+        loadingDialog?.show()
+    }
+
+    private fun hideLoadingDialog() {
+        loadingDialog?.dismiss()
+        loadingDialog = null
+    }
+
     override fun openDrawer() {
         binding.drawerLayout.openDrawer(GravityCompat.END)
     }
 
-    @OptIn(UnstableApi::class)
-    override fun hidePlayerControlView() {
-        binding.layoutBottomPlayerController.post {
-            binding.layoutBottomPlayerController.apply {
-                animate().translationY(height.toFloat()).setDuration(200).start()
-                player?.pause()
-            }
+    private fun attachController() {
+        if (mediaController != null) {
+            maybePreloadRecent()
+            return
+        }
+        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        val future = MediaController.Builder(this, token).buildAsync()
+        future.addListener(
+            {
+                mediaController = future.get()
+                mediaController?.let { controller ->
+                    binding.layoutBottomPlayerController.setPlayer(controller)
+                    setPlayerControlViewVisibility()
+                    maybePreloadRecent()
+                }
+            },
+            ContextCompat.getMainExecutor(this),
+        )
+    }
+
+    private fun maybePreloadRecent() {
+        val controller = mediaController ?: return
+        if (hasSentPreload) return
+
+        val hasRecent = mainViewModel.recentHearit.value != null
+        val preparedOrHasItem =
+            (controller.playbackState == Player.STATE_READY) || (controller.mediaItemCount > 0)
+
+        if (hasRecent && !preparedOrHasItem) {
+            hasSentPreload = true
+            controller.sendCustomCommand(
+                PlaybackSessionCallback.PRELOAD_RECENT_COMMAND,
+                Bundle.EMPTY,
+            )
         }
     }
 
+    private fun setPlayerControlViewVisibility() {
+        val controller = mediaController
+        val isPreparedOrPlaying =
+            controller?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
+        val hasRecent = mainViewModel.recentHearit.value != null
+
+        if (currentSelectedItemId != R.id.nav_explore && (hasRecent || isPreparedOrPlaying)) {
+            showPlayerControlView()
+        } else {
+            hidePlayerControlView()
+        }
+    }
+
+    private fun navigateToLogin() {
+        val intent =
+            Intent(this, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+        startActivity(intent)
+        finish()
+    }
+
+    private fun navigateToDetail(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(this, hearitId)
+        startActivity(intent)
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
     override fun showPlayerControlView() {
+        if (binding.layoutBottomPlayerController.translationY == 0f) return
         binding.layoutBottomPlayerController
             .animate()
             .translationY(0f)
@@ -180,9 +321,67 @@ class MainActivity :
             .start()
     }
 
+    override fun hidePlayerControlView() {
+        binding.layoutBottomPlayerController.post {
+            val target = binding.layoutBottomPlayerController.height.toFloat()
+            if (binding.layoutBottomPlayerController.translationY != target) {
+                binding.layoutBottomPlayerController
+                    .animate()
+                    .translationY(target)
+                    .setDuration(200)
+                    .start()
+            }
+        }
+    }
+
+    override fun pause() {
+        mediaController?.pause()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        player.release()
+        mediaController?.release()
+        mediaController = null
+    }
+
+    override fun startPlayback() {
+        val controller = mediaController
+        if (controller != null) {
+            controller.play()
+            return
+        }
+
+        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        val future = MediaController.Builder(this, token).buildAsync()
+        future.addListener(
+            {
+                mediaController =
+                    future.get().also {
+                        binding.layoutBottomPlayerController.setPlayer(it)
+                        it.play()
+                    }
+                setPlayerControlViewVisibility()
+            },
+            ContextCompat.getMainExecutor(this),
+        )
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        splashViewModel.checkToken.observeOnce(this) { isLoggedIn ->
+            if (!isLoggedIn) {
+                navigateToSplash()
+            }
+        }
+        super.onNewIntent(intent)
+    }
+
+    private fun navigateToSplash() {
+        val intent =
+            Intent(this, SplashActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+        startActivity(intent)
+        finish()
     }
 
     companion object {

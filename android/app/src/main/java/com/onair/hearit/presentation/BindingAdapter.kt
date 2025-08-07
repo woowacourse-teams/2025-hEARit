@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation
 
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import coil.load
 import com.onair.hearit.R
+import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.library.BookmarkUiState
 import com.onair.hearit.presentation.search.SearchUiState
 import java.text.SimpleDateFormat
@@ -46,15 +48,16 @@ fun setHighlightedStyle(
     isHighlighted: Boolean,
 ) {
     val context = textView.context
-    val textColor = ContextCompat.getColor(context, R.color.hearit_gray4)
+    val highlightTextColor = ContextCompat.getColor(context, R.color.hearit_gray4)
+    val normalTextColor = ContextCompat.getColor(context, R.color.hearit_gray2)
     val transparent = ContextCompat.getColor(context, android.R.color.transparent)
 
-    textView.setTextColor(textColor)
+    textView.setTextColor(if (isHighlighted) highlightTextColor else normalTextColor)
     textView.setBackgroundColor(transparent)
 
     textView.setTextSize(
         TypedValue.COMPLEX_UNIT_SP,
-        if (isHighlighted) 18f else 16f,
+        if (isHighlighted) 16f else 14f,
     )
 
     val fontRes =
@@ -65,17 +68,6 @@ fun setHighlightedStyle(
         }
 
     textView.typeface = ResourcesCompat.getFont(context, fontRes)
-}
-
-@BindingAdapter("formattedMillisToTime")
-fun setFormattedMillisToTime(
-    textView: TextView,
-    millis: Long,
-) {
-    val totalSeconds = millis / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    textView.text = String.format("%02d:%02d", minutes, seconds)
 }
 
 @BindingAdapter("formattedDate")
@@ -96,22 +88,6 @@ fun setFormattedDate(
     }
 }
 
-@BindingAdapter("visibleIfNotNull")
-fun setVisibleIfNotNull(
-    view: View,
-    value: Any?,
-) {
-    view.isVisible = value != null
-}
-
-@BindingAdapter("visibleIfNull")
-fun setVisibleIfNull(
-    view: View,
-    value: Any?,
-) {
-    view.isVisible = value == null
-}
-
 @BindingAdapter("imageUrl")
 fun setImageUrl(
     view: ImageView,
@@ -125,38 +101,39 @@ fun setImageUrl(
         }
 }
 
-@BindingAdapter("visibleIfNotLogin")
-fun setVisibleIfNotLogin(
-    view: View,
-    state: BookmarkUiState?,
-) {
-    view.isVisible = state is BookmarkUiState.NotLoggedIn
-}
-
 @BindingAdapter("visibleIfLogin")
 fun setVisibleIfLogin(
+    view: View,
+    condition: Boolean,
+) {
+    view.isVisible = condition
+}
+
+@BindingAdapter("visibleBookmarkIfLogin")
+fun setBookmarkVisibleIfLogin(
     view: View,
     state: BookmarkUiState?,
 ) {
     view.isVisible = state is BookmarkUiState.LoggedIn
 }
 
-@BindingAdapter("setSelectedState")
-fun setSelectedState(
-    view: ImageView,
-    condition: Boolean?,
+@BindingAdapter("visibleBookmarkIfNotLogin")
+fun setBookmarkVisibleIfNotLogin(
+    view: View,
+    state: BookmarkUiState?,
 ) {
-    view.isSelected = condition == true
+    view.isVisible = state is BookmarkUiState.NotLoggedIn
 }
 
-@BindingAdapter("categoryBackgroundColor")
-fun setCategoryBackgroundColor(
+@BindingAdapter("backgroundColor")
+fun setBackgroundColor(
     view: View,
     colorCode: String,
 ) {
-    val background = view.background?.mutate()
-    if (background is GradientDrawable) {
-        background.setColor(colorCode.toColorInt())
+    when (val background = view.background?.mutate()) {
+        is GradientDrawable -> background.setColor(colorCode.toColorInt())
+        is ColorDrawable -> background.color = colorCode.toColorInt()
+        else -> view.setBackgroundColor(colorCode.toColorInt())
     }
 }
 
@@ -174,4 +151,12 @@ fun setVisibleIfHearitsExist(
     state: SearchUiState?,
 ) {
     view.isVisible = state is SearchUiState.HearitsExist
+}
+
+@BindingAdapter("setKeywords")
+fun setExploreKeywords(
+    textView: TextView,
+    keywords: List<Keyword>,
+) {
+    textView.text = keywords.joinToString(" ") { "#${it.name}" }
 }

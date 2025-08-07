@@ -7,4 +7,8 @@ import kotlinx.serialization.Serializable
 data class KakaoLoginResponse(
     @SerialName("accessToken")
     val accessToken: String,
-)
+    @SerialName("refreshToken")
+    val refreshToken: String,
+) {
+    override fun toString(): String = "KakaoLoginResponse(accessToken=****, refreshToken=****)"
+}

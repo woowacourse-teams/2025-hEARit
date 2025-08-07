@@ -4,6 +4,9 @@
         <domain includeSubdomains="true">hearit.o-r.kr</domain>
     </domain-config>
     <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">hearit-dev.o-r.kr</domain>
+    </domain-config>
+    <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">k.kakaocdn.net</domain>
     </domain-config>
 </network-security-config>

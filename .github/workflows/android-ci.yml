@@ -37,9 +37,6 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{secrets.GOOGLE_SERVICES_JSON}}
         run:
           echo $GOOGLE_SERVICES_JSON > ./app/google-services.json
-          
-      - name: Clean Project
-        run: ./gradlew clean
         
       - name: Run ktlint Check
         run: ./gradlew ktlintCheck
@@ -47,8 +44,8 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew test
         
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Clean Project and Build with Gradle
+        run: ./gradlew clean build
         
       - name: If Success, Send notification on Slack
         if: ${{success()}}

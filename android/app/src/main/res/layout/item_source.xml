@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="source"
+            type="com.onair.hearit.domain.model.Source" />
+
+        <variable
+            name="clickListener"
+            type="com.onair.hearit.presentation.detail.PlayerDetailClickListener" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingVertical="8dp">
+
+        <ImageView
+            android:id="@+id/iv_source_link"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_link"
+            app:layout_constraintBottom_toBottomOf="@id/tv_detail_source"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_detail_source" />
+
+        <TextView
+            android:id="@+id/tv_detail_source"
+            style="@style/pretendard_body"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:onClick="@{() -> clickListener.onClickSource(source.url)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iv_source_link"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="원본은 쿠버네티스 공식 문서를 기반으로 만들어졌습니다. 저작권자는 Kubernetes Author입니다." />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -5,16 +5,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RecommendHearitResponse(
-    @SerialName("createdAt")
-    val createdAt: String,
     @SerialName("id")
     val id: Long,
-    @SerialName("playTime")
-    val playTime: Int,
-    @SerialName("source")
-    val source: String,
-    @SerialName("summary")
-    val summary: String,
     @SerialName("title")
     val title: String,
+    @SerialName("playTime")
+    val playTime: Int,
+    @SerialName("createdAt")
+    val createdAt: String,
+    @SerialName("categoryName")
+    val categoryName: String,
+    @SerialName("categoryColor")
+    val categoryColor: String,
 )

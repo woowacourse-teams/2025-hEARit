@@ -1,10 +1,16 @@
 package com.onair.hearit.presentation.explore
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -12,10 +18,20 @@ import androidx.fragment.app.viewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.LoginRequiredDialogFragment
+import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
+import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.service.PlaybackService
 
 class ExploreFragment :
     Fragment(),
@@ -28,6 +44,25 @@ class ExploreFragment :
     private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
     private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
+    private var isFirstLoad = true
+
+    private val playerDetailLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                (activity as? PlayerControllerView)?.apply {
+                    pause()
+                    hidePlayerControlView()
+
+                    val hearitId = result.data?.getLongExtra(HEARIT_ID, -1) ?: -1
+                    val bookmarkId =
+                        result.data?.getLongExtra(BOOKMARK_ID, -1L).takeIf { it != -1L }
+
+                    if (hearitId != -1L) {
+                        updateBookmarkState(hearitId, bookmarkId)
+                    }
+                }
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +84,8 @@ class ExploreFragment :
         setupRecyclerView()
         observeViewModel()
 
+        (activity as? PlayerControllerView)?.pause()
+
         player.addListener(
             object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
@@ -62,6 +99,10 @@ class ExploreFragment :
 
     override fun onResume() {
         super.onResume()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsScreenInfo.Explore.NAME,
+            screenClass = AnalyticsScreenInfo.Explore.CLASS,
+        )
         if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
             player.play()
         }
@@ -97,7 +138,8 @@ class ExploreFragment :
                     newState: Int,
                 ) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        val layoutManager = recyclerView.layoutManager ?: return
+                        val layoutManager =
+                            recyclerView.layoutManager as? LinearLayoutManager ?: return
                         val snapView = snapHelper.findSnapView(layoutManager) ?: return
                         val position = layoutManager.getPosition(snapView)
                         val item = adapter.currentList.getOrNull(position) ?: return
@@ -105,8 +147,9 @@ class ExploreFragment :
                         player.setMediaItem(MediaItem.fromUri(item.audioUrl))
                         player.prepare()
                         player.play()
-
                         checkAndLoadNextPage(position)
+
+                        AnalyticsProvider.get().logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
                     }
                 }
             },
@@ -116,11 +159,46 @@ class ExploreFragment :
     private fun observeViewModel() {
         viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
             adapter.submitList(shortsHearits)
+
+            if (isFirstLoad && shortsHearits.isNotEmpty()) {
+                viewModel.shouldPlayAnimation.observe(viewLifecycleOwner) { isEnabled ->
+                    if (isEnabled) {
+                        startSwipeAnimation()
+                        isFirstLoad = false
+                    }
+                }
+            }
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
+
+        viewModel.showLoginDialog.observe(viewLifecycleOwner) {
+            showLoginRequiredDialog()
+        }
+    }
+
+    private fun startSwipeAnimation() {
+        binding.lavExploreSwipeUp.visibility = View.VISIBLE
+
+        val animator =
+            ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
+                duration = 1300
+                repeatCount = 1
+                repeatMode = ObjectAnimator.RESTART
+            }
+
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    super.onAnimationEnd(animation)
+                    binding.lavExploreSwipeUp.visibility = View.INVISIBLE
+                }
+            },
+        )
+
+        animator.start()
     }
 
     private fun checkAndLoadNextPage(position: Int) {
@@ -133,13 +211,76 @@ class ExploreFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onClickHearitInfo(hearitId: Long) {
-        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
+    private fun navigateToDetail(
+        hearitId: Long,
+        lastPosition: Long = 0L,
+    ) {
+        val intent =
+            PlayerDetailActivity.newIntent(requireActivity(), hearitId, lastPosition).apply {
+                putExtra(AnalyticsParamKeys.SOURCE, PlayerDetailActivity.EXPLORE_SCREEN_ID)
+            }
+        playerDetailLauncher.launch(intent)
     }
 
-    override fun onClickBookmark(hearitId: Long) {
-        viewModel.toggleBookmark(hearitId)
+    private fun showLoginRequiredDialog() {
+        LoginRequiredDialogFragment {
+            navigateToLogin()
+        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+    }
+
+    private fun navigateToLogin() {
+        val intent = LoginActivity.newIntent(requireContext())
+        startActivity(intent)
+
+        // PlaybackService 종료 (선택)
+        val serviceIntent = Intent(requireContext(), PlaybackService::class.java)
+        requireContext().stopService(serviceIntent)
+
+        // 현재 프래그먼트 종료
+        parentFragmentManager
+            .beginTransaction()
+            .remove(this)
+            .commit()
+    }
+
+    private fun updateBookmarkState(
+        hearitId: Long,
+        bookmarkId: Long?,
+    ) {
+        val updatedList =
+            adapter.currentList.map { item ->
+                if (item.id == hearitId) {
+                    item.copy(
+                        bookmarkId = bookmarkId,
+                        isBookmarked = bookmarkId != null,
+                    )
+                } else {
+                    item
+                }
+            }
+        adapter.submitList(updatedList)
+    }
+
+    override fun onClickHearitInfo(hearitId: Long) {
+        val lastPosition = player.currentPosition
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.EXPLORE_TO_DETAIL,
+            mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+        )
+
+        navigateToDetail(hearitId, lastPosition)
+    }
+
+    override fun onClickBookmark(
+        hearitId: Long,
+        callback: (bookmarkId: Long?) -> Unit,
+    ) {
+        viewModel.toggleBookmark(
+            hearitId = hearitId,
+            onFinished = { bookmarkId ->
+                callback(bookmarkId)
+            },
+        )
     }
 
     override fun onPause() {
@@ -155,5 +296,10 @@ class ExploreFragment :
     override fun onDestroy() {
         super.onDestroy()
         player.release()
+    }
+
+    companion object {
+        const val HEARIT_ID = "hearit_id"
+        const val BOOKMARK_ID = "bookmark_id"
     }
 }
