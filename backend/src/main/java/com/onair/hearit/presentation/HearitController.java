@@ -1,16 +1,16 @@
 package com.onair.hearit.presentation;
 
-import com.onair.hearit.application.HearitExploreService;
 import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
+import com.onair.hearit.application.explore.HearitExploreService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
-import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
