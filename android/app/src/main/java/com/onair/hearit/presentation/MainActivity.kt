@@ -373,7 +373,7 @@ class MainActivity :
     }
 
     override fun onNewIntent(intent: Intent) {
-        splashViewModel.checkToken.observe(this) { isLoggedIn ->
+        splashViewModel.checkToken.observeOnce(this) { isLoggedIn ->
             if (!isLoggedIn) {
                 navigateToSplash()
             }

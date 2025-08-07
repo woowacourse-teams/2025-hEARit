@@ -24,14 +24,14 @@ class SplashViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    init {
+    fun checkValidAccessTokenWithDelay() {
         viewModelScope.launch {
-            delay(1000)
+            delay(DELAY_TIME)
             checkValidAccessToken()
         }
     }
 
-    fun checkValidAccessToken() {
+    private fun checkValidAccessToken() {
         viewModelScope.launch {
             val accessToken = dataStoreRepository.getAccessToken().getOrNull()
             val refreshToken = dataStoreRepository.getRefreshToken().getOrNull()
@@ -81,5 +81,9 @@ class SplashViewModel(
                     }
                 }
         }
+    }
+
+    companion object {
+        private const val DELAY_TIME = 1000L
     }
 }
