@@ -11,6 +11,11 @@ class FirebaseCrashlyticsLogger(
         crashlytics.recordException(throwable)
     }
 
+    override fun log(message: String) {
+        if (BuildConfig.DEBUG) return
+        crashlytics.log(message)
+    }
+
     override fun setUserId(userId: String) {
         if (BuildConfig.DEBUG) return
         crashlytics.setUserId(userId)

@@ -31,13 +31,7 @@ class HearitApplication : Application() {
     private fun plantDebugTimberTree() {
         Timber.plant(
             object : Timber.DebugTree() {
-                override fun createStackElementTag(element: StackTraceElement): String =
-                    String.format(
-                        "Class:%s: Line: %s, Method: %s",
-                        super.createStackElementTag(element),
-                        element.lineNumber,
-                        element.methodName,
-                    )
+                override fun createStackElementTag(element: StackTraceElement): String = "${element.fileName}: ${element.lineNumber}"
             },
         )
     }
@@ -61,7 +55,11 @@ class HearitApplication : Application() {
                 if (priority == Log.ERROR) {
                     CrashlyticsProvider.get().recordException(t)
                 } else if (priority == Log.WARN) {
-                    CrashlyticsProvider.get().log(t.message)
+                    CrashlyticsProvider.get().log(t.message.toString())
+                }
+            } else {
+                if (priority == Log.ERROR || priority == Log.WARN) {
+                    CrashlyticsProvider.get().log(message)
                 }
             }
         }
