@@ -1,6 +1,7 @@
 package com.onair.hearit.admin.dto.request;
 
 import com.onair.hearit.domain.Source;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -14,13 +15,13 @@ public record HearitCreateRequest(
         @NotNull MultipartFile originalAudio,
         @NotNull MultipartFile shortAudio,
         @NotNull MultipartFile scriptFile,
-        @NotEmpty List<SourceRequest> sources,
+        @NotEmpty List<@Valid SourceRequest> sources,
         @NotNull Long categoryId,
         List<Long> keywordIds
 ) {
 
     public record SourceRequest(
-            String sourceName,
+            @NotBlank String sourceName,
             String sourceUrl
     ) {
         public Source toSource() {
