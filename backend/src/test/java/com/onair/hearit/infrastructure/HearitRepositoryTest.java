@@ -50,26 +50,6 @@ class HearitRepositoryTest {
     }
 
     @Test
-    @DisplayName("원하는 개수만큼 랜덤 히어릿을 조회할 수 있다.")
-    void findRandom() {
-        // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        Pageable pageable = PageRequest.of(0, 1);
-
-        // when
-        Page<Hearit> hearits = hearitRepository.findRandom(pageable);
-
-        // then
-        assertAll(() -> {
-            assertThat(hearits).hasSize(1);
-            assertThat(hearitRepository.findAll()).hasSize(2);
-        });
-    }
-
-    @Test
     @DisplayName("원하는 개수만큼 랜덤 히어릿을 List로 조회할 수 있다.")
     void findRandom_withLimit() {
         // given
@@ -88,23 +68,6 @@ class HearitRepositoryTest {
                 () -> assertThat(result).hasSize(limit),
                 () -> assertThat(hearitRepository.findAll()).hasSize(3)
         );
-    }
-
-    @Test
-    @DisplayName("전체 히어릿 개수 < 원하는 개수면 전체 히어릿을 모두 조회할 수 있다.")
-    void findRandomWithAllHearits() {
-        // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        Pageable pageable = PageRequest.of(0, 2);
-
-        // when
-        Page<Hearit> hearits = hearitRepository.findRandom(pageable);
-
-        // then
-        assertThat(hearits.getTotalElements()).isEqualTo(hearitRepository.findAll().size());
     }
 
     @Test

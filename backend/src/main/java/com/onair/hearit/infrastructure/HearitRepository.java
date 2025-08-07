@@ -14,9 +14,6 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id = :id")
     Optional<Hearit> findWithCategoryById(Long id);
 
-    @Query("SELECT h FROM Hearit h ORDER BY function('RAND')")
-    Page<Hearit> findRandom(Pageable pageable);
-
     @Query("SELECT h FROM Hearit h ORDER BY function('RAND') LIMIT :size")
     List<Hearit> findRandom(@Param("size") int size);
 
