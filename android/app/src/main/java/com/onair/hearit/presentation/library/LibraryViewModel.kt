@@ -16,12 +16,12 @@ import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class LibraryViewModel(
     private val bookmarkRepository: BookmarkRepository,
     private val dataStoreRepository: DataStoreRepository,
     private val memberRepository: MemberRepository,
-    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _bookmarks: MutableLiveData<List<Bookmark>> = MutableLiveData()
     val bookmarks: LiveData<List<Bookmark>> = _bookmarks
@@ -56,6 +56,7 @@ class LibraryViewModel(
                         }
 
                         else -> {
+                            Timber.w(throwable)
                             _toastMessage.value = R.string.library_toast_bookmark_load_fail
                         }
                     }
@@ -96,6 +97,7 @@ class LibraryViewModel(
                         }
 
                         else -> {
+                            Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }

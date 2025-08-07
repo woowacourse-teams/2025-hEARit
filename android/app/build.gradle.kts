@@ -25,11 +25,13 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            manifestPlaceholders["enableCrashReporting"] = "true"
         }
 
         debug {
@@ -41,6 +43,8 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
             resValue("string", "app_name", "hEARit (Dev)")
+
+            manifestPlaceholders["enableCrashReporting"] = "false"
         }
     }
     compileOptions {
@@ -91,6 +95,11 @@ dependencies {
     // LiveData
     implementation(libs.androidx.lifecycle.livedata.ktx)
 
+    // test
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.assertj.core)
+
     // android test
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.rules)
@@ -134,8 +143,6 @@ dependencies {
     // coil
     implementation(libs.coil)
 
-    // test
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.assertj.core)
+    // timber
+    implementation(libs.timber)
 }

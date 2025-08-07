@@ -5,18 +5,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class SplashViewModel(
     private val authRepository: AuthRepository,
     private val dataStoreRepository: DataStoreRepository,
-    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _checkToken: MutableLiveData<Boolean> = MutableLiveData()
     val checkToken: LiveData<Boolean> = _checkToken
@@ -51,7 +50,7 @@ class SplashViewModel(
                         }
 
                         else -> {
-                            crashlyticsLogger.recordException(throwable)
+                            Timber.w(throwable)
                             _checkToken.value = false
                             _toastMessage.value = R.string.splash_toast_token_check_fail
                         }
@@ -74,7 +73,7 @@ class SplashViewModel(
                         }
 
                         else -> {
-                            crashlyticsLogger.recordException(throwable)
+                            Timber.w(throwable)
                             _checkToken.value = false
                             _toastMessage.value = R.string.splash_toast_refresh_token_fail
                         }

@@ -68,7 +68,6 @@ class BaseControllerView
 
         fun setOnBookmarkClickListener(listener: () -> Unit) {
             binding.btnDetailBookmark.setOnClickListener {
-                binding.btnDetailBookmark.isSelected = !binding.btnDetailBookmark.isSelected
                 listener()
             }
         }
