@@ -64,6 +64,21 @@ class LibraryViewModel(
         }
     }
 
+    fun deleteBookmark(bookmarkId: Long) {
+        viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
+            bookmarkRepository
+                .deleteBookmark(token?.toBearerToken(), bookmarkId)
+                .onSuccess {
+                    _bookmarks.value =
+                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }
+                }.onFailure {
+                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                }
+        }
+    }
+
     private fun getUserInfo() {
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
