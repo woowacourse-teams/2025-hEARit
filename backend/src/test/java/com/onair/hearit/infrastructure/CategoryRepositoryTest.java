@@ -29,7 +29,7 @@ class CategoryRepositoryTest {
     private DbHelper dbHelper;
 
     @Test
-    @DisplayName("가장 오래된 순으로 지정된 개수만큼 카테고리를 조회한다.")
+    @DisplayName("회원의 북마크 수에 따라 상위 카테고리를 조회한다.")
     void findTopCategoriesByMemberBookmarks() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
