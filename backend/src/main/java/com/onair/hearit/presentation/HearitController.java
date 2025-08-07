@@ -5,6 +5,7 @@ import com.onair.hearit.application.HearitService;
 import com.onair.hearit.application.explore.HearitExploreService;
 import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.PagingRequest;
+import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
@@ -41,12 +42,12 @@ public class HearitController {
     }
 
     @GetMapping("/explore")
-    public ResponseEntity<List<ExploredHearitResponse>> readPersonalHearits(
+    public ResponseEntity<CursorResponse<ExploredHearitResponse>> readExploredHearits(
             @AuthenticationPrincipal CurrentMember member,
             @RequestParam(name = "cursorId", defaultValue = "0") Long cursorId,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Long memberId = extractMemberId(member);
-        List<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(memberId, cursorId, size);
+        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(memberId, cursorId, size);
         return ResponseEntity.ok(responses);
     }
 

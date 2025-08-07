@@ -16,11 +16,12 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.response.CursorResponse;
+import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
 import com.onair.hearit.dto.response.PagedResponse;
-import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
@@ -149,7 +150,7 @@ class HearitControllerTest extends IntegrationTest {
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
 
         // when
-        List<ExploredHearitResponse> responses = RestAssured.given(this.spec)
+        CursorResponse<ExploredHearitResponse> responses = RestAssured.given(this.spec)
                 .queryParam("cursorId", 0)
                 .queryParam("size", 10)
                 .filter(document("hearit-read-explore",
@@ -161,20 +162,27 @@ class HearitControllerTest extends IntegrationTest {
                                         parameterWithName("cursorId").description("마지막 Cursor ID").defaultValue("0"),
                                         parameterWithName("size").description("필요한 히어릿 항목 수").defaultValue("10")
                                 )
-                                .responseSchema(Schema.schema("ExploredHearitResponse"))
+                                .responseSchema(Schema.schema("CursorExploredHearitResponse"))
                                 .responseFields(
-                                        fieldWithPath("[].id").description("히어릿 ID"),
-                                        fieldWithPath("[].title").description("히어릿 제목"),
-                                        fieldWithPath("[].categoryColorCode").description("카테고리 색상"),
-                                        fieldWithPath("[].isBookmarked").description("북마크 여부"),
-                                        fieldWithPath("[].bookmarkId").description(
-                                                "북마크 ID (북마크된 경우)").optional(),
-                                        fieldWithPath("[].keywords").description(
-                                                "히어릿에 포함된 키워드 목록"),
-                                        fieldWithPath("[].keywords[].id").description("키워드 ID"),
-                                        fieldWithPath("[].keywords[].name").description("키워드 이름"),
-                                        fieldWithPath("[].cursorId").description(
-                                                "Cursor ID (마지막 제공 컨텐츠)")
+                                        Stream.concat(
+                                                Arrays.stream(new FieldDescriptor[]{
+                                                        fieldWithPath("content[].id").description("히어릿 ID"),
+                                                        fieldWithPath("content[].title").description("히어릿 제목"),
+                                                        fieldWithPath("content[].categoryColorCode").description(
+                                                                "카테고리 색상"),
+                                                        fieldWithPath("content[].isBookmarked").description("북마크 여부"),
+                                                        fieldWithPath("content[].bookmarkId").description(
+                                                                "북마크 ID (북마크된 경우)").optional(),
+                                                        fieldWithPath("content[].keywords").description(
+                                                                "히어릿에 포함된 키워드 목록"),
+                                                        fieldWithPath("content[].keywords[].id").description("키워드 ID"),
+                                                        fieldWithPath("content[].keywords[].name").description(
+                                                                "키워드 이름"),
+                                                        fieldWithPath("content[].cursorId").description(
+                                                                "Cursor ID (마지막 제공 컨텐츠)")
+                                                }),
+                                                Arrays.stream(ApiDocSnippets.getCustomCursorResponseFields())
+                                        ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
                 ))
@@ -187,7 +195,10 @@ class HearitControllerTest extends IntegrationTest {
                 });
 
         // then
-        assertThat(responses).hasSize(3);
+        assertAll(() -> {
+            assertThat(responses.content()).hasSize(3);
+            assertThat(responses.isEmpty()).isFalse();
+        });
     }
 
     @Test

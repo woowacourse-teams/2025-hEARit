@@ -7,6 +7,7 @@ import com.onair.hearit.application.explore.score.ScoreFactor;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
+import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.ExploreScoreCommandRepository;
@@ -36,15 +37,16 @@ public class HearitExploreService {
     private final RecencyScoreFactor recencyScoreFactor;
     private final RandomScoreFactor randomScoreFactor;
 
-    public List<ExploredHearitResponse> getExploredHearits(Long memberId, Long cursorId, int size) {
+    public CursorResponse<ExploredHearitResponse> getExploredHearits(Long memberId, Long cursorId, int size) {
         if (isFirstExploreRequest(cursorId)) {
             generateScores(memberId);
         }
 
         List<Hearit> exploredHearits = findExploredHearits(memberId, cursorId, size);
-        return exploredHearits.stream()
+        List<ExploredHearitResponse> exploredHearitsDto = exploredHearits.stream()
                 .map(hearit -> toExploredHearitResponse(hearit, memberId, cursorId))
                 .toList();
+        return CursorResponse.from(exploredHearitsDto);
     }
 
     private boolean isFirstExploreRequest(Long cursorId) {

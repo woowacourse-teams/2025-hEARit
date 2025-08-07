@@ -10,6 +10,7 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
@@ -101,10 +102,10 @@ class HearitExploreServiceTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit5));
 
         // when
-        List<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(member.getId(), 0L, 10);
+        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(member.getId(), 0L, 10);
 
         // then
-        exploredHearits.forEach(System.out::println);
+        exploredHearits.content().forEach(System.out::println);
     }
 
     @DisplayName("바회원 점수판 생성 - 최신성, 랜덤성")
@@ -127,10 +128,10 @@ class HearitExploreServiceTest {
         Hearit hearit10 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit10", category3));
 
         // when
-        List<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(null, 0L, 10);
+        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(null, 0L, 10);
 
         // then
-        exploredHearits.forEach(System.out::println);
+        exploredHearits.content().forEach(System.out::println);
     }
 
     private Hearit createHearitByNameAndCategory(String name, Category category) {
