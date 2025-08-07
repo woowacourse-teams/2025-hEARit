@@ -6,9 +6,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        /* Optional: Add some style for better spacing */
         .file-upload-form {
             margin-top: 8px;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
         }
     </style>
     <meta name="_csrf" th:content="${_csrf.token}"/>
@@ -23,7 +26,7 @@
     <div>
         <p id="hearit-count" class="text-muted mb-0">히어릿 총 개수: 0개</p>
     </div>
-    <table class="table table-striped table-hover align-middle">
+    <table class="table table-striped table-hover">
         <thead class="table-dark">
         <tr>
             <th scope="col">ID</th>
@@ -33,7 +36,7 @@
             <th scope="col">Original Audio</th>
             <th scope="col">Short Audio</th>
             <th scope="col">Script</th>
-            <th scope="col">Source</th>
+            <th scope="col">Sources</th>
             <th scope="col">Created At</th>
             <th scope="col">Category</th>
             <th scope="col">Keywords</th>
@@ -74,17 +77,45 @@
         tableBody.innerHTML = '';
         hearits.forEach(hearit => {
             const row = document.createElement('tr');
+
+            const sourcesHtml = Array.isArray(hearit.sources) && hearit.sources.length > 0
+                ? hearit.sources.map(s => {
+                    if (s.sourceUrl) { // URL이 있으면 링크로 표시
+                        return `<a href="${s.sourceUrl}" target="_blank" rel="noopener noreferrer">${s.sourceName}</a>`;
+                    } else { // URL이 없으면 텍스트로만 표시
+                        return `<span>${s.sourceName}</span>`;
+                    }
+                }).join('<br>')
+                : '없음';
+
             if (editingId === hearit.id) {
-                // Edit mode for text fields
+                const editSourcesHtml = `
+                    <div id="edit-sources-container-${hearit.id}">
+                        ${hearit.sources.map(s => `
+                            <div class="input-group input-group-sm mb-1 source-group">
+                                <input type="text" class="form-control source-name-input" value="${s.sourceName || ''}" placeholder="이름">
+                                <input type="text" class="form-control source-url-input" value="${s.sourceUrl || ''}" placeholder="URL (선택사항)">
+                                <button type="button" class="btn btn-outline-danger" onclick="this.closest('.source-group').remove()">삭제</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="addSourceRowToEdit(${hearit.id})">출처 추가</button>
+                `;
+
                 row.innerHTML = `
-                    <td>${hearit.id}</td>
+                    <td>
+                        ${hearit.id}
+                        <input type="hidden" id="original-audio-url-${hearit.id}" value="${hearit.originalAudioUrl || ''}">
+                        <input type="hidden" id="short-audio-url-${hearit.id}" value="${hearit.shortAudioUrl || ''}">
+                        <input type="hidden" id="script-url-${hearit.id}" value="${hearit.scriptUrl || ''}">
+                    </td>
                     <td><input type="text" class="form-control" value="${hearit.title}" id="edit-title-${hearit.id}" style="min-width: 120px;"></td>
                     <td><input type="text" class="form-control" value="${hearit.summary || ''}" id="edit-summary-${hearit.id}" style="min-width: 120px;"></td>
                     <td><input type="number" class="form-control" value="${hearit.playTime}" id="edit-playtime-${hearit.id}" style="min-width: 120px;"></td>
                     <td>${hearit.originalAudioUrl || 'N/A'}</td>
                     <td>${hearit.shortAudioUrl || 'N/A'}</td>
                     <td>${hearit.scriptUrl || 'N/A'}</td>
-                    <td><input type="text" class="form-control" value="${hearit.source}" id="edit-source-${hearit.id}" style="min-width: 120px;"></td>
+                    <td>${editSourcesHtml}</td>
                     <td>${hearit.createdAt ? new Date(hearit.createdAt).toLocaleString() : ''}</td>
                     <td>
                         ${hearit.category?.name || ''}
@@ -101,11 +132,10 @@
                     </td>
                 `;
             } else {
-                // Display mode with separate file upload forms
                 row.innerHTML = `
                     <td>${hearit.id}</td>
                     <td>${hearit.title}</td>
-                    <td>${hearit.summary}</td>
+                    <td>${hearit.summary || ''}</td>
                     <td>${hearit.playTime}초</td>
                     <td>
                         <div>${hearit.originalAudioUrl || '없음'}</div>
@@ -134,7 +164,7 @@
                             </div>
                         </form>
                     </td>
-                    <td>${hearit.source}</td>
+                    <td>${sourcesHtml}</td>
                     <td>${hearit.createdAt ? new Date(hearit.createdAt).toLocaleString() : ''}</td>
                     <td>${hearit.category?.name || ''}</td>
                     <td>${
@@ -180,22 +210,54 @@
         fetchHearits(currentPage);
     }
 
-    // update for text-based fields
+    function addSourceRowToEdit(hearitId) {
+        const container = document.getElementById(`edit-sources-container-${hearitId}`);
+        const newRow = document.createElement('div');
+        newRow.className = 'input-group input-group-sm mb-1 source-group';
+        newRow.innerHTML = `
+            <input type="text" class="form-control source-name-input" placeholder="이름">
+            <input type="text" class="form-control source-url-input" placeholder="URL (선택사항)">
+            <button type="button" class="btn btn-outline-danger" onclick="this.closest('.source-group').remove()">삭제</button>
+        `;
+        container.appendChild(newRow);
+    }
+
     async function updateMetadata(id) {
         const title = document.getElementById(`edit-title-${id}`).value;
         const summary = document.getElementById(`edit-summary-${id}`).value;
         const playTime = parseInt(document.getElementById(`edit-playtime-${id}`).value, 10);
-        const source = document.getElementById(`edit-source-${id}`).value;
         const categoryId = parseInt(document.getElementById(`edit-category-id-${id}`).value, 10);
 
-        // URLs are no longer part of this update
+        const sourcesContainer = document.getElementById(`edit-sources-container-${id}`);
+        const sourceGroups = sourcesContainer.querySelectorAll('.source-group');
+        const sources = Array.from(sourceGroups).map(group => {
+            const nameInput = group.querySelector('.source-name-input');
+            const urlInput = group.querySelector('.source-url-input');
+            const name = nameInput?.value.trim() || '';
+            const url = urlInput?.value.trim();
+
+            return {
+                sourceName: name,
+                sourceUrl: url === '' ? null : url
+            };
+        })
+            .filter(s => s.sourceName.trim() !== '');
+
+        const originalAudioUrl = document.getElementById(`original-audio-url-${id}`).value;
+        const shortAudioUrl = document.getElementById(`short-audio-url-${id}`).value;
+        const scriptUrl = document.getElementById(`script-url-${id}`).value;
+
         const updated = {
             title,
             summary,
             playTime,
-            source,
-            categoryId
+            sources,
+            categoryId,
+            originalAudioUrl,
+            shortAudioUrl,
+            scriptUrl
         };
+
         try {
             const csrfToken = document.querySelector('meta[name="_csrf"]').content;
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
@@ -217,11 +279,10 @@
             }
         } catch (e) {
             console.error('Update error:', e);
-            alert('수정 중 오류 발생');
+            alert('수정 중 오류가 발생했습니다.');
         }
     }
 
-    // NEW: Function to handle file uploads
     async function updateFile(event, id, type) {
         event.preventDefault();
         const form = event.target;
@@ -233,8 +294,6 @@
 
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
-
-        // Backend endpoint e.g., /api/v1/admin/hearits/123/original-audio
         const url = `/api/v1/admin/hearits/${id}/${type}`;
 
         try {
@@ -244,14 +303,14 @@
                 method: 'PUT',
                 headers: {
                     [csrfHeader]: csrfToken
-                    // Content-Type for FormData is set automatically by the browser with boundary
                 },
                 body: formData
             });
 
             if (response.ok) {
                 alert(`파일이 성공적으로 수정되었습니다.`);
-                fetchHearits(currentPage); // Refresh list
+                fetchHearits(currentPage);
+
             } else {
                 const err = await response.json();
                 alert('파일 수정 실패: ' + (err.detail || '서버 오류 발생'));

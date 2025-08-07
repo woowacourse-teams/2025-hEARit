@@ -14,9 +14,6 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id = :id")
     Optional<Hearit> findWithCategoryById(Long id);
 
-    @Query("SELECT h FROM Hearit h ORDER BY function('RAND')")
-    Page<Hearit> findRandom(Pageable pageable);
-
     @Query("SELECT h FROM Hearit h ORDER BY function('RAND') LIMIT :size")
     List<Hearit> findRandom(@Param("size") int size);
 
@@ -35,11 +32,24 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
 
     @Query("""
-            SELECT h 
-            FROM Hearit h 
-            WHERE h.category.id = :categoryId 
-            ORDER BY h.createdAt DESC 
+            SELECT h
+            FROM Hearit h
+            WHERE h.category.id = :categoryId
+            ORDER BY h.createdAt DESC
             LIMIT :size
             """)
     List<Hearit> findByCategory(@Param("categoryId") Long categoryId, @Param("size") int size);
+
+    @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id IN :hearitIds")
+    List<Hearit> findAllByIdInWithCategory(@Param("hearitIds") List<Long> hearitIds);
+
+    @Query("""
+            SELECT h
+            FROM Hearit h
+            JOIN FETCH h.category
+            ORDER BY h.createdAt DESC
+            """)
+    Page<Hearit> findAll(Pageable pageable);
+
+    List<Hearit> findAllByIdIn(List<Long> hearitIds);
 }

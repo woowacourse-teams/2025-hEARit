@@ -5,7 +5,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import java.util.List;
 
-public record RandomHearitResponse(
+public record ExploredHearitResponse(
         Long id,
         String title,
         String categoryColorCode,
@@ -13,9 +13,9 @@ public record RandomHearitResponse(
         Long bookmarkId,
         List<KeywordResponse> keywords
 ) {
-    public static RandomHearitResponse from(Hearit hearit, List<Keyword> keywords) {
+    public static ExploredHearitResponse from(Hearit hearit, List<Keyword> keywords) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
-        return new RandomHearitResponse(
+        return new ExploredHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getCategory().getColorCode(),
@@ -25,9 +25,9 @@ public record RandomHearitResponse(
         );
     }
 
-    public static RandomHearitResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords) {
+    public static ExploredHearitResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
-        return new RandomHearitResponse(
+        return new ExploredHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getCategory().getColorCode(),

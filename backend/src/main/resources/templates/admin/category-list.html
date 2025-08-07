@@ -12,7 +12,7 @@
 <div class="container mt-4">
     <h1>카테고리 관리</h1>
     <div>
-        <p id="category-count" class="text-muted mb-0">카테고리 총 개수: 0개</p>
+        <p class="text-muted mb-0" id="category-count">카테고리 총 개수: 0개</p>
     </div>
     <div class="row mt-4">
         <!-- 카테고리 목록 -->
@@ -34,9 +34,10 @@
                         <!-- 카테고리 데이터가 여기에 동적으로 추가됩니다. -->
                         </tbody>
                     </table>
-                    <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Category pagination">
+                    <nav aria-label="Category pagination"
+                         class="d-flex justify-content-between align-items-center mt-3">
                         <button class="btn btn-outline-secondary" id="category-prev-btn">Previous</button>
-                        <span id="category-page-info" class="mx-2"></span>
+                        <span class="mx-2" id="category-page-info"></span>
                         <button class="btn btn-outline-secondary" id="category-next-btn">Next</button>
                     </nav>
                 </div>
@@ -52,20 +53,21 @@
                 <div class="card-body">
                     <form id="create-category-form">
                         <div class="mb-3">
-                            <label for="category-name" class="form-label">카테고리 이름</label>
-                            <input type="text" class="form-control" id="category-name" name="name" required>
+                            <label class="form-label" for="category-name">카테고리 이름</label>
+                            <input class="form-control" id="category-name" name="name" required type="text">
                         </div>
                         <div class="mb-3">
-                            <label for="category-color" class="form-label">컬러 코드 (e.g., #RRGGBB)</label>
+                            <label class="form-label" for="category-color">컬러 코드 (e.g., #RRGGBB)</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="category-color" name="colorCode" value="#000000" required>
+                                <input class="form-control" id="category-color" name="colorCode" required
+                                       type="text" value="#000000">
                                 <span class="input-group-text p-2">
                                     <span id="color-preview"
                                           style="display: inline-block; width: 1.5rem; height: 1.5rem; border: 1px solid #ccc; border-radius: .25rem;"></span>
                                 </span>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">추가</button>
+                        <button class="btn btn-primary" type="submit">추가</button>
                     </form>
                 </div>
             </div>
@@ -92,6 +94,7 @@
     // Pagination variables
     let currentPage = 0;
     const pageSize = 15;
+
     async function fetchCategories(page = 0, size = pageSize) {
         try {
             const response = await fetch(`/api/v1/admin/categories?page=${page}&size=${size}`);
@@ -182,7 +185,7 @@
                 'Content-Type': 'application/json',
                 [csrfHeader]: csrfToken
             },
-            body: JSON.stringify({ name: newName, colorCode: newColor })
+            body: JSON.stringify({name: newName, colorCode: newColor})
         })
             .then(res => {
                 if (!res.ok) throw new Error("카테고리 수정 실패");

@@ -8,6 +8,7 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
+import com.onair.hearit.domain.Source;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
@@ -50,26 +51,6 @@ class HearitRepositoryTest {
     }
 
     @Test
-    @DisplayName("원하는 개수만큼 랜덤 히어릿을 조회할 수 있다.")
-    void findRandom() {
-        // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        Pageable pageable = PageRequest.of(0, 1);
-
-        // when
-        Page<Hearit> hearits = hearitRepository.findRandom(pageable);
-
-        // then
-        assertAll(() -> {
-            assertThat(hearits).hasSize(1);
-            assertThat(hearitRepository.findAll()).hasSize(2);
-        });
-    }
-
-    @Test
     @DisplayName("원하는 개수만큼 랜덤 히어릿을 List로 조회할 수 있다.")
     void findRandom_withLimit() {
         // given
@@ -88,23 +69,6 @@ class HearitRepositoryTest {
                 () -> assertThat(result).hasSize(limit),
                 () -> assertThat(hearitRepository.findAll()).hasSize(3)
         );
-    }
-
-    @Test
-    @DisplayName("전체 히어릿 개수 < 원하는 개수면 전체 히어릿을 모두 조회할 수 있다.")
-    void findRandomWithAllHearits() {
-        // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        Pageable pageable = PageRequest.of(0, 2);
-
-        // when
-        Page<Hearit> hearits = hearitRepository.findRandom(pageable);
-
-        // then
-        assertThat(hearits.getTotalElements()).isEqualTo(hearitRepository.findAll().size());
     }
 
     @Test
@@ -179,6 +143,28 @@ class HearitRepositoryTest {
         );
     }
 
+    @Test
+    @DisplayName("히어릿 아이디들로 히어릿 리스트를 카테고리와 함께 조회한다.")
+    void findAllByIdInWithCategoryTest() {
+        // given
+        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        List<Long> hearitIds = List.of(hearit1.getId(), hearit2.getId(), hearit3.getId());
+
+        // when
+        List<Hearit> hearits = hearitRepository.findAllByIdInWithCategory(hearitIds);
+
+        // then
+        assertAll(() -> {
+            assertThat(hearits).hasSize(3);
+            assertThat(hearits.get(0).getId()).isEqualTo(hearit1.getId());
+            assertThat(hearits.get(1).getId()).isEqualTo(hearit2.getId());
+            assertThat(hearits.get(2).getId()).isEqualTo(hearit3.getId());
+        });
+    }
+
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = new Hearit(
@@ -188,7 +174,7 @@ class HearitRepositoryTest {
                 "originalAudioUrl",
                 "shortAudioUrl",
                 "scriptUrl",
-                "source",
+                List.of(new Source("출처", "url")),
                 category);
         Hearit savedHearit = dbHelper.insertHearit(hearit);
         dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));

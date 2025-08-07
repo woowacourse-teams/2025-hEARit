@@ -15,15 +15,23 @@
         <h1>히어릿 추가</h1>
     </div>
 
-    <!-- 히어릿 추가 폼 -->
     <div id="upload-section" class="card card-body mb-4" style="display: block;">
         <h2 class="mb-3">새 히어릿 추가</h2>
         <form id="upload-form">
             <div class="row">
-                <div class="col-md-6 mb-3"><label for="title" class="form-label">제목</label><input type="text" class="form-control" id="title" name="title"></div>
-                <div class="col-md-6 mb-3"><label for="source" class="form-label">출처</label><input type="text" class="form-control" id="source" name="source"></div>
+                <div class="col-md-12 mb-3">
+                    <label for="title" class="form-label">제목</label><input type="text" class="form-control" id="title" name="title" required>
+                </div>
             </div>
-            <div class="mb-3"><label for="summary" class="form-label">요약</label><textarea class="form-control" id="summary" name="summary" rows="2"></textarea></div>
+            <div class="mb-3">
+                <label class="form-label">출처</label>
+                <div id="sources-container">
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="add-source-btn">출처 추가</button>
+            </div>
+            <div class="mb-3">
+                <label for="summary" class="form-label">요약</label><textarea class="form-control" id="summary" name="summary" rows="2"></textarea>
+            </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="originalAudio" class="form-label">원본 오디오 파일</label>
@@ -43,10 +51,17 @@
                         <input type="file" class="form-control" id="scriptFile" name="scriptFile" accept="application/json" required>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3"><label for="playTime" class="form-label">재생 시간(초)</label><input type="number" class="form-control" id="playTime" name="playTime"></div>
-                <div class="col-md-3 mb-3"><label for="categoryId" class="form-label">카테고리</label><select id="categoryId" name="categoryId" class="form-select" required><option value="" disabled selected>선택...</option></select></div>
+                <div class="col-md-3 mb-3">
+                    <label for="playTime" class="form-label">재생 시간(초)</label><input type="number" class="form-control" id="playTime" name="playTime">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="categoryId" class="form-label">카테고리</label><select id="categoryId" name="categoryId" class="form-select" required>
+                    <option value="" disabled selected>선택...</option>
+                </select></div>
             </div>
-            <div class="mb-3"><label class="form-label d-block">키워드</label><div id="keyword-checkboxes"></div></div>
+            <div class="mb-3"><label class="form-label d-block">키워드</label>
+                <div id="keyword-checkboxes"></div>
+            </div>
             <button type="submit" class="btn btn-success">등록</button>
             <button type="button" class="btn btn-secondary" id="cancel-upload">취소</button>
         </form>
@@ -55,6 +70,30 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    let sourceIndex = 0;
+    const sourcesContainer = document.getElementById('sources-container');
+
+    function addSourceRow() {
+        const sourceRow = document.createElement('div');
+        sourceRow.className = 'input-group mb-2';
+        sourceRow.innerHTML = `
+            <input type="text" name="sources[${sourceIndex}].sourceName" class="form-control" placeholder="출처 이름 (예: 테코톡)" required>
+            <input type="text" name="sources[${sourceIndex}].sourceUrl" class="form-control" placeholder="URL (예: https://...)" >
+            <button type="button" class="btn btn-outline-danger remove-source-btn">삭제</button>
+        `;
+        sourcesContainer.appendChild(sourceRow);
+        sourceIndex++;
+
+        sourceRow.querySelector('.remove-source-btn').addEventListener('click', function () {
+            this.parentElement.remove();
+        });
+    }
+
+    document.getElementById('add-source-btn').addEventListener('click', addSourceRow);
+
+    // 페이지 로드 시 기본으로 한 줄 추가
+    addSourceRow();
+
     async function fetchCategories() {
         try {
             const response = await fetch('/api/v1/admin/categories/all');
@@ -69,7 +108,9 @@
                     categorySelect.appendChild(option);
                 });
             } else console.error('카테고리를 불러오는 데 실패했습니다.');
-        } catch (error) { console.error('Error fetching categories:', error); }
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
     }
 
     async function fetchKeywords() {
@@ -97,7 +138,9 @@
                     keywordCheckboxes.appendChild(wrapper);
                 });
             } else console.error('키워드를 불러오는 데 실패했습니다.');
-        } catch (error) { console.error('Error fetching keywords:', error); }
+        } catch (error) {
+            console.error('Error fetching keywords:', error);
+        }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -106,6 +149,9 @@
 
         document.getElementById('cancel-upload').addEventListener('click', () => {
             document.getElementById('upload-form').reset();
+            sourcesContainer.innerHTML = '';
+            sourceIndex = 0;
+            addSourceRow();
         });
 
         // Intercept upload form submission and send via fetch
@@ -113,6 +159,16 @@
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
+
+            const keysToDelete = [];
+            for (const [key, value] of formData.entries()) {
+                if (key.endsWith('].sourceUrl') && typeof value === 'string' && value.trim() === '') {
+                    keysToDelete.push(key);
+                }
+            }
+            keysToDelete.forEach(key => formData.delete(key));
+
+
             formData.set("shortAudio", document.getElementById("shortAudio").files[0]);
             formData.set("scriptFile", document.getElementById("scriptFile").files[0]);
 
@@ -130,6 +186,9 @@
                 if (response.ok) {
                     alert('히어릿이 성공적으로 추가되었습니다.');
                     form.reset();
+                    sourcesContainer.innerHTML = '';
+                    sourceIndex = 0;
+                    addSourceRow();
                 } else {
                     const responseText = await response.text();
                     let errorMessage = '서버 오류';
@@ -143,7 +202,8 @@
                                 .filter(msg => msg.length > 0)
                                 .join('\n');
                         }
-                    } catch (_) {}
+                    } catch (_) {
+                    }
                     alert('추가 실패:\n' + errorMessage);
                 }
             } catch (error) {
