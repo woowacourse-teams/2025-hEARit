@@ -18,7 +18,6 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentSearchBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
@@ -33,9 +32,7 @@ class SearchFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SearchViewModel by viewModels {
-        SearchViewModelFactory(CrashlyticsProvider.get())
-    }
+    private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory() }
     private val categoryFragment by lazy { SearchCategoryFragment.newInstance() }
     private val recentFragment by lazy { SearchRecentFragment.newInstance() }
 

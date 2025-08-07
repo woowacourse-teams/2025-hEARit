@@ -65,7 +65,7 @@
             android:layout_height="24dp"
             android:layout_marginEnd="10dp"
             android:contentDescription="@null"
-            android:onClick="@{() -> bookmarkListener.onClickOption()}"
+            android:onClick="@{() -> bookmarkListener.onClickOption(item.bookmarkId)}"
             android:src="@drawable/ic_option_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

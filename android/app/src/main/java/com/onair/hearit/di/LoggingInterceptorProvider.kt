@@ -1,10 +1,10 @@
 package com.onair.hearit.di
 
-import android.util.Log
 import com.onair.hearit.BuildConfig
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import okhttp3.logging.HttpLoggingInterceptor
+import timber.log.Timber
 
 object LoggingInterceptorProvider {
     private val json =
@@ -20,16 +20,13 @@ object LoggingInterceptorProvider {
                     if (message.startsWith("{") || message.startsWith("[")) {
                         runCatching {
                             val parsed = json.parseToJsonElement(message)
-                            Log.i(
-                                "PrettyLogger",
-                                json.encodeToString(JsonElement.serializer(), parsed),
-                            )
+                            Timber.i(json.encodeToString(JsonElement.serializer(), parsed))
                         }.onFailure {
-                            Log.i("PrettyLogger", message)
+                            Timber.i(message)
                         }
                         return
                     }
-                    Log.i("PrettyLogger", message)
+                    Timber.i(message)
                 }
             },
         ).apply {

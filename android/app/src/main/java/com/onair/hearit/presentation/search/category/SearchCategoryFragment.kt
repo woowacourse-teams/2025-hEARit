@@ -12,10 +12,8 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentSearchCategoryBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
@@ -32,7 +30,7 @@ class SearchCategoryFragment :
     private val categoryAdapter by lazy { CategoryAdapter(this) }
 
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
-        SearchViewModelFactory(CrashlyticsProvider.get())
+        SearchViewModelFactory()
     }
 
     override fun onCreateView(
@@ -96,10 +94,7 @@ class SearchCategoryFragment :
     ) {
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
-            mapOf(
-                AnalyticsParamKeys.CATEGORY_NAME to name,
-                AnalyticsParamKeys.SCREEN_NAME to AnalyticsScreenInfo.Search.NAME,
-            ),
+            mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
 
         navigateToSearchResult(id, name)

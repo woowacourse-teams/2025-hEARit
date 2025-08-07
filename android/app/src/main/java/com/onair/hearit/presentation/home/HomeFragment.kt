@@ -19,7 +19,6 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.RecommendHearits
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
@@ -39,7 +38,7 @@ class HomeFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory(CrashlyticsProvider.get()) }
+    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val recommendAdapter: RecommendHearitAdapter by lazy {

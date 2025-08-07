@@ -15,26 +15,21 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivitySplashBinding
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.login.LoginActivity
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
-    private val viewModel: SplashViewModel by viewModels {
-        SplashViewModelFactory(CrashlyticsProvider.get())
-    }
+    private val viewModel: SplashViewModel by viewModels { SplashViewModelFactory() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_splash)
         setupWindowInsets()
+        viewModel.checkValidAccessTokenWithDelay()
         observeViewModel()
-        Handler(Looper.getMainLooper()).postDelayed({
-            viewModel.checkValidAccessToken()
-        }, 1000)
     }
 
     private fun setupWindowInsets() {

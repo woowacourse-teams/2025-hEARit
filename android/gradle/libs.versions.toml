@@ -7,7 +7,6 @@ datastorePreferences = "1.1.7"
 firebaseBom = "33.16.0"
 flexbox = "3.0.0"
 fragmentTesting = "1.8.8"
-hamcrest = "2.2"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -30,6 +29,7 @@ kotlinx-serialization-json = "1.8.1"
 runner = "1.6.2"
 rules = "1.6.1"
 junitKtx = "1.2.1"
+timber = "5.0.1"
 v2User = "2.21.4"
 room-runtime = "2.7.2"
 
@@ -55,7 +55,6 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics-ndk = { module = "com.google.firebase:firebase-crashlytics-ndk" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
-hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -72,6 +71,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2-kotlinx-serialization-converter" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 
 [plugins]

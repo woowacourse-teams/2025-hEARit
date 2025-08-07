@@ -5,8 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
+import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RandomHearit
@@ -21,13 +21,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class ExploreViewModel(
     private val hearitRepository: HearitRepository,
     private val bookmarkRepository: BookmarkRepository,
     private val exploreDataStoreRepository: ExploreDataStoreRepository,
     private val getShortsHearitUseCase: GetShortsHearitUseCase,
-    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _shortsHearits = MutableLiveData<List<ShortsHearit>>()
     val shortsHearits: LiveData<List<ShortsHearit>> = _shortsHearits
@@ -37,6 +37,9 @@ class ExploreViewModel(
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
+
+    private val _showLoginDialog = SingleLiveData<Unit>()
+    val showLoginDialog: LiveData<Unit> = _showLoginDialog
 
     private val _shouldPlayAnimation = MutableLiveData<Boolean>()
     val shouldPlayAnimation: LiveData<Boolean> = _shouldPlayAnimation
@@ -56,15 +59,15 @@ class ExploreViewModel(
         fetchData(page = currentPage, isInitial = false)
     }
 
-    fun toggleBookmark(hearitId: Long) {
-        val currentBookmarkIdMap = _bookmarkId.value.orEmpty().toMutableMap()
-
-        val bookmarkId = currentBookmarkIdMap[hearitId]
-
-        if (bookmarkId != null) {
-            deleteBookmark(hearitId, bookmarkId)
+    fun toggleBookmark(
+        hearitId: Long,
+        onFinished: (bookmarkId: Long?) -> Unit,
+    ) {
+        val currentBookmarkId = _bookmarkId.value?.get(hearitId)
+        if (currentBookmarkId == null) {
+            addBookmark(hearitId, onFinished)
         } else {
-            addBookmark(hearitId)
+            deleteBookmark(hearitId, currentBookmarkId, onFinished)
         }
     }
 
@@ -80,7 +83,8 @@ class ExploreViewModel(
                     } else {
                         _shouldPlayAnimation.value = false
                     }
-                }.onFailure {
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
                     _shouldPlayAnimation.value = false
                 }
         }
@@ -104,10 +108,12 @@ class ExploreViewModel(
 
                         // currentPage++
                         // isLastPage = paging.isLast
-                    }.onFailure {
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
                         _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
                     }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Timber.w(e)
                 _toastMessage.value = R.string.explore_toast_shorts_hearits_load_fail
             } finally {
                 isLoading = false
@@ -115,7 +121,10 @@ class ExploreViewModel(
         }
     }
 
-    private fun addBookmark(hearitId: Long) {
+    private fun addBookmark(
+        hearitId: Long,
+        onFinished: (bookmarkId: Long?) -> Unit,
+    ) {
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
 
@@ -123,8 +132,19 @@ class ExploreViewModel(
                 .addBookmark(token?.toBearerToken(), hearitId)
                 .onSuccess { newBookmarkId ->
                     updateBookmarkState(hearitId, newBookmarkId)
-                }.onFailure {
-                    _toastMessage.value = R.string.all_toast_add_bookmark_fail
+                }.onFailure { throwable ->
+                    when (throwable) {
+                        is UserNotRegisteredException -> {
+                            _showLoginDialog.call()
+                            onFinished(-1L)
+                        }
+
+                        else -> {
+                            Timber.w(throwable)
+                            _toastMessage.value = R.string.all_toast_add_bookmark_fail
+                            onFinished(null)
+                        }
+                    }
                 }
         }
     }
@@ -132,6 +152,7 @@ class ExploreViewModel(
     private fun deleteBookmark(
         hearitId: Long,
         bookmarkId: Long,
+        onFinished: (bookmarkId: Long?) -> Unit,
     ) {
         viewModelScope.launch {
             val token = dataStoreRepository.getAccessToken().getOrNull()
@@ -140,8 +161,10 @@ class ExploreViewModel(
                 .deleteBookmark(token?.toBearerToken(), bookmarkId)
                 .onSuccess {
                     updateBookmarkState(hearitId, null)
-                }.onFailure {
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
                     _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                    onFinished(null)
                 }
         }
     }

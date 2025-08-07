@@ -63,6 +63,10 @@
                     android:scheme="kakao${kakaoNativeKey}" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="${enableCrashReporting}" />
     </application>
 
 </manifest>
