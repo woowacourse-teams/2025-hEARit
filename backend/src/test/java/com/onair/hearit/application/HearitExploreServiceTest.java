@@ -19,7 +19,6 @@ import com.onair.hearit.infrastructure.ExploreScoreCommandRepository;
 import com.onair.hearit.infrastructure.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -102,7 +101,8 @@ class HearitExploreServiceTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit5));
 
         // when
-        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(member.getId(), 0L, 10);
+        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(member.getId(),
+                0L, 10);
 
         // then
         exploredHearits.content().forEach(System.out::println);
