@@ -22,6 +22,7 @@ public class JsonMaskingPrettyFormatter {
         put("password", v -> "*****");
         put("localId", v -> maskEdge(v, 1));
         put("accessToken", v -> "*****");
+        put("refreshToken", v -> "*****");
     }};
 
     private final ObjectMapper objectMapper;

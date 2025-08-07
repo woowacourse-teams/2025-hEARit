@@ -58,172 +58,189 @@ class AuthServiceTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Test
-    @DisplayName("아이디와 비밀번호로 회원가입할 수 있으며, 기본 프로필 이미지로 저장된다.")
-    void signup_success() {
-        // given
-        SignupRequest request = new SignupRequest("localId", "nickname", "password123");
+    @Nested
+    @DisplayName("회원가입")
+    class Signup {
 
-        // when
-        authService.signup(request);
+        @Test
+        @DisplayName("아이디와 비밀번호로 회원가입할 수 있으며, 기본 프로필 이미지로 저장된다.")
+        void signup_success() {
+            // given
+            SignupRequest request = new SignupRequest("localId", "nickname", "password123");
 
-        // then
-        Member saved = memberRepository.findByLocalId("localId").orElseThrow();
-        assertAll(() -> {
-            assertThat(saved.getNickname()).isEqualTo("nickname");
-            assertThat(passwordEncoder.matches("password123", saved.getPassword())).isTrue();
-            assertThat(saved.getProfileImage()).isNotNull();
-        });
-    }
+            // when
+            authService.signup(request);
 
-    @Test
-    @DisplayName("이미 존재하는 아이디로 회원가입 시 예외가 발생한다.")
-    void signup_duplicate_id() {
-        // given
-        dbHelper.insertMember(
-                Member.createLocalUser("sameId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
+            // then
+            Member saved = memberRepository.findByLocalId("localId").orElseThrow();
+            assertAll(() -> {
+                assertThat(saved.getNickname()).isEqualTo("nickname");
+                assertThat(passwordEncoder.matches("password123", saved.getPassword())).isTrue();
+                assertThat(saved.getProfileImage()).isNotNull();
+            });
+        }
 
-        SignupRequest signupRequest = new SignupRequest("sameId", "another", "password");
+        @Test
+        @DisplayName("이미 존재하는 아이디로 회원가입 시 예외가 발생한다.")
+        void signup_duplicate_id() {
+            // given
+            dbHelper.insertMember(
+                    Member.createLocalUser("sameId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
 
-        // when & then
-        assertThatThrownBy(() -> authService.signup(signupRequest))
-                .isInstanceOf(InvalidInputException.class)
-                .hasMessageContaining("이미 존재하는 아이디입니다.");
-    }
+            SignupRequest signupRequest = new SignupRequest("sameId", "another", "password");
 
-    @Test
-    @DisplayName("로그인 성공 시 엑세스토큰 + 리프래시토큰을 발급한다.")
-    void login_success() {
-        // given
-        dbHelper.insertMember(
-                Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
-
-        LoginRequest loginRequest = new LoginRequest("localId", "password");
-
-        // when
-        LoginTokenResponse loginTokenResponse = authService.login(loginRequest);
-
-        // then
-        String responseAccessToken = loginTokenResponse.accessToken();
-        String responseRefreshToken = loginTokenResponse.refreshToken();
-
-        assertAll(() -> {
-            assertThat(responseAccessToken).isNotNull();
-            assertThat(responseRefreshToken).isNotNull();
-            RefreshToken refreshToken = refreshTokenRepository.findByToken(responseRefreshToken).orElseThrow();
-            assertThat(refreshToken.getToken()).isEqualTo(responseRefreshToken);
-        });
-    }
-
-    @Test
-    @DisplayName("아이디가 존재하지 않을 경우 인증예외가 발생한다")
-    void login_fail_member_not_found() {
-        // given
-        LoginRequest request = new LoginRequest("nonexistent", "password");
-
-        // when & then
-        assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
-    }
-
-    @Test
-    @DisplayName("비밀번호가 틀릴 경우 인증예외가 발생한다")
-    void login_fail_wrong_password() {
-        // given
-        dbHelper.insertMember(Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
-
-        LoginRequest loginRequest = new LoginRequest("localId", "wrongpassword");
-
-        // when & then
-        assertThatThrownBy(() -> authService.login(loginRequest))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
-    }
-
-    @Test
-    @DisplayName("로그아웃 시 해당 member의 리프레시토큰을 삭제한다.")
-    void logout_then_deleteRefreshToken() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
-        refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
-        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
-
-        // when
-        authService.logout(member.getId());
-
-        // then
-        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+            // when & then
+            assertThatThrownBy(() -> authService.signup(signupRequest))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("이미 존재하는 아이디입니다.");
+        }
     }
 
     @Nested
-    @DisplayName("토큰 재발급")
-    class Reissue {
+    @DisplayName("로그인")
+    class Login {
 
         @Test
-        @DisplayName("리프레시 토큰이 유효하고 저장된 값과 일치하면 엑세스토큰을 재발급한다")
-        void reissue_success() {
+        @DisplayName("로그인 성공 시 엑세스토큰 + 리프래시토큰을 발급한다.")
+        void login_success() {
             // given
-            Member member = dbHelper.insertMember(
+            dbHelper.insertMember(
                     Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
-            String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
-            refreshTokenRepository.save(new RefreshToken(member.getId(), refreshTokenValue, LocalDateTime.now()));
+
+            LoginRequest loginRequest = new LoginRequest("localId", "password");
 
             // when
-            String reissuedAccessToken = authService.reissue(refreshTokenValue);
+            LoginTokenResponse loginTokenResponse = authService.login(loginRequest);
 
             // then
-            assertThat(reissuedAccessToken).isNotNull();
-        }
+            String responseAccessToken = loginTokenResponse.accessToken();
+            String responseRefreshToken = loginTokenResponse.refreshToken();
 
-        @Disabled("만료 테스트는 실시간 대기 필요 - 실제 실행은 비효율적이므로 제외")
-        @Test
-        @DisplayName("리프레시 토큰이 만료되었으면 UnauthorizedException을 던진다")
-        void reissue_fail_when_refreshToken_expired() throws InterruptedException {
-            // given
-            Member member = dbHelper.insertMember(
-                    Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
-            String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
-            refreshTokenRepository.save(new RefreshToken(member.getId(), refreshTokenValue, LocalDateTime.now()));
-
-            Thread.sleep(1000); // 리프레시 토큰 유효시간 1초 -> 1초 기다려서 토큰 만료시킴
-
-            // when & then
-            assertThatThrownBy(() -> authService.reissue(refreshTokenValue))
-                    .isInstanceOf(UnauthorizedException.class)
-                    .hasMessage("만료된 리프레시토큰입니다.");
+            assertAll(() -> {
+                assertThat(responseAccessToken).isNotNull();
+                assertThat(responseRefreshToken).isNotNull();
+                RefreshToken refreshToken = refreshTokenRepository.findByToken(responseRefreshToken).orElseThrow();
+                assertThat(refreshToken.getToken()).isEqualTo(responseRefreshToken);
+            });
         }
 
         @Test
-        @DisplayName("저장된 리프레시토큰이 없으면 UnauthorizedException을 던진다")
-        void reissue_fail_when_refreshToken_not_found_in_db() {
+        @DisplayName("아이디가 존재하지 않을 경우 인증예외가 발생한다")
+        void login_fail_member_not_found() {
             // given
-            Member member = dbHelper.insertMember(
-                    Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
-            String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
-            // 리프레시토큰 DB에 저장 안 함
+            LoginRequest request = new LoginRequest("nonexistent", "password");
 
             // when & then
-            assertThatThrownBy(() -> authService.reissue(refreshTokenValue))
+            assertThatThrownBy(() -> authService.login(request))
                     .isInstanceOf(UnauthorizedException.class)
-                    .hasMessage("저장된 토큰이 없습니다.");
+                    .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
         }
 
         @Test
-        @DisplayName("리프레시토큰 값이 DB에 저장된 것과 다르면 UnauthorizedException을 던진다")
-        void reissue_fail_when_refreshToken_mismatch() {
+        @DisplayName("비밀번호가 틀릴 경우 인증예외가 발생한다")
+        void login_fail_wrong_password() {
             // given
-            Member member = dbHelper.insertMember(
-                    Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
-            String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
-            // 다른 리프레시토큰 저장
-            refreshTokenRepository.save(new RefreshToken(member.getId(), "other-refresh-token", LocalDateTime.now()));
+            dbHelper.insertMember(Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
+
+            LoginRequest loginRequest = new LoginRequest("localId", "wrongpassword");
 
             // when & then
-            assertThatThrownBy(() -> authService.reissue(refreshTokenValue))
+            assertThatThrownBy(() -> authService.login(loginRequest))
                     .isInstanceOf(UnauthorizedException.class)
-                    .hasMessage("리프레시 토큰이 불일치합니다.");
+                    .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
+        }
+
+        @Nested
+        @DisplayName("토큰 재발급")
+        class Reissue {
+
+            @Test
+            @DisplayName("리프레시 토큰이 유효하고 저장된 값과 일치하면 엑세스토큰을 재발급한다")
+            void reissue_success() {
+                // given
+                Member member = dbHelper.insertMember(
+                        Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"),
+                                "profile.jpg"));
+                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
+                refreshTokenRepository.save(new RefreshToken(member.getId(), refreshTokenValue, LocalDateTime.now()));
+
+                // when
+                String reissuedAccessToken = authService.reissue(refreshTokenValue);
+
+                // then
+                assertThat(reissuedAccessToken).isNotNull();
+            }
+
+            @Disabled("만료 테스트는 실시간 대기 필요 - 실제 실행은 비효율적이므로 제외")
+            @Test
+            @DisplayName("리프레시 토큰이 만료되었으면 UnauthorizedException을 던진다")
+            void reissue_fail_when_refreshToken_expired() throws InterruptedException {
+                // given
+                Member member = dbHelper.insertMember(
+                        Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"),
+                                "profile.jpg"));
+                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
+                refreshTokenRepository.save(new RefreshToken(member.getId(), refreshTokenValue, LocalDateTime.now()));
+
+                Thread.sleep(1000); // 리프레시 토큰 유효시간 1초 -> 1초 기다려서 토큰 만료시킴
+
+                // when & then
+                assertThatThrownBy(() -> authService.reissue(refreshTokenValue))
+                        .isInstanceOf(UnauthorizedException.class)
+                        .hasMessage("만료된 리프레시토큰입니다.");
+            }
+
+            @Test
+            @DisplayName("저장된 리프레시토큰이 없으면 UnauthorizedException을 던진다")
+            void reissue_fail_when_refreshToken_not_found_in_db() {
+                // given
+                Member member = dbHelper.insertMember(
+                        Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"),
+                                "profile.jpg"));
+                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
+                // 리프레시토큰 DB에 저장 안 함
+
+                // when & then
+                assertThatThrownBy(() -> authService.reissue(refreshTokenValue))
+                        .isInstanceOf(UnauthorizedException.class)
+                        .hasMessage("저장된 토큰이 없습니다.");
+            }
+
+            @Test
+            @DisplayName("리프레시토큰 값이 DB에 저장된 것과 다르면 UnauthorizedException을 던진다")
+            void reissue_fail_when_refreshToken_mismatch() {
+                // given
+                Member member = dbHelper.insertMember(
+                        Member.createLocalUser("localId", "nickname", passwordEncoder.encode("password"),
+                                "profile.jpg"));
+                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
+                // 다른 리프레시토큰 저장
+                refreshTokenRepository.save(
+                        new RefreshToken(member.getId(), "other-refresh-token", LocalDateTime.now()));
+
+                // when & then
+                assertThatThrownBy(() -> authService.reissue(refreshTokenValue))
+                        .isInstanceOf(UnauthorizedException.class)
+                        .hasMessage("리프레시 토큰이 불일치합니다.");
+            }
+        }
+
+        @Test
+        @DisplayName("회원탈퇴 시 리프레시토큰 제거 및 회원탈퇴한시각을 기록한다.")
+        void logout_then_deleteRefreshToken() {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+            refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
+            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
+
+            // when
+            authService.withdraw(member.getId());
+
+            // then
+            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+            Member withdrawnMember = memberRepository.findById(member.getId()).orElseThrow();
+            assertThat(withdrawnMember.getDeletedAt()).isNotNull();
         }
     }
 }

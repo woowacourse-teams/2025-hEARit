@@ -8,6 +8,7 @@ import java.util.List;
 public record RandomHearitResponse(
         Long id,
         String title,
+        String categoryColorCode,
         Boolean isBookmarked,
         Long bookmarkId,
         List<KeywordResponse> keywords
@@ -17,6 +18,7 @@ public record RandomHearitResponse(
         return new RandomHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
+                hearit.getCategory().getColorCode(),
                 false,
                 null,
                 keywordResponses
@@ -28,6 +30,7 @@ public record RandomHearitResponse(
         return new RandomHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
+                hearit.getCategory().getColorCode(),
                 true,
                 bookmark.getId(),
                 keywordResponses

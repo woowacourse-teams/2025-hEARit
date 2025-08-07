@@ -14,9 +14,9 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.domain.RecommendHearit;
 import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitOfCategoryResponse;
+import com.onair.hearit.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RandomHearitResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
@@ -92,13 +92,13 @@ class HearitServiceTest {
 
         // then
         assertAll(
-                () -> assertThat(response.id()).isEqualTo(hearit.getId()),
-                () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
-                () -> assertThat(response.summary()).isEqualTo(hearit.getSummary()),
-                () -> assertThat(response.isBookmarked()).isTrue(),
-                () -> assertThat(response.bookmarkId()).isEqualTo(bookmark.getId()),
-                () -> assertThat(response.category()).isEqualTo(hearit.getCategory().getName()),
-                () -> assertThat(response.keywords()).hasSize(1)
+            () -> assertThat(response.id()).isEqualTo(hearit.getId()),
+            () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
+            () -> assertThat(response.summary()).isEqualTo(hearit.getSummary()),
+            () -> assertThat(response.isBookmarked()).isTrue(),
+            () -> assertThat(response.bookmarkId()).isEqualTo(bookmark.getId()),
+            () -> assertThat(response.category()).isEqualTo(hearit.getCategory().getName()),
+            () -> assertThat(response.keywords()).hasSize(1)
         );
     }
 
@@ -111,8 +111,8 @@ class HearitServiceTest {
 
         // when & then
         assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId, member.getId()))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("hearitId");
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining("hearitId");
     }
 
     @Test
@@ -193,34 +193,78 @@ class HearitServiceTest {
     }
 
     @Test
-    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회할 수 있다.")
-    void getGroupedHearitsByCategory() {
+    @DisplayName("북마크한 카테고리가 3개 이상인 경우, 북마크 개수별로 정렬하여 3개의 카테고리와 히어릿들을 조회할 수 있다.")
+    void getHearitsWithRecommendCategory() {
         // given
-        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
-        Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category c2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category c3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
-        Category category3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
+        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
+        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
+        Hearit hearit21 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
+        Hearit hearit22 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
+        Hearit hearit31 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
+
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit11));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit12));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit13));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit21));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit22));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit31));
 
         // when
-        List<GroupedHearitsWithCategoryResponse> responses = hearitService.getGroupedHearitsByCategory();
+        List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(
+            member.getId());
 
         // then
-        assertAll(
-                () -> assertThat(responses).hasSize(3),
-                () -> assertThat(responses.get(0).hearits()).hasSize(3),
-                () -> assertThat(responses.get(1).hearits()).hasSize(3),
-                () -> assertThat(responses.get(2).hearits()).hasSize(3)
-        );
+        assertAll(() -> {
+            assertThat(responses).hasSize(3);
+            assertThat(responses.get(0).hearits()).hasSize(3);
+            assertThat(responses.get(1).hearits()).hasSize(2);
+            assertThat(responses.get(2).hearits()).hasSize(1);
+            assertThat(responses.get(0).categoryId()).isEqualTo(c1.getId());
+            assertThat(responses.get(1).categoryId()).isEqualTo(c2.getId());
+            assertThat(responses.get(2).categoryId()).isEqualTo(c3.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("북마크한 카테고리가 n개(3개 미만)인 경우, 오늘의 랜덤 카테고리 3-n개와 북마크한 카테고리 n개의 히어릿들을 조회할 수 있다.")
+    void getHearitsWithRecommendCategory_TodayRandom() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category4 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category category5 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit11));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit12));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit13));
+
+        // when
+        List<HearitsWithRecommendCategoryResponse> firstResponses = hearitService.getHearitsWithRecommendCategory(
+            member.getId());
+        List<HearitsWithRecommendCategoryResponse> secondResponses = hearitService.getHearitsWithRecommendCategory(
+            member.getId());
+
+        // then
+        assertAll(() -> {
+            assertThat(firstResponses.get(0).categoryId()).isEqualTo(category1.getId());
+            assertThat(secondResponses.get(0).categoryId()).isEqualTo(category1.getId());
+            assertThat(firstResponses.get(1).categoryId()).isEqualTo(secondResponses.get(1).categoryId());
+            assertThat(firstResponses.get(2).categoryId()).isEqualTo(secondResponses.get(2).categoryId());
+        });
     }
 
     @Test
@@ -236,13 +280,13 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category1.getId(),
-                request);
+            request);
 
         // then
         assertAll(() -> {
             assertThat(result.content()).hasSize(2);
             assertThat(result.content()).extracting(HearitOfCategoryResponse::id)
-                    .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
+                .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
         });
     }
 
@@ -260,13 +304,13 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request);
+            request);
 
         // then
         assertAll(
-                () -> assertThat(result.content()).hasSize(1),
-                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
-                () -> assertThat(result.content().get(0).keywords()).hasSize(2)
+            () -> assertThat(result.content()).hasSize(1),
+            () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
+            () -> assertThat(result.content().get(0).keywords()).hasSize(2)
         );
     }
 
@@ -282,12 +326,12 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request);
+            request);
 
         // then
         assertAll(
-                () -> assertThat(result.content()).hasSize(1),
-                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
+            () -> assertThat(result.content()).hasSize(1),
+            () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
         );
     }
 }
