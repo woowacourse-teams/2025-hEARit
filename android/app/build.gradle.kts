@@ -91,6 +91,11 @@ dependencies {
     // LiveData
     implementation(libs.androidx.lifecycle.livedata.ktx)
 
+    // test
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.assertj.core)
+
     // android test
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.rules)
@@ -134,8 +139,6 @@ dependencies {
     // coil
     implementation(libs.coil)
 
-    // test
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.assertj.core)
+    // timber
+    implementation(libs.timber)
 }
