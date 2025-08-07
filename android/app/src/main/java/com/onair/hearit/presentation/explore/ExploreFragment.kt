@@ -40,11 +40,7 @@ class ExploreFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: ExploreViewModel by viewModels {
-        ExploreViewModelFactory(
-            CrashlyticsProvider.get(),
-        )
-    }
+    private val viewModel: ExploreViewModel by viewModels { ExploreViewModelFactory() }
 
     private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
     private val adapter by lazy { ShortsAdapter(player, this) }
@@ -68,9 +64,6 @@ class ExploreFragment :
                 }
             }
         }
-
-    var currentPosition = 0
-    var swipeCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -148,7 +141,6 @@ class ExploreFragment :
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         val layoutManager =
                             recyclerView.layoutManager as? LinearLayoutManager ?: return
-                        val newPosition = layoutManager.findFirstVisibleItemPosition()
                         val snapView = snapHelper.findSnapView(layoutManager) ?: return
                         val position = layoutManager.getPosition(snapView)
                         val item = adapter.currentList.getOrNull(position) ?: return
@@ -156,19 +148,9 @@ class ExploreFragment :
                         player.setMediaItem(MediaItem.fromUri(item.audioUrl))
                         player.prepare()
                         player.play()
-
-                        swipeCount++
-                        currentPosition = newPosition
-                        AnalyticsProvider.get().logEvent(
-                            AnalyticsEventNames.EXPLORE_SWIPE,
-                            mapOf(
-                                AnalyticsParamKeys.SWIPE_POSITION to currentPosition.toString(),
-                                AnalyticsParamKeys.SWIPE_COUNT to swipeCount.toString(),
-                                AnalyticsParamKeys.SCREEN_NAME to AnalyticsScreenInfo.Explore.NAME,
-                            ),
-                        )
-
                         checkAndLoadNextPage(position)
+
+                        AnalyticsProvider.get().logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
                     }
                 }
             },
@@ -284,10 +266,7 @@ class ExploreFragment :
         val lastPosition = player.currentPosition
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,
-            mapOf(
-                AnalyticsParamKeys.SOURCE to EXPLORE_SCREEN_ID,
-                AnalyticsParamKeys.ITEM_ID to hearitId.toString(),
-            ),
+            mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
         )
 
         navigateToDetail(hearitId, lastPosition)
@@ -321,7 +300,6 @@ class ExploreFragment :
     }
 
     companion object {
-        const val EXPLORE_SCREEN_ID = "explore"
         const val HEARIT_ID = "hearit_id"
         const val BOOKMARK_ID = "bookmark_id"
     }

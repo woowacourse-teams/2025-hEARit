@@ -48,7 +48,7 @@ class ScriptFragment : Fragment() {
         requireArguments().getLong(HEARIT_ID)
     }
     private val viewModel: PlayerDetailViewModel by activityViewModels {
-        PlayerDetailViewModelFactory(hearitId, CrashlyticsProvider.get())
+        PlayerDetailViewModelFactory(hearitId)
     }
 
     private val handler = Handler(Looper.getMainLooper())

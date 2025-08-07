@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RecentSearch
@@ -13,11 +12,11 @@ import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class SearchViewModel(
     private val categoryRepository: CategoryRepository,
     private val recentKeywordRepository: RecentKeywordRepository,
-    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
     val categories: LiveData<List<Category>> = _categories
@@ -44,8 +43,8 @@ class SearchViewModel(
                     paging = pageCategories.paging
                     _categories.value = pageCategories.items
                     isLastPage = paging.isLast
-                }.onFailure {
-                    crashlyticsLogger.recordException(it)
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
                     _toastMessage.value = R.string.all_toast_categories_load_fail
                 }
         }
@@ -57,8 +56,8 @@ class SearchViewModel(
                 .getKeywords()
                 .onSuccess { keywords ->
                     _recentKeywords.value = keywords
-                }.onFailure {
-                    crashlyticsLogger.recordException(it)
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
                     _toastMessage.value = R.string.search_toast_recent_keyword_load_fail
                 }
         }
@@ -73,8 +72,8 @@ class SearchViewModel(
                         _recentKeywords.value = emptyList()
                         _toastMessage.value = R.string.search_toast_recent_keyword_delete_success
                     }
-                }.onFailure {
-                    crashlyticsLogger.recordException(it)
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
                     _toastMessage.value = R.string.search_toast_recent_keyword_delete_fail
                 }
         }

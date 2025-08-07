@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.PageResult
@@ -22,13 +21,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class ExploreViewModel(
     private val hearitRepository: HearitRepository,
     private val bookmarkRepository: BookmarkRepository,
     private val exploreDataStoreRepository: ExploreDataStoreRepository,
     private val getShortsHearitUseCase: GetShortsHearitUseCase,
-    private val crashlyticsLogger: CrashlyticsLogger,
 ) : ViewModel() {
     private val _shortsHearits = MutableLiveData<List<ShortsHearit>>()
     val shortsHearits: LiveData<List<ShortsHearit>> = _shortsHearits
@@ -84,7 +83,8 @@ class ExploreViewModel(
                     } else {
                         _shouldPlayAnimation.value = false
                     }
-                }.onFailure {
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
                     _shouldPlayAnimation.value = false
                 }
         }
@@ -108,10 +108,12 @@ class ExploreViewModel(
 
                         // currentPage++
                         // isLastPage = paging.isLast
-                    }.onFailure {
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
                         _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
                     }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Timber.w(e)
                 _toastMessage.value = R.string.explore_toast_shorts_hearits_load_fail
             } finally {
                 isLoading = false
@@ -130,7 +132,6 @@ class ExploreViewModel(
                 .addBookmark(token?.toBearerToken(), hearitId)
                 .onSuccess { newBookmarkId ->
                     updateBookmarkState(hearitId, newBookmarkId)
-                    onFinished(newBookmarkId)
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegisteredException -> {
@@ -139,6 +140,7 @@ class ExploreViewModel(
                         }
 
                         else -> {
+                            Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_add_bookmark_fail
                             onFinished(null)
                         }
@@ -159,8 +161,8 @@ class ExploreViewModel(
                 .deleteBookmark(token?.toBearerToken(), bookmarkId)
                 .onSuccess {
                     updateBookmarkState(hearitId, null)
-                    onFinished(bookmarkId)
-                }.onFailure {
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
                     _toastMessage.value = R.string.all_toast_delete_bookmark_fail
                     onFinished(null)
                 }
