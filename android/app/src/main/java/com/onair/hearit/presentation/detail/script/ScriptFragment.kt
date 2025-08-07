@@ -231,11 +231,9 @@ class ScriptFragment : Fragment() {
         val intent = LoginActivity.newIntent(requireContext())
         startActivity(intent)
 
-        // PlaybackService 종료 (선택)
         val serviceIntent = Intent(requireContext(), PlaybackService::class.java)
         requireContext().stopService(serviceIntent)
 
-        // 현재 프래그먼트 종료
         parentFragmentManager
             .beginTransaction()
             .remove(this)

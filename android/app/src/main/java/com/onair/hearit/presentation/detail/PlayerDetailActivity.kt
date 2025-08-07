@@ -329,11 +329,9 @@ class PlayerDetailActivity : AppCompatActivity() {
         val intent = LoginActivity.newIntent(this)
         startActivity(intent)
 
-        // PlaybackService 종료 (선택)
         val serviceIntent = Intent(this, PlaybackService::class.java)
         this.stopService(serviceIntent)
 
-        // 현재 액티비티 종료
         finish()
     }
 
