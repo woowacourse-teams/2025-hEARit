@@ -39,4 +39,9 @@ public class AdminViewController {
     public String keywordListPage() {
         return "admin/keyword-list";
     }
+
+    @GetMapping("/recommend-hearit")
+    public String recommendHearitPage() {
+        return "admin/recommend-hearit";
+    }
 }

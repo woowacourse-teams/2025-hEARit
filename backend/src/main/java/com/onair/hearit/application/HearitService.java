@@ -42,6 +42,7 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final CategoryRepository categoryRepository;
+    private final RecommendHearitProvider recommendHearitProvider;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, Long memberId) {
         Hearit hearit = getHearitById(hearitId);
@@ -55,7 +56,7 @@ public class HearitService {
 
     private Hearit getHearitById(Long hearitId) {
         return hearitRepository.findWithCategoryById(hearitId)
-            .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
+                .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
     }
 
     public PagedResponse<RandomHearitResponse> getRandomHearits(Long memberId, PagingRequest pagingRequest) {
@@ -67,7 +68,7 @@ public class HearitService {
 
     private RandomHearitResponse toRandomHearitResponse(Hearit hearit, Long memberId) {
         List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-            KEYWORDS_PER_HEARIT_FOR_RANDOM);
+                KEYWORDS_PER_HEARIT_FOR_RANDOM);
         Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitIdAndMemberId(hearit.getId(), memberId);
         if (bookmarkOptional.isPresent()) {
             return RandomHearitResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
@@ -76,14 +77,15 @@ public class HearitService {
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
-        return hearitRepository.findRandom(RECOMMEND_HEARIT_COUNT).stream()
-            .map(RecommendHearitResponse::from)
-            .toList();
+        List<Hearit> recommendHearits = recommendHearitProvider.getRecommendHearit(RECOMMEND_HEARIT_COUNT);
+        return recommendHearits.stream()
+                .map(RecommendHearitResponse::from)
+                .toList();
     }
 
     public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(Long memberId) {
         List<Category> recommendCategories =
-            categoryRepository.findTopCategoriesByMemberBookmarks(memberId, RECOMMEND_CATEGORY_COUNT);
+                categoryRepository.findTopCategoriesByMemberBookmarks(memberId, RECOMMEND_CATEGORY_COUNT);
         if (recommendCategories.size() < RECOMMEND_CATEGORY_COUNT) {
             int extraCount = RECOMMEND_CATEGORY_COUNT - recommendCategories.size();
             List<Long> randomCategoryIds = pickTodayRandomCategoryIds(recommendCategories, extraCount);
@@ -91,8 +93,8 @@ public class HearitService {
             recommendCategories.addAll(randomCategories);
         }
         return recommendCategories.stream()
-            .map(this::toHearitsWithRecommendedWithCategory)
-            .toList();
+                .map(this::toHearitsWithRecommendedWithCategory)
+                .toList();
     }
 
     private List<Long> pickTodayRandomCategoryIds(List<Category> recommendCategories, int count) {

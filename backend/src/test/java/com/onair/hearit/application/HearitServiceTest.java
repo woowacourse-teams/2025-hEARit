@@ -12,6 +12,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.domain.RecommendHearit;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitOfCategoryResponse;
@@ -25,6 +26,8 @@ import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
+import com.onair.hearit.infrastructure.RecommendHearitRepository;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,15 +58,22 @@ class HearitServiceTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private RecommendHearitRepository recommendHearitRepository;
+
+    private DbRecommendHearitProvider recommendHearitProvider;
+
     private HearitService hearitService;
 
     @BeforeEach
     void setup() {
+        recommendHearitProvider = new DbRecommendHearitProvider(hearitRepository, recommendHearitRepository);
         hearitService = new HearitService(
-            hearitRepository,
-            bookmarkRepository,
-            hearitKeywordRepository,
-            categoryRepository);
+                hearitRepository,
+                bookmarkRepository,
+                hearitKeywordRepository,
+                categoryRepository,
+                recommendHearitProvider);
     }
 
     @Test
@@ -151,19 +161,29 @@ class HearitServiceTest {
 
         // then
         assertAll(
-            () -> assertThat(result.content()).hasSize(2),
-            () -> assertThat(result.content().get(0).keywords()).hasSize(2),
-            () -> assertThat(result.content().get(1).keywords()).hasSize(2)
+                () -> assertThat(result.content()).hasSize(2),
+                () -> assertThat(result.content().get(0).keywords()).hasSize(2),
+                () -> assertThat(result.content().get(1).keywords()).hasSize(2)
         );
     }
 
     @Test
-    @DisplayName("최대 5개의 추천 히어릿을 조회할 수 있다.")
+    @DisplayName("최근 추천 히어릿 5개를 조회할 수 있다.")
     void getRecommendedHearits() {
         // given
+        LocalDate today = LocalDate.now();
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        IntStream.rangeClosed(1, 6)
-            .forEach((num) -> dbHelper.insertHearit(TestFixture.createFixedHearitWith(category)));
+        IntStream.rangeClosed(1, 3)
+                .forEach((num) -> {
+                    Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), today));
+                });
+        LocalDate yesterday = today.minusDays(1);
+        IntStream.rangeClosed(1, 5)
+                .forEach((num) -> {
+                    Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), yesterday));
+                });
 
         // when
         List<RecommendHearitResponse> hearits = hearitService.getRecommendedHearits();

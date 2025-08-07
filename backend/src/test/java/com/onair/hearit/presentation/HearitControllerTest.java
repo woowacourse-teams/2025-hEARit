@@ -16,6 +16,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.domain.RecommendHearit;
 import com.onair.hearit.domain.Source;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
@@ -27,6 +28,7 @@ import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -180,13 +182,15 @@ class HearitControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("추천 히어릿을 조회 시, 200 OK 및 최대 5개 히어릿 정보 목록을 제공한다.")
+    @DisplayName("오늘의 추천 히어릿을 조회 시, 200 OK 및 5개 히어릿 정보 목록을 제공한다.")
     void readRecommendedHearits() {
         // given
+        LocalDate today = LocalDate.now();
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        for (int i = 0; i < 5; i++) {
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+            dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), today));
+        }
 
         // when
         List<RecommendHearitResponse> responses = RestAssured.given(this.spec)
@@ -215,7 +219,7 @@ class HearitControllerTest extends IntegrationTest {
                 .getList(".", RecommendHearitResponse.class);
 
         // then
-        assertThat(responses).hasSize(3);
+        assertThat(responses).hasSize(5);
     }
 
     @Test
@@ -381,8 +385,6 @@ class HearitControllerTest extends IntegrationTest {
             assertThat(responses.get(1).categoryId()).isEqualTo(category2.getId());
             assertThat(responses.get(2).categoryId()).isEqualTo(category3.getId());
         });
-
-
     }
 
     @Test
