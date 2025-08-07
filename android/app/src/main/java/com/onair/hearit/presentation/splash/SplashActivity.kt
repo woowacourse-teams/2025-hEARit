@@ -31,10 +31,8 @@ class SplashActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_splash)
         setupWindowInsets()
+        viewModel.checkValidAccessTokenWithDelay()
         observeViewModel()
-        Handler(Looper.getMainLooper()).postDelayed({
-            viewModel.checkValidAccessToken()
-        }, 1000)
     }
 
     private fun setupWindowInsets() {

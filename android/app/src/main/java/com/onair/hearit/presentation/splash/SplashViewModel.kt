@@ -10,6 +10,7 @@ import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.presentation.SingleLiveData
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SplashViewModel(
@@ -23,7 +24,14 @@ class SplashViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    fun checkValidAccessToken() {
+    fun checkValidAccessTokenWithDelay() {
+        viewModelScope.launch {
+            delay(DELAY_TIME)
+            checkValidAccessToken()
+        }
+    }
+
+    private fun checkValidAccessToken() {
         viewModelScope.launch {
             val accessToken = dataStoreRepository.getAccessToken().getOrNull()
             val refreshToken = dataStoreRepository.getRefreshToken().getOrNull()
@@ -73,5 +81,9 @@ class SplashViewModel(
                     }
                 }
         }
+    }
+
+    companion object {
+        private const val DELAY_TIME = 1000L
     }
 }
