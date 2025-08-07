@@ -78,7 +78,6 @@
         hearits.forEach(hearit => {
             const row = document.createElement('tr');
 
-            // ===== [수정 1/2] URL이 없는 출처를 처리하기 위한 렌더링 로직 변경 =====
             const sourcesHtml = Array.isArray(hearit.sources) && hearit.sources.length > 0
                 ? hearit.sources.map(s => {
                     if (s.sourceUrl) { // URL이 있으면 링크로 표시
