@@ -18,7 +18,6 @@ public record HearitMetaDataUpdateRequest(
         @NotNull Long categoryId,
         List<Long> keywordIds
 ) {
-
     public record SourceUpdateRequest(
             @NotBlank String sourceName,
             String sourceUrl
