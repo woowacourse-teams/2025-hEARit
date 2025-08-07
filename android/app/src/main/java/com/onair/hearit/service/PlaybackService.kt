@@ -1,5 +1,6 @@
 package com.onair.hearit.service
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.OptIn
@@ -10,6 +11,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.onair.hearit.presentation.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,16 +32,18 @@ class PlaybackService : MediaSessionService() {
         notificationManager = NotificationManager(this)
         initializePlayer()
         initializeMediaSession()
+        initializeAndStartForeground()
         stateSaver = PlaybackStateSaver(player, serviceScope)
         player.addListener(stateSaver.listener)
     }
 
+    // startService나 startForegroundService와 같은 메서드를 사용해서, 서비스가 명시적으로 시작되는 경우,
+    // 외부 컴포넌트가 서비스를 시작하도록 요청할 때 호출됨
     override fun onStartCommand(
         intent: Intent?,
         flags: Int,
         startId: Int,
     ): Int {
-        initializeAndStartForeground()
         super.onStartCommand(intent, flags, startId)
         val audioUrl = intent?.getStringExtra(EXTRA_AUDIO_URL)
         val title = intent?.getStringExtra(EXTRA_TITLE) ?: "hearit"
@@ -60,11 +64,25 @@ class PlaybackService : MediaSessionService() {
     }
 
     private fun initializeMediaSession() {
+        val mainActivityIntent =
+            Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+
+        val pendingIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                mainActivityIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+
         mediaSession =
             MediaSession
                 .Builder(this, player)
                 .setId(SESSION_ID)
                 .setCallback(PlaybackSessionCallback(player, serviceScope))
+                .setSessionActivity(pendingIntent)
                 .build()
     }
 
