@@ -340,9 +340,7 @@ class PlayerDetailActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
-        mediaController?.pause()
         mediaController?.release()
-        mediaController = null
     }
 
     companion object {
