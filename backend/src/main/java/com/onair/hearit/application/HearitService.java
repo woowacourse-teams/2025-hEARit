@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -84,9 +85,9 @@ public class HearitService {
         List<Category> recommendCategories =
             categoryRepository.findTopCategoriesByMemberBookmarks(memberId, RECOMMEND_CATEGORY_COUNT);
         if (recommendCategories.size() < RECOMMEND_CATEGORY_COUNT) {
-            List<Long> randomCategoryIds = pickTodayRandomCategoryIds(recommendCategories,
-                RECOMMEND_CATEGORY_COUNT - recommendCategories.size());
-            List<Category> randomCategories = categoryRepository.findAllByIdIn(randomCategoryIds);
+            int extraCount = RECOMMEND_CATEGORY_COUNT - recommendCategories.size();
+            List<Long> randomCategoryIds = pickTodayRandomCategoryIds(recommendCategories, extraCount);
+            List<Category> randomCategories = categoryRepository.findAllById(randomCategoryIds);
             recommendCategories.addAll(randomCategories);
         }
         return recommendCategories.stream()
@@ -104,8 +105,9 @@ public class HearitService {
     private List<Long> getAllCategoryIdsWithoutRecommend(List<Category> recommendCategories) {
         List<Long> recommendCategoryIds = recommendCategories.stream().map(Category::getId).toList();
         List<Long> categoryIds = categoryRepository.findAllIds();
-        categoryIds.removeAll(recommendCategoryIds);
-        return categoryIds;
+        return categoryIds.stream()
+            .filter(id -> !recommendCategoryIds.contains(id))
+            .collect(Collectors.toList());
     }
 
     private HearitsWithRecommendCategoryResponse toHearitsWithRecommendedWithCategory(Category category) {
