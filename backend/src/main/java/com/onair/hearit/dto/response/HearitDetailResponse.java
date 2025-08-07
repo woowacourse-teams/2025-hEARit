@@ -3,6 +3,7 @@ package com.onair.hearit.dto.response;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
+import com.onair.hearit.domain.Source;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public record HearitDetailResponse(
         Long id,
         String title,
         String summary,
-        String source,
+        List<SourceResponse> sources,
         Integer playTime,
         LocalDateTime createdAt,
         Boolean isBookmarked,
@@ -20,11 +21,12 @@ public record HearitDetailResponse(
 ) {
     public static HearitDetailResponse from(Hearit hearit, List<Keyword> keywords) {
         List<KeywordResponse> keywordNames = getKeywordNames(keywords);
+        List<SourceResponse> sources = getSources(hearit.getSources());
         return new HearitDetailResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
-                hearit.getSource(),
+                sources,
                 hearit.getPlayTime(),
                 hearit.getCreatedAt(),
                 false,
@@ -35,11 +37,12 @@ public record HearitDetailResponse(
 
     public static HearitDetailResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords) {
         List<KeywordResponse> keywordNames = getKeywordNames(keywords);
+        List<SourceResponse> sources = getSources(hearit.getSources());
         return new HearitDetailResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
-                hearit.getSource(),
+                sources,
                 hearit.getPlayTime(),
                 hearit.getCreatedAt(),
                 true,
@@ -52,6 +55,10 @@ public record HearitDetailResponse(
         return keywords.stream().map(KeywordResponse::from).toList();
     }
 
+    private static List<SourceResponse> getSources(List<Source> sources) {
+        return sources.stream().map(SourceResponse::from).toList();
+    }
+
     private record KeywordResponse(
             Long id,
             String name
@@ -61,6 +68,19 @@ public record HearitDetailResponse(
             return new KeywordResponse(
                     keyword.getId(),
                     keyword.getName()
+            );
+        }
+    }
+
+    private record SourceResponse(
+            String sourceName,
+            String sourceUrl
+    ) {
+
+        public static SourceResponse from(Source source) {
+            return new SourceResponse(
+                    source.getSourceName(),
+                    source.getSourceUrl()
             );
         }
     }

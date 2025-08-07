@@ -10,6 +10,7 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.domain.Source;
 import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.fixture.DbHelper;
@@ -19,6 +20,7 @@ import com.onair.hearit.infrastructure.ExploreScoreCommandRepository;
 import com.onair.hearit.infrastructure.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -142,7 +144,7 @@ class HearitExploreServiceTest {
                 "originalAudioUrl" + name,
                 "shortAudioUrl" + name,
                 "scriptUrl" + name,
-                "source" + name,
+                List.of(new Source("source", "sourceUrl")),
                 category);
     }
 }

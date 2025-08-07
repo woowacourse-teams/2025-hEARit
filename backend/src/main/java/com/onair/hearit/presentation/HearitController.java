@@ -7,10 +7,10 @@ import com.onair.hearit.auth.dto.CurrentMember;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
-import com.onair.hearit.dto.response.GroupedHearitsWithCategoryResponse;
 import com.onair.hearit.dto.response.HearitDetailResponse;
 import com.onair.hearit.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.dto.response.HearitSearchResponse;
+import com.onair.hearit.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.dto.response.RecommendHearitResponse;
 import java.util.List;
@@ -47,7 +47,8 @@ public class HearitController {
             @RequestParam(name = "cursorId", defaultValue = "0") Long cursorId,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Long memberId = extractMemberId(member);
-        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(memberId, cursorId, size);
+        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(memberId, cursorId,
+                size);
         return ResponseEntity.ok(responses);
     }
 
@@ -74,9 +75,11 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/grouped-by-category")
-    public ResponseEntity<List<GroupedHearitsWithCategoryResponse>> readGroupedHearitsByCategory() {
-        List<GroupedHearitsWithCategoryResponse> responses = hearitService.getGroupedHearitsByCategory();
+    @GetMapping("/recommend-category")
+    public ResponseEntity<List<HearitsWithRecommendCategoryResponse>> readHearitsWithRecommendCategory(
+            @AuthenticationPrincipal CurrentMember member) {
+        Long memberId = extractMemberId(member);
+        List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(memberId);
         return ResponseEntity.ok(responses);
     }
 
