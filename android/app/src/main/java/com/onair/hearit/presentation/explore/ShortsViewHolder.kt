@@ -1,9 +1,13 @@
 package com.onair.hearit.presentation.explore
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
@@ -24,7 +28,9 @@ class ShortsViewHolder(
     private var updateRunnable: Runnable? = null
 
     private var shortsHearit: ShortsHearit? = null
-    private val scriptAdapter = ScriptAdapter()
+    private val exploreScriptAdapter = ExploreScriptAdapter()
+
+    private var rotateAnimator: ObjectAnimator? = null
 
     init {
         binding.shortsClickListener = shortsClickListener
@@ -33,10 +39,9 @@ class ShortsViewHolder(
     @OptIn(UnstableApi::class)
     fun bind(item: ShortsHearit) {
         this.shortsHearit = item
-
         binding.hearitItem = item
-        binding.rvExploreItemScript.adapter = scriptAdapter
-        scriptAdapter.submitList(item.script)
+        binding.rvExploreItemScript.adapter = exploreScriptAdapter
+        exploreScriptAdapter.submitList(item.script)
 
         binding.layoutExplorePlayer.player = player
 
@@ -44,6 +49,27 @@ class ShortsViewHolder(
         player.setMediaItem(mediaItem)
         player.prepare()
         player.playWhenReady = true
+
+        val rotate =
+            ObjectAnimator.ofFloat(binding.imgExploreLp, View.ROTATION, 0f, 360f).apply {
+                duration = 3000L
+                repeatCount = ValueAnimator.INFINITE
+                interpolator = LinearInterpolator()
+            }
+        rotateAnimator?.cancel()
+        rotateAnimator = rotate
+        rotate.start()
+
+        binding.btnExploreItemBookmark.setOnClickListener {
+            shortsClickListener.onClickBookmark(item.id) { bookmarkId ->
+                if (bookmarkId != -1L) {
+                    binding.btnExploreItemBookmark.isSelected =
+                        !binding.btnExploreItemBookmark.isSelected
+                }
+            }
+        }
+
+        binding.btnExploreItemBookmark.isSelected = item.isBookmarked
 
         startSubtitleSync()
     }
@@ -73,7 +99,7 @@ class ShortsViewHolder(
         val currentId = currentSubtitle?.id
         val currentIndex = item.script.indexOfLast { it.start <= currentPositionMs }
 
-        scriptAdapter.highlightSubtitle(currentId)
+        exploreScriptAdapter.highlightSubtitle(currentId)
 
         val layoutManager = binding.rvExploreItemScript.layoutManager as? LinearLayoutManager
         layoutManager?.let {

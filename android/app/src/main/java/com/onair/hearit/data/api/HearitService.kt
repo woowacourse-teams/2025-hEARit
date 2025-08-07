@@ -1,5 +1,6 @@
 package com.onair.hearit.data.api
 
+import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
@@ -11,21 +12,20 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface HearitService {
-    @GET("hearits/{hearitId}")
-    suspend fun getHearit(
+    @GET("hearits/recommend-category")
+    suspend fun getCategoryHearits(
         @Header("Authorization") token: String?,
-        @Path("hearitId") hearitId: Long,
-    ): Response<HearitResponse>
+    ): Response<List<GroupedCategoryHearitResponse>>
+
+    @GET("hearits/explore")
+    suspend fun getRandomHearits(
+        @Header("Authorization") token: String?,
+        @Query("cursorId") cursorId: Long?,
+        @Query("size") size: Int?,
+    ): Response<RandomHearitResponse>
 
     @GET("hearits/recommend")
     suspend fun getRecommendHearits(): Response<List<RecommendHearitResponse>>
-
-    @GET("hearits/random")
-    suspend fun getRandomHearits(
-        @Header("Authorization") token: String?,
-        @Query("page") page: Int?,
-        @Query("size") size: Int?,
-    ): Response<RandomHearitResponse>
 
     @GET("hearits/search")
     suspend fun getSearchHearits(
@@ -33,4 +33,10 @@ interface HearitService {
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<SearchHearitResponse>
+
+    @GET("hearits/{hearitId}")
+    suspend fun getHearit(
+        @Header("Authorization") token: String?,
+        @Path("hearitId") hearitId: Long,
+    ): Response<HearitResponse>
 }

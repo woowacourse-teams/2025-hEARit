@@ -8,4 +8,5 @@ data class RecentHearitEntity(
     @PrimaryKey val id: Int = 1,
     val hearitId: Long,
     val title: String,
+    val lastPosition: Long = 0L,
 )

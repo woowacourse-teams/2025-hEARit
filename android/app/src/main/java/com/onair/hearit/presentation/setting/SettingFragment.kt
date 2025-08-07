@@ -15,7 +15,7 @@ class SettingFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SettingViewModel by viewModels { SettingViewModelFactory(requireContext()) }
+    private val viewModel: SettingViewModel by viewModels { SettingViewModelFactory() }
 
     override fun onCreateView(
         inflater: LayoutInflater,

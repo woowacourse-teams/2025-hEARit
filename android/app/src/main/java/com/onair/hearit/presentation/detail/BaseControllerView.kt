@@ -3,15 +3,11 @@ package com.onair.hearit.presentation.detail
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
-import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutControllerBinding
@@ -29,24 +25,13 @@ class BaseControllerView
         private lateinit var player: Player
         private lateinit var binding: LayoutControllerBinding
 
-        private lateinit var timeBar: DefaultTimeBar
-        private lateinit var playButton: ImageButton
-        private lateinit var rewindButton: ImageButton
-        private lateinit var forwardButton: ImageButton
-        private lateinit var curPositionView: TextView
-        private lateinit var durPositionView: TextView
-        private lateinit var playSpeedView: TextView
-
-        private lateinit var listener: CustomComponentListener
-
         private val formatBuilder = StringBuilder()
         private val formatter = Formatter(formatBuilder, Locale.getDefault())
 
         private val window = Timeline.Window()
+        private var playSpeedIndex = DEFAULT_SPEED_INDEX
 
-        private var playSpeedPosition = DEFAULT_SPEED_POSITION
-
-        private val speedList = floatArrayOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
+        private val speedOptions = floatArrayOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
 
         private val progressRunnable = Runnable { updateProgress() }
 
@@ -54,42 +39,69 @@ class BaseControllerView
             initView()
         }
 
+        private fun initView() {
+            binding = LayoutControllerBinding.inflate(LayoutInflater.from(context), this, true)
+        }
+
         fun setPlayer(player: Player) =
             apply {
                 this.player = player
-                listener = CustomComponentListener()
-
-                player.addListener(listener)
-                timeBar.addListener(listener)
-                playButton.setOnClickListener(listener)
-                rewindButton.setOnClickListener(listener)
-                forwardButton.setOnClickListener(listener)
-                playSpeedView.setOnClickListener(listener)
-
-                updateAllUi()
+                setupListeners()
+                updateUI()
             }
 
-        private fun initView() {
-            binding = LayoutControllerBinding.inflate(LayoutInflater.from(context), this, true)
+        private fun setupListeners() {
+            val listener = ComponentListener()
 
-            timeBar = binding.exoProgress
-            playButton = binding.exoPlay
-            rewindButton = binding.exoRew
-            forwardButton = binding.exoFfwd
-            curPositionView = binding.exoPosition
-            durPositionView = binding.exoDuration
-            playSpeedView = binding.playSpeed
+            player.addListener(listener)
+            binding.exoProgress.addListener(listener)
+
+            binding.exoPlay.setOnClickListener { togglePlayPause() }
+            binding.exoRew.setOnClickListener { player.seekBack() }
+            binding.exoFfwd.setOnClickListener { player.seekForward() }
+            binding.playSpeed.setOnClickListener { changeSpeed() }
         }
 
-        private fun updateAllUi() {
+        fun setBookmarkSelected(isSelected: Boolean) {
+            binding.btnDetailBookmark.isSelected = isSelected
+        }
+
+        fun setOnBookmarkClickListener(listener: () -> Unit) {
+            binding.btnDetailBookmark.setOnClickListener {
+                listener()
+            }
+        }
+
+        private fun togglePlayPause() {
+            if (player.playWhenReady) {
+                player.pause()
+            } else {
+                player.play()
+            }
+            updatePlayPauseButton()
+        }
+
+        private fun changeSpeed() {
+            playSpeedIndex = (playSpeedIndex + 1) % speedOptions.size
+            val speed = speedOptions[playSpeedIndex]
+            player.playbackParameters = player.playbackParameters.withSpeed(speed)
+            binding.playSpeed.text = "${speed}x"
+        }
+
+        private fun updateUI() {
             updateTimeline()
             updatePlayPauseButton()
-            updatePlaySpeed()
+            updateSpeedLabel()
         }
 
         private fun updateTimeline() {
-            player.currentTimeline.getWindow(player.currentMediaItemIndex, window)
-            timeBar.setDuration(window.durationMs)
+            val timeline = player.currentTimeline
+            val index = player.currentMediaItemIndex
+
+            if (timeline.isEmpty || index >= timeline.windowCount) return
+
+            timeline.getWindow(index, window)
+            binding.exoProgress.setDuration(window.durationMs)
             updateProgress()
         }
 
@@ -98,48 +110,39 @@ class BaseControllerView
 
             val pos = player.currentPosition
             val buf = player.bufferedPosition
+            val duration = player.duration
 
-            curPositionView.text = Util.getStringForTime(formatBuilder, formatter, pos)
-            durPositionView.text =
-                "-${Util.getStringForTime(formatBuilder, formatter, player.duration - pos)}"
+            binding.exoPosition.text = Util.getStringForTime(formatBuilder, formatter, pos)
+            binding.exoDuration.text =
+                "-${Util.getStringForTime(formatBuilder, formatter, duration - pos)}"
 
-            timeBar.setPosition(pos)
-            timeBar.setBufferedPosition(buf)
+            binding.exoProgress.setPosition(pos)
+            binding.exoProgress.setBufferedPosition(buf)
 
             removeCallbacks(progressRunnable)
-
             if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-                postDelayed(progressRunnable, timeBar.preferredUpdateDelay)
+                postDelayed(progressRunnable, PROGRESS_UPDATE_INTERVAL)
             }
         }
 
         private fun updatePlayPauseButton() {
-            if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-                playButton.setImageResource(R.drawable.img_pause)
-            } else {
-                playButton.setImageResource(R.drawable.img_play)
-            }
+            val icon =
+                if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
+                    R.drawable.img_pause
+                } else {
+                    R.drawable.img_play
+                }
+            binding.exoPlay.setImageResource(icon)
         }
 
-        private fun updatePlaySpeed() {
-            playSpeedView.text = "${speedList[playSpeedPosition]}x"
+        private fun updateSpeedLabel() {
+            val speed = player.playbackParameters.speed
+            binding.playSpeed.text = "${speed}x"
         }
 
-        private fun dispatchPlayPause() {
-            if (player.playWhenReady) player.pause() else player.play()
-        }
-
-        private fun setNextSpeed() {
-            playSpeedPosition = (playSpeedPosition + 1) % speedList.size
-            player.playbackParameters =
-                player.playbackParameters.withSpeed(speedList[playSpeedPosition])
-            updatePlaySpeed()
-        }
-
-        inner class CustomComponentListener :
+        private inner class ComponentListener :
             Player.Listener,
-            TimeBar.OnScrubListener,
-            OnClickListener {
+            TimeBar.OnScrubListener {
             override fun onTimelineChanged(
                 timeline: Timeline,
                 reason: Int,
@@ -151,14 +154,14 @@ class BaseControllerView
                 player: Player,
                 events: Player.Events,
             ) {
-                if (events.contains(Player.EVENT_TIMELINE_CHANGED)) {
-                    updateTimeline()
-                }
-                if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) ||
-                    events.contains(Player.EVENT_IS_PLAYING_CHANGED)
+                if (events.containsAny(
+                        Player.EVENT_TIMELINE_CHANGED,
+                        Player.EVENT_PLAYBACK_STATE_CHANGED,
+                        Player.EVENT_IS_PLAYING_CHANGED,
+                        Player.EVENT_PLAYBACK_PARAMETERS_CHANGED,
+                    )
                 ) {
-                    updatePlayPauseButton()
-                    updateProgress()
+                    updateUI()
                 }
             }
 
@@ -166,14 +169,14 @@ class BaseControllerView
                 timeBar: TimeBar,
                 position: Long,
             ) {
-                curPositionView.text = Util.getStringForTime(formatBuilder, formatter, position)
+                binding.exoPosition.text = Util.getStringForTime(formatBuilder, formatter, position)
             }
 
             override fun onScrubMove(
                 timeBar: TimeBar,
                 position: Long,
             ) {
-                curPositionView.text = Util.getStringForTime(formatBuilder, formatter, position)
+                binding.exoPosition.text = Util.getStringForTime(formatBuilder, formatter, position)
             }
 
             override fun onScrubStop(
@@ -184,18 +187,10 @@ class BaseControllerView
                 player.seekTo(position)
                 updateProgress()
             }
-
-            override fun onClick(v: View?) {
-                when (v) {
-                    playButton -> dispatchPlayPause()
-                    rewindButton -> player.seekBack()
-                    forwardButton -> player.seekForward()
-                    playSpeedView -> setNextSpeed()
-                }
-            }
         }
 
         companion object {
-            const val DEFAULT_SPEED_POSITION = 3
+            private const val DEFAULT_SPEED_INDEX = 3
+            private const val PROGRESS_UPDATE_INTERVAL = 1000L
         }
     }

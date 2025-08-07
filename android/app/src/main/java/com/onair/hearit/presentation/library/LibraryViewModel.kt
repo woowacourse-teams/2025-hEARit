@@ -5,17 +5,20 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.NoBookmarkException
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
+import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class LibraryViewModel(
     private val bookmarkRepository: BookmarkRepository,
+    private val dataStoreRepository: DataStoreRepository,
     private val memberRepository: MemberRepository,
 ) : ViewModel() {
     private val _bookmarks: MutableLiveData<List<Bookmark>> = MutableLiveData()
@@ -37,18 +40,21 @@ class LibraryViewModel(
 
     fun fetchData(page: Int) {
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
             bookmarkRepository
-                .getBookmarks(page = page, size = null)
+                .getBookmarks(token?.toBearerToken(), page = page, size = null)
                 .onSuccess {
                     _uiState.value = BookmarkUiState.LoggedIn
                     _bookmarks.value = it
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is NoBookmarkException -> {
+                        is UserNotRegisteredException -> {
                             _uiState.value = BookmarkUiState.NotLoggedIn
                         }
 
                         else -> {
+                            Timber.w(throwable)
                             _toastMessage.value = R.string.library_toast_bookmark_load_fail
                         }
                     }
@@ -58,10 +64,27 @@ class LibraryViewModel(
         }
     }
 
+    fun deleteBookmark(bookmarkId: Long) {
+        viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
+            bookmarkRepository
+                .deleteBookmark(token?.toBearerToken(), bookmarkId)
+                .onSuccess {
+                    _bookmarks.value =
+                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }
+                }.onFailure {
+                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                }
+        }
+    }
+
     private fun getUserInfo() {
         viewModelScope.launch {
+            val token = dataStoreRepository.getAccessToken().getOrNull()
+
             memberRepository
-                .getUserInfo()
+                .getUserInfo(token?.toBearerToken())
                 .onSuccess { userInfo ->
                     _uiState.value = BookmarkUiState.LoggedIn
                     _userInfo.value = userInfo
@@ -72,6 +95,7 @@ class LibraryViewModel(
                         }
 
                         else -> {
+                            Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }

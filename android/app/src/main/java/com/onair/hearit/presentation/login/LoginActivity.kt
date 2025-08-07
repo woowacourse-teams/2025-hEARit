@@ -1,29 +1,31 @@
 package com.onair.hearit.presentation.login
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
 import com.kakao.sdk.auth.model.OAuthToken
-import com.kakao.sdk.common.model.ClientError
-import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityLoginBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.MainActivity
+import timber.log.Timber
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
-    private val factory by lazy { LoginViewModelFactory(applicationContext) }
-    private val viewModel by lazy { ViewModelProvider(this, factory)[LoginViewModel::class.java] }
+    private val viewModel: LoginViewModel by viewModels { LoginViewModelFactory() }
+
+    private lateinit var kakaoLoginHelper: KakaoLoginHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,30 +33,10 @@ class LoginActivity : AppCompatActivity() {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
         setupWindowInsets()
-
-        setupKakao()
-
-        binding.layoutLoginSymbol
-            .animate()
-            .translationY(-400f)
-            .setDuration(1000)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-
-        binding.tvLoginHearit.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
-
-        viewModel.loginState.observe(this) { state ->
-            if (state == true) {
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
-            }
-        }
-        viewModel.toastMessage.observe(this) { resId ->
-            showToast(getString(resId))
-        }
+        setupAnimation()
+        setupKakaoLogin()
+        setupListeners()
+        observeViewModel()
     }
 
     private fun setupWindowInsets() {
@@ -66,42 +48,71 @@ class LoginActivity : AppCompatActivity() {
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
-    private fun setupKakao() {
+    private fun setupAnimation() {
+        binding.layoutLoginSymbol
+            .animate()
+            .translationY(-400f)
+            .setDuration(1000)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+    }
+
+    private fun setupKakaoLogin() {
+        kakaoLoginHelper =
+            KakaoLoginHelper(
+                activity = this,
+                onSuccess = { token -> handleKakaoLoginSuccess(token) },
+                onError = { throwable ->
+                    showToast(getString(R.string.login_toast_kakao_login_fail))
+                    Timber.w(throwable)
+                },
+            )
+
         binding.btnLoginKakao.setOnClickListener {
-            // 카카오톡으로 로그인 할 수 없어 카카오계정으로 로그인할 경우 사용됨
-            val kakaoCallback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
-                if (error != null) {
-                    Log.e("kakao login", "카카오계정으로 로그인 실패", error)
-                } else if (token != null) {
-                    viewModel.kakaoLogin(token.accessToken)
-                }
-            }
+            kakaoLoginHelper.startLogin()
+        }
+    }
 
-            // 카카오톡이 설치되어 있으면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
-            if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
-                UserApiClient.instance.loginWithKakaoTalk(this) { token, error ->
-                    if (error != null) {
-                        Log.e("kakao login", "카카오톡으로 로그인 실패", error)
+    private fun setupListeners() {
+        binding.tvLoginHearit.setOnClickListener {
+            navigateToMain()
+        }
+    }
 
-                        // 사용자가 카카오톡 설치 후 디바이스 권한 요청 화면에서 로그인을 취소한 경우,
-                        // 의도적인 로그인 취소로 보고 카카오계정으로 로그인 시도 없이 로그인 취소로 처리 (예: 뒤로 가기)
-                        if (error is ClientError && error.reason == ClientErrorCause.Cancelled) {
-                            return@loginWithKakaoTalk
-                        }
-
-                        // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인 시도
-                        UserApiClient.instance.loginWithKakaoAccount(this, callback = kakaoCallback)
-                    } else if (token != null) {
-                        viewModel.kakaoLogin(token.accessToken)
-                    }
-                }
-            } else {
-                UserApiClient.instance.loginWithKakaoAccount(this, callback = kakaoCallback)
+    private fun observeViewModel() {
+        viewModel.loginState.observe(this) { isLoggedIn ->
+            if (isLoggedIn == true) {
+                navigateToMain()
             }
         }
+        viewModel.toastMessage.observe(this) { resId ->
+            showToast(getString(resId))
+        }
+    }
+
+    private fun handleKakaoLoginSuccess(token: OAuthToken) {
+        UserApiClient.instance.me { user, _ ->
+            if (user != null) {
+                AnalyticsProvider.get().setUserId(user.id.toString())
+                CrashlyticsProvider.get().setUserId(user.id.toString())
+            }
+            viewModel.kakaoLogin(token.accessToken)
+        }
+    }
+
+    private fun navigateToMain() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    companion object {
+        fun newIntent(context: Context): Intent =
+            Intent(context, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
     }
 }

@@ -13,7 +13,7 @@ class GetSearchResultUseCase(
     suspend operator fun invoke(
         input: SearchInput,
         page: Int,
-        size: Int,
+        size: Int? = null,
     ): Result<PageResult<SearchedHearit>> =
         when (input) {
             is SearchInput.Keyword -> hearitRepository.getSearchHearits(input.term, page, size)

@@ -5,7 +5,11 @@ import com.onair.hearit.domain.model.UserInfo
 interface DataStoreRepository {
     suspend fun getAccessToken(): Result<String>
 
+    suspend fun getRefreshToken(): Result<String>
+
     suspend fun saveAccessToken(accessToken: String): Result<Boolean>
+
+    suspend fun saveRefreshToken(refreshToken: String): Result<Boolean>
 
     suspend fun getUserInfo(): Result<UserInfo>
 

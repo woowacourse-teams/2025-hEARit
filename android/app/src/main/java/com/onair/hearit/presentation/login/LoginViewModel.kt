@@ -5,11 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.di.TokenProvider
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class LoginViewModel(
     private val authRepository: AuthRepository,
@@ -26,22 +26,31 @@ class LoginViewModel(
             authRepository
                 .kakaoLogin(accessToken)
                 .onSuccess { appToken ->
-                    TokenProvider.accessToken = appToken
-                    saveAccessToken(appToken)
-                }.onFailure {
+                    saveToken(appToken.accessToken, appToken.refreshToken)
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
                     _toastMessage.value = R.string.login_toast_kakao_login_fail
                     _loginState.value = false
                 }
         }
     }
 
-    private fun saveAccessToken(appToken: String) {
+    private fun saveToken(
+        accessToken: String,
+        refreshToken: String,
+    ) {
         viewModelScope.launch {
-            dataStoreRepository
-                .saveAccessToken(appToken)
+            val result =
+                runCatching {
+                    dataStoreRepository.saveAccessToken(accessToken).getOrThrow()
+                    dataStoreRepository.saveRefreshToken(refreshToken).getOrThrow()
+                }
+
+            result
                 .onSuccess {
                     _loginState.value = true
-                }.onFailure {
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
                     _toastMessage.value = R.string.login_toast_save_token_fail
                     _loginState.value = false
                 }

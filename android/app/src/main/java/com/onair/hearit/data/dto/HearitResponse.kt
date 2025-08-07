@@ -11,8 +11,8 @@ data class HearitResponse(
     val title: String,
     @SerialName("summary")
     val summary: String,
-    @SerialName("source")
-    val source: String,
+    @SerialName("sources")
+    val sources: List<SourceResponse>,
     @SerialName("playTime")
     val playTime: Int,
     @SerialName("createdAt")
@@ -21,4 +21,8 @@ data class HearitResponse(
     val isBookmarked: Boolean,
     @SerialName("bookmarkId")
     val bookmarkId: Long?,
+    @SerialName("category")
+    val category: String,
+    @SerialName("keywords")
+    val keywords: List<KeywordResponse>,
 )
