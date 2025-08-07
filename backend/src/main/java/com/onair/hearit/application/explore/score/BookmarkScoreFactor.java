@@ -49,6 +49,6 @@ public class BookmarkScoreFactor implements ScoreFactor {
                                                  long totalBookmarkCount) {
         long sameCategoryCount = bookmarkCountsByCategory
                 .getOrDefault(hearit.getCategory().getId(), 0L);
-        return Math.min(MIN_BOOKMARK_SCORE, ((double) sameCategoryCount / totalBookmarkCount) * MAX_BOOKMARK_SCORE);
+        return Math.max(MIN_BOOKMARK_SCORE, ((double) sameCategoryCount / totalBookmarkCount) * MAX_BOOKMARK_SCORE);
     }
 }
