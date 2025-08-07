@@ -26,7 +26,6 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity

@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentScriptBinding
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
