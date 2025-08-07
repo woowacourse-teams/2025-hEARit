@@ -161,8 +161,7 @@ class HearitControllerTest extends IntegrationTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("탐색 히어릿 목록 조회")
-                                .description("로그인된 사용자 별 최대 10개의 히어릿 목록을 조회합니다.\n" +
-                                        "비회원인 경우 동일하지만 중복된 히어릿이 제공되리 수 있습니다.")
+                                .description("사용자 별 최대 10개의 히어릿 목록을 조회합니다.")
                                 .queryParameters(
                                         parameterWithName("cursorId").description("시작 Cursor ID").defaultValue("0"),
                                         parameterWithName("size").description("필요한 히어릿 항목 수").defaultValue("10")
