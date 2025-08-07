@@ -1,5 +1,6 @@
 package com.onair.hearit.domain.repository
 
+import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RandomHearit
@@ -17,9 +18,9 @@ interface HearitRepository {
 
     suspend fun getRandomHearits(
         token: String?,
-        page: Int? = null,
+        cursorId: Long? = null,
         size: Int? = null,
-    ): Result<PageResult<RandomHearit>>
+    ): Result<CursorResult<RandomHearit>>
 
     suspend fun getSearchHearits(
         searchTerm: String,

@@ -2,6 +2,7 @@ package com.onair.hearit.data.repository
 
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
+import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RandomHearit
@@ -23,11 +24,11 @@ class HearitRepositoryImpl(
 
     override suspend fun getRandomHearits(
         token: String?,
-        page: Int?,
+        cursorId: Long?,
         size: Int?,
-    ): Result<PageResult<RandomHearit>> =
+    ): Result<CursorResult<RandomHearit>> =
         hearitRemoteDataSource
-            .getRandomHearits(token, page, size)
+            .getRandomHearits(token, cursorId, size)
             .mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getSearchHearits(
