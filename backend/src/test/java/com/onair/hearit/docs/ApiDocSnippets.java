@@ -15,7 +15,7 @@ public class ApiDocSnippets {
                 fieldWithPath("totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
                 fieldWithPath("totalElements").type(JsonFieldType.NUMBER).description("전체 항목(요소) 수"),
                 fieldWithPath("isFirst").type(JsonFieldType.BOOLEAN).description("첫 페이지 여부"),
-                fieldWithPath("isEmpty").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부")
+                fieldWithPath("isLast").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부")
         };
     }
 
