@@ -57,10 +57,6 @@ class HearitApplication : Application() {
                 } else if (priority == Log.WARN) {
                     CrashlyticsProvider.get().log(t.message.toString())
                 }
-            } else {
-                if (priority == Log.ERROR || priority == Log.WARN) {
-                    CrashlyticsProvider.get().log(message)
-                }
             }
         }
     }

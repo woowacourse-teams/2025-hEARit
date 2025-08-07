@@ -6,12 +6,14 @@ import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.FirebaseAnalyticsLogger
 
 object AnalyticsProvider {
-    private lateinit var instance: AnalyticsLogger
+    private var instance: AnalyticsLogger? = null
 
     fun init(application: Application) {
         val firebaseAnalytics = FirebaseAnalytics.getInstance(application)
         instance = FirebaseAnalyticsLogger(firebaseAnalytics)
     }
 
-    fun get(): AnalyticsLogger = instance
+    fun get(): AnalyticsLogger =
+        instance
+            ?: throw IllegalStateException("AnalyticsProvider must be initialized before use.")
 }
