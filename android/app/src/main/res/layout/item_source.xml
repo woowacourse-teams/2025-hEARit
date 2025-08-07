@@ -6,12 +6,12 @@
     <data>
 
         <variable
-            name="scriptLine"
-            type="com.onair.hearit.domain.model.ScriptLine" />
+            name="source"
+            type="com.onair.hearit.domain.model.Source" />
 
         <variable
-            name="isHighlighted"
-            type="Boolean" />
+            name="clickListener"
+            type="com.onair.hearit.presentation.detail.PlayerDetailClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,9 +26,9 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:lineSpacingMultiplier="1.3"
+            android:onClick="@{() -> clickListener.onClickSource(source.url)}"
             android:singleLine="false"
-            android:text="@{scriptLine.text}"
-            app:detailHighlightedStyle="@{isHighlighted}"
+            android:text="@{@string/player_detail_source_text(source.name)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

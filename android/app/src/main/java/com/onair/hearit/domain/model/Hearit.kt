@@ -4,7 +4,7 @@ data class Hearit(
     val id: Long,
     val title: String,
     val summary: String,
-    val source: List<Source>,
+    val sources: List<Source>,
     val audioUrl: String,
     val script: List<ScriptLine>,
     val playTime: Int,

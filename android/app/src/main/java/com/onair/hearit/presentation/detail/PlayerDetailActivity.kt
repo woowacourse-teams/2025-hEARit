@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,6 +18,7 @@ import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.concurrent.futures.await
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -45,10 +47,13 @@ import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-class PlayerDetailActivity : AppCompatActivity() {
+class PlayerDetailActivity :
+    AppCompatActivity(),
+    PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
+    private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
+    private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
     private var mediaController: MediaController? = null
 
@@ -82,8 +87,7 @@ class PlayerDetailActivity : AppCompatActivity() {
         bindLayout()
         setupBackPressHandler()
         setupWindowInsets()
-        setupScriptRecyclerView()
-        setupKeywordRecyclerView()
+        setupRecyclerView()
         observeViewModel()
         setupMediaController()
         setupBaseControllerBookmark()
@@ -213,17 +217,28 @@ class PlayerDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupScriptRecyclerView() {
+    private fun setupRecyclerView() {
         binding.rvScript.adapter = scriptAdapter
         setupGestureListener()
+        val layoutManager =
+            FlexboxLayoutManager(this).apply {
+                flexDirection = FlexDirection.ROW
+                flexWrap = FlexWrap.WRAP
+                justifyContent = JustifyContent.FLEX_START
+            }
+
+        binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
+        binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
+        binding.layoutDetailSource.rvDetailSource.adapter = sourceAdapter
     }
 
     @OptIn(UnstableApi::class)
     private fun observeViewModel() {
         viewModel.hearit.observe(this) { hearit ->
             binding.hearit = hearit
-            scriptAdapter.submitList(hearit.script)
             keywordAdapter.submitList(hearit.keywords)
+            scriptAdapter.submitList(hearit.script)
+            sourceAdapter.submitList(hearit.sources)
             handlePlayback(hearit)
         }
 
@@ -264,18 +279,6 @@ class PlayerDetailActivity : AppCompatActivity() {
             }
 
         handler.post(updateRunnable)
-    }
-
-    private fun setupKeywordRecyclerView() {
-        val layoutManager =
-            FlexboxLayoutManager(this).apply {
-                flexDirection = FlexDirection.ROW
-                flexWrap = FlexWrap.WRAP
-                justifyContent = JustifyContent.FLEX_START
-            }
-
-        binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
-        binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
     }
 
     @OptIn(UnstableApi::class)
@@ -332,6 +335,11 @@ class PlayerDetailActivity : AppCompatActivity() {
         this.stopService(serviceIntent)
 
         finish()
+    }
+
+    override fun onClickSource(sourceUrl: String) {
+        val intent = Intent(Intent.ACTION_VIEW, sourceUrl.toUri())
+        startActivity(intent)
     }
 
     override fun onDestroy() {

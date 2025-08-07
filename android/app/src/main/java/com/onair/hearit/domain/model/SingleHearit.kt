@@ -4,7 +4,7 @@ data class SingleHearit(
     val id: Long,
     val title: String,
     val summary: String,
-    val source: List<Source>,
+    val sources: List<Source>,
     val playTime: Int,
     val createdAt: String,
     val isBookmarked: Boolean,
