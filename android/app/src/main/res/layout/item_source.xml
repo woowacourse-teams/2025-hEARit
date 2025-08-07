@@ -19,18 +19,25 @@
         android:layout_height="wrap_content"
         android:paddingVertical="8dp">
 
+        <ImageView
+            android:id="@+id/iv_source_link"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_link"
+            app:layout_constraintBottom_toBottomOf="@id/tv_detail_source"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_detail_source" />
+
         <TextView
             android:id="@+id/tv_detail_source"
             style="@style/pretendard_body"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:lineSpacingMultiplier="1.3"
+            android:layout_marginStart="8dp"
             android:onClick="@{() -> clickListener.onClickSource(source.url)}"
-            android:singleLine="false"
-            android:text="@{@string/player_detail_source_text(source.name)}"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iv_source_link"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="원본은 쿠버네티스 공식 문서를 기반으로 만들어졌습니다. 저작권자는 Kubernetes Author입니다." />
 
