@@ -27,7 +27,7 @@ import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.MainActivity
-import com.onair.hearit.presentation.PlayerViewModel
+import com.onair.hearit.presentation.MainViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.search.SearchFragment
@@ -40,7 +40,7 @@ class HomeFragment :
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory(CrashlyticsProvider.get()) }
-    private val playerViewModel: PlayerViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     private val recommendAdapter: RecommendHearitAdapter by lazy {
         RecommendHearitAdapter(
@@ -143,7 +143,7 @@ class HomeFragment :
         }
 
         viewModel.isLoggedIn.observe(viewLifecycleOwner) { isLoggedIn ->
-            playerViewModel.updateLoginState(isLoggedIn)
+            mainViewModel.updateLoginState(isLoggedIn)
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->

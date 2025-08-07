@@ -13,7 +13,7 @@ class PlayerViewModelFactory(
         val authRepository = RepositoryProvider.authRepository
         val dataStoreRepository = RepositoryProvider.dataStoreRepository
         val recentHearitRepository = RepositoryProvider.recentHearitRepository
-        return PlayerViewModel(
+        return MainViewModel(
             authRepository,
             dataStoreRepository,
             recentHearitRepository,

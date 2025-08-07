@@ -13,7 +13,7 @@ import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import kotlinx.coroutines.launch
 
-class PlayerViewModel(
+class MainViewModel(
     private val authRepository: AuthRepository,
     private val dataStoreRepository: DataStoreRepository,
     private val recentHearitRepository: RecentHearitRepository,

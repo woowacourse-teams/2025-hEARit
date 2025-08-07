@@ -50,7 +50,7 @@ class MainActivity :
     private var currentSelectedItemId: Int = R.id.nav_home
     private var hasSentPreload = false
 
-    private val playerViewModel: PlayerViewModel by viewModels {
+    private val mainViewModel: MainViewModel by viewModels {
         PlayerViewModelFactory(CrashlyticsProvider.get())
     }
 
@@ -58,7 +58,7 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        binding.layoutDrawer.viewModel = playerViewModel
+        binding.layoutDrawer.viewModel = mainViewModel
         binding.lifecycleOwner = this
 
         setupBackPressHandler()
@@ -149,7 +149,7 @@ class MainActivity :
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
         binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
         binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
-        binding.layoutDrawer.tvDrawerLogout.setOnClickListener { playerViewModel.performLogout() }
+        binding.layoutDrawer.tvDrawerLogout.setOnClickListener { mainViewModel.performLogout() }
         binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
     }
 
@@ -159,7 +159,7 @@ class MainActivity :
             if (mediaId != null) {
                 navigateToDetail(mediaId)
             } else {
-                playerViewModel.recentHearit.value
+                mainViewModel.recentHearit.value
                     ?.id
                     ?.let { navigateToDetail(it) }
             }
@@ -167,12 +167,12 @@ class MainActivity :
     }
 
     private fun observeViewModel() {
-        playerViewModel.recentHearit.observe(this) {
+        mainViewModel.recentHearit.observe(this) {
             setPlayerControlViewVisibility()
             maybePreloadRecent()
         }
 
-        playerViewModel.isLoggingOut.observe(this) { isLoading ->
+        mainViewModel.isLoggingOut.observe(this) { isLoading ->
             if (isLoading) {
                 showLoadingDialog()
             } else {
@@ -181,7 +181,7 @@ class MainActivity :
             }
         }
 
-        playerViewModel.withdrawState.observe(this) { state ->
+        mainViewModel.withdrawState.observe(this) { state ->
             if (state) {
                 navigateToLogin()
             } else {
@@ -189,7 +189,7 @@ class MainActivity :
             }
         }
 
-        playerViewModel.toastMessage.observe(this) { resId ->
+        mainViewModel.toastMessage.observe(this) { resId ->
             showToast(getString(resId))
         }
     }
@@ -199,7 +199,7 @@ class MainActivity :
             .Builder(this)
             .setTitle(R.string.dialog_withdraw_title)
             .setMessage(R.string.dialog_withdraw_message)
-            .setPositiveButton(R.string.dialog_withdraw) { _, _ -> playerViewModel.withdraw() }
+            .setPositiveButton(R.string.dialog_withdraw) { _, _ -> mainViewModel.withdraw() }
             .setNegativeButton(R.string.all_cancel, null)
             .show()
     }
@@ -267,7 +267,7 @@ class MainActivity :
         val controller = mediaController ?: return
         if (hasSentPreload) return
 
-        val hasRecent = playerViewModel.recentHearit.value != null
+        val hasRecent = mainViewModel.recentHearit.value != null
         val preparedOrHasItem =
             (controller.playbackState == Player.STATE_READY) || (controller.mediaItemCount > 0)
 
@@ -284,7 +284,7 @@ class MainActivity :
         val controller = mediaController
         val isPreparedOrPlaying =
             controller?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
-        val hasRecent = playerViewModel.recentHearit.value != null
+        val hasRecent = mainViewModel.recentHearit.value != null
 
         if (currentSelectedItemId != R.id.nav_explore && (hasRecent || isPreparedOrPlaying)) {
             showPlayerControlView()
