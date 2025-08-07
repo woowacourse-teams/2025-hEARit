@@ -159,6 +159,16 @@
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
+
+            const entriesToDelete = [];
+            for (const [key, value] of formData.entries()) {
+                if (key.endsWith('.sourceUrl') && value.trim() === '') {
+                    entriesToDelete.push(key);
+                }
+            }
+            entriesToDelete.forEach(k => formData.delete(k));
+
+            
             formData.set("shortAudio", document.getElementById("shortAudio").files[0]);
             formData.set("scriptFile", document.getElementById("scriptFile").files[0]);
 

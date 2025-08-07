@@ -233,9 +233,12 @@
         const sources = Array.from(sourceGroups).map(group => {
             const nameInput = group.querySelector('.source-name-input');
             const urlInput = group.querySelector('.source-url-input');
+            const name = nameInput?.value.trim() || '';
+            const url = urlInput?.value.trim();
+
             return {
-                sourceName: nameInput ? nameInput.value : '',
-                sourceUrl: urlInput ? urlInput.value : ''
+                sourceName: name,
+                sourceUrl: url === '' ? null : url
             };
         })
             .filter(s => s.sourceName.trim() !== '');
