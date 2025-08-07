@@ -2,6 +2,7 @@ package com.onair.hearit.presentation
 
 import android.content.ComponentName
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -196,10 +197,10 @@ class MainActivity :
     private fun confirmAndWithdraw() {
         AlertDialog
             .Builder(this)
-            .setTitle("회원탈퇴")
-            .setMessage("정말 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제됩니다.")
-            .setPositiveButton("탈퇴") { _, _ -> playerViewModel.withdraw() }
-            .setNegativeButton("취소", null)
+            .setTitle(R.string.dialog_withdraw_title)
+            .setMessage(R.string.dialog_withdraw_message)
+            .setPositiveButton(R.string.dialog_withdraw) { _, _ -> playerViewModel.withdraw() }
+            .setNegativeButton(R.string.all_cancel, null)
             .show()
     }
 
@@ -222,15 +223,14 @@ class MainActivity :
     private fun showLoadingDialog() {
         if (loadingDialog?.isShowing == true) return
 
-        val dialogView = layoutInflater.inflate(R.layout.dialog_loading, null)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_logout, null)
         loadingDialog =
             AlertDialog
                 .Builder(this)
                 .setView(dialogView)
                 .setCancelable(false)
                 .create()
-        val color = ContextCompat.getColor(this, R.color.hearit_black1)
-        loadingDialog?.window?.setBackgroundDrawable(color.toDrawable())
+        loadingDialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         loadingDialog?.show()
     }
 
