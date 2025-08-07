@@ -69,7 +69,7 @@ public class ExploreScoreCommandRepositoryTest {
 
         // then
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM explore_score WHERE member_id IS NULL", Integer.class);
+                "SELECT COUNT(*) FROM explore_score WHERE member_id = -1", Integer.class); //memberId null인 경우 -1 취급
         assertThat(count).isEqualTo(scores.size());
     }
 

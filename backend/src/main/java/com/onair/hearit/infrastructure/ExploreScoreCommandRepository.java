@@ -28,8 +28,9 @@ public class ExploreScoreCommandRepository {
                 """;
 
         // TODO: Custom DTO 생성
+        long resolvedMemberId = (memberId == null) ? -1L : memberId;
         List<Object[]> batchArgs = scores.entrySet().stream()
-                .map(entry -> new Object[]{memberId, entry.getKey(), entry.getValue()})
+                .map(entry -> new Object[]{resolvedMemberId, entry.getKey(), entry.getValue()})
                 .toList();
 
         jdbcTemplate.batchUpdate(insertSql, batchArgs);
