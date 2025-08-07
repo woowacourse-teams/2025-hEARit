@@ -14,6 +14,13 @@ class AuthRemoteDataSourceImpl(
     private val authService: AuthService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : AuthRemoteDataSource {
+    override suspend fun checkAccessToken(token: String): Result<NetworkResult<Unit>> =
+        handleApiCall(
+            apiCall = { authService.getAuthCheck(token) },
+            transform = { },
+            errorHandler = errorResponseHandler,
+        )
+
     override suspend fun kakaoLogin(kakaoLoginRequest: KakaoLoginRequest): Result<NetworkResult<KakaoLoginResponse>> =
         handleApiCall(
             apiCall = { authService.postLogin(kakaoLoginRequest) },
@@ -32,9 +39,9 @@ class AuthRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun checkAccessToken(token: String): Result<NetworkResult<Unit>> =
+    override suspend fun withdraw(token: String): Result<NetworkResult<Unit>> =
         handleApiCall(
-            apiCall = { authService.getAuthCheck(token) },
+            apiCall = { authService.deleteAccount(token) },
             transform = { },
             errorHandler = errorResponseHandler,
         )

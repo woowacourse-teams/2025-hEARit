@@ -3,7 +3,6 @@ package com.onair.hearit
 import android.app.Application
 import com.kakao.sdk.common.KakaoSdk
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.di.DatabaseProvider
 import com.onair.hearit.di.RepositoryProvider
 
@@ -15,6 +14,5 @@ class HearitApplication : Application() {
         DatabaseProvider.init(this)
         RepositoryProvider.init(this)
         AnalyticsProvider.init(this)
-        CrashlyticsProvider.init()
     }
 }

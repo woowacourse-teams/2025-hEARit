@@ -18,5 +18,5 @@ class RecentKeywordRepositoryImpl(
         return hearitLocalDataSource.saveKeyword(recentSearch.toData())
     }
 
-    override suspend fun clearKeywords(): Result<Unit> = hearitLocalDataSource.clearKeywords()
+    override suspend fun clearKeywords(): Result<Int> = hearitLocalDataSource.clearKeywords()
 }

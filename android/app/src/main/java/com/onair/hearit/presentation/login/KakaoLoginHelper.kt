@@ -28,10 +28,7 @@ class KakaoLoginHelper(
     }
 
     private fun loginWithKakaoAccount() {
-        UserApiClient.instance.loginWithKakaoAccount(
-            activity,
-            callback = kakaoCallback(),
-        )
+        UserApiClient.instance.loginWithKakaoAccount(activity, callback = kakaoCallback())
     }
 
     private fun kakaoCallback(): (OAuthToken?, Throwable?) -> Unit {
