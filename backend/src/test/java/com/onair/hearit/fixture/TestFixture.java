@@ -35,8 +35,9 @@ public class TestFixture {
                 "shortAudioUrl",
                 "scriptUrl",
                 List.of(
-                        new Source("출처1", "https://example.com/1"),
-                        new Source("출처2", "https://example.com/2")
+                        new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
+                                "https://example.com/1"),
+                        new Source("원본은 CC BY 4.0 라이선스를 따릅니다.", "https://example.com/2")
                 ),
                 category);
     }
@@ -47,8 +48,9 @@ public class TestFixture {
 
     public static List<Source> createFixedSources() {
         return List.of(
-                new Source("출처1", "https://example.com/1"),
-                new Source("출처2", "https://example.com/2")
+                new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
+                        "https://example.com/1"),
+                new Source("원본은 CC BY 4.0 라이선스를 따릅니다.", "https://example.com/2")
         );
     }
 }
