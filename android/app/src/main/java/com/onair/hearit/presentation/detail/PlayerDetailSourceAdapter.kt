@@ -26,7 +26,7 @@ class PlayerDetailSourceAdapter(
                 override fun areItemsTheSame(
                     oldItem: Source,
                     newItem: Source,
-                ): Boolean = oldItem.name == newItem.name
+                ): Boolean = oldItem.url == newItem.url
 
                 override fun areContentsTheSame(
                     oldItem: Source,

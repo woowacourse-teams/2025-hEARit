@@ -18,6 +18,7 @@ class PlayerDetailSourceViewHolder(
     }
 
     fun bind(source: Source) {
+        binding.source = source
         val underlined =
             SpannableString(source.name).apply {
                 setSpan(UnderlineSpan(), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)

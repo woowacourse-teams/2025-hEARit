@@ -44,6 +44,7 @@ import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import kotlin.math.abs
 
 class PlayerDetailActivity :
@@ -336,9 +337,25 @@ class PlayerDetailActivity :
         finish()
     }
 
+    private fun showToast(message: String?) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
     override fun onClickSource(sourceUrl: String) {
-        val intent = Intent(Intent.ACTION_VIEW, sourceUrl.toUri())
-        startActivity(intent)
+        try {
+            val uri = sourceUrl.toUri()
+            if (uri.scheme !in listOf("http", "https")) {
+                Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
+                showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
+                return
+            }
+
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Timber.w(e)
+            showToast(ERROR_INVALID_LINK_MESSAGE)
+        }
     }
 
     override fun onDestroy() {
@@ -354,6 +371,8 @@ class PlayerDetailActivity :
         const val HEARIT_ID = "hearit_id"
         const val BOOKMARK_ID = "bookmark_id"
         const val LAST_POSITION = "last_position"
+        private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
+        private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
 
         fun newIntent(
             context: Context,
