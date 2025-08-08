@@ -5,7 +5,7 @@ on:
     tags:
       - 'v*' # 버전 태그 push 시 실행
   pull_request:
-    branches: [ "develop", "release" ]
+    branches: [ "develop-an", "develop", "release" ]
 
 jobs:
   build:
