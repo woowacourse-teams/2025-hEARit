@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -9,6 +10,14 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint")
     id("com.google.firebase.crashlytics")
 }
+
+val localProperties =
+    Properties().apply {
+        val localFile = rootProject.file("local.properties")
+        if (localFile.exists()) {
+            localFile.inputStream().use { load(it) }
+        }
+    }
 
 android {
     namespace = "com.onair.hearit"
@@ -23,13 +32,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("hearit_keystore.jks")
+            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD", "")
+            keyAlias = "releaseKey"
+            keyPassword = localProperties.getProperty("KEY_PASSWORD", "")
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            signingConfig = signingConfigs.getByName("release")
 
             manifestPlaceholders["enableCrashReporting"] = "true"
         }
@@ -55,12 +74,14 @@ android {
         jvmTarget = "21"
     }
     defaultConfig {
+        manifestPlaceholders += mapOf()
         val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
         val kakaoNativeKey =
             gradleLocalProperties(rootDir, providers).getProperty("KAKAO_NATIVE_KEY") ?: ""
         buildConfigField("String", "KAKAO_NATIVE_KEY", "\"$kakaoNativeKey\"")
+        signingConfig = signingConfigs.getByName("release")
 
         manifestPlaceholders["kakaoNativeKey"] = kakaoNativeKey
     }
