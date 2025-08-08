@@ -14,10 +14,7 @@ plugins {
 
 val localProperties =
     Properties().apply {
-        val localFile = rootProject.file("local.properties")
-        if (localFile.exists()) {
-            localFile.inputStream().use { load(it) }
-        }
+        load(FileInputStream(rootProject.file("local.properties")))
     }
 
 android {
@@ -33,7 +30,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    val signingFile = rootProject.file("app/.signing/keystore.properties")
+    val signingFile = rootProject.file("keystore.properties")
     val releaseSigningConfig =
         if (signingFile.exists()) {
             val keystoreProperties =
@@ -51,18 +48,6 @@ android {
             null
         }
 
-    signingConfigs {
-        create("release") {
-            storeFile =
-                file(System.getenv("RELEASE_STORE_FILE") ?: "./signing/hearit_keystore.jks")
-            storePassword = System.getenv("KEYSTORE_PASSWORD")
-                ?: localProperties.getProperty("KEYSTORE_PASSWORD")
-            keyAlias = "releaseKey"
-            keyPassword = System.getenv("KEY_PASSWORD")
-                ?: localProperties.getProperty("KEY_PASSWORD")
-        }
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -70,8 +55,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("release")
-            manifestPlaceholders["enableCrashReporting"] = "true"
+            if (releaseSigningConfig != null) {
+                signingConfig = releaseSigningConfig
+            }
         }
 
         debug {
@@ -83,8 +69,6 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
             resValue("string", "app_name", "hEARit (Dev)")
-
-            manifestPlaceholders["enableCrashReporting"] = "false"
         }
     }
     compileOptions {
