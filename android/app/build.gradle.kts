@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -34,10 +35,27 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("hearit_keystore")
-            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD")
-            keyAlias = "releaseKey"
-            keyPassword = localProperties.getProperty("KEY_PASSWORD")
+            if (project.hasProperty("KEYSTORE_PASSWORD")) {
+                storeFile = file("hearit_keystore")
+                storePassword = localProperties.getProperty("KEYSTORE_PASSWORD")
+                keyAlias = "releaseKey"
+                keyPassword = localProperties.getProperty("KEY_PASSWORD")
+            } else {
+                val keystoreBase64 = System.getenv("KEYSTORE_BASE64")
+                if (keystoreBase64 != null) {
+                    val keystoreFile =
+                        File("hearit_keystore.jks").apply {
+                            writeBytes(Base64.getDecoder().decode(keystoreBase64))
+                        }
+                    storeFile = keystoreFile
+                    storePassword = System.getenv("KEYSTORE_PASSWORD")
+                    keyAlias = "releaseKey"
+                    keyPassword = System.getenv("KEY_PASSWORD")
+                } else {
+                    // 키스토어 정보가 없을 경우를 대비한 대체(fallback) 처리
+                    println("Warning: Keystore info not found. Release build will fail without proper signing credentials.")
+                }
+            }
         }
     }
 
