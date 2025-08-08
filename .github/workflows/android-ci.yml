@@ -44,13 +44,13 @@ jobs:
       #   run: ./gradlew clean assembleDebug
 
       - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ./app/hearit_keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ./hearit_keystore
 
       # release 브랜치나 태그 푸시일 때 release 빌드
       - name: Build Release
         run: ./gradlew assembleRelease
         env:
-          RELEASE_STORE_FILE: ./app/hearit_keystore
+          RELEASE_STORE_FILE: ./hearit_keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
