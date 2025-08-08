@@ -37,9 +37,6 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{secrets.GOOGLE_SERVICES_JSON}}
         run:
           echo $GOOGLE_SERVICES_JSON > ./app/google-services.json
-      
-      - name: Decode release keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ./app/hearit_keystore
 
       # develop 브랜치, PR은 debug 빌드
       # - name: Build Debug
@@ -48,7 +45,9 @@ jobs:
 
       # release 브랜치나 태그 푸시일 때 release 빌드
       - name: Clean Build Release
-        run: ./gradlew assembleRelease --stacktrace
+        run: |
+             echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ./app/hearit_keystore
+             ./gradlew assembleRelease --stacktrace
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
