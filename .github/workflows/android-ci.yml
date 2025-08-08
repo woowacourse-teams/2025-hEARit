@@ -37,21 +37,20 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{secrets.GOOGLE_SERVICES_JSON}}
         run:
           echo $GOOGLE_SERVICES_JSON > ./app/google-services.json
-
-      # release 브랜치 또는 태그 푸시일 때만 keystore 복원
+      
       - name: Decode release keystore
-        if: github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/tags/')
+        if: github.ref == 'refs/heads/release' || github.event_name == 'pull_request'
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ./app/hearit_keystore
 
       # develop 브랜치, PR은 debug 빌드
       - name: Build Debug
-        if: github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
-        run: ./gradlew assembleDebug
+        if: startsWith(github.ref, 'refs/heads/develop') || github.event_name == 'pull_request'
+        run: ./gradlew clean assembleDebug
 
       # release 브랜치나 태그 푸시일 때 release 빌드
-      - name: Build Release
+      - name: Clean Build Release
         if: github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/tags/')
-        run: ./gradlew assembleRelease
+        run: ./gradlew clean build
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -61,9 +60,6 @@ jobs:
         
       - name: Run Unit Tests
         run: ./gradlew test
-        
-      - name: Clean Project and Build with Gradle
-        run: ./gradlew clean build
         
       - name: If Success, Send notification on Slack
         if: ${{success()}}
