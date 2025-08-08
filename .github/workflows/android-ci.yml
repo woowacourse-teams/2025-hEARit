@@ -44,7 +44,7 @@ jobs:
 
       - name: Create KeyStore File and Properties
         run: |
-          echo "$KEYSTORE_JKS" | base64 --decode > ./app/hearit_keystore.jks
+          echo "$KEYSTORE_JKS" | base64 --decode > ./app/signing/hearit_keystore.jks
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
       # bundleRelease만 실행
