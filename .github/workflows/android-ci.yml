@@ -44,6 +44,7 @@ jobs:
 
       - name: Create KeyStore File and Properties
         run: |
+          mkdir -p ./app/signing
           echo "$KEYSTORE_JKS" | base64 --decode > ./app/signing/hearit_keystore.jks
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
