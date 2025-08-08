@@ -1,0 +1,26 @@
+name: Hearit CI-Release
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*' # 버전 태그 push 시 실행
+  pull_request:
+    branches: [ "develop", "release" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Decode release keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ./app/hearit_keystore
+      - name: Build Release
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
