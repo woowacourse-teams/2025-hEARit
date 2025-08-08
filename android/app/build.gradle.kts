@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
@@ -32,16 +33,33 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    signingConfigs {
-        signingConfigs {
-            create("release") {
-                storeFile = file(System.getenv("RELEASE_STORE_FILE") ?: "hearit_keystore")
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                    ?: localProperties.getProperty("KEYSTORE_PASSWORD")
-                keyAlias = "releaseKey"
-                keyPassword = System.getenv("KEY_PASSWORD")
-                    ?: localProperties.getProperty("KEY_PASSWORD")
+    val signingFile = rootProject.file("app/.signing/keystore.properties")
+    val releaseSigningConfig =
+        if (signingFile.exists()) {
+            val keystoreProperties =
+                Properties().apply {
+                    load(FileInputStream(signingFile))
+                }
+
+            signingConfigs.create("release") {
+                storeFile = file("${keystoreProperties["store_file"]}")
+                keyAlias = "${keystoreProperties["key_alias"]}"
+                keyPassword = "${keystoreProperties["key_password"]}"
+                storePassword = "${keystoreProperties["keystore_password"]}"
             }
+        } else {
+            null
+        }
+
+    signingConfigs {
+        create("release") {
+            storeFile =
+                file(System.getenv("RELEASE_STORE_FILE") ?: "./signing/hearit_keystore.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+                ?: localProperties.getProperty("KEYSTORE_PASSWORD")
+            keyAlias = "releaseKey"
+            keyPassword = System.getenv("KEY_PASSWORD")
+                ?: localProperties.getProperty("KEY_PASSWORD")
         }
     }
 
@@ -78,7 +96,8 @@ android {
     }
     defaultConfig {
         manifestPlaceholders += mapOf()
-        val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
+        val baseUrl =
+            gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
         val kakaoNativeKey =
