@@ -18,6 +18,11 @@ val localProperties =
             localFile.inputStream().use { load(it) }
         }
     }
+val keystorePassword =
+    localProperties.getProperty("KEYSTORE_PASSWORD")
+        ?: System.getenv("KEYSTORE_PASSWORD") ?: ""
+val keyPassword =
+    localProperties.getProperty("KEY_PASSWORD") ?: System.getenv("KEY_PASSWORD") ?: ""
 
 android {
     namespace = "com.onair.hearit"
@@ -35,9 +40,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("hearit_keystore")
-            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD")
+            storePassword = keystorePassword
             keyAlias = "releaseKey"
-            keyPassword = localProperties.getProperty("KEY_PASSWORD")
+            keyPassword = keyPassword
         }
     }
 
