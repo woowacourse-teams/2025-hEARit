@@ -34,10 +34,10 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("hearit_keystore.jks")
-            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD", "")
+            storeFile = file("hearit_keystore")
+            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD")
             keyAlias = "releaseKey"
-            keyPassword = localProperties.getProperty("KEY_PASSWORD", "")
+            keyPassword = localProperties.getProperty("KEY_PASSWORD")
         }
     }
 
@@ -49,7 +49,6 @@ android {
                 "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("release")
-
             manifestPlaceholders["enableCrashReporting"] = "true"
         }
 
