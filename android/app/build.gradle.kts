@@ -44,7 +44,7 @@ android {
                 val keystoreBase64 = System.getenv("KEYSTORE_BASE64")
                 if (keystoreBase64 != null) {
                     val keystoreFile =
-                        File("hearit_keystore.jks").apply {
+                        File("hearit_keystore").apply {
                             writeBytes(Base64.getDecoder().decode(keystoreBase64))
                         }
                     storeFile = keystoreFile
