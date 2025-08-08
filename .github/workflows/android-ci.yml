@@ -39,9 +39,7 @@ jobs:
           echo $GOOGLE_SERVICES_JSON > ./app/google-services.json
 
       - name: Decode release keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: echo "$KEYSTORE_BASE64" | base64 -d > ./app/hearit_keystore.jks
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ./app/hearit_keystore
       
       - name: Run ktlint Check
         run: ./gradlew ktlintCheck
