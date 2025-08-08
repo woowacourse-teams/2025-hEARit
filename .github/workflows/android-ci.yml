@@ -43,12 +43,14 @@ jobs:
       #   if: startsWith(github.ref, 'refs/heads/develop') || github.event_name == 'pull_request'
       #   run: ./gradlew clean assembleDebug
 
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ./app/hearit_keystore
+
       # release 브랜치나 태그 푸시일 때 release 빌드
-      - name: Clean Build Release
-        run: |
-             echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ./app/hearit_keystore
-             ./gradlew assembleRelease --stacktrace
+      - name: Build Release
+        run: ./gradlew assembleRelease
         env:
+          RELEASE_STORE_FILE: ./app/hearit_keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
