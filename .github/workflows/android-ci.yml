@@ -2,7 +2,7 @@ name: Hearit Android CI
 
 on:
   pull_request:
-    branches: [ "main", "develop-an", "release", "develop" ]
+    branches: [ "main", "develop-an", "release", "develop", "temp-ci-1" ]
     paths:
       - 'android/**'
 
