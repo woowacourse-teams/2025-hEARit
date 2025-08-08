@@ -81,7 +81,6 @@ android {
         val kakaoNativeKey =
             gradleLocalProperties(rootDir, providers).getProperty("KAKAO_NATIVE_KEY") ?: ""
         buildConfigField("String", "KAKAO_NATIVE_KEY", "\"$kakaoNativeKey\"")
-        signingConfig = signingConfigs.getByName("release")
 
         manifestPlaceholders["kakaoNativeKey"] = kakaoNativeKey
     }
