@@ -38,21 +38,11 @@ jobs:
         run:
           echo $GOOGLE_SERVICES_JSON > ./app/google-services.json
 
-      # develop 브랜치, PR은 debug 빌드
-      # - name: Build Debug
-      #   if: startsWith(github.ref, 'refs/heads/develop') || github.event_name == 'pull_request'
-      #   run: ./gradlew clean assembleDebug
-
-      - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ./hearit_keystore
-
-      # release 브랜치나 태그 푸시일 때 release 빌드
-      - name: Build Release
-        run: ./gradlew assembleRelease
-        env:
-          RELEASE_STORE_FILE: ./hearit_keystore
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Create KeyStore File and Properties
+        run: |
+          mkdir -p ./app/.signing
+          echo "$UPLOAD_KEY_STORE_JKS" | base64 --decode > ./app/.signing/upload_key_store
+          echo "$KEY_STORE_PROPERTIES" > ./app/.signing/keystore.properties
 
       # - name: Run ktlint Check
       #   run: ./gradlew ktlintCheck
