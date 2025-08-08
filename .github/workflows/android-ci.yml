@@ -2,7 +2,7 @@ name: Hearit Android CI
 
 on:
   pull_request:
-    branches: [ "main", "develop-an" ]
+    branches: [ "main", "develop-an", "release", "develop" ]
     paths:
       - 'android/**'
 
@@ -38,9 +38,24 @@ jobs:
         run:
           echo $GOOGLE_SERVICES_JSON > ./app/google-services.json
 
+      # release 브랜치 또는 태그 푸시일 때만 keystore 복원
       - name: Decode release keystore
+        if: github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/tags/')
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ./app/hearit_keystore
-      
+
+      # develop 브랜치, PR은 debug 빌드
+      - name: Build Debug
+        if: github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
+        run: ./gradlew assembleDebug
+
+      # release 브랜치나 태그 푸시일 때 release 빌드
+      - name: Build Release
+        if: github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/tags/')
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
       - name: Run ktlint Check
         run: ./gradlew ktlintCheck
         
