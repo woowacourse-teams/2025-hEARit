@@ -23,6 +23,14 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    applicationVariants.all {
+        outputs.all {
+            val outputImpl = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+            val newFileName = "hEARit-$versionName-$name.apk"
+            outputImpl.outputFileName = newFileName
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
