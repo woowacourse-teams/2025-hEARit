@@ -50,11 +50,11 @@ jobs:
 
       # 1. AAB 빌드
       - name: Build AAB
-        run: ./gradlew bundleRelease
+        run: ./gradlew clean bundleRelease
       
       # 2. APK 빌드
       - name: Build APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew clean assembleRelease
 
       # Upload AAB
       - name: Upload a Build AAB Artifact
