@@ -85,7 +85,7 @@ jobs:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: hearit-test
-          releaseNotesFile: ./app/release_note.txt
+          releaseNotesFile: android/app/release_note.txt
           file: android/app/build/outputs/apk/release/hEARit-release.apk
 
       # - name: Run ktlint Check
