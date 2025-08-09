@@ -48,8 +48,13 @@ jobs:
           echo "$KEYSTORE_JKS" | base64 --decode > ./app/signing/hearit_keystore.jks
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
-      # - name: Build debug APK
-      #   run: ./gradlew assembleDebug
+      # 1. AAB 빌드
+      - name: Build AAB
+        run: ./gradlew bundleRelease
+      
+      # 2. APK 빌드
+      - name: Build APK
+        run: ./gradlew assembleRelease
 
       # Upload AAB
       - name: Upload a Build AAB Artifact
@@ -75,7 +80,7 @@ jobs:
         uses: wzieba/Firebase-Distribution-Github-Action@v1.7.1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: hearit-test
           releaseNotesFile: ./app/release_note.txt
           file: ./app/build/outputs/apk/release/app-release.apk
