@@ -53,8 +53,8 @@ jobs:
       #   run: ./gradlew clean bundleRelease
       
       # 2. APK 빌드
-      # - name: Build APK
-      #   run: ./gradlew assembleRelease
+      - name: Build APK
+        run: ./gradlew assembleRelease
 
       # Upload AAB
       # - name: Upload a Build AAB Artifact
