@@ -80,7 +80,7 @@ jobs:
         uses: wzieba/Firebase-Distribution-Github-Action@v1.7.1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: hearit-test
           releaseNotesFile: ./app/release_note.txt
           file: ./app/build/outputs/apk/release/app-release.apk
