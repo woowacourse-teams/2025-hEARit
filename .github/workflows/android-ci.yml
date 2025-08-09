@@ -54,7 +54,10 @@ jobs:
       
       # 2. APK 빌드
       - name: Build APK
-        run: ./gradlew clean assembleRelease
+        run: ./gradlew assembleRelease
+
+      - name: List APK files
+        run: ls -l ./app/build/outputs/apk/release
 
       # Upload AAB
       - name: Upload a Build AAB Artifact
