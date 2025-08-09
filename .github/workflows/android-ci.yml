@@ -53,8 +53,8 @@ jobs:
       #   run: ./gradlew clean bundleRelease
       
       # 2. APK 빌드
-      - name: Build APK
-        run: ./gradlew assembleRelease
+      # - name: Build APK
+      #   run: ./gradlew assembleRelease
 
       # Upload AAB
       # - name: Upload a Build AAB Artifact
@@ -78,7 +78,7 @@ jobs:
 
       - name: Debug Secret Content
         run: |
-          echo "${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}" | head -c 50
+          echo "${{ secrets.CREDENTIAL_FILE_CONTENT }}" | head -c 50
 
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1.7.0
