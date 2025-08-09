@@ -49,28 +49,25 @@ jobs:
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
       # 1. AAB 빌드
-      - name: Build AAB
-        run: ./gradlew clean bundleRelease
+      # - name: Build AAB
+      #   run: ./gradlew clean bundleRelease
       
       # 2. APK 빌드
       - name: Build APK
         run: ./gradlew assembleRelease
 
-      - name: List APK files
-        run: ls -l ./app/build/outputs/apk/release
-
       # Upload AAB
-      - name: Upload a Build AAB Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          # Artifact name
-          name: hearit-release-aab
-          # A file, directory or wildcard pattern that describes what to upload
-          path: android/app/build/outputs/bundle/release/app-release.aab
-          retention-days: 14
+      # - name: Upload a Build AAB Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     # Artifact name
+      #     name: hearit-release-aab
+      #     # A file, directory or wildcard pattern that describes what to upload
+      #     path: android/app/build/outputs/bundle/release/app-release.aab
+      #     retention-days: 14
 
       # Upload APK
-      - name: Upload a Build AAB Artifact
+      - name: Upload a Build APK Artifact
         uses: actions/upload-artifact@v4
         with:
           # Artifact name
@@ -79,8 +76,12 @@ jobs:
           path: android/app/build/outputs/apk/release/hEARit-release.apk
           retention-days: 14
 
+      - name: Debug Secret Content
+        run: |
+          echo "${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}" | head -c 50
+
       - name: Upload to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.1
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.0
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
