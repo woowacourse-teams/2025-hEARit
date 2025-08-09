@@ -48,9 +48,37 @@ jobs:
           echo "$KEYSTORE_JKS" | base64 --decode > ./app/signing/hearit_keystore.jks
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
-      # bundleRelease만 실행
-      - name: Build Release AAB
-        run: ./gradlew bundleRelease --stacktrace
+      # - name: Build debug APK
+      #   run: ./gradlew assembleDebug
+
+      # Upload AAB
+      - name: Upload a Build AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Artifact name
+          name: hearit-release-aab
+          # A file, directory or wildcard pattern that describes what to upload
+          path: ./app/build/outputs/bundle/release/app-release.aab
+          retention-days: 14
+
+      # Upload APK
+      - name: Upload a Build AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Artifact name
+          name: hearit-release-apk
+          # A file, directory or wildcard pattern that describes what to upload
+          path: ./app/build/outputs/apk/release/app-release.apk
+          retention-days: 14
+
+      - name: Upload to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_CREDENTIAL_FILE_CONTENT }}
+          groups: hearit-test
+          releaseNotesFile: ./app/release_note.txt
+          file: ./app/build/outputs/apk/release/app-release.apk
 
       # - name: Run ktlint Check
       #   run: ./gradlew ktlintCheck
