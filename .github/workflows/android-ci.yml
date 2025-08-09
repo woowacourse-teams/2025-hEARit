@@ -48,8 +48,13 @@ jobs:
           echo "$KEYSTORE_JKS" | base64 --decode > ./app/signing/hearit_keystore.jks
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
-      # - name: Build debug APK
-      #   run: ./gradlew assembleDebug
+      # 1. AAB 빌드
+      - name: Build AAB
+        run: ./gradlew bundleRelease
+      
+      # 2. APK 빌드
+      - name: Build APK
+        run: ./gradlew assembleRelease
 
       # Upload AAB
       - name: Upload a Build AAB Artifact
