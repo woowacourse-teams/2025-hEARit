@@ -135,4 +135,5 @@
     <string name="dialog_withdraw">탈퇴</string>
     <string name="dialog_withdraw_title">회원탈퇴</string>
     <string name="dialog_withdraw_message">"정말 탈퇴하시겠습니까?\n탈퇴 시 모든 데이터가 삭제됩니다."</string>
+
 </resources>
