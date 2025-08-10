@@ -9,6 +9,8 @@ on:
 env:
   KEYSTORE_JKS: ${{ secrets.KEYSTORE_BASE64 }}
   KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
+  BASE_URL: ${{ secrets.BASE_URL }}
+  GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}        
 
 jobs:
   build:
@@ -31,14 +33,10 @@ jobs:
         run: chmod +x gradlew
 
       - name: Add Local Properties
-        env:
-          BASE_URL: ${{ secrets.BASE_URL }}
         run:
-          echo BASE_URL=\"$BASE_URL\" > ./local.properties
+          echo "BASE_URL=$BASE_URL" > ./local.properties
 
       - name: Get Google Services JSON
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run:
           echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
 
