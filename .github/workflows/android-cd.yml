@@ -64,5 +64,5 @@ jobs:
           packageName: com.onair.hearit
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: alpha
-          whatsNewDirectory: android/app/release_note.txt
+          whatsNewDirectory: android/app/whatsnew
           
