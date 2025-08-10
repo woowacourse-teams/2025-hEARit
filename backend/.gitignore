@@ -33,5 +33,11 @@ out/
 /nbdist/
 /.nb-gradle/
 
+### Logging ###
+/log/
+
 ### VS Code ###
 .vscode/
+
+.DS_store
+.env
