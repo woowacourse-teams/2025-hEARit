@@ -2,7 +2,7 @@ name: Hearit Android CI
 
 on:
   pull_request:
-    branches: [ "main", "develop-an", "release", "develop", "temp-ci-1" ]
+    branches: [ "main", "develop-an" ]
     paths:
       - 'android/**'
 
@@ -42,54 +42,14 @@ jobs:
         run:
           echo $GOOGLE_SERVICES_JSON > ./app/google-services.json
 
-      - name: Create KeyStore File and Properties
-        run: |
-          mkdir -p ./app/signing
-          echo "$KEYSTORE_JKS" | base64 --decode > ./app/signing/hearit_keystore.jks
-          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
-
-      # 1. AAB 빌드
-      # - name: Build AAB
-      #   run: ./gradlew clean bundleRelease
-      
-      # 2. APK 빌드
-      - name: Build APK
-        run: ./gradlew assembleRelease
-
-      # Upload AAB
-      # - name: Upload a Build AAB Artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     # Artifact name
-      #     name: hearit-release-aab
-      #     # A file, directory or wildcard pattern that describes what to upload
-      #     path: android/app/build/outputs/bundle/release/app-release.aab
-      #     retention-days: 14
-
-      # Upload APK
-      - name: Upload a Build APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          # Artifact name
-          name: hearit-release-apk
-          # A file, directory or wildcard pattern that describes what to upload
-          path: android/app/build/outputs/apk/release/hEARit-release.apk
-          retention-days: 14
-
-      - name: Upload to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.0
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID }}
-          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-          groups: hearit-test
-          releaseNotesFile: android/app/release_note.txt
-          file: android/app/build/outputs/apk/release/hEARit-release.apk
-
-      # - name: Run ktlint Check
-      #   run: ./gradlew ktlintCheck
+      - name: Run ktlint Check
+        run: ./gradlew ktlintCheck
         
-      # - name: Run Unit Tests
-      #   run: ./gradlew test
+      - name: Run Unit Tests
+        run: ./gradlew test
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
         
       - name: If Success, Send notification on Slack
         if: ${{success()}}
