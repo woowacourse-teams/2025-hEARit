@@ -76,14 +76,6 @@ jobs:
           path: android/app/build/outputs/apk/release/hEARit-release.apk
           retention-days: 14
 
-      - name: Debug Secret Content
-        run: |
-          echo "${{ secrets.CREDENTIAL_FILE_CONTENT }}" | head -c 50
-
-      - name: Check service account JSON in CI
-        run: |
-          echo "${{ secrets.CREDENTIAL_FILE_CONTENT }}" | jq .
-
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1.7.0
         with:
