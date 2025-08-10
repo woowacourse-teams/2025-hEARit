@@ -27,13 +27,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="72dp"
             android:nestedScrollingEnabled="false"
             android:orientation="vertical"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_search_categories"
             app:spanCount="2"
-            tools:itemCount="12"
+            tools:itemCount="10"
             tools:listitem="@layout/item_category" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

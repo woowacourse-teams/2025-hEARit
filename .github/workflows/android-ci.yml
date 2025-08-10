@@ -7,8 +7,6 @@ on:
       - 'android/**'
 
 env:
-  KEYSTORE_JKS: ${{ secrets.KEYSTORE_BASE64 }}
-  KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
   BASE_URL: ${{ secrets.BASE_URL }}
   GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}        
 

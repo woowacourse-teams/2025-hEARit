@@ -1,4 +1,6 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -9,6 +11,11 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint")
     id("com.google.firebase.crashlytics")
 }
+
+val localProperties =
+    Properties().apply {
+        load(FileInputStream(rootProject.file("local.properties")))
+    }
 
 android {
     namespace = "com.onair.hearit"
@@ -23,6 +30,24 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val signingFile = rootProject.file("keystore.properties")
+    val releaseSigningConfig =
+        if (signingFile.exists()) {
+            val keystoreProperties =
+                Properties().apply {
+                    load(FileInputStream(signingFile))
+                }
+
+            signingConfigs.create("release") {
+                storeFile = file("${keystoreProperties["store_file"]}")
+                keyAlias = "${keystoreProperties["key_alias"]}"
+                keyPassword = "${keystoreProperties["key_password"]}"
+                storePassword = "${keystoreProperties["keystore_password"]}"
+            }
+        } else {
+            null
+        }
+
     applicationVariants.all {
         outputs.all {
             val outputImpl = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
@@ -33,13 +58,14 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-
-            manifestPlaceholders["enableCrashReporting"] = "true"
+            if (releaseSigningConfig != null) {
+                signingConfig = releaseSigningConfig
+            }
         }
 
         debug {
@@ -51,8 +77,6 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
             resValue("string", "app_name", "hEARit (Dev)")
-
-            manifestPlaceholders["enableCrashReporting"] = "false"
         }
     }
     compileOptions {
@@ -63,7 +87,9 @@ android {
         jvmTarget = "21"
     }
     defaultConfig {
-        val baseUrl = gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
+        manifestPlaceholders += mapOf()
+        val baseUrl =
+            gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
         val kakaoNativeKey =

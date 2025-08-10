@@ -8,5 +8,5 @@ data class SourceResponse(
     @SerialName("sourceName")
     val sourceName: String,
     @SerialName("sourceUrl")
-    val sourceUrl: String,
+    val sourceUrl: String?,
 )
