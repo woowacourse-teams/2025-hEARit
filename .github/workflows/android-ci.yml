@@ -8,7 +8,7 @@ on:
 
 env:
   BASE_URL: ${{ secrets.BASE_URL }}
-  GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}        
+  GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
 jobs:
   build:
