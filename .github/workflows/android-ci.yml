@@ -2,9 +2,15 @@ name: Hearit Android CI
 
 on:
   pull_request:
-    branches: [ "main", "develop-an", "release", "develop" ]
+    branches: [ "main", "develop-an" ]
     paths:
       - 'android/**'
+
+env:
+  KEYSTORE_JKS: ${{ secrets.KEYSTORE_BASE64 }}
+  KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
+  BASE_URL: ${{ secrets.BASE_URL }}
+  GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}        
 
 jobs:
   build:
@@ -13,7 +19,7 @@ jobs:
     defaults:
       run:
         working-directory: android
-        
+
     steps:
       - uses: actions/checkout@v4
       - name: set up JDK 21
@@ -22,44 +28,27 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: gradle
-          
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Add Local Properties
-        env:
-          BASE_URL: ${{secrets.BASE_URL}}
         run:
-          echo base.url=\"$_BASE_URL\" >> ./local.properties
-      
+          echo "BASE_URL=$BASE_URL" > ./local.properties
+
       - name: Get Google Services JSON
-        env:
-          GOOGLE_SERVICES_JSON: ${{secrets.GOOGLE_SERVICES_JSON}}
         run:
-          echo $GOOGLE_SERVICES_JSON > ./app/google-services.json
+          echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
 
-      # develop 브랜치, PR은 debug 빌드
-      # - name: Build Debug
-      #   if: startsWith(github.ref, 'refs/heads/develop') || github.event_name == 'pull_request'
-      #   run: ./gradlew clean assembleDebug
+      - name: Run ktlint Check
+        run: ./gradlew ktlintCheck
 
-      - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ./hearit_keystore
+      - name: Run Unit Tests
+        run: ./gradlew test
 
-      # release 브랜치나 태그 푸시일 때 release 빌드
-      - name: Build Release
-        run: ./gradlew assembleRelease
-        env:
-          RELEASE_STORE_FILE: ./hearit_keystore
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
 
-      # - name: Run ktlint Check
-      #   run: ./gradlew ktlintCheck
-        
-      # - name: Run Unit Tests
-      #   run: ./gradlew test
-        
       - name: If Success, Send notification on Slack
         if: ${{success()}}
         uses: rtCamp/action-slack-notify@v2
@@ -70,7 +59,7 @@ jobs:
           MSG_MINIMAL: true
           SLACK_USERNAME: Hearit Android
           SLACK_MESSAGE: 'Hearit Android PR Check Success 🎉'
-          
+
       - name: If Fail, Send notification on Slack
         if: ${{failure()}}
         uses: rtCamp/action-slack-notify@v2
