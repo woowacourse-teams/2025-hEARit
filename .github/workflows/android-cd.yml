@@ -46,9 +46,6 @@ jobs:
           echo "$KEYSTORE_JKS" | base64 --decode > ./app/signing/hearit_keystore.jks
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
       # AAB 파일 추출 후 Play Console에 업로드
       - name: Build Release AAB
         run: ./gradlew bundleRelease
