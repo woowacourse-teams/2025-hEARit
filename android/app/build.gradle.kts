@@ -12,11 +12,6 @@ plugins {
     id("com.google.firebase.crashlytics")
 }
 
-val localProperties =
-    Properties().apply {
-        load(FileInputStream(rootProject.file("local.properties")))
-    }
-
 android {
     namespace = "com.onair.hearit"
     compileSdk = 35

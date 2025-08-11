@@ -46,6 +46,14 @@ class ExploreFragment :
     private val snapHelper = PagerSnapHelper()
     private var isFirstLoad = true
 
+    private val animator: ObjectAnimator by lazy {
+        ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
+            duration = 1300
+            repeatCount = 1
+            repeatMode = ObjectAnimator.RESTART
+        }
+    }
+
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -182,13 +190,6 @@ class ExploreFragment :
     private fun startSwipeAnimation() {
         binding.lavExploreSwipeUp.visibility = View.VISIBLE
 
-        val animator =
-            ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
-                duration = 1300
-                repeatCount = 1
-                repeatMode = ObjectAnimator.RESTART
-            }
-
         animator.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
@@ -290,6 +291,7 @@ class ExploreFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+        animator.end()
         _binding = null
     }
 
