@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
         return buildProblemDetail(ErrorCode.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다.", request);
     }
-
+  
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnhandledException(Exception ex, HttpServletRequest request) {
         return buildProblemDetail(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getTitle(), request);
