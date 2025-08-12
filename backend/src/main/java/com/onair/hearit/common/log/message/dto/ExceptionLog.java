@@ -14,7 +14,7 @@ public class ExceptionLog {
     private final LogLevel logType;
     private final String timestamp;
     private final RequestInfo requestInfo;
-    private final HttpStatus httpStatus;
+    private final Status httpStatus;
     private final ErrorDetail errorDetail;
 
     public static ExceptionLog warn(
@@ -22,7 +22,7 @@ public class ExceptionLog {
             RequestInfo requestInfo,
             HttpStatus httpStatus,
             ErrorDetail errorDetail) {
-        return new ExceptionLog(LogLevel.WARN, timestamp.toString(), requestInfo, httpStatus, errorDetail);
+        return new ExceptionLog(LogLevel.WARN, timestamp.toString(), requestInfo, Status.from(httpStatus), errorDetail);
     }
 
     public static ExceptionLog error(
@@ -30,7 +30,18 @@ public class ExceptionLog {
             RequestInfo requestInfo,
             HttpStatus httpStatus,
             ErrorDetail errorDetail) {
-        return new ExceptionLog(LogLevel.ERROR, timestamp.toString(), requestInfo, httpStatus, errorDetail);
+        return new ExceptionLog(LogLevel.ERROR, timestamp.toString(), requestInfo, Status.from(httpStatus), errorDetail);
+    }
+
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class Status {
+        private final int code;
+        private final String name;
+
+        public static Status from(HttpStatus status) {
+            return new Status(status.value(), status.name());
+        }
     }
 
     @Getter
