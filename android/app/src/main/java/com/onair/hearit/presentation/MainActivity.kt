@@ -71,9 +71,6 @@ class MainActivity :
         observeViewModel()
         showFragment(HomeFragment())
         setupBottomControllerClick()
-
-        var keyHash = Utility.getKeyHash(this)
-        Timber.d(keyHash)
     }
 
     override fun onResume() {
