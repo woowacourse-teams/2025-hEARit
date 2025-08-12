@@ -77,7 +77,6 @@ class LibraryViewModel(
             memberRepository
                 .getUserInfo()
                 .onSuccess { userInfo ->
-                    Timber.d("$userInfo")
                     _uiState.value = BookmarkUiState.LoggedIn
                     _userInfo.value = userInfo
                 }.onFailure { throwable ->

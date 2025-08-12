@@ -6,7 +6,6 @@ import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.MemberRepository
-import com.onair.hearit.presentation.toBearerToken
 
 class MemberRepositoryImpl(
     private val preferencesLocalDataSource: PreferencesLocalDataSource,
@@ -20,12 +19,8 @@ class MemberRepositoryImpl(
                     .getOrThrow()
             if (localUser.id != -1L) return@runCatching localUser
 
-            val accessToken =
-                preferencesLocalDataSource.getAccessToken().getOrNull()
-                    ?: throw UserNotRegisteredException()
-
             memberRemoteDataSource
-                .getUserInfo(accessToken.toBearerToken())
+                .getUserInfo()
                 .mapOrThrowDomain { it.toDomain() }
                 .onSuccess { preferencesLocalDataSource.saveUserInfo(it) }
                 .getOrThrow()
