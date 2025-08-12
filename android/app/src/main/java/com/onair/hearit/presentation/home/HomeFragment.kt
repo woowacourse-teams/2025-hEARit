@@ -71,6 +71,7 @@ class HomeFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
+        binding.viewModel = viewModel
         setupWindowInsets()
         setupListeners()
         setupRecommendRecyclerView()
