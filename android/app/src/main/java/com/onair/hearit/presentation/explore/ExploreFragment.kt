@@ -87,6 +87,7 @@ class ExploreFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
+        binding.viewModel = viewModel
 
         setupWindowInsets()
         setupRecyclerView()
