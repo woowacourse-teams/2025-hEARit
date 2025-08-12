@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
 import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
+import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
@@ -52,6 +53,7 @@ class MainViewModel(
                 _toastMessage.value = R.string.logout_fail
             } else {
                 clearData()
+                TokenInterceptorProvider.setAccessToken(null)
                 _toastMessage.value = R.string.logout_success
             }
         }
@@ -70,7 +72,7 @@ class MainViewModel(
                             return@unlink
                         }
 
-                        this@MainViewModel.clearData()
+                        clearData()
                         _withdrawState.value = true
                         _toastMessage.value = R.string.withdraw_success
                     }

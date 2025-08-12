@@ -17,12 +17,8 @@ class HearitRepositoryImpl(
     private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
-    override suspend fun getHearit(hearitId: Long): Result<SingleHearit> {
-        val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
-        return hearitRemoteDataSource
-            .getHearit(accessToken.toBearerToken(), hearitId)
-            .mapOrThrowDomain { it.toDomain() }
-    }
+    override suspend fun getHearit(hearitId: Long): Result<SingleHearit> =
+        hearitRemoteDataSource.getHearit(hearitId).mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =
         hearitRemoteDataSource.getRecommendHearits().mapListOrThrowDomain { it.toDomain() }
@@ -30,12 +26,10 @@ class HearitRepositoryImpl(
     override suspend fun getRandomHearits(
         cursorId: Long?,
         size: Int?,
-    ): Result<CursorResult<RandomHearit>> {
-        val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
-        return hearitRemoteDataSource
-            .getRandomHearits(accessToken.toBearerToken(), cursorId, size)
+    ): Result<CursorResult<RandomHearit>> =
+        hearitRemoteDataSource
+            .getRandomHearits(cursorId, size)
             .mapOrThrowDomain { it.toDomain() }
-    }
 
     override suspend fun getSearchHearits(
         searchTerm: String,
@@ -46,10 +40,6 @@ class HearitRepositoryImpl(
             .getSearchHearits(searchTerm, page, size)
             .mapOrThrowDomain { it.toDomain() }
 
-    override suspend fun getCategoryHearits(): Result<List<GroupedCategory>> {
-        val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
-        return hearitRemoteDataSource
-            .getCategoryHearits(accessToken.toBearerToken())
-            .mapListOrThrowDomain { it.toDomain() }
-    }
+    override suspend fun getCategoryHearits(): Result<List<GroupedCategory>> =
+        hearitRemoteDataSource.getCategoryHearits().mapListOrThrowDomain { it.toDomain() }
 }

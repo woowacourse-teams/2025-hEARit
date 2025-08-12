@@ -15,24 +15,11 @@ class BookmarkRepositoryImpl(
         page: Int?,
         size: Int?,
     ): Result<List<Bookmark>> =
-        bookmarkDataSource
-            .getBookmarks(page, size)
-            .mapOrThrowDomain { bookmarkResponse ->
-                bookmarkResponse.content.map { it.toDomain() }
-            }
+        bookmarkDataSource.getBookmarks(page, size).mapOrThrowDomain { bookmarkResponse ->
+            bookmarkResponse.content.map { it.toDomain() }
+        }
 
-    override suspend fun addBookmark(hearitId: Long): Result<Long> {
-        val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
+    override suspend fun addBookmark(hearitId: Long): Result<Long> = bookmarkDataSource.addBookmark(hearitId).mapOrThrowDomain { it.id }
 
-        return bookmarkDataSource
-            .addBookmark(accessToken.toBearerToken(), hearitId)
-            .mapOrThrowDomain { it.id }
-    }
-
-    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> {
-        val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
-        return bookmarkDataSource
-            .deleteBookmark(accessToken.toBearerToken(), bookmarkId)
-            .mapOrThrowDomain { }
-    }
+    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> = bookmarkDataSource.deleteBookmark(bookmarkId).mapOrThrowDomain { }
 }

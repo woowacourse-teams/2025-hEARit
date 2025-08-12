@@ -8,15 +8,11 @@ import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 
 interface HearitRemoteDataSource {
-    suspend fun getHearit(
-        token: String?,
-        hearitId: Long,
-    ): Result<NetworkResult<HearitResponse>>
+    suspend fun getHearit(hearitId: Long): Result<NetworkResult<HearitResponse>>
 
     suspend fun getRecommendHearits(): Result<NetworkResult<List<RecommendHearitResponse>>>
 
     suspend fun getRandomHearits(
-        token: String?,
         cursorId: Long?,
         size: Int?,
     ): Result<NetworkResult<RandomHearitResponse>>
@@ -27,5 +23,5 @@ interface HearitRemoteDataSource {
         size: Int?,
     ): Result<NetworkResult<SearchHearitResponse>>
 
-    suspend fun getCategoryHearits(token: String?): Result<NetworkResult<List<GroupedCategoryHearitResponse>>>
+    suspend fun getCategoryHearits(): Result<NetworkResult<List<GroupedCategoryHearitResponse>>>
 }

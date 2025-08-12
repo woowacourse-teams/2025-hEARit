@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
+import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.presentation.SingleLiveData
@@ -43,6 +44,7 @@ class SplashViewModel(
             result
                 .onSuccess {
                     _checkToken.value = true
+                    TokenInterceptorProvider.setAccessToken(accessToken)
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegisteredException -> {
