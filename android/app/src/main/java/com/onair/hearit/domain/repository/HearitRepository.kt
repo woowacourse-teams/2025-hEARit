@@ -9,15 +9,11 @@ import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
 
 interface HearitRepository {
-    suspend fun getHearit(
-        token: String?,
-        hearitId: Long,
-    ): Result<SingleHearit>
+    suspend fun getHearit(hearitId: Long): Result<SingleHearit>
 
     suspend fun getRecommendHearits(): Result<List<RecommendHearit>>
 
     suspend fun getRandomHearits(
-        token: String?,
         cursorId: Long? = null,
         size: Int? = null,
     ): Result<CursorResult<RandomHearit>>
@@ -28,5 +24,5 @@ interface HearitRepository {
         size: Int? = null,
     ): Result<PageResult<SearchedHearit>>
 
-    suspend fun getCategoryHearits(token: String?): Result<List<GroupedCategory>>
+    suspend fun getCategoryHearits(): Result<List<GroupedCategory>>
 }
