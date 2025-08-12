@@ -7,19 +7,15 @@ import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface HearitService {
     @GET("hearits/recommend-category")
-    suspend fun getCategoryHearits(
-        @Header("Authorization") token: String?,
-    ): Response<List<GroupedCategoryHearitResponse>>
+    suspend fun getCategoryHearits(): Response<List<GroupedCategoryHearitResponse>>
 
     @GET("hearits/explore")
     suspend fun getRandomHearits(
-        @Header("Authorization") token: String?,
         @Query("cursorId") cursorId: Long?,
         @Query("size") size: Int?,
     ): Response<RandomHearitResponse>
@@ -36,7 +32,6 @@ interface HearitService {
 
     @GET("hearits/{hearitId}")
     suspend fun getHearit(
-        @Header("Authorization") token: String?,
         @Path("hearitId") hearitId: Long,
     ): Response<HearitResponse>
 }

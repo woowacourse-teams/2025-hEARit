@@ -9,17 +9,13 @@ import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.UserInfo
-import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.toBearerToken
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class HomeViewModel(
-    private val dataStoreRepository: DataStoreRepository,
     private val hearitRepository: HearitRepository,
     private val memberRepository: MemberRepository,
 ) : ViewModel() {
@@ -49,10 +45,8 @@ class HomeViewModel(
     private fun fetchData() {
         _isLoading.value = true
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()?.toBearerToken()
-
             val recommendDeferred = async { hearitRepository.getRecommendHearits() }
-            val groupedDeferred = async { hearitRepository.getCategoryHearits(token) }
+            val groupedDeferred = async { hearitRepository.getCategoryHearits() }
 
             val recommendHearitsResult = recommendDeferred.await()
             val groupedCategoryResult = groupedDeferred.await()
@@ -78,10 +72,8 @@ class HomeViewModel(
 
     private fun fetchUserInfo() {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             memberRepository
-                .getUserInfo(token?.toBearerToken())
+                .getUserInfo()
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo
                     _isLoggedIn.value = true

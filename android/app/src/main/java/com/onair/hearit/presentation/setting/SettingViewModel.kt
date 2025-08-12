@@ -11,7 +11,6 @@ import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -40,7 +39,7 @@ class SettingViewModel(
             }
 
             memberRepository
-                .getUserInfo(token.toBearerToken())
+                .getUserInfo()
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo
                 }.onFailure { throwable ->
