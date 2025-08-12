@@ -3,8 +3,9 @@ package com.onair.hearit.di
 import okhttp3.Interceptor
 
 object TokenInterceptorProvider {
-    const val NO_AUTH_KEY = "No-Auth"
-    const val AUTH_HEADER_NAME = "Authorization"
+    private const val NO_AUTH_KEY = "No-Auth"
+    private const val AUTH_HEADER_NAME = "Authorization"
+    private const val BEARER_PREFIX = "Bearer "
 
     @Volatile
     private var accessToken: String? = null
@@ -26,7 +27,7 @@ object TokenInterceptorProvider {
                 val newRequest =
                     originalRequest
                         .newBuilder()
-                        .addHeader(AUTH_HEADER_NAME, "Bearer $token")
+                        .addHeader(AUTH_HEADER_NAME, "$BEARER_PREFIX$token")
                         .build()
                 chain.proceed(newRequest)
             } ?: chain.proceed(originalRequest)
