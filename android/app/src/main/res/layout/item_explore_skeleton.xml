@@ -54,7 +54,6 @@
             android:layout_marginTop="-10dp"
             android:background="@color/hearit_gray1"
             android:contentDescription="@null"
-            android:src="@drawable/img_explore_lp"
             app:layout_constraintBottom_toTopOf="@id/guideline_top_6"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

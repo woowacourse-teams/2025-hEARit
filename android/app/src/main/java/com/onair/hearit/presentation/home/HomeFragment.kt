@@ -70,7 +70,7 @@ class HomeFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
         setupWindowInsets()
         setupListeners()
@@ -166,6 +166,14 @@ class HomeFragment :
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (isLoading) {
+                binding.frHomeSkeleton.startShimmer()
+            } else {
+                binding.frHomeSkeleton.stopShimmer()
+            }
         }
     }
 

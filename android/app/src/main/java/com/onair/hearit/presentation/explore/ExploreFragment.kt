@@ -86,7 +86,7 @@ class ExploreFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
 
         setupWindowInsets()
@@ -185,6 +185,14 @@ class ExploreFragment :
 
         viewModel.showLoginDialog.observe(viewLifecycleOwner) {
             showLoginRequiredDialog()
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (isLoading) {
+                binding.frExploreSkeleton.startShimmer()
+            } else {
+                binding.frExploreSkeleton.stopShimmer()
+            }
         }
     }
 

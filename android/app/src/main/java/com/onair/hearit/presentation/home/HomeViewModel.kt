@@ -59,6 +59,7 @@ class HomeViewModel(
                 _groupedCategory.value = groupedCategoryResult.getOrThrow()
                 _isLoading.value = false
             } else {
+                _isLoading.value = false
                 if (recommendHearitsResult.isFailure) {
                     _toastMessage.value =
                         R.string.home_toast_recommend_load_fail
