@@ -1,8 +1,8 @@
-package com.onair.hearit.domain.repository
+package com.onair.hearit.data.datasource.local
 
 import com.onair.hearit.domain.model.UserInfo
 
-interface DataStoreRepository {
+interface PreferencesLocalDataSource {
     suspend fun getAccessToken(): Result<String>
 
     suspend fun getRefreshToken(): Result<String>
@@ -14,8 +14,6 @@ interface DataStoreRepository {
     suspend fun getUserInfo(): Result<UserInfo>
 
     suspend fun saveUserInfo(userInfo: UserInfo): Result<Boolean>
-
-    suspend fun clearUserInfo(): Result<Boolean>
 
     suspend fun clearData(): Result<Boolean>
 }

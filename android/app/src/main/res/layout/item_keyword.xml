@@ -15,6 +15,7 @@
         style="@style/pretendard_body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="12dp"
         android:background="@drawable/bg_dark_gray_radius_24dp"
         android:gravity="center"

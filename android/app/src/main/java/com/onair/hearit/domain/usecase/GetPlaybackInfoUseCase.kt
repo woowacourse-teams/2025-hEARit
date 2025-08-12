@@ -13,8 +13,7 @@ class GetPlaybackInfoUseCase(
 ) {
     suspend operator fun invoke(hearitId: Long): Result<PlaybackInfo> =
         runCatching {
-            val hearitInfo =
-                hearitRepository.getHearit(hearitId).getOrThrow()
+            val hearitInfo = hearitRepository.getHearit(hearitId).getOrThrow()
             val audioUrl = mediaFileRepository.getOriginalAudioUrl(hearitId).getOrThrow().url
             val recentHearit = recentHearitRepository.getRecentHearit().getOrThrow()
             val lastPosition = recentHearit?.lastPosition ?: 0L

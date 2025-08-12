@@ -1,8 +1,15 @@
 package com.onair.hearit.di
 
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.local.HearitLocalDataSource
 import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
+import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
+import com.onair.hearit.data.datasource.local.PreferencesLocalDataSourceImpl
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSource
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.BookmarkRemoteDataSource
@@ -20,6 +27,19 @@ import com.onair.hearit.data.datasource.remote.MemberRemoteDataSourceImpl
 
 object DataSourceProvider {
     private val errorHandler = ErrorResponseHandler()
+    private lateinit var dataStore: DataStore<Preferences>
+
+    lateinit var preferencesLocalDataSource: PreferencesLocalDataSource
+        private set
+
+    fun init(context: Context) {
+        dataStore =
+            PreferenceDataStoreFactory.create {
+                context.preferencesDataStoreFile("user_prefs")
+            }
+
+        preferencesLocalDataSource = PreferencesLocalDataSourceImpl(dataStore)
+    }
 
     val authRemoteDataSource: AuthRemoteDataSource by lazy {
         AuthRemoteDataSourceImpl(

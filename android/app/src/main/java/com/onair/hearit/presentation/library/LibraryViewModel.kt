@@ -24,7 +24,7 @@ class LibraryViewModel(
     private val _uiState = MutableLiveData<BookmarkUiState>()
     val uiState: LiveData<BookmarkUiState> = _uiState
 
-    private val _userInfo = MutableLiveData<UserInfo>()
+    private val _userInfo = MutableLiveData(UserInfo.default())
     val userInfo: LiveData<UserInfo> = _userInfo
 
     private val _toastMessage = SingleLiveData<Int>()
@@ -90,8 +90,7 @@ class LibraryViewModel(
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }
-                    val defaultUserInfo = UserInfo(-1, "hEARit", null)
-                    _userInfo.value = defaultUserInfo
+                    _userInfo.value = UserInfo.default()
                 }
         }
     }

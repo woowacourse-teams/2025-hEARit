@@ -1,5 +1,6 @@
 package com.onair.hearit.data.repository
 
+import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.data.datasource.remote.BookmarkRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.Bookmark
@@ -7,6 +8,7 @@ import com.onair.hearit.domain.repository.BookmarkRepository
 
 class BookmarkRepositoryImpl(
     private val bookmarkDataSource: BookmarkRemoteDataSource,
+    private val preferencesLocalDataSource: PreferencesLocalDataSource,
 ) : BookmarkRepository {
     override suspend fun getBookmarks(
         page: Int?,

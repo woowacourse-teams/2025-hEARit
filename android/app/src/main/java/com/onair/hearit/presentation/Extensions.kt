@@ -6,4 +6,4 @@ fun Int.dpToPx(context: Context): Int = (this * context.resources.displayMetrics
 
 fun Int.pxToDp(context: Context): Int = (this / context.resources.displayMetrics.density).toInt()
 
-fun String?.toBearerToken(): String? = this?.let { "Bearer $it" }
+fun String.toBearerToken(): String = "Bearer $this"
