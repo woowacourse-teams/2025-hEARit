@@ -174,4 +174,7 @@ dependencies {
 
     // timber
     implementation(libs.timber)
+
+    // shimmer
+    implementation(libs.shimmer)
 }

@@ -42,16 +42,20 @@ class ExploreViewModel(
     private val _shouldPlayAnimation = MutableLiveData<Boolean>()
     val shouldPlayAnimation: LiveData<Boolean> = _shouldPlayAnimation
 
+    private val _isLoading = MutableLiveData<Boolean>(true)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     private lateinit var cursorInfo: CursorInfo
-    private var isLoading = false
+    private var isFetchingData = false
 
     init {
+        _isLoading.value = true
         setAnimation()
         fetchData(cursorId = 0)
     }
 
     fun fetchNextPage() {
-        if (cursorInfo.isEmpty || isLoading) return
+        if (cursorInfo.isEmpty || isFetchingData) return
         fetchData(cursorInfo.cursorId)
     }
 
@@ -87,8 +91,8 @@ class ExploreViewModel(
     }
 
     private fun fetchData(cursorId: Long) {
-        if (isLoading) return
-        isLoading = true
+        if (isFetchingData) return
+        isFetchingData = true
 
         viewModelScope.launch {
             try {
@@ -99,6 +103,7 @@ class ExploreViewModel(
                         cursorInfo = randomItems.cursorInfo
                         val shortsList = buildShortsHearit(randomItems)
                         updateShortsHearit(shortsList)
+                        _isLoading.value = false
                     }.onFailure { throwable ->
                         Timber.w(throwable)
                         _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
@@ -107,7 +112,7 @@ class ExploreViewModel(
                 Timber.w(e)
                 _toastMessage.value = R.string.explore_toast_shorts_hearits_load_fail
             } finally {
-                isLoading = false
+                isFetchingData = false
             }
         }
     }

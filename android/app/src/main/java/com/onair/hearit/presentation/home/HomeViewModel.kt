@@ -12,6 +12,7 @@ import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -34,32 +35,40 @@ class HomeViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     init {
         fetchUserInfo()
         fetchData()
     }
 
     private fun fetchData() {
+        _isLoading.value = true
         viewModelScope.launch {
-            hearitRepository
-                .getRecommendHearits()
-                .onSuccess {
-                    _recommendHearits.value = it
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.home_toast_recommend_load_fail
-                }
-        }
+            val recommendDeferred = async { hearitRepository.getRecommendHearits() }
+            val groupedDeferred = async { hearitRepository.getCategoryHearits() }
 
-        viewModelScope.launch {
-            hearitRepository
-                .getCategoryHearits()
-                .onSuccess { groupedCategory ->
-                    _groupedCategory.value = groupedCategory
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.home_toast_grouped_category_load_fail
+            val recommendHearitsResult = recommendDeferred.await()
+            val groupedCategoryResult = groupedDeferred.await()
+
+            val bothSuccess = recommendHearitsResult.isSuccess && groupedCategoryResult.isSuccess
+
+            if (bothSuccess) {
+                _recommendHearits.value = recommendHearitsResult.getOrThrow()
+                _groupedCategory.value = groupedCategoryResult.getOrThrow()
+                _isLoading.value = false
+            } else {
+                _isLoading.value = false
+                if (recommendHearitsResult.isFailure) {
+                    _toastMessage.value =
+                        R.string.home_toast_recommend_load_fail
                 }
+                if (groupedCategoryResult.isFailure) {
+                    _toastMessage.value =
+                        R.string.home_toast_grouped_category_load_fail
+                }
+            }
         }
     }
 

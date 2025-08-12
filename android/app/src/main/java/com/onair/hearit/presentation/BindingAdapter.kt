@@ -160,3 +160,11 @@ fun setExploreKeywords(
 ) {
     textView.text = keywords.joinToString(" ") { "#${it.name}" }
 }
+
+@BindingAdapter("setSkeleton")
+fun setShimmerVisibility(
+    view: View,
+    isLoading: Boolean,
+) {
+    view.isVisible = isLoading
+}
