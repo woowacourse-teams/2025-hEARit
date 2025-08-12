@@ -8,11 +8,9 @@ import com.onair.hearit.di.RepositoryProvider
 class LibraryViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val bookmarkRepository = RepositoryProvider.bookmarkRepository
-        val dataStoreRepository = RepositoryProvider.dataStoreRepository
         val memberRepository = RepositoryProvider.memberRepository
         return LibraryViewModel(
             bookmarkRepository,
-            dataStoreRepository,
             memberRepository,
         ) as T
     }

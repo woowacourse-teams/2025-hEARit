@@ -9,16 +9,13 @@ import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
-import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class LibraryViewModel(
     private val bookmarkRepository: BookmarkRepository,
-    private val dataStoreRepository: DataStoreRepository,
     private val memberRepository: MemberRepository,
 ) : ViewModel() {
     private val _bookmarks: MutableLiveData<List<Bookmark>> = MutableLiveData()
@@ -27,7 +24,7 @@ class LibraryViewModel(
     private val _uiState = MutableLiveData<BookmarkUiState>()
     val uiState: LiveData<BookmarkUiState> = _uiState
 
-    private val _userInfo = MutableLiveData<UserInfo>()
+    private val _userInfo = MutableLiveData(UserInfo.default())
     val userInfo: LiveData<UserInfo> = _userInfo
 
     private val _toastMessage = SingleLiveData<Int>()
@@ -40,10 +37,8 @@ class LibraryViewModel(
 
     fun fetchData(page: Int) {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             bookmarkRepository
-                .getBookmarks(token?.toBearerToken(), page = page, size = null)
+                .getBookmarks(page = page, size = null)
                 .onSuccess {
                     _uiState.value = BookmarkUiState.LoggedIn
                     _bookmarks.value = it
@@ -66,10 +61,8 @@ class LibraryViewModel(
 
     fun deleteBookmark(bookmarkId: Long) {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             bookmarkRepository
-                .deleteBookmark(token?.toBearerToken(), bookmarkId)
+                .deleteBookmark(bookmarkId)
                 .onSuccess {
                     _bookmarks.value =
                         _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }
@@ -81,11 +74,10 @@ class LibraryViewModel(
 
     private fun getUserInfo() {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             memberRepository
-                .getUserInfo(token?.toBearerToken())
+                .getUserInfo()
                 .onSuccess { userInfo ->
+                    Timber.d("$userInfo")
                     _uiState.value = BookmarkUiState.LoggedIn
                     _userInfo.value = userInfo
                 }.onFailure { throwable ->
@@ -99,8 +91,7 @@ class LibraryViewModel(
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }
-                    val defaultUserInfo = UserInfo(-1, "hEARit", null)
-                    _userInfo.value = defaultUserInfo
+                    _userInfo.value = UserInfo.default()
                 }
         }
     }

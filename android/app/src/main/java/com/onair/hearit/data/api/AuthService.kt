@@ -14,7 +14,7 @@ import retrofit2.http.POST
 interface AuthService {
     @GET("auth/check")
     suspend fun getAuthCheck(
-        @Header("Authorization") token: String,
+        @Header("Authorization") token: String?,
     ): Response<Unit>
 
     @POST("auth/kakao-login")
@@ -29,6 +29,6 @@ interface AuthService {
 
     @DELETE("auth/withdraw")
     suspend fun deleteAccount(
-        @Header("Authorization") token: String,
+        @Header("Authorization") token: String?,
     ): Response<Unit>
 }

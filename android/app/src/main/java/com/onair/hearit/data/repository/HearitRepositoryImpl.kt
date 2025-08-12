@@ -1,5 +1,6 @@
 package com.onair.hearit.data.repository
 
+import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.CursorResult
@@ -10,26 +11,31 @@ import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.repository.HearitRepository
+import com.onair.hearit.presentation.toBearerToken
 
 class HearitRepositoryImpl(
+    private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
-    override suspend fun getHearit(
-        token: String?,
-        hearitId: Long,
-    ): Result<SingleHearit> = hearitRemoteDataSource.getHearit(token, hearitId).mapOrThrowDomain { it.toDomain() }
+    override suspend fun getHearit(hearitId: Long): Result<SingleHearit> {
+        val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
+        return hearitRemoteDataSource
+            .getHearit(accessToken.toBearerToken(), hearitId)
+            .mapOrThrowDomain { it.toDomain() }
+    }
 
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =
         hearitRemoteDataSource.getRecommendHearits().mapListOrThrowDomain { it.toDomain() }
 
     override suspend fun getRandomHearits(
-        token: String?,
         cursorId: Long?,
         size: Int?,
-    ): Result<CursorResult<RandomHearit>> =
-        hearitRemoteDataSource
-            .getRandomHearits(token, cursorId, size)
+    ): Result<CursorResult<RandomHearit>> {
+        val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
+        return hearitRemoteDataSource
+            .getRandomHearits(accessToken.toBearerToken(), cursorId, size)
             .mapOrThrowDomain { it.toDomain() }
+    }
 
     override suspend fun getSearchHearits(
         searchTerm: String,
@@ -40,6 +46,10 @@ class HearitRepositoryImpl(
             .getSearchHearits(searchTerm, page, size)
             .mapOrThrowDomain { it.toDomain() }
 
-    override suspend fun getCategoryHearits(token: String?): Result<List<GroupedCategory>> =
-        hearitRemoteDataSource.getCategoryHearits(token).mapListOrThrowDomain { it.toDomain() }
+    override suspend fun getCategoryHearits(): Result<List<GroupedCategory>> {
+        val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
+        return hearitRemoteDataSource
+            .getCategoryHearits(accessToken.toBearerToken())
+            .mapListOrThrowDomain { it.toDomain() }
+    }
 }

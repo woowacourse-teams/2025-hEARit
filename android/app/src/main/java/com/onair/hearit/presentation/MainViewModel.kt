@@ -6,16 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
+import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.AuthRepository
-import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MainViewModel(
     private val authRepository: AuthRepository,
-    private val dataStoreRepository: DataStoreRepository,
+    private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val recentHearitRepository: RecentHearitRepository,
 ) : ViewModel() {
     private val _recentHearit = MutableLiveData<RecentHearit?>()
@@ -51,7 +51,7 @@ class MainViewModel(
                 Timber.w(error)
                 _toastMessage.value = R.string.logout_fail
             } else {
-                clearAccessToken()
+                clearData()
                 _toastMessage.value = R.string.logout_success
             }
         }
@@ -59,15 +59,8 @@ class MainViewModel(
 
     fun withdraw() {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-            if (token == null) {
-                _toastMessage.value = R.string.withdraw_fail
-                _withdrawState.value = false
-                return@launch
-            }
-
             authRepository
-                .withdraw("Bearer $token")
+                .withdraw()
                 .onSuccess {
                     UserApiClient.instance.unlink { error ->
                         if (error != null) {
@@ -77,7 +70,7 @@ class MainViewModel(
                             return@unlink
                         }
 
-                        clearAccessToken()
+                        this@MainViewModel.clearData()
                         _withdrawState.value = true
                         _toastMessage.value = R.string.withdraw_success
                     }
@@ -102,9 +95,9 @@ class MainViewModel(
         }
     }
 
-    private fun clearAccessToken() {
+    private fun clearData() {
         viewModelScope.launch {
-            dataStoreRepository
+            preferencesLocalDataSource
                 .clearData()
                 .onFailure { throwable ->
                     Timber.w(throwable)

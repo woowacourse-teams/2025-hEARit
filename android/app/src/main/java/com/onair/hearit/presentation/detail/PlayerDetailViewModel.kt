@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.RecentHearit
@@ -13,7 +12,6 @@ import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -50,10 +48,8 @@ class PlayerDetailViewModel(
     private fun deleteBookmark() {
         val id = _bookmarkId.value ?: return
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             bookmarkRepository
-                .deleteBookmark(token?.toBearerToken(), id)
+                .deleteBookmark(id)
                 .onSuccess {
                     _bookmarkId.value = null
                 }.onFailure { throwable ->
@@ -79,10 +75,8 @@ class PlayerDetailViewModel(
 
     private fun addBookmark() {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             bookmarkRepository
-                .addBookmark(token?.toBearerToken(), hearitId)
+                .addBookmark(hearitId)
                 .onSuccess { bookmarkId ->
                     _bookmarkId.value = bookmarkId
                 }.onFailure { throwable ->

@@ -6,17 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.BuildConfig
 import com.onair.hearit.R
+import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.UserInfo
-import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class SettingViewModel(
-    private val dataStoreRepository: DataStoreRepository,
+    private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val memberRepository: MemberRepository,
 ) : ViewModel() {
     val appVersion = BuildConfig.VERSION_NAME
@@ -33,14 +32,8 @@ class SettingViewModel(
 
     private fun fetchUserInfo() {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-            if (token == null) {
-                _userInfo.value = UserInfo.default()
-                return@launch
-            }
-
             memberRepository
-                .getUserInfo(token.toBearerToken())
+                .getUserInfo()
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo
                 }.onFailure { throwable ->
