@@ -2,7 +2,6 @@ package com.onair.hearit.common.log.message;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -11,23 +10,27 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class JsonMaskingPrettyFormatter {
 
-    private static final Map<String, Function<String, String>> MASKING_RULES = new HashMap<>() {{
-        put("password", v -> "*****");
-        put("localId", v -> maskEdge(v, 1));
-        put("accessToken", v -> "*****");
-        put("refreshToken", v -> "*****");
-    }};
 
+    private final Map<String, Function<String, String>> maskingRules;
     private final ObjectMapper objectMapper;
-    private final DefaultPrettyPrinter defaultPrettyPrinter;
+//    private final DefaultPrettyPrinter defaultPrettyPrinter;
+
+    public JsonMaskingPrettyFormatter(UrlMasker urlMasker, ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        this.maskingRules = new HashMap<>() {{
+            put("password", v -> "*****");
+            put("localId", v -> maskEdge(v, 1));
+            put("accessToken", v -> "*****");
+            put("refreshToken", v -> "*****");
+            put("url", v -> urlMasker.maskUrl(v));
+        }};
+    }
 
     /**
      * @param value
@@ -62,8 +65,8 @@ public class JsonMaskingPrettyFormatter {
                 Map.Entry<String, JsonNode> entry = fields.next();
                 String fieldName = entry.getKey();
                 JsonNode valueNode = entry.getValue();
-                if (MASKING_RULES.containsKey(fieldName) && valueNode.isTextual()) {
-                    String masked = MASKING_RULES.get(fieldName).apply(valueNode.asText());
+                if (maskingRules.containsKey(fieldName) && valueNode.isTextual()) {
+                    String masked = maskingRules.get(fieldName).apply(valueNode.asText());
                     objectNode.put(fieldName, masked);
                     continue;
                 }
