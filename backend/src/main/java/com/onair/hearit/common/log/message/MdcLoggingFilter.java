@@ -8,13 +8,10 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.UUID;
-import org.apache.logging.log4j.core.config.Order;
 import org.jboss.logging.MDC;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class MdcLoggingFilter implements Filter {
 
     @Override
