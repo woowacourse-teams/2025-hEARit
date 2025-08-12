@@ -15,12 +15,9 @@ class HearitRemoteDataSourceImpl(
     private val hearitService: HearitService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : HearitRemoteDataSource {
-    override suspend fun getHearit(
-        token: String?,
-        hearitId: Long,
-    ): Result<NetworkResult<HearitResponse>> =
+    override suspend fun getHearit(hearitId: Long): Result<NetworkResult<HearitResponse>> =
         handleApiCall(
-            apiCall = { hearitService.getHearit(token, hearitId) },
+            apiCall = { hearitService.getHearit(hearitId) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
@@ -37,12 +34,11 @@ class HearitRemoteDataSourceImpl(
         )
 
     override suspend fun getRandomHearits(
-        token: String?,
         cursorId: Long?,
         size: Int?,
     ): Result<NetworkResult<RandomHearitResponse>> =
         handleApiCall(
-            apiCall = { hearitService.getRandomHearits(token, cursorId, size) },
+            apiCall = { hearitService.getRandomHearits(cursorId, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
@@ -62,9 +58,9 @@ class HearitRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getCategoryHearits(token: String?): Result<NetworkResult<List<GroupedCategoryHearitResponse>>> =
+    override suspend fun getCategoryHearits(): Result<NetworkResult<List<GroupedCategoryHearitResponse>>> =
         handleApiCall(
-            apiCall = { hearitService.getCategoryHearits(token) },
+            apiCall = { hearitService.getCategoryHearits() },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },

@@ -16,13 +16,7 @@ class BookmarkRepositoryImpl(
             bookmarkResponse.content.map { it.toDomain() }
         }
 
-    override suspend fun addBookmark(
-        token: String?,
-        hearitId: Long,
-    ): Result<Long> = bookmarkDataSource.addBookmark(token, hearitId).mapOrThrowDomain { it.id }
+    override suspend fun addBookmark(hearitId: Long): Result<Long> = bookmarkDataSource.addBookmark(hearitId).mapOrThrowDomain { it.id }
 
-    override suspend fun deleteBookmark(
-        token: String?,
-        bookmarkId: Long,
-    ): Result<Unit> = runCatching { bookmarkDataSource.deleteBookmark(token, bookmarkId) }
+    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> = runCatching { bookmarkDataSource.deleteBookmark(bookmarkId) }
 }

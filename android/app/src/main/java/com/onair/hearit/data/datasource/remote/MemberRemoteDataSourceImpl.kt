@@ -11,9 +11,9 @@ class MemberRemoteDataSourceImpl(
     private val memberService: MemberService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : MemberRemoteDataSource {
-    override suspend fun getUserInfo(token: String?): Result<NetworkResult<UserInfoResponse>> =
+    override suspend fun getUserInfo(): Result<NetworkResult<UserInfoResponse>> =
         handleApiCall(
-            apiCall = { memberService.getUserInfo(token) },
+            apiCall = { memberService.getUserInfo() },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
