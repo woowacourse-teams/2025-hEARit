@@ -28,7 +28,7 @@ class LoginViewModel(
                 .kakaoLogin(accessToken)
                 .onSuccess { appToken ->
                     saveToken(appToken.accessToken, appToken.refreshToken)
-                    TokenInterceptorProvider.setAccessToken(appToken.toString())
+                    TokenInterceptorProvider.setAccessToken(appToken.accessToken)
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.login_toast_kakao_login_fail

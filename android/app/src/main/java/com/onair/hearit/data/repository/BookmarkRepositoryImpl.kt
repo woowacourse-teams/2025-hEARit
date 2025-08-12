@@ -9,11 +9,10 @@ class BookmarkRepositoryImpl(
     private val bookmarkDataSource: BookmarkRemoteDataSource,
 ) : BookmarkRepository {
     override suspend fun getBookmarks(
-        token: String?,
         page: Int?,
         size: Int?,
     ): Result<List<Bookmark>> =
-        bookmarkDataSource.getBookmarks(token, page, size).mapOrThrowDomain { bookmarkResponse ->
+        bookmarkDataSource.getBookmarks(page, size).mapOrThrowDomain { bookmarkResponse ->
             bookmarkResponse.content.map { it.toDomain() }
         }
 

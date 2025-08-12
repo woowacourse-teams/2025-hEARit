@@ -4,7 +4,6 @@ import com.onair.hearit.domain.model.Bookmark
 
 interface BookmarkRepository {
     suspend fun getBookmarks(
-        token: String?,
         page: Int?,
         size: Int?,
     ): Result<List<Bookmark>>

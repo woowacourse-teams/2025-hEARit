@@ -13,7 +13,6 @@ import retrofit2.http.Query
 interface BookmarkService {
     @GET("bookmarks/hearits")
     suspend fun getBookmarks(
-        @Header("Authorization") token: String?,
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<BookmarkResponse>

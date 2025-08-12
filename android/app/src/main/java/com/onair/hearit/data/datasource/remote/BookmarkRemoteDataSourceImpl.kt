@@ -13,12 +13,11 @@ class BookmarkRemoteDataSourceImpl(
     private val errorResponseHandler: ErrorResponseHandler,
 ) : BookmarkRemoteDataSource {
     override suspend fun getBookmarks(
-        token: String?,
         page: Int?,
         size: Int?,
     ): Result<NetworkResult<BookmarkResponse>> =
         handleApiCall(
-            apiCall = { bookmarkService.getBookmarks(token, page, size) },
+            apiCall = { bookmarkService.getBookmarks(page, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },

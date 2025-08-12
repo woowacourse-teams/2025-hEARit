@@ -40,10 +40,8 @@ class LibraryViewModel(
 
     fun fetchData(page: Int) {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             bookmarkRepository
-                .getBookmarks(token?.toBearerToken(), page = page, size = null)
+                .getBookmarks(page = page, size = null)
                 .onSuccess {
                     _uiState.value = BookmarkUiState.LoggedIn
                     _bookmarks.value = it
