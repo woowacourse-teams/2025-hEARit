@@ -24,11 +24,10 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="20dp"
+            android:ellipsize="end"
             android:maxLines="2"
             android:text="@{bookmark.title}"
             android:textColor="@color/hearit_gray4"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="HTTP와 HTTPS의 차이만약 제목이 엄청 길다면 어떻게 될까요? 제목이 이만큼 길다면?" />
 
@@ -44,7 +43,6 @@
             android:gravity="center_vertical"
             android:text="@string/library_bottom_sheet_bookmark_delete"
             android:textColor="@color/hearit_gray4"
-            app:layout_constraintStart_toStartOf="@id/tv_bookmark_option_title"
             app:layout_constraintTop_toBottomOf="@id/tv_bookmark_option_title" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
