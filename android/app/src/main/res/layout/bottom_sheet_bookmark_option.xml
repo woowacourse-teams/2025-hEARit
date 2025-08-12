@@ -19,49 +19,32 @@
 
         <TextView
             android:id="@+id/tv_bookmark_option_title"
-            style="@style/pretendard_body"
-            android:layout_width="wrap_content"
+            style="@style/pretendard_sub_title"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_marginHorizontal="20dp"
             android:layout_marginTop="20dp"
+            android:maxLines="2"
             android:text="@{bookmark.title}"
             android:textColor="@color/hearit_gray4"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="HTTP와 HTTPS의 차이" />
+            tools:text="HTTP와 HTTPS의 차이만약 제목이 엄청 길다면 어떻게 될까요? 제목이 이만큼 길다면?" />
 
-        <TextView
-            android:id="@+id/tv_bookmark_option_time"
-            style="@style/pretendard_body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="@color/hearit_gray2"
-            app:layout_constraintStart_toStartOf="@id/tv_bookmark_option_title"
-            app:layout_constraintTop_toBottomOf="@id/tv_bookmark_option_title"
-            app:playTimeFormatted="@{bookmark.playTime}"
-            tools:text="00:00" />
-
-        <ImageView
-            android:id="@+id/iv_bookmark_option_delete_bookmark"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_marginTop="26dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_delete_bookmark"
-            app:layout_constraintStart_toStartOf="@id/tv_bookmark_option_title"
-            app:layout_constraintTop_toBottomOf="@id/tv_bookmark_option_time" />
-
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_bookmark_option_delete_bookmark"
             style="@style/pretendard_body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="18dp"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="32dp"
+            android:drawableStart="@drawable/ic_delete_bookmark"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
             android:text="@string/library_bottom_sheet_bookmark_delete"
             android:textColor="@color/hearit_gray4"
-            app:layout_constraintBottom_toBottomOf="@id/iv_bookmark_option_delete_bookmark"
-            app:layout_constraintStart_toEndOf="@id/iv_bookmark_option_delete_bookmark"
-            app:layout_constraintTop_toTopOf="@id/iv_bookmark_option_delete_bookmark" />
+            app:layout_constraintStart_toStartOf="@id/tv_bookmark_option_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_bookmark_option_title" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
