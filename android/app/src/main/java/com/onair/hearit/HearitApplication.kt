@@ -5,6 +5,7 @@ import android.util.Log
 import com.kakao.sdk.common.KakaoSdk
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.di.DataSourceProvider
 import com.onair.hearit.di.DatabaseProvider
 import com.onair.hearit.di.RepositoryProvider
 import timber.log.Timber
@@ -15,6 +16,7 @@ class HearitApplication : Application() {
 
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_KEY)
         DatabaseProvider.init(this)
+        DataSourceProvider.init(this)
         RepositoryProvider.init(this)
         AnalyticsProvider.init(this)
         initialTimber()
