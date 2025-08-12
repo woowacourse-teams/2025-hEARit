@@ -28,6 +28,6 @@ class AuthRepositoryImpl(
     override suspend fun withdraw(): Result<Unit> =
         runCatching {
             val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
-            authRemoteDataSource.withdraw("Bearer $accessToken")
+            authRemoteDataSource.withdraw()
         }
 }
