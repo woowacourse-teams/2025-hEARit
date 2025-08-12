@@ -37,7 +37,6 @@ object RepositoryProvider {
     val bookmarkRepository: BookmarkRepository by lazy {
         BookmarkRepositoryImpl(
             bookmarkDataSource = DataSourceProvider.bookmarkRemoteDataSource,
-            preferencesLocalDataSource = DataSourceProvider.preferencesLocalDataSource,
         )
     }
 
