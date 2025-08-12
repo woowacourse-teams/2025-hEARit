@@ -1,6 +1,5 @@
 package com.onair.hearit.data.repository
 
-import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.CursorResult
@@ -13,7 +12,6 @@ import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.repository.HearitRepository
 
 class HearitRepositoryImpl(
-    private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
     override suspend fun getHearit(hearitId: Long): Result<SingleHearit> =

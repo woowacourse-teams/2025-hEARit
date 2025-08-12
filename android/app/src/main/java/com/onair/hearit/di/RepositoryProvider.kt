@@ -53,10 +53,7 @@ object RepositoryProvider {
     }
 
     val hearitRepository: HearitRepository by lazy {
-        HearitRepositoryImpl(
-            preferencesLocalDataSource = DataSourceProvider.preferencesLocalDataSource,
-            hearitRemoteDataSource = DataSourceProvider.hearitRemoteDataSource,
-        )
+        HearitRepositoryImpl(hearitRemoteDataSource = DataSourceProvider.hearitRemoteDataSource)
     }
 
     val keywordRepository: KeywordRepository by lazy {
