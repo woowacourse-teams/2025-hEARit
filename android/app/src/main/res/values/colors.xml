@@ -13,4 +13,5 @@
     <color name="hearit_gray2">#B2B4B6</color>
     <color name="hearit_gray3">#D6DADB</color>
     <color name="hearit_gray4">#EFF1F2</color>
+    <color name="hearit_dark_black">#252525</color>
 </resources>

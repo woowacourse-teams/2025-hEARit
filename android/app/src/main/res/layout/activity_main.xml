@@ -30,7 +30,6 @@
                 android:id="@+id/layout_bottom_player_controller"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="12dp"
                 android:clickable="true"
                 android:focusable="true"
                 app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
