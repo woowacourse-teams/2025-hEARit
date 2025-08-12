@@ -1,6 +1,5 @@
 package com.onair.hearit.data.repository
 
-import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSource
 import com.onair.hearit.data.dto.KakaoLoginRequest
 import com.onair.hearit.data.dto.TokenReissueRequest
@@ -9,7 +8,6 @@ import com.onair.hearit.domain.model.LoginToken
 import com.onair.hearit.domain.repository.AuthRepository
 
 class AuthRepositoryImpl(
-    private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val authRemoteDataSource: AuthRemoteDataSource,
 ) : AuthRepository {
     override suspend fun checkAccessToken(accessToken: String): Result<Unit> =
@@ -27,7 +25,6 @@ class AuthRepositoryImpl(
 
     override suspend fun withdraw(): Result<Unit> =
         runCatching {
-            val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
-            authRemoteDataSource.withdraw("Bearer $accessToken")
+            authRemoteDataSource.withdraw()
         }
 }

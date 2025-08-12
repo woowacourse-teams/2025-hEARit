@@ -15,9 +15,9 @@ class AuthRemoteDataSourceImpl(
     private val authService: AuthService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : AuthRemoteDataSource {
-    override suspend fun checkAccessToken(token: String?): Result<NetworkResult<Unit>> =
+    override suspend fun checkAccessToken(accessToken: String): Result<NetworkResult<Unit>> =
         handleApiCall(
-            apiCall = { authService.getAuthCheck(token.toBearerToken()) },
+            apiCall = { authService.getAuthCheck(accessToken.toBearerToken()) },
             transform = { },
             errorHandler = errorResponseHandler,
         )
@@ -40,9 +40,9 @@ class AuthRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun withdraw(token: String?): Result<NetworkResult<Unit>> =
+    override suspend fun withdraw(): Result<NetworkResult<Unit>> =
         handleApiCall(
-            apiCall = { authService.deleteAccount(token.toBearerToken()) },
+            apiCall = { authService.deleteAccount() },
             transform = { },
             errorHandler = errorResponseHandler,
         )
