@@ -88,6 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
             android:text="@string/setting_notification"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@id/divider1"
             app:layout_constraintTop_toBottomOf="@id/divider1" />
 
@@ -98,6 +99,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="72dp"
             android:text="@string/setting_recommend_notification"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@id/divider1"
             app:layout_constraintTop_toBottomOf="@id/divider1" />
 
@@ -106,6 +108,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:thumb="@drawable/check_switch_thumb"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tv_setting_notification_text"
             app:layout_constraintEnd_toEndOf="@id/divider1"
             app:layout_constraintTop_toTopOf="@id/tv_setting_notification_text"
@@ -129,7 +132,7 @@
             style="@style/pretendard_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="72dp"
+            android:layout_marginBottom="80dp"
             android:text="@string/all_hearit_email"
             android:textColor="@color/hearit_gray4"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -11,13 +11,14 @@
         android:layout_height="wrap_content"
         android:paddingStart="-10dp"
         android:paddingEnd="-10dp"
+        app:buffered_color="@color/hearit_gray2"
         app:layout_constraintTop_toTopOf="parent"
-        app:played_color="@color/hearit_purple3"
+        app:played_color="@color/hearit_purple2"
         app:scrubber_color="@android:color/transparent"
         app:scrubber_disabled_size="0dp"
         app:scrubber_drawable="@null"
         app:scrubber_enabled_size="0dp"
         app:touch_target_height="40dp"
-        app:unplayed_color="@color/hearit_gray4" />
+        app:unplayed_color="@color/hearit_gray2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

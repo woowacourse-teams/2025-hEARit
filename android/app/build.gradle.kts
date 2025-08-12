@@ -20,8 +20,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1008
-        versionName = "1.0.08"
+        versionCode = 1009
+        versionName = "1.0.09"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -58,7 +58,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-
             if (releaseSigningConfig != null) {
                 signingConfig = releaseSigningConfig
             }
@@ -175,4 +174,7 @@ dependencies {
 
     // timber
     implementation(libs.timber)
+
+    // shimmer
+    implementation(libs.shimmer)
 }

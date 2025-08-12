@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.di.RepositoryProvider.dataStoreRepository
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.model.CursorInfo
 import com.onair.hearit.domain.model.CursorResult
@@ -16,7 +15,6 @@ import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.toBearerToken
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -44,16 +42,20 @@ class ExploreViewModel(
     private val _shouldPlayAnimation = MutableLiveData<Boolean>()
     val shouldPlayAnimation: LiveData<Boolean> = _shouldPlayAnimation
 
+    private val _isLoading = MutableLiveData<Boolean>(true)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     private lateinit var cursorInfo: CursorInfo
-    private var isLoading = false
+    private var isFetchingData = false
 
     init {
+        _isLoading.value = true
         setAnimation()
         fetchData(cursorId = 0)
     }
 
     fun fetchNextPage() {
-        if (cursorInfo.isEmpty || isLoading) return
+        if (cursorInfo.isEmpty || isFetchingData) return
         fetchData(cursorInfo.cursorId)
     }
 
@@ -89,20 +91,19 @@ class ExploreViewModel(
     }
 
     private fun fetchData(cursorId: Long) {
-        if (isLoading) return
-        isLoading = true
+        if (isFetchingData) return
+        isFetchingData = true
 
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             try {
                 val result =
-                    hearitRepository.getRandomHearits(token?.toBearerToken(), cursorId)
+                    hearitRepository.getRandomHearits(cursorId)
                 result
                     .onSuccess { randomItems ->
                         cursorInfo = randomItems.cursorInfo
                         val shortsList = buildShortsHearit(randomItems)
                         updateShortsHearit(shortsList)
+                        _isLoading.value = false
                     }.onFailure { throwable ->
                         Timber.w(throwable)
                         _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
@@ -111,7 +112,7 @@ class ExploreViewModel(
                 Timber.w(e)
                 _toastMessage.value = R.string.explore_toast_shorts_hearits_load_fail
             } finally {
-                isLoading = false
+                isFetchingData = false
             }
         }
     }
@@ -121,10 +122,8 @@ class ExploreViewModel(
         onFinished: (bookmarkId: Long?) -> Unit,
     ) {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             bookmarkRepository
-                .addBookmark(token?.toBearerToken(), hearitId)
+                .addBookmark(hearitId)
                 .onSuccess { newBookmarkId ->
                     updateBookmarkState(hearitId, newBookmarkId)
                     onFinished(newBookmarkId)
@@ -151,10 +150,8 @@ class ExploreViewModel(
         onFinished: (bookmarkId: Long?) -> Unit,
     ) {
         viewModelScope.launch {
-            val token = dataStoreRepository.getAccessToken().getOrNull()
-
             bookmarkRepository
-                .deleteBookmark(token?.toBearerToken(), bookmarkId)
+                .deleteBookmark(bookmarkId)
                 .onSuccess {
                     updateBookmarkState(hearitId, null)
                     onFinished(bookmarkId)

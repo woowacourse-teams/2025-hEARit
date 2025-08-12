@@ -8,7 +8,6 @@ import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
 object UseCaseProvider {
     val getHearitUseCase: GetHearitUseCase by lazy {
         GetHearitUseCase(
-            dataStoreRepository = RepositoryProvider.dataStoreRepository,
             hearitRepository = RepositoryProvider.hearitRepository,
             mediaFileRepository = RepositoryProvider.mediaFileRepository,
         )
@@ -16,7 +15,6 @@ object UseCaseProvider {
 
     val getPlaybackInfoUseCase: GetPlaybackInfoUseCase by lazy {
         GetPlaybackInfoUseCase(
-            dataStoreRepository = RepositoryProvider.dataStoreRepository,
             hearitRepository = RepositoryProvider.hearitRepository,
             mediaFileRepository = RepositoryProvider.mediaFileRepository,
             recentHearitRepository = RepositoryProvider.recentHearitRepository,

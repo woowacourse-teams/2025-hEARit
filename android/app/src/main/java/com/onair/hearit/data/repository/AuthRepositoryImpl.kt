@@ -23,5 +23,8 @@ class AuthRepositoryImpl(
             .refreshAccessToken(TokenReissueRequest(refreshToken))
             .mapOrThrowDomain { it.accessToken }
 
-    override suspend fun withdraw(token: String): Result<Unit> = runCatching { authRemoteDataSource.withdraw(token) }
+    override suspend fun withdraw(): Result<Unit> =
+        runCatching {
+            authRemoteDataSource.withdraw()
+        }
 }

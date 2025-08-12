@@ -86,7 +86,8 @@ class ExploreFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.viewModel = viewModel
 
         setupWindowInsets()
         setupRecyclerView()
@@ -185,6 +186,14 @@ class ExploreFragment :
         viewModel.showLoginDialog.observe(viewLifecycleOwner) {
             showLoginRequiredDialog()
         }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (isLoading) {
+                binding.frExploreSkeleton.startShimmer()
+            } else {
+                binding.frExploreSkeleton.stopShimmer()
+            }
+        }
     }
 
     private fun startSwipeAnimation() {
@@ -233,10 +242,11 @@ class ExploreFragment :
         val intent = LoginActivity.newIntent(requireContext())
         startActivity(intent)
 
-        // PlaybackService 종료
+        // PlaybackService 종료 (선택)
         val serviceIntent = Intent(requireContext(), PlaybackService::class.java)
         requireContext().stopService(serviceIntent)
 
+        // 현재 프래그먼트 종료
         parentFragmentManager
             .beginTransaction()
             .remove(this)

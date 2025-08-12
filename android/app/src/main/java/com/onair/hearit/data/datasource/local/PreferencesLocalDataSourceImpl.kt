@@ -1,21 +1,16 @@
-package com.onair.hearit.data.repository
+package com.onair.hearit.data.datasource.local
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.kakao.sdk.common.util.KakaoJson.json
-import com.onair.hearit.data.dataStore
 import com.onair.hearit.domain.model.UserInfo
-import com.onair.hearit.domain.repository.DataStoreRepository
 import kotlinx.coroutines.flow.first
 
-class DataStoreRepositoryImpl(
-    context: Context,
-) : DataStoreRepository {
-    private val dataStore: DataStore<Preferences> = context.dataStore
-
+class PreferencesLocalDataSourceImpl(
+    private val dataStore: DataStore<Preferences>,
+) : PreferencesLocalDataSource {
     override suspend fun getAccessToken(): Result<String> =
         runCatching {
             val preferences = dataStore.data.first()
@@ -48,17 +43,19 @@ class DataStoreRepositoryImpl(
     override suspend fun getUserInfo(): Result<UserInfo> =
         runCatching {
             val prefs = dataStore.data.first()
-            val jsonString =
-                prefs[USER_INFO_KEY]
-                    ?: throw IllegalStateException("UserInfo가 존재하지 않습니다.")
-            json.decodeFromString<UserInfo>(jsonString)
+            UserInfo(
+                id = prefs[USER_ID_KEY] ?: -1,
+                nickname = prefs[NICKNAME_KEY] ?: "hEARit",
+                profileImage = prefs[PROFILE_URL_KEY] ?: "",
+            )
         }
 
     override suspend fun saveUserInfo(userInfo: UserInfo): Result<Boolean> =
         runCatching {
-            val jsonString = json.encodeToString(userInfo)
             dataStore.edit { prefs ->
-                prefs[USER_INFO_KEY] = jsonString
+                prefs[USER_ID_KEY] = userInfo.id
+                prefs[NICKNAME_KEY] = userInfo.nickname
+                prefs[PROFILE_URL_KEY] = userInfo.profileImage ?: ""
             }
             true
         }
@@ -71,17 +68,11 @@ class DataStoreRepositoryImpl(
             true
         }
 
-    override suspend fun clearUserInfo(): Result<Boolean> =
-        runCatching {
-            dataStore.edit { prefs ->
-                prefs.remove(USER_INFO_KEY)
-            }
-            true
-        }
-
     companion object {
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
-        private val USER_INFO_KEY = stringPreferencesKey("user_info_json")
+        private val USER_ID_KEY = longPreferencesKey("user_id")
+        private val NICKNAME_KEY = stringPreferencesKey("nickname")
+        private val PROFILE_URL_KEY = stringPreferencesKey("profile_url")
     }
 }

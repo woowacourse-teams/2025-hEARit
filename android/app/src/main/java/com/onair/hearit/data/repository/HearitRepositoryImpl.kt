@@ -14,21 +14,18 @@ import com.onair.hearit.domain.repository.HearitRepository
 class HearitRepositoryImpl(
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
-    override suspend fun getHearit(
-        token: String?,
-        hearitId: Long,
-    ): Result<SingleHearit> = hearitRemoteDataSource.getHearit(token, hearitId).mapOrThrowDomain { it.toDomain() }
+    override suspend fun getHearit(hearitId: Long): Result<SingleHearit> =
+        hearitRemoteDataSource.getHearit(hearitId).mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =
         hearitRemoteDataSource.getRecommendHearits().mapListOrThrowDomain { it.toDomain() }
 
     override suspend fun getRandomHearits(
-        token: String?,
         cursorId: Long?,
         size: Int?,
     ): Result<CursorResult<RandomHearit>> =
         hearitRemoteDataSource
-            .getRandomHearits(token, cursorId, size)
+            .getRandomHearits(cursorId, size)
             .mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getSearchHearits(
@@ -40,6 +37,6 @@ class HearitRepositoryImpl(
             .getSearchHearits(searchTerm, page, size)
             .mapOrThrowDomain { it.toDomain() }
 
-    override suspend fun getCategoryHearits(token: String?): Result<List<GroupedCategory>> =
-        hearitRemoteDataSource.getCategoryHearits(token).mapListOrThrowDomain { it.toDomain() }
+    override suspend fun getCategoryHearits(): Result<List<GroupedCategory>> =
+        hearitRemoteDataSource.getCategoryHearits().mapListOrThrowDomain { it.toDomain() }
 }

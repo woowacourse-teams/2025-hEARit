@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/hearit_black1">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_top_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.1" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_top_6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.6" />
+
+        <View
+            android:id="@+id/view_explore_skeleton_main_title"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginHorizontal="50dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/hearit_gray1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/guideline_top_1" />
+
+        <TextView
+            android:id="@+id/view_explore_skeleton_keywords"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/hearit_gray1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/view_explore_skeleton_main_title" />
+
+        <View
+            android:id="@+id/view_explore_skeleton_lp"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="-10dp"
+            android:background="@color/hearit_gray1"
+            android:contentDescription="@null"
+            app:layout_constraintBottom_toTopOf="@id/guideline_top_6"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/view_explore_skeleton_keywords" />
+
+        <View
+            android:id="@+id/view_explore_skeleton_hearit_info"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="40dp"
+            android:background="@color/hearit_gray1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/view_explore_skeleton_bookmark"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <View
+            android:id="@+id/view_explore_skeleton_bookmark"
+            android:layout_width="42dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="10dp"
+            android:background="@color/hearit_gray1"
+            android:contentDescription="@null"
+            app:layout_constraintBottom_toBottomOf="@id/view_explore_skeleton_hearit_info"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/view_explore_skeleton_hearit_info"
+            app:layout_constraintTop_toTopOf="@id/view_explore_skeleton_hearit_info" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -4,7 +4,6 @@ import android.content.Context
 import com.onair.hearit.data.repository.AuthRepositoryImpl
 import com.onair.hearit.data.repository.BookmarkRepositoryImpl
 import com.onair.hearit.data.repository.CategoryRepositoryImpl
-import com.onair.hearit.data.repository.DataStoreRepositoryImpl
 import com.onair.hearit.data.repository.ExploreDataStoreRepositoryImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
 import com.onair.hearit.data.repository.KeywordRepositoryImpl
@@ -15,7 +14,6 @@ import com.onair.hearit.data.repository.RecentKeywordRepositoryImpl
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.CategoryRepository
-import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.KeywordRepository
@@ -37,15 +35,14 @@ object RepositoryProvider {
     }
 
     val bookmarkRepository: BookmarkRepository by lazy {
-        BookmarkRepositoryImpl(bookmarkDataSource = DataSourceProvider.bookmarkRemoteDataSource)
+        BookmarkRepositoryImpl(
+            bookmarkDataSource = DataSourceProvider.bookmarkRemoteDataSource,
+            preferencesLocalDataSource = DataSourceProvider.preferencesLocalDataSource,
+        )
     }
 
     val categoryRepository: CategoryRepository by lazy {
         CategoryRepositoryImpl(categoryDataSource = DataSourceProvider.categoryRemoteDataSource)
-    }
-
-    val dataStoreRepository: DataStoreRepository by lazy {
-        DataStoreRepositoryImpl(context = appContext)
     }
 
     val exploreDataStoreRepository: ExploreDataStoreRepository by lazy {
@@ -65,7 +62,10 @@ object RepositoryProvider {
     }
 
     val memberRepository: MemberRepository by lazy {
-        MemberRepositoryImpl(memberRemoteDataSource = DataSourceProvider.memberRemoteDataSource)
+        MemberRepositoryImpl(
+            preferencesLocalDataSource = DataSourceProvider.preferencesLocalDataSource,
+            memberRemoteDataSource = DataSourceProvider.memberRemoteDataSource,
+        )
     }
 
     val recentHearitRepository: RecentHearitRepository by lazy {
