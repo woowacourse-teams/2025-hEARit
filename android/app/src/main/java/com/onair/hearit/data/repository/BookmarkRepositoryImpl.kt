@@ -5,7 +5,6 @@ import com.onair.hearit.data.datasource.remote.BookmarkRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.repository.BookmarkRepository
-import com.onair.hearit.presentation.toBearerToken
 
 class BookmarkRepositoryImpl(
     private val bookmarkDataSource: BookmarkRemoteDataSource,

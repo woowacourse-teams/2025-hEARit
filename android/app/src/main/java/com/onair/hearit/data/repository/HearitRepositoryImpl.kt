@@ -11,7 +11,6 @@ import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.repository.HearitRepository
-import com.onair.hearit.presentation.toBearerToken
 
 class HearitRepositoryImpl(
     private val preferencesLocalDataSource: PreferencesLocalDataSource,

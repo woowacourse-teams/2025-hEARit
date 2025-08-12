@@ -23,7 +23,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import com.kakao.sdk.common.util.Utility
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -38,7 +37,6 @@ import com.onair.hearit.presentation.splash.SplashViewModel
 import com.onair.hearit.presentation.splash.SplashViewModelFactory
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
-import timber.log.Timber
 
 @OptIn(UnstableApi::class)
 class MainActivity :
