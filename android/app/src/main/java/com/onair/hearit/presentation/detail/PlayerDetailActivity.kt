@@ -76,14 +76,17 @@ class PlayerDetailActivity :
         PlayerDetailViewModelFactory(hearitId)
     }
 
-    private val updateInterval = 300L
+    private val updateInterval = 500L
 
     private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        bindLayout()
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
+        binding.lifecycleOwner = this
+        binding.viewModel = viewModel
+
         setupBackPressHandler()
         setupWindowInsets()
         setupRecyclerView()
@@ -102,12 +105,6 @@ class PlayerDetailActivity :
             binding.fragmentContainerView.visibility =
                 if (fragment != null && fragment.isVisible) View.VISIBLE else View.GONE
         }
-    }
-
-    private fun bindLayout() {
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
-        binding.lifecycleOwner = this
-        binding.viewModel = viewModel
     }
 
     private fun setupBackPressHandler() {
