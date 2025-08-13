@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.onair.hearit.analytics.AnalyticsScreenInfo
@@ -84,8 +83,6 @@ class LibraryFragment :
     private fun observeViewModel() {
         viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarks ->
             adapter.submitList(bookmarks)
-
-            binding.layoutLibraryWhenNoBookmark.isVisible = bookmarks.isEmpty()
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->

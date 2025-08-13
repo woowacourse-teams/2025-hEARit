@@ -39,9 +39,14 @@ class LibraryViewModel(
         viewModelScope.launch {
             bookmarkRepository
                 .getBookmarks(page = page, size = null)
-                .onSuccess {
-                    _uiState.value = BookmarkUiState.LoggedIn
-                    _bookmarks.value = it
+                .onSuccess { bookmarks ->
+                    _bookmarks.value = bookmarks
+                    _uiState.value =
+                        if (bookmarks.isEmpty()) {
+                            BookmarkUiState.NoBookmarks
+                        } else {
+                            BookmarkUiState.LoggedIn
+                        }
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
