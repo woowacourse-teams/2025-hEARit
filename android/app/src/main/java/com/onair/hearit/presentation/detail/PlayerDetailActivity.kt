@@ -5,8 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -43,6 +41,9 @@ import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.abs
@@ -56,6 +57,7 @@ class PlayerDetailActivity :
     private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
     private var mediaController: MediaController? = null
+    private var scriptSyncJob: Job? = null
 
     private val previousScreen by lazy {
         intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: UNKNOWN_SCREEN_ID
@@ -73,7 +75,6 @@ class PlayerDetailActivity :
         PlayerDetailViewModelFactory(hearitId)
     }
 
-    private val handler = Handler(Looper.getMainLooper())
     private val updateInterval = 300L
 
     private val itemHeightPx by lazy {
@@ -256,13 +257,13 @@ class PlayerDetailActivity :
     }
 
     private fun startScriptSync(controller: Player) {
-        val updateRunnable =
-            object : Runnable {
-                override fun run() {
-                    val pos = controller.currentPosition
+        scriptSyncJob =
+            lifecycleScope.launch {
+                while (isActive) {
+                    val position = controller.currentPosition
 
                     val currentItem =
-                        scriptAdapter.currentList.firstOrNull { pos in it.start until it.end }
+                        scriptAdapter.currentList.firstOrNull { position in it.start until it.end }
 
                     if (currentItem != null) {
                         scriptAdapter.highlightScriptLine(currentItem.id)
@@ -273,12 +274,9 @@ class PlayerDetailActivity :
                         (binding.rvScript.layoutManager as LinearLayoutManager)
                             .scrollToPositionWithOffset(currentIndex, centerOffset)
                     }
-
-                    handler.postDelayed(this, updateInterval)
+                    delay(updateInterval)
                 }
             }
-
-        handler.post(updateRunnable)
     }
 
     @OptIn(UnstableApi::class)
@@ -360,7 +358,8 @@ class PlayerDetailActivity :
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
+        scriptSyncJob?.cancel()
+        binding.playerView.player = null
         mediaController?.release()
     }
 
