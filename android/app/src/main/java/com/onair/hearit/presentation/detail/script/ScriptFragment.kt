@@ -3,7 +3,6 @@ package com.onair.hearit.presentation.detail.script
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +24,7 @@ import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
+import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.Job
@@ -54,14 +54,7 @@ class ScriptFragment : Fragment() {
 
     private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
 
-    private val itemHeightPx: Int by lazy {
-        TypedValue
-            .applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                SCRIPT_ITEM_HEIGHT_DP,
-                resources.displayMetrics,
-            ).toInt()
-    }
+    private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(requireContext()) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -199,7 +192,10 @@ class ScriptFragment : Fragment() {
 
                     if (isUserScrolling) {
                         val isVisible = isItemVisible(currentIndex)
-                        if (now - lastUserScrollTime > 3000L && isVisible) isUserScrolling = false
+                        if (now - lastUserScrollTime > USER_SCROLL_IDLE_THRESHOLD_MS && isVisible) {
+                            isUserScrolling =
+                                false
+                        }
                     }
 
                     if (currentItem != null) adapter.highlightScriptLine(currentItem.id)
@@ -256,7 +252,8 @@ class ScriptFragment : Fragment() {
     companion object {
         private const val HEARIT_ID = "hearit_id"
         private const val SCRIPT_SYNC_INTERVAL_MS = 300L
-        private const val SCRIPT_ITEM_HEIGHT_DP = 16f
+        private const val USER_SCROLL_IDLE_THRESHOLD_MS = 3000L
+        private const val SCRIPT_ITEM_HEIGHT_DP = 16
 
         fun newInstance(hearitId: Long) =
             ScriptFragment().apply {
