@@ -5,9 +5,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.ScriptLine
 
-class ScriptAdapter : ListAdapter<ScriptLine, ScriptViewHolder>(DiffCallback) {
+class ScriptAdapter(
+    private val onItemClick: (ScriptLine) -> Unit,
+) : ListAdapter<ScriptLine, ScriptViewHolder>(DiffCallback) {
     private var highlightedId: Long? = null
-    var onItemClick: ((ScriptLine) -> Unit)? = null
 
     fun highlightScriptLine(id: Long?) {
         if (highlightedId == id) return
@@ -35,7 +36,7 @@ class ScriptAdapter : ListAdapter<ScriptLine, ScriptViewHolder>(DiffCallback) {
         holder.bind(item, item.id == highlightedId)
 
         holder.itemView.setOnClickListener {
-            onItemClick?.invoke(item)
+            onItemClick.invoke(item)
         }
     }
 

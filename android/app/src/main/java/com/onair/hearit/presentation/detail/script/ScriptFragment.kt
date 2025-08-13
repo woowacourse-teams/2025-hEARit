@@ -43,7 +43,11 @@ class ScriptFragment : Fragment() {
     private var scriptSyncJob: Job? = null
     private var mediaController: MediaController? = null
 
-    private val adapter: ScriptAdapter by lazy { ScriptAdapter() }
+    private val adapter: ScriptAdapter by lazy {
+        ScriptAdapter({ item ->
+            mediaController?.seekTo(item.start)
+        })
+    }
 
     private val hearitId: Long by lazy {
         requireArguments().getLong(HEARIT_ID)
@@ -90,10 +94,6 @@ class ScriptFragment : Fragment() {
 
     private fun setupRecyclerView() {
         binding.rvScript.adapter = adapter
-
-        adapter.onItemClick = { item ->
-            mediaController?.seekTo(item.start)
-        }
 
         binding.rvScript.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
