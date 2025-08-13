@@ -3,8 +3,6 @@ package com.onair.hearit.presentation.detail.script
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +26,9 @@ import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class ScriptFragment : Fragment() {
@@ -38,8 +39,9 @@ class ScriptFragment : Fragment() {
     private var isUserScrolling = false
     private var lastUserScrollTime = 0L
 
+    private var scriptSyncJob: Job? = null
+
     private lateinit var mediaController: MediaController
-    private lateinit var updateRunnable: Runnable
 
     private val adapter by lazy { ScriptAdapter() }
 
@@ -50,7 +52,6 @@ class ScriptFragment : Fragment() {
         PlayerDetailViewModelFactory(hearitId)
     }
 
-    private val handler = Handler(Looper.getMainLooper())
     private val updateInterval = 300L
 
     private val itemHeightPx by lazy {
@@ -175,42 +176,33 @@ class ScriptFragment : Fragment() {
     }
 
     private fun startScriptSync(controller: Player) {
-        updateRunnable =
-            object : Runnable {
-                override fun run() {
-                    val now = System.currentTimeMillis()
-
-                    val pos = controller.currentPosition
+        scriptSyncJob =
+            lifecycleScope.launch {
+                while (isActive) {
+                    val position = controller.currentPosition
                     val currentItem =
-                        adapter.currentList.firstOrNull { pos in it.start until it.end }
+                        adapter.currentList.firstOrNull { position in it.start until it.end }
                     val currentIndex = adapter.currentList.indexOf(currentItem)
 
-                    // 사용자가 스크롤을 멈춘 시점을 체크함
-                    // 사용자가 스크롤을 멈춤 + 하이라이트 부분을 보고 있을 때 3초 후에 다시 포커싱함
+                    val now = System.currentTimeMillis()
+
                     if (isUserScrolling) {
                         val isVisible = isItemVisible(currentIndex)
-
-                        if (now - lastUserScrollTime > 3000L && isVisible) {
-                            isUserScrolling = false
-                        }
+                        if (now - lastUserScrollTime > 3000L && isVisible) isUserScrolling = false
                     }
 
-                    // 하이라이트는 항상 진행하도록 함
-                    if (currentItem != null) {
-                        adapter.highlightScriptLine(currentItem.id)
-                    }
+                    if (currentItem != null) adapter.highlightScriptLine(currentItem.id)
 
-                    // 스크롤 이동은 사용자가 스크롤 중이 아닐 때만
                     if (!isUserScrolling && currentItem != null) {
                         val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-                        (binding.rvScript.layoutManager as LinearLayoutManager)
-                            .scrollToPositionWithOffset(currentIndex, centerOffset)
+                        (binding.rvScript.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                            currentIndex,
+                            centerOffset,
+                        )
                     }
-
-                    handler.postDelayed(this, updateInterval)
+                    delay(updateInterval)
                 }
             }
-        handler.post(updateRunnable)
     }
 
     private fun isItemVisible(position: Int): Boolean {
@@ -241,7 +233,7 @@ class ScriptFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        handler.removeCallbacks(updateRunnable)
+        scriptSyncJob?.cancel()
         if (::mediaController.isInitialized) {
             mediaController.release()
         }
