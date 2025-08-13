@@ -12,7 +12,8 @@ public interface HearitKeywordRepository extends JpaRepository<HearitKeyword, Lo
     @Query("""
                 SELECT hk
                 FROM HearitKeyword hk
-                JOIN hk.keyword k
+               JOIN FETCH hk.hearit h
+               JOIN FETCH hk.keyword k
                 WHERE hk.hearit.id IN :hearitIds
             """)
     List<HearitKeyword> findByHearitIdIn(@Param("hearitIds") List<Long> hearitIds);
