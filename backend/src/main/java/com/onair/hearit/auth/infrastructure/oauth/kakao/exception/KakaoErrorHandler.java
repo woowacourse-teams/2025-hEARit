@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.infrastructure.oauth.kakao;
+package com.onair.hearit.auth.infrastructure.oauth.kakao.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.auth.dto.response.KakaoErrorResponse;

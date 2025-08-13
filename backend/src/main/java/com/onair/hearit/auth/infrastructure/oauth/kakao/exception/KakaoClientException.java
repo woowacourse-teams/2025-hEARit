@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.infrastructure.oauth.kakao;
+package com.onair.hearit.auth.infrastructure.oauth.kakao.exception;
 
 import com.onair.hearit.common.exception.ErrorCode;
 import com.onair.hearit.common.exception.custom.HearitException;

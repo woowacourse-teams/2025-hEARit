@@ -1,6 +1,7 @@
 package com.onair.hearit.auth.infrastructure.oauth.kakao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onair.hearit.auth.infrastructure.oauth.kakao.exception.KakaoErrorHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
