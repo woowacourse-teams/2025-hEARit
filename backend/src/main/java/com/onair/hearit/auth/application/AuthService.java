@@ -1,12 +1,11 @@
 package com.onair.hearit.auth.application;
 
 import com.onair.hearit.auth.domain.RefreshToken;
-import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
+import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
+import com.onair.hearit.auth.dto.request.OAuthUserInfo;
 import com.onair.hearit.auth.dto.request.SignupRequest;
-import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
-import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
@@ -30,8 +29,8 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final KakaoUserInfoClient kakaoUserInfoClient;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final OAuthServiceRegistry oAuthServiceRegistry;
 
     @Value("${hearit.profile.default-image-url}")
     private String defaultProfileImage;
@@ -66,18 +65,17 @@ public class AuthService {
         }
     }
 
-    // 소셜 로그인의 경우 회원가입이 따로 없으며 로그인 시 자동으로 회원가입되도록 구현
     @Transactional
-    public LoginTokenResponse loginOrSignupWithKakao(KakaoLoginRequest request) {
-        KakaoUserInfoResponse kakaoUser = kakaoUserInfoClient.getUserInfo(request.accessToken());
-
-        Member member = memberRepository.findBySocialId(kakaoUser.id())
-                .orElseGet(() -> signupWithKakao(kakaoUser));
+    public LoginTokenResponse loginOrSignUp(OAuthLoginRequest request, OAuthProvider provider) {
+        OAuthService oAuthService = oAuthServiceRegistry.get(provider);
+        OAuthUserInfo userInfo = oAuthService.fetchUser(request.accessToken());
+        Member member = memberRepository.findBySocialId(userInfo.id())
+                .orElseGet(() -> signupWithUserInfo(userInfo));
         return createTokenResponseFrom(member);
     }
 
-    private Member signupWithKakao(KakaoUserInfoResponse kakaoUser) {
-        Member member = Member.createSocialUser(kakaoUser.id(), kakaoUser.nickname(), kakaoUser.profileImage());
+    private Member signupWithUserInfo(OAuthUserInfo userInfo) {
+        Member member = Member.createSocialUser(userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl());
         return memberRepository.save(member);
     }
 
@@ -90,7 +88,6 @@ public class AuthService {
                         existing -> existing.update(refreshToken, expiryDate),
                         () -> refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, expiryDate))
                 );
-        log.info("로그인 토큰 발급 완료 - memberId: {}", member.getId());
         return new LoginTokenResponse(accessToken, refreshToken);
     }
 
