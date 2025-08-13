@@ -20,8 +20,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1009
-        versionName = "1.0.09"
+        versionCode = 1010
+        versionName = "1.0.10"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -177,4 +177,7 @@ dependencies {
 
     // shimmer
     implementation(libs.shimmer)
+
+    // in-app-update
+    implementation(libs.app.update.ktx)
 }
