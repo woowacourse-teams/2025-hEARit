@@ -39,6 +39,7 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.script.ScriptFragment
+import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.Job
@@ -77,10 +78,7 @@ class PlayerDetailActivity :
 
     private val updateInterval = 300L
 
-    private val itemHeightPx by lazy {
-        val scale = resources.displayMetrics.density
-        (16 * scale + 0.5f).toInt()
-    }
+    private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -372,6 +370,7 @@ class PlayerDetailActivity :
         const val LAST_POSITION = "last_position"
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
+        private const val SCRIPT_ITEM_HEIGHT_DP = 16
 
         fun newIntent(
             context: Context,
