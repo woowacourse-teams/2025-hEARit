@@ -15,7 +15,7 @@ public record AdminHearitResponse(
         List<SourceInHearit> sources,
         Integer playTime,
         LocalDateTime createdAt,
-        CategoryInfoResponse category,
+        AdminCategoryResponse category,
         List<KeywordInHearit> keywords
 ) {
     public static AdminHearitResponse from(Hearit hearit, List<KeywordInHearit> keywords) {
@@ -30,7 +30,7 @@ public record AdminHearitResponse(
                 sources,
                 hearit.getPlayTime(),
                 hearit.getCreatedAt(),
-                CategoryInfoResponse.from(hearit.getCategory()),
+                AdminCategoryResponse.from(hearit.getCategory()),
                 keywords
         );
     }
@@ -48,7 +48,6 @@ public record AdminHearitResponse(
             String sourceName,
             String sourceUrl
     ) {
-
         public static SourceInHearit from(Source source) {
             return new SourceInHearit(
                     source.getSourceName(),

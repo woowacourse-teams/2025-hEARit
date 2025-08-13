@@ -5,7 +5,7 @@ import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
 import com.onair.hearit.admin.dto.request.KeywordUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
-import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
+import com.onair.hearit.admin.dto.response.AdminKeywordResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +28,17 @@ public class AdminKeywordController {
     private final AdminKeywordService adminKeywordService;
 
     @GetMapping
-    public ResponseEntity<AdminPagedResponse<KeywordInfoResponse>> readKeywords(
+    public ResponseEntity<AdminPagedResponse<AdminKeywordResponse>> readKeywords(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
         AdminPagingRequest pagingRequest = new AdminPagingRequest(page, size);
-        AdminPagedResponse<KeywordInfoResponse> response = adminKeywordService.getKeywords(pagingRequest);
+        AdminPagedResponse<AdminKeywordResponse> response = adminKeywordService.getKeywords(pagingRequest);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<KeywordInfoResponse>> readAllKeywords() {
-        List<KeywordInfoResponse> response = adminKeywordService.getAllKeywords();
+    public ResponseEntity<List<AdminKeywordResponse>> readAllKeywords() {
+        List<AdminKeywordResponse> response = adminKeywordService.getAllKeywords();
         return ResponseEntity.ok(response);
     }
 

@@ -4,7 +4,7 @@ import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
-import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
+import com.onair.hearit.admin.dto.response.AdminCategoryResponse;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.infrastructure.CategoryRepository;
@@ -23,18 +23,18 @@ public class AdminCategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public AdminPagedResponse<CategoryInfoResponse> getCategories(AdminPagingRequest pagingRequest) {
+    public AdminPagedResponse<AdminCategoryResponse> getCategories(AdminPagingRequest pagingRequest) {
         Sort sort = Sort.by(Sort.Order.asc("id"));
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sort);
         Page<Category> pageKeywords = categoryRepository.findAll(pageable);
-        Page<CategoryInfoResponse> dtoPage = pageKeywords.map(CategoryInfoResponse::from);
+        Page<AdminCategoryResponse> dtoPage = pageKeywords.map(AdminCategoryResponse::from);
         return AdminPagedResponse.from(dtoPage);
     }
 
-    public List<CategoryInfoResponse> getAllCategories() {
+    public List<AdminCategoryResponse> getAllCategories() {
         List<Category> allCategories = categoryRepository.findAll();
         return allCategories.stream()
-                .map(CategoryInfoResponse::from)
+                .map(AdminCategoryResponse::from)
                 .toList();
     }
 

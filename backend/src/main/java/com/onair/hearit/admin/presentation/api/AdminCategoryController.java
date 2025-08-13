@@ -5,7 +5,7 @@ import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
-import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
+import com.onair.hearit.admin.dto.response.AdminCategoryResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +28,17 @@ public class AdminCategoryController {
     private final AdminCategoryService adminCategoryService;
 
     @GetMapping
-    public ResponseEntity<AdminPagedResponse<CategoryInfoResponse>> readCategories(
+    public ResponseEntity<AdminPagedResponse<AdminCategoryResponse>> readCategories(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
         AdminPagingRequest pagingRequest = new AdminPagingRequest(page, size);
-        AdminPagedResponse<CategoryInfoResponse> response = adminCategoryService.getCategories(pagingRequest);
+        AdminPagedResponse<AdminCategoryResponse> response = adminCategoryService.getCategories(pagingRequest);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<CategoryInfoResponse>> readAllCategories() {
-        List<CategoryInfoResponse> response = adminCategoryService.getAllCategories();
+    public ResponseEntity<List<AdminCategoryResponse>> readAllCategories() {
+        List<AdminCategoryResponse> response = adminCategoryService.getAllCategories();
         return ResponseEntity.ok(response);
     }
 

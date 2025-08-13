@@ -5,7 +5,7 @@ import com.onair.hearit.admin.dto.request.RecommendHearitCreateRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
-import com.onair.hearit.admin.dto.response.RecommendHearitResponse;
+import com.onair.hearit.admin.dto.response.AdminRecommendHearitResponse;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.RecommendHearit;
@@ -32,11 +32,11 @@ public class AdminRecommendHearitService {
     private final HearitRepository hearitRepository;
     private final RecommendHearitRepository recommendHearitRepository;
 
-    public AdminPagedResponse<RecommendHearitResponse> getHearits(AdminPagingRequest pagingRequest) {
+    public AdminPagedResponse<AdminRecommendHearitResponse> getHearits(AdminPagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findAll(pageable);
-        Page<RecommendHearitResponse> dtoPage = hearits.map(
-                hearit -> RecommendHearitResponse.of(hearit, getLastRecommendDate(hearit)));
+        Page<AdminRecommendHearitResponse> dtoPage = hearits.map(
+                hearit -> AdminRecommendHearitResponse.of(hearit, getLastRecommendDate(hearit)));
         return AdminPagedResponse.from(dtoPage);
     }
 

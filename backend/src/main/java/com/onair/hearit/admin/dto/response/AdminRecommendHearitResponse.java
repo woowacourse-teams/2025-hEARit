@@ -3,7 +3,7 @@ package com.onair.hearit.admin.dto.response;
 import com.onair.hearit.domain.Hearit;
 import java.time.LocalDate;
 
-public record RecommendHearitResponse(
+public record AdminRecommendHearitResponse(
         Long id,
         String title,
         String summary,
@@ -12,9 +12,8 @@ public record RecommendHearitResponse(
         LocalDate createdAt,
         LocalDate lastRecommendedDate
 ) {
-
-    public static RecommendHearitResponse of(Hearit hearit, LocalDate lastRecommendedDate) {
-        return new RecommendHearitResponse(
+    public static AdminRecommendHearitResponse of(Hearit hearit, LocalDate lastRecommendedDate) {
+        return new AdminRecommendHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),

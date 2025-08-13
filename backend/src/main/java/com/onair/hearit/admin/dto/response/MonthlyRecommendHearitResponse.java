@@ -6,21 +6,24 @@ import java.util.List;
 
 public record MonthlyRecommendHearitResponse(
         LocalDate recommendDate,
-        List<RecommendHearitSimpleResponse> recommendHearits
+        List<RecommendHearitInfoResponse> recommendHearits
 ) {
     public static MonthlyRecommendHearitResponse from(LocalDate recommendDate, List<Hearit> recommendHearits) {
-        List<RecommendHearitSimpleResponse> simpleResponses = recommendHearits.stream()
-                .map(RecommendHearitSimpleResponse::from).toList();
+        List<RecommendHearitInfoResponse> simpleResponses = recommendHearits.stream()
+                .map(RecommendHearitInfoResponse::from)
+                .toList();
         return new MonthlyRecommendHearitResponse(recommendDate, simpleResponses);
     }
 
-    record RecommendHearitSimpleResponse(
+    record RecommendHearitInfoResponse(
             String title,
             String summary,
             String categoryName
     ) {
-        static RecommendHearitSimpleResponse from(Hearit hearit) {
-            return new RecommendHearitSimpleResponse(hearit.getTitle(), hearit.getSummary(),
+        static RecommendHearitInfoResponse from(Hearit hearit) {
+            return new RecommendHearitInfoResponse(
+                    hearit.getTitle(),
+                    hearit.getSummary(),
                     hearit.getCategory().getName());
         }
     }
