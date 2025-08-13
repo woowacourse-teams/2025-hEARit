@@ -26,19 +26,13 @@ import com.onair.hearit.data.datasource.remote.MemberRemoteDataSource
 import com.onair.hearit.data.datasource.remote.MemberRemoteDataSourceImpl
 
 object DataSourceProvider {
-    private val errorHandler = ErrorResponseHandler()
     private lateinit var dataStore: DataStore<Preferences>
-
-    lateinit var preferencesLocalDataSource: PreferencesLocalDataSource
-        private set
+    private val errorHandler = ErrorResponseHandler()
 
     fun init(context: Context) {
+        val appContext = context.applicationContext
         dataStore =
-            PreferenceDataStoreFactory.create {
-                context.preferencesDataStoreFile("user_prefs")
-            }
-
-        preferencesLocalDataSource = PreferencesLocalDataSourceImpl(dataStore)
+            PreferenceDataStoreFactory.create { appContext.preferencesDataStoreFile("user_prefs") }
     }
 
     val authRemoteDataSource: AuthRemoteDataSource by lazy {
@@ -92,5 +86,10 @@ object DataSourceProvider {
 
     val hearitLocalDataSource: HearitLocalDataSource by lazy {
         HearitLocalDataSourceImpl(DatabaseProvider.hearitDao)
+    }
+
+    val preferencesLocalDataSource: PreferencesLocalDataSource by lazy {
+        check(::dataStore.isInitialized) { "DataSourceProvider.init() 먼저 호출 필요" }
+        PreferencesLocalDataSourceImpl(dataStore)
     }
 }

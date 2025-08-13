@@ -47,8 +47,8 @@ class SplashActivity : AppCompatActivity() {
                 }
             }
 
-        checkForUpdate()
         observeViewModel()
+        checkForUpdate()
     }
 
     private fun setupWindowInsets() {
