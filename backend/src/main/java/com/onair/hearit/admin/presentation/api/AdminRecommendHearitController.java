@@ -5,7 +5,7 @@ import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitCreateRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
-import com.onair.hearit.admin.dto.response.MonthlyRecommendedHearitResponse;
+import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
 import com.onair.hearit.admin.dto.response.RecommendHearitResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,11 +36,11 @@ public class AdminRecommendHearitController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MonthlyRecommendedHearitResponse>> readRecommendedHearit(
+    public ResponseEntity<List<MonthlyRecommendHearitResponse>> readRecommendedHearit(
             @RequestParam Integer year,
             @RequestParam Integer month) {
-        List<MonthlyRecommendedHearitResponse> responses =
-                adminRecommendHearitService.getMonthRecommendedHearit(year, month);
+        List<MonthlyRecommendHearitResponse> responses =
+                adminRecommendHearitService.getMonthRecommendHearit(year, month);
         return ResponseEntity.ok(responses);
     }
 
