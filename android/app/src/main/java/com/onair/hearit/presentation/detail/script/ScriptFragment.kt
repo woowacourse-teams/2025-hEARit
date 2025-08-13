@@ -40,8 +40,7 @@ class ScriptFragment : Fragment() {
     private var lastUserScrollTime = 0L
 
     private var scriptSyncJob: Job? = null
-
-    private lateinit var mediaController: MediaController
+    private var mediaController: MediaController? = null
 
     private val adapter by lazy { ScriptAdapter() }
 
@@ -168,10 +167,12 @@ class ScriptFragment : Fragment() {
             mediaController =
                 MediaController.Builder(requireContext(), sessionToken).buildAsync().await()
 
-            binding.playerView.player = mediaController
-            binding.baseController.setPlayer(mediaController)
+            mediaController?.let { controller ->
+                binding.playerView.player = controller
+                binding.baseController.setPlayer(controller)
 
-            startScriptSync(mediaController)
+                startScriptSync(controller)
+            }
         }
     }
 
@@ -234,9 +235,7 @@ class ScriptFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         scriptSyncJob?.cancel()
-        if (::mediaController.isInitialized) {
-            mediaController.release()
-        }
+        mediaController?.release()
         _binding = null
     }
 
