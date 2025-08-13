@@ -10,8 +10,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +39,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class LoggingAspect {
 
     private final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
+    private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
     private final MaskingSupport maskingSupport;
 
     @Pointcut("@annotation(org.springframework.web.bind.annotation.GetMapping)")
@@ -75,7 +80,8 @@ public class LoggingAspect {
     @Before("allMapping()")
     public void logRequest(JoinPoint joinPoint) {
         RequestLog requestLog = getRequestLog(joinPoint);
-        log.info(maskingSupport.mask(requestLog));
+        jsonLogger.info(maskingSupport.mask(requestLog));
+        consoleLogger.info(getRequestLogForConsole(requestLog));
     }
 
     private RequestLog getRequestLog(JoinPoint joinPoint) {
@@ -113,7 +119,8 @@ public class LoggingAspect {
                 requestInfo,
                 responseEntity,
                 calculateTimeTakenMs());
-            log.info(maskingSupport.mask(responseLog));
+        jsonLogger.info(maskingSupport.mask(responseLog));
+        consoleLogger.info(formatResponseLogForConsole(responseLog));
     }
 
     private long calculateTimeTakenMs() {
@@ -140,7 +147,7 @@ public class LoggingAspect {
                     logServerErrorWithStackTrace(requestInfo, httpStatus, errorDetail, throwable.get());
                     return;
                 }
-                logServerErrorWithoutStackTrace(requestInfo, httpStatus, errorDetail);
+                logServerErrorWithoutStackTrace(requestInfo, httpStatus, errorDetail, throwable.get());
                 return;
             }
             logClientError(problemDetail, requestInfo, errorDetail);
@@ -159,21 +166,91 @@ public class LoggingAspect {
     private void logServerErrorWithStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
                                               ErrorDetail errorDetail, Throwable throwable) {
         ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
-        log.error(maskingSupport.mask(exceptionLog));
+        jsonLogger.error(maskingSupport.mask(exceptionLog));
         errorLogger.error(exceptionLog, throwable);
+        consoleLogger.error("[ERROR] {} {} from {} → {}",
+                requestInfo.getHttpMethod(),
+                requestInfo.getRequestUri(),
+                requestInfo.getIp(),
+                throwable.toString(),
+                throwable
+        );
     }
 
     private void logServerErrorWithoutStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
-                                                 ErrorDetail errorDetail) {
+                                                 ErrorDetail errorDetail, Throwable throwable) {
         ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
-        log.error(maskingSupport.mask(exceptionLog));
+        jsonLogger.error(maskingSupport.mask(exceptionLog));
         errorLogger.error(exceptionLog);
+        consoleLogger.error("[ERROR] {} {} from {} → {}",
+                requestInfo.getHttpMethod(),
+                requestInfo.getRequestUri(),
+                requestInfo.getIp(),
+                throwable.toString(),
+                throwable
+        );
     }
 
     private void logClientError(ProblemDetail problemDetail, RequestInfo requestInfo, ErrorDetail errorDetail) {
         ExceptionLog exceptionLog = ExceptionLog.warn(LocalDateTime.now(), requestInfo,
                 HttpStatus.resolve(problemDetail.getStatus()),
                 errorDetail);
-        log.warn(maskingSupport.mask(exceptionLog));
+        jsonLogger.warn(maskingSupport.mask(exceptionLog));
+        consoleLogger.warn(
+                "[CLIENT ERROR] {} {} from {} → status: {} / title: {} / detail: {}",
+                requestInfo.getHttpMethod(),
+                requestInfo.getRequestUri(),
+                requestInfo.getIp(),
+                problemDetail.getStatus(),
+                problemDetail.getTitle(),
+                problemDetail.getDetail()
+        );
+    }
+
+    private String getRequestLogForConsole(RequestLog requestLog) {
+        String method = requestLog.getRequestInfo().getHttpMethod();
+        String uri = requestLog.getRequestInfo().getRequestUri();
+        String ip = requestLog.getRequestInfo().getIp();
+        String time = requestLog.getTimestamp();
+        Map<String, List<String>> params = requestLog.getRequestParameter();
+        Object body = requestLog.getRequestBody();
+
+        return String.format("[REQUEST] %s → %s %s from %s params=%s body=%s",
+                time,
+                method,
+                uri,
+                ip,
+                toFlatParamString(params),
+                body == null ? "null" : truncateBody(body.toString())
+        );
+    }
+
+    private String toFlatParamString(Map<String, List<String>> params) {
+        return params.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(", ", "{", "}"));
+    }
+
+    private String truncateBody(String body) {
+        return body.length() > 200 ? body.substring(0, 200) + "...(생략)" : body;
+    }
+
+    private String formatResponseLogForConsole(ResponseLog<?> responseLog) {
+        String time = responseLog.timestamp();
+        String method = responseLog.requestInfo().getHttpMethod();
+        String uri = responseLog.requestInfo().getRequestUri();
+        String ip = responseLog.requestInfo().getIp();
+        long timeTaken = responseLog.timeTakenMs();
+        Object body = responseLog.responseEntity();
+
+        return String.format(
+                "[RESPONSE] %s ← %s %s from %s timeTaken=%dms body=%s",
+                time,
+                method,
+                uri,
+                ip,
+                timeTaken,
+                truncateBody(body == null ? "null" : body.toString())
+        );
     }
 }

@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -19,12 +18,13 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Log4j2
 @Component
 @RequiredArgsConstructor
 public class FilterExceptionLogger extends OncePerRequestFilter {
 
     private final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
+    private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
     private final MaskingSupport maskingSupport;
 
     @Override
@@ -41,8 +41,14 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     errorDetail);
 
-            log.error(maskingSupport.mask(exceptionLog));
+            jsonLogger.error(maskingSupport.mask(exceptionLog));
             errorLogger.error(exceptionLog, ex);
+            consoleLogger.error("[ERROR] {} {} from {} → {}",
+                    requestInfo.getHttpMethod(),
+                    requestInfo.getRequestUri(),
+                    requestInfo.getIp(),
+                    ex.toString(),
+                    ex);
 
             throw ex;
         }
@@ -62,6 +68,14 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                 errorDetail
         );
 
-        log.warn(maskingSupport.mask(exceptionLog));
+        jsonLogger.warn(maskingSupport.mask(exceptionLog));
+        consoleLogger.warn("[CLIENT ERROR] {} {} from {} → status: {} / title: {} / detail: {}",
+                requestInfo.getHttpMethod(),
+                requestInfo.getRequestUri(),
+                requestInfo.getIp(),
+                problemDetail.getStatus(),
+                problemDetail.getTitle(),
+                problemDetail.getDetail()
+        );
     }
 }
