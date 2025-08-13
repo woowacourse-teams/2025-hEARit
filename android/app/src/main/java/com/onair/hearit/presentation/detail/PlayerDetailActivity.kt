@@ -165,6 +165,8 @@ class PlayerDetailActivity :
             val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
             val isDifferentHearit = playingId != hearitId
 
+            binding.hearit?.let { handlePlayback(it) }
+
             if (isDifferentHearit) {
                 controller.addListener(
                     object : Player.Listener {
@@ -324,7 +326,7 @@ class PlayerDetailActivity :
                 hearitId = hearitId,
                 startPosition = startPosition,
             )
-        startService(serviceIntent)
+        startForegroundService(serviceIntent)
     }
 
     private fun navigateToLogin() {
