@@ -3,8 +3,6 @@ name: Hearit Android dev CD
 on:
   pull_request:
     branches: [ "develop", "develop-an", "fix/#368-android-dev-cd" ]
-    paths:
-      - 'android/**'
 
 env:
   BASE_URL: ${{ secrets.BASE_URL }}
