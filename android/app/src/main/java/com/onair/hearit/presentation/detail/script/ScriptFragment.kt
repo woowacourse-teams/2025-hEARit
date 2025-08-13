@@ -188,7 +188,7 @@ class ScriptFragment : Fragment() {
 
     private fun startScriptSync(controller: Player) {
         scriptSyncJob =
-            lifecycleScope.launch {
+            viewLifecycleOwner.lifecycleScope.launch {
                 while (isActive) {
                     val position = controller.currentPosition
                     val currentItem =
@@ -205,11 +205,14 @@ class ScriptFragment : Fragment() {
                     if (currentItem != null) adapter.highlightScriptLine(currentItem.id)
 
                     if (!isUserScrolling && currentItem != null) {
-                        val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-                        (binding.rvScript.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                            currentIndex,
-                            centerOffset,
-                        )
+                        val scriptHeight = binding.rvScript.height
+                        if (scriptHeight > 0) {
+                            val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
+                            (binding.rvScript.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                                currentIndex,
+                                centerOffset,
+                            )
+                        }
                     }
                     delay(updateInterval)
                 }
@@ -245,6 +248,7 @@ class ScriptFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         scriptSyncJob?.cancel()
+        binding.playerView.player = null
         mediaController?.release()
         _binding = null
     }
