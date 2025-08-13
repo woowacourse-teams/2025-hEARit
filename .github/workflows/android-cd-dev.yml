@@ -55,5 +55,5 @@ jobs:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: hearit-test
-          releaseNotesFile: ./app/whatsnew/whatsnew-ko-KR
-          file: ./app/build/outputs/apk/debug/hEARit-debug.apk
+          releaseNotesFile: ./android/app/whatsnew/whatsnew-ko-KR
+          file: ./android/app/build/outputs/apk/debug/hEARit-debug.apk
