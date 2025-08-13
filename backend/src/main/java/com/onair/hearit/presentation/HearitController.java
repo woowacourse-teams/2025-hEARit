@@ -3,7 +3,7 @@ package com.onair.hearit.presentation;
 import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.application.explore.HearitExploreService;
-import com.onair.hearit.auth.dto.CurrentMember;
+import com.onair.hearit.auth.dto.UserContext;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
@@ -35,28 +35,20 @@ public class HearitController {
     @GetMapping("/{hearitId}")
     public ResponseEntity<HearitDetailResponse> readHearit(
             @PathVariable Long hearitId,
-            @AuthenticationPrincipal CurrentMember member) {
-        Long memberId = extractMemberId(member);
-        HearitDetailResponse response = hearitService.getHearitDetail(hearitId, memberId);
+            @AuthenticationPrincipal UserContext userContext) {
+        HearitDetailResponse response = hearitService.getHearitDetail(hearitId, userContext);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/explore")
     public ResponseEntity<CursorResponse<ExploredHearitResponse>> readExploredHearits(
-            @AuthenticationPrincipal CurrentMember member,
+            @AuthenticationPrincipal UserContext userContext,
             @RequestParam(name = "cursorId", defaultValue = "0") Long cursorId,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-        Long memberId = extractMemberId(member);
-        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(memberId, cursorId,
+        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(userContext,
+                cursorId,
                 size);
         return ResponseEntity.ok(responses);
-    }
-
-    private Long extractMemberId(CurrentMember member) {
-        if (member == null) {
-            return null;
-        }
-        return member.memberId();
     }
 
     @GetMapping("/recommend")
@@ -77,9 +69,9 @@ public class HearitController {
 
     @GetMapping("/recommend-category")
     public ResponseEntity<List<HearitsWithRecommendCategoryResponse>> readHearitsWithRecommendCategory(
-            @AuthenticationPrincipal CurrentMember member) {
-        Long memberId = extractMemberId(member);
-        List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(memberId);
+            @AuthenticationPrincipal UserContext userContext) {
+        List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(
+                userContext);
         return ResponseEntity.ok(responses);
     }
 

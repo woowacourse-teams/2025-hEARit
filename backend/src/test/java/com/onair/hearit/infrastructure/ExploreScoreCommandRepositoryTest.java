@@ -65,7 +65,7 @@ public class ExploreScoreCommandRepositoryTest {
         );
 
         // when
-        exploreScoreCommandRepository.insertScores(null, scores);
+        exploreScoreCommandRepository.insertScores(-1L, scores);
 
         // then
         Integer count = jdbcTemplate.queryForObject(

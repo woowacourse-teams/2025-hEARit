@@ -5,6 +5,7 @@ import com.onair.hearit.application.explore.HearitExploreService;
 import com.onair.hearit.application.explore.score.BookmarkScoreFactor;
 import com.onair.hearit.application.explore.score.RandomScoreFactor;
 import com.onair.hearit.application.explore.score.RecencyScoreFactor;
+import com.onair.hearit.auth.dto.UserContext;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
@@ -20,6 +21,7 @@ import com.onair.hearit.infrastructure.ExploreScoreCommandRepository;
 import com.onair.hearit.infrastructure.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
+import com.onair.hearit.infrastructure.MemberRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,6 +52,9 @@ class HearitExploreServiceTest {
     private ExploredHearitQueryRepository exploredHearitQueryRepository;
 
     @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
     private HearitRepository hearitRepository;
 
     @Autowired
@@ -75,7 +80,7 @@ class HearitExploreServiceTest {
     @BeforeEach
     void setup() {
         hearitExploreService = new HearitExploreService(
-                exploreScoreCommandRepository, exploredHearitQueryRepository, hearitRepository,
+                exploreScoreCommandRepository, exploredHearitQueryRepository, memberRepository, hearitRepository,
                 hearitKeywordRepository, bookmarkRepository, exploreScoreCalculator,
                 bookmarkScoreFactor, recencyScoreFactor, randomScoreFactor);
     }
@@ -103,7 +108,8 @@ class HearitExploreServiceTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit5));
 
         // when
-        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(member.getId(),
+        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(
+                UserContext.member(member.getId()),
                 0L, 10);
 
         // then
@@ -130,7 +136,8 @@ class HearitExploreServiceTest {
         Hearit hearit10 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit10", category3));
 
         // when
-        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(null, 0L, 10);
+        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(
+                UserContext.guest(), 0L, 10);
 
         // then
         exploredHearits.content().forEach(System.out::println);

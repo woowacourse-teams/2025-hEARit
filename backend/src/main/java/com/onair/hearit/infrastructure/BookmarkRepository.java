@@ -1,6 +1,7 @@
 package com.onair.hearit.infrastructure;
 
 import com.onair.hearit.domain.Bookmark;
+import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     Page<Bookmark> findAllByMemberOrderByCreatedAtDesc(Member member, Pageable pageable);
 
-    Optional<Bookmark> findByHearitIdAndMemberId(Long hearitId, Long memberId);
+    Optional<Bookmark> findByHearitAndMember(Hearit hearit, Member member);
 
     @Query("""
                 SELECT b.hearit.category.id AS categoryId, COUNT(b) AS count
@@ -24,5 +25,5 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
             """)
     List<CategoryBookmarkCount> countBookmarksByCategoryId(@Param("memberId") Long memberId);
 
-    boolean existsByHearitIdAndMemberId(Long hearitId, Long memberId);
+    boolean existsByHearitAndMember(Hearit hearit, Member member);
 }

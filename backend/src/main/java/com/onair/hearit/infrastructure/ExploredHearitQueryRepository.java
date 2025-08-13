@@ -17,9 +17,9 @@ public interface ExploredHearitQueryRepository extends JpaRepository<Hearit, Lon
             ORDER BY es.cursor_id ASC
             LIMIT :size
             """, nativeQuery = true)
-    List<Hearit> findExploredHearits(@Param("memberId") Long memberId,
-                                     @Param("cursorId") Long cursorId,
-                                     @Param("size") int size);
+    List<Hearit> findExploredHearitsForMember(@Param("memberId") Long memberId,
+                                              @Param("cursorId") Long cursorId,
+                                              @Param("size") int size);
 
     @Query(value = """
             SELECT h.*

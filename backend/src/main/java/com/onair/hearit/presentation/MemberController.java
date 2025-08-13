@@ -1,7 +1,7 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.MemberService;
-import com.onair.hearit.auth.dto.CurrentMember;
+import com.onair.hearit.auth.dto.UserContext;
 import com.onair.hearit.dto.response.MemberInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
-    
+
     @GetMapping("/me")
-    public ResponseEntity<MemberInfoResponse> readCurrentMemberInfo(@AuthenticationPrincipal CurrentMember member) {
-        MemberInfoResponse response = memberService.getMember(member.memberId());
+    public ResponseEntity<MemberInfoResponse> readCurrentMemberInfo(@AuthenticationPrincipal UserContext userContext) {
+        MemberInfoResponse response = memberService.getMember(userContext.memberId());
         return ResponseEntity.ok(response);
     }
 }
