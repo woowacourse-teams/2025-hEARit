@@ -3,8 +3,6 @@ package com.onair.hearit.presentation.detail.script
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,8 +24,12 @@ import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
+import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class ScriptFragment : Fragment() {
@@ -38,10 +40,14 @@ class ScriptFragment : Fragment() {
     private var isUserScrolling = false
     private var lastUserScrollTime = 0L
 
-    private lateinit var mediaController: MediaController
-    private lateinit var updateRunnable: Runnable
+    private var scriptSyncJob: Job? = null
+    private var mediaController: MediaController? = null
 
-    private val adapter by lazy { ScriptAdapter() }
+    private val adapter: ScriptAdapter by lazy {
+        ScriptAdapter({ item ->
+            mediaController?.seekTo(item.start)
+        })
+    }
 
     private val hearitId: Long by lazy {
         requireArguments().getLong(HEARIT_ID)
@@ -50,13 +56,9 @@ class ScriptFragment : Fragment() {
         PlayerDetailViewModelFactory(hearitId)
     }
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateInterval = 300L
+    private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
 
-    private val itemHeightPx by lazy {
-        val scale = resources.displayMetrics.density
-        (16 * scale + 0.5f).toInt()
-    }
+    private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(requireContext()) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,6 +94,7 @@ class ScriptFragment : Fragment() {
 
     private fun setupRecyclerView() {
         binding.rvScript.adapter = adapter
+
         binding.rvScript.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(
@@ -167,50 +170,49 @@ class ScriptFragment : Fragment() {
             mediaController =
                 MediaController.Builder(requireContext(), sessionToken).buildAsync().await()
 
-            binding.playerView.player = mediaController
-            binding.baseController.setPlayer(mediaController)
+            mediaController?.let { controller ->
+                binding.playerView.player = controller
+                binding.baseController.setPlayer(controller)
 
-            startScriptSync(mediaController)
+                startScriptSync(controller)
+            }
         }
     }
 
     private fun startScriptSync(controller: Player) {
-        updateRunnable =
-            object : Runnable {
-                override fun run() {
-                    val now = System.currentTimeMillis()
-
-                    val pos = controller.currentPosition
+        scriptSyncJob =
+            viewLifecycleOwner.lifecycleScope.launch {
+                while (isActive) {
+                    val position = controller.currentPosition
                     val currentItem =
-                        adapter.currentList.firstOrNull { pos in it.start until it.end }
+                        adapter.currentList.firstOrNull { position in it.start until it.end }
                     val currentIndex = adapter.currentList.indexOf(currentItem)
 
-                    // 사용자가 스크롤을 멈춘 시점을 체크함
-                    // 사용자가 스크롤을 멈춤 + 하이라이트 부분을 보고 있을 때 3초 후에 다시 포커싱함
+                    val now = System.currentTimeMillis()
+
                     if (isUserScrolling) {
                         val isVisible = isItemVisible(currentIndex)
-
-                        if (now - lastUserScrollTime > 3000L && isVisible) {
-                            isUserScrolling = false
+                        if (now - lastUserScrollTime > USER_SCROLL_IDLE_THRESHOLD_MS && isVisible) {
+                            isUserScrolling =
+                                false
                         }
                     }
 
-                    // 하이라이트는 항상 진행하도록 함
-                    if (currentItem != null) {
-                        adapter.highlightScriptLine(currentItem.id)
-                    }
+                    if (currentItem != null) adapter.highlightScriptLine(currentItem.id)
 
-                    // 스크롤 이동은 사용자가 스크롤 중이 아닐 때만
                     if (!isUserScrolling && currentItem != null) {
-                        val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-                        (binding.rvScript.layoutManager as LinearLayoutManager)
-                            .scrollToPositionWithOffset(currentIndex, centerOffset)
+                        val scriptHeight = binding.rvScript.height
+                        if (scriptHeight > 0) {
+                            val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
+                            (binding.rvScript.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                                currentIndex,
+                                centerOffset,
+                            )
+                        }
                     }
-
-                    handler.postDelayed(this, updateInterval)
+                    delay(updateInterval)
                 }
             }
-        handler.post(updateRunnable)
     }
 
     private fun isItemVisible(position: Int): Boolean {
@@ -241,15 +243,17 @@ class ScriptFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        handler.removeCallbacks(updateRunnable)
-        if (::mediaController.isInitialized) {
-            mediaController.release()
-        }
+        scriptSyncJob?.cancel()
+        binding.playerView.player = null
+        mediaController?.release()
         _binding = null
     }
 
     companion object {
         private const val HEARIT_ID = "hearit_id"
+        private const val SCRIPT_SYNC_INTERVAL_MS = 300L
+        private const val USER_SCROLL_IDLE_THRESHOLD_MS = 3000L
+        private const val SCRIPT_ITEM_HEIGHT_DP = 16
 
         fun newInstance(hearitId: Long) =
             ScriptFragment().apply {
