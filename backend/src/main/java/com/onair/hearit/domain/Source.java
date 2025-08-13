@@ -3,18 +3,19 @@ package com.onair.hearit.domain;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Embeddable
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Source {
 
-    @Column(name = "sourceName")
+    @Column(name = "source_name")
     private String sourceName;
 
-    @Column(name = "sourceUrl")
+    @Column(name = "source_url")
     private String sourceUrl;
 
     public Source(String sourceName, String sourceUrl) {
@@ -24,7 +25,7 @@ public class Source {
     }
 
     private void validate(String sourceName, String sourceUrl) {
-        if (((sourceName == null) || (sourceName.isBlank()) || (sourceName.length() > 250))) {
+        if (sourceName == null || sourceName.isBlank() || sourceName.length() > 250) {
             throw new InvalidInputException("출처명(sourceName)은 250자 이하의 유효한 문자열이어야 합니다.");
         }
     }
