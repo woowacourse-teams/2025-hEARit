@@ -1,9 +1,12 @@
 package com.onair.hearit.domain;
 
 import com.onair.hearit.common.exception.custom.InvalidInputException;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -41,14 +44,13 @@ public class Hearit {
     @Column(name = "play_time", nullable = false)
     private Integer playTime;
 
-    @Column(name = "original_audio_url", nullable = false)
-    private String originalAudioUrl;
-
-    @Column(name = "short_audio_url", nullable = false)
-    private String shortAudioUrl;
-
-    @Column(name = "script_url", nullable = false)
-    private String scriptUrl;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "originalAudioUrl", column = @Column(name = "original_audio_url")),
+            @AttributeOverride(name = "shortAudioUrl", column = @Column(name = "short_audio_url")),
+            @AttributeOverride(name = "scriptUrl", column = @Column(name = "script_url"))
+    })
+    private FileUrls fileUrls;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
@@ -71,9 +73,7 @@ public class Hearit {
         this.title = title;
         this.summary = summary;
         this.playTime = playTime;
-        this.originalAudioUrl = originalAudioUrl;
-        this.shortAudioUrl = shortAudioUrl;
-        this.scriptUrl = scriptUrl;
+        this.fileUrls = new FileUrls(originalAudioUrl, shortAudioUrl, scriptUrl);
         this.sources = sources;
         this.category = category;
     }
@@ -109,22 +109,46 @@ public class Hearit {
     }
 
     public void updateFileUrl(String fileUrl, FileType fileType) {
-        fileType.updateFileUrl(this, fileUrl);
+        switch (fileType) {
+            case ORIGINAL -> updateOriginalAudioUrl(fileUrl);
+            case SHORT -> updateShortAudioUrl(fileUrl);
+            case SCRIPT -> updateScriptUrl(fileUrl);
+            default -> throw new IllegalArgumentException("지원하지 않는 파일 타입입니다.");
+        }
     }
 
+
+    public String getFileUrl(FileType fileType) {
+        return switch (fileType) {
+            case ORIGINAL -> this.fileUrls.getOriginalAudioUrl();
+            case SHORT -> this.fileUrls.getShortAudioUrl();
+            case SCRIPT -> this.fileUrls.getScriptUrl();
+            default -> throw new IllegalArgumentException("지원하지 않는 파일 타입입니다.");
+        };
+    }
+
+    // 내부 업데이트 메서드는 FileUrls의 wither 메서드를 사용하여 불변성을 유지
     void updateOriginalAudioUrl(String originalAudioUrl) {
-        this.originalAudioUrl = originalAudioUrl;
+        this.fileUrls = this.fileUrls.withOriginalAudioUrl(originalAudioUrl);
     }
 
     void updateShortAudioUrl(String shortAudioUrl) {
-        this.shortAudioUrl = shortAudioUrl;
+        this.fileUrls = this.fileUrls.withShortAudioUrl(shortAudioUrl);
     }
 
     void updateScriptUrl(String scriptUrl) {
-        this.scriptUrl = scriptUrl;
+        this.fileUrls = this.fileUrls.withScriptUrl(scriptUrl);
     }
 
-    public String getFileUrl(FileType fileType) {
-        return fileType.getFileUrl(this);
+    public String getOriginalAudioUrl() {
+        return this.fileUrls.getOriginalAudioUrl();
+    }
+
+    public String getShortAudioUrl() {
+        return this.fileUrls.getShortAudioUrl();
+    }
+
+    public String getScriptUrl() {
+        return this.fileUrls.getScriptUrl();
     }
 }
