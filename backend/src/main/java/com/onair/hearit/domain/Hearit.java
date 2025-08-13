@@ -109,37 +109,13 @@ public class Hearit {
     }
 
     public void updateFileUrl(String fileUrl, FileType fileType) {
-        switch (fileType) {
-            case ORIGINAL -> updateOriginalAudioUrl(fileUrl);
-            case SHORT -> updateShortAudioUrl(fileUrl);
-            case SCRIPT -> updateScriptUrl(fileUrl);
-            default -> throw new IllegalArgumentException("지원하지 않는 파일 타입입니다.");
-        }
+        this.fileUrls = fileType.update(this.fileUrls, fileUrl);
     }
-
 
     public String getFileUrl(FileType fileType) {
-        return switch (fileType) {
-            case ORIGINAL -> this.fileUrls.getOriginalAudioUrl();
-            case SHORT -> this.fileUrls.getShortAudioUrl();
-            case SCRIPT -> this.fileUrls.getScriptUrl();
-            default -> throw new IllegalArgumentException("지원하지 않는 파일 타입입니다.");
-        };
+        return fileType.get(this.fileUrls);
     }
-
-    // 내부 업데이트 메서드는 FileUrls의 wither 메서드를 사용하여 불변성을 유지
-    void updateOriginalAudioUrl(String originalAudioUrl) {
-        this.fileUrls = this.fileUrls.withOriginalAudioUrl(originalAudioUrl);
-    }
-
-    void updateShortAudioUrl(String shortAudioUrl) {
-        this.fileUrls = this.fileUrls.withShortAudioUrl(shortAudioUrl);
-    }
-
-    void updateScriptUrl(String scriptUrl) {
-        this.fileUrls = this.fileUrls.withScriptUrl(scriptUrl);
-    }
-
+    
     public String getOriginalAudioUrl() {
         return this.fileUrls.getOriginalAudioUrl();
     }

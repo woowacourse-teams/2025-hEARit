@@ -1,3 +1,4 @@
+// FileType.java - 수정됨
 package com.onair.hearit.domain;
 
 import com.onair.hearit.common.exception.custom.InvalidInputException;
@@ -8,13 +9,47 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum FileType {
 
-    ORIGINAL("ORG", ".mp3", "hearit/audio/original/"),
-    SHORT("SHR", ".mp3", "hearit/audio/short/"),
-    SCRIPT("SCR", ".json", "hearit/script/");
+    ORIGINAL("ORG", ".mp3", "hearit/audio/original/") {
+        @Override
+        public FileUrls update(FileUrls urls, String newUrl) {
+            return urls.updateOriginalAudioUrl(newUrl);
+        }
+
+        @Override
+        public String get(FileUrls urls) {
+            return urls.getOriginalAudioUrl();
+        }
+    },
+    SHORT("SHR", ".mp3", "hearit/audio/short/") {
+        @Override
+        public FileUrls update(FileUrls urls, String newUrl) {
+            return urls.updateShortAudioUrl(newUrl);
+        }
+
+        @Override
+        public String get(FileUrls urls) {
+            return urls.getShortAudioUrl();
+        }
+    },
+    SCRIPT("SCR", ".json", "hearit/script/") {
+        @Override
+        public FileUrls update(FileUrls urls, String newUrl) {
+            return urls.updateScriptUrl(newUrl);
+        }
+
+        @Override
+        public String get(FileUrls urls) {
+            return urls.getScriptUrl();
+        }
+    };
 
     private final String prefix;
     private final String extension;
     private final String uploadPath;
+
+    public abstract FileUrls update(FileUrls urls, String newUrl);
+
+    public abstract String get(FileUrls urls);
 
     public void validateFilename(String filename) {
         if (!filename.startsWith(prefix)) {
