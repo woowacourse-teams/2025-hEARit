@@ -52,7 +52,7 @@ public class S3FileProvider {
         }
     }
 
-    public String extractKey(String filePath) {
+    private String extractKey(String filePath) {
         if (filePath.startsWith("/")) {
             return filePath.substring(1);
         }

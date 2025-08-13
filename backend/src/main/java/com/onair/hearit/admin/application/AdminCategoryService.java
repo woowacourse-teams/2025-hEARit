@@ -26,8 +26,8 @@ public class AdminCategoryService {
     public AdminPagedResponse<AdminCategoryResponse> getCategories(AdminPagingRequest pagingRequest) {
         Sort sort = Sort.by(Sort.Order.asc("id"));
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sort);
-        Page<Category> pageKeywords = categoryRepository.findAll(pageable);
-        Page<AdminCategoryResponse> dtoPage = pageKeywords.map(AdminCategoryResponse::from);
+        Page<Category> pageCategories = categoryRepository.findAll(pageable);
+        Page<AdminCategoryResponse> dtoPage = pageCategories.map(AdminCategoryResponse::from);
         return AdminPagedResponse.from(dtoPage);
     }
 
