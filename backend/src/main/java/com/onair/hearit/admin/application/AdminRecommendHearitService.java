@@ -1,14 +1,14 @@
 package com.onair.hearit.admin.application;
 
+import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitCreateRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.dto.response.MonthlyRecommendedHearitResponse;
 import com.onair.hearit.admin.dto.response.RecommendHearitResponse;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.RecommendHearit;
-import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.RecommendHearitRepository;
 import java.time.LocalDate;
@@ -30,7 +30,7 @@ public class AdminRecommendHearitService {
     private final HearitRepository hearitRepository;
     private final RecommendHearitRepository recommendHearitRepository;
 
-    public PagedResponse<RecommendHearitResponse> getHearits(PagingRequest pagingRequest) {
+    public AdminPagedResponse<RecommendHearitResponse> getHearits(AdminPagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findAll(pageable);
         Page<RecommendHearitResponse> recommendHearitResponses = hearits.map((hearit) -> {
@@ -40,17 +40,7 @@ public class AdminRecommendHearitService {
             }
             return RecommendHearitResponse.of(hearit, null);
         });
-        return PagedResponse.from(recommendHearitResponses);
-    }
-
-    @Transactional
-    public void addRecommendHearits(RecommendHearitCreateRequest request) {
-        validateForCreateRecommendHearit(request.recommendDate(), request.hearitIds());
-        List<Hearit> hearits = getHearitsById(request.hearitIds());
-        for (Hearit hearit : hearits) {
-            RecommendHearit recommendHearit = new RecommendHearit(hearit.getId(), request.recommendDate());
-            recommendHearitRepository.save(recommendHearit);
-        }
+        return AdminPagedResponse.from(recommendHearitResponses);
     }
 
     public List<MonthlyRecommendedHearitResponse> getMonthRecommendedHearit(Integer year, Integer month) {
@@ -69,6 +59,16 @@ public class AdminRecommendHearitService {
             responses.add(MonthlyRecommendedHearitResponse.from(target, hearits));
         }
         return responses;
+    }
+
+    @Transactional
+    public void addRecommendHearits(RecommendHearitCreateRequest request) {
+        validateForCreateRecommendHearit(request.recommendDate(), request.hearitIds());
+        List<Hearit> hearits = getHearitsById(request.hearitIds());
+        for (Hearit hearit : hearits) {
+            RecommendHearit recommendHearit = new RecommendHearit(hearit.getId(), request.recommendDate());
+            recommendHearitRepository.save(recommendHearit);
+        }
     }
 
     @Transactional

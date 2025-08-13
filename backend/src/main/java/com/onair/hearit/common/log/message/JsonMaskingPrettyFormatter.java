@@ -59,7 +59,7 @@ public class JsonMaskingPrettyFormatter {
             ObjectNode objectNode = (ObjectNode) node;
             Iterator<Entry<String, JsonNode>> fields = objectNode.fields();
             while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
+                Entry<String, JsonNode> entry = fields.next();
                 String fieldName = entry.getKey();
                 JsonNode valueNode = entry.getValue();
                 if (MASKING_RULES.containsKey(fieldName) && valueNode.isTextual()) {

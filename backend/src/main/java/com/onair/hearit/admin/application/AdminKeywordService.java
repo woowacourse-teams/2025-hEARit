@@ -1,12 +1,12 @@
 package com.onair.hearit.admin.application;
 
+import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
 import com.onair.hearit.admin.dto.request.KeywordUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.KeywordRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -23,11 +23,11 @@ public class AdminKeywordService {
 
     private final KeywordRepository keywordRepository;
 
-    public PagedResponse<KeywordInfoResponse> getKeywords(PagingRequest pagingRequest) {
+    public AdminPagedResponse<KeywordInfoResponse> getKeywords(AdminPagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), Sort.by(Sort.Order.asc("id")));
         Page<Keyword> pageKeywords = keywordRepository.findAll(pageable);
         Page<KeywordInfoResponse> dtoPage = pageKeywords.map(KeywordInfoResponse::from);
-        return PagedResponse.from(dtoPage);
+        return AdminPagedResponse.from(dtoPage);
     }
 
     public List<KeywordInfoResponse> getAllKeywords() {
@@ -37,6 +37,7 @@ public class AdminKeywordService {
                 .toList();
     }
 
+    @Transactional
     public void addKeyword(KeywordCreateRequest request) {
         Keyword keyword = new Keyword(request.name());
         keywordRepository.save(keyword);
