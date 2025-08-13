@@ -1,6 +1,6 @@
 package com.onair.hearit.common.log;
 
-import com.onair.hearit.common.log.message.JsonMaskingPrettyFormatter;
+import com.onair.hearit.common.log.mask.MaskingSupport;
 import com.onair.hearit.common.log.message.dto.ExceptionLog;
 import com.onair.hearit.common.log.message.dto.ExceptionLog.ErrorDetail;
 import com.onair.hearit.common.log.message.dto.RequestInfo;
@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -25,8 +24,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class FilterExceptionLogger extends OncePerRequestFilter {
 
-    private final JsonMaskingPrettyFormatter jsonMaskingPrettyFormatter;
     private final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private final MaskingSupport maskingSupport;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -42,7 +41,7 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     errorDetail);
 
-            log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+            log.error(maskingSupport.mask(exceptionLog));
             errorLogger.error(exceptionLog, ex);
 
             throw ex;
@@ -63,6 +62,6 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                 errorDetail
         );
 
-        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        log.warn(maskingSupport.mask(exceptionLog));
     }
 }

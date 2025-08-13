@@ -3,23 +3,23 @@ package com.onair.hearit.common.log.message.dto;
 import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 
-public record ResponseLog(
+public record ResponseLog<T>(
         String logType,
         String timestamp,
         RequestInfo requestInfo,
-        ResponseEntity<?> responseEntity,
+        T responseEntity,
         long timeTakenMs
 ) {
-    public static ResponseLog of(
+    public static <T> ResponseLog<T> of(
             LocalDateTime timestamp,
             RequestInfo requestInfo,
-            ResponseEntity<?> responseEntity,
+            ResponseEntity<T> responseEntity,
             long timeTakenMs) {
-        return new ResponseLog(
+        return new ResponseLog<>(
                 "RESPONSE",
                 timestamp.toString(),
                 requestInfo,
-                responseEntity,
+                responseEntity.getBody(),
                 timeTakenMs);
     }
 }

@@ -1,6 +1,6 @@
 package com.onair.hearit.common.log;
 
-import com.onair.hearit.common.log.message.JsonMaskingPrettyFormatter;
+import com.onair.hearit.common.log.mask.MaskingSupport;
 import com.onair.hearit.common.log.message.dto.ExceptionLog;
 import com.onair.hearit.common.log.message.dto.ExceptionLog.ErrorDetail;
 import com.onair.hearit.common.log.message.dto.RequestInfo;
@@ -35,8 +35,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class LoggingAspect {
 
-    private final JsonMaskingPrettyFormatter jsonMaskingPrettyFormatter;
     private final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private final MaskingSupport maskingSupport;
 
     @Pointcut("@annotation(org.springframework.web.bind.annotation.GetMapping)")
     public void getMapping() {
@@ -70,7 +70,7 @@ public class LoggingAspect {
     @Before("allMapping()")
     public void logRequest(JoinPoint joinPoint) {
         RequestLog requestLog = getRequestLog(joinPoint);
-        log.info(jsonMaskingPrettyFormatter.convertToPrettyJson(requestLog));
+        log.info(maskingSupport.mask(requestLog));
     }
 
     private RequestLog getRequestLog(JoinPoint joinPoint) {
@@ -85,7 +85,7 @@ public class LoggingAspect {
     }
 
     private HttpServletRequest getHttpServletRequest() {
-        return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
+        return Optional.of(RequestContextHolder.getRequestAttributes())
                 .filter(ServletRequestAttributes.class::isInstance)
                 .map(ServletRequestAttributes.class::cast)
                 .map(ServletRequestAttributes::getRequest)
@@ -101,15 +101,14 @@ public class LoggingAspect {
     }
 
     @AfterReturning(value = "allMapping()", returning = "responseEntity")
-    public void logResponse(ResponseEntity<?> responseEntity) {
+    public void logResponse(JoinPoint joinPoint, ResponseEntity<?> responseEntity) {
         RequestInfo requestInfo = RequestInfo.fromMdc();
         ResponseLog responseLog = ResponseLog.of(
                 LocalDateTime.now(),
                 requestInfo,
                 responseEntity,
                 calculateTimeTakenMs());
-        log.info(jsonMaskingPrettyFormatter.convertToPrettyJson(responseLog));
-
+            log.info(maskingSupport.mask(responseLog));
     }
 
     private long calculateTimeTakenMs() {
@@ -155,14 +154,14 @@ public class LoggingAspect {
     private void logServerErrorWithStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
                                               ErrorDetail errorDetail, Throwable throwable) {
         ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
-        log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        log.error(maskingSupport.mask(exceptionLog));
         errorLogger.error(exceptionLog, throwable);
     }
 
     private void logServerErrorWithoutStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
                                                  ErrorDetail errorDetail) {
         ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
-        log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        log.error(maskingSupport.mask(exceptionLog));
         errorLogger.error(exceptionLog);
     }
 
@@ -170,6 +169,6 @@ public class LoggingAspect {
         ExceptionLog exceptionLog = ExceptionLog.warn(LocalDateTime.now(), requestInfo,
                 HttpStatus.resolve(problemDetail.getStatus()),
                 errorDetail);
-        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        log.warn(maskingSupport.mask(exceptionLog));
     }
 }
