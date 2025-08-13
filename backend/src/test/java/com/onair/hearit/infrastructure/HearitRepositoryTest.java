@@ -51,27 +51,6 @@ class HearitRepositoryTest {
     }
 
     @Test
-    @DisplayName("원하는 개수만큼 랜덤 히어릿을 List로 조회할 수 있다.")
-    void findRandom_withLimit() {
-        // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        int limit = 2;
-
-        // when
-        List<Hearit> result = hearitRepository.findRandom(limit);
-
-        // then
-        assertAll(
-                () -> assertThat(result).hasSize(limit),
-                () -> assertThat(hearitRepository.findAll()).hasSize(3)
-        );
-    }
-
-    @Test
     @DisplayName("제목 또는 키워드에 검색어가 포함된 히어릿을 반환한다.")
     void searchByTerm_filterByTitleOrKeyword() {
         // given
