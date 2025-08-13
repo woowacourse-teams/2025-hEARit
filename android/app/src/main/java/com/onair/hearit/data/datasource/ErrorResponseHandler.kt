@@ -2,6 +2,7 @@ package com.onair.hearit.data.datasource
 
 import retrofit2.HttpException
 import retrofit2.Response
+import java.io.IOException
 
 class ErrorResponseHandler {
     fun getError(exception: Throwable): NetworkResult.Failure =
@@ -20,6 +21,7 @@ class ErrorResponseHandler {
                 }
             }
 
+            is IOException -> NetworkResult.Failure.NetworkConnection
             else -> NetworkResult.Failure.Unknown
         }
 
