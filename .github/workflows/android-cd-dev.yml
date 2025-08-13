@@ -39,7 +39,10 @@ jobs:
           echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
 
       - name: Build Debug apk
-        run: ./gradlew assembleDebug
+        run: ./gradlew clean assembleDebug
+
+      - name: Check APK files
+        run: ls -l android/app/build/outputs/apk/debug/
 
       - name: Upload a Build APK Artifact
         uses: actions/upload-artifact@v4
