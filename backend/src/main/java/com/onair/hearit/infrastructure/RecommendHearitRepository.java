@@ -11,24 +11,26 @@ import org.springframework.data.repository.query.Param;
 public interface RecommendHearitRepository extends JpaRepository<RecommendHearit, Long> {
 
     @Query("""
-        SELECT rh
-        FROM RecommendHearit rh
-        WHERE rh.recommendDate <= :recommendDate
-        ORDER BY rh.recommendDate DESC
-        LIMIT :size
-    """)
+                SELECT rh
+                FROM RecommendHearit rh
+                JOIN FETCH rh.hearit
+                WHERE rh.recommendDate <= :recommendDate
+                ORDER BY rh.recommendDate DESC
+                LIMIT :size
+            """)
     List<RecommendHearit> findByRecentRecommendDateLimitN(@Param("recommendDate") LocalDate recommendDate,
                                                           @Param("size") int size);
 
     @Query("""
-        SELECT rh FROM RecommendHearit rh
-        WHERE rh.hearitId = :hearitId
-        ORDER BY rh.recommendDate DESC
-        LIMIT 1
-    """)
-    Optional<RecommendHearit> findRecentByHearitId(Long hearitId);
+                SELECT rh FROM RecommendHearit rh
+                WHERE rh.hearit.id = :hearitId
+                ORDER BY rh.recommendDate DESC
+                LIMIT 1
+            """)
+    Optional<RecommendHearit> findRecentByHearitId(@Param("hearitId") Long hearitId);
 
-    List<RecommendHearit> findByRecommendDateIsBetween(LocalDate recommendDateAfter, LocalDate recommendDateBefore);
+    @Query("SELECT rh FROM RecommendHearit rh JOIN FETCH rh.hearit WHERE rh.recommendDate BETWEEN :from AND :to")
+    List<RecommendHearit> findByRecommendDateIsBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
 
     int deleteAllByRecommendDate(LocalDate localDate);
 }
