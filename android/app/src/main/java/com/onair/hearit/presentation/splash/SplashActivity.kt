@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
@@ -17,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
@@ -25,6 +24,8 @@ import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivitySplashBinding
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.login.LoginActivity
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
@@ -108,13 +109,14 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun navigateToLogin() {
-        Handler(Looper.getMainLooper()).postDelayed({
+        lifecycleScope.launch {
+            delay(1000)
             val intent =
-                Intent(this, LoginActivity::class.java).apply {
+                Intent(this@SplashActivity, LoginActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                 }
             startActivity(intent)
             finish()
-        }, 1000)
+        }
     }
 }
