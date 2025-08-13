@@ -180,6 +180,7 @@ class BottomPlayerView
                     events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) ||
                     events.contains(Player.EVENT_IS_PLAYING_CHANGED)
                 ) {
+                    updateTitle(player)
                     updatePlayPauseButton(player)
                     updateProgress()
                 }
