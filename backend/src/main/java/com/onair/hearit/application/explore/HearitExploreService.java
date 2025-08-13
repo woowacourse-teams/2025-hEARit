@@ -4,7 +4,7 @@ import com.onair.hearit.application.explore.score.BookmarkScoreFactor;
 import com.onair.hearit.application.explore.score.RandomScoreFactor;
 import com.onair.hearit.application.explore.score.RecencyScoreFactor;
 import com.onair.hearit.application.explore.score.ScoreFactor;
-import com.onair.hearit.auth.dto.UserContext;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.domain.Bookmark;

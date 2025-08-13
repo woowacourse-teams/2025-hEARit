@@ -1,7 +1,7 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.BookmarkService;
-import com.onair.hearit.auth.dto.UserContext;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
 import com.onair.hearit.dto.response.BookmarkInfoResponse;

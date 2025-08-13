@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.auth.dto.UserContext;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;

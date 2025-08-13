@@ -5,7 +5,7 @@ import com.onair.hearit.application.explore.HearitExploreService;
 import com.onair.hearit.application.explore.score.BookmarkScoreFactor;
 import com.onair.hearit.application.explore.score.RandomScoreFactor;
 import com.onair.hearit.application.explore.score.RecencyScoreFactor;
-import com.onair.hearit.auth.dto.UserContext;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;

@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.dto;
+package com.onair.hearit.auth.domain;
 
 public class UserContext {
 

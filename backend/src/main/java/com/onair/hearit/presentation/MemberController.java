@@ -1,7 +1,7 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.MemberService;
-import com.onair.hearit.auth.dto.UserContext;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.dto.response.MemberInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

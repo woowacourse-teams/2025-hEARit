@@ -1,6 +1,6 @@
 package com.onair.hearit.application;
 
-import com.onair.hearit.auth.dto.UserContext;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.domain.Bookmark;
