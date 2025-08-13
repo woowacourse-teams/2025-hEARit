@@ -22,14 +22,14 @@ class PlaybackService : MediaSessionService() {
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
     private lateinit var stateSaver: PlaybackStateSaver
-    private lateinit var notificationManager: NotificationManager
+    private lateinit var playerNotificationManager: PlayerNotificationManager
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var isServiceStarted = false
 
     override fun onCreate() {
         super.onCreate()
-        notificationManager = NotificationManager(this)
+        playerNotificationManager = PlayerNotificationManager(this)
         initializePlayer()
         initializeMediaSession()
         stateSaver = PlaybackStateSaver(player, serviceScope, this)
@@ -119,7 +119,7 @@ class PlaybackService : MediaSessionService() {
 
     private fun initializeAndStartForeground() {
         if (!isServiceStarted) {
-            val notification = notificationManager.buildForegroundNotification()
+            val notification = playerNotificationManager.buildForegroundNotification()
             startForeground(NOTIFICATION_ID, notification)
             isServiceStarted = true
         }
