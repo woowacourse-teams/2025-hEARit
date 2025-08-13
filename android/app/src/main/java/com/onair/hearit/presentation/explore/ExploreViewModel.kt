@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.DomainException
+import com.onair.hearit.domain.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.CursorInfo
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.RandomHearit
@@ -129,7 +129,7 @@ class ExploreViewModel(
                     onFinished(newBookmarkId)
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is DomainException.UserNotRegistered -> {
+                        is UserNotRegistered -> {
                             _showLoginDialog.call()
                             onFinished(-1L)
                         }
