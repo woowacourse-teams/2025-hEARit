@@ -5,7 +5,13 @@
     <title>히어릿 관리</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css">
     <style>
+        /* 모달 내 폰트/크기 통일 */
+        .modal { font-family: inherit; }
+        .modal .source-group .form-control,
+        .modal .source-group .btn { font-size: 1rem; font-family: inherit; }
+        html, body { font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
         .file-upload-form {
             margin-top: 8px;
         }
@@ -50,10 +56,28 @@
     </nav>
 </div>
 
+<!-- Edit Modal -->
+<div class="modal fade" id="editHearitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">히어릿 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="edit-hearit-modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelEditHearit()">취소</button>
+                <button type="button" class="btn btn-success" id="edit-save-button">저장</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let currentPage = 0;
     const pageSize = 15;
+    let lastFetchedHearits = [];
 
     async function fetchHearits(page) {
         try {
@@ -63,6 +87,7 @@
             updateTable(pagedData.content);
             updatePagination(pagedData);
             document.getElementById('hearit-count').textContent = `히어릿 총 개수: ${pagedData.totalElements}개`;
+            lastFetchedHearits = pagedData.content || [];
             currentPage = page;
         } catch (error) {
             console.error('Error fetching hearits:', error);
@@ -92,7 +117,7 @@
                 const editSourcesHtml = `
                     <div id="edit-sources-container-${hearit.id}">
                         ${hearit.sources.map(s => `
-                            <div class="input-group input-group-sm mb-1 source-group">
+                            <div class="input-group input-group-lg mb-2 source-group">
                                 <input type="text" class="form-control source-name-input" value="${s.sourceName || ''}" placeholder="이름">
                                 <input type="text" class="form-control source-url-input" value="${s.sourceUrl || ''}" placeholder="URL (선택사항)">
                                 <button type="button" class="btn btn-outline-danger" onclick="this.closest('.source-group').remove()">삭제</button>
@@ -206,14 +231,80 @@
     }
 
     function editHearit(hearitId) {
+        const hearit = lastFetchedHearits.find(h => h.id === hearitId);
+        if (!hearit) {
+            alert('데이터를 불러오지 못했습니다. 다시 시도해주세요.');
+            return;
+        }
         editingId = hearitId;
-        fetchHearits(currentPage);
+
+        const sources = Array.isArray(hearit.sources) ? hearit.sources : [];
+        const sourcesRowsHtml = (sources.length > 0 ? sources : [{ sourceName: '', sourceUrl: '' }])
+            .map(s => `
+                <div class="input-group input-group-lg mb-2 source-group">
+                    <input type="text" class="form-control source-name-input" value="${s.sourceName || ''}" placeholder="이름">
+                    <input type="text" class="form-control source-url-input" value="${s.sourceUrl || ''}" placeholder="URL (선택사항)">
+                    <button type="button" class="btn btn-outline-danger" onclick="this.closest('.source-group').remove()">삭제</button>
+                </div>
+            `).join('');
+
+        const modalBody = document.getElementById('edit-hearit-modal-body');
+        modalBody.innerHTML = `
+            <div class="container-fluid">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">제목</label>
+                        <input type="text" class="form-control" value="${hearit.title}" id="edit-title-${hearit.id}" style="min-width: 120px;">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">재생시간(초)</label>
+                        <input type="number" class="form-control" value="${hearit.playTime}" id="edit-playtime-${hearit.id}" style="min-width: 120px;">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">요약</label>
+                        <input type="text" class="form-control" value="${hearit.summary || ''}" id="edit-summary-${hearit.id}" style="min-width: 120px;">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">출처</label>
+                        <div id="edit-sources-container-${hearit.id}">
+                            ${sourcesRowsHtml}
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="addSourceRowToEdit(${hearit.id})">출처 추가</button>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Original Audio</label>
+                        <div>${hearit.originalAudioUrl || 'N/A'}</div>
+                        <input type="hidden" id="original-audio-url-${hearit.id}" value="${hearit.originalAudioUrl || ''}">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Short Audio</label>
+                        <div>${hearit.shortAudioUrl || 'N/A'}</div>
+                        <input type="hidden" id="short-audio-url-${hearit.id}" value="${hearit.shortAudioUrl || ''}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Script</label>
+                        <div>${hearit.scriptUrl || 'N/A'}</div>
+                        <input type="hidden" id="script-url-${hearit.id}" value="${hearit.scriptUrl || ''}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">카테고리</label>
+                        <div>${hearit.category?.name || ''}</div>
+                        <input type="hidden" id="edit-category-id-${hearit.id}" value="${hearit.category?.id || ''}">
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const modalEl = document.getElementById('editHearitModal');
+        const modal = new bootstrap.Modal(modalEl);
+        document.getElementById('edit-save-button').onclick = () => updateMetadata(hearitId);
+        modal.show();
     }
 
     function addSourceRowToEdit(hearitId) {
         const container = document.getElementById(`edit-sources-container-${hearitId}`);
         const newRow = document.createElement('div');
-        newRow.className = 'input-group input-group-sm mb-1 source-group';
+        newRow.className = 'input-group input-group-lg mb-2 source-group';
         newRow.innerHTML = `
             <input type="text" class="form-control source-name-input" placeholder="이름">
             <input type="text" class="form-control source-url-input" placeholder="URL (선택사항)">
@@ -272,6 +363,11 @@
             if (response.ok) {
                 alert('수정되었습니다.');
                 editingId = null;
+                const modalEl = document.getElementById('editHearitModal');
+                const instance = bootstrap.Modal.getInstance(modalEl);
+                if (instance) {
+                    instance.hide();
+                }
                 fetchHearits(currentPage);
             } else {
                 const err = await response.json();
@@ -323,6 +419,11 @@
 
     function cancelEditHearit() {
         editingId = null;
+        const modalEl = document.getElementById('editHearitModal');
+        const instance = bootstrap.Modal.getInstance(modalEl);
+        if (instance) {
+            instance.hide();
+        }
         fetchHearits(currentPage);
     }
 
