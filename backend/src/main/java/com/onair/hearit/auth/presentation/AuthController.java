@@ -1,7 +1,7 @@
 package com.onair.hearit.auth.presentation;
 
 import com.onair.hearit.auth.application.AuthService;
-import com.onair.hearit.auth.dto.CurrentMember;
+import com.onair.hearit.auth.dto.UserContext;
 import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
@@ -56,8 +56,8 @@ public class AuthController {
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<Void> withdraw(@AuthenticationPrincipal CurrentMember currentMember) {
-        authService.withdraw(currentMember.memberId());
+    public ResponseEntity<Void> withdraw(@AuthenticationPrincipal UserContext userContext) {
+        authService.withdraw(userContext.memberId());
         return ResponseEntity.noContent().build();
     }
 }

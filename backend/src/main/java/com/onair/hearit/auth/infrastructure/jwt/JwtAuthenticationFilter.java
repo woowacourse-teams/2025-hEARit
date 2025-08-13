@@ -1,7 +1,7 @@
 package com.onair.hearit.auth.infrastructure.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.auth.dto.CurrentMember;
+import com.onair.hearit.auth.dto.UserContext;
 import com.onair.hearit.common.exception.ErrorCode;
 import com.onair.hearit.common.log.FilterExceptionLogger;
 import jakarta.servlet.FilterChain;
@@ -50,9 +50,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         Long memberId = jwtTokenProvider.getMemberId(token);
-        CurrentMember currentMember = new CurrentMember(memberId);
+        UserContext userContext = UserContext.member(memberId);
 
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(currentMember, null, null);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userContext, null, null);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         chain.doFilter(request, response);

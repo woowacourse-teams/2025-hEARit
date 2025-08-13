@@ -1,6 +1,7 @@
 package com.onair.hearit.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onair.hearit.auth.dto.UserContext;
 import com.onair.hearit.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.log.FilterExceptionLogger;
@@ -46,6 +47,7 @@ public class ApiSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+                .anonymous(a -> a.principal(UserContext.guest()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .securityMatcher("/api/**")
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
