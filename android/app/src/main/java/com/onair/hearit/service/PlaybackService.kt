@@ -53,6 +53,7 @@ class PlaybackService : MediaSessionService() {
         }
 
         super.onStartCommand(intent, flags, startId)
+        initializeAndStartForeground()
 
         val audioUrl = intent?.getStringExtra(EXTRA_AUDIO_URL)
         val title = intent?.getStringExtra(EXTRA_TITLE) ?: "hearit"
@@ -63,8 +64,6 @@ class PlaybackService : MediaSessionService() {
             stopSelf()
             return START_NOT_STICKY
         }
-
-        initializeAndStartForeground()
 
         val item = createMediaItem(audioUrl, title, hearitId)
         player.setMediaItems(listOf(item), 0, startPosition.coerceAtLeast(0L))
