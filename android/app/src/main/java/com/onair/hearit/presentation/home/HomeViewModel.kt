@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.UserNotRegisteredException
+import com.onair.hearit.domain.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.UserInfo
@@ -81,7 +81,7 @@ class HomeViewModel(
                     _isLoggedIn.value = true
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegisteredException -> {
+                        is UserNotRegistered -> {
                             _userInfo.value = UserInfo.default()
                             _isLoggedIn.value = false
                         }
