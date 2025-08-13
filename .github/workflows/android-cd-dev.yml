@@ -47,8 +47,8 @@ jobs:
       - name: Upload a Build APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hearit-debug.apk
-          path: android/app/build/outputs/apk/debug/hearit-debug.apk
+          name: hEARit-debug.apk
+          path: android/app/build/outputs/apk/debug/hEARit-debug.apk
           overwrite: 'true'
 
       - name: Upload APK to Firebase App Distribution
@@ -58,4 +58,4 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: hearit-test
           releaseNotesFile: android/app/whatsnew/whatsnew-ko-KR
-          file: android/app/build/outputs/apk/debug/hearit-debug.apk
+          file: android/app/build/outputs/apk/debug/hEARit-debug.apk
