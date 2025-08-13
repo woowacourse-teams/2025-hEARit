@@ -14,7 +14,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
@@ -30,7 +29,6 @@ import com.onair.hearit.presentation.MainViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.search.SearchFragment
-import kotlin.math.abs
 
 class HomeFragment :
     Fragment(),
@@ -54,6 +52,7 @@ class HomeFragment :
         )
     }
     private val snapHelper = PagerSnapHelper()
+    private var centerScrollListener: CenterScrollListener? = null
     private lateinit var indicatorContainer: LinearLayout
 
     override fun onCreateView(
@@ -102,34 +101,15 @@ class HomeFragment :
     }
 
     private fun setupRecommendRecyclerView() {
+        centerScrollListener =
+            CenterScrollListener(snapHelper) { position ->
+                updateIndicator(position)
+            }
+
         binding.rvHomeRecommend.apply {
             adapter = recommendAdapter
             snapHelper.attachToRecyclerView(this)
-
-            addOnScrollListener(
-                object : RecyclerView.OnScrollListener() {
-                    override fun onScrolled(
-                        recyclerView: RecyclerView,
-                        dx: Int,
-                        dy: Int,
-                    ) {
-                        updateCenterEffect(recyclerView)
-                    }
-
-                    override fun onScrollStateChanged(
-                        recyclerView: RecyclerView,
-                        newState: Int,
-                    ) {
-                        if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                            val layoutManager =
-                                recyclerView.layoutManager as? LinearLayoutManager ?: return
-                            val snapView = snapHelper.findSnapView(layoutManager) ?: return
-                            val position = layoutManager.getPosition(snapView)
-                            updateIndicator(position)
-                        }
-                    }
-                },
-            )
+            centerScrollListener?.let { addOnScrollListener(it) }
         }
     }
 
@@ -138,12 +118,20 @@ class HomeFragment :
     }
 
     private fun observeViewModel() {
-        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
-            binding.userInfo = userInfo
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (isLoading) {
+                binding.frHomeSkeleton.startShimmer()
+            } else {
+                binding.frHomeSkeleton.stopShimmer()
+            }
         }
 
         viewModel.isLoggedIn.observe(viewLifecycleOwner) { isLoggedIn ->
             mainViewModel.updateLoginState(isLoggedIn)
+        }
+
+        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
+            binding.userInfo = userInfo
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
@@ -167,25 +155,18 @@ class HomeFragment :
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
-
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            if (isLoading) {
-                binding.frHomeSkeleton.startShimmer()
-            } else {
-                binding.frHomeSkeleton.stopShimmer()
-            }
-        }
     }
 
     private fun setupIndicator(size: Int) {
         indicatorContainer = binding.indicatorContainer
         indicatorContainer.removeAllViews()
+        val density = resources.displayMetrics.density
 
         repeat(size) {
             val dot =
                 View(requireContext()).apply {
-                    val sizeInPx = (INDICATOR_SIZE_DP * resources.displayMetrics.density).toInt()
-                    val marginPx = (INDICATOR_MARGIN_DP * resources.displayMetrics.density).toInt()
+                    val sizeInPx = (INDICATOR_SIZE_DP * density).toInt()
+                    val marginPx = (INDICATOR_MARGIN_DP * density).toInt()
                     layoutParams =
                         LinearLayout.LayoutParams(sizeInPx, sizeInPx).apply {
                             marginStart = marginPx
@@ -194,15 +175,7 @@ class HomeFragment :
                 }
             indicatorContainer.addView(dot)
         }
-        setCurrentIndicator(2)
-    }
-
-    private fun updateCenterEffect(recyclerView: RecyclerView) {
-        val centerX = recyclerView.width / 2
-        for (i in 0 until recyclerView.childCount) {
-            val child = recyclerView.getChildAt(i) ?: continue
-            applyCenterScalingEffect(child, centerX, recyclerView)
-        }
+        setCurrentIndicator(INITIAL_INDICATOR_POSITION)
     }
 
     private fun updateIndicator(position: Int) {
@@ -215,46 +188,24 @@ class HomeFragment :
         }
     }
 
-    private fun setCurrentIndicator(index: Int) {
-        for (i in 0 until indicatorContainer.childCount) {
-            val dot = indicatorContainer.getChildAt(i)
+    private fun setCurrentIndicator(selectedIndex: Int) {
+        (0 until indicatorContainer.childCount).forEach { i ->
             val drawableRes =
-                if (i == index) R.drawable.indicator_selected else R.drawable.indicator_unselected
-            dot.setBackgroundResource(drawableRes)
+                if (i == selectedIndex) R.drawable.indicator_selected else R.drawable.indicator_unselected
+            indicatorContainer.getChildAt(i).setBackgroundResource(drawableRes)
         }
     }
 
-    private fun applyCenterScalingEffect(
-        child: View,
-        centerX: Int,
-        recyclerView: RecyclerView,
-    ) {
-        val childCenterX = (child.left + child.right) / 2
-        val distanceFromCenter = (centerX - childCenterX).toFloat()
-        val d = abs(distanceFromCenter) / recyclerView.width.coerceAtLeast(1)
-        val scale = MIN_SCALE + (1 - d).coerceIn(0f, 1f) * MAX_SCALE_DELTA
-        val translationX = distanceFromCenter * TRANSLATION_FACTOR
-
-        child.pivotY = child.height / 2f
-        child.translationY = 0f
-        child.scaleX = scale
-        child.scaleY = scale
-        child.translationX = translationX
-
-        // 중심에 가까울수록 불투명, 멀수록 더 투명
-        child.z = (1 - d) * MAX_ELEVATION
-        child.alpha = MIN_ALPHA + (1 - d) * MAX_ALPHA_DELTA
-    }
-
-    // 리스트 중앙에 포지션 배치
     private fun scrollToMiddlePosition() {
         binding.rvHomeRecommend.post {
             val middlePosition = recommendAdapter.currentList.size / 2
             val layoutManager = binding.rvHomeRecommend.layoutManager as LinearLayoutManager
             val recyclerViewCenter = binding.rvHomeRecommend.width / 2
             val itemWidth = (ITEM_WIDTH_DP * resources.displayMetrics.density).toInt()
-            val offset = recyclerViewCenter - (itemWidth / 2)
-            layoutManager.scrollToPositionWithOffset(middlePosition, offset)
+            layoutManager.scrollToPositionWithOffset(
+                middlePosition,
+                recyclerViewCenter - itemWidth / 2,
+            )
         }
     }
 
@@ -305,18 +256,17 @@ class HomeFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+        centerScrollListener?.let {
+            binding.rvHomeRecommend.removeOnScrollListener(it)
+        }
+        centerScrollListener = null
         _binding = null
     }
 
     private companion object {
-        private const val MIN_SCALE = 0.85f
-        private const val MAX_SCALE_DELTA = 0.15f
-        private const val TRANSLATION_FACTOR = 0.2f
-        private const val MAX_ELEVATION = 20f
-        private const val MIN_ALPHA = 0.3f
-        private const val MAX_ALPHA_DELTA = 0.8f
         private const val ITEM_WIDTH_DP = 260
         private const val INDICATOR_SIZE_DP = 8
         private const val INDICATOR_MARGIN_DP = 4
+        private const val INITIAL_INDICATOR_POSITION = 2
     }
 }
