@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hEARit-debug.apk
-          path: ./app/build/outputs/apk/debug/hEARit-debug.apk
+          path: ./android/app/build/outputs/apk/debug/hEARit-debug.apk
           overwrite: 'true'
 
       - name: Upload APK to Firebase App Distribution
