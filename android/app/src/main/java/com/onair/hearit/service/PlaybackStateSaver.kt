@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 class PlaybackStateSaver(
     private val player: Player,
     private val serviceScope: CoroutineScope,
-    private val service: PlaybackService,
+    private var service: PlaybackService?,
 ) {
     private var saveJob: Job? = null
 
@@ -43,7 +43,7 @@ class PlaybackStateSaver(
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) {
                     stopSavingPosition(finished = true)
-                    service.stopSelf()
+                    service?.stopSelf()
                 }
             }
 
@@ -80,7 +80,9 @@ class PlaybackStateSaver(
 
     fun release() {
         saveJob?.cancel()
+        service?.let { player.removeListener(listener) }
         savePlaybackPosition()
+        service = null
     }
 
     @OptIn(UnstableApi::class)

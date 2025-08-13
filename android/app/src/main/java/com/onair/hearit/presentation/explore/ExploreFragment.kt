@@ -237,7 +237,7 @@ class ExploreFragment :
         startActivity(intent)
 
         // PlaybackService 종료
-        requireContext().startService(PlaybackService.stopIntent(requireContext()))
+        requireContext().stopService(PlaybackService.stopIntent(requireContext()))
 
         // 현재 프래그먼트 종료
         parentFragmentManager
