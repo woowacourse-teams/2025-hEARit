@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.di.TokenInterceptorProvider
-import com.onair.hearit.domain.UserNotRegisteredException
+import com.onair.hearit.domain.DomainException
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.delay
@@ -47,7 +47,11 @@ class SplashViewModel(
                     TokenInterceptorProvider.setAccessToken(accessToken)
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegisteredException -> {
+                        is DomainException.NetworkConnection -> {
+                            _toastMessage.value = R.string.splash_toast_network_check_fail
+                        }
+
+                        is DomainException.UserNotRegistered -> {
                             refreshAccessToken(refreshToken)
                         }
 
@@ -70,7 +74,7 @@ class SplashViewModel(
                     _checkToken.value = true
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegisteredException -> {
+                        is DomainException.UserNotRegistered -> {
                             _checkToken.value = false
                         }
 

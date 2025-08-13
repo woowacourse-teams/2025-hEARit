@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.UserNotRegisteredException
+import com.onair.hearit.domain.DomainException
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
@@ -44,7 +44,7 @@ class LibraryViewModel(
                     _bookmarks.value = it
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegisteredException -> {
+                        is DomainException.UserNotRegistered -> {
                             _uiState.value = BookmarkUiState.NotLoggedIn
                         }
 
@@ -81,7 +81,7 @@ class LibraryViewModel(
                     _userInfo.value = userInfo
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegisteredException -> {
+                        is DomainException.UserNotRegistered -> {
                             _uiState.value = BookmarkUiState.NotLoggedIn
                         }
 

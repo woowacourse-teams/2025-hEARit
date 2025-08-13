@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.UserNotRegisteredException
+import com.onair.hearit.domain.DomainException
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
@@ -81,7 +81,7 @@ class PlayerDetailViewModel(
                     _bookmarkId.value = bookmarkId
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegisteredException -> _showLoginDialog.call()
+                        is DomainException.UserNotRegistered -> _showLoginDialog.call()
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_add_bookmark_fail

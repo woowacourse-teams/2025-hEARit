@@ -105,6 +105,7 @@
     <!-- SplashActivity-->
     <string name="splash_toast_access_token_load_fail">저장된 토큰 조회에 실패했습니다</string>
     <string name="splash_toast_token_check_fail">토큰 유효성 검사에 실패했습니다</string>
+    <string name="splash_toast_network_check_fail">네트워크 연결을 확인해주세요</string>
     <string name="splash_toast_refresh_token_fail">새로운 토큰 생성에 실패했습니다</string>
 
     <!-- LoginActivity-->
