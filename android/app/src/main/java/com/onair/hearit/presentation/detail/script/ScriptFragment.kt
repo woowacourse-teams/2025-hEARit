@@ -3,6 +3,7 @@ package com.onair.hearit.presentation.detail.script
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,9 +54,13 @@ class ScriptFragment : Fragment() {
 
     private val updateInterval = 300L
 
-    private val itemHeightPx by lazy {
-        val scale = resources.displayMetrics.density
-        (16 * scale + 0.5f).toInt()
+    private val itemHeightPx: Int by lazy {
+        TypedValue
+            .applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                16f,
+                resources.displayMetrics,
+            ).toInt()
     }
 
     override fun onCreateView(
