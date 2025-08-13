@@ -5,8 +5,8 @@ import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitCreateRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
-import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
 import com.onair.hearit.admin.dto.response.AdminRecommendHearitResponse;
+import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,7 +31,8 @@ public class AdminRecommendHearitController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         AdminPagingRequest pagingRequest = new AdminPagingRequest(page, size);
-        AdminPagedResponse<AdminRecommendHearitResponse> response = adminRecommendHearitService.getHearits(pagingRequest);
+        AdminPagedResponse<AdminRecommendHearitResponse> response = adminRecommendHearitService.getHearits(
+                pagingRequest);
         return ResponseEntity.ok(response);
     }
 
