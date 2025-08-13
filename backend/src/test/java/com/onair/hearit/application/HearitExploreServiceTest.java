@@ -1,6 +1,6 @@
 package com.onair.hearit.application;
 
-import com.onair.hearit.application.explore.ExploreScoreCalculator;
+import com.onair.hearit.application.explore.DefaultExploreScoreCalculator;
 import com.onair.hearit.application.explore.HearitExploreService;
 import com.onair.hearit.application.explore.score.BookmarkScoreFactor;
 import com.onair.hearit.application.explore.score.RandomScoreFactor;
@@ -35,7 +35,8 @@ import org.springframework.test.context.jdbc.Sql;
 @DataJpaTest
 @Sql("/dbclean.sql")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, ExploreScoreCommandRepository.class,
-        ExploreScoreCalculator.class, BookmarkScoreFactor.class, RecencyScoreFactor.class, RandomScoreFactor.class})
+        DefaultExploreScoreCalculator.class, BookmarkScoreFactor.class, RecencyScoreFactor.class,
+        RandomScoreFactor.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
@@ -59,7 +60,7 @@ class HearitExploreServiceTest {
     private BookmarkRepository bookmarkRepository;
 
     @Autowired
-    private ExploreScoreCalculator exploreScoreCalculator;
+    private DefaultExploreScoreCalculator exploreScoreCalculator;
 
     @Autowired
     private BookmarkScoreFactor bookmarkScoreFactor;
