@@ -11,6 +11,7 @@ import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.domain.Source;
+import com.onair.hearit.dto.request.CursorRequest;
 import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.fixture.DbHelper;
@@ -105,7 +106,7 @@ class HearitExploreServiceTest {
 
         // when
         CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(member.getId(),
-                0L, 10);
+                new CursorRequest(0L, 10));
 
         // then
         exploredHearits.content().forEach(System.out::println);
@@ -131,7 +132,8 @@ class HearitExploreServiceTest {
         Hearit hearit10 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit10", category3));
 
         // when
-        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(null, 0L, 10);
+        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(null,
+                new CursorRequest(0L, 10));
 
         // then
         exploredHearits.content().forEach(System.out::println);
