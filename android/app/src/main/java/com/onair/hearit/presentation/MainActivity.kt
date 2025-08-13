@@ -66,15 +66,10 @@ class MainActivity :
         setupWindowInsets()
         setupNavigation()
         setupDrawer()
+        attachController()
         observeViewModel()
         showFragment(HomeFragment())
         setupBottomControllerClick()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        attachController()
-        setPlayerControlViewVisibility()
     }
 
     private fun setupBackPressHandler() {
@@ -150,7 +145,11 @@ class MainActivity :
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
         binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
         binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
-        binding.layoutDrawer.tvDrawerLogout.setOnClickListener { mainViewModel.performLogout() }
+        binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
+            val stopIntent = PlaybackService.stopIntent(this)
+            stopService(stopIntent)
+            mainViewModel.performLogout()
+        }
         binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
     }
 
