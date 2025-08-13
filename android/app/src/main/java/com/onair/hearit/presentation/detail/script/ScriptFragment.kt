@@ -43,7 +43,7 @@ class ScriptFragment : Fragment() {
     private var scriptSyncJob: Job? = null
     private var mediaController: MediaController? = null
 
-    private val adapter by lazy { ScriptAdapter() }
+    private val adapter: ScriptAdapter by lazy { ScriptAdapter() }
 
     private val hearitId: Long by lazy {
         requireArguments().getLong(HEARIT_ID)
@@ -52,13 +52,13 @@ class ScriptFragment : Fragment() {
         PlayerDetailViewModelFactory(hearitId)
     }
 
-    private val updateInterval = 300L
+    private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
 
     private val itemHeightPx: Int by lazy {
         TypedValue
             .applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
-                16f,
+                SCRIPT_ITEM_HEIGHT_DP,
                 resources.displayMetrics,
             ).toInt()
     }
@@ -97,6 +97,11 @@ class ScriptFragment : Fragment() {
 
     private fun setupRecyclerView() {
         binding.rvScript.adapter = adapter
+
+        adapter.onItemClick = { item ->
+            mediaController?.seekTo(item.start)
+        }
+
         binding.rvScript.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(
@@ -246,6 +251,8 @@ class ScriptFragment : Fragment() {
 
     companion object {
         private const val HEARIT_ID = "hearit_id"
+        private const val SCRIPT_SYNC_INTERVAL_MS = 300L
+        private const val SCRIPT_ITEM_HEIGHT_DP = 16f
 
         fun newInstance(hearitId: Long) =
             ScriptFragment().apply {

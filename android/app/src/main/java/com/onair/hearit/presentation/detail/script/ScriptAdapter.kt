@@ -7,6 +7,7 @@ import com.onair.hearit.domain.model.ScriptLine
 
 class ScriptAdapter : ListAdapter<ScriptLine, ScriptViewHolder>(DiffCallback) {
     private var highlightedId: Long? = null
+    var onItemClick: ((ScriptLine) -> Unit)? = null
 
     fun highlightScriptLine(id: Long?) {
         if (highlightedId == id) return
@@ -32,6 +33,10 @@ class ScriptAdapter : ListAdapter<ScriptLine, ScriptViewHolder>(DiffCallback) {
     ) {
         val item = getItem(position)
         holder.bind(item, item.id == highlightedId)
+
+        holder.itemView.setOnClickListener {
+            onItemClick?.invoke(item)
+        }
     }
 
     companion object {
