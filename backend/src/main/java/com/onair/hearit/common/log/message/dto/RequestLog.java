@@ -31,4 +31,16 @@ public class RequestLog {
                 ));
         return new RequestLog("REQUEST", timestamp.toString(), requestInfo, parameters, body);
     }
+
+    public static RequestLog ofFilter(
+            LocalDateTime timestamp,
+            RequestInfo requestInfo,
+            Map<String, String[]> rawParameters) {
+        Map<String, List<String>> parameters = rawParameters.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> Arrays.asList(entry.getValue())
+                ));
+        return new RequestLog("ONLY_FILTER_REQUEST", timestamp.toString(), requestInfo, parameters, null); //Filter는 body 추적 불가
+    }
 }

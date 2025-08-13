@@ -68,6 +68,11 @@ public class LoggingAspect {
     }
 
     @Before("allMapping()")
+    public void markAopEntered() {
+        MDC.put("AOP_ENTERED", "true");
+    }
+
+    @Before("allMapping()")
     public void logRequest(JoinPoint joinPoint) {
         RequestLog requestLog = getRequestLog(joinPoint);
         log.info(maskingSupport.mask(requestLog));

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.onair.hearit.common.log.mask.strategy.MaskingStrategy;
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
 import java.util.Iterator;
@@ -66,13 +67,17 @@ public class MaskingSupport {
             }
         } else {
             for (Field field : clazz.getDeclaredFields()) {
-                field.setAccessible(true);
-                Masking masking = field.getAnnotation(Masking.class);
-                String name = field.getName();
-                Object value = field.get(obj);
-                JsonNode childNode = objectNode.get(name);
+                try {
+                    field.setAccessible(true);
+                    Masking masking = field.getAnnotation(Masking.class);
+                    String name = field.getName();
+                    Object value = field.get(obj);
+                    JsonNode childNode = objectNode.get(name);
 
-                applyMaskingToField(masking, objectNode, name, value, childNode);
+                    applyMaskingToField(masking, objectNode, name, value, childNode);
+                } catch (InaccessibleObjectException e) {
+                    // 접근 불가 필드는 무시
+                }
             }
         }
     }
@@ -88,7 +93,8 @@ public class MaskingSupport {
         }
     }
 
-    private void applyMaskingToField(Masking masking, ObjectNode objectNode, String name, Object value, JsonNode childNode)
+    private void applyMaskingToField(Masking masking, ObjectNode objectNode, String name, Object value,
+                                     JsonNode childNode)
             throws IllegalAccessException, InvocationTargetException {
         if (childNode == null) {
             return;
