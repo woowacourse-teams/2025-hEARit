@@ -2,7 +2,7 @@ name: Hearit Android dev CD
 
 on:
   pull_request:
-    branches: [ "develop", "develop-an", "fix/#368-android-dev-cd" ]
+    branches: [ "develop" ]
 
 env:
   BASE_URL: ${{ secrets.BASE_URL }}
@@ -37,10 +37,7 @@ jobs:
           echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
 
       - name: Build Debug apk
-        run: ./gradlew clean assembleDebug
-
-      - name: Check APK files
-        run: ls -l ./app/build/outputs/apk/debug/
+        run: ./gradlew assembleDebug
 
       - name: Upload a Build APK Artifact
         uses: actions/upload-artifact@v4
