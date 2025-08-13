@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Source {
 
-    @Column(name = "source_name")
+    @Column(name = "source_name", nullable = false)
     private String sourceName;
 
     @Column(name = "source_url")
