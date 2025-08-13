@@ -24,11 +24,11 @@
         android:background="@color/hearit_black1">
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_top_15"
+            android:id="@+id/guideline_top_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.15" />
+            app:layout_constraintGuide_percent="0.1" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline_top_6"
@@ -71,7 +71,7 @@
             android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/guideline_top_15"
+            app:layout_constraintTop_toBottomOf="@id/guideline_top_1"
             tools:text="HTTP와 HTTPS의 차이" />
 
         <TextView

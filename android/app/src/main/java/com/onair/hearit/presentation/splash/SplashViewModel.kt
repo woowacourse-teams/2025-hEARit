@@ -5,9 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
+import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.UserNotRegisteredException
 import com.onair.hearit.domain.repository.AuthRepository
-import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -15,7 +16,7 @@ import timber.log.Timber
 
 class SplashViewModel(
     private val authRepository: AuthRepository,
-    private val dataStoreRepository: DataStoreRepository,
+    private val preferencesLocalDataSource: PreferencesLocalDataSource,
 ) : ViewModel() {
     private val _checkToken: MutableLiveData<Boolean> = MutableLiveData()
     val checkToken: LiveData<Boolean> = _checkToken
@@ -32,17 +33,18 @@ class SplashViewModel(
 
     private fun checkValidAccessToken() {
         viewModelScope.launch {
-            val accessToken = dataStoreRepository.getAccessToken().getOrNull()
-            val refreshToken = dataStoreRepository.getRefreshToken().getOrNull()
+            val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
+            val refreshToken = preferencesLocalDataSource.getRefreshToken().getOrNull()
             if (accessToken.isNullOrBlank() || refreshToken.isNullOrBlank()) {
                 _checkToken.value = false
                 return@launch
             }
 
-            val result = authRepository.checkAccessToken("Bearer $accessToken")
+            val result = authRepository.checkAccessToken(accessToken)
             result
                 .onSuccess {
                     _checkToken.value = true
+                    TokenInterceptorProvider.setAccessToken(accessToken)
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegisteredException -> {
@@ -64,7 +66,7 @@ class SplashViewModel(
             authRepository
                 .reissue(refreshToken)
                 .onSuccess { newToken ->
-                    dataStoreRepository.saveAccessToken(newToken)
+                    preferencesLocalDataSource.saveAccessToken(newToken)
                     _checkToken.value = true
                 }.onFailure { throwable ->
                     when (throwable) {

@@ -5,15 +5,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
+import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.repository.AuthRepository
-import com.onair.hearit.domain.repository.DataStoreRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class LoginViewModel(
+    private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val authRepository: AuthRepository,
-    private val dataStoreRepository: DataStoreRepository,
 ) : ViewModel() {
     private val _loginState = MutableLiveData<Boolean>()
     val loginState: LiveData<Boolean> = _loginState
@@ -27,6 +28,7 @@ class LoginViewModel(
                 .kakaoLogin(accessToken)
                 .onSuccess { appToken ->
                     saveToken(appToken.accessToken, appToken.refreshToken)
+                    TokenInterceptorProvider.setAccessToken(appToken.accessToken)
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.login_toast_kakao_login_fail
@@ -42,8 +44,8 @@ class LoginViewModel(
         viewModelScope.launch {
             val result =
                 runCatching {
-                    dataStoreRepository.saveAccessToken(accessToken).getOrThrow()
-                    dataStoreRepository.saveRefreshToken(refreshToken).getOrThrow()
+                    preferencesLocalDataSource.saveAccessToken(accessToken).getOrThrow()
+                    preferencesLocalDataSource.saveRefreshToken(refreshToken).getOrThrow()
                 }
 
             result

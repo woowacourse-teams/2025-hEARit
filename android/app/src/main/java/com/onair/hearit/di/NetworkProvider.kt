@@ -27,6 +27,7 @@ object NetworkProvider {
         OkHttpClient
             .Builder()
             .addInterceptor(LoggingInterceptorProvider.provide())
+            .addInterceptor(TokenInterceptorProvider.provide())
             .build()
 
     private val retrofit: Retrofit by lazy {

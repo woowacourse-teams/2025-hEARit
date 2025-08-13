@@ -29,6 +29,7 @@ kotlinx-serialization-json = "1.8.1"
 runner = "1.6.2"
 rules = "1.6.1"
 junitKtx = "1.2.1"
+shimmer = "0.5.0"
 timber = "5.0.1"
 v2User = "2.21.4"
 room-runtime = "2.7.2"
@@ -71,6 +72,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2-kotlinx-serialization-converter" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 
