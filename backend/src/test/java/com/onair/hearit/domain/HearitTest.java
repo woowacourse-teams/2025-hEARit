@@ -25,11 +25,11 @@ class HearitTest {
         void titleValidationTest(String title) {
             // when & then
             assertThatThrownBy(
-                () -> new Hearit(title, "summary",
-                    10, "ORG_123.mp3",
-                    "SHR_123.mp3", "SCR_123.json",
-                    List.of(new Source("출처", "url")), TestFixture.createFixedCategory()))
-                .isInstanceOf(InvalidInputException.class);
+                    () -> new Hearit(title, "summary",
+                            10, "ORG_123.mp3",
+                            "SHR_123.mp3", "SCR_123.json",
+                            List.of(new Source("출처", "url")), TestFixture.createFixedCategory()))
+                    .isInstanceOf(InvalidInputException.class);
         }
 
         @Test
@@ -44,11 +44,11 @@ class HearitTest {
 
             // when & then
             assertThatThrownBy(
-                () -> new Hearit("title", summary,
-                    10, "ORG_123.mp3",
-                    "SHR_123.mp3", "SCR_123.json",
-                    List.of(new Source("출처", "url")), TestFixture.createFixedCategory()))
-                .isInstanceOf(InvalidInputException.class);
+                    () -> new Hearit("title", summary,
+                            10, "ORG_123.mp3",
+                            "SHR_123.mp3", "SCR_123.json",
+                            List.of(new Source("출처", "url")), TestFixture.createFixedCategory()))
+                    .isInstanceOf(InvalidInputException.class);
         }
 
         @ParameterizedTest
@@ -57,11 +57,11 @@ class HearitTest {
         void playTimeValidationTest(int playTime) {
             // when & then
             assertThatThrownBy(
-                () -> new Hearit("title", "summary",
-                    playTime, "ORG_123.mp3",
-                    "SHR_123.mp3", "SCR_123.json",
-                    List.of(new Source("출처", "url")), TestFixture.createFixedCategory()))
-                .isInstanceOf(InvalidInputException.class);
+                    () -> new Hearit("title", "summary",
+                            playTime, "ORG_123.mp3",
+                            "SHR_123.mp3", "SCR_123.json",
+                            List.of(new Source("출처", "url")), TestFixture.createFixedCategory()))
+                    .isInstanceOf(InvalidInputException.class);
         }
 
         @Test
@@ -69,26 +69,26 @@ class HearitTest {
         void categoryValidationTest() {
             // when & then
             assertThatThrownBy(
-                () -> new Hearit("title", "summary",
-                    10, "ORG_123.mp3",
-                    "SHR_123.mp3", "SCR_123.json",
-                    List.of(new Source("출처", "url")), null))
-                .isInstanceOf(InvalidInputException.class);
+                    () -> new Hearit("title", "summary",
+                            10, "ORG_123.mp3",
+                            "SHR_123.mp3", "SCR_123.json",
+                            List.of(new Source("출처", "url")), null))
+                    .isInstanceOf(InvalidInputException.class);
         }
     }
 
     @ParameterizedTest
     @DisplayName("FileType에 따라 fileUrl을 수정한다.")
     @CsvSource({
-        "ORIGINAL, ORG_123_new.mp3",
-        "SHORT, SHR_123_new.mp3",
-        "SCRIPT, SCR_123_new.json"})
+            "ORIGINAL, /hearit/audio/original/ORG_123.mp3",
+            "SHORT, /hearit/audio/short/SHR_123.mp3",
+            "SCRIPT, /hearit/script/SCR_123.json"})
     void updateFileUrlTest(FileType fileType, String fileUrl) {
         // given
         Hearit hearit = new Hearit("title", "summary",
-            10, "/hearit/audio/original/ORG_123.mp3",
-            "/hearit/audio/original/SHR_123.mp3", "/hearit/audio/original/SCR_123.json",
-            List.of(new Source("출처", "url")), TestFixture.createFixedCategory());
+                10, "/hearit/audio/original/ORG_123.mp3",
+                "/hearit/audio/short/SHR_123.mp3", "/hearit/script/SCR_123.json",
+                List.of(new Source("출처", "url")), TestFixture.createFixedCategory());
 
         // when
         hearit.updateFileUrl(fileUrl, fileType);

@@ -74,9 +74,13 @@ class AdminHearitControllerTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
 
-        given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("mock/origin.mp3");
-        given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn("mock/short.mp3");
-        given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("mock/script.json");
+        String expectedOriginalPath = "/hearit/audio/original/ORG_test.mp3";
+        String expectedShortPath = "/hearit/audio/short/SHR_test.mp3";
+        String expectedScriptPath = "/hearit/script/SCR_test.json";
+
+        given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn(expectedOriginalPath);
+        given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn(expectedShortPath);
+        given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn(expectedScriptPath);
 
         // when & then
         RestAssured.given().log().uri()
@@ -110,8 +114,9 @@ class AdminHearitControllerTest extends IntegrationTest {
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         HearitMetaDataUpdateRequest request = new HearitMetaDataUpdateRequest(
-                "수정 제목", "수정 요약", 100, "origin-audio", "short-audio",
-                "script-url", List.of(new SourceUpdateRequest("출처", "url")), category.getId(), List.of()
+                "수정 제목", "수정 요약", 100, "/hearit/audio/original/ORG_test.mp3", "/hearit/audio/short/SHR_test.mp3",
+                "/hearit/script/SCR_test.json", List.of(new SourceUpdateRequest("출처", "url")), category.getId(),
+                List.of()
         );
 
         // when & then
@@ -176,12 +181,17 @@ class AdminHearitControllerTest extends IntegrationTest {
         // given
         CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        String originalPath = "/hearit/audio/original/ORG_test.mp3";
+        String shortPath = "/hearit/audio/short/SHR_test.mp3";
+        String scriptPath = "/hearit/script/SCR_test.json";
+
         Hearit hearit = dbHelper.insertHearit(
                 new Hearit("title", "summary",
-                        10, "ORG_test.mp3",
-                        "SHR_test.mp3", "SCR_test.json",
+                        10, originalPath,
+                        shortPath, scriptPath,
                         List.of(new Source("출처", "url")), category));
-        given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("/mock/origin.mp3");
+        given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn(originalPath);
 
         // when & then
         RestAssured.given().log().all()
@@ -195,7 +205,7 @@ class AdminHearitControllerTest extends IntegrationTest {
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
         assertAll(() -> {
-            assertThat(updatedHearit.getOriginalAudioUrl()).isEqualTo("/mock/origin.mp3");
+            assertThat(updatedHearit.getOriginalAudioUrl()).isEqualTo(originalPath);
         });
     }
 
@@ -205,12 +215,17 @@ class AdminHearitControllerTest extends IntegrationTest {
         // given
         CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        String originalPath = "/hearit/audio/original/ORG_test.mp3";
+        String shortPath = "/hearit/audio/short/SHR_test.mp3";
+        String scriptPath = "/hearit/script/SCR_test.json";
+
         Hearit hearit = dbHelper.insertHearit(
                 new Hearit("title", "summary",
-                        10, "ORG_test.mp3",
-                        "SHR_test.mp3", "SCR_test.json",
+                        10, originalPath,
+                        shortPath, scriptPath,
                         List.of(new Source("출처", "url")), category));
-        given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn("/mock/origin.mp3");
+        given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn(shortPath);
 
         // when & then
         RestAssured.given().log().all()
@@ -224,7 +239,7 @@ class AdminHearitControllerTest extends IntegrationTest {
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
         assertAll(() -> {
-            assertThat(updatedHearit.getShortAudioUrl()).isEqualTo("/mock/origin.mp3");
+            assertThat(updatedHearit.getShortAudioUrl()).isEqualTo(shortPath);
         });
     }
 
@@ -234,26 +249,31 @@ class AdminHearitControllerTest extends IntegrationTest {
         // given
         CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        String originalPath = "/hearit/audio/original/ORG_test.mp3";
+        String shortPath = "/hearit/audio/short/SHR_test.mp3";
+        String scriptPath = "/hearit/script/SCR_test.json";
+
         Hearit hearit = dbHelper.insertHearit(
                 new Hearit("title", "summary",
-                        10, "ORG_test.mp3",
-                        "SHR_test.mp3", "SCR_test.json",
+                        10, originalPath,
+                        shortPath, scriptPath,
                         List.of(new Source("출처", "url")), category));
-        given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("/mock/origin.json");
+        given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("/hearit/script/SCR_test.json");
 
         // when & then
         RestAssured.given().log().all()
                 .cookie("JSESSIONID", csrfSession.sessionId())
                 .header("X-CSRF-TOKEN", csrfSession.csrfToken())
                 .multiPart("file", new File("src/test/resources/SCR_test.json"))
-                .when()
+                .when().log().all()
                 .put("/api/v1/admin/hearits/" + hearit.getId() + "/script")
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT);
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
         assertAll(() -> {
-            assertThat(updatedHearit.getScriptUrl()).isEqualTo("/mock/origin.json");
+            assertThat(updatedHearit.getScriptUrl()).isEqualTo("/hearit/script/SCR_test.json");
         });
     }
 
@@ -262,13 +282,14 @@ class AdminHearitControllerTest extends IntegrationTest {
         dbHelper.insertCategory(category);
 
         for (int i = 0; i < count; i++) {
-            Hearit hearit = new Hearit("title" + i,
+            Hearit hearit = new Hearit(
+                    "title" + i,
                     "summary" + i,
                     100,
-                    "origin-audio" + i,
-                    "short-audio-url" + i,
-                    "script-url" + i,
-                    TestFixture.createFixedSources(),
+                    "/hearit/audio/original/ORG_test" + i + ".mp3",
+                    "/hearit/audio/short/SHR_test" + i + ".mp3",
+                    "/hearit/script/SCR_test" + i + ".json",
+                    List.of(new Source("출처", "https://example.com")),
                     category
             );
             dbHelper.insertHearit(hearit);

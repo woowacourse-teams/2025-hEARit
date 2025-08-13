@@ -20,9 +20,9 @@ public class DbRecommendHearitProvider implements RecommendHearitProvider {
     @Override
     public List<Hearit> getRecommendHearit(int hearitCount) {
         List<RecommendHearit> recommendHearits = getRecommendHearits(hearitCount);
-        List<Long> recommendHearitIds = recommendHearits.stream()
-                .map(RecommendHearit::getHearitId).toList();
-        return hearitRepository.findAllByIdInWithCategory(recommendHearitIds);
+        return recommendHearits.stream()
+                .map(RecommendHearit::getHearit)
+                .toList();
     }
 
     private List<RecommendHearit> getRecommendHearits(int hearitCount) {

@@ -52,7 +52,7 @@ class DbRecommendHearitProviderTest {
         LocalDate today = LocalDate.now();
         for (int i = 0; i < hearitCount; i++) {
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), today));
+            dbHelper.insertRecommendHearit(new RecommendHearit(hearit, today));
         }
 
         // when

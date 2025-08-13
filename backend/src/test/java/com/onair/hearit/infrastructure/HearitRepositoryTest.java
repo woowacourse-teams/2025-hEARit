@@ -171,9 +171,9 @@ class HearitRepositoryTest {
                 title,
                 "summary",
                 100,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
+                "/hearit/audio/original/ORG_test.mp3",
+                "/hearit/audio/short/SHR_test.mp3",
+                "/hearit/script/SCR_test.json",
                 List.of(new Source("출처", "url")),
                 category);
         Hearit savedHearit = dbHelper.insertHearit(hearit);

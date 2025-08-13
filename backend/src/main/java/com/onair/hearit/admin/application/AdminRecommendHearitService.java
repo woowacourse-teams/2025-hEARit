@@ -48,7 +48,7 @@ public class AdminRecommendHearitService {
         validateForCreateRecommendHearit(request.recommendDate(), request.hearitIds());
         List<Hearit> hearits = getHearitsById(request.hearitIds());
         for (Hearit hearit : hearits) {
-            RecommendHearit recommendHearit = new RecommendHearit(hearit.getId(), request.recommendDate());
+            RecommendHearit recommendHearit = new RecommendHearit(hearit, request.recommendDate());
             recommendHearitRepository.save(recommendHearit);
         }
     }
@@ -63,7 +63,7 @@ public class AdminRecommendHearitService {
             LocalDate target = date;
             List<Long> hearitIds = monthlyRecommendHearits.stream()
                     .filter(recommendHearit -> recommendHearit.getRecommendDate().isEqual(target))
-                    .map(RecommendHearit::getHearitId)
+                    .map(recommendHearit -> recommendHearit.getHearit().getId())
                     .toList();
             List<Hearit> hearits = hearitRepository.findAllByIdIn(hearitIds);
             responses.add(MonthlyRecommendedHearitResponse.from(target, hearits));
@@ -80,7 +80,7 @@ public class AdminRecommendHearitService {
             throw new InvalidInputException("추천 히어릿 아이디가 유효하지 않습니다.");
         }
         for (Hearit hearit : hearits) {
-            RecommendHearit recommendHearit = new RecommendHearit(hearit.getId(), request.recommendDate());
+            RecommendHearit recommendHearit = new RecommendHearit(hearit, request.recommendDate());
             recommendHearitRepository.save(recommendHearit);
         }
     }

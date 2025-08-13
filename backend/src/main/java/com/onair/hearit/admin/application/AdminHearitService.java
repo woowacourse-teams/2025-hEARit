@@ -1,6 +1,5 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.domain.FileNameValidator;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest.SourceRequest;
 import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
@@ -73,10 +72,10 @@ public class AdminHearitService {
 
     @Transactional
     public void addHearit(HearitCreateRequest request) {
-        FileNameValidator.validateAll(
-                request.originalAudio().getOriginalFilename(),
-                request.shortAudio().getOriginalFilename(),
-                request.scriptFile().getOriginalFilename());
+//        FileNameValidator.validateAll(
+//                request.originalAudio().getOriginalFilename(),
+//                request.shortAudio().getOriginalFilename(),
+//                request.scriptFile().getOriginalFilename());
         String originalAudioPath = fileStorageService.uploadFile(request.originalAudio(), FileType.ORIGINAL);
         String shortAudioPath = fileStorageService.uploadFile(request.shortAudio(), FileType.SHORT);
         String scriptFilePath = fileStorageService.uploadFile(request.scriptFile(), FileType.SCRIPT);
@@ -131,7 +130,7 @@ public class AdminHearitService {
     @Transactional
     public void modifyHearitFile(Long hearitId, HearitFileUpdateRequest request, FileType fileType) {
         Hearit hearit = getHearitById(hearitId);
-        FileNameValidator.validateFileUrl(request.file().getOriginalFilename(), fileType, hearit);
+//        FileNameValidator.validateFileUrl(request.file().getOriginalFilename(), fileType, hearit);
         fileStorageService.deleteFile(hearit.getFileUrl(fileType));
         String uploadFilePath = fileStorageService.uploadFile(request.file(), fileType);
         hearit.updateFileUrl(uploadFilePath, fileType);

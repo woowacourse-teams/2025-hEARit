@@ -73,6 +73,7 @@ public class Hearit {
         this.title = title;
         this.summary = summary;
         this.playTime = playTime;
+        System.out.println("originalAudioUrl = " + originalAudioUrl);
         this.fileUrls = new FileUrls(originalAudioUrl, shortAudioUrl, scriptUrl);
         this.sources = sources;
         this.category = category;
@@ -109,13 +110,13 @@ public class Hearit {
     }
 
     public void updateFileUrl(String fileUrl, FileType fileType) {
-        this.fileUrls = fileType.update(this.fileUrls, fileUrl);
+        this.fileUrls = fileType.updateFileUrls(this.fileUrls, fileUrl);
     }
 
     public String getFileUrl(FileType fileType) {
-        return fileType.get(this.fileUrls);
+        return fileType.getFileUrls(this.fileUrls);
     }
-    
+
     public String getOriginalAudioUrl() {
         return this.fileUrls.getOriginalAudioUrl();
     }

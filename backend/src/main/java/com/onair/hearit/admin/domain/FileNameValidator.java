@@ -8,9 +8,9 @@ import java.util.List;
 public class FileNameValidator {
 
     public static void validateAll(String originalAudioPath, String shortAudioPath, String scriptFilePath) {
-        FileType.ORIGINAL.validateFilename(originalAudioPath);
-        FileType.SHORT.validateFilename(shortAudioPath);
-        FileType.SCRIPT.validateFilename(scriptFilePath);
+        FileType.ORIGINAL.validUrlName(originalAudioPath);
+        FileType.SHORT.validUrlName(shortAudioPath);
+        FileType.SCRIPT.validUrlName(scriptFilePath);
         validateSameUuid(List.of(originalAudioPath, shortAudioPath, scriptFilePath));
     }
 
@@ -33,7 +33,7 @@ public class FileNameValidator {
     }
 
     public static void validateFileUrl(String fileUrl, FileType fileType, Hearit hearit) {
-        fileType.validateFilename(fileUrl);
+        fileType.validUrlName(fileUrl);
         validateSameUuid(List.of(hearit.getFileUrl(fileType), fileUrl));
     }
 }
