@@ -18,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -127,5 +128,24 @@ public class Hearit {
 
     public String getScriptUrl() {
         return this.fileUrls.getScriptUrl();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Hearit hearit)) {
+            return false;
+        }
+        if (this.id == null || hearit.id == null) {
+            return false;
+        }
+        return Objects.equals(id, hearit.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

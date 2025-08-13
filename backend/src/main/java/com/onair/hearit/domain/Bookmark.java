@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,5 +47,24 @@ public class Bookmark {
 
     public boolean isCreatedBy(Member member) {
         return this.member.equals(member);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Bookmark bookmark)) {
+            return false;
+        }
+        if (this.id == null || bookmark.id == null) {
+            return false;
+        }
+        return Objects.equals(id, bookmark.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

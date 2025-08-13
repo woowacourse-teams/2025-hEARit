@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +16,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-    name = "explore_score",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "hearit_id"})
+        name = "explore_score",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "hearit_id"})
 )
 public class ExploreScore {
 
@@ -41,5 +42,24 @@ public class ExploreScore {
         this.hearitId = hearitId;
         this.score = score;
         this.cursorId = cursorId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ExploreScore exploreScore)) {
+            return false;
+        }
+        if (this.id == null || exploreScore.id == null) {
+            return false;
+        }
+        return Objects.equals(id, exploreScore.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

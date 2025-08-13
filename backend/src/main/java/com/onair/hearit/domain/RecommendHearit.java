@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +24,7 @@ public class RecommendHearit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @ManyToOne
     @JoinColumn(name = "hearit_id", nullable = false)
     private Hearit hearit;
@@ -44,5 +45,24 @@ public class RecommendHearit {
         if (recommendDate == null) {
             throw new InvalidInputException("recommendDate는 null일 수 없습니다.");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof RecommendHearit recommendHearit)) {
+            return false;
+        }
+        if (this.id == null || recommendHearit.id == null) {
+            return false;
+        }
+        return Objects.equals(id, recommendHearit.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

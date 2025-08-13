@@ -3,6 +3,7 @@ package com.onair.hearit.domain;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Embeddable;
 import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,5 +60,24 @@ public class FileUrls {
 
     public FileUrls updateScriptUrl(String newScriptUrl) {
         return new FileUrls(this.originalAudioUrl, this.shortAudioUrl, newScriptUrl);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        FileUrls fileUrls = (FileUrls) o;
+        return Objects.equals(originalAudioUrl, fileUrls.originalAudioUrl) &&
+                Objects.equals(shortAudioUrl, fileUrls.shortAudioUrl) &&
+                Objects.equals(scriptUrl, fileUrls.scriptUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(originalAudioUrl, shortAudioUrl, scriptUrl);
     }
 }

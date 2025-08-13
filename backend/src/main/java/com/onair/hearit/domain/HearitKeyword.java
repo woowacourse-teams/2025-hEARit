@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,5 +34,24 @@ public class HearitKeyword {
     public HearitKeyword(Hearit hearit, Keyword keyword) {
         this.hearit = hearit;
         this.keyword = keyword;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof HearitKeyword hearitKeyword)) {
+            return false;
+        }
+        if (this.id == null || hearitKeyword.id == null) {
+            return false;
+        }
+        return Objects.equals(id, hearitKeyword.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
