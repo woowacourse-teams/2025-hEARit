@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -46,13 +45,8 @@ class ExploreFragment :
     private val snapHelper = PagerSnapHelper()
     private var isFirstLoad = true
 
-    private val animator: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
-            duration = 1300
-            repeatCount = 1
-            repeatMode = ObjectAnimator.RESTART
-        }
-    }
+    private var animator: ObjectAnimator? = null
+    private var playbackListener: Player.Listener? = null
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -95,15 +89,12 @@ class ExploreFragment :
 
         (activity as? PlayerControllerView)?.pause()
 
-        player.addListener(
+        playbackListener =
             object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
-                    if (state == Player.STATE_ENDED) {
-                        scrollToNextItem()
-                    }
+                    if (state == Player.STATE_ENDED) scrollToNextItem()
                 }
-            },
-        )
+            }.also { player.addListener(it) }
     }
 
     override fun onResume() {
@@ -198,17 +189,20 @@ class ExploreFragment :
 
     private fun startSwipeAnimation() {
         binding.lavExploreSwipeUp.visibility = View.VISIBLE
-
-        animator.addListener(
-            object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    super.onAnimationEnd(animation)
-                    binding.lavExploreSwipeUp.visibility = View.INVISIBLE
-                }
-            },
-        )
-
-        animator.start()
+        animator =
+            ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
+                duration = 1300
+                repeatCount = 1
+                repeatMode = ObjectAnimator.RESTART
+                addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            binding.lavExploreSwipeUp.visibility = View.INVISIBLE
+                        }
+                    },
+                )
+                start()
+            }
     }
 
     private fun checkAndLoadNextPage(position: Int) {
@@ -242,9 +236,8 @@ class ExploreFragment :
         val intent = LoginActivity.newIntent(requireContext())
         startActivity(intent)
 
-        // PlaybackService 종료 (선택)
-        val serviceIntent = Intent(requireContext(), PlaybackService::class.java)
-        requireContext().stopService(serviceIntent)
+        // PlaybackService 종료
+        requireContext().stopService(PlaybackService.stopIntent(requireContext()))
 
         // 현재 프래그먼트 종료
         parentFragmentManager
@@ -300,7 +293,18 @@ class ExploreFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
-        animator.end()
+
+        playbackListener?.let { player.removeListener(it) }
+        playbackListener = null
+
+        animator?.cancel()
+        animator?.removeAllListeners()
+        animator?.setTarget(null)
+
+        binding.rvExplore.clearOnScrollListeners()
+        snapHelper.attachToRecyclerView(null)
+        binding.rvExplore.adapter = null
+
         _binding = null
     }
 

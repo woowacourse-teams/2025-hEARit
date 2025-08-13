@@ -324,7 +324,7 @@ class PlayerDetailActivity :
                 hearitId = hearitId,
                 startPosition = startPosition,
             )
-        startService(serviceIntent)
+        startForegroundService(serviceIntent)
     }
 
     private fun navigateToLogin() {
