@@ -84,7 +84,22 @@ class BottomPlayerView
             player?.let {
                 updateTimeline(it)
                 updatePlayPauseButton(it)
+                updateTitle(it)
             }
+        }
+
+        private fun updateTitle(player: Player) {
+            val title =
+                listOf(
+                    player.currentMediaItem
+                        ?.mediaMetadata
+                        ?.title
+                        ?.toString(),
+                    player.mediaMetadata.title?.toString(),
+                    player.currentMediaItem?.mediaId,
+                ).firstOrNull { !it.isNullOrBlank() } ?: ""
+
+            setTitle(title)
         }
 
         private fun updateTimeline(player: Player) {
@@ -101,16 +116,16 @@ class BottomPlayerView
 
         private fun updateProgress() {
             if (!isAttachedToWindow) return
-            val p = player ?: return
+            val currentPlayer = player ?: return
 
             removeCallbacks(progressRunnable)
 
-            if (p.playbackState == Player.STATE_READY) {
-                binding.exoProgress.setPosition(p.currentPosition)
-                binding.exoProgress.setBufferedPosition(p.bufferedPosition)
+            if (currentPlayer.playbackState == Player.STATE_READY) {
+                binding.exoProgress.setPosition(currentPlayer.currentPosition)
+                binding.exoProgress.setBufferedPosition(currentPlayer.bufferedPosition)
             }
 
-            if (p.playWhenReady && p.playbackState == Player.STATE_READY) {
+            if (currentPlayer.playWhenReady && currentPlayer.playbackState == Player.STATE_READY) {
                 postDelayed(progressRunnable, binding.exoProgress.preferredUpdateDelay)
             }
         }
@@ -152,11 +167,11 @@ class BottomPlayerView
                 player: Player,
                 events: Player.Events,
             ) {
-                if (events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)) {
-                    player.mediaMetadata.title
-                        ?.toString()
-                        ?.takeIf { it.isNotBlank() }
-                        ?.let { setTitle(it) }
+                if (events.contains(Player.EVENT_MEDIA_METADATA_CHANGED) ||
+                    events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
+                    events.contains(Player.EVENT_TIMELINE_CHANGED)
+                ) {
+                    updateTitle(player)
                 }
                 if (events.contains(Player.EVENT_TIMELINE_CHANGED)) {
                     updateTimeline(player)
@@ -165,6 +180,7 @@ class BottomPlayerView
                     events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) ||
                     events.contains(Player.EVENT_IS_PLAYING_CHANGED)
                 ) {
+                    updateTitle(player)
                     updatePlayPauseButton(player)
                     updateProgress()
                 }
