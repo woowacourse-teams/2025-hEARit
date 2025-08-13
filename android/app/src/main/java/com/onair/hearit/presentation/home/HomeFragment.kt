@@ -52,6 +52,7 @@ class HomeFragment :
         )
     }
     private val snapHelper = PagerSnapHelper()
+    private var centerScrollListener: CenterScrollListener? = null
     private lateinit var indicatorContainer: LinearLayout
 
     override fun onCreateView(
@@ -100,15 +101,15 @@ class HomeFragment :
     }
 
     private fun setupRecommendRecyclerView() {
+        centerScrollListener =
+            CenterScrollListener(snapHelper) { position ->
+                updateIndicator(position)
+            }
+
         binding.rvHomeRecommend.apply {
             adapter = recommendAdapter
             snapHelper.attachToRecyclerView(this)
-
-            addOnScrollListener(
-                CenterScrollListener(snapHelper) { position ->
-                    updateIndicator(position)
-                },
-            )
+            centerScrollListener?.let { addOnScrollListener(it) }
         }
     }
 
@@ -255,6 +256,10 @@ class HomeFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+        centerScrollListener?.let {
+            binding.rvHomeRecommend.removeOnScrollListener(it)
+        }
+        centerScrollListener = null
         _binding = null
     }
 
