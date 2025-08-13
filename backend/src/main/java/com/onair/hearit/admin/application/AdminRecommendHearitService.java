@@ -4,9 +4,9 @@ import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitCreateRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
-import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
 import com.onair.hearit.admin.dto.response.AdminRecommendHearitResponse;
-import com.onair.hearit.common.exception.custom.InvalidInputException;
+import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
+import com.onair.hearit.admin.exception.custom.AdminInvalidInputException;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.RecommendHearit;
 import com.onair.hearit.infrastructure.HearitRepository;
@@ -79,7 +79,7 @@ public class AdminRecommendHearitService {
         List<Hearit> hearits = getHearitsById(request.hearitIds());
         int deletedRowCount = recommendHearitRepository.deleteAllByRecommendDate(request.recommendDate());
         if (deletedRowCount != RECOMMEND_HEARIT_COUNT) {
-            throw new InvalidInputException("추천 히어릿 아이디가 유효하지 않습니다.");
+            throw new AdminInvalidInputException("추천 히어릿 아이디가 유효하지 않습니다.");
         }
         for (Hearit hearit : hearits) {
             RecommendHearit recommendHearit = new RecommendHearit(hearit.getId(), request.recommendDate());
@@ -90,17 +90,17 @@ public class AdminRecommendHearitService {
     private void validateForCreateRecommendHearit(LocalDate recommendDate, List<Long> hearitIds) {
         LocalDate today = LocalDate.now();
         if (recommendDate.isBefore(today)) {
-            throw new InvalidInputException("과거의 추천히어릿은 생성할 수 없습니다.");
+            throw new AdminInvalidInputException("과거의 추천히어릿은 생성할 수 없습니다.");
         }
         if (hearitIds.size() != RECOMMEND_HEARIT_COUNT) {
-            throw new InvalidInputException("추천 히어릿은 반드시 5개여야합니다.");
+            throw new AdminInvalidInputException("추천 히어릿은 반드시 5개여야합니다.");
         }
     }
 
     private List<Hearit> getHearitsById(List<Long> hearitIds) {
         List<Hearit> hearits = hearitRepository.findAllByIdIn(hearitIds);
         if (hearits.size() != RECOMMEND_HEARIT_COUNT) {
-            throw new InvalidInputException("추천 히어릿은 반드시 5개여야합니다.");
+            throw new AdminInvalidInputException("추천 히어릿은 반드시 5개여야합니다.");
         }
         return hearits;
     }

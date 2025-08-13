@@ -1,6 +1,6 @@
-package com.onair.hearit.common.exception;
+package com.onair.hearit.admin.exception;
 
-import com.onair.hearit.common.exception.custom.HearitException;
+import com.onair.hearit.admin.exception.custom.AdminException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.stream.Collectors;
@@ -14,17 +14,17 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class AdminGlobalExceptionHandler {
 
-    @ExceptionHandler(HearitException.class)
-    public ProblemDetail handleHearitException(HearitException ex, HttpServletRequest request) {
+    @ExceptionHandler(AdminException.class)
+    public ProblemDetail handleAdminException(AdminException ex, HttpServletRequest request) {
         return buildProblemDetail(ex.getErrorCode(), ex.getDetail(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
         String detail = extractValidationDetail(ex);
-        return buildProblemDetail(ErrorCode.INVALID_INPUT, detail, request);
+        return buildProblemDetail(AdminErrorCode.INVALID_INPUT, detail, request);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -38,17 +38,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-        return buildProblemDetail(ErrorCode.INVALID_INPUT, "잘못된 파라미터 값: " + ex.getValue(), request);
+        return buildProblemDetail(AdminErrorCode.INVALID_INPUT, "잘못된 파라미터 값: " + ex.getValue(), request);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ProblemDetail handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
-        return buildProblemDetail(ErrorCode.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다.", request);
+        return buildProblemDetail(AdminErrorCode.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다.", request);
     }
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnhandledException(Exception ex, HttpServletRequest request) {
-        return buildProblemDetail(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getTitle(), request);
+        return buildProblemDetail(AdminErrorCode.INTERNAL_SERVER_ERROR, AdminErrorCode.INTERNAL_SERVER_ERROR.getTitle(), request);
     }
 
     private String extractValidationDetail(MethodArgumentNotValidException ex) {
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
     }
 
-    private ProblemDetail buildProblemDetail(ErrorCode errorCode, String detail, HttpServletRequest request) {
+    private ProblemDetail buildProblemDetail(AdminErrorCode errorCode, String detail, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(errorCode.getHttpStatus(), detail);
         problemDetail.setTitle(errorCode.getTitle());
         problemDetail.setType(URI.create(request.getRequestURI()));

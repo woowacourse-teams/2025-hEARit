@@ -9,8 +9,8 @@ import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest.SourceUpdateRe
 import com.onair.hearit.admin.dto.response.AdminHearitResponse;
 import com.onair.hearit.admin.dto.response.AdminHearitResponse.KeywordInHearit;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
+import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.admin.infrastructure.s3.S3FileProvider;
-import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.FileType;
 import com.onair.hearit.domain.Hearit;
@@ -110,7 +110,7 @@ public class AdminHearitService {
 
     private void validateHearitKeywords(List<Long> keywordIds, List<Keyword> keywords) {
         if (keywords.size() != keywordIds.size()) {
-            throw new NotFoundException("keywordIds", keywordIds.toString());
+            throw new AdminNotFoundException("keywordIds", keywordIds.toString());
         }
     }
 
@@ -138,11 +138,11 @@ public class AdminHearitService {
 
     private Category getCategoryById(Long categoryId) {
         return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("categoryId", categoryId.toString()));
+                .orElseThrow(() -> new AdminNotFoundException("categoryId", categoryId.toString()));
     }
 
     private Hearit getHearitById(Long hearitId) {
         return hearitRepository.findById(hearitId)
-                .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
+                .orElseThrow(() -> new AdminNotFoundException("hearitId", hearitId.toString()));
     }
 }

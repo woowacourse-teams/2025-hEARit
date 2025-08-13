@@ -3,9 +3,9 @@ package com.onair.hearit.admin.application;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
-import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.dto.response.AdminCategoryResponse;
-import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
+import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import jakarta.transaction.Transactional;
@@ -52,6 +52,6 @@ public class AdminCategoryService {
 
     private Category getCategoryById(Long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("categoryId", id.toString()));
+                .orElseThrow(() -> new AdminNotFoundException("categoryId", id.toString()));
     }
 }

@@ -1,6 +1,6 @@
 package com.onair.hearit.admin.infrastructure.s3;
 
-import com.onair.hearit.admin.exception.AdminFileException;
+import com.onair.hearit.admin.exception.custom.AdminFileException;
 import com.onair.hearit.domain.FileType;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,9 +33,9 @@ public class S3FileProvider {
             );
             return filePath;
         } catch (IOException e) {
-            throw new AdminFileException("업로드 된 파일을 읽어오는데 실패했습니다.", e);
+            throw new AdminFileException("업로드 된 파일을 읽어오는데 실패");
         } catch (S3Exception e) {
-            throw new AdminFileException("S3 파일 업로드 실패했습니다.", e);
+            throw new AdminFileException("S3 파일 업로드 실패");
         }
     }
 
@@ -48,7 +48,7 @@ public class S3FileProvider {
                     .build()
             );
         } catch (S3Exception e) {
-            throw new AdminFileException("S3 파일 삭제 실패했습니다.", e);
+            throw new AdminFileException("S3 파일 삭제 실패");
         }
     }
 

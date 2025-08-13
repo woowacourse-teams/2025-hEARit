@@ -3,9 +3,9 @@ package com.onair.hearit.admin.application;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
 import com.onair.hearit.admin.dto.request.KeywordUpdateRequest;
-import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.dto.response.AdminKeywordResponse;
-import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
+import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.infrastructure.KeywordRepository;
 import jakarta.transaction.Transactional;
@@ -46,7 +46,7 @@ public class AdminKeywordService {
     @Transactional
     public void updateKeyword(Long keywordId, KeywordUpdateRequest request) {
         Keyword keyword = keywordRepository.findById(keywordId)
-                .orElseThrow(() -> new NotFoundException("keywordId", keywordId.toString()));
+                .orElseThrow(() -> new AdminNotFoundException("keywordId", keywordId.toString()));
         keyword.updateName(request.name());
     }
 }
