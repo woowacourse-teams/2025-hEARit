@@ -74,15 +74,16 @@ class SearchResultFragment :
             addOnScrollListener(
                 object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(
-                        rv: RecyclerView,
+                        recyclerView: RecyclerView,
                         dx: Int,
                         dy: Int,
                     ) {
-                        val lm = rv.layoutManager as? LinearLayoutManager ?: return
-                        val total = lm.itemCount
-                        val last = lm.findLastVisibleItemPosition()
+                        val layoutManager =
+                            recyclerView.layoutManager as? LinearLayoutManager ?: return
+                        val threshold = layoutManager.itemCount - REFRESH_THRESHOLD
+                        val last = layoutManager.findLastVisibleItemPosition()
 
-                        if (last >= total - 3) viewModel.loadNextPageIfPossible()
+                        if (last >= threshold) viewModel.loadNextPageIfPossible()
                     }
                 },
             )
@@ -123,6 +124,8 @@ class SearchResultFragment :
     }
 
     companion object {
+        private const val REFRESH_THRESHOLD = 3
+
         fun newInstance(input: SearchInput): SearchResultFragment =
             SearchResultFragment().apply {
                 arguments = input.toBundle()
