@@ -39,8 +39,14 @@ class LibraryViewModel(
     private var nextPage: Int? = 0
 
     init {
-        fetchData(page = 0)
+        refreshBookmarks()
         getUserInfo()
+    }
+
+    fun refreshBookmarks() {
+        nextPage = 0
+        _bookmarks.value = emptyList()
+        fetchData(page = 0)
     }
 
     fun loadNextPage() {

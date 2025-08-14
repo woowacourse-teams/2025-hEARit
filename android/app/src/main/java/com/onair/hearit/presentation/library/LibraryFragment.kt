@@ -33,7 +33,7 @@ class LibraryFragment :
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                viewModel.loadNextPage()
+                viewModel.refreshBookmarks()
             }
         }
 
@@ -45,6 +45,7 @@ class LibraryFragment :
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         binding.rvBookmark.adapter = adapter
+        binding.rvBookmark.layoutManager = LinearLayoutManager(requireContext())
         return binding.root
     }
 
@@ -100,7 +101,7 @@ class LibraryFragment :
     }
 
     private fun setupInfiniteScroll() {
-        val layoutManager = binding.rvBookmark.layoutManager
+        val layoutManager = binding.rvBookmark.layoutManager as? LinearLayoutManager ?: return
         binding.rvBookmark.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(
@@ -111,13 +112,10 @@ class LibraryFragment :
                     super.onScrolled(recyclerView, dx, dy)
                     if (dy <= 0) return
 
-                    val lastVisibleItemPosition =
-                        (layoutManager as? LinearLayoutManager)?.findLastVisibleItemPosition()
-                            ?: return
+                    val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
                     val totalItemCount = layoutManager.itemCount
 
-                    // 마지막 3개 아이템에 도달하면 다음 페이지 로드
-                    if (lastVisibleItemPosition >= totalItemCount - 3 && viewModel.isLoading.value == false) {
+                    if (lastVisibleItem >= totalItemCount - 3 && viewModel.isLoading.value != true) {
                         viewModel.loadNextPage()
                     }
                 }
@@ -133,5 +131,10 @@ class LibraryFragment :
     override fun onClickBookmarkedHearit(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         playerDetailLauncher.launch(intent)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
