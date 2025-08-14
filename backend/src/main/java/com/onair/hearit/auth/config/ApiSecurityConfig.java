@@ -5,7 +5,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.common.log.FilterExceptionLogger;
+import com.onair.hearit.common.log.exception.FilterExceptionLogger;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

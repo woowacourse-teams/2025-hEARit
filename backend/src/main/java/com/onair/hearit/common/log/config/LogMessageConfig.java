@@ -1,4 +1,4 @@
-package com.onair.hearit.common.config;
+package com.onair.hearit.common.log.config;
 
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class LogConfig {
+public class LogMessageConfig {
 
     @Bean
     public ObjectMapper logObjectMapper() {
