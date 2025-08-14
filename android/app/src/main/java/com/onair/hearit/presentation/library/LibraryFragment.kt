@@ -12,6 +12,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
@@ -26,12 +28,12 @@ class LibraryFragment :
     private val binding get() = _binding!!
 
     private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
-    private val adapter by lazy { BookmarkAdapter(this) }
+    private val adapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                viewModel.fetchData(page = 0)
+                viewModel.loadNextPage()
             }
         }
 
@@ -54,6 +56,7 @@ class LibraryFragment :
 
         setupWindowInsets()
         observeViewModel()
+        setupInfiniteScroll()
     }
 
     override fun onResume() {
@@ -70,8 +73,6 @@ class LibraryFragment :
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
-
-        observeViewModel()
 
         binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
             val intent = Intent(requireContext(), LoginActivity::class.java)
@@ -96,6 +97,32 @@ class LibraryFragment :
         viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
             binding.userInfo = userInfo
         }
+    }
+
+    private fun setupInfiniteScroll() {
+        val layoutManager = binding.rvBookmark.layoutManager
+        binding.rvBookmark.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int,
+                ) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    if (dy <= 0) return
+
+                    val lastVisibleItemPosition =
+                        (layoutManager as? LinearLayoutManager)?.findLastVisibleItemPosition()
+                            ?: return
+                    val totalItemCount = layoutManager.itemCount
+
+                    // 마지막 3개 아이템에 도달하면 다음 페이지 로드
+                    if (lastVisibleItemPosition >= totalItemCount - 3 && viewModel.isLoading.value == false) {
+                        viewModel.loadNextPage()
+                    }
+                }
+            },
+        )
     }
 
     override fun onClickOption(bookmarkId: Long) {
