@@ -34,6 +34,9 @@ public class UrlMasker {
     }
 
     private String maskPrefixAndSuffix(String str, int prefixLen, int suffixLen) {
+        if (str == null || str.length() <= prefixLen + suffixLen) {
+            return "*****";
+        }
         return str.substring(0, prefixLen) +
                 "*".repeat(str.length() - prefixLen - suffixLen) +
                 str.substring(str.length() - suffixLen);
