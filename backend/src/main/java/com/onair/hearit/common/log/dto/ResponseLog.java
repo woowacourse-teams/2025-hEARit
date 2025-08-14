@@ -7,7 +7,7 @@ public record ResponseLog<T>(
         String logType,
         String timestamp,
         RequestInfo requestInfo,
-        T responseEntity,
+        T responseBody,
         long timeTakenMs
 ) {
     public static <T> ResponseLog<T> of(

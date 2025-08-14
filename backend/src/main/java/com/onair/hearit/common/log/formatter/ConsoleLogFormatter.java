@@ -43,7 +43,7 @@ public class ConsoleLogFormatter {
         String uri = responseLog.requestInfo().getRequestUri();
         String ip = responseLog.requestInfo().getIp();
         long timeTaken = responseLog.timeTakenMs();
-        Object body = responseLog.responseEntity();
+        Object body = responseLog.responseBody();
 
         return String.format(
                 "[RESPONSE] %s ← %s %s from %s timeTaken=%dms body=%s",
