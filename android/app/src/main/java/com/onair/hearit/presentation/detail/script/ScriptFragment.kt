@@ -11,7 +11,9 @@ import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -27,7 +29,6 @@ import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
 import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -40,7 +41,6 @@ class ScriptFragment : Fragment() {
     private var isUserScrolling = false
     private var lastUserScrollTime = 0L
 
-    private var scriptSyncJob: Job? = null
     private var mediaController: MediaController? = null
 
     private val adapter: ScriptAdapter by lazy {
@@ -179,13 +179,15 @@ class ScriptFragment : Fragment() {
         }
     }
 
+    @UnstableApi
     private fun startScriptSync(controller: Player) {
-        scriptSyncJob =
-            viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (isActive) {
                     val position = controller.currentPosition
                     val currentItem =
-                        adapter.currentList.firstOrNull { position in it.start until it.end }
+                        adapter.currentList
+                            .firstOrNull { position in it.start until it.end }
                     val currentIndex = adapter.currentList.indexOf(currentItem)
 
                     val now = System.currentTimeMillis()
@@ -193,26 +195,25 @@ class ScriptFragment : Fragment() {
                     if (isUserScrolling) {
                         val isVisible = isItemVisible(currentIndex)
                         if (now - lastUserScrollTime > USER_SCROLL_IDLE_THRESHOLD_MS && isVisible) {
-                            isUserScrolling =
-                                false
+                            isUserScrolling = false
                         }
                     }
 
-                    if (currentItem != null) adapter.highlightScriptLine(currentItem.id)
+                    currentItem?.let { adapter.highlightScriptLine(it.id) }
 
                     if (!isUserScrolling && currentItem != null) {
                         val scriptHeight = binding.rvScript.height
                         if (scriptHeight > 0) {
-                            val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-                            (binding.rvScript.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                                currentIndex,
-                                centerOffset,
-                            )
+                            val centerOffset = scriptHeight / 2 - itemHeightPx / 2
+                            (binding.rvScript.layoutManager as? LinearLayoutManager)
+                                ?.scrollToPositionWithOffset(currentIndex, centerOffset)
                         }
                     }
+
                     delay(updateInterval)
                 }
             }
+        }
     }
 
     private fun isItemVisible(position: Int): Boolean {
@@ -243,7 +244,6 @@ class ScriptFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        scriptSyncJob?.cancel()
         binding.playerView.player = null
         mediaController?.release()
         _binding = null

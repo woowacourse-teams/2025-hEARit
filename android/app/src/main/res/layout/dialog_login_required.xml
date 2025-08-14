@@ -5,7 +5,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_gray2_radius_24dp">
+        android:background="@drawable/bg_gray1_radius_16dp">
 
         <TextView
             android:id="@+id/tv_dialog_message"
@@ -14,6 +14,7 @@
             android:layout_height="140dp"
             android:gravity="center"
             android:text="@string/all_login_dialog_message_body"
+            android:textColor="@color/hearit_gray3"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -23,28 +24,32 @@
             android:id="@+id/tv_dialog_cancel"
             style="@style/pretendard_sub_title"
             android:layout_width="0dp"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_gray2_radius_8dp"
             android:clickable="true"
-            android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:text="@string/all_dialog_cancel"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tv_dialog_login_positive"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_dialog_message"
-            app:layout_constraintWidth_percent="0.5" />
+            app:layout_constraintWidth_percent="0.4" />
 
         <TextView
             android:id="@+id/tv_dialog_login_positive"
             style="@style/pretendard_sub_title"
             android:layout_width="0dp"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_purple3_radius_8dp"
             android:clickable="true"
-            android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:text="@string/all_dialog_login_positive"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/tv_dialog_cancel"
-            app:layout_constraintWidth_percent="0.5" />
+            app:layout_constraintWidth_percent="0.4" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -32,6 +32,7 @@
 
             <TextView
                 android:id="@+id/exo_position"
+                style="@style/pretendard_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
@@ -43,6 +44,7 @@
 
             <TextView
                 android:id="@+id/exo_duration"
+                style="@style/pretendard_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
@@ -114,6 +116,7 @@
 
             <TextView
                 android:id="@+id/play_speed"
+                style="@style/pretendard_sub_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="28dp"
