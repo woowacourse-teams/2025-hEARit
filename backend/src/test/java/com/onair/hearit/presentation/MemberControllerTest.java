@@ -8,6 +8,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.onair.hearit.auth.application.OAuthProvider;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Member;
@@ -31,7 +32,8 @@ class MemberControllerTest extends IntegrationTest {
         String socialId = "12345678";
         String nickname = "nickname";
         String profileImage = "profile-image.jpg";
-        Member member = dbHelper.insertMember(Member.createSocialUser(socialId, nickname, profileImage));
+        Member member = dbHelper.insertMember(
+                Member.createSocialUser(socialId, nickname, profileImage, OAuthProvider.KAKAO));
 
         String token = generateToken(member);
 

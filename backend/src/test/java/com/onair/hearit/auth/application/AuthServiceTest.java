@@ -76,6 +76,7 @@ class AuthServiceTest {
                 assertThat(saved.getNickname()).isEqualTo("nickname");
                 assertThat(passwordEncoder.matches("password123", saved.getPassword())).isTrue();
                 assertThat(saved.getProfileImage()).isNotNull();
+                assertThat(saved.getOAuthProvider()).isEqualTo(OAuthProvider.NONE);
             });
         }
 

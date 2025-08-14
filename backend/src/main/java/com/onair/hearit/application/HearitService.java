@@ -112,8 +112,9 @@ public class HearitService {
     private List<Long> pickTodayRandomCategoryIds(List<Category> recommendCategories, int count) {
         long seed = LocalDate.now().toEpochDay();
         List<Long> categoryIds = getAllCategoryIdsWithoutRecommend(recommendCategories);
-        Collections.shuffle(categoryIds, new Random(seed));
-        return categoryIds.subList(0, count);
+        List<Long> mutableCategoryIds = new ArrayList<>(categoryIds);
+        Collections.shuffle(mutableCategoryIds, new Random(seed));
+        return mutableCategoryIds.subList(0, count);
     }
 
     private List<Long> getAllCategoryIdsWithoutRecommend(List<Category> recommendCategories) {

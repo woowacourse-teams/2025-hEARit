@@ -69,13 +69,14 @@ public class AuthService {
     public LoginTokenResponse loginOrSignUp(OAuthLoginRequest request, OAuthProvider provider) {
         OAuthService oAuthService = oAuthServiceRegistry.get(provider);
         OAuthUserInfo userInfo = oAuthService.fetchUser(request.accessToken());
-        Member member = memberRepository.findBySocialId(userInfo.id())
-                .orElseGet(() -> signupWithUserInfo(userInfo));
+        Member member = memberRepository.findBySocialIdAndOAuthProvider(userInfo.id(), provider)
+                .orElseGet(() -> signupWithUserInfo(userInfo, provider));
         return createTokenResponseFrom(member);
     }
 
-    private Member signupWithUserInfo(OAuthUserInfo userInfo) {
-        Member member = Member.createSocialUser(userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl());
+    private Member signupWithUserInfo(OAuthUserInfo userInfo, OAuthProvider provider) {
+        Member member = Member.createSocialUser(userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl(),
+                provider);
         return memberRepository.save(member);
     }
 

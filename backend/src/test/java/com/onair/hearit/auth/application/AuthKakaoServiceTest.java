@@ -2,6 +2,7 @@ package com.onair.hearit.auth.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
 
 import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
@@ -45,10 +46,10 @@ class AuthKakaoServiceTest {
     void signupIfNotExists_thenReturnJwt() {
         // given
         String socialId = "kakao-12345";
-        assertThat(memberRepository.findBySocialId(socialId)).isEmpty(); // 회원 정보가 없음을 확인
+        OAuthProvider provider = OAuthProvider.KAKAO;
+        assertThat(memberRepository.findBySocialIdAndOAuthProvider(socialId, provider)).isEmpty(); // 회원 정보가 없음을 확인
 
         String accessToken = "test-access-token";
-        OAuthProvider provider = OAuthProvider.KAKAO;
         OAuthLoginRequest request = new OAuthLoginRequest(accessToken);
         OAuthUserInfo userInfo = new OAuthUserInfo(socialId, "테스트유저", "profile.jpg", provider);
 
@@ -63,8 +64,9 @@ class AuthKakaoServiceTest {
             softly.assertThat(response.accessToken()).isNotNull();
             softly.assertThat(response.refreshToken()).isNotNull();
 
-            Member member = memberRepository.findBySocialId(userInfo.id()).orElseThrow();
+            Member member = memberRepository.findBySocialIdAndOAuthProvider(userInfo.id(), provider).orElseThrow();
             softly.assertThat(member.getNickname()).isEqualTo(userInfo.nickname());
+            assertThat(member.getOAuthProvider()).isEqualTo(OAuthProvider.KAKAO);
         });
     }
 
@@ -75,11 +77,12 @@ class AuthKakaoServiceTest {
         String kakaoId = "12345678";
         String nickname = "존재하는유저";
         String profileImage = "프로필이미지.URL";
-        Member saved = memberRepository.save(Member.createSocialUser(kakaoId, nickname, profileImage));
-        assertThat(memberRepository.findBySocialId(kakaoId)).isPresent(); // 회원 정보가 이미 있음을 확인
+        OAuthProvider provider = OAuthProvider.KAKAO;
+        Member saved = memberRepository.save(
+                Member.createSocialUser(kakaoId, nickname, profileImage, provider));
+        assertThat(memberRepository.findBySocialIdAndOAuthProvider(kakaoId, provider)).isPresent(); // 회원 정보가 이미 있음을 확인
 
         String accessToken = "test-access-token";
-        OAuthProvider provider = OAuthProvider.KAKAO;
         OAuthLoginRequest request = new OAuthLoginRequest(accessToken);
         OAuthUserInfo userInfo = new OAuthUserInfo(saved.getSocialId(), "테스트유저", "profile.jpg", provider);
 
@@ -90,9 +93,12 @@ class AuthKakaoServiceTest {
         LoginTokenResponse response = authService.loginOrSignUp(request, OAuthProvider.KAKAO);
 
         // then
-        assertThat(response.accessToken()).isNotBlank();
-        Member member = memberRepository.findBySocialId(kakaoId).orElseThrow();
-        assertThat(member.getId()).isEqualTo(saved.getId());
+        assertAll(() -> {
+            assertThat(response.accessToken()).isNotBlank();
+            Member member = memberRepository.findBySocialIdAndOAuthProvider(kakaoId, provider).orElseThrow();
+            assertThat(member.getId()).isEqualTo(saved.getId());
+            assertThat(member.getOAuthProvider()).isEqualTo(OAuthProvider.KAKAO);
+        });
     }
 
     @Test

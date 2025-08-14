@@ -1,8 +1,11 @@
 package com.onair.hearit.domain;
 
+import com.onair.hearit.auth.application.OAuthProvider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,6 +44,10 @@ public class Member {
     @Column(name = "profile_image")
     private String profileImage;
 
+    @Column(name = "oauth_provider")
+    @Enumerated(value = EnumType.STRING)
+    private OAuthProvider oAuthProvider;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -48,20 +55,23 @@ public class Member {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    private Member(String localId, String password, String socialId, String nickname, String profileImage) {
+    private Member(String localId, String password, String socialId, String nickname, String profileImage,
+                   OAuthProvider provider) {
         this.localId = localId;
         this.password = password;
         this.socialId = socialId;
         this.nickname = nickname;
         this.profileImage = profileImage;
+        this.oAuthProvider = provider;
     }
 
     public static Member createLocalUser(String memberId, String nickname, String password, String profileImage) {
-        return new Member(memberId, password, null, nickname, profileImage);
+        return new Member(memberId, password, null, nickname, profileImage, OAuthProvider.NONE);
     }
 
-    public static Member createSocialUser(String socialId, String nickname, String profileImage) {
-        return new Member(null, null, socialId, nickname, profileImage);
+    public static Member createSocialUser(String socialId, String nickname, String profileImage,
+                                          OAuthProvider provider) {
+        return new Member(null, null, socialId, nickname, profileImage, provider);
     }
 
     public void withdraw() {
