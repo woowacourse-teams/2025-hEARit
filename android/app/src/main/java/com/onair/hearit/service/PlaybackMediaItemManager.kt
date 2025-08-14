@@ -19,6 +19,7 @@ class PlaybackMediaItemManager {
                 MediaMetadata
                     .Builder()
                     .setTitle(info.title)
+                    .setArtist(info.source)
                     .build(),
             ).build()
 

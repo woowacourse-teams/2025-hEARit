@@ -17,8 +17,8 @@ class GetPlaybackInfoUseCase(
             val audioUrl = mediaFileRepository.getOriginalAudioUrl(hearitId).getOrThrow().url
             val recentHearit = recentHearitRepository.getRecentHearit().getOrThrow()
             val lastPosition = recentHearit?.lastPosition ?: 0L
-            val duration = hearitInfo.playTime * 1000L
+            val source = hearitInfo.sources.first().name
 
-            hearitInfo.toPlaybackInfo(audioUrl, hearitInfo.title, lastPosition, duration)
+            hearitInfo.toPlaybackInfo(audioUrl, hearitInfo.title, lastPosition, source)
         }
 }
