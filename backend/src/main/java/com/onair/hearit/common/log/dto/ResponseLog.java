@@ -7,6 +7,7 @@ public record ResponseLog<T>(
         String logType,
         String timestamp,
         RequestInfo requestInfo,
+        int status,
         T responseBody,
         long timeTakenMs
 ) {
@@ -19,6 +20,7 @@ public record ResponseLog<T>(
                 "RESPONSE",
                 timestamp.toString(),
                 requestInfo,
+                responseEntity.getStatusCode().value(),
                 responseEntity.getBody(),
                 timeTakenMs);
     }

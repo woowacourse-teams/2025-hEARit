@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EdgeMaskingStrategy implements MaskingStrategy {
+
     @Override
     public MaskingType type() {
         return MaskingType.EDGE;

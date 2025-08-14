@@ -4,7 +4,6 @@ import com.onair.hearit.common.log.mask.Masking;
 import com.onair.hearit.common.log.mask.MaskingType;
 
 public record TokenReissueRequest(
-        @Masking(type = MaskingType.TOKEN)
-        String refreshToken
+        @Masking(type = MaskingType.TOKEN) String refreshToken
 ) {
 }

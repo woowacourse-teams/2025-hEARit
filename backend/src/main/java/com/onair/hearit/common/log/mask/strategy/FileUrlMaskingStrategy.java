@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class UrlMaskingStrategy implements MaskingStrategy {
+public class FileUrlMaskingStrategy implements MaskingStrategy {
 
     private final UrlMasker urlMasker;
 

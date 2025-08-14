@@ -22,9 +22,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class FilterExceptionLogger extends OncePerRequestFilter {
 
-    private final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private static final Logger errorLogger = LogManager.getLogger("errorLogger");
     private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
     private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
+
     private final MaskingSupport maskingSupport;
 
     @Override
@@ -43,7 +44,7 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
 
             jsonLogger.error(maskingSupport.mask(exceptionLog));
             errorLogger.error(exceptionLog, ex);
-            consoleLogger.error("[ERROR] {} {} from {} → {}",
+            consoleLogger.error("[FILTER ERROR] {} {} from {} → {}",
                     requestInfo.getHttpMethod(),
                     requestInfo.getRequestUri(),
                     requestInfo.getIp(),
@@ -69,7 +70,7 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
         );
 
         jsonLogger.warn(maskingSupport.mask(exceptionLog));
-        consoleLogger.warn("[CLIENT ERROR] {} {} from {} → status: {} / title: {} / detail: {}",
+        consoleLogger.warn("[FILTER WARN] {} {} from {} → status: {} / title: {} / detail: {}",
                 requestInfo.getHttpMethod(),
                 requestInfo.getRequestUri(),
                 requestInfo.getIp(),

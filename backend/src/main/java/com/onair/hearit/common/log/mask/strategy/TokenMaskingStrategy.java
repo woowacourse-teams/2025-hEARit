@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TokenMaskingStrategy implements MaskingStrategy {
+
     private static final int PREFIX_VISIBLE_LENGTH = 5; //토큰 유형, 발급처 또는 서명 방식 파악용
     private static final int SUFFIX_VISIBLE_LENGTH = 4; //고유 식별자 뒷부분 식별용
 

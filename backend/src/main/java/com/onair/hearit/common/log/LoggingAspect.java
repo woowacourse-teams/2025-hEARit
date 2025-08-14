@@ -1,12 +1,12 @@
 package com.onair.hearit.common.log;
 
-import com.onair.hearit.common.log.formatter.ConsoleLogFormatter;
-import com.onair.hearit.common.log.mask.MaskingSupport;
 import com.onair.hearit.common.log.dto.ExceptionLog;
 import com.onair.hearit.common.log.dto.ExceptionLog.ErrorDetail;
 import com.onair.hearit.common.log.dto.RequestInfo;
 import com.onair.hearit.common.log.dto.RequestLog;
 import com.onair.hearit.common.log.dto.ResponseLog;
+import com.onair.hearit.common.log.formatter.ConsoleLogFormatter;
+import com.onair.hearit.common.log.mask.MaskingSupport;
 import jakarta.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -38,9 +38,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class LoggingAspect {
 
-    private final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private static final Logger errorLogger = LogManager.getLogger("errorLogger");
     private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
     private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
+
     private final MaskingSupport maskingSupport;
 
     @Pointcut("@annotation(org.springframework.web.bind.annotation.GetMapping)")
@@ -205,7 +206,7 @@ public class LoggingAspect {
                 errorDetail);
         jsonLogger.warn(maskingSupport.mask(exceptionLog));
         consoleLogger.warn(
-                "[CLIENT ERROR] {} {} from {} → status: {} / title: {} / detail: {}",
+                "[WARN] {} {} from {} → status: {} / title: {} / detail: {}",
                 requestInfo.getHttpMethod(),
                 requestInfo.getRequestUri(),
                 requestInfo.getIp(),

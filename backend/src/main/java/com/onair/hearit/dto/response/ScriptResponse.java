@@ -4,10 +4,7 @@ import com.onair.hearit.common.log.mask.Masking;
 import com.onair.hearit.common.log.mask.MaskingType;
 
 public record ScriptResponse(
-
         Long id,
-
-        @Masking(type = MaskingType.URL)
-        String url
+        @Masking(type = MaskingType.URL) String url
 ) {
 }

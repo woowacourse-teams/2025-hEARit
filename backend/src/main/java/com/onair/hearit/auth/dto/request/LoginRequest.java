@@ -5,8 +5,6 @@ import com.onair.hearit.common.log.mask.MaskingType;
 
 public record LoginRequest(
         String localId,
-
-        @Masking(type = MaskingType.FULL)
-        String password
+        @Masking(type = MaskingType.FULL) String password
 ) {
 }
