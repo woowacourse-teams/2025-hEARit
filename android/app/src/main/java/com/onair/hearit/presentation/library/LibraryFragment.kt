@@ -115,7 +115,7 @@ class LibraryFragment :
                     val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
                     val totalItemCount = layoutManager.itemCount
 
-                    if (lastVisibleItem >= totalItemCount - 3 && viewModel.isLoading.value != true) {
+                    if (lastVisibleItem >= totalItemCount - LOAD_MORE_THRESHOLD && viewModel.isLoading.value != true) {
                         viewModel.loadNextPage()
                     }
                 }
@@ -136,5 +136,9 @@ class LibraryFragment :
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        private const val LOAD_MORE_THRESHOLD = 3
     }
 }
