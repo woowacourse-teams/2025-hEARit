@@ -1,0 +1,54 @@
+name: Backend CI for prod
+
+on:
+  pull_request:
+    branches: [ "release" ]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        ports:
+          - 13307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      TEST_MYSQL_PORT: ${{ secrets.TEST_MYSQL_PORT }}
+      DB_MYSQL_HOST: ${{ secrets.DB_MYSQL_HOST }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
