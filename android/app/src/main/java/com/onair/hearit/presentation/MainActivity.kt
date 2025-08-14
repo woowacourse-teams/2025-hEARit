@@ -23,6 +23,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -143,7 +144,7 @@ class MainActivity :
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
-        binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
+        binding.layoutDrawer.tvOpenLicense.setOnClickListener { goOpenLicense() }
         binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
         binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
             val stopIntent = PlaybackService.stopIntent(this)
@@ -381,6 +382,12 @@ class MainActivity :
             }
         startActivity(intent)
         finish()
+    }
+
+    private fun goOpenLicense() {
+        OssLicensesMenuActivity.setActivityTitle("hEARit Open Source Licenses")
+        val intent = Intent(this, OssLicensesMenuActivity::class.java)
+        startActivity(intent)
     }
 
     companion object {
