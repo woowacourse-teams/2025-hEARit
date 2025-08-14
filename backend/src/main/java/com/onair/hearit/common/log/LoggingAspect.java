@@ -28,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -97,7 +98,7 @@ public class LoggingAspect {
     }
 
     private HttpServletRequest getHttpServletRequest() {
-        return Optional.of(RequestContextHolder.getRequestAttributes())
+        return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
                 .filter(ServletRequestAttributes.class::isInstance)
                 .map(ServletRequestAttributes.class::cast)
                 .map(ServletRequestAttributes::getRequest)
@@ -111,7 +112,7 @@ public class LoggingAspect {
 
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (Annotation annotation : parameterAnnotations[i]) {
-                if (annotation.annotationType().getSimpleName().equals("RequestBody")) {
+                if (annotation.annotationType() == RequestBody.class) {
                     return args[i];
                 }
             }
@@ -128,7 +129,7 @@ public class LoggingAspect {
                 responseEntity,
                 calculateTimeTakenMs());
         jsonLogger.info(maskingSupport.mask(responseLog));
-        consoleLogger.info(ConsoleLogFormatter.formatResponseLog(responseLog));
+        consoleLogger.info(maskingSupport.mask(ConsoleLogFormatter.formatResponseLog(responseLog)));
     }
 
     private long calculateTimeTakenMs() {

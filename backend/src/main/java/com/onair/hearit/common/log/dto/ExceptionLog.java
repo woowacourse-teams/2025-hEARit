@@ -30,7 +30,8 @@ public class ExceptionLog {
             RequestInfo requestInfo,
             HttpStatus httpStatus,
             ErrorDetail errorDetail) {
-        return new ExceptionLog(LogLevel.ERROR, timestamp.toString(), requestInfo, Status.from(httpStatus), errorDetail);
+        return new ExceptionLog(LogLevel.ERROR, timestamp.toString(), requestInfo, Status.from(httpStatus),
+                errorDetail);
     }
 
     @Getter
@@ -40,6 +41,9 @@ public class ExceptionLog {
         private final String name;
 
         public static Status from(HttpStatus status) {
+            if (status == null) {
+                return new Status(-1, "UNKNOWN");
+            }
             return new Status(status.value(), status.name());
         }
     }
