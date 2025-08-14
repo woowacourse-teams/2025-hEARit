@@ -29,7 +29,11 @@ public interface RecommendHearitRepository extends JpaRepository<RecommendHearit
             """)
     Optional<RecommendHearit> findRecentByHearitId(@Param("hearitId") Long hearitId);
 
-    @Query("SELECT rh FROM RecommendHearit rh JOIN FETCH rh.hearit WHERE rh.recommendDate BETWEEN :from AND :to")
+    @Query("""
+                 SELECT rh FROM RecommendHearit rh
+                 JOIN FETCH rh.hearit
+                 WHERE rh.recommendDate BETWEEN :from AND :to
+            """)
     List<RecommendHearit> findByRecommendDateIsBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
 
     int deleteAllByRecommendDate(LocalDate localDate);
