@@ -8,7 +8,6 @@ import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.infrastructure.CategoryRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
