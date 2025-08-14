@@ -81,10 +81,9 @@ class LoginActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         viewModel.loginState.observe(this) { isLoggedIn ->
-            if (isLoggedIn == true) {
-                navigateToMain()
-            }
+            if (isLoggedIn) navigateToMain()
         }
+
         viewModel.toastMessage.observe(this) { resId ->
             showToast(getString(resId))
         }

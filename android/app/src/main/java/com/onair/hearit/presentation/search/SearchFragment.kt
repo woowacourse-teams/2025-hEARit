@@ -14,6 +14,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentSearchBinding
@@ -27,6 +28,7 @@ import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import com.onair.hearit.presentation.search.result.SearchResultFragment
+import kotlinx.coroutines.launch
 
 class SearchFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -59,6 +61,14 @@ class SearchFragment : Fragment() {
         updateAppBarUIOnBackStackChanged()
     }
 
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logScreenView(
+            screenName = AnalyticsScreenInfo.Search.NAME,
+            screenClass = AnalyticsScreenInfo.Search.CLASS,
+        )
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private fun setupSearchInput() {
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
@@ -79,15 +89,13 @@ class SearchFragment : Fragment() {
     }
 
     private fun performSearchFromInput() {
-        val searchTerm =
-            binding.etSearch.text
-                ?.toString()
-                ?.trim()
-                .orEmpty()
-        if (searchTerm.isNotBlank()) {
-            navigateToSearchResult(SearchInput.Keyword(searchTerm))
-            hideKeyboard()
-        }
+        binding.etSearch.text
+            ?.toString()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { searchTerm ->
+                navigateToSearchResult(SearchInput.Keyword(searchTerm))
+                hideKeyboard()
+            }
     }
 
     private fun setupFragmentResultListeners() {
@@ -97,7 +105,7 @@ class SearchFragment : Fragment() {
         ) { _, bundle ->
             val id = bundle.getLong(CATEGORY_ID_KEY)
             val name = bundle.getString(CATEGORY_NAME_KEY).orEmpty()
-            binding.root.post {
+            viewLifecycleOwner.lifecycleScope.launch {
                 navigateToSearchResult(SearchInput.Category(id, name))
             }
         }
@@ -187,14 +195,6 @@ class SearchFragment : Fragment() {
             .replace(R.id.fl_search_container, fragment, tag)
             .addToBackStack(tag)
             .commit()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Search.NAME,
-            screenClass = AnalyticsScreenInfo.Search.CLASS,
-        )
     }
 
     private fun setupWindowInsets() {
