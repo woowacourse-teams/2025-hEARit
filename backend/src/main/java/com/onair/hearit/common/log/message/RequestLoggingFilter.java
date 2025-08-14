@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.logging.MDC;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
@@ -25,11 +26,23 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
     private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
 
+    private static final List<String> excludedPaths = List.of(
+            "/admin/**",
+            "/api/v1/admin/**"
+    );
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
+
+        if (isExcludedPath(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             filterChain.doFilter(request, response);
@@ -48,6 +61,11 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
                 consoleLogger.info(getRequestLogForConsole(requestLog));
             }
         }
+    }
+
+    private boolean isExcludedPath(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return excludedPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     private String getRequestLogForConsole(RequestLog log) {

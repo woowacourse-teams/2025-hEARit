@@ -7,12 +7,12 @@ import com.onair.hearit.common.log.message.dto.RequestInfo;
 import com.onair.hearit.common.log.message.dto.RequestLog;
 import com.onair.hearit.common.log.message.dto.ResponseLog;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -63,12 +64,14 @@ public class LoggingAspect {
     public void patchMapping() {
     }
 
-    @Pointcut("getMapping() || postMapping() || deleteMapping() || putMapping() || patchMapping()")
+    @Pointcut("(getMapping() || postMapping() || deleteMapping() || putMapping() || patchMapping())"
+            + "&& !within(com.onair.hearit.admin..*)")
     public void allMapping() {
     }
 
-    @Pointcut("within(@org.springframework.web.bind.annotation.RestControllerAdvice *) || "
-            + "within(@org.springframework.web.bind.annotation.ControllerAdvice *)")
+    @Pointcut("(@within(org.springframework.web.bind.annotation.RestControllerAdvice)" +
+            "|| @within(org.springframework.web.bind.annotation.ControllerAdvice))" +
+            "&& !within(com.onair.hearit.admin..*)")
     public void exceptionHandler() {
     }
 
@@ -104,11 +107,18 @@ public class LoggingAspect {
     }
 
     private Object extractRequestBody(JoinPoint joinPoint) {
-        return Arrays.stream(joinPoint.getArgs())
-                .filter(Objects::nonNull)
-                .filter(arg -> !(arg instanceof HttpServletRequest) && !(arg instanceof HttpServletResponse))
-                .findFirst()
-                .orElse(null);
+        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        Object[] args = joinPoint.getArgs();
+
+        for (int i = 0; i < parameterAnnotations.length; i++) {
+            for (Annotation annotation : parameterAnnotations[i]) {
+                if (annotation.annotationType().getSimpleName().equals("RequestBody")) {
+                    return args[i];
+                }
+            }
+        }
+        return null;
     }
 
     @AfterReturning(value = "allMapping()", returning = "responseEntity")
@@ -232,7 +242,7 @@ public class LoggingAspect {
     }
 
     private String truncateBody(String body) {
-        return body.length() > 200 ? body.substring(0, 200) + "...(생략)" : body;
+        return body.length() > 200 ? body.substring(0, 200) + "...(생ㅜ)" : body;
     }
 
     private String formatResponseLogForConsole(ResponseLog<?> responseLog) {
