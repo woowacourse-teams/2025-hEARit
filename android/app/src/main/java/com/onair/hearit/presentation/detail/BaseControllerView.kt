@@ -113,8 +113,8 @@ class BaseControllerView
             val duration = player.duration
 
             binding.exoPosition.text = Util.getStringForTime(formatBuilder, formatter, pos)
-            binding.exoDuration.text =
-                "-${Util.getStringForTime(formatBuilder, formatter, duration - pos)}"
+            val remaining = maxOf(duration - pos, 0L)
+            binding.exoDuration.text = "-${Util.getStringForTime(formatBuilder, formatter, remaining)}"
 
             binding.exoProgress.setPosition(pos)
             binding.exoProgress.setBufferedPosition(buf)
