@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class DbRecommendHearitProvider implements RecommendHearitProvider {
+public class FixedRecommendedHearitProviding implements FixedRecommendHearitStrategy {
 
     private final HearitRepository hearitRepository;
     private final RecommendHearitRepository recommendHearitRepository;

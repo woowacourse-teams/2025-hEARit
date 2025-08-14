@@ -40,7 +40,7 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final CategoryRepository categoryRepository;
-    private final RecommendHearitProvider recommendHearitProvider;
+    private final FixedRecommendHearitStrategy fixedRecommendHearitStrategy;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, Long memberId) {
         Hearit hearit = getHearitById(hearitId);
@@ -58,7 +58,7 @@ public class HearitService {
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
-        List<Hearit> recommendHearits = recommendHearitProvider.getRecommendHearit(RECOMMEND_HEARIT_COUNT);
+        List<Hearit> recommendHearits = fixedRecommendHearitStrategy.getRecommendHearit(RECOMMEND_HEARIT_COUNT);
         return recommendHearits.stream()
                 .map(RecommendHearitResponse::from)
                 .toList();
@@ -89,8 +89,8 @@ public class HearitService {
         List<Long> recommendCategoryIds = recommendCategories.stream().map(Category::getId).toList();
         List<Long> categoryIds = categoryRepository.findAllIds();
         return categoryIds.stream()
-            .filter(id -> !recommendCategoryIds.contains(id))
-            .collect(Collectors.toList());
+                .filter(id -> !recommendCategoryIds.contains(id))
+                .collect(Collectors.toList());
     }
 
     private HearitsWithRecommendCategoryResponse toHearitsWithRecommendedWithCategory(Category category) {
@@ -107,7 +107,7 @@ public class HearitService {
 
     private HearitOfCategoryResponse toHearitOfCategoryResponse(Hearit hearit) {
         List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-            KEYWORDS_PER_CATEGORIZED_HEARIT);
+                KEYWORDS_PER_CATEGORIZED_HEARIT);
         return HearitOfCategoryResponse.from(hearit, keywords);
     }
 }
