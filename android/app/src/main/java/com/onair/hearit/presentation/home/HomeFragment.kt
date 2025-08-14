@@ -74,8 +74,7 @@ class HomeFragment :
         binding.viewModel = viewModel
         setupWindowInsets()
         setupListeners()
-        setupRecommendRecyclerView()
-        setupCategoryRecyclerView()
+        setupRecyclerView()
         observeViewModel()
     }
 
@@ -101,7 +100,7 @@ class HomeFragment :
         }
     }
 
-    private fun setupRecommendRecyclerView() {
+    private fun setupRecyclerView() {
         centerScrollListener =
             CenterScrollListener(snapHelper) { position ->
                 updateIndicator(position)
@@ -112,9 +111,7 @@ class HomeFragment :
             snapHelper.attachToRecyclerView(this)
             centerScrollListener?.let { addOnScrollListener(it) }
         }
-    }
 
-    private fun setupCategoryRecyclerView() {
         binding.rvHomeGroupedCategory.adapter = groupedCategoryAdapter
     }
 
