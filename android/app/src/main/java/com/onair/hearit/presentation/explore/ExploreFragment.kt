@@ -179,10 +179,8 @@ class ExploreFragment :
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            if (isLoading) {
-                binding.frExploreSkeleton.startShimmer()
-            } else {
-                binding.frExploreSkeleton.stopShimmer()
+            binding.frExploreSkeleton.apply {
+                if (isLoading) startShimmer() else stopShimmer()
             }
         }
     }
@@ -236,10 +234,8 @@ class ExploreFragment :
         val intent = LoginActivity.newIntent(requireContext())
         startActivity(intent)
 
-        // PlaybackService 종료
         requireContext().stopService(PlaybackService.stopIntent(requireContext()))
 
-        // 현재 프래그먼트 종료
         parentFragmentManager
             .beginTransaction()
             .remove(this)

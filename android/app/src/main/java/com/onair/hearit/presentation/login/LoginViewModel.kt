@@ -43,10 +43,12 @@ class LoginViewModel(
     ) {
         viewModelScope.launch {
             val result =
-                runCatching {
-                    preferencesLocalDataSource.saveAccessToken(accessToken).getOrThrow()
-                    preferencesLocalDataSource.saveRefreshToken(refreshToken).getOrThrow()
-                }
+                preferencesLocalDataSource
+                    .saveAccessToken(accessToken)
+                    .fold(
+                        onSuccess = { preferencesLocalDataSource.saveRefreshToken(refreshToken) },
+                        onFailure = { Result.failure(it) },
+                    )
 
             result
                 .onSuccess {
