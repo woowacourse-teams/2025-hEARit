@@ -8,6 +8,7 @@
     <string name="all_cancel">취소</string>
     <string name="all_privacy_policy">개인정보처리방침</string>
     <string name="all_terms_of_use">이용 약관</string>
+    <string name="all_open_license">오픈 라이선스</string>
     <string name="all_account_info">설정 및 계정 정보</string>
     <string name="all_login_button_text">로그인 하러가기</string>
     <string name="all_toast_categories_load_fail">카테고리 조회에 실패했습니다.</string>
@@ -105,6 +106,7 @@
     <!-- SplashActivity-->
     <string name="splash_toast_access_token_load_fail">저장된 토큰 조회에 실패했습니다</string>
     <string name="splash_toast_token_check_fail">토큰 유효성 검사에 실패했습니다</string>
+    <string name="splash_toast_network_check_fail">네트워크 연결을 확인해주세요</string>
     <string name="splash_toast_refresh_token_fail">새로운 토큰 생성에 실패했습니다</string>
 
     <!-- LoginActivity-->

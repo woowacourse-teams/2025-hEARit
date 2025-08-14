@@ -5,8 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -41,8 +39,12 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.script.ScriptFragment
+import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.abs
@@ -51,11 +53,12 @@ class PlayerDetailActivity :
     AppCompatActivity(),
     PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
-    private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
-    private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
+    private val keywordAdapter: PlayerDetailKeywordAdapter by lazy { PlayerDetailKeywordAdapter() }
+    private val scriptAdapter: PlayerDetailScriptAdapter by lazy { PlayerDetailScriptAdapter() }
+    private val sourceAdapter: PlayerDetailSourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
     private var mediaController: MediaController? = null
+    private var scriptSyncJob: Job? = null
 
     private val previousScreen by lazy {
         intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: UNKNOWN_SCREEN_ID
@@ -73,18 +76,17 @@ class PlayerDetailActivity :
         PlayerDetailViewModelFactory(hearitId)
     }
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateInterval = 300L
+    private val updateInterval = 500L
 
-    private val itemHeightPx by lazy {
-        val scale = resources.displayMetrics.density
-        (16 * scale + 0.5f).toInt()
-    }
+    private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        bindLayout()
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
+        binding.lifecycleOwner = this
+        binding.viewModel = viewModel
+
         setupBackPressHandler()
         setupWindowInsets()
         setupRecyclerView()
@@ -103,12 +105,6 @@ class PlayerDetailActivity :
             binding.fragmentContainerView.visibility =
                 if (fragment != null && fragment.isVisible) View.VISIBLE else View.GONE
         }
-    }
-
-    private fun bindLayout() {
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
-        binding.lifecycleOwner = this
-        binding.viewModel = viewModel
     }
 
     private fun setupBackPressHandler() {
@@ -202,13 +198,6 @@ class PlayerDetailActivity :
                             .commit()
                         return true
                     }
-
-                    override fun onScroll(
-                        e1: MotionEvent?,
-                        e2: MotionEvent,
-                        distanceX: Float,
-                        distanceY: Float,
-                    ): Boolean = false
                 },
             )
 
@@ -256,13 +245,13 @@ class PlayerDetailActivity :
     }
 
     private fun startScriptSync(controller: Player) {
-        val updateRunnable =
-            object : Runnable {
-                override fun run() {
-                    val pos = controller.currentPosition
+        scriptSyncJob =
+            lifecycleScope.launch {
+                while (isActive) {
+                    val position = controller.currentPosition
 
                     val currentItem =
-                        scriptAdapter.currentList.firstOrNull { pos in it.start until it.end }
+                        scriptAdapter.currentList.firstOrNull { position in it.start until it.end }
 
                     if (currentItem != null) {
                         scriptAdapter.highlightScriptLine(currentItem.id)
@@ -273,12 +262,9 @@ class PlayerDetailActivity :
                         (binding.rvScript.layoutManager as LinearLayoutManager)
                             .scrollToPositionWithOffset(currentIndex, centerOffset)
                     }
-
-                    handler.postDelayed(this, updateInterval)
+                    delay(updateInterval)
                 }
             }
-
-        handler.post(updateRunnable)
     }
 
     @OptIn(UnstableApi::class)
@@ -294,9 +280,10 @@ class PlayerDetailActivity :
         val isDifferentHearit = currentlyPlayingId != hearit.id
         val shouldResume = intent.hasExtra(LAST_POSITION) && lastPosition > 0L
         val startPosition = if (shouldResume) lastPosition else 0L
+        val source = hearit.sources.first().name
 
         if (isDifferentHearit) {
-            startPlaybackService(hearit.audioUrl, hearit.title, startPosition)
+            startPlaybackService(hearit.audioUrl, hearit.title, startPosition, source)
         } else {
             if (!controller.isPlaying) controller.play()
             if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
@@ -315,6 +302,7 @@ class PlayerDetailActivity :
         audioUrl: String,
         title: String,
         startPosition: Long = 0L,
+        source: String,
     ) {
         val serviceIntent =
             PlaybackService.newIntent(
@@ -323,8 +311,9 @@ class PlayerDetailActivity :
                 title = title,
                 hearitId = hearitId,
                 startPosition = startPosition,
+                source = source,
             )
-        startService(serviceIntent)
+        startForegroundService(serviceIntent)
     }
 
     private fun navigateToLogin() {
@@ -360,7 +349,8 @@ class PlayerDetailActivity :
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
+        scriptSyncJob?.cancel()
+        binding.playerView.player = null
         mediaController?.release()
     }
 
@@ -373,6 +363,7 @@ class PlayerDetailActivity :
         const val LAST_POSITION = "last_position"
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
+        private const val SCRIPT_ITEM_HEIGHT_DP = 16
 
         fun newIntent(
             context: Context,

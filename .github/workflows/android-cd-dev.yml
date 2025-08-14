@@ -3,8 +3,6 @@ name: Hearit Android dev CD
 on:
   pull_request:
     branches: [ "develop" ]
-    paths:
-      - 'android/**'
 
 env:
   BASE_URL: ${{ secrets.BASE_URL }}
@@ -38,24 +36,21 @@ jobs:
         run:
           echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
 
-#      - name: Build Debug apk
-#        run: ./gradlew clean assembleDebug
-#
-#      - name: Check APK files
-#        run: ls -l android/app/build/outputs/apk/debug/
-#
-#      - name: Upload a Build APK Artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: hEARit-debug.apk
-#          path: android/app/build/outputs/apk/debug/hEARit-debug.apk
-#          overwrite: 'true'
-#
-#      - name: Upload APK to Firebase App Distribution
-#        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.1
-#        with:
-#          appId: ${{ secrets.FIREBASE_APP_ID }}
-#          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-#          groups: hearit-test
-#          releaseNotesFile: android/app/whatsnew/whatsnew-ko-KR
-#          file: android/app/build/outputs/apk/debug/hEARit-debug.apk
+      - name: Build Debug apk
+        run: ./gradlew assembleDebug
+
+      - name: Upload a Build APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hEARit-debug.apk
+          path: ./android/app/build/outputs/apk/debug/hEARit-debug.apk
+          overwrite: 'true'
+
+      - name: Upload APK to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          groups: hearit-test
+          releaseNotesFile: ./android/app/whatsnew/whatsnew-ko-KR
+          file: ./android/app/build/outputs/apk/debug/hEARit-debug.apk

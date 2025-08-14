@@ -23,7 +23,7 @@ class SearchRecentFragment :
     private var _binding: FragmentSearchRecentBinding? = null
     private val binding get() = _binding!!
 
-    private val recentSearchAdapter by lazy { RecentSearchAdapter(this) }
+    private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
         SearchViewModelFactory()

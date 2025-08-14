@@ -6,7 +6,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionCommand
-import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.di.RepositoryProvider
@@ -70,8 +69,8 @@ class PlaybackSessionCallback(
                             prepareIfNeeded(info)
                         }
                         completer.set(SessionResult(SessionResult.RESULT_SUCCESS))
-                    } catch (_: Exception) {
-                        completer.set(SessionResult(SessionError.ERROR_UNKNOWN))
+                    } catch (e: Exception) {
+                        completer.setException(e)
                     }
                 }
             completer.addCancellationListener({ job.cancel() }, Runnable::run)

@@ -37,15 +37,19 @@ class BottomPlayerView
             binding.exoPlay.setOnClickListener { togglePlayPause() }
         }
 
+        // 제대로 Player를 끊었다가 다시 연결해서 문제가 없도록 하기 위함.
+        // 새로운 플레이어에 리스너를 달아주고,프로그레스바 연결
         fun setPlayer(newPlayer: Player): BottomPlayerView =
             apply {
                 detachPlayer()
                 player = newPlayer
                 listener = PlayerListener().also { newPlayer.addListener(it) }
                 refresh()
+                // post를 이용해서 UI가 완전히 그려진 후에 연결되도록 함.
                 post { updateProgress() }
             }
 
+        // marquee로 길이가 긴경우에는 돌아가도록 하기 위해서 선택된 상태를 줌.
         fun setTitle(title: String) {
             binding.tvBottomPlayerTitle.isSelected = true
             binding.tvBottomPlayerTitle.text = title
@@ -84,7 +88,22 @@ class BottomPlayerView
             player?.let {
                 updateTimeline(it)
                 updatePlayPauseButton(it)
+                updateTitle(it)
             }
+        }
+
+        private fun updateTitle(player: Player) {
+            val title =
+                listOf(
+                    player.currentMediaItem
+                        ?.mediaMetadata
+                        ?.title
+                        ?.toString(),
+                    player.mediaMetadata.title?.toString(),
+                    player.currentMediaItem?.mediaId,
+                ).firstOrNull { !it.isNullOrBlank() } ?: ""
+
+            setTitle(title)
         }
 
         private fun updateTimeline(player: Player) {
@@ -101,16 +120,16 @@ class BottomPlayerView
 
         private fun updateProgress() {
             if (!isAttachedToWindow) return
-            val p = player ?: return
+            val currentPlayer = player ?: return
 
             removeCallbacks(progressRunnable)
 
-            if (p.playbackState == Player.STATE_READY) {
-                binding.exoProgress.setPosition(p.currentPosition)
-                binding.exoProgress.setBufferedPosition(p.bufferedPosition)
+            if (currentPlayer.playbackState == Player.STATE_READY) {
+                binding.exoProgress.setPosition(currentPlayer.currentPosition)
+                binding.exoProgress.setBufferedPosition(currentPlayer.bufferedPosition)
             }
 
-            if (p.playWhenReady && p.playbackState == Player.STATE_READY) {
+            if (currentPlayer.playWhenReady && currentPlayer.playbackState == Player.STATE_READY) {
                 postDelayed(progressRunnable, binding.exoProgress.preferredUpdateDelay)
             }
         }
@@ -141,6 +160,9 @@ class BottomPlayerView
             player = null
         }
 
+        // onDetachedFromWindow()는 뷰(View)가 화면에서 분리될 때 호출되는 안드로이드 생명주기 메서드
+        // remove와 같은 정리 작업을 하는 경우에 사용됨.
+        // detachPlayer()는 Player 객체와의 연결을 해제하는 함수
         override fun onDetachedFromWindow() {
             super.onDetachedFromWindow()
             removeCallbacks(progressRunnable)
@@ -152,11 +174,11 @@ class BottomPlayerView
                 player: Player,
                 events: Player.Events,
             ) {
-                if (events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)) {
-                    player.mediaMetadata.title
-                        ?.toString()
-                        ?.takeIf { it.isNotBlank() }
-                        ?.let { setTitle(it) }
+                if (events.contains(Player.EVENT_MEDIA_METADATA_CHANGED) ||
+                    events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
+                    events.contains(Player.EVENT_TIMELINE_CHANGED)
+                ) {
+                    updateTitle(player)
                 }
                 if (events.contains(Player.EVENT_TIMELINE_CHANGED)) {
                     updateTimeline(player)
@@ -165,6 +187,7 @@ class BottomPlayerView
                     events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) ||
                     events.contains(Player.EVENT_IS_PLAYING_CHANGED)
                 ) {
+                    updateTitle(player)
                     updatePlayPauseButton(player)
                     updateProgress()
                 }

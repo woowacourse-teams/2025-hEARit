@@ -12,6 +12,8 @@ sealed class NetworkResult<out T> {
 
         data object UnAuthorized : Failure()
 
+        data object NetworkConnection : Failure()
+
         class BadRequest(
             val code: Int,
             val message: String,

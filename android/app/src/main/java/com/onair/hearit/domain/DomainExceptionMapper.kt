@@ -14,7 +14,11 @@ object DomainExceptionMapper {
             is NetworkResult.Failure.Unknown ->
                 IllegalStateException(ERROR_NETWORK_MESSAGE)
 
-            NetworkResult.Failure.UnAuthorized -> UserNotRegisteredException()
+            NetworkResult.Failure.NetworkConnection ->
+                DomainException.NetworkConnection
+
+            NetworkResult.Failure.UnAuthorized ->
+                DomainException.UserNotRegistered
         }
 
     private const val ERROR_NETWORK_MESSAGE = "알 수 없는 네트워크 오류"

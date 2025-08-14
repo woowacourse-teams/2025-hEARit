@@ -6,12 +6,13 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import com.onair.hearit.R
 
-class NotificationManager(
+class PlayerNotificationManager(
     private val context: Context,
 ) {
     private val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+    // PlayerNotificationManager는 서비스가 안정적으로 시작되고 포그라운드 상태를 유지하기 위해 필요한 알림을 제공하는 역할을 합니다.
     init {
         createNotificationChannel()
     }

@@ -10,9 +10,10 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
@@ -27,12 +28,12 @@ class LibraryFragment :
     private val binding get() = _binding!!
 
     private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
-    private val adapter by lazy { BookmarkAdapter(this) }
+    private val bookmarkAdapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                viewModel.fetchData(page = 0)
+                viewModel.refreshBookmarks()
             }
         }
 
@@ -43,7 +44,7 @@ class LibraryFragment :
     ): View {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
-        binding.rvBookmark.adapter = adapter
+        binding.rvBookmark.adapter = bookmarkAdapter
         return binding.root
     }
 
@@ -55,6 +56,7 @@ class LibraryFragment :
 
         setupWindowInsets()
         observeViewModel()
+        setupInfiniteScroll()
     }
 
     override fun onResume() {
@@ -72,8 +74,6 @@ class LibraryFragment :
             insets
         }
 
-        observeViewModel()
-
         binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
             val intent = Intent(requireContext(), LoginActivity::class.java)
             startActivity(intent)
@@ -83,9 +83,7 @@ class LibraryFragment :
 
     private fun observeViewModel() {
         viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarks ->
-            adapter.submitList(bookmarks)
-
-            binding.layoutLibraryWhenNoBookmark.isVisible = bookmarks.isEmpty()
+            bookmarkAdapter.submitList(bookmarks)
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
@@ -101,6 +99,29 @@ class LibraryFragment :
         }
     }
 
+    private fun setupInfiniteScroll() {
+        val layoutManager = binding.rvBookmark.layoutManager as? LinearLayoutManager ?: return
+        binding.rvBookmark.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int,
+                ) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    if (dy <= 0) return
+
+                    val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+                    val totalItemCount = layoutManager.itemCount
+
+                    if (lastVisibleItem >= totalItemCount - LOAD_MORE_THRESHOLD && viewModel.isLoading.value != true) {
+                        viewModel.loadNextPage()
+                    }
+                }
+            },
+        )
+    }
+
     override fun onClickOption(bookmarkId: Long) {
         val sheet = BookmarkOptionBottomSheet.newInstance(bookmarkId)
         sheet.show(childFragmentManager, sheet.tag)
@@ -109,5 +130,14 @@ class LibraryFragment :
     override fun onClickBookmarkedHearit(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         playerDetailLauncher.launch(intent)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    companion object {
+        private const val LOAD_MORE_THRESHOLD = 3
     }
 }
