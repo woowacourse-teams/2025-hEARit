@@ -1,4 +1,3 @@
-// FileType.java - 수정됨
 package com.onair.hearit.domain;
 
 import com.onair.hearit.common.exception.custom.InvalidInputException;
@@ -52,7 +51,6 @@ public enum FileType {
     public abstract String getFileUrls(FileUrls urls);
 
     public void validUrlName(String filename) {
-        System.out.println("filename = " + filename);
         if (!filename.startsWith("/" + uploadPath)) {
             throw new InvalidInputException(this.name() + "의 파일명은 '" + "/" + uploadPath + "'로 시작해야 합니다.");
         }

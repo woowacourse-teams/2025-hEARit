@@ -77,7 +77,6 @@ public class Hearit {
         this.title = title;
         this.summary = summary;
         this.playTime = playTime;
-        System.out.println("originalAudioUrl = " + originalAudioUrl);
         this.fileUrls = new FileUrls(originalAudioUrl, shortAudioUrl, scriptUrl);
         this.sources = sources;
         this.category = category;
