@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExploreScoreCalculator implements ExploreScoreCalculator {
+public class ExploreScoreCalculator {
 
     public Map<Long, Double> calculateTotalScores(Long memberId, List<Hearit> hearits, List<ScoreFactor> scoreFactors) {
         Map<Long, Double> totalScoreMap = hearits.stream()
