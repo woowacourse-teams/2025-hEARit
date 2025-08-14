@@ -120,10 +120,8 @@ class HomeFragment :
 
     private fun observeViewModel() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            if (isLoading) {
-                binding.frHomeSkeleton.startShimmer()
-            } else {
-                binding.frHomeSkeleton.stopShimmer()
+            binding.frHomeSkeleton.apply {
+                if (isLoading) startShimmer() else stopShimmer()
             }
         }
 
