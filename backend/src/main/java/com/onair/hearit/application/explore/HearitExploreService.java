@@ -44,7 +44,7 @@ public class HearitExploreService {
     private final RandomScoreFactor randomScoreFactor;
 
     public CursorResponse<ExploredHearitResponse> getExploredHearits(UserContext userContext, Long cursorId, int size) {
-        if (userContext.isGuest()) {
+        if (userContext == null || userContext.isGuest()) {
             List<Hearit> exploredHearits = getExploredHearitsForGuest(cursorId, size);
             List<ExploredHearitResponse> exploredHearitsDto = exploredHearits.stream()
                     .map(this::toExploredHearitResponse)

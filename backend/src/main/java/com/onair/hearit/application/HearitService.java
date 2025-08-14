@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -51,7 +50,7 @@ public class HearitService {
     public HearitDetailResponse getHearitDetail(Long hearitId, UserContext userContext) {
         Hearit hearit = getHearitById(hearitId);
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId());
-        if (userContext.isGuest()) {
+        if (userContext == null || userContext.isGuest()) {
             return HearitDetailResponse.from(hearit, keywords);
         }
 
@@ -60,7 +59,6 @@ public class HearitService {
         if (bookmarkOptional.isPresent()) {
             return HearitDetailResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
         }
-
         return HearitDetailResponse.from(hearit, keywords);
     }
 
@@ -90,7 +88,7 @@ public class HearitService {
     }
 
     private List<Category> getRecommendCategories(UserContext userContext) {
-        if (userContext.isGuest()) {
+        if (userContext == null || userContext.isGuest()) {
             return new ArrayList<>();
         }
         Member member = getMemberByUserContext(userContext);
@@ -123,7 +121,7 @@ public class HearitService {
         List<Long> categoryIds = categoryRepository.findAllIds();
         return categoryIds.stream()
                 .filter(id -> !recommendCategoryIds.contains(id))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private HearitsWithRecommendCategoryResponse toHearitsWithRecommendedWithCategory(Category category) {
