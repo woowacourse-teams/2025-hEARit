@@ -13,7 +13,7 @@ public class LogFilterConfig {
     @Bean
     public FilterRegistrationBean<MdcLoggingFilter> mdcFilterRegistration(MdcLoggingFilter filter) {
         FilterRegistrationBean<MdcLoggingFilter> registration = new FilterRegistrationBean<>(filter);
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         registration.addUrlPatterns("/*");
         return registration;
     }
