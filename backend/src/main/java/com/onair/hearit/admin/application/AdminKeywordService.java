@@ -37,7 +37,6 @@ public class AdminKeywordService {
                 .toList();
     }
 
-    @Transactional
     public void addKeyword(KeywordCreateRequest request) {
         Keyword keyword = new Keyword(request.name());
         keywordRepository.save(keyword);

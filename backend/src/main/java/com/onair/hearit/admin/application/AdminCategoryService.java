@@ -38,7 +38,6 @@ public class AdminCategoryService {
                 .toList();
     }
 
-    @Transactional
     public void addCategory(CategoryCreateRequest request) {
         Category category = new Category(request.name(), request.colorCode());
         categoryRepository.save(category);

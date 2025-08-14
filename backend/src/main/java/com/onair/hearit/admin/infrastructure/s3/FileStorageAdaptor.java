@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @RequiredArgsConstructor
-public class S3FileProvider {
+public class FileStorageAdaptor {
 
     private final S3Client s3Client;
     private final String bucket;
