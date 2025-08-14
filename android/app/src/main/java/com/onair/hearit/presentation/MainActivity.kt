@@ -243,6 +243,7 @@ class MainActivity :
         binding.drawerLayout.openDrawer(GravityCompat.END)
     }
 
+    // 제일 먼저 여기서 호출함 ->
     private fun attachController() {
         if (mediaController != null) {
             maybePreloadRecent()
@@ -345,11 +346,13 @@ class MainActivity :
 
     override fun startPlayback() {
         val controller = mediaController
+        // 컨트롤러 연결되어있으면 바로 즉시 재생하도록
         if (controller != null) {
             controller.play()
             return
         }
 
+        // 컨트롤러가 연결되어있지 않으면, 세션 토큰을 이용해서 PlaybackService를 연결할 수 있도록 함.
         val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
         val future = MediaController.Builder(this, token).buildAsync()
         future.addListener(
