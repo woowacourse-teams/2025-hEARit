@@ -34,7 +34,11 @@ public class KakaoErrorHandler implements ResponseErrorHandler {
 
     private KakaoErrorResponse getKakaoErrorResponse(ClientHttpResponse response) {
         try {
-            String errorBody = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+            byte[] bodyBytes = response.getBody().readAllBytes();
+            if (bodyBytes.length == 0) {
+                throw new KakaoClientException("Kakao 에러 응답이 비어있습니다.");
+            }
+            String errorBody = new String(bodyBytes, StandardCharsets.UTF_8);
             return objectMapper.readValue(errorBody, KakaoErrorResponse.class);
         } catch (IOException ex) {
             throw new KakaoClientException("Kakao 예외 응답 파싱에 실패했습니다.");

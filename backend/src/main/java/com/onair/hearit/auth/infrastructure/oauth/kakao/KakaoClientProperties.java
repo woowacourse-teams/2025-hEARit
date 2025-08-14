@@ -2,6 +2,7 @@ package com.onair.hearit.auth.infrastructure.oauth.kakao;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.Duration;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,8 +18,8 @@ public class KakaoClientProperties {
     private final String baseUrl;
 
     @NotNull(message = "connectTimeout은 비어있을 수 없습니다.")
-    private final int connectTimeout;
+    private final Duration connectTimeout;
 
     @NotNull(message = "readTimeout은 비어있을 수 없습니다.")
-    private final int readTimeout;
+    private final Duration readTimeout;
 }
