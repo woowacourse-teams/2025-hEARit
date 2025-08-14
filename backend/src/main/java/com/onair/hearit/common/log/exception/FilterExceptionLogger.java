@@ -61,7 +61,8 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                 problemDetail.getDetail(),
                 problemDetail.getTitle(),
                 null,
-                0);
+                0,
+                null);
         ExceptionLog exceptionLog = ExceptionLog.warn(
                 LocalDateTime.now(),
                 requestInfo,

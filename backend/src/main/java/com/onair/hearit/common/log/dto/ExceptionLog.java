@@ -56,19 +56,22 @@ public class ExceptionLog {
         private final String className;
         private final String methodName;
         private final int lineNumber;
+        private final String exceptionName;
 
         public static ErrorDetail emptyErrorDetail() {
-            return new ErrorDetail("예외 정보가 없습니다.", null, null, -1);
+            return new ErrorDetail("예외 정보가 없습니다.", null, null, -1, null);
         }
 
         public static ErrorDetail fromThrowable(Throwable throwable) {
             StackTraceElement[] stackTrace = throwable.getStackTrace();
+            String exceptionName = throwable.getClass().getName();
             if (stackTrace.length == 0) {
                 return new ErrorDetail(
                         throwable.getMessage(),
                         throwable.getClass().getName(),
                         "unknown",
-                        -1
+                        -1,
+                        exceptionName
                 );
             }
             StackTraceElement finalStackTraceElement = stackTrace[0];
@@ -76,12 +79,13 @@ public class ExceptionLog {
                     throwable.getMessage(),
                     finalStackTraceElement.getClassName(),
                     finalStackTraceElement.getMethodName(),
-                    finalStackTraceElement.getLineNumber()
+                    finalStackTraceElement.getLineNumber(),
+                    exceptionName
             );
         }
 
-        public static ErrorDetail of(String message, String className, String methodName, int lineNumber) {
-            return new ErrorDetail(message, className, methodName, lineNumber);
+        public static ErrorDetail of(String message, String className, String methodName, int lineNumber, String exceptionName) {
+            return new ErrorDetail(message, className, methodName, lineNumber, exceptionName);
         }
     }
 }
