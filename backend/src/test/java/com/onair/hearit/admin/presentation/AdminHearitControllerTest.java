@@ -266,7 +266,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 .cookie("JSESSIONID", csrfSession.sessionId())
                 .header("X-CSRF-TOKEN", csrfSession.csrfToken())
                 .multiPart("file", new File("src/test/resources/SCR_test.json"))
-                .when().log().all()
+                .when()
                 .put("/api/v1/admin/hearits/" + hearit.getId() + "/script")
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT);

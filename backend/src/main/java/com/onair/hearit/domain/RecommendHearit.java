@@ -34,12 +34,12 @@ public class RecommendHearit {
     private LocalDate recommendDate;
 
     public RecommendHearit(Hearit hearit, LocalDate recommendDate) {
-        validateFields(hearit, recommendDate);
+        validateNull(hearit, recommendDate);
         this.hearit = hearit;
         this.recommendDate = recommendDate;
     }
 
-    private void validateFields(Hearit hearit, LocalDate recommendDate) {
+    private void validateNull(Hearit hearit, LocalDate recommendDate) {
         if (hearit == null) {
             throw new InvalidInputException("hearit은 null일 수 없습니다.");
         }

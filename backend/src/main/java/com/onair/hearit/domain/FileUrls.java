@@ -18,13 +18,13 @@ public class FileUrls {
     private String scriptUrl;
 
     public FileUrls(final String originalAudioUrl, final String shortAudioUrl, final String scriptUrl) {
-        validateAll(originalAudioUrl, shortAudioUrl, scriptUrl);
+        validateAllFilePath(originalAudioUrl, shortAudioUrl, scriptUrl);
         this.originalAudioUrl = originalAudioUrl;
         this.shortAudioUrl = shortAudioUrl;
         this.scriptUrl = scriptUrl;
     }
 
-    private void validateAll(String originalAudioPath, String shortAudioPath, String scriptFilePath) {
+    private void validateAllFilePath(String originalAudioPath, String shortAudioPath, String scriptFilePath) {
         FileType.ORIGINAL.validUrlName(originalAudioPath);
         FileType.SHORT.validUrlName(shortAudioPath);
         FileType.SCRIPT.validUrlName(scriptFilePath);
