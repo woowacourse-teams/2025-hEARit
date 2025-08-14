@@ -10,6 +10,7 @@ plugins {
     id("com.google.gms.google-services")
     id("org.jlleitschuh.gradle.ktlint")
     id("com.google.firebase.crashlytics")
+    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
@@ -180,4 +181,7 @@ dependencies {
 
     // in-app-update
     implementation(libs.app.update.ktx)
+
+    // open license
+    implementation(libs.play.services.oss.licenses)
 }
