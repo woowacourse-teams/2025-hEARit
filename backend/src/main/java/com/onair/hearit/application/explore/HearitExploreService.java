@@ -11,6 +11,7 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.dto.request.CursorRequest;
 import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
@@ -43,22 +44,22 @@ public class HearitExploreService {
     private final RecencyScoreFactor recencyScoreFactor;
     private final RandomScoreFactor randomScoreFactor;
 
-    public CursorResponse<ExploredHearitResponse> getExploredHearits(UserContext userContext, Long cursorId, int size) {
+    public CursorResponse<ExploredHearitResponse> getExploredHearits(UserContext userContext, CursorRequest cursorRequest) {
         if (userContext == null || userContext.isGuest()) {
-            List<Hearit> exploredHearits = getExploredHearitsForGuest(cursorId, size);
+            List<Hearit> exploredHearits = getExploredHearitsForGuest(cursorRequest.cursorId(), cursorRequest.size());
             List<ExploredHearitResponse> exploredHearitsDto = exploredHearits.stream()
                     .map(this::toExploredHearitResponse)
                     .toList();
-            long updatedCursorId = cursorId + exploredHearits.size();
+            long updatedCursorId = cursorRequest.cursorId() + exploredHearits.size();
             return CursorResponse.from(exploredHearitsDto, updatedCursorId);
         }
 
         Member member = getMemberByUserContext(userContext);
-        List<Hearit> exploredHearits = getExploredHearitsForMember(cursorId, member.getId(), size);
+        List<Hearit> exploredHearits = getExploredHearitsForMember(cursorRequest.cursorId(), member.getId(), cursorRequest.size());
         List<ExploredHearitResponse> exploredHearitsDto = exploredHearits.stream()
                 .map(hearit -> toExploredHearitResponseWithBookmark(hearit, member))
                 .toList();
-        long updatedCursorId = cursorId + exploredHearits.size();
+        long updatedCursorId = cursorRequest.cursorId() + exploredHearits.size();
         return CursorResponse.from(exploredHearitsDto, updatedCursorId);
     }
 

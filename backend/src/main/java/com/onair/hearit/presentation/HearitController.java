@@ -4,6 +4,7 @@ import com.onair.hearit.application.HearitSearchService;
 import com.onair.hearit.application.HearitService;
 import com.onair.hearit.application.explore.HearitExploreService;
 import com.onair.hearit.auth.domain.UserContext;
+import com.onair.hearit.dto.request.CursorRequest;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
@@ -43,11 +44,10 @@ public class HearitController {
     @GetMapping("/explore")
     public ResponseEntity<CursorResponse<ExploredHearitResponse>> readExploredHearits(
             @AuthenticationPrincipal UserContext userContext,
-            @RequestParam(name = "cursorId", defaultValue = "0") Long cursorId,
+            @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(userContext,
-                cursorId,
-                size);
+        CursorRequest cursorRequest = new CursorRequest(cursorId, size);
+        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(userContext, cursorRequest);
         return ResponseEntity.ok(responses);
     }
 
