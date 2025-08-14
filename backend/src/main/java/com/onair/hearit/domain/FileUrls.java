@@ -1,6 +1,7 @@
 package com.onair.hearit.domain;
 
 import com.onair.hearit.common.exception.custom.InvalidInputException;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.List;
 import java.util.Objects;
@@ -13,8 +14,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FileUrls {
 
+    @Column(name = "original_audio_url", nullable = false)
     private String originalAudioUrl;
+
+    @Column(name = "short_audio_url", nullable = false)
     private String shortAudioUrl;
+
+    @Column(name = "script_url", nullable = false)
     private String scriptUrl;
 
     public FileUrls(final String originalAudioUrl, final String shortAudioUrl, final String scriptUrl) {

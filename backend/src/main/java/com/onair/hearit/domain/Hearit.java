@@ -1,8 +1,6 @@
 package com.onair.hearit.domain;
 
 import com.onair.hearit.common.exception.custom.InvalidInputException;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -46,14 +44,6 @@ public class Hearit {
     private Integer playTime;
 
     @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "originalAudioUrl",
-                    column = @Column(name = "original_audio_url", nullable = false)),
-            @AttributeOverride(name = "shortAudioUrl",
-                    column = @Column(name = "short_audio_url", nullable = false)),
-            @AttributeOverride(name = "scriptUrl",
-                    column = @Column(name = "script_url", nullable = false))
-    })
     private FileUrls fileUrls;
 
     @ElementCollection(fetch = FetchType.EAGER)
