@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Long memberId = jwtTokenProvider.getMemberId(token);
         UserContext userContext = UserContext.member(memberId);
 
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userContext, null, null);
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(userContext, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         chain.doFilter(request, response);
