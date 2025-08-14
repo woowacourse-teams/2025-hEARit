@@ -39,8 +39,8 @@ class LibraryViewModel(
     private var nextPage: Int? = 0
 
     init {
-        refreshBookmarks()
         getUserInfo()
+        refreshBookmarks()
     }
 
     fun refreshBookmarks() {
@@ -103,8 +103,8 @@ class LibraryViewModel(
             memberRepository
                 .getUserInfo()
                 .onSuccess { userInfo ->
-                    _uiState.value = LoggedIn
                     _userInfo.value = userInfo
+                    _uiState.value = if (_bookmarks.value.isNullOrEmpty()) NoBookmarks else LoggedIn
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
