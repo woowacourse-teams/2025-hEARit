@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
 
 public class ConsoleLogFormatter {
 
+    private static final List<String> SENSITIVE_KEYS = List.of(
+            "password",
+            "accessToken",
+            "refreshToken",
+            "url");
 
     public static String formatRequestLog(RequestLog requestLog) {
         String method = requestLog.getRequestInfo().getHttpMethod();
@@ -33,8 +38,18 @@ public class ConsoleLogFormatter {
                 .collect(Collectors.joining(", ", "{", "}"));
     }
 
-    private static String truncateBody(String body) {
-        return body.length() > 200 ? body.substring(0, 200) + "...(생ㅜ)" : body;
+    private static String truncateBody(String rawBody) {
+        String masked = maskBodySensitiveData(rawBody);
+        return masked.length() > 200 ? masked.substring(0, 200) + "...(생략)" : masked;
+    }
+
+    private static String maskBodySensitiveData(String raw) {
+        for (String key : SENSITIVE_KEYS) {
+            // record toString style: ClassName[field1=value1, key=value2, ...]
+            String regex = String.format("(?i)(%s=)([^,\\]]+)", key);
+            raw = raw.replaceAll(regex, "$1****");
+        }
+        return raw;
     }
 
     public static String formatResponseLog(ResponseLog<?> responseLog) {
