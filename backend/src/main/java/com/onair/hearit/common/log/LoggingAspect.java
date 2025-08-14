@@ -130,7 +130,7 @@ public class LoggingAspect {
                 responseEntity,
                 calculateTimeTakenMs());
         jsonLogger.info(maskingSupport.mask(responseLog));
-        consoleLogger.info(maskingSupport.mask(ConsoleLogFormatter.formatResponseLog(responseLog)));
+        consoleLogger.info(ConsoleLogFormatter.formatResponseLog(responseLog));
     }
 
     private long calculateTimeTakenMs() {

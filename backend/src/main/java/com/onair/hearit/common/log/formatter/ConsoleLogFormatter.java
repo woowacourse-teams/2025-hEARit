@@ -22,13 +22,14 @@ public class ConsoleLogFormatter {
         Map<String, List<String>> params = requestLog.getRequestParameter();
         Object body = requestLog.getRequestBody();
 
-        return String.format("[REQUEST] %s → %s %s from %s params=%s body=%s",
+        return String.format("[%s] %s → %s %s from %s params=%s body=%s",
+                requestLog.getLogType(),
                 time,
                 method,
                 uri,
                 ip,
                 toFlatParamString(params),
-                body == null ? "null" : truncateBody(body.toString())
+                truncateBody(body == null ? "null" : body.toString())
         );
     }
 
@@ -61,12 +62,14 @@ public class ConsoleLogFormatter {
         Object body = responseLog.responseBody();
 
         return String.format(
-                "[RESPONSE] %s ← %s %s from %s timeTaken=%dms body=%s",
+                "[%s] %s ← %s %s from %s timeTaken=%dms statusCode=%d body=%s",
+                responseLog.logType(),
                 time,
                 method,
                 uri,
                 ip,
                 timeTaken,
+                responseLog.status(),
                 truncateBody(body == null ? "null" : body.toString())
         );
     }
