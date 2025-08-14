@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release.aab
-          path: android/app/build/outputs/bundle/release/app-release.aab
+          path: ./app/build/outputs/bundle/release/app-release.aab
           overwrite: 'true'
 
       - name: Deploy AAB On Google Play Console
@@ -62,7 +62,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
           packageName: com.onair.hearit
-          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          releaseFiles: ./android/app/build/outputs/bundle/release/app-release.aab
           track: alpha
-          whatsNewDirectory: android/app/whatsnew
+          whatsNewDirectory: ./android/app/whatsnew
           
