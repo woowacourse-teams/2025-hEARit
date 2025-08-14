@@ -46,14 +46,14 @@ fun SingleHearit.toPlaybackInfo(
     audioUrl: String,
     title: String,
     startPosition: Long = 0L,
-    duration: Long,
+    source: String,
 ): PlaybackInfo =
     PlaybackInfo(
         hearitId = this.id,
         audioUrl = audioUrl,
         title = title,
         lastPosition = startPosition,
-        duration = duration,
+        source = source,
     )
 
 fun SearchInput.term(): String =

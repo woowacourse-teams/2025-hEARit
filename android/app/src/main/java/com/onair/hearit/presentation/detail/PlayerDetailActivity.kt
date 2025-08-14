@@ -287,9 +287,10 @@ class PlayerDetailActivity :
         val isDifferentHearit = currentlyPlayingId != hearit.id
         val shouldResume = intent.hasExtra(LAST_POSITION) && lastPosition > 0L
         val startPosition = if (shouldResume) lastPosition else 0L
+        val source = hearit.sources.first().name
 
         if (isDifferentHearit) {
-            startPlaybackService(hearit.audioUrl, hearit.title, startPosition)
+            startPlaybackService(hearit.audioUrl, hearit.title, startPosition, source)
         } else {
             if (!controller.isPlaying) controller.play()
             if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
@@ -308,6 +309,7 @@ class PlayerDetailActivity :
         audioUrl: String,
         title: String,
         startPosition: Long = 0L,
+        source: String,
     ) {
         val serviceIntent =
             PlaybackService.newIntent(
@@ -316,6 +318,7 @@ class PlayerDetailActivity :
                 title = title,
                 hearitId = hearitId,
                 startPosition = startPosition,
+                source = source,
             )
         startForegroundService(serviceIntent)
     }
