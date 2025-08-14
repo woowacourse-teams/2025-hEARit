@@ -53,9 +53,9 @@ class PlayerDetailActivity :
     AppCompatActivity(),
     PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
-    private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
-    private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
+    private val keywordAdapter: PlayerDetailKeywordAdapter by lazy { PlayerDetailKeywordAdapter() }
+    private val scriptAdapter: PlayerDetailScriptAdapter by lazy { PlayerDetailScriptAdapter() }
+    private val sourceAdapter: PlayerDetailSourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
     private var mediaController: MediaController? = null
     private var scriptSyncJob: Job? = null

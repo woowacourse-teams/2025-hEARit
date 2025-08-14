@@ -27,7 +27,7 @@ class LibraryFragment :
     private val binding get() = _binding!!
 
     private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
-    private val adapter by lazy { BookmarkAdapter(this) }
+    private val bookmarkAdapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -43,7 +43,7 @@ class LibraryFragment :
     ): View {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
-        binding.rvBookmark.adapter = adapter
+        binding.rvBookmark.adapter = bookmarkAdapter
         return binding.root
     }
 
@@ -83,8 +83,7 @@ class LibraryFragment :
 
     private fun observeViewModel() {
         viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarks ->
-            adapter.submitList(bookmarks)
-
+            bookmarkAdapter.submitList(bookmarks)
             binding.layoutLibraryWhenNoBookmark.isVisible = bookmarks.isEmpty()
         }
 

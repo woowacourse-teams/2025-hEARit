@@ -33,7 +33,7 @@ class SearchResultFragment :
     private val viewModel: SearchResultViewModel by viewModels {
         SearchResultViewModelFactory(searchedTerm)
     }
-    private val searchedAdapter by lazy { SearchedHearitAdapter(this) }
+    private val searchedAdapter: SearchedHearitAdapter by lazy { SearchedHearitAdapter(this) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
