@@ -91,7 +91,8 @@ class SearchFragment : Fragment() {
     private fun performSearchFromInput() {
         binding.etSearch.text
             ?.toString()
-            ?.takeIf { it.isNotBlank() }
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
             ?.let { searchTerm ->
                 navigateToSearchResult(SearchInput.Keyword(searchTerm))
                 hideKeyboard()
