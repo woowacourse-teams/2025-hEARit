@@ -20,7 +20,7 @@ public class S3Config {
     }
 
     @Bean
-    public FileStorageAdaptor s3FileProvider(S3Client s3Client) {
-        return new FileStorageAdaptor(s3Client, bucket);
+    public FileStorage s3FileProvider(S3Client s3Client) {
+        return new FileStorage(s3Client, bucket);
     }
 }

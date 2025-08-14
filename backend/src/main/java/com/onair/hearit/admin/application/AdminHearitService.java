@@ -10,7 +10,7 @@ import com.onair.hearit.admin.dto.response.AdminHearitResponse;
 import com.onair.hearit.admin.dto.response.AdminHearitResponse.KeywordInHearit;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
-import com.onair.hearit.admin.infrastructure.s3.FileStorageAdaptor;
+import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.FileType;
 import com.onair.hearit.domain.Hearit;
@@ -40,7 +40,7 @@ public class AdminHearitService {
     private final CategoryRepository categoryRepository;
     private final KeywordRepository keywordRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
-    private final FileStorageAdaptor fileStorageAdaptor;
+    private final FileStorage fileStorage;
 
     public AdminPagedResponse<AdminHearitResponse> getHearits(AdminPagingRequest pagingRequest) {
         Pageable pageable = getHearitOrderByIdDesc(pagingRequest);
@@ -83,9 +83,9 @@ public class AdminHearitService {
         Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), originalAudioUrl,
                 shortAudioUrl, scriptUrl, sources, category);
 
-        fileStorageAdaptor.uploadFile(request.originalAudio(), FileType.ORIGINAL);
-        fileStorageAdaptor.uploadFile(request.shortAudio(), FileType.SHORT);
-        fileStorageAdaptor.uploadFile(request.scriptFile(), FileType.SCRIPT);
+        fileStorage.uploadFile(request.originalAudio(), FileType.ORIGINAL);
+        fileStorage.uploadFile(request.shortAudio(), FileType.SHORT);
+        fileStorage.uploadFile(request.scriptFile(), FileType.SCRIPT);
 
         Hearit savedHearit = hearitRepository.save(hearit);
         saveHearitKeywords(request.keywordIds(), savedHearit);
@@ -135,8 +135,8 @@ public class AdminHearitService {
     @Transactional
     public void modifyHearitFile(Long hearitId, HearitFileUpdateRequest request, FileType fileType) {
         Hearit hearit = getHearitById(hearitId);
-        fileStorageAdaptor.deleteFile(hearit.getFileUrl(fileType));
-        String uploadFilePath = fileStorageAdaptor.uploadFile(request.file(), fileType);
+        fileStorage.deleteFile(hearit.getFileUrl(fileType));
+        String uploadFilePath = fileStorage.uploadFile(request.file(), fileType);
         hearit.updateFileUrl(uploadFilePath, fileType);
     }
 
