@@ -90,8 +90,13 @@ class LibraryViewModel(
             bookmarkRepository
                 .deleteBookmark(bookmarkId)
                 .onSuccess {
-                    _bookmarks.value =
-                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }
+                    val updatedList =
+                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }.orEmpty()
+                    _bookmarks.value = updatedList
+
+                    if (updatedList.isEmpty()) {
+                        _uiState.value = NoBookmarks
+                    }
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_delete_bookmark_fail
                 }
