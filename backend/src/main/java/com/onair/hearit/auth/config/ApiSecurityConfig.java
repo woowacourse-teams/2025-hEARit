@@ -6,10 +6,12 @@ import com.onair.hearit.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.log.FilterExceptionLogger;
 import java.util.Arrays;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,14 +27,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class ApiSecurityConfig {
 
-    private static final String[] AUTH_WHITELIST = {
-            "/api/v1/hearits/**",
-            "/api/v1/categories/**",
-            "/api/v1/keywords/**",
+    private static final String[] PUBLIC_AUTH_ENDPOINTS = {
             "/api/v1/auth/login",
             "/api/v1/auth/kakao-login",
             "/api/v1/auth/signup",
             "/api/v1/auth/token/refresh",
+    };
+
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/api/v1/hearits/**",
+            "/api/v1/categories/**",
+            "/api/v1/keywords/**"
     };
 
     private final ObjectMapper objectMapper;
@@ -52,11 +57,17 @@ public class ApiSecurityConfig {
                 .securityMatcher("/api/**")
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(AUTH_WHITELIST).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                        .requestMatchers(PUBLIC_AUTH_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 ).addFilterBefore(
-                        new JwtAuthenticationFilter(Arrays.stream(AUTH_WHITELIST).toList(), objectMapper,
-                                jwtTokenProvider, filterExceptionLogger),
+                        new JwtAuthenticationFilter(
+                                Stream.concat(
+                                        Arrays.stream(PUBLIC_GET_ENDPOINTS),
+                                        Arrays.stream(PUBLIC_AUTH_ENDPOINTS)).toList(),
+                                objectMapper,
+                                jwtTokenProvider,
+                                filterExceptionLogger),
                         UsernamePasswordAuthenticationFilter.class
                 ).build();
     }
