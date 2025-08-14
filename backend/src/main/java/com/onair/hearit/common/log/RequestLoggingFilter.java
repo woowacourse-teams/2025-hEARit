@@ -28,7 +28,9 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
     private static final List<String> excludedPaths = List.of(
             "/admin/**",
-            "/api/v1/admin/**"
+            "/api/v1/admin/**",
+            "/favicon.ico",
+            "/.well-known/**"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
