@@ -33,7 +33,7 @@ class SearchResultFragment :
     private val viewModel: SearchResultViewModel by viewModels {
         SearchResultViewModelFactory(searchedTerm)
     }
-    private val adapter by lazy { SearchedHearitAdapter(this) }
+    private val searchedAdapter by lazy { SearchedHearitAdapter(this) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,29 +69,35 @@ class SearchResultFragment :
     }
 
     private fun setupRecyclerView() {
-        binding.rvSearchedHearit.adapter = adapter
-        binding.rvSearchedHearit.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(
-                    rv: RecyclerView,
-                    dx: Int,
-                    dy: Int,
-                ) {
-                    val lm = rv.layoutManager as? LinearLayoutManager ?: return
-                    val total = lm.itemCount
-                    val last = lm.findLastVisibleItemPosition()
+        binding.rvSearchedHearit.apply {
+            adapter = searchedAdapter
+            addOnScrollListener(
+                object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(
+                        rv: RecyclerView,
+                        dx: Int,
+                        dy: Int,
+                    ) {
+                        val lm = rv.layoutManager as? LinearLayoutManager ?: return
+                        val total = lm.itemCount
+                        val last = lm.findLastVisibleItemPosition()
 
-                    if (last >= total - 3) viewModel.loadNextPageIfPossible()
-                }
-            },
-        )
+                        if (last >= total - 3) viewModel.loadNextPageIfPossible()
+                    }
+                },
+            )
+        }
     }
 
     private fun observeViewModel() {
-        viewModel.uiState.observe(viewLifecycleOwner) { binding.uiState = it }
-        viewModel.searchedHearits.observe(viewLifecycleOwner) { adapter.submitList(it) }
-        viewModel.toastMessage.observe(viewLifecycleOwner) {
-            showToast(getString(it))
+        viewModel.uiState.observe(viewLifecycleOwner) { state ->
+            binding.uiState = state
+        }
+        viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
+            searchedAdapter.submitList(searchedHearits)
+        }
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
         }
     }
 
