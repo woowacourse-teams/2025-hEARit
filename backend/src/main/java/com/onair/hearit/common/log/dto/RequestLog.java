@@ -1,4 +1,4 @@
-package com.onair.hearit.common.log.message.dto;
+package com.onair.hearit.common.log.dto;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

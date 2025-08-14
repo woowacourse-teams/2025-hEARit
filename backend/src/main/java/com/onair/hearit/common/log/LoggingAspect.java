@@ -1,20 +1,18 @@
 package com.onair.hearit.common.log;
 
+import com.onair.hearit.common.log.formatter.ConsoleLogFormatter;
 import com.onair.hearit.common.log.mask.MaskingSupport;
-import com.onair.hearit.common.log.message.dto.ExceptionLog;
-import com.onair.hearit.common.log.message.dto.ExceptionLog.ErrorDetail;
-import com.onair.hearit.common.log.message.dto.RequestInfo;
-import com.onair.hearit.common.log.message.dto.RequestLog;
-import com.onair.hearit.common.log.message.dto.ResponseLog;
+import com.onair.hearit.common.log.dto.ExceptionLog;
+import com.onair.hearit.common.log.dto.ExceptionLog.ErrorDetail;
+import com.onair.hearit.common.log.dto.RequestInfo;
+import com.onair.hearit.common.log.dto.RequestLog;
+import com.onair.hearit.common.log.dto.ResponseLog;
 import jakarta.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
@@ -84,7 +82,7 @@ public class LoggingAspect {
     public void logRequest(JoinPoint joinPoint) {
         RequestLog requestLog = getRequestLog(joinPoint);
         jsonLogger.info(maskingSupport.mask(requestLog));
-        consoleLogger.info(getRequestLogForConsole(requestLog));
+        consoleLogger.info(ConsoleLogFormatter.formatRequestLog(requestLog));
     }
 
     private RequestLog getRequestLog(JoinPoint joinPoint) {
@@ -130,7 +128,7 @@ public class LoggingAspect {
                 responseEntity,
                 calculateTimeTakenMs());
         jsonLogger.info(maskingSupport.mask(responseLog));
-        consoleLogger.info(formatResponseLogForConsole(responseLog));
+        consoleLogger.info(ConsoleLogFormatter.formatResponseLog(responseLog));
     }
 
     private long calculateTimeTakenMs() {
@@ -213,53 +211,6 @@ public class LoggingAspect {
                 problemDetail.getStatus(),
                 problemDetail.getTitle(),
                 problemDetail.getDetail()
-        );
-    }
-
-    private String getRequestLogForConsole(RequestLog requestLog) {
-        String method = requestLog.getRequestInfo().getHttpMethod();
-        String uri = requestLog.getRequestInfo().getRequestUri();
-        String ip = requestLog.getRequestInfo().getIp();
-        String time = requestLog.getTimestamp();
-        Map<String, List<String>> params = requestLog.getRequestParameter();
-        Object body = requestLog.getRequestBody();
-
-        return String.format("[REQUEST] %s → %s %s from %s params=%s body=%s",
-                time,
-                method,
-                uri,
-                ip,
-                toFlatParamString(params),
-                body == null ? "null" : truncateBody(body.toString())
-        );
-    }
-
-    private String toFlatParamString(Map<String, List<String>> params) {
-        return params.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining(", ", "{", "}"));
-    }
-
-    private String truncateBody(String body) {
-        return body.length() > 200 ? body.substring(0, 200) + "...(생ㅜ)" : body;
-    }
-
-    private String formatResponseLogForConsole(ResponseLog<?> responseLog) {
-        String time = responseLog.timestamp();
-        String method = responseLog.requestInfo().getHttpMethod();
-        String uri = responseLog.requestInfo().getRequestUri();
-        String ip = responseLog.requestInfo().getIp();
-        long timeTaken = responseLog.timeTakenMs();
-        Object body = responseLog.responseEntity();
-
-        return String.format(
-                "[RESPONSE] %s ← %s %s from %s timeTaken=%dms body=%s",
-                time,
-                method,
-                uri,
-                ip,
-                timeTaken,
-                truncateBody(body == null ? "null" : body.toString())
         );
     }
 }

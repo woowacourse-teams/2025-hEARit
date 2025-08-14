@@ -1,9 +1,9 @@
-package com.onair.hearit.common.log;
+package com.onair.hearit.common.log.exception;
 
 import com.onair.hearit.common.log.mask.MaskingSupport;
-import com.onair.hearit.common.log.message.dto.ExceptionLog;
-import com.onair.hearit.common.log.message.dto.ExceptionLog.ErrorDetail;
-import com.onair.hearit.common.log.message.dto.RequestInfo;
+import com.onair.hearit.common.log.dto.ExceptionLog;
+import com.onair.hearit.common.log.dto.ExceptionLog.ErrorDetail;
+import com.onair.hearit.common.log.dto.RequestInfo;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package com.onair.hearit.common.log.message;
+package com.onair.hearit.common.log;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -12,7 +12,7 @@ import org.jboss.logging.MDC;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MdcLoggingFilter implements Filter {
+public class MdcSetupFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

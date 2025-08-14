@@ -1,7 +1,8 @@
-package com.onair.hearit.common.log.message;
+package com.onair.hearit.common.log;
 
-import com.onair.hearit.common.log.message.dto.RequestInfo;
-import com.onair.hearit.common.log.message.dto.RequestLog;
+import com.onair.hearit.common.log.dto.RequestInfo;
+import com.onair.hearit.common.log.dto.RequestLog;
+import com.onair.hearit.common.log.formatter.ConsoleLogFormatter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,7 +11,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,7 +58,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             boolean aopEntered = "true".equals(MDC.get("AOP_ENTERED"));
             if (!aopEntered) {
                 jsonLogger.info(requestLog);
-                consoleLogger.info(getRequestLogForConsole(requestLog));
+                consoleLogger.info(ConsoleLogFormatter.formatRequestLog(requestLog));
             }
         }
     }
@@ -66,27 +66,5 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     private boolean isExcludedPath(HttpServletRequest request) {
         String path = request.getRequestURI();
         return excludedPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
-    }
-
-    private String getRequestLogForConsole(RequestLog log) {
-        String method = log.getRequestInfo().getHttpMethod();
-        String uri = log.getRequestInfo().getRequestUri();
-        String ip = log.getRequestInfo().getIp();
-        String time = log.getTimestamp();
-        Map<String, List<String>> params = log.getRequestParameter();
-
-        return String.format("[REQUEST] %s → %s %s from %s params=%s",
-                time,
-                method,
-                uri,
-                ip,
-                toFlatParamString(params)
-        );
-    }
-
-    private String toFlatParamString(Map<String, List<String>> params) {
-        return params.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining(", ", "{", "}"));
     }
 }
