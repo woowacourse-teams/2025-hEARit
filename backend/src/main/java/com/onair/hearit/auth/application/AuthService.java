@@ -14,13 +14,13 @@ import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.infrastructure.MemberRepository;
-import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
