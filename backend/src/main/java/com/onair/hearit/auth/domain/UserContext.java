@@ -1,17 +1,19 @@
 package com.onair.hearit.auth.domain;
 
+import java.util.Objects;
+
 public class UserContext {
 
     private final Long memberId;
     private final boolean isAuthenticated;
 
     private UserContext(Long memberId, boolean isAuthenticated) {
-        this.memberId = memberId;
+        this.memberId = Objects.requireNonNull(memberId, "memberId는 null일 수 없습니다.");
         this.isAuthenticated = isAuthenticated;
     }
 
     public static UserContext guest() {
-        return new UserContext(null, false);
+        return new UserContext(-1L, false);
     }
 
     public static UserContext member(Long memberId) {
