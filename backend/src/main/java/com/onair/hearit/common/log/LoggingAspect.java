@@ -196,8 +196,7 @@ public class LoggingAspect {
                 requestInfo.getHttpMethod(),
                 requestInfo.getRequestUri(),
                 requestInfo.getIp(),
-                throwable.toString(),
-                throwable
+                throwable.toString()
         );
     }
 
