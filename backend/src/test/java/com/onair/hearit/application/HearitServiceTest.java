@@ -71,7 +71,7 @@ class HearitServiceTest {
 
     @BeforeEach
     void setup() {
-        recommendHearitProvider = new FixedRecommendedHearitProviding(hearitRepository, recommendHearitRepository);
+        recommendHearitProvider = new FixedRecommendedHearitProviding(recommendHearitRepository);
         hearitService = new HearitService(
                 hearitRepository,
                 memberRepository,

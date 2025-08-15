@@ -57,7 +57,7 @@ public class Member {
 
     private Member(String localId, String password, String socialId, String nickname, String profileImage,
                    OAuthProvider provider) {
-        validate(nickname, createdAt);
+        validate(nickname);
         this.localId = localId;
         this.password = password;
         this.socialId = socialId;
@@ -66,18 +66,7 @@ public class Member {
         this.oAuthProvider = provider;
     }
 
-    private void validate(String nickname, LocalDateTime createdAt) {
-        validateNickName(nickname);
-        validateCreatedAt(createdAt);
-    }
-
-    private void validateCreatedAt(LocalDateTime createdAt) {
-        if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시간은 null이 될 수 없습니다.");
-        }
-    }
-
-    private void validateNickName(String nickname) {
+    private void validate(String nickname) {
         if (nickname == null) {
             throw new IllegalArgumentException("닉네임은 null이 될 수 없습니다.");
         }

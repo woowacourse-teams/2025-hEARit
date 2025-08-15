@@ -40,7 +40,7 @@ class FixedRecommendedHearitProvidingTest {
 
     @BeforeEach
     void setup() {
-        recommendHearitProvider = new FixedRecommendedHearitProviding(hearitRepository, recommendHearitRepository);
+        recommendHearitProvider = new FixedRecommendedHearitProviding(recommendHearitRepository);
     }
 
     @Test
