@@ -34,15 +34,23 @@ public class RecommendHearit {
     private LocalDate recommendDate;
 
     public RecommendHearit(Hearit hearit, LocalDate recommendDate) {
-        validateNull(hearit, recommendDate);
+        validate(hearit, recommendDate);
         this.hearit = hearit;
         this.recommendDate = recommendDate;
     }
 
-    private void validateNull(Hearit hearit, LocalDate recommendDate) {
+    private void validate(Hearit hearit, LocalDate recommendDate) {
+        validateHearit(hearit);
+        validateRecommendDate(recommendDate);
+    }
+
+    private void validateHearit(Hearit hearit) {
         if (hearit == null) {
             throw new InvalidInputException("hearit은 null일 수 없습니다.");
         }
+    }
+
+    private void validateRecommendDate(LocalDate recommendDate) {
         if (recommendDate == null) {
             throw new InvalidInputException("recommendDate는 null일 수 없습니다.");
         }

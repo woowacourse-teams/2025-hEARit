@@ -84,17 +84,33 @@ public class Hearit {
 
     private void validateMetaData(String title, String summary, Integer playTime, List<Source> sources,
                                   Category category) {
-        if (isEmptyString(title) || title.length() > 35) {
-            throw new InvalidInputException("제목은 35자 이하의 문자열이어야합니다.");
+        validateTitle(title);
+        validateSummary(summary);
+        validatePlayTime(playTime);
+        validateCategory(category);
+    }
+
+    private void validateCategory(Category category) {
+        if (category == null) {
+            throw new InvalidInputException("카테고리는 반드시 입력해야합니다.");
         }
-        if (isEmptyString(summary) || summary.length() > 250) {
-            throw new InvalidInputException("요약은 250자 이하의 문자열이어야합니다.");
-        }
+    }
+
+    private void validatePlayTime(Integer playTime) {
         if (playTime == null || playTime < 1) {
             throw new InvalidInputException("총 길이는 1초 이상의 숫자여야합니다.");
         }
-        if (category == null) {
-            throw new InvalidInputException("카테고리는 반드시 입력해야합니다.");
+    }
+
+    private void validateSummary(String summary) {
+        if (isEmptyString(summary) || summary.length() > 250) {
+            throw new InvalidInputException("요약은 250자 이하의 문자열이어야합니다.");
+        }
+    }
+
+    private void validateTitle(String title) {
+        if (isEmptyString(title) || title.length() > 35) {
+            throw new InvalidInputException("제목은 35자 이하의 문자열이어야합니다.");
         }
     }
 
@@ -103,10 +119,29 @@ public class Hearit {
     }
 
     public void updateFileUrl(String fileUrl, FileType fileType) {
+        validateFile(fileUrl, fileType);
         this.fileUrls = fileType.updateFileUrls(this.fileUrls, fileUrl);
     }
 
+    private void validateFile(String fileUrl, FileType fileType) {
+        validateFileUrl(fileUrl);
+        validateFileType(fileType);
+    }
+
+    private void validateFileType(FileType fileType) {
+        if (fileType == null) {
+            throw new InvalidInputException("파일 타입은 null이 될 수 없습니다.");
+        }
+    }
+
+    private void validateFileUrl(String fileUrl) {
+        if (fileUrl == null) {
+            throw new InvalidInputException("파일 url은 null이 될 수 없습니다.");
+        }
+    }
+
     public String getFileUrl(FileType fileType) {
+        validateFileType(fileType);
         return fileType.getFileUrls(this.fileUrls);
     }
 

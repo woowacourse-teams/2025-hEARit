@@ -1,5 +1,6 @@
 package com.onair.hearit.domain;
 
+import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -42,8 +43,26 @@ public class Bookmark {
     private LocalDateTime createdAt;
 
     public Bookmark(Member member, Hearit hearit) {
+        validate(member, hearit);
         this.member = member;
         this.hearit = hearit;
+    }
+
+    private void validate(Member member, Hearit hearit) {
+        validateMember(member);
+        validateHearit(hearit);
+    }
+
+    private void validateHearit(Hearit hearit) {
+        if (hearit == null) {
+            throw new InvalidInputException("히어릿은 null이 될 수 없습니다.");
+        }
+    }
+
+    private void validateMember(Member member) {
+        if (member == null) {
+            throw new InvalidInputException("멤버는 null이 될 수 없습니다.");
+        }
     }
 
     public boolean isCreatedBy(Member member) {

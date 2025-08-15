@@ -1,5 +1,6 @@
 package com.onair.hearit.auth.domain;
 
+import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,12 +32,40 @@ public class RefreshToken {
     private LocalDateTime expiryDate;
 
     public RefreshToken(Long memberId, String token, LocalDateTime expiryDate) {
+        validate(memberId, token, expiryDate);
         this.memberId = memberId;
         this.token = token;
         this.expiryDate = expiryDate;
     }
 
+    private void validate(Long memberId, String token, LocalDateTime expiryDate) {
+        validateMember(memberId);
+        validateToken(token);
+        validateExpiryDate(expiryDate);
+    }
+
+    private void validateExpiryDate(LocalDateTime expiryDate) {
+        if (expiryDate == null) {
+            throw new InvalidInputException("멤버는 null이 될 수 없습니다.");
+        }
+    }
+
+    private void validateToken(String token) {
+        if (token == null) {
+            throw new InvalidInputException("멤버는 null이 될 수 없습니다.");
+        }
+    }
+
+    private void validateMember(Long memberId) {
+        if (memberId == null) {
+            throw new InvalidInputException("멤버는 null이 될 수 없습니다.");
+        }
+    }
+
+
     public void update(String token, LocalDateTime expiryDate) {
+        validateToken(token);
+        validateExpiryDate(expiryDate);
         this.token = token;
         this.expiryDate = expiryDate;
     }

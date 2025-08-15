@@ -38,10 +38,28 @@ public class ExploreScore {
     private Long cursorId;
 
     public ExploreScore(Long memberId, Long hearitId, Double score, Long cursorId) {
+        validate(hearitId, score);
         this.memberId = memberId;
         this.hearitId = hearitId;
         this.score = score;
         this.cursorId = cursorId;
+    }
+
+    private void validate(Long hearitId, Double score) {
+        validateHearit(hearitId);
+        validateScore(score);
+    }
+
+    private void validateScore(Double score) {
+        if (score == null) {
+            throw new IllegalArgumentException("점수는 null이 될 수 없습니다.");
+        }
+    }
+
+    private void validateHearit(Long hearitId) {
+        if (hearitId == null) {
+            throw new IllegalArgumentException("히어릿은 null이 될 수 없습니다.");
+        }
     }
 
     @Override

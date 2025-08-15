@@ -51,8 +51,8 @@ public enum FileType {
     public abstract String getFileUrls(FileUrls urls);
 
     public void validUrlName(String filename) {
-        if (!filename.startsWith("/" + uploadPath)) {
-            throw new InvalidInputException(this.name() + "의 파일명은 '" + "/" + uploadPath + "'로 시작해야 합니다.");
+        if (!filename.startsWith(uploadPath)) {
+            throw new InvalidInputException(this.name() + "의 파일명은 '" + uploadPath + "'로 시작해야 합니다.");
         }
         if (!filename.endsWith(extension)) {
             throw new InvalidInputException(this.name() + "의 파일 확장자는 '" + extension + "' 이어야 합니다.");
