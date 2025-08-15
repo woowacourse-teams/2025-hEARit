@@ -18,7 +18,7 @@ import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityLoginBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.presentation.MainActivity
+import com.onair.hearit.presentation.main.MainActivity
 import timber.log.Timber
 
 class LoginActivity : AppCompatActivity() {

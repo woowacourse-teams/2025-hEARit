@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation
+package com.onair.hearit.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

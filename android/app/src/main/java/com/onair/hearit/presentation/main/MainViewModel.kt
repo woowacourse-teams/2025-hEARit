@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation
+package com.onair.hearit.presentation.main
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +11,7 @@ import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
+import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 import timber.log.Timber
 

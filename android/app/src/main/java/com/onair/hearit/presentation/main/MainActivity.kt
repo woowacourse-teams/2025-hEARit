@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation
+package com.onair.hearit.presentation.main
 
 import android.content.ComponentName
 import android.content.Intent
@@ -19,6 +19,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -26,11 +27,15 @@ import androidx.media3.session.SessionToken
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
+import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.PlaybackStarter
+import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.observeOnce
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.presentation.splash.SplashActivity
@@ -230,7 +235,7 @@ class MainActivity :
     }
 
     private fun showFragment(
-        fragment: androidx.fragment.app.Fragment,
+        fragment: Fragment,
         addToBackStack: Boolean = false,
     ) {
         supportFragmentManager
