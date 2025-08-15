@@ -53,11 +53,10 @@ public class AdminRecommendHearitService {
         List<MonthlyRecommendHearitResponse> responses = new ArrayList<>();
         for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
             LocalDate target = date;
-            List<Long> hearitIds = recommendHearits.stream()
+            List<Hearit> hearits = recommendHearits.stream()
                     .filter(recommendHearit -> recommendHearit.getRecommendDate().isEqual(target))
-                    .map(recommendHearit -> recommendHearit.getHearit().getId())
+                    .map(RecommendHearit::getHearit)
                     .toList();
-            List<Hearit> hearits = hearitRepository.findAllByIdIn(hearitIds);
             responses.add(MonthlyRecommendHearitResponse.from(target, hearits));
         }
         return responses;
