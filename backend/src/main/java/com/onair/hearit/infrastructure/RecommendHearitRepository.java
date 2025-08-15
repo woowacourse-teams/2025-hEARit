@@ -14,6 +14,7 @@ public interface RecommendHearitRepository extends JpaRepository<RecommendHearit
                 SELECT rh
                 FROM RecommendHearit rh
                 JOIN FETCH rh.hearit
+                JOIN FETCH rh.hearit.category
                 WHERE rh.recommendDate <= :recommendDate
                 ORDER BY rh.recommendDate DESC
                 LIMIT :size
@@ -32,6 +33,7 @@ public interface RecommendHearitRepository extends JpaRepository<RecommendHearit
     @Query("""
                  SELECT rh FROM RecommendHearit rh
                  JOIN FETCH rh.hearit
+                 JOIN FETCH rh.hearit.category
                  WHERE rh.recommendDate BETWEEN :from AND :to
             """)
     List<RecommendHearit> findByRecommendDateIsBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
