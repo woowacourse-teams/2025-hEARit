@@ -1,9 +1,9 @@
-package com.onair.hearit.common.log;
+package com.onair.hearit.common.log.exception;
 
-import com.onair.hearit.common.log.message.JsonMaskingPrettyFormatter;
-import com.onair.hearit.common.log.message.dto.ExceptionLog;
-import com.onair.hearit.common.log.message.dto.ExceptionLog.ErrorDetail;
-import com.onair.hearit.common.log.message.dto.RequestInfo;
+import com.onair.hearit.common.log.mask.MaskingSupport;
+import com.onair.hearit.common.log.dto.ExceptionLog;
+import com.onair.hearit.common.log.dto.ExceptionLog.ErrorDetail;
+import com.onair.hearit.common.log.dto.RequestInfo;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,8 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -20,13 +18,15 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Log4j2
 @Component
 @RequiredArgsConstructor
 public class FilterExceptionLogger extends OncePerRequestFilter {
 
-    private final JsonMaskingPrettyFormatter jsonMaskingPrettyFormatter;
-    private final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private static final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
+    private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
+
+    private final MaskingSupport maskingSupport;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -42,8 +42,14 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     errorDetail);
 
-            log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+            jsonLogger.error(maskingSupport.mask(exceptionLog));
             errorLogger.error(exceptionLog, ex);
+            consoleLogger.error("[FILTER ERROR] {} {} from {} → {}",
+                    requestInfo.getHttpMethod(),
+                    requestInfo.getRequestUri(),
+                    requestInfo.getIp(),
+                    ex.toString(),
+                    ex);
 
             throw ex;
         }
@@ -55,7 +61,8 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                 problemDetail.getDetail(),
                 problemDetail.getTitle(),
                 null,
-                0);
+                0,
+                null);
         ExceptionLog exceptionLog = ExceptionLog.warn(
                 LocalDateTime.now(),
                 requestInfo,
@@ -63,6 +70,14 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                 errorDetail
         );
 
-        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        jsonLogger.warn(maskingSupport.mask(exceptionLog));
+        consoleLogger.warn("[FILTER WARN] {} {} from {} → status: {} / title: {} / detail: {}",
+                requestInfo.getHttpMethod(),
+                requestInfo.getRequestUri(),
+                requestInfo.getIp(),
+                problemDetail.getStatus(),
+                problemDetail.getTitle(),
+                problemDetail.getDetail()
+        );
     }
 }

@@ -1,16 +1,17 @@
 package com.onair.hearit.common.log;
 
-import com.onair.hearit.common.log.message.JsonMaskingPrettyFormatter;
-import com.onair.hearit.common.log.message.dto.ExceptionLog;
-import com.onair.hearit.common.log.message.dto.ExceptionLog.ErrorDetail;
-import com.onair.hearit.common.log.message.dto.RequestInfo;
-import com.onair.hearit.common.log.message.dto.RequestLog;
-import com.onair.hearit.common.log.message.dto.ResponseLog;
+import com.onair.hearit.common.log.dto.ExceptionLog;
+import com.onair.hearit.common.log.dto.ExceptionLog.ErrorDetail;
+import com.onair.hearit.common.log.dto.RequestInfo;
+import com.onair.hearit.common.log.dto.RequestLog;
+import com.onair.hearit.common.log.dto.ResponseLog;
+import com.onair.hearit.common.log.formatter.ConsoleLogFormatter;
+import com.onair.hearit.common.log.mask.MaskingSupport;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,11 +22,13 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -35,8 +38,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class LoggingAspect {
 
-    private final JsonMaskingPrettyFormatter jsonMaskingPrettyFormatter;
-    private final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private static final Logger errorLogger = LogManager.getLogger("errorLogger");
+    private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
+    private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
+
+    private final MaskingSupport maskingSupport;
 
     @Pointcut("@annotation(org.springframework.web.bind.annotation.GetMapping)")
     public void getMapping() {
@@ -58,19 +64,27 @@ public class LoggingAspect {
     public void patchMapping() {
     }
 
-    @Pointcut("getMapping() || postMapping() || deleteMapping() || putMapping() || patchMapping()")
+    @Pointcut("(getMapping() || postMapping() || deleteMapping() || putMapping() || patchMapping())"
+            + "&& !within(com.onair.hearit.admin..*)")
     public void allMapping() {
     }
 
-    @Pointcut("within(@org.springframework.web.bind.annotation.RestControllerAdvice *) || "
-            + "within(@org.springframework.web.bind.annotation.ControllerAdvice *)")
+    @Pointcut("(@within(org.springframework.web.bind.annotation.RestControllerAdvice)" +
+            "|| @within(org.springframework.web.bind.annotation.ControllerAdvice))" +
+            "&& !within(com.onair.hearit.admin..*)")
     public void exceptionHandler() {
+    }
+
+    @Before("allMapping()")
+    public void markAopEntered() {
+        MDC.put("AOP_ENTERED", "true");
     }
 
     @Before("allMapping()")
     public void logRequest(JoinPoint joinPoint) {
         RequestLog requestLog = getRequestLog(joinPoint);
-        log.info(jsonMaskingPrettyFormatter.convertToPrettyJson(requestLog));
+        jsonLogger.info(maskingSupport.mask(requestLog));
+        consoleLogger.info(ConsoleLogFormatter.formatRequestLog(requestLog));
     }
 
     private RequestLog getRequestLog(JoinPoint joinPoint) {
@@ -93,23 +107,30 @@ public class LoggingAspect {
     }
 
     private Object extractRequestBody(JoinPoint joinPoint) {
-        return Arrays.stream(joinPoint.getArgs())
-                .filter(Objects::nonNull)
-                .filter(arg -> !(arg instanceof HttpServletRequest) && !(arg instanceof HttpServletResponse))
-                .findFirst()
-                .orElse(null);
+        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        Object[] args = joinPoint.getArgs();
+
+        for (int i = 0; i < parameterAnnotations.length; i++) {
+            for (Annotation annotation : parameterAnnotations[i]) {
+                if (annotation.annotationType() == RequestBody.class) {
+                    return args[i];
+                }
+            }
+        }
+        return null;
     }
 
     @AfterReturning(value = "allMapping()", returning = "responseEntity")
-    public void logResponse(ResponseEntity<?> responseEntity) {
+    public void logResponse(JoinPoint joinPoint, ResponseEntity<?> responseEntity) {
         RequestInfo requestInfo = RequestInfo.fromMdc();
         ResponseLog responseLog = ResponseLog.of(
                 LocalDateTime.now(),
                 requestInfo,
                 responseEntity,
                 calculateTimeTakenMs());
-        log.info(jsonMaskingPrettyFormatter.convertToPrettyJson(responseLog));
-
+        jsonLogger.info(maskingSupport.mask(responseLog));
+        consoleLogger.info(ConsoleLogFormatter.formatResponseLog(responseLog));
     }
 
     private long calculateTimeTakenMs() {
@@ -136,7 +157,7 @@ public class LoggingAspect {
                     logServerErrorWithStackTrace(requestInfo, httpStatus, errorDetail, throwable.get());
                     return;
                 }
-                logServerErrorWithoutStackTrace(requestInfo, httpStatus, errorDetail);
+                logServerErrorWithoutStackTrace(requestInfo, httpStatus, errorDetail, throwable.get());
                 return;
             }
             logClientError(problemDetail, requestInfo, errorDetail);
@@ -155,21 +176,43 @@ public class LoggingAspect {
     private void logServerErrorWithStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
                                               ErrorDetail errorDetail, Throwable throwable) {
         ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
-        log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        jsonLogger.error(maskingSupport.mask(exceptionLog));
         errorLogger.error(exceptionLog, throwable);
+        consoleLogger.error("[ERROR] {} {} from {} → {}",
+                requestInfo.getHttpMethod(),
+                requestInfo.getRequestUri(),
+                requestInfo.getIp(),
+                throwable.toString(),
+                throwable
+        );
     }
 
     private void logServerErrorWithoutStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
-                                                 ErrorDetail errorDetail) {
+                                                 ErrorDetail errorDetail, Throwable throwable) {
         ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
-        log.error(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        jsonLogger.error(maskingSupport.mask(exceptionLog));
         errorLogger.error(exceptionLog);
+        consoleLogger.error("[ERROR] {} {} from {} → {}",
+                requestInfo.getHttpMethod(),
+                requestInfo.getRequestUri(),
+                requestInfo.getIp(),
+                throwable.toString()
+        );
     }
 
     private void logClientError(ProblemDetail problemDetail, RequestInfo requestInfo, ErrorDetail errorDetail) {
         ExceptionLog exceptionLog = ExceptionLog.warn(LocalDateTime.now(), requestInfo,
                 HttpStatus.resolve(problemDetail.getStatus()),
                 errorDetail);
-        log.warn(jsonMaskingPrettyFormatter.convertToPrettyJson(exceptionLog));
+        jsonLogger.warn(maskingSupport.mask(exceptionLog));
+        consoleLogger.warn(
+                "[WARN] {} {} from {} → status: {} / title: {} / detail: {}",
+                requestInfo.getHttpMethod(),
+                requestInfo.getRequestUri(),
+                requestInfo.getIp(),
+                problemDetail.getStatus(),
+                problemDetail.getTitle(),
+                problemDetail.getDetail()
+        );
     }
 }
