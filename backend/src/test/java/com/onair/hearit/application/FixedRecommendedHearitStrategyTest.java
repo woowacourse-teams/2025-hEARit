@@ -25,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
-class FixedRecommendedHearitProvidingTest {
+class FixedRecommendedHearitStrategyTest {
 
     @Autowired
     private DbHelper dbHelper;
@@ -36,11 +36,11 @@ class FixedRecommendedHearitProvidingTest {
     @Autowired
     private RecommendHearitRepository recommendHearitRepository;
 
-    private FixedRecommendedHearitProviding recommendHearitProvider;
+    private FixedRecommendedHearitStrategy recommendHearitProvider;
 
     @BeforeEach
     void setup() {
-        recommendHearitProvider = new FixedRecommendedHearitProviding(recommendHearitRepository);
+        recommendHearitProvider = new FixedRecommendedHearitStrategy(recommendHearitRepository);
     }
 
     @Test

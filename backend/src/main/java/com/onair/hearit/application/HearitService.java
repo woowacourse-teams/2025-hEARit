@@ -45,7 +45,7 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final CategoryRepository categoryRepository;
-    private final FixedRecommendHearitStrategy fixedRecommendHearitStrategy;
+    private final RecommendHearitStrategy recommendHearitStrategy;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, UserContext userContext) {
         Hearit hearit = getHearitById(hearitId);
@@ -68,7 +68,7 @@ public class HearitService {
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
-        List<Hearit> recommendHearits = fixedRecommendHearitStrategy.getRecommendHearit(RECOMMEND_HEARIT_COUNT);
+        List<Hearit> recommendHearits = recommendHearitStrategy.getRecommendHearit(RECOMMEND_HEARIT_COUNT);
         return recommendHearits.stream()
                 .map(RecommendHearitResponse::from)
                 .toList();

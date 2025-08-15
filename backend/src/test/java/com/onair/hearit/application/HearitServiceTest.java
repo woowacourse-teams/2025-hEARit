@@ -65,13 +65,13 @@ class HearitServiceTest {
     @Autowired
     private RecommendHearitRepository recommendHearitRepository;
 
-    private FixedRecommendedHearitProviding recommendHearitProvider;
+    private FixedRecommendedHearitStrategy recommendHearitProvider;
 
     private HearitService hearitService;
 
     @BeforeEach
     void setup() {
-        recommendHearitProvider = new FixedRecommendedHearitProviding(recommendHearitRepository);
+        recommendHearitProvider = new FixedRecommendedHearitStrategy(recommendHearitRepository);
         hearitService = new HearitService(
                 hearitRepository,
                 memberRepository,

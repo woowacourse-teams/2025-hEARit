@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class FixedRecommendedHearitProviding implements FixedRecommendHearitStrategy {
+public class FixedRecommendedHearitStrategy implements RecommendHearitStrategy {
 
     private final RecommendHearitRepository recommendHearitRepository;
 
