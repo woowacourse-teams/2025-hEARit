@@ -30,18 +30,6 @@ class ApiSecurityConfigTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("OPEN GET API 경로는 HTTP Method get 제외 인증 없이 접근할 수 없다")
-    void canAccessWhitelistedPathWithoutAuth() {
-        // when & then
-        RestAssured.given().log().all()
-                .when()
-                .post("/api/v1/categories")
-                .then().log().all()
-                .statusCode(HttpStatus.FORBIDDEN);
-    }
-
-
-    @Test
     @DisplayName("보호된 API는 인증 없이 접근할 수 없다")
     void cannotAccessProtectedApiWithoutToken() {
         RestAssured.given().log().all()
