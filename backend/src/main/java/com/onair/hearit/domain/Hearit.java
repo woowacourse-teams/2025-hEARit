@@ -128,15 +128,15 @@ public class Hearit {
         validateFileType(fileType);
     }
 
-    private void validateFileType(FileType fileType) {
-        if (fileType == null) {
-            throw new InvalidInputException("파일 타입은 null이 될 수 없습니다.");
-        }
-    }
-
     private void validateFileUrl(String fileUrl) {
         if (fileUrl == null) {
             throw new InvalidInputException("파일 url은 null이 될 수 없습니다.");
+        }
+    }
+
+    private void validateFileType(FileType fileType) {
+        if (fileType == null) {
+            throw new InvalidInputException("파일 타입은 null이 될 수 없습니다.");
         }
     }
 

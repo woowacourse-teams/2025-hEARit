@@ -50,15 +50,15 @@ public class ExploreScore {
         validateScore(score);
     }
 
-    private void validateScore(Double score) {
-        if (score == null) {
-            throw new IllegalArgumentException("점수는 null이 될 수 없습니다.");
-        }
-    }
-
     private void validateHearit(Long hearitId) {
         if (hearitId == null) {
             throw new IllegalArgumentException("히어릿은 null이 될 수 없습니다.");
+        }
+    }
+
+    private void validateScore(Double score) {
+        if (score == null) {
+            throw new IllegalArgumentException("점수는 null이 될 수 없습니다.");
         }
     }
 
