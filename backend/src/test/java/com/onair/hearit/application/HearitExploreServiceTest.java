@@ -1,10 +1,13 @@
 package com.onair.hearit.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.onair.hearit.application.explore.ExploreScoreCalculator;
 import com.onair.hearit.application.explore.HearitExploreService;
 import com.onair.hearit.application.explore.score.BookmarkScoreFactor;
 import com.onair.hearit.application.explore.score.RandomScoreFactor;
 import com.onair.hearit.application.explore.score.RecencyScoreFactor;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
@@ -21,6 +24,7 @@ import com.onair.hearit.infrastructure.ExploreScoreCommandRepository;
 import com.onair.hearit.infrastructure.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
+import com.onair.hearit.infrastructure.MemberRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,6 +56,9 @@ class HearitExploreServiceTest {
     private ExploredHearitQueryRepository exploredHearitQueryRepository;
 
     @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
     private HearitRepository hearitRepository;
 
     @Autowired
@@ -77,7 +84,7 @@ class HearitExploreServiceTest {
     @BeforeEach
     void setup() {
         hearitExploreService = new HearitExploreService(
-                exploreScoreCommandRepository, exploredHearitQueryRepository, hearitRepository,
+                exploreScoreCommandRepository, exploredHearitQueryRepository, memberRepository, hearitRepository,
                 hearitKeywordRepository, bookmarkRepository, exploreScoreCalculator,
                 bookmarkScoreFactor, recencyScoreFactor, randomScoreFactor);
     }
@@ -90,29 +97,31 @@ class HearitExploreServiceTest {
         Category category2 = dbHelper.insertCategory(new Category("category2", "#000000"));
         Category category3 = dbHelper.insertCategory(new Category("category3", "#000000"));
 
-        Hearit hearit1 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit1", category1));
-        Hearit hearit2 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit2", category1));
-        Hearit hearit3 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit3", category1));
-        Hearit hearit4 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit4", category1));
-        Hearit hearit5 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit5", category2));
-        Hearit hearit6 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit6", category2));
-        Hearit hearit7 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit7", category2));
-        Hearit hearit8 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit8", category3));
-        Hearit hearit9 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit9", category3));
-        Hearit hearit10 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit10", category3));
+        Hearit hearit = dbHelper.insertHearit(createHearitByNameAndCategory("hearit5", category2));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit1", category1));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit2", category1));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit3", category1));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit4", category1));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit6", category2));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit7", category2));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit8", category3));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit9", category3));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit10", category3));
 
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        dbHelper.insertBookmark(new Bookmark(member, hearit5));
+        dbHelper.insertBookmark(new Bookmark(member, hearit));
 
         // when
-        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(member.getId(),
-                new CursorRequest(0L, 10));
+        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(
+                UserContext.member(member.getId()), new CursorRequest(0L, 10));
 
         // then
-        exploredHearits.content().forEach(System.out::println);
+        // 출력을 해보고 싶으면 아래 주석 해제
+        // exploredHearits.content().forEach(System.out::println);
+        assertThat(exploredHearits.content()).hasSize(10);
     }
 
-    @DisplayName("바회원 점수판 생성 - 최신성, 랜덤성")
+    @DisplayName("비회원 점수판 생성 - 최신성, 랜덤성")
     @Test
     void generateGuestScore() {
         // given
@@ -120,23 +129,25 @@ class HearitExploreServiceTest {
         Category category2 = dbHelper.insertCategory(new Category("category2", "#000000"));
         Category category3 = dbHelper.insertCategory(new Category("category3", "#000000"));
 
-        Hearit hearit1 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit1", category1));
-        Hearit hearit2 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit2", category1));
-        Hearit hearit3 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit3", category1));
-        Hearit hearit4 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit4", category1));
-        Hearit hearit5 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit5", category2));
-        Hearit hearit6 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit6", category2));
-        Hearit hearit7 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit7", category2));
-        Hearit hearit8 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit8", category3));
-        Hearit hearit9 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit9", category3));
-        Hearit hearit10 = dbHelper.insertHearit(createHearitByNameAndCategory("hearit10", category3));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit2", category1));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit1", category1));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit3", category1));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit4", category1));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit5", category2));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit6", category2));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit7", category2));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit8", category3));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit9", category3));
+        dbHelper.insertHearit(createHearitByNameAndCategory("hearit10", category3));
 
         // when
-        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(null,
-                new CursorRequest(0L, 10));
+        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(
+                UserContext.guest(), new CursorRequest(0L, 10));
 
         // then
-        exploredHearits.content().forEach(System.out::println);
+        // 출력을 해보고 싶으면 아래 주석 해제
+        // exploredHearits.content().forEach(System.out::println);
+        assertThat(exploredHearits.content()).hasSize(10);
     }
 
     private Hearit createHearitByNameAndCategory(String name, Category category) {

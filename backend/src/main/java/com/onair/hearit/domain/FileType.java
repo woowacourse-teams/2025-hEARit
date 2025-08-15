@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum FileType {
 
-    ORIGINAL("ORG", ".mp3", "hearit/audio/original/") {
+    ORIGINAL("ORG", ".mp3", "/hearit/audio/original/") {
         @Override
         public FileUrls updateFileUrls(FileUrls urls, String newUrl) {
             return urls.updateOriginalAudioUrl(newUrl);
@@ -19,7 +19,7 @@ public enum FileType {
             return urls.getOriginalAudioUrl();
         }
     },
-    SHORT("SHR", ".mp3", "hearit/audio/short/") {
+    SHORT("SHR", ".mp3", "/hearit/audio/short/") {
         @Override
         public FileUrls updateFileUrls(FileUrls urls, String newUrl) {
             return urls.updateShortAudioUrl(newUrl);
@@ -30,7 +30,7 @@ public enum FileType {
             return urls.getShortAudioUrl();
         }
     },
-    SCRIPT("SCR", ".json", "hearit/script/") {
+    SCRIPT("SCR", ".json", "/hearit/script/") {
         @Override
         public FileUrls updateFileUrls(FileUrls urls, String newUrl) {
             return urls.updateScriptUrl(newUrl);

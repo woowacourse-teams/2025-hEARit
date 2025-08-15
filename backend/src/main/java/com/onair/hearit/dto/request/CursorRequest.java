@@ -1,17 +1,16 @@
 package com.onair.hearit.dto.request;
 
-import com.onair.hearit.common.exception.custom.InvalidInputException;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 public record CursorRequest(
+        @NotNull
+        @Min(0)
         long cursorId,
+
+        @NotNull
+        @Min(1) @Max(20)
         int size
 ) {
-    public CursorRequest {
-        if (cursorId < 0) {
-            throw new InvalidInputException("page는 0 이상이어야합니다.");
-        }
-        if (size < 0 || size > 100) {
-            throw new InvalidInputException("size는 0 ~ 100 이어야합니다.");
-        }
-    }
 }

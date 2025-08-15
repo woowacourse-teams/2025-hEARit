@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
 import com.onair.hearit.admin.dto.request.KeywordUpdateRequest;
-import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
+import com.onair.hearit.admin.dto.response.AdminKeywordResponse;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.dto.response.PagedResponse;
@@ -32,7 +32,7 @@ class AdminKeywordControllerTest extends IntegrationTest {
         CsrfSession csrf = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
 
         // when
-        PagedResponse<KeywordInfoResponse> response = RestAssured.given().log().all()
+        PagedResponse<AdminKeywordResponse> response = RestAssured.given().log().all()
                 .cookie("JSESSIONID", csrf.sessionId())
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -59,7 +59,7 @@ class AdminKeywordControllerTest extends IntegrationTest {
         CsrfSession csrf = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
 
         // when
-        List<KeywordInfoResponse> response = RestAssured.given().log().all()
+        List<AdminKeywordResponse> response = RestAssured.given().log().all()
                 .cookie("JSESSIONID", csrf.sessionId())
                 .when()
                 .get("/api/v1/admin/keywords/all")

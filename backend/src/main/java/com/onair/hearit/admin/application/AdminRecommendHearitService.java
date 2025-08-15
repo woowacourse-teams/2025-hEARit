@@ -1,14 +1,14 @@
 package com.onair.hearit.admin.application;
 
+import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitCreateRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitUpdateRequest;
-import com.onair.hearit.admin.dto.response.MonthlyRecommendedHearitResponse;
-import com.onair.hearit.admin.dto.response.RecommendHearitResponse;
-import com.onair.hearit.common.exception.custom.InvalidInputException;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
+import com.onair.hearit.admin.dto.response.AdminRecommendHearitResponse;
+import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
+import com.onair.hearit.admin.exception.custom.AdminInvalidInputException;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.RecommendHearit;
-import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.RecommendHearitRepository;
 import java.time.LocalDate;
@@ -27,20 +27,40 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminRecommendHearitService {
 
+    private static final int RECOMMEND_HEARIT_COUNT = 5;
+
     private final HearitRepository hearitRepository;
     private final RecommendHearitRepository recommendHearitRepository;
 
-    public PagedResponse<RecommendHearitResponse> getHearits(PagingRequest pagingRequest) {
+    public AdminPagedResponse<AdminRecommendHearitResponse> getHearits(AdminPagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findAll(pageable);
-        Page<RecommendHearitResponse> recommendHearitResponses = hearits.map((hearit) -> {
-            Optional<RecommendHearit> recommendHearit = recommendHearitRepository.findRecentByHearitId(hearit.getId());
-            if (recommendHearit.isPresent()) {
-                return RecommendHearitResponse.of(hearit, recommendHearit.get().getRecommendDate());
-            }
-            return RecommendHearitResponse.of(hearit, null);
-        });
-        return PagedResponse.from(recommendHearitResponses);
+        Page<AdminRecommendHearitResponse> dtoPage = hearits.map(
+                hearit -> AdminRecommendHearitResponse.of(hearit, getLastRecommendDate(hearit)));
+        return AdminPagedResponse.from(dtoPage);
+    }
+
+    private LocalDate getLastRecommendDate(Hearit hearit) {
+        Optional<RecommendHearit> recommendHearit = recommendHearitRepository.findRecentByHearitId(hearit.getId());
+        return recommendHearit.map(RecommendHearit::getRecommendDate).orElse(null);
+    }
+
+    public List<MonthlyRecommendHearitResponse> getMonthRecommendHearit(Integer year, Integer month) {
+        LocalDate from = LocalDate.of(year, month, 1);
+        LocalDate to = YearMonth.of(year, month).atEndOfMonth();
+        List<RecommendHearit> recommendHearits = recommendHearitRepository.findByRecommendDateIsBetween(from, to);
+
+        List<MonthlyRecommendHearitResponse> responses = new ArrayList<>();
+        for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+            LocalDate target = date;
+            List<Long> hearitIds = recommendHearits.stream()
+                    .filter(recommendHearit -> recommendHearit.getRecommendDate().isEqual(target))
+                    .map(recommendHearit -> recommendHearit.getHearit().getId())
+                    .toList();
+            List<Hearit> hearits = hearitRepository.findAllByIdIn(hearitIds);
+            responses.add(MonthlyRecommendHearitResponse.from(target, hearits));
+        }
+        return responses;
     }
 
     @Transactional
@@ -48,27 +68,9 @@ public class AdminRecommendHearitService {
         validateForCreateRecommendHearit(request.recommendDate(), request.hearitIds());
         List<Hearit> hearits = getHearitsById(request.hearitIds());
         for (Hearit hearit : hearits) {
-            RecommendHearit recommendHearit = new RecommendHearit(hearit, request.recommendDate());
+            RecommendHearit recommendHearit = new RecommendHearit(hearit.getId(), request.recommendDate());
             recommendHearitRepository.save(recommendHearit);
         }
-    }
-
-    public List<MonthlyRecommendedHearitResponse> getMonthRecommendedHearit(Integer year, Integer month) {
-        LocalDate from = LocalDate.of(year, month, 1);
-        LocalDate to = YearMonth.of(year, month).atEndOfMonth();
-        List<RecommendHearit> monthlyRecommendHearits = recommendHearitRepository.findByRecommendDateIsBetween(from,
-                to);
-        List<MonthlyRecommendedHearitResponse> responses = new ArrayList<>();
-        for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
-            LocalDate target = date;
-            List<Long> hearitIds = monthlyRecommendHearits.stream()
-                    .filter(recommendHearit -> recommendHearit.getRecommendDate().isEqual(target))
-                    .map(recommendHearit -> recommendHearit.getHearit().getId())
-                    .toList();
-            List<Hearit> hearits = hearitRepository.findAllByIdIn(hearitIds);
-            responses.add(MonthlyRecommendedHearitResponse.from(target, hearits));
-        }
-        return responses;
     }
 
     @Transactional
@@ -76,8 +78,8 @@ public class AdminRecommendHearitService {
         validateForCreateRecommendHearit(request.recommendDate(), request.hearitIds());
         List<Hearit> hearits = getHearitsById(request.hearitIds());
         int deletedRowCount = recommendHearitRepository.deleteAllByRecommendDate(request.recommendDate());
-        if (deletedRowCount != 5) {
-            throw new InvalidInputException("추천 히어릿 아이디가 유효하지 않습니다.");
+        if (deletedRowCount != RECOMMEND_HEARIT_COUNT) {
+            throw new AdminInvalidInputException("추천 히어릿 아이디가 유효하지 않습니다.");
         }
         for (Hearit hearit : hearits) {
             RecommendHearit recommendHearit = new RecommendHearit(hearit, request.recommendDate());
@@ -88,17 +90,17 @@ public class AdminRecommendHearitService {
     private void validateForCreateRecommendHearit(LocalDate recommendDate, List<Long> hearitIds) {
         LocalDate today = LocalDate.now();
         if (recommendDate.isBefore(today)) {
-            throw new InvalidInputException("과거의 추천히어릿은 생성할 수 없습니다.");
+            throw new AdminInvalidInputException("과거의 추천히어릿은 생성할 수 없습니다.");
         }
-        if (hearitIds.size() != 5) {
-            throw new InvalidInputException("추천 히어릿은 반드시 5개여야합니다.");
+        if (hearitIds.size() != RECOMMEND_HEARIT_COUNT) {
+            throw new AdminInvalidInputException("추천 히어릿은 반드시 5개여야합니다.");
         }
     }
 
     private List<Hearit> getHearitsById(List<Long> hearitIds) {
         List<Hearit> hearits = hearitRepository.findAllByIdIn(hearitIds);
-        if (hearits.size() != 5) {
-            throw new InvalidInputException("추천 히어릿은 반드시 5개여야합니다.");
+        if (hearits.size() != RECOMMEND_HEARIT_COUNT) {
+            throw new AdminInvalidInputException("추천 히어릿은 반드시 5개여야합니다.");
         }
         return hearits;
     }

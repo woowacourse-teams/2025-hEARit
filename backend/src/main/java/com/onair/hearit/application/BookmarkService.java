@@ -1,6 +1,6 @@
 package com.onair.hearit.application;
 
-import com.onair.hearit.auth.dto.CurrentMember;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
@@ -14,12 +14,12 @@ import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.MemberRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +30,9 @@ public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
 
     public PagedResponse<BookmarkHearitResponse> getBookmarkHearits(
-            CurrentMember currentMember,
+            UserContext userContext,
             PagingRequest pagingRequest) {
-        Member member = getMemberByCurrentMember(currentMember);
+        Member member = getMemberByUserContext(userContext);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByCreatedAtDesc(member, pageable);
         Page<BookmarkHearitResponse> bookmarkHearits = bookmarks.map(
@@ -41,10 +41,10 @@ public class BookmarkService {
     }
 
     @Transactional
-    public BookmarkInfoResponse addBookmark(CurrentMember currentMember, Long hearitId) {
-        Member member = getMemberByCurrentMember(currentMember);
+    public BookmarkInfoResponse addBookmark(UserContext userContext, Long hearitId) {
+        Member member = getMemberByUserContext(userContext);
         Hearit hearit = getHearitById(hearitId);
-        if (bookmarkRepository.existsByHearitIdAndMemberId(hearit.getId(), member.getId())) {
+        if (bookmarkRepository.existsByHearitAndMember(hearit, member)) {
             throw new AlreadyExistException("이미 북마크된 히어릿입니다.");
         }
         Bookmark bookmark = new Bookmark(member, hearit);
@@ -53,20 +53,20 @@ public class BookmarkService {
     }
 
     @Transactional
-    public void deleteBookmark(Long bookmarkId, CurrentMember currentMember) {
+    public void deleteBookmark(Long bookmarkId, UserContext userContext) {
         Bookmark bookmark = getBookmarkById(bookmarkId);
-        Member member = getMemberByCurrentMember(currentMember);
+        Member member = getMemberByUserContext(userContext);
         if (!bookmark.isCreatedBy(member)) {
             throw new UnauthorizedException("북마크를 삭제할 권한이 없습니다.");
         }
         bookmarkRepository.delete(bookmark);
     }
 
-    private Member getMemberByCurrentMember(CurrentMember currentMember) {
-        if (currentMember == null) {
+    private Member getMemberByUserContext(UserContext userContext) {
+        if (userContext == null || userContext.isGuest()) {
             throw new UnauthorizedException("로그인한 회원이 아닙니다.");
         }
-        return getMemberById(currentMember.memberId());
+        return getMemberById(userContext.memberId());
     }
 
     private Member getMemberById(Long memberId) {
