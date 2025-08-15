@@ -75,7 +75,7 @@ public class AdminHearitService {
     @Transactional
     public void addHearit(HearitCreateRequest request) {
         Category category = getCategoryById(request.categoryId());
-        List<Source> sources = parseSourceCreateRequestToSource(request.sources());
+        List<Source> sources = mapSourceCreateRequestToSource(request.sources());
         String originalAudioUrl = FileType.ORIGINAL.getUploadPath() + request.originalAudio().getOriginalFilename();
         String shortAudioUrl = FileType.SHORT.getUploadPath() + request.shortAudio().getOriginalFilename();
         String scriptUrl = FileType.SCRIPT.getUploadPath() + request.scriptFile().getOriginalFilename();
@@ -91,7 +91,7 @@ public class AdminHearitService {
         saveHearitKeywords(request.keywordIds(), savedHearit);
     }
 
-    private List<Source> parseSourceCreateRequestToSource(List<SourceCreateRequest> sources) {
+    private List<Source> mapSourceCreateRequestToSource(List<SourceCreateRequest> sources) {
         return sources.stream()
                 .map(s -> new Source(s.sourceName(), s.sourceUrl()))
                 .toList();
@@ -121,12 +121,12 @@ public class AdminHearitService {
     @Transactional
     public void modifyHearitMetaData(Long hearitId, HearitInfoUpdateRequest request) {
         Category category = getCategoryById(request.categoryId());
-        List<Source> sources = parseSourceUpdateRequestToSource(request.sources());
+        List<Source> sources = mapSourceUpdateRequestToSource(request.sources());
         Hearit hearit = getHearitById(hearitId);
         hearit.updateMetaData(request.title(), request.summary(), request.playTime(), sources, category);
     }
 
-    private List<Source> parseSourceUpdateRequestToSource(List<SourceUpdateRequest> sources) {
+    private List<Source> mapSourceUpdateRequestToSource(List<SourceUpdateRequest> sources) {
         return sources.stream()
                 .map(s -> new Source(s.sourceName(), s.sourceUrl()))
                 .toList();
