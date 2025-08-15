@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.application;
+package com.onair.hearit.auth.domain;
 
 public enum OAuthProvider {
 

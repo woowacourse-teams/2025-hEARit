@@ -1,7 +1,7 @@
 package com.onair.hearit.auth.presentation;
 
 import com.onair.hearit.auth.application.AuthService;
-import com.onair.hearit.auth.application.OAuthProvider;
+import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.OAuthLoginRequest;

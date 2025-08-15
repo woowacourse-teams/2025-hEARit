@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
 
+import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.auth.dto.request.OAuthUserInfo;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;

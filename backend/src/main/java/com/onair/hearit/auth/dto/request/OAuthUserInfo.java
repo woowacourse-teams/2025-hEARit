@@ -1,6 +1,6 @@
 package com.onair.hearit.auth.dto.request;
 
-import com.onair.hearit.auth.application.OAuthProvider;
+import com.onair.hearit.auth.domain.OAuthProvider;
 
 public record OAuthUserInfo(
         String id,

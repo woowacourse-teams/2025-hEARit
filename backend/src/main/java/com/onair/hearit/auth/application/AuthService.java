@@ -1,5 +1,6 @@
 package com.onair.hearit.auth.application;
 
+import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.OAuthLoginRequest;

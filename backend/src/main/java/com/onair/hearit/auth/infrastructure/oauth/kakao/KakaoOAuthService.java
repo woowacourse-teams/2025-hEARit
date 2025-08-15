@@ -1,6 +1,6 @@
 package com.onair.hearit.auth.infrastructure.oauth.kakao;
 
-import com.onair.hearit.auth.application.OAuthProvider;
+import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.auth.application.OAuthService;
 import com.onair.hearit.auth.dto.request.OAuthUserInfo;
 import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;

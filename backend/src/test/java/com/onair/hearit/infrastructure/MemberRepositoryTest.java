@@ -3,7 +3,7 @@ package com.onair.hearit.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.auth.application.OAuthProvider;
+import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;

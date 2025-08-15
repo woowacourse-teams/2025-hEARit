@@ -8,7 +8,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.auth.application.OAuthProvider;
+import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Member;
