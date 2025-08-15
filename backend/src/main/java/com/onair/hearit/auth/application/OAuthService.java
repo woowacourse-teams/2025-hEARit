@@ -1,11 +1,11 @@
 package com.onair.hearit.auth.application;
 
 import com.onair.hearit.auth.domain.OAuthProvider;
-import com.onair.hearit.auth.dto.request.OAuthUserInfo;
+import com.onair.hearit.auth.dto.response.OAuthUserInfoResponse;
 
 public interface OAuthService {
 
     OAuthProvider provider();
 
-    OAuthUserInfo fetchUser(String accessToken);
+    OAuthUserInfoResponse fetchUser(String accessToken);
 }

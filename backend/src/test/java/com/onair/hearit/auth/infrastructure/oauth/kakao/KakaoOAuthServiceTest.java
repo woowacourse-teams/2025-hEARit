@@ -1,6 +1,6 @@
 package com.onair.hearit.auth.infrastructure.oauth.kakao;
 
-import com.onair.hearit.auth.dto.request.OAuthUserInfo;
+import com.onair.hearit.auth.dto.response.OAuthUserInfoResponse;
 import com.onair.hearit.fixture.IntegrationTest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Disabled;
@@ -18,7 +18,7 @@ class KakaoOAuthServiceTest extends IntegrationTest {
     @DisplayName("실제 카카오 API를 호출하여 사용자정보를 가져온다.")
     void fetchUserInfo_usingRealKakaoApi() {
         String kakaoAccessToken = "yC5CmZ1kj1jHcCICRBWX_dvbXIMqfn8rAAAAAQoXBi4AAAGYE03XhpQkbXeV0h_w";
-        OAuthUserInfo response = kakaoOAuthService.fetchUser(kakaoAccessToken);
+        OAuthUserInfoResponse response = kakaoOAuthService.fetchUser(kakaoAccessToken);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response).isNotNull();

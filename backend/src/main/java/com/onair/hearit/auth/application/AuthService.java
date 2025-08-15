@@ -4,9 +4,9 @@ import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
-import com.onair.hearit.auth.dto.request.OAuthUserInfo;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
+import com.onair.hearit.auth.dto.response.OAuthUserInfoResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
@@ -69,13 +69,13 @@ public class AuthService {
     @Transactional
     public LoginTokenResponse loginOrSignUp(OAuthLoginRequest request, OAuthProvider provider) {
         OAuthService oAuthService = oAuthServiceRegistry.get(provider);
-        OAuthUserInfo userInfo = oAuthService.fetchUser(request.accessToken());
+        OAuthUserInfoResponse userInfo = oAuthService.fetchUser(request.accessToken());
         Member member = memberRepository.findBySocialIdAndOAuthProvider(userInfo.id(), provider)
                 .orElseGet(() -> signupWithUserInfo(userInfo, provider));
         return createTokenResponseFrom(member);
     }
 
-    private Member signupWithUserInfo(OAuthUserInfo userInfo, OAuthProvider provider) {
+    private Member signupWithUserInfo(OAuthUserInfoResponse userInfo, OAuthProvider provider) {
         Member member = Member.createSocialUser(
                 userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl(), provider);
         return memberRepository.save(member);

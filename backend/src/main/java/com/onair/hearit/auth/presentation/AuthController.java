@@ -29,7 +29,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginTokenResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginTokenResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginTokenResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
@@ -41,13 +41,13 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody SignupRequest request) {
+    public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest request) {
         authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/token/refresh")
-    public ResponseEntity<TokenReissueResponse> reissue(@RequestBody TokenReissueRequest request) {
+    public ResponseEntity<TokenReissueResponse> reissue(@Valid @RequestBody TokenReissueRequest request) {
         String newAccessToken = authService.reissue(request.refreshToken());
         return ResponseEntity.ok(new TokenReissueResponse(newAccessToken));
     }

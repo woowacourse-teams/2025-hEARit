@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 
 import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
-import com.onair.hearit.auth.dto.request.OAuthUserInfo;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
+import com.onair.hearit.auth.dto.response.OAuthUserInfoResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Member;
@@ -52,7 +52,7 @@ class AuthKakaoServiceTest {
 
         String accessToken = "test-access-token";
         OAuthLoginRequest request = new OAuthLoginRequest(accessToken);
-        OAuthUserInfo userInfo = new OAuthUserInfo(socialId, "테스트유저", "profile.jpg", provider);
+        OAuthUserInfoResponse userInfo = new OAuthUserInfoResponse(socialId, "테스트유저", "profile.jpg", provider);
 
         when(oAuthServiceRegistry.get(provider)).thenReturn(oAuthService);
         when(oAuthService.fetchUser(accessToken)).thenReturn(userInfo);
@@ -85,7 +85,8 @@ class AuthKakaoServiceTest {
 
         String accessToken = "test-access-token";
         OAuthLoginRequest request = new OAuthLoginRequest(accessToken);
-        OAuthUserInfo userInfo = new OAuthUserInfo(saved.getSocialId(), "테스트유저", "profile.jpg", provider);
+        OAuthUserInfoResponse userInfo = new OAuthUserInfoResponse(saved.getSocialId(), "테스트유저", "profile.jpg",
+                provider);
 
         when(oAuthServiceRegistry.get(provider)).thenReturn(oAuthService);
         when(oAuthService.fetchUser(accessToken)).thenReturn(userInfo);
