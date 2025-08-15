@@ -19,8 +19,8 @@ class ApiSecurityConfigTest extends IntegrationTest {
     JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("화이트리스트 경로는 인증 없이 접근할 수 있다")
-    void canAccessWhitelistedPathWithoutAuth() {
+    @DisplayName("PUBLIC GET API 경로는 HTTP Method GET만 인증 없이 접근할 수 있다")
+    void canAccessPublicGetListPathWithoutAuth() {
         // when & then
         RestAssured.given().log().all()
                 .when()

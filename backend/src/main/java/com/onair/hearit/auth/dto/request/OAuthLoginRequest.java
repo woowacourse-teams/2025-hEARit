@@ -4,10 +4,10 @@ import com.onair.hearit.common.log.mask.Masking;
 import com.onair.hearit.common.log.mask.MaskingType;
 import jakarta.validation.constraints.NotBlank;
 
-public record TokenReissueRequest(
+public record OAuthLoginRequest(
 
         @NotBlank
         @Masking(type = MaskingType.TOKEN)
-        String refreshToken
+        String accessToken
 ) {
 }

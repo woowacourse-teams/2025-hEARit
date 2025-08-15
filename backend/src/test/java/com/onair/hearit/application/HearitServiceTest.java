@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
@@ -25,6 +26,7 @@ import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.CategoryRepository;
 import com.onair.hearit.infrastructure.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
+import com.onair.hearit.infrastructure.MemberRepository;
 import com.onair.hearit.infrastructure.RecommendHearitRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -58,6 +60,9 @@ class HearitServiceTest {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
     private RecommendHearitRepository recommendHearitRepository;
 
     private DbRecommendHearitProvider recommendHearitProvider;
@@ -69,6 +74,7 @@ class HearitServiceTest {
         recommendHearitProvider = new DbRecommendHearitProvider(hearitRepository, recommendHearitRepository);
         hearitService = new HearitService(
                 hearitRepository,
+                memberRepository,
                 bookmarkRepository,
                 hearitKeywordRepository,
                 categoryRepository,
@@ -87,17 +93,18 @@ class HearitServiceTest {
         HearitKeyword hearitKeyword = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword));
 
         // when
-        HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(), member.getId());
+        HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(),
+                UserContext.member(member.getId()));
 
         // then
         assertAll(
-            () -> assertThat(response.id()).isEqualTo(hearit.getId()),
-            () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
-            () -> assertThat(response.summary()).isEqualTo(hearit.getSummary()),
-            () -> assertThat(response.isBookmarked()).isTrue(),
-            () -> assertThat(response.bookmarkId()).isEqualTo(bookmark.getId()),
-            () -> assertThat(response.category()).isEqualTo(hearit.getCategory().getName()),
-            () -> assertThat(response.keywords()).hasSize(1)
+                () -> assertThat(response.id()).isEqualTo(hearit.getId()),
+                () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
+                () -> assertThat(response.summary()).isEqualTo(hearit.getSummary()),
+                () -> assertThat(response.isBookmarked()).isTrue(),
+                () -> assertThat(response.bookmarkId()).isEqualTo(bookmark.getId()),
+                () -> assertThat(response.category()).isEqualTo(hearit.getCategory().getName()),
+                () -> assertThat(response.keywords()).hasSize(1)
         );
     }
 
@@ -109,9 +116,9 @@ class HearitServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // when & then
-        assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId, member.getId()))
-            .isInstanceOf(NotFoundException.class)
-            .hasMessageContaining("hearitId");
+        assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId, UserContext.member(notExistHearitId)))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("hearitId");
     }
 
     @Test
@@ -165,7 +172,7 @@ class HearitServiceTest {
 
         // when
         List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(
-            member.getId());
+                UserContext.member(member.getId()));
 
         // then
         assertAll(() -> {
@@ -201,9 +208,9 @@ class HearitServiceTest {
 
         // when
         List<HearitsWithRecommendCategoryResponse> firstResponses = hearitService.getHearitsWithRecommendCategory(
-            member.getId());
+                UserContext.member(member.getId()));
         List<HearitsWithRecommendCategoryResponse> secondResponses = hearitService.getHearitsWithRecommendCategory(
-            member.getId());
+                UserContext.member(member.getId()));
 
         // then
         assertAll(() -> {
@@ -227,13 +234,13 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category1.getId(),
-            request);
+                request);
 
         // then
         assertAll(() -> {
             assertThat(result.content()).hasSize(2);
             assertThat(result.content()).extracting(HearitOfCategoryResponse::id)
-                .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
+                    .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
         });
     }
 
@@ -251,13 +258,13 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-            request);
+                request);
 
         // then
         assertAll(
-            () -> assertThat(result.content()).hasSize(1),
-            () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
-            () -> assertThat(result.content().get(0).keywords()).hasSize(2)
+                () -> assertThat(result.content()).hasSize(1),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
+                () -> assertThat(result.content().get(0).keywords()).hasSize(2)
         );
     }
 
@@ -273,12 +280,12 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-            request);
+                request);
 
         // then
         assertAll(
-            () -> assertThat(result.content()).hasSize(1),
-            () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
+                () -> assertThat(result.content()).hasSize(1),
+                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
         );
     }
 }

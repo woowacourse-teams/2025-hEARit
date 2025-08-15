@@ -3,6 +3,7 @@ package com.onair.hearit.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.config.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
@@ -60,10 +61,11 @@ class MemberRepositoryTest {
     @DisplayName("socialId로 활성 회원을 조회할 수 있다")
     void findBySocialId_whenActiveMember_thenReturnMember() {
         // given
-        dbHelper.insertMember(Member.createSocialUser("social123", "닉네임", null));
+        OAuthProvider kakao = OAuthProvider.KAKAO;
+        dbHelper.insertMember(Member.createSocialUser("social123", "닉네임", null, kakao));
 
         // when
-        Optional<Member> result = memberRepository.findBySocialId("social123");
+        Optional<Member> result = memberRepository.findBySocialIdAndOAuthProvider("social123", kakao);
 
         // then
         assertAll(() -> {

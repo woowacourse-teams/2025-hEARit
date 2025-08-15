@@ -1,7 +1,7 @@
 package com.onair.hearit.presentation;
 
 import com.onair.hearit.application.BookmarkService;
-import com.onair.hearit.auth.dto.CurrentMember;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.dto.request.PagingRequest;
 import com.onair.hearit.dto.response.BookmarkHearitResponse;
 import com.onair.hearit.dto.response.BookmarkInfoResponse;
@@ -29,25 +29,26 @@ public class BookmarkController {
     public ResponseEntity<PagedResponse<BookmarkHearitResponse>> readBookmarkHearits(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
-            @AuthenticationPrincipal CurrentMember member) {
+            @AuthenticationPrincipal UserContext userContext) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(member, pagingRequest);
+        PagedResponse<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(userContext,
+                pagingRequest);
         return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/hearits/{hearitId}")
     public ResponseEntity<BookmarkInfoResponse> createBookmark(
             @PathVariable Long hearitId,
-            @AuthenticationPrincipal CurrentMember member) {
-        BookmarkInfoResponse response = bookmarkService.addBookmark(member, hearitId);
+            @AuthenticationPrincipal UserContext userContext) {
+        BookmarkInfoResponse response = bookmarkService.addBookmark(userContext, hearitId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{bookmarkId}")
     public ResponseEntity<Void> deleteBookmark(
             @PathVariable Long bookmarkId,
-            @AuthenticationPrincipal CurrentMember member) {
-        bookmarkService.deleteBookmark(bookmarkId, member);
+            @AuthenticationPrincipal UserContext userContext) {
+        bookmarkService.deleteBookmark(bookmarkId, userContext);
         return ResponseEntity.noContent().build();
     }
 }

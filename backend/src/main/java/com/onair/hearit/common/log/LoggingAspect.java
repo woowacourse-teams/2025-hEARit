@@ -122,7 +122,7 @@ public class LoggingAspect {
     }
 
     @AfterReturning(value = "allMapping()", returning = "responseEntity")
-    public void logResponse(JoinPoint joinPoint, ResponseEntity<?> responseEntity) {
+    public void logResponse(ResponseEntity<?> responseEntity) {
         RequestInfo requestInfo = RequestInfo.fromMdc();
         ResponseLog responseLog = ResponseLog.of(
                 LocalDateTime.now(),

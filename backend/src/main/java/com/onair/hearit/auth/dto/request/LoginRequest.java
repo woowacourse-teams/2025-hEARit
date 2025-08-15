@@ -2,9 +2,16 @@ package com.onair.hearit.auth.dto.request;
 
 import com.onair.hearit.common.log.mask.Masking;
 import com.onair.hearit.common.log.mask.MaskingType;
+import jakarta.validation.constraints.NotBlank;
 
 public record LoginRequest(
+
+        @NotBlank
+        @Masking(type = MaskingType.EDGE)
         String localId,
-        @Masking(type = MaskingType.FULL) String password
+
+        @NotBlank
+        @Masking(type = MaskingType.FULL)
+        String password
 ) {
 }

@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.dto.response;
+package com.onair.hearit.auth.infrastructure.oauth.kakao.dto;
 
 public record KakaoUserInfoResponse(
         String id,

@@ -32,7 +32,7 @@ class ExploredHearitQueryRepositoryTest {
 
     @Test
     @DisplayName("회원의 점수 기반 히어릿을 커서 이후부터 조회한다")
-    void findExploredHearits_byMember() {
+    void findExploredHearits_ForMember_byMember() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         List<ExploreScore> exploreScores = insertTestExploreScoreByMemberIdAndCount(member.getId(), 5);
@@ -41,7 +41,7 @@ class ExploredHearitQueryRepositoryTest {
                 .toList();
 
         // when
-        List<Hearit> result = exploredHearitQueryRepository.findExploredHearits(member.getId(), 2L, 3);
+        List<Hearit> result = exploredHearitQueryRepository.findExploredHearitsForMember(member.getId(), 2L, 3);
 
         // then
         assertAll(() -> {
@@ -53,7 +53,7 @@ class ExploredHearitQueryRepositoryTest {
 
     @Test
     @DisplayName("비회원의 점수 기반 히어릿을 커서 이후부터 조회한다")
-    void findExploredHearits_byGuest() {
+    void findExploredHearits_ForMember_byGuest() {
         // given
         List<ExploreScore> exploreScores = insertTestExploreScoreByMemberIdAndCount(-1L, 5);
         List<Long> exploreScoreHearitIds = exploreScores.stream()

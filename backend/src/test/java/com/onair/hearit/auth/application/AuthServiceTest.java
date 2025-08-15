@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.auth.domain.OAuthProvider;
 import com.onair.hearit.auth.domain.RefreshToken;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
-import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
@@ -38,7 +38,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 class AuthServiceTest {
 
     @MockitoBean
-    KakaoUserInfoClient kakaoUserInfoClient;
+    OAuthServiceRegistry oAuthServiceRegistry;
 
     @Autowired
     MemberRepository memberRepository;
@@ -77,6 +77,7 @@ class AuthServiceTest {
                 assertThat(saved.getNickname()).isEqualTo("nickname");
                 assertThat(passwordEncoder.matches("password123", saved.getPassword())).isTrue();
                 assertThat(saved.getProfileImage()).isNotNull();
+                assertThat(saved.getOAuthProvider()).isEqualTo(OAuthProvider.NONE);
             });
         }
 
@@ -148,6 +149,24 @@ class AuthServiceTest {
             assertThatThrownBy(() -> authService.login(loginRequest))
                     .isInstanceOf(UnauthorizedException.class)
                     .hasMessageContaining("아이디나 비밀번호가 일치하지 않습니다.");
+        }
+
+        @Test
+        @DisplayName("회원탈퇴 시 리프레시토큰 제거 및 회원탈퇴한시각을 기록한다.")
+        void logout_then_deleteRefreshToken() {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+            refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
+            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
+
+            // when
+            authService.withdraw(member.getId());
+
+            // then
+            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+            Member withdrawnMember = memberRepository.findById(member.getId()).orElseThrow();
+            assertThat(withdrawnMember.getDeletedAt()).isNotNull();
         }
 
         @Nested
@@ -223,24 +242,6 @@ class AuthServiceTest {
                         .isInstanceOf(UnauthorizedException.class)
                         .hasMessage("리프레시 토큰이 불일치합니다.");
             }
-        }
-
-        @Test
-        @DisplayName("회원탈퇴 시 리프레시토큰 제거 및 회원탈퇴한시각을 기록한다.")
-        void logout_then_deleteRefreshToken() {
-            // given
-            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-            String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
-            refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
-            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
-
-            // when
-            authService.withdraw(member.getId());
-
-            // then
-            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
-            Member withdrawnMember = memberRepository.findById(member.getId()).orElseThrow();
-            assertThat(withdrawnMember.getDeletedAt()).isNotNull();
         }
     }
 }

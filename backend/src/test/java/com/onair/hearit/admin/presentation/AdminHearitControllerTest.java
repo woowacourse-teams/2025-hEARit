@@ -6,10 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest.SourceUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminHearitResponse;
+import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.FileType;
@@ -194,9 +194,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.NO_CONTENT);
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
-        assertAll(() -> {
-            assertThat(updatedHearit.getOriginalAudioUrl()).isEqualTo("/mock/origin.mp3");
-        });
+        assertThat(updatedHearit.getOriginalAudioUrl()).isEqualTo("/mock/origin.mp3");
     }
 
     @Test
@@ -223,9 +221,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.NO_CONTENT);
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
-        assertAll(() -> {
-            assertThat(updatedHearit.getShortAudioUrl()).isEqualTo("/mock/origin.mp3");
-        });
+        assertThat(updatedHearit.getShortAudioUrl()).isEqualTo("/mock/origin.mp3");
     }
 
     @Test
@@ -252,9 +248,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.NO_CONTENT);
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
-        assertAll(() -> {
-            assertThat(updatedHearit.getScriptUrl()).isEqualTo("/mock/origin.json");
-        });
+        assertThat(updatedHearit.getScriptUrl()).isEqualTo("/mock/origin.json");
     }
 
     private void insertTestHearits(int count) {
