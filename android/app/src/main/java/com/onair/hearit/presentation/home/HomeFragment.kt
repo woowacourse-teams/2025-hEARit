@@ -19,6 +19,7 @@ import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Direction
+import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
 import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
@@ -73,8 +74,7 @@ class HomeFragment :
         binding.viewModel = viewModel
         setupWindowInsets()
         setupListeners()
-        setupRecommendRecyclerView()
-        setupCategoryRecyclerView()
+        setupRecyclerView()
         observeViewModel()
     }
 
@@ -100,7 +100,7 @@ class HomeFragment :
         }
     }
 
-    private fun setupRecommendRecyclerView() {
+    private fun setupRecyclerView() {
         centerScrollListener =
             CenterScrollListener(snapHelper) { position ->
                 updateIndicator(position)
@@ -111,18 +111,14 @@ class HomeFragment :
             snapHelper.attachToRecyclerView(this)
             centerScrollListener?.let { addOnScrollListener(it) }
         }
-    }
 
-    private fun setupCategoryRecyclerView() {
         binding.rvHomeGroupedCategory.adapter = groupedCategoryAdapter
     }
 
     private fun observeViewModel() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            if (isLoading) {
-                binding.frHomeSkeleton.startShimmer()
-            } else {
-                binding.frHomeSkeleton.stopShimmer()
+            binding.frHomeSkeleton.apply {
+                if (isLoading) startShimmer() else stopShimmer()
             }
         }
 
@@ -135,17 +131,7 @@ class HomeFragment :
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
-            val contentItems = recommendItems.map { RecommendHearits.Content(it) }
-            val items =
-                buildList {
-                    add(RecommendHearits.NavigateItem(direction = Direction.LEFT))
-                    addAll(contentItems)
-                    add(RecommendHearits.NavigateItem(direction = Direction.RIGHT))
-                }
-            recommendAdapter.submitList(items) {
-                scrollToMiddlePosition()
-                setupIndicator(contentItems.size)
-            }
+            submitRecommendItems(recommendItems)
         }
 
         viewModel.groupedCategory.observe(viewLifecycleOwner) { groupedCategory ->
@@ -154,6 +140,20 @@ class HomeFragment :
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
+        }
+    }
+
+    private fun submitRecommendItems(recommendItems: List<RecommendHearit>) {
+        val contentItems = recommendItems.map { RecommendHearits.Content(it) }
+        val items =
+            buildList {
+                add(RecommendHearits.NavigateItem(Direction.LEFT))
+                addAll(contentItems)
+                add(RecommendHearits.NavigateItem(Direction.RIGHT))
+            }
+        recommendAdapter.submitList(items) {
+            scrollToMiddlePosition()
+            setupIndicator(contentItems.size)
         }
     }
 

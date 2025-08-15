@@ -31,27 +31,25 @@ class KakaoLoginHelper(
         UserApiClient.instance.loginWithKakaoAccount(activity, callback = kakaoCallback())
     }
 
-    private fun kakaoCallback(): (OAuthToken?, Throwable?) -> Unit {
-        return callback@{ token, error ->
+    private fun kakaoCallback(): (OAuthToken?, Throwable?) -> Unit =
+        { token, error ->
             when {
-                token != null -> {
-                    onSuccess(token)
-                }
+                token != null -> onSuccess(token)
 
-                error != null -> {
-                    if (error is ClientError && error.reason == ClientErrorCause.Cancelled) return@callback
-                    if (isKakaoTalkLogin) {
-                        isKakaoTalkLogin = false
-                        loginWithKakaoAccount()
-                    } else {
-                        onError(error)
-                    }
-                }
+                error != null -> handleKakaoError(error)
 
-                else -> {
-                    onError(null)
-                }
+                else -> onError(null)
             }
+        }
+
+    private fun handleKakaoError(error: Throwable) {
+        if (error is ClientError && error.reason == ClientErrorCause.Cancelled) return
+
+        if (isKakaoTalkLogin) {
+            isKakaoTalkLogin = false
+            loginWithKakaoAccount()
+        } else {
+            onError(error)
         }
     }
 }

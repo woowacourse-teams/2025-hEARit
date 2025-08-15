@@ -27,7 +27,7 @@ class SearchCategoryFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchCategoryBinding? = null
     private val binding get() = _binding!!
-    private val categoryAdapter by lazy { CategoryAdapter(this) }
+    private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
 
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
         SearchViewModelFactory()

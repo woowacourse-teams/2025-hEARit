@@ -215,10 +215,8 @@ class ExploreFragment :
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            if (isLoading) {
-                binding.frExploreSkeleton.startShimmer()
-            } else {
-                binding.frExploreSkeleton.stopShimmer()
+            binding.frExploreSkeleton.apply {
+                if (isLoading) startShimmer() else stopShimmer()
             }
         }
     }

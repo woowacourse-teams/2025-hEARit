@@ -10,6 +10,7 @@ plugins {
     id("com.google.gms.google-services")
     id("org.jlleitschuh.gradle.ktlint")
     id("com.google.firebase.crashlytics")
+    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
@@ -20,8 +21,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1010
-        versionName = "1.0.10"
+        versionCode = 1012
+        versionName = "1.0.12"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -180,4 +181,7 @@ dependencies {
 
     // in-app-update
     implementation(libs.app.update.ktx)
+
+    // open license
+    implementation(libs.play.services.oss.licenses)
 }

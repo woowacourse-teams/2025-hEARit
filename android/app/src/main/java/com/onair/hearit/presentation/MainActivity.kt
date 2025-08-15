@@ -23,6 +23,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -72,6 +73,10 @@ class MainActivity :
         setupBottomControllerClick()
     }
 
+    fun selectTab(itemId: Int) {
+        binding.layoutBottomNavigation.selectedItemId = itemId
+    }
+
     private fun setupBackPressHandler() {
         onBackPressedDispatcher.addCallback(
             this,
@@ -96,10 +101,6 @@ class MainActivity :
             insets
         }
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
-    }
-
-    fun selectTab(itemId: Int) {
-        binding.layoutBottomNavigation.selectedItemId = itemId
     }
 
     private fun setupNavigation() {
@@ -143,7 +144,7 @@ class MainActivity :
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
-        binding.layoutDrawer.tvDrawerTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
+        binding.layoutDrawer.tvOpenLicense.setOnClickListener { navigateToLicense() }
         binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
         binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
             val stopIntent = PlaybackService.stopIntent(this)
@@ -153,17 +154,24 @@ class MainActivity :
         binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
     }
 
-    private fun setupBottomControllerClick() {
-        binding.layoutBottomPlayerController.setOnClickListener {
-            val mediaId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
-            if (mediaId != null) {
-                navigateToDetail(mediaId)
-            } else {
-                mainViewModel.recentHearit.value
-                    ?.id
-                    ?.let { navigateToDetail(it) }
-            }
+    private fun attachController() {
+        if (mediaController != null) {
+            maybePreloadRecent()
+            return
         }
+        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        val future = MediaController.Builder(this, token).buildAsync()
+        future.addListener(
+            {
+                mediaController = future.get()
+                mediaController?.let { controller ->
+                    binding.layoutBottomPlayerController.setPlayer(controller)
+                    setPlayerControlViewVisibility()
+                    maybePreloadRecent()
+                }
+            },
+            ContextCompat.getMainExecutor(this),
+        )
     }
 
     private fun observeViewModel() {
@@ -191,6 +199,19 @@ class MainActivity :
 
         mainViewModel.toastMessage.observe(this) { resId ->
             showToast(getString(resId))
+        }
+    }
+
+    private fun setupBottomControllerClick() {
+        binding.layoutBottomPlayerController.setOnClickListener {
+            val mediaId = mediaController?.currentMediaItem?.mediaId?.toLongOrNull()
+            if (mediaId != null) {
+                navigateToDetail(mediaId)
+            } else {
+                mainViewModel.recentHearit.value
+                    ?.id
+                    ?.let { navigateToDetail(it) }
+            }
         }
     }
 
@@ -239,30 +260,6 @@ class MainActivity :
         loadingDialog = null
     }
 
-    override fun openDrawer() {
-        binding.drawerLayout.openDrawer(GravityCompat.END)
-    }
-
-    private fun attachController() {
-        if (mediaController != null) {
-            maybePreloadRecent()
-            return
-        }
-        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
-        val future = MediaController.Builder(this, token).buildAsync()
-        future.addListener(
-            {
-                mediaController = future.get()
-                mediaController?.let { controller ->
-                    binding.layoutBottomPlayerController.setPlayer(controller)
-                    setPlayerControlViewVisibility()
-                    maybePreloadRecent()
-                }
-            },
-            ContextCompat.getMainExecutor(this),
-        )
-    }
-
     private fun maybePreloadRecent() {
         val controller = mediaController ?: return
         if (hasSentPreload) return
@@ -309,6 +306,25 @@ class MainActivity :
 
     private fun showToast(message: String?) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun navigateToSplash() {
+        val intent =
+            Intent(this, SplashActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+        startActivity(intent)
+        finish()
+    }
+
+    private fun navigateToLicense() {
+        OssLicensesMenuActivity.setActivityTitle(HEARIT_OPEN_LICENSE_TITLE)
+        val intent = Intent(this, OssLicensesMenuActivity::class.java)
+        startActivity(intent)
+    }
+
+    override fun openDrawer() {
+        binding.drawerLayout.openDrawer(GravityCompat.END)
     }
 
     override fun showPlayerControlView() {
@@ -374,16 +390,8 @@ class MainActivity :
         super.onNewIntent(intent)
     }
 
-    private fun navigateToSplash() {
-        val intent =
-            Intent(this, SplashActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-        startActivity(intent)
-        finish()
-    }
-
     companion object {
+        private const val HEARIT_OPEN_LICENSE_TITLE = "hEARit Open Source Licenses"
         private const val PRIVACY_POLICY_URL =
             "https://glistening-eclipse-58b.notion.site/231d39b9c3c3809b9f92ec3e812ea24b?source=copy_link"
         private const val TERMS_OF_USE_URL =

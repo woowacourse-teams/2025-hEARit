@@ -45,30 +45,27 @@ class HomeViewModel(
 
     private fun fetchData() {
         _isLoading.value = true
+
         viewModelScope.launch {
             val recommendDeferred = async { hearitRepository.getRecommendHearits() }
             val groupedDeferred = async { hearitRepository.getCategoryHearits() }
 
-            val recommendHearitsResult = recommendDeferred.await()
-            val groupedCategoryResult = groupedDeferred.await()
+            val recommendResult = recommendDeferred.await()
+            val groupedResult = groupedDeferred.await()
 
-            val bothSuccess = recommendHearitsResult.isSuccess && groupedCategoryResult.isSuccess
-
-            if (bothSuccess) {
-                _recommendHearits.value = recommendHearitsResult.getOrThrow()
-                _groupedCategory.value = groupedCategoryResult.getOrThrow()
-                _isLoading.value = false
-            } else {
-                _isLoading.value = true
-                if (recommendHearitsResult.isFailure) {
-                    _toastMessage.value =
-                        R.string.home_toast_recommend_load_fail
-                }
-                if (groupedCategoryResult.isFailure) {
-                    _toastMessage.value =
-                        R.string.home_toast_grouped_category_load_fail
-                }
+            recommendResult.onFailure { throwable ->
+                Timber.w(throwable)
+                _toastMessage.value = R.string.home_toast_recommend_load_fail
             }
+            groupedResult.onFailure { throwable ->
+                Timber.w(throwable)
+                _toastMessage.value = R.string.home_toast_grouped_category_load_fail
+            }
+
+            recommendResult.onSuccess { _recommendHearits.value = it }
+            groupedResult.onSuccess { _groupedCategory.value = it }
+
+            _isLoading.value = false
         }
     }
 
@@ -80,14 +77,12 @@ class HomeViewModel(
                     _userInfo.value = userInfo
                     _isLoggedIn.value = true
                 }.onFailure { throwable ->
+                    _isLoggedIn.value = false
+
                     when (throwable) {
-                        is UserNotRegistered -> {
-                            _userInfo.value = UserInfo.default()
-                            _isLoggedIn.value = false
-                        }
+                        is UserNotRegistered -> _userInfo.value = UserInfo.default()
 
                         else -> {
-                            _isLoggedIn.value = false
                             Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }

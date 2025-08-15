@@ -77,7 +77,7 @@ class SplashActivity : AppCompatActivity() {
                     checkTokenAndNavigate()
                 }
             }.addOnFailureListener {
-                finish()
+                checkTokenAndNavigate()
             }
     }
 
