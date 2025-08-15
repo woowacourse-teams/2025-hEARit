@@ -1,12 +1,12 @@
-package com.onair.hearit.admin.presentation;
+package com.onair.hearit.admin.presentation.api;
 
 import com.onair.hearit.admin.application.AdminRecommendHearitService;
+import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitCreateRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitUpdateRequest;
-import com.onair.hearit.admin.dto.response.MonthlyRecommendedHearitResponse;
-import com.onair.hearit.admin.dto.response.RecommendHearitResponse;
-import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.PagedResponse;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
+import com.onair.hearit.admin.dto.response.AdminRecommendHearitResponse;
+import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,30 +19,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-//TODO 테스트 작성
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin/recommend-hearits")
+@RequestMapping("/api/v1/admin/recommend")
 public class AdminRecommendHearitController {
 
     private final AdminRecommendHearitService adminRecommendHearitService;
 
     @GetMapping("/hearits")
-    public ResponseEntity<PagedResponse<RecommendHearitResponse>> readHearits(
+    public ResponseEntity<AdminPagedResponse<AdminRecommendHearitResponse>> readHearits(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<RecommendHearitResponse> response = adminRecommendHearitService.getHearits(pagingRequest);
+        AdminPagingRequest pagingRequest = new AdminPagingRequest(page, size);
+        AdminPagedResponse<AdminRecommendHearitResponse> response = adminRecommendHearitService.getHearits(
+                pagingRequest);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<MonthlyRecommendedHearitResponse>> readRecommendedHearit(
+    public ResponseEntity<List<MonthlyRecommendHearitResponse>> readRecommendedHearit(
             @RequestParam Integer year,
-            @RequestParam Integer month
-    ) {
-        List<MonthlyRecommendedHearitResponse> responses =
-                adminRecommendHearitService.getMonthRecommendedHearit(year, month);
+            @RequestParam Integer month) {
+        List<MonthlyRecommendHearitResponse> responses =
+                adminRecommendHearitService.getMonthRecommendHearit(year, month);
         return ResponseEntity.ok(responses);
     }
 

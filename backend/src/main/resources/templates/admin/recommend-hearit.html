@@ -482,7 +482,7 @@
 
     // 히어릿 목록 페이지 로드 (페이징 적용)
     function loadHearitsPage(page) {
-        fetch(`/api/v1/admin/recommend-hearits/hearits?page=${page}&size=${PAGE_SIZE}`, {
+        fetch(`/api/v1/admin/recommend/hearits?page=${page}&size=${PAGE_SIZE}`, {
             method: 'GET',
             headers: {[csrfHeader]: csrfToken}
         })
@@ -567,7 +567,7 @@
             hearitIds: selectedHearits.map(hearit => hearit.id)
         };
 
-        fetch('/api/v1/admin/recommend-hearits', {
+        fetch('/api/v1/admin/recommend', {
             method: 'POST',
             headers: {'Content-Type': 'application/json', [csrfHeader]: csrfToken},
             body: JSON.stringify(requestData)
@@ -598,7 +598,7 @@
             hearitIds: selectedHearits.map(hearit => hearit.id)
         };
 
-        fetch('/api/v1/admin/recommend-hearits', {
+        fetch('/api/v1/admin/recommend', {
             method: 'PUT',
             headers: {'Content-Type': 'application/json', [csrfHeader]: csrfToken},
             body: JSON.stringify(requestData)
@@ -619,7 +619,7 @@
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth() + 1; // API는 1월=1
 
-        fetch(`/api/v1/admin/recommend-hearits?year=${year}&month=${month}`, {
+        fetch(`/api/v1/admin/recommend?year=${year}&month=${month}`, {
             method: 'GET',
             headers: {[csrfHeader]: csrfToken}
         })

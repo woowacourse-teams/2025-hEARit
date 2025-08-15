@@ -1,11 +1,11 @@
-package com.onair.hearit.admin.presentation;
+package com.onair.hearit.admin.presentation.api;
 
 import com.onair.hearit.admin.application.AdminKeywordService;
+import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
 import com.onair.hearit.admin.dto.request.KeywordUpdateRequest;
-import com.onair.hearit.admin.dto.response.KeywordInfoResponse;
-import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.PagedResponse;
+import com.onair.hearit.admin.dto.response.AdminKeywordResponse;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +28,17 @@ public class AdminKeywordController {
     private final AdminKeywordService adminKeywordService;
 
     @GetMapping
-    public ResponseEntity<PagedResponse<KeywordInfoResponse>> readKeywords(
+    public ResponseEntity<AdminPagedResponse<AdminKeywordResponse>> readKeywords(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
-        PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<KeywordInfoResponse> response = adminKeywordService.getKeywords(pagingRequest);
+        AdminPagingRequest pagingRequest = new AdminPagingRequest(page, size);
+        AdminPagedResponse<AdminKeywordResponse> response = adminKeywordService.getKeywords(pagingRequest);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<KeywordInfoResponse>> readAllKeywords() {
-        List<KeywordInfoResponse> response = adminKeywordService.getAllKeywords();
+    public ResponseEntity<List<AdminKeywordResponse>> readAllKeywords() {
+        List<AdminKeywordResponse> response = adminKeywordService.getAllKeywords();
         return ResponseEntity.ok(response);
     }
 

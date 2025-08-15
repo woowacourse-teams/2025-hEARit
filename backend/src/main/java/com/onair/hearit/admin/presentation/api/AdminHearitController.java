@@ -1,13 +1,13 @@
-package com.onair.hearit.admin.presentation;
+package com.onair.hearit.admin.presentation.api;
 
 import com.onair.hearit.admin.application.AdminHearitService;
+import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
-import com.onair.hearit.admin.dto.request.HearitMetaDataUpdateRequest;
-import com.onair.hearit.admin.dto.response.HearitAdminResponse;
+import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminHearitResponse;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.domain.FileType;
-import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.PagedResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,35 +25,35 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/api/v1/admin/hearits")
 public class AdminHearitController {
 
     private final AdminHearitService adminHearitService;
 
-    @GetMapping("/hearits")
-    public ResponseEntity<PagedResponse<HearitAdminResponse>> readHearits(
+    @GetMapping
+    public ResponseEntity<AdminPagedResponse<AdminHearitResponse>> readHearits(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
-        PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<HearitAdminResponse> response = adminHearitService.getHearits(pagingRequest);
+        AdminPagingRequest pagingRequest = new AdminPagingRequest(page, size);
+        AdminPagedResponse<AdminHearitResponse> response = adminHearitService.getHearits(pagingRequest);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(value = "/hearits", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createHearit(@ModelAttribute @Valid HearitCreateRequest request) {
         adminHearitService.addHearit(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping("/hearits/{hearitId}")
+    @PutMapping("/{hearitId}")
     public ResponseEntity<Void> updateHearitById(
             @PathVariable Long hearitId,
-            @RequestBody @Valid HearitMetaDataUpdateRequest request) {
+            @RequestBody @Valid HearitInfoUpdateRequest request) {
         adminHearitService.modifyHearitMetaData(hearitId, request);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/hearits/{hearitId}/original-audio")
+    @PutMapping("/{hearitId}/original-audio")
     public ResponseEntity<Void> updateHearitOriginalAudio(
             @PathVariable Long hearitId,
             @ModelAttribute @Valid HearitFileUpdateRequest request) {
@@ -61,7 +61,7 @@ public class AdminHearitController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/hearits/{hearitId}/short-audio")
+    @PutMapping("/{hearitId}/short-audio")
     public ResponseEntity<Void> updateHearitShortAudio(
             @PathVariable Long hearitId,
             @ModelAttribute @Valid HearitFileUpdateRequest request) {
@@ -69,7 +69,7 @@ public class AdminHearitController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/hearits/{hearitId}/script")
+    @PutMapping("/{hearitId}/script")
     public ResponseEntity<Void> updateHearitScript(
             @PathVariable Long hearitId,
             @ModelAttribute @Valid HearitFileUpdateRequest request) {

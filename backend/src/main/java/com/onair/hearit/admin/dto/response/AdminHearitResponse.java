@@ -4,9 +4,8 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Source;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
-public record HearitAdminResponse(
+public record AdminHearitResponse(
         Long id,
         String title,
         String summary,
@@ -16,12 +15,12 @@ public record HearitAdminResponse(
         List<SourceInHearit> sources,
         Integer playTime,
         LocalDateTime createdAt,
-        CategoryInfoResponse category,
+        AdminCategoryResponse category,
         List<KeywordInHearit> keywords
 ) {
-    public static HearitAdminResponse from(Hearit hearit, Map<Long, List<KeywordInHearit>> keywordMap) {
+    public static AdminHearitResponse from(Hearit hearit, List<KeywordInHearit> keywords) {
         List<SourceInHearit> sources = getSources(hearit.getSources());
-        return new HearitAdminResponse(
+        return new AdminHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
@@ -31,8 +30,8 @@ public record HearitAdminResponse(
                 sources,
                 hearit.getPlayTime(),
                 hearit.getCreatedAt(),
-                CategoryInfoResponse.from(hearit.getCategory()),
-                keywordMap.getOrDefault(hearit.getId(), List.of())
+                AdminCategoryResponse.from(hearit.getCategory()),
+                keywords
         );
     }
 
@@ -49,7 +48,6 @@ public record HearitAdminResponse(
             String sourceName,
             String sourceUrl
     ) {
-
         public static SourceInHearit from(Source source) {
             return new SourceInHearit(
                     source.getSourceName(),

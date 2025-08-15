@@ -14,12 +14,12 @@ import com.onair.hearit.dto.response.PagedResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;
 import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.MemberRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

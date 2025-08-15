@@ -2,13 +2,13 @@ package com.onair.hearit.admin.dto.response;
 
 import com.onair.hearit.domain.Category;
 
-public record CategoryInfoResponse(
+public record AdminCategoryResponse(
         Long id,
         String name,
         String colorCode
 ) {
-    public static CategoryInfoResponse from(Category category) {
-        return new CategoryInfoResponse(
+    public static AdminCategoryResponse from(Category category) {
+        return new AdminCategoryResponse(
                 category.getId(),
                 category.getName(),
                 category.getColorCode()

@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.config;
+package com.onair.hearit.admin.infrastructure.s3;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -9,13 +9,18 @@ import software.amazon.awssdk.services.s3.S3Client;
 @Configuration
 public class S3Config {
 
-    @Value("${aws.region}")
-    private String region;
+    @Value("${aws.s3.bucket}")
+    private String bucket;
 
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()
-                .region(Region.of(region))
+                .region(Region.AP_NORTHEAST_2)
                 .build();
+    }
+
+    @Bean
+    public FileStorage s3FileProvider(S3Client s3Client) {
+        return new FileStorage(s3Client, bucket);
     }
 }
