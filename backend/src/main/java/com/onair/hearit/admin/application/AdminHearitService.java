@@ -1,5 +1,6 @@
 package com.onair.hearit.admin.application;
 
+import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitCreateRequest.SourceCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
@@ -134,8 +135,8 @@ public class AdminHearitService {
     @Transactional
     public void modifyHearitFile(Long hearitId, HearitFileUpdateRequest request, FileType fileType) {
         Hearit hearit = getHearitById(hearitId);
-        fileStorageService.deleteFile(hearit.getFileUrl(fileType));
-        String uploadFilePath = fileStorageService.uploadFile(request.file(), fileType);
+        fileStorage.deleteFile(hearit.getFileUrl(fileType));
+        String uploadFilePath = fileStorage.uploadFile(request.file(), fileType);
         hearit.updateFileUrl(uploadFilePath, fileType);
     }
 

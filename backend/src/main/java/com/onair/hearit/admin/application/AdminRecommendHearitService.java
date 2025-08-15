@@ -68,7 +68,7 @@ public class AdminRecommendHearitService {
         validateForCreateRecommendHearit(request.recommendDate(), request.hearitIds());
         List<Hearit> hearits = getHearitsById(request.hearitIds());
         for (Hearit hearit : hearits) {
-            RecommendHearit recommendHearit = new RecommendHearit(hearit.getId(), request.recommendDate());
+            RecommendHearit recommendHearit = new RecommendHearit(hearit, request.recommendDate());
             recommendHearitRepository.save(recommendHearit);
         }
     }
