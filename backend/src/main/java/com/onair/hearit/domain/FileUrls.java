@@ -23,7 +23,7 @@ public class FileUrls {
     @Column(name = "script_url", nullable = false)
     private String scriptUrl;
 
-    public FileUrls(final String originalAudioUrl, final String shortAudioUrl, final String scriptUrl) {
+    public FileUrls(String originalAudioUrl, String shortAudioUrl, String scriptUrl) {
         validateAllFilePath(originalAudioUrl, shortAudioUrl, scriptUrl);
         this.originalAudioUrl = originalAudioUrl;
         this.shortAudioUrl = shortAudioUrl;
