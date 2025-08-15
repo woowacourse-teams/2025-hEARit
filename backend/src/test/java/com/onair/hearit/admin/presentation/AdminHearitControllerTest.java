@@ -6,10 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-import com.onair.hearit.admin.application.FileStorageService;
-import com.onair.hearit.admin.dto.request.HearitMetaDataUpdateRequest;
-import com.onair.hearit.admin.dto.request.HearitMetaDataUpdateRequest.SourceUpdateRequest;
-import com.onair.hearit.admin.dto.response.HearitAdminResponse;
+import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest.SourceUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminHearitResponse;
+import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.FileType;
@@ -36,7 +36,7 @@ class AdminHearitControllerTest extends IntegrationTest {
     private HearitRepository hearitRepository;
 
     @MockitoBean
-    private FileStorageService fileStorageService;
+    private FileStorage fileStorage;
 
     @Test
     @DisplayName("히어릿 목록을 페이징 조회할 수 있다")
@@ -46,7 +46,7 @@ class AdminHearitControllerTest extends IntegrationTest {
         CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
 
         // when & then
-        PagedResponse<HearitAdminResponse> response =
+        PagedResponse<AdminHearitResponse> response =
                 RestAssured.given().log().all()
                         .cookie("JSESSIONID", csrfSession.sessionId())
                         .queryParam("page", 0)
@@ -74,9 +74,9 @@ class AdminHearitControllerTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
 
-        given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("mock/origin.mp3");
-        given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn("mock/short.mp3");
-        given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("mock/script.json");
+        given(fileStorage.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("mock/origin.mp3");
+        given(fileStorage.uploadFile(any(), eq(FileType.SHORT))).willReturn("mock/short.mp3");
+        given(fileStorage.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("mock/script.json");
 
         // when & then
         RestAssured.given().log().uri()
@@ -109,7 +109,7 @@ class AdminHearitControllerTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        HearitMetaDataUpdateRequest request = new HearitMetaDataUpdateRequest(
+        HearitInfoUpdateRequest request = new HearitInfoUpdateRequest(
                 "수정 제목", "수정 요약", 100, "origin-audio", "short-audio",
                 "script-url", List.of(new SourceUpdateRequest("출처", "url")), category.getId(), List.of()
         );
@@ -141,7 +141,7 @@ class AdminHearitControllerTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        HearitMetaDataUpdateRequest request = new HearitMetaDataUpdateRequest(
+        HearitInfoUpdateRequest request = new HearitInfoUpdateRequest(
                 "수정 제목", "수정 요약", 100, "origin-audio", "short-audio",
                 "script-url",
                 List.of(
@@ -181,7 +181,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                         10, "ORG_test.mp3",
                         "SHR_test.mp3", "SCR_test.json",
                         List.of(new Source("출처", "url")), category));
-        given(fileStorageService.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("/mock/origin.mp3");
+        given(fileStorage.uploadFile(any(), eq(FileType.ORIGINAL))).willReturn("/mock/origin.mp3");
 
         // when & then
         RestAssured.given().log().all()
@@ -194,9 +194,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.NO_CONTENT);
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
-        assertAll(() -> {
-            assertThat(updatedHearit.getOriginalAudioUrl()).isEqualTo("/mock/origin.mp3");
-        });
+        assertThat(updatedHearit.getOriginalAudioUrl()).isEqualTo("/mock/origin.mp3");
     }
 
     @Test
@@ -210,7 +208,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                         10, "ORG_test.mp3",
                         "SHR_test.mp3", "SCR_test.json",
                         List.of(new Source("출처", "url")), category));
-        given(fileStorageService.uploadFile(any(), eq(FileType.SHORT))).willReturn("/mock/origin.mp3");
+        given(fileStorage.uploadFile(any(), eq(FileType.SHORT))).willReturn("/mock/origin.mp3");
 
         // when & then
         RestAssured.given().log().all()
@@ -223,9 +221,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.NO_CONTENT);
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
-        assertAll(() -> {
-            assertThat(updatedHearit.getShortAudioUrl()).isEqualTo("/mock/origin.mp3");
-        });
+        assertThat(updatedHearit.getShortAudioUrl()).isEqualTo("/mock/origin.mp3");
     }
 
     @Test
@@ -239,7 +235,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                         10, "ORG_test.mp3",
                         "SHR_test.mp3", "SCR_test.json",
                         List.of(new Source("출처", "url")), category));
-        given(fileStorageService.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("/mock/origin.json");
+        given(fileStorage.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("/mock/origin.json");
 
         // when & then
         RestAssured.given().log().all()
@@ -252,9 +248,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.NO_CONTENT);
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
-        assertAll(() -> {
-            assertThat(updatedHearit.getScriptUrl()).isEqualTo("/mock/origin.json");
-        });
+        assertThat(updatedHearit.getScriptUrl()).isEqualTo("/mock/origin.json");
     }
 
     private void insertTestHearits(int count) {

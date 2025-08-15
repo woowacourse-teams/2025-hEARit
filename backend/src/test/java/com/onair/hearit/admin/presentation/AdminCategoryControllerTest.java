@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
-import com.onair.hearit.admin.dto.response.CategoryInfoResponse;
+import com.onair.hearit.admin.dto.response.AdminCategoryResponse;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.dto.response.PagedResponse;
@@ -32,7 +32,7 @@ class AdminCategoryControllerTest extends IntegrationTest {
         CsrfSession csrf = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
 
         // when
-        PagedResponse<CategoryInfoResponse> response = RestAssured.given().log().all()
+        PagedResponse<AdminCategoryResponse> response = RestAssured.given().log().all()
                 .cookie("JSESSIONID", csrf.sessionId())
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -59,7 +59,7 @@ class AdminCategoryControllerTest extends IntegrationTest {
         CsrfSession csrf = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
 
         // when
-        List<CategoryInfoResponse> response = RestAssured.given().log().all()
+        List<AdminCategoryResponse> response = RestAssured.given().log().all()
                 .cookie("JSESSIONID", csrf.sessionId())
                 .when()
                 .get("/api/v1/admin/categories/all")

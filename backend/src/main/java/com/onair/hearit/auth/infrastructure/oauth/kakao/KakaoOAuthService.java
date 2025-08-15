@@ -2,8 +2,8 @@ package com.onair.hearit.auth.infrastructure.oauth.kakao;
 
 import com.onair.hearit.auth.application.OAuthService;
 import com.onair.hearit.auth.domain.OAuthProvider;
-import com.onair.hearit.auth.dto.response.KakaoUserInfoResponse;
 import com.onair.hearit.auth.dto.response.OAuthUserInfoResponse;
+import com.onair.hearit.auth.infrastructure.oauth.kakao.dto.KakaoUserInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
