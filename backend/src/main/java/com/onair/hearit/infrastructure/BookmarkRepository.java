@@ -13,7 +13,15 @@ import org.springframework.data.repository.query.Param;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
-    Page<Bookmark> findAllByMemberOrderByCreatedAtDesc(Member member, Pageable pageable);
+    @Query("""
+                SELECT b
+                FROM Bookmark b
+                JOIN FETCH b.hearit
+                JOIN FETCH b.hearit.category
+                WHERE b.member = :member
+                ORDER BY b.createdAt DESC
+            """)
+    Page<Bookmark> findAllByMemberOrderByRecent(@Param("member") Member member, Pageable pageable);
 
     Optional<Bookmark> findByHearitAndMember(Hearit hearit, Member member);
 
@@ -23,7 +31,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
                 WHERE b.member.id = :memberId
                 GROUP BY b.hearit.category.id
             """)
-    List<CategoryBookmarkCount> countBookmarksByCategoryId(@Param("memberId") Long memberId);
+    List<CategoryBookmarkCount> countMemberBookmarksByCategoryId(@Param("memberId") Long memberId);
 
     boolean existsByHearitAndMember(Hearit hearit, Member member);
 }

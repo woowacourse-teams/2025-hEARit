@@ -8,7 +8,8 @@ public record BookmarkHearitResponse(
         Long bookmarkId,
         String title,
         String summary,
-        Integer playTime
+        Integer playTime,
+        String categoryColor
 ) {
     public static BookmarkHearitResponse of(Bookmark bookmark, Hearit hearit) {
         return new BookmarkHearitResponse(
@@ -16,6 +17,7 @@ public record BookmarkHearitResponse(
                 bookmark.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
-                hearit.getPlayTime());
+                hearit.getPlayTime(),
+                hearit.getCategory().getColorCode());
     }
 }

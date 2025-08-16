@@ -31,7 +31,7 @@ public class BookmarkScoreFactor implements ScoreFactor {
     }
 
     private Map<Long, Long> getBookmarkCountsByCategory(Long memberId) {
-        return bookmarkRepository.countBookmarksByCategoryId(memberId).stream()
+        return bookmarkRepository.countMemberBookmarksByCategoryId(memberId).stream()
                 .collect(Collectors.toMap(
                         CategoryBookmarkCount::getCategoryId,
                         CategoryBookmarkCount::getCount
