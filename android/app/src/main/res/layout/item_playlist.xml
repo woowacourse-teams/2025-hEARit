@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="item"
+            type="com.onair.hearit.domain.model.Bookmark" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:background="@color/hearit_gray1">
+
+        <ImageView
+            android:id="@+id/iv_playlist_thumbnail"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="24dp"
+            android:background="@drawable/bg_gray2_radius_8dp"
+            android:contentDescription="@null"
+            android:padding="10dp"
+            android:src="@drawable/img_home_record"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="-3dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="@id/iv_playlist_thumbnail"
+            app:layout_constraintEnd_toStartOf="@id/btn_playlist_play_pause"
+            app:layout_constraintStart_toEndOf="@id/iv_playlist_thumbnail"
+            app:layout_constraintTop_toTopOf="@id/iv_playlist_thumbnail">
+
+            <TextView
+                android:id="@+id/tv_playlist_title"
+                style="@style/pretendard_body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@{item.title}"
+                android:textColor="@color/hearit_gray4"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="HTTP와 HTTPS의 차이근데 만약 제목이 이만큼 길면 어떻게" />
+
+            <TextView
+                android:id="@+id/tv_playlist_source"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hEARit  •  "
+                android:textColor="@color/hearit_gray4"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@id/tv_playlist_title"
+                app:layout_constraintTop_toBottomOf="@id/tv_playlist_title"
+                tools:text="hEARit  •  " />
+
+            <TextView
+                android:id="@+id/tv_playlist_playtime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/hearit_gray4"
+                android:textSize="12sp"
+                app:layout_constraintStart_toEndOf="@id/tv_playlist_source"
+                app:layout_constraintTop_toTopOf="@id/tv_playlist_source"
+                app:playTimeFormatted='@{item.playTime}'
+                tools:text="10:30" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/btn_playlist_play_pause"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="24dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_bottom_play"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_gray1_radius_top_24dp">
+
+        <View
+            android:id="@+id/playlist_handler"
+            android:layout_width="42dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_gray2_radius_8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_playlist_guide"
+            style="@style/pretendard_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="32dp"
+            android:text="@string/playlist_bottom_sheet_playlist_guide"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/playlist_handler" />
+
+        <TextView
+            android:id="@+id/tv_playlist_type"
+            style="@style/pretendard_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="내가 북마크한 히어릿"
+            android:textColor="@color/hearit_gray3"
+            app:layout_constraintStart_toStartOf="@id/tv_playlist_guide"
+            app:layout_constraintTop_toBottomOf="@id/tv_playlist_guide"
+            tools:text="내가 북마크한 히어릿" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_playlist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintTop_toBottomOf="@id/tv_playlist_type"
+            tools:itemCount="8"
+            tools:listitem="@layout/item_playlist" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

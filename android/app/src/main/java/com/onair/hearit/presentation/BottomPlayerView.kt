@@ -3,6 +3,7 @@ package com.onair.hearit.presentation
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
@@ -10,6 +11,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutBottomPlayerControllerBinding
+import com.onair.hearit.presentation.main.playlist.PlaylistBottomSheet
 
 @UnstableApi
 class BottomPlayerView
@@ -35,6 +37,7 @@ class BottomPlayerView
         init {
             setupScrubListener()
             binding.exoPlay.setOnClickListener { togglePlayPause() }
+            binding.exoPlaylist.setOnClickListener { showPlaylist() }
         }
 
         // 제대로 Player를 끊었다가 다시 연결해서 문제가 없도록 하기 위함.
@@ -152,6 +155,12 @@ class BottomPlayerView
             } else {
                 currentPlayer.play()
             }
+        }
+
+        private fun showPlaylist() {
+            val activity = context as? AppCompatActivity ?: return
+            val playlist = PlaylistBottomSheet.newInstance()
+            playlist.show(activity.supportFragmentManager, "PlaylistBottomSheet")
         }
 
         private fun detachPlayer() {
