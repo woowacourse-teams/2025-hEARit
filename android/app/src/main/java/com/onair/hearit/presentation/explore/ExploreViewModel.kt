@@ -65,22 +65,6 @@ class ExploreViewModel(
         fetchData(cursorInfo.cursorId)
     }
 
-    private fun reFetchData() {
-        _shortsHearits.value?.lastOrNull()?.let { shortsLastItem ->
-            val lastBookmarkId = _bookmarkId.value?.get(shortsLastItem.id)
-            lastItem =
-                shortsLastItem.copy(
-                    bookmarkId = lastBookmarkId,
-                    isBookmarked = lastBookmarkId != null,
-                )
-        }
-
-        _currentIndex.value = 0
-        _bookmarkId.value = emptyMap()
-        _shortsHearits.value = emptyList()
-        fetchData(0)
-    }
-
     fun onPause(
         position: Int,
         lastPlayerPosition: Long,
@@ -161,6 +145,22 @@ class ExploreViewModel(
                 isFetchingData = false
             }
         }
+    }
+
+    private fun reFetchData() {
+        _shortsHearits.value?.lastOrNull()?.let { shortsLastItem ->
+            val lastBookmarkId = _bookmarkId.value?.get(shortsLastItem.id)
+            lastItem =
+                shortsLastItem.copy(
+                    bookmarkId = lastBookmarkId,
+                    isBookmarked = lastBookmarkId != null,
+                )
+        }
+
+        _currentIndex.value = 0
+        _bookmarkId.value = emptyMap()
+        _shortsHearits.value = emptyList()
+        fetchData(0)
     }
 
     private fun addBookmark(

@@ -14,9 +14,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.media3.common.MediaItem
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -40,12 +39,13 @@ class ExploreFragment :
     private val binding get() = _binding!!
     private val viewModel: ExploreViewModel by activityViewModels { ExploreViewModelFactory() }
 
-    private val player by lazy { ExoPlayer.Builder(requireContext()).build() }
+    private lateinit var playerManager: ExplorePlayerManager
+    private val player get() = playerManager.player
+
     private val adapter by lazy { ShortsAdapter(player, this) }
     private val snapHelper = PagerSnapHelper()
 
     private var animator: ObjectAnimator? = null
-    private var playbackListener: Player.Listener? = null
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -81,19 +81,20 @@ class ExploreFragment :
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
-
         setupWindowInsets()
+
+        playerManager =
+            ExplorePlayerManager(
+                context = requireContext().applicationContext,
+                lifecycleScope = viewLifecycleOwner.lifecycleScope,
+                onPlaybackEnded = { scrollToNextItem() },
+                onPositionUpdated = { position -> highlightScript(position) },
+            )
+
         setupRecyclerView()
         observeViewModel()
 
         (activity as? PlayerControllerView)?.pause()
-
-        playbackListener =
-            object : Player.Listener {
-                override fun onPlaybackStateChanged(state: Int) {
-                    if (state == Player.STATE_ENDED) scrollToNextItem()
-                }
-            }.also { player.addListener(it) }
     }
 
     override fun onResume() {
@@ -102,6 +103,7 @@ class ExploreFragment :
             screenName = AnalyticsScreenInfo.Explore.NAME,
             screenClass = AnalyticsScreenInfo.Explore.CLASS,
         )
+        val player = playerManager.player
         if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
             player.play()
         }
@@ -123,11 +125,19 @@ class ExploreFragment :
         return layoutManager.getPosition(snapView)
     }
 
-    private fun playAudioAtIndex(index: Int) {
+    private fun highlightScript(positionMs: Long) {
+        val index = currentIndex()
+        if (index == RecyclerView.NO_POSITION) return
+        val holder = binding.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
+        holder?.highlightScriptLine(positionMs)
+    }
+
+    private fun playAudioAtIndex(
+        index: Int,
+        startPosition: Long = 0L,
+    ) {
         val item = adapter.currentList.getOrNull(index) ?: return
-        player.setMediaItem(MediaItem.fromUri(item.audioUrl))
-        player.prepare()
-        player.play()
+        playerManager.playAudio(item.audioUrl, startPosition)
     }
 
     private fun switchTo(newPosition: Int) {
@@ -136,28 +146,13 @@ class ExploreFragment :
         val lastPosition = viewModel.getLastPlayerPosition()
         viewModel.onPageSnapped(newPosition)
 
-        playAudioAtIndex(newPosition)
-
-        if (lastPosition > 0) {
-            player.addListener(
-                object : Player.Listener {
-                    override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_READY) {
-                            player.seekTo(lastPosition)
-                            player.removeListener(this)
-                        }
-                    }
-                },
-            )
-        }
-
+        playAudioAtIndex(newPosition, lastPosition)
         checkAndLoadNextPage(newPosition)
     }
 
     private fun scrollToNextItem() {
         val currentPosition = currentIndex()
         val nextPosition = currentPosition + 1
-
         if (nextPosition < adapter.itemCount) {
             binding.rvExplore.smoothScrollToPosition(nextPosition)
         }
@@ -201,9 +196,7 @@ class ExploreFragment :
         }
 
         viewModel.shouldPlayAnimation.observe(viewLifecycleOwner) { isEnabled ->
-            if (isEnabled) {
-                startSwipeAnimation()
-            }
+            if (isEnabled) startSwipeAnimation()
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
@@ -297,7 +290,7 @@ class ExploreFragment :
     }
 
     override fun onClickHearitInfo(hearitId: Long) {
-        val lastPosition = player.currentPosition
+        val lastPosition = playerManager.getCurrentPosition()
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,
             mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
@@ -320,21 +313,18 @@ class ExploreFragment :
 
     override fun onPause() {
         val position = currentIndex()
-        viewModel.onPause(position, player.currentPosition, adapter.itemCount)
-        player.pause()
+        viewModel.onPause(position, playerManager.getCurrentPosition(), adapter.itemCount)
+        playerManager.pause()
         super.onPause()
     }
 
     override fun onStop() {
+        playerManager.stop()
         super.onStop()
-        player.stop()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-
-        playbackListener?.let { player.removeListener(it) }
-        playbackListener = null
 
         animator?.cancel()
         animator?.removeAllListeners()
@@ -349,7 +339,7 @@ class ExploreFragment :
 
     override fun onDestroy() {
         super.onDestroy()
-        player.release()
+        playerManager.release()
     }
 
     companion object {
