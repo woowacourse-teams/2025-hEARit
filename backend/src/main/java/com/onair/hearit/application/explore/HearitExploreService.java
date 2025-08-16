@@ -12,6 +12,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.dto.request.CursorRequest;
+import com.onair.hearit.dto.request.CursorRequest;
 import com.onair.hearit.dto.response.CursorResponse;
 import com.onair.hearit.dto.response.ExploredHearitResponse;
 import com.onair.hearit.infrastructure.BookmarkRepository;

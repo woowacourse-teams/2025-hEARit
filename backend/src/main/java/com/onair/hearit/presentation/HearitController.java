@@ -47,7 +47,8 @@ public class HearitController {
             @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         CursorRequest cursorRequest = new CursorRequest(cursorId, size);
-        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(userContext, cursorRequest);
+        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(userContext,
+                cursorRequest);
         return ResponseEntity.ok(responses);
     }
 

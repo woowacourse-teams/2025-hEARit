@@ -57,12 +57,19 @@ public class Member {
 
     private Member(String localId, String password, String socialId, String nickname, String profileImage,
                    OAuthProvider provider) {
+        validate(nickname);
         this.localId = localId;
         this.password = password;
         this.socialId = socialId;
         this.nickname = nickname;
         this.profileImage = profileImage;
         this.oAuthProvider = provider;
+    }
+
+    private void validate(String nickname) {
+        if (nickname == null) {
+            throw new IllegalArgumentException("닉네임은 null이 될 수 없습니다.");
+        }
     }
 
     public static Member createLocalUser(String memberId, String nickname, String password, String profileImage) {

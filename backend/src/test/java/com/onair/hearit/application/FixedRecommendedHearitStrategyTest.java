@@ -25,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
-class DbRecommendHearitProviderTest {
+class FixedRecommendedHearitStrategyTest {
 
     @Autowired
     private DbHelper dbHelper;
@@ -36,11 +36,11 @@ class DbRecommendHearitProviderTest {
     @Autowired
     private RecommendHearitRepository recommendHearitRepository;
 
-    private DbRecommendHearitProvider recommendHearitProvider;
+    private FixedRecommendedHearitStrategy recommendHearitProvider;
 
     @BeforeEach
     void setup() {
-        recommendHearitProvider = new DbRecommendHearitProvider(hearitRepository, recommendHearitRepository);
+        recommendHearitProvider = new FixedRecommendedHearitStrategy(recommendHearitRepository);
     }
 
     @Test
@@ -52,7 +52,7 @@ class DbRecommendHearitProviderTest {
         LocalDate today = LocalDate.now();
         for (int i = 0; i < hearitCount; i++) {
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), today));
+            dbHelper.insertRecommendHearit(new RecommendHearit(hearit, today));
         }
 
         // when

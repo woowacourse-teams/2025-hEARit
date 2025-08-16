@@ -39,13 +39,13 @@ class RecommendHearitRepositoryTest {
         IntStream.rangeClosed(1, 3)
                 .forEach((num) -> {
                     Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), today));
+                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit, today));
                 });
         LocalDate yesterday = today.minusDays(1);
         IntStream.rangeClosed(1, 5)
                 .forEach((num) -> {
                     Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), yesterday));
+                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit, yesterday));
                 });
 
         // when
@@ -58,5 +58,43 @@ class RecommendHearitRepositoryTest {
             assertThat(recommendHearits.getFirst().getRecommendDate()).isEqualTo(today);
             assertThat(recommendHearits.getLast().getRecommendDate()).isEqualTo(yesterday);
         });
+    }
+
+    @Test
+    @DisplayName("시작일과 종료일 사이의 추천 히어릿을 Hearit 엔티티와 함께 조회한다")
+    void findByRecommendDateIsBetweenWithHearit() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        LocalDate from = LocalDate.of(2025, 8, 10);
+        LocalDate to = LocalDate.of(2025, 8, 20);
+        LocalDate middleDate = from.plusDays(5);
+
+        Hearit hearitIn1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertRecommendHearit(new RecommendHearit(hearitIn1, from)); // 시작일
+
+        Hearit hearitIn2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertRecommendHearit(new RecommendHearit(hearitIn2, to)); // 종료일
+
+        Hearit hearitIn3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertRecommendHearit(new RecommendHearit(hearitIn3, middleDate)); // 중간일
+
+        Hearit hearitOut1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertRecommendHearit(new RecommendHearit(hearitOut1, from.minusDays(1)));
+        Hearit hearitOut2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertRecommendHearit(new RecommendHearit(hearitOut2, to.plusDays(1)));
+
+        // when
+        List<RecommendHearit> results = recommendHearitRepository.findByRecommendDateIsBetween(from, to);
+
+        // then
+        assertAll(
+                () -> assertThat(results).hasSize(3),
+                () -> assertThat(results)
+                        .extracting(RecommendHearit::getHearit)
+                        .containsExactlyInAnyOrder(hearitIn1, hearitIn2, hearitIn3),
+                () -> assertThat(results)
+                        .extracting(RecommendHearit::getRecommendDate)
+                        .containsExactlyInAnyOrder(from, to, middleDate)
+        );
     }
 }

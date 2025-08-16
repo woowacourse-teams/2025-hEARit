@@ -53,11 +53,10 @@ public class AdminRecommendHearitService {
         List<MonthlyRecommendHearitResponse> responses = new ArrayList<>();
         for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
             LocalDate target = date;
-            List<Long> hearitIds = recommendHearits.stream()
+            List<Hearit> hearits = recommendHearits.stream()
                     .filter(recommendHearit -> recommendHearit.getRecommendDate().isEqual(target))
-                    .map(RecommendHearit::getHearitId)
+                    .map(RecommendHearit::getHearit)
                     .toList();
-            List<Hearit> hearits = hearitRepository.findAllByIdIn(hearitIds);
             responses.add(MonthlyRecommendHearitResponse.from(target, hearits));
         }
         return responses;
@@ -67,10 +66,10 @@ public class AdminRecommendHearitService {
     public void addRecommendHearits(RecommendHearitCreateRequest request) {
         validateForCreateRecommendHearit(request.recommendDate(), request.hearitIds());
         List<Hearit> hearits = getHearitsById(request.hearitIds());
-        for (Hearit hearit : hearits) {
-            RecommendHearit recommendHearit = new RecommendHearit(hearit.getId(), request.recommendDate());
-            recommendHearitRepository.save(recommendHearit);
-        }
+        List<RecommendHearit> recommendHearits = hearits.stream()
+                .map(h -> new RecommendHearit(h, request.recommendDate()))
+                .toList();
+        recommendHearitRepository.saveAll(recommendHearits);
     }
 
     @Transactional
@@ -81,10 +80,10 @@ public class AdminRecommendHearitService {
         if (deletedRowCount != RECOMMEND_HEARIT_COUNT) {
             throw new AdminInvalidInputException("추천 히어릿 아이디가 유효하지 않습니다.");
         }
-        for (Hearit hearit : hearits) {
-            RecommendHearit recommendHearit = new RecommendHearit(hearit.getId(), request.recommendDate());
-            recommendHearitRepository.save(recommendHearit);
-        }
+        List<RecommendHearit> recommendHearits = hearits.stream()
+                .map(h -> new RecommendHearit(h, request.recommendDate()))
+                .toList();
+        recommendHearitRepository.saveAll(recommendHearits);
     }
 
     private void validateForCreateRecommendHearit(LocalDate recommendDate, List<Long> hearitIds) {

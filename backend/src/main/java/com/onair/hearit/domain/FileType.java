@@ -10,50 +10,49 @@ public enum FileType {
 
     ORIGINAL("ORG", ".mp3", "/hearit/audio/original/") {
         @Override
-        public void updateFileUrl(Hearit hearit, String newUrl) {
-            hearit.updateOriginalAudioUrl(newUrl);
+        public FileUrls updateFileUrls(FileUrls urls, String newUrl) {
+            return urls.updateOriginalAudioUrl(newUrl);
         }
 
         @Override
-        public String getFileUrl(Hearit hearit) {
-            return hearit.getOriginalAudioUrl();
+        public String getFileUrls(FileUrls urls) {
+            return urls.getOriginalAudioUrl();
         }
     },
     SHORT("SHR", ".mp3", "/hearit/audio/short/") {
         @Override
-        public void updateFileUrl(Hearit hearit, String newUrl) {
-            hearit.updateShortAudioUrl(newUrl);
+        public FileUrls updateFileUrls(FileUrls urls, String newUrl) {
+            return urls.updateShortAudioUrl(newUrl);
         }
 
         @Override
-        public String getFileUrl(Hearit hearit) {
-            return hearit.getShortAudioUrl();
+        public String getFileUrls(FileUrls urls) {
+            return urls.getShortAudioUrl();
         }
     },
     SCRIPT("SCR", ".json", "/hearit/script/") {
         @Override
-        public void updateFileUrl(Hearit hearit, String newUrl) {
-            hearit.updateScriptUrl(newUrl);
+        public FileUrls updateFileUrls(FileUrls urls, String newUrl) {
+            return urls.updateScriptUrl(newUrl);
         }
 
         @Override
-        public String getFileUrl(Hearit hearit) {
-            return hearit.getScriptUrl();
+        public String getFileUrls(FileUrls urls) {
+            return urls.getScriptUrl();
         }
-    },
-    ;
+    };
 
     private final String prefix;
     private final String extension;
     private final String uploadPath;
 
-    public abstract void updateFileUrl(Hearit hearit, String newUrl);
+    public abstract FileUrls updateFileUrls(FileUrls urls, String newUrl);
 
-    public abstract String getFileUrl(Hearit hearit);
+    public abstract String getFileUrls(FileUrls urls);
 
-    public void validateFilename(String filename) {
-        if (!filename.startsWith(prefix)) {
-            throw new InvalidInputException(this.name() + "의 파일명은 '" + prefix + "'로 시작해야 합니다.");
+    public void validUrlName(String filename) {
+        if (!filename.startsWith(uploadPath)) {
+            throw new InvalidInputException(this.name() + "의 파일명은 '" + uploadPath + "'로 시작해야 합니다.");
         }
         if (!filename.endsWith(extension)) {
             throw new InvalidInputException(this.name() + "의 파일 확장자는 '" + extension + "' 이어야 합니다.");

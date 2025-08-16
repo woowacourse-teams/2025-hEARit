@@ -40,7 +40,8 @@ import org.springframework.test.context.jdbc.Sql;
 @DataJpaTest
 @Sql("/dbclean.sql")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, ExploreScoreCommandRepository.class,
-        ExploreScoreCalculator.class, BookmarkScoreFactor.class, RecencyScoreFactor.class, RandomScoreFactor.class})
+        ExploreScoreCalculator.class, BookmarkScoreFactor.class, RecencyScoreFactor.class,
+        RandomScoreFactor.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
@@ -154,9 +155,9 @@ class HearitExploreServiceTest {
                 "title" + name,
                 "summary" + name,
                 500,
-                "originalAudioUrl" + name,
-                "shortAudioUrl" + name,
-                "scriptUrl" + name,
+                "/hearit/audio/original/ORG_test.mp3",
+                "/hearit/audio/short/SHR_test.mp3",
+                "/hearit/script/SCR_test.json",
                 List.of(new Source("source", "sourceUrl")),
                 category);
     }

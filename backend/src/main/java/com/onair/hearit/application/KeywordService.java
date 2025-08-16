@@ -26,7 +26,7 @@ public class KeywordService {
                 .toList();
     }
 
-    public KeywordResponse getKeyword(final Long id) {
+    public KeywordResponse getKeyword(Long id) {
         Keyword keyword = getKeywordById(id);
         return KeywordResponse.from(keyword);
     }

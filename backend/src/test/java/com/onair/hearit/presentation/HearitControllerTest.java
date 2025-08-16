@@ -205,7 +205,7 @@ class HearitControllerTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         for (int i = 0; i < 5; i++) {
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), today));
+            dbHelper.insertRecommendHearit(new RecommendHearit(hearit, today));
         }
 
         // when
@@ -494,9 +494,9 @@ class HearitControllerTest extends IntegrationTest {
                 title,
                 "summary",
                 100,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
+                "/hearit/audio/original/ORG_test.mp3",
+                "/hearit/audio/short/SHR_test.mp3",
+                "/hearit/script/SCR_test.json",
                 List.of(new Source("출처", "url")),
                 category);
         Hearit savedHearit = dbHelper.insertHearit(hearit);
@@ -509,9 +509,9 @@ class HearitControllerTest extends IntegrationTest {
                 "title",
                 "summary",
                 100,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
+                "/hearit/audio/original/ORG_test.mp3",
+                "/hearit/audio/short/SHR_test.mp3",
+                "/hearit/script/SCR_test.json",
                 List.of(new Source("출처", "url")),
                 category);
         Hearit savedHearit = dbHelper.insertHearit(hearit);

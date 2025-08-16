@@ -3,7 +3,6 @@ package com.onair.hearit.application;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.RecommendHearit;
-import com.onair.hearit.infrastructure.HearitRepository;
 import com.onair.hearit.infrastructure.RecommendHearitRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -12,17 +11,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class DbRecommendHearitProvider implements RecommendHearitProvider {
+public class FixedRecommendedHearitStrategy implements RecommendHearitStrategy {
 
-    private final HearitRepository hearitRepository;
     private final RecommendHearitRepository recommendHearitRepository;
 
     @Override
     public List<Hearit> getRecommendHearit(int hearitCount) {
         List<RecommendHearit> recommendHearits = getRecommendHearits(hearitCount);
-        List<Long> recommendHearitIds = recommendHearits.stream()
-                .map(RecommendHearit::getHearitId).toList();
-        return hearitRepository.findAllByIdInWithCategory(recommendHearitIds);
+        return recommendHearits.stream()
+                .map(RecommendHearit::getHearit)
+                .toList();
     }
 
     private List<RecommendHearit> getRecommendHearits(int hearitCount) {

@@ -3,12 +3,15 @@ package com.onair.hearit.domain;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,25 +26,52 @@ public class RecommendHearit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //TODO 히어릿으로 변경해야함
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hearit_id", nullable = false)
-    private Long hearitId;
+    private Hearit hearit;
 
     @Column(name = "recommend_date", nullable = false)
     private LocalDate recommendDate;
 
-    public RecommendHearit(Long hearitId, LocalDate recommendDate) {
-        validateFields(hearitId, recommendDate);
-        this.hearitId = hearitId;
+    public RecommendHearit(Hearit hearit, LocalDate recommendDate) {
+        validate(hearit, recommendDate);
+        this.hearit = hearit;
         this.recommendDate = recommendDate;
     }
 
-    private void validateFields(Long hearitId, LocalDate recommendDate) {
-        if (hearitId == null) {
-            throw new InvalidInputException("hearit Id는 null일 수 없습니다.");
+    private void validate(Hearit hearit, LocalDate recommendDate) {
+        validateHearit(hearit);
+        validateRecommendDate(recommendDate);
+    }
+
+    private void validateHearit(Hearit hearit) {
+        if (hearit == null) {
+            throw new InvalidInputException("hearit은 null일 수 없습니다.");
         }
+    }
+
+    private void validateRecommendDate(LocalDate recommendDate) {
         if (recommendDate == null) {
             throw new InvalidInputException("recommendDate는 null일 수 없습니다.");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof RecommendHearit recommendHearit)) {
+            return false;
+        }
+        if (this.id == null || recommendHearit.id == null) {
+            return false;
+        }
+        return Objects.equals(id, recommendHearit.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

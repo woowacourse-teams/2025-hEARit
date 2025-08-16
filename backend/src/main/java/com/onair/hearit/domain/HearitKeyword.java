@@ -1,5 +1,6 @@
 package com.onair.hearit.domain;
 
+import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -8,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +33,44 @@ public class HearitKeyword {
     private Keyword keyword;
 
     public HearitKeyword(Hearit hearit, Keyword keyword) {
+        validate(hearit, keyword);
         this.hearit = hearit;
         this.keyword = keyword;
+    }
+
+    private void validate(Hearit hearit, Keyword keyword) {
+        validateHearit(hearit);
+        validateKeyword(keyword);
+    }
+
+    private static void validateHearit(Hearit hearit) {
+        if (hearit == null) {
+            throw new InvalidInputException("키워드는 null이 될 수 없습니다.");
+        }
+    }
+
+    private static void validateKeyword(Keyword keyword) {
+        if (keyword == null) {
+            throw new InvalidInputException("키워드는 null이 될 수 없습니다.");
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof HearitKeyword hearitKeyword)) {
+            return false;
+        }
+        if (this.id == null || hearitKeyword.id == null) {
+            return false;
+        }
+        return Objects.equals(id, hearitKeyword.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

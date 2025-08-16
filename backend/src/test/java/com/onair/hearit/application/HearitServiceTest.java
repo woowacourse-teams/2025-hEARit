@@ -65,13 +65,13 @@ class HearitServiceTest {
     @Autowired
     private RecommendHearitRepository recommendHearitRepository;
 
-    private DbRecommendHearitProvider recommendHearitProvider;
+    private FixedRecommendedHearitStrategy recommendHearitProvider;
 
     private HearitService hearitService;
 
     @BeforeEach
     void setup() {
-        recommendHearitProvider = new DbRecommendHearitProvider(hearitRepository, recommendHearitRepository);
+        recommendHearitProvider = new FixedRecommendedHearitStrategy(recommendHearitRepository);
         hearitService = new HearitService(
                 hearitRepository,
                 memberRepository,
@@ -130,13 +130,13 @@ class HearitServiceTest {
         IntStream.rangeClosed(1, 3)
                 .forEach((num) -> {
                     Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), today));
+                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit, today));
                 });
         LocalDate yesterday = today.minusDays(1);
         IntStream.rangeClosed(1, 5)
                 .forEach((num) -> {
                     Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit.getId(), yesterday));
+                    dbHelper.insertRecommendHearit(new RecommendHearit(hearit, yesterday));
                 });
 
         // when
