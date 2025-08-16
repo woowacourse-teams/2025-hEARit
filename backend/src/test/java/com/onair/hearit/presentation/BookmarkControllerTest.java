@@ -69,7 +69,9 @@ class BookmarkControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].bookmarkId").description("북마크 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
-                                                        fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)")
+                                                        fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
+                                                        fieldWithPath("content[].categoryColor").description(
+                                                                "해당 히어릿 카테고리 ColoCode")
                                                 }),
                                                 Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)

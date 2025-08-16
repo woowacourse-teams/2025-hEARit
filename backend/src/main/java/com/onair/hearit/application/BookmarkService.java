@@ -34,7 +34,7 @@ public class BookmarkService {
             PagingRequest pagingRequest) {
         Member member = getMemberByUserContext(userContext);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByCreatedAtDesc(member, pageable);
+        Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(member, pageable);
         Page<BookmarkHearitResponse> bookmarkHearits = bookmarks.map(
                 bookmark -> BookmarkHearitResponse.of(bookmark, bookmark.getHearit()));
         return PagedResponse.from(bookmarkHearits);
