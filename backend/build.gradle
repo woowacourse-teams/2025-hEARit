@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.onair'
-version = '1.0.09-SNAPSHOT'
+version = '1.0.10-SNAPSHOT'
 
 java {
     toolchain {
