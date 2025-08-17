@@ -1,11 +1,11 @@
 package com.onair.hearit.fixture;
 
-import com.onair.hearit.domain.Bookmark;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.Source;
+import com.onair.hearit.common.domain.Bookmark;
+import com.onair.hearit.common.domain.Category;
+import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.Source;
 import java.util.List;
 
 public class TestFixture {
@@ -31,9 +31,9 @@ public class TestFixture {
                 "title",
                 "summary",
                 500,
-                "originalAudioUrl",
-                "shortAudioUrl",
-                "scriptUrl",
+                "/hearit/audio/original/ORG_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
+                "/hearit/audio/short/SHR_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
+                "/hearit/script/SCR_bf7c513e-579e-4224-8505-3824bb22ed01.json",
                 List.of(
                         new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
                                 "https://example.com/1"),
