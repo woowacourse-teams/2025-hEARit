@@ -305,7 +305,7 @@ class PlayerDetailActivity :
         source: String,
     ) {
         val serviceIntent =
-            PlaybackService.newIntent(
+            PlaybackService.newIntentSingle(
                 context = this,
                 audioUrl = audioUrl,
                 title = title,

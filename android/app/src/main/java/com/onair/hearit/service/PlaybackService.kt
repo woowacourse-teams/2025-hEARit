@@ -43,35 +43,85 @@ class PlaybackService : MediaSessionService() {
         flags: Int,
         startId: Int,
     ): Int {
-        if (intent?.action == ACTION_STOP_SERVICE) {
-            runCatching {
-                player.pause()
-                player.clearMediaItems()
+        super.onStartCommand(intent, flags, startId)
+
+        when (intent?.action) {
+            ACTION_STOP_SERVICE -> {
+                runCatching {
+                    player.pause()
+                    player.clearMediaItems()
+                }
+                stopSelf()
+                return START_NOT_STICKY
             }
-            stopSelf()
-            return START_NOT_STICKY
+
+            ACTION_PLAY_SINGLE -> {
+                handlePlaySingle(intent)
+            }
+
+            ACTION_PLAY_PLAYLIST -> {
+                handlePlayPlaylist(intent)
+            }
+
+            ACTION_APPEND_PLAYLIST -> {
+                handleAppendPlaylist(intent)
+            }
         }
 
-        super.onStartCommand(intent, flags, startId)
         initializeAndStartForeground()
+        return START_STICKY
+    }
 
-        val audioUrl = intent?.getStringExtra(EXTRA_AUDIO_URL)
-        val title = intent?.getStringExtra(EXTRA_TITLE) ?: "hEARit"
-        val hearitId = intent?.getLongExtra(EXTRA_HEARIT_ID, -1L) ?: -1L
-        val startPosition = intent?.getLongExtra(EXTRA_START_POSITION, 0L) ?: 0L
-        val source = intent?.getStringExtra(EXTRA_SOURCE) ?: "hEARit"
+    private fun handlePlaySingle(intent: Intent) {
+        val audioUrl = intent.getStringExtra(EXTRA_AUDIO_URL)
+        val title = intent.getStringExtra(EXTRA_TITLE) ?: "hEARit"
+        val hearitId = intent.getLongExtra(EXTRA_HEARIT_ID, -1L)
+        val startPosition = intent.getLongExtra(EXTRA_START_POSITION, 0L)
+        val source = intent.getStringExtra(EXTRA_SOURCE) ?: "hEARit"
 
         if (audioUrl.isNullOrEmpty() || hearitId == -1L) {
             stopSelf()
-            return START_NOT_STICKY
+            return
         }
 
         val item = createMediaItem(audioUrl, title, hearitId, source)
         player.setMediaItems(listOf(item), 0, startPosition.coerceAtLeast(0L))
         player.prepare()
         player.play()
+    }
 
-        return START_STICKY
+    private fun handlePlayPlaylist(intent: Intent) {
+        val urls = intent.getStringArrayListExtra(EXTRA_AUDIO_URLS) ?: return
+        val titles = intent.getStringArrayListExtra(EXTRA_TITLES) ?: return
+        val hearitIds = intent.getLongArrayExtra(EXTRA_HEARIT_IDS) ?: return
+        val sources = intent.getStringArrayListExtra(EXTRA_SOURCES) ?: return
+        val startIndex = intent.getIntExtra(EXTRA_START_INDEX, 0)
+
+        val items =
+            urls.mapIndexed { index, url ->
+                createMediaItem(
+                    url,
+                    titles.getOrElse(index) { "hEARit" },
+                    hearitIds.getOrElse(index) { -1L },
+                    sources.getOrElse(index) { "hEARit" },
+                )
+            }
+
+        player.setMediaItems(items, startIndex.coerceAtLeast(0), 0L)
+        player.prepare()
+        player.play()
+    }
+
+    private fun handleAppendPlaylist(intent: Intent) {
+        val audioUrl = intent.getStringExtra(EXTRA_AUDIO_URL) ?: return
+        val title = intent.getStringExtra(EXTRA_TITLE) ?: "hEARit"
+        val hearitId = intent.getLongExtra(EXTRA_HEARIT_ID, -1L)
+        val source = intent.getStringExtra(EXTRA_SOURCE) ?: "hEARit"
+
+        if (hearitId == -1L) return
+
+        val item = createMediaItem(audioUrl, title, hearitId, source)
+        player.addMediaItem(item)
     }
 
     private fun initializePlayer() {
@@ -147,20 +197,60 @@ class PlaybackService : MediaSessionService() {
         private const val EXTRA_START_POSITION = "START_POSITION"
         private const val EXTRA_SOURCE = "SOURCE"
 
-        const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
+        private const val EXTRA_AUDIO_URLS = "AUDIO_URLS"
+        private const val EXTRA_TITLES = "TITLES"
+        private const val EXTRA_HEARIT_IDS = "HEARIT_IDS"
+        private const val EXTRA_SOURCES = "SOURCES"
+        private const val EXTRA_START_INDEX = "START_INDEX"
 
-        fun newIntent(
+        const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
+        const val ACTION_PLAY_SINGLE = "hearit.ACTION_PLAY_SINGLE"
+        const val ACTION_PLAY_PLAYLIST = "hearit.ACTION_PLAY_PLAYLIST"
+        const val ACTION_APPEND_PLAYLIST = "hearit.ACTION_APPEND_PLAYLIST"
+
+        fun newIntentSingle(
             context: Context,
             audioUrl: String,
             title: String,
             hearitId: Long,
-            startPosition: Long,
+            startPosition: Long = 0L,
             source: String,
         ) = Intent(context, PlaybackService::class.java).apply {
+            action = ACTION_PLAY_SINGLE
             putExtra(EXTRA_AUDIO_URL, audioUrl)
             putExtra(EXTRA_TITLE, title)
             putExtra(EXTRA_HEARIT_ID, hearitId)
             putExtra(EXTRA_START_POSITION, startPosition)
+            putExtra(EXTRA_SOURCE, source)
+        }
+
+        fun newIntentPlaylist(
+            context: Context,
+            audioUrls: ArrayList<String>,
+            titles: ArrayList<String>,
+            hearitIds: LongArray,
+            sources: ArrayList<String>,
+            startIndex: Int = 0,
+        ) = Intent(context, PlaybackService::class.java).apply {
+            action = ACTION_PLAY_PLAYLIST
+            putStringArrayListExtra(EXTRA_AUDIO_URLS, audioUrls)
+            putStringArrayListExtra(EXTRA_TITLES, titles)
+            putExtra(EXTRA_HEARIT_IDS, hearitIds)
+            putStringArrayListExtra(EXTRA_SOURCES, sources)
+            putExtra(EXTRA_START_INDEX, startIndex)
+        }
+
+        fun appendIntent(
+            context: Context,
+            audioUrl: String,
+            title: String,
+            hearitId: Long,
+            source: String,
+        ) = Intent(context, PlaybackService::class.java).apply {
+            action = ACTION_APPEND_PLAYLIST
+            putExtra(EXTRA_AUDIO_URL, audioUrl)
+            putExtra(EXTRA_TITLE, title)
+            putExtra(EXTRA_HEARIT_ID, hearitId)
             putExtra(EXTRA_SOURCE, source)
         }
 
