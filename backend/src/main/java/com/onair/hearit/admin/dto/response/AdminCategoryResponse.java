@@ -1,6 +1,6 @@
 package com.onair.hearit.admin.dto.response;
 
-import com.onair.hearit.domain.Category;
+import com.onair.hearit.common.domain.Category;
 
 public record AdminCategoryResponse(
         Long id,

@@ -1,7 +1,7 @@
 package com.onair.hearit.admin.infrastructure.s3;
 
 import com.onair.hearit.admin.exception.custom.AdminFileException;
-import com.onair.hearit.domain.FileType;
+import com.onair.hearit.common.domain.FileType;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;

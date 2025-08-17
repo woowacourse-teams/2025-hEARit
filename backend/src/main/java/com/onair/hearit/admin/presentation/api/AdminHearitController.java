@@ -7,7 +7,7 @@ import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminHearitResponse;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
-import com.onair.hearit.domain.FileType;
+import com.onair.hearit.common.domain.FileType;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
