@@ -92,7 +92,7 @@ swaggerSources {
 
 openapi3 {
     servers = [
-            { url = "http://localhost:80"; description = "로컬 서버" },
+            { url = "http://localhost:8080"; description = "로컬 서버" },
             { url = "http://hearit.o-r.kr"; description = "운영 서버" },
             { url = "http://hearit-dev.o-r.kr"; description = "개발 서버" }
     ]
