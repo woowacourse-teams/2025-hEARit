@@ -5,13 +5,203 @@
     <title>히어릿 관리</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css">
     <style>
-        .file-upload-form {
-            margin-top: 8px;
+        /* 모달 내 폰트/크기 통일 */
+        .modal { font-family: inherit; }
+        .modal .source-group .form-control,
+        .modal .source-group .btn { font-size: 1rem; font-family: inherit; }
+        html, body { font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
+
+        .hearit-card {
+            transition: all 0.3s ease;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
         }
 
-        .table th, .table td {
-            vertical-align: middle;
+        .hearit-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .hearit-card .card-header {
+            background: #f8f9fa;
+            color: #212529;
+            border-bottom: none;
+            padding: 0.75rem 1rem;
+        }
+
+        .hearit-card .card-body {
+            padding: 1rem;
+        }
+
+        .info-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-badge {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .keywords-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .sources-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .summary-section {
+            margin-bottom: 1rem;
+        }
+
+        .summary-section h6 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .summary-text {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #495057;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .file-section {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-section h6 {
+            color: #495057;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .file-items-container {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .file-item {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .file-status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .file-status.has-file {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .file-status.no-file {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .file-upload-form {
+            margin-top: 0.5rem;
+        }
+
+        .file-upload-form .input-group {
+            margin-bottom: 0;
+        }
+
+        .file-upload-form .input-group .form-control {
+            font-size: 0.8rem;
+        }
+
+        .file-upload-form .input-group .btn {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .keywords-section {
+            margin-bottom: 1rem;
+        }
+
+        .keyword-badge {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+
+        .sources-section {
+            margin-bottom: 1rem;
+        }
+
+        .source-link {
+            display: inline-block;
+            color: #0d6efd;
+            text-decoration: none;
+            font-size: 0.75rem;
+            word-break: break-all;
+            background-color: #f8f9fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .card-actions .btn {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
         }
     </style>
     <meta name="_csrf" th:content="${_csrf.token}"/>
@@ -19,171 +209,230 @@
 </head>
 <body>
 <div th:insert="~{admin/navbar :: navbar}"></div>
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>히어릿 관리</h1>
-    </div>
+<div class="container mt-4">
+    <h1>컨텐츠 관리</h1>
     <div>
-        <p id="hearit-count" class="text-muted mb-0">히어릿 총 개수: 0개</p>
+        <p class="text-muted mb-0" id="hearit-count">히어릿 총 개수: 0개</p>
     </div>
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-        <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Title</th>
-            <th scope="col">Summary</th>
-            <th scope="col">Play Time</th>
-            <th scope="col">Original Audio</th>
-            <th scope="col">Short Audio</th>
-            <th scope="col">Script</th>
-            <th scope="col">Sources</th>
-            <th scope="col">Created At</th>
-            <th scope="col">Category</th>
-            <th scope="col">Keywords</th>
-            <th scope="col">Actions</th>
-        </tr>
-        </thead>
-        <tbody id="hearit-table-body"></tbody>
-    </table>
-    <nav>
+
+    <!-- 로딩 스피너 -->
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">로딩중...</span>
+        </div>
+        <p class="mt-2">데이터를 불러오는 중...</p>
+    </div>
+
+    <!-- 히어릿 카드 목록 -->
+    <div id="hearit-cards-container">
+        <!-- 카드들이 여기에 동적으로 추가됩니다 -->
+    </div>
+
+    <!-- 빈 상태 -->
+    <div class="empty-state" id="empty-state" style="display: none;">
+        <i class="bi bi-inbox"></i>
+        <h4>히어릿이 없습니다</h4>
+        <p>새로운 히어릿을 추가해보세요.</p>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <nav class="mt-4">
         <ul class="pagination justify-content-center" id="pagination-controls"></ul>
     </nav>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editHearitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>히어릿 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="edit-hearit-modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cancelEditHearit()">
+                    <i class="bi bi-x-circle me-1"></i>취소
+                </button>
+                <button type="button" class="btn btn-success" id="edit-save-button">
+                    <i class="bi bi-check-circle me-1"></i>저장
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let currentPage = 0;
     const pageSize = 15;
+    let lastFetchedHearits = [];
+    let editingId = null;
 
     async function fetchHearits(page) {
+        showLoading(true);
         try {
             const response = await fetch(`/api/v1/admin/hearits?page=${page}&size=${pageSize}`);
             if (!response.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
             const pagedData = await response.json();
-            updateTable(pagedData.content);
+
+            updateCards(pagedData.content);
             updatePagination(pagedData);
             document.getElementById('hearit-count').textContent = `히어릿 총 개수: ${pagedData.totalElements}개`;
+            lastFetchedHearits = pagedData.content || [];
             currentPage = page;
+
+            // 빈 상태 처리
+            const emptyState = document.getElementById('empty-state');
+            const cardsContainer = document.getElementById('hearit-cards-container');
+            if (pagedData.content.length === 0) {
+                emptyState.style.display = 'block';
+                cardsContainer.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                cardsContainer.style.display = 'block';
+            }
         } catch (error) {
             console.error('Error fetching hearits:', error);
             alert(error.message);
+        } finally {
+            showLoading(false);
         }
     }
 
-    let editingId = null;
+    function showLoading(show) {
+        const spinner = document.getElementById('loading-spinner');
+        const cardsContainer = document.getElementById('hearit-cards-container');
+        const emptyState = document.getElementById('empty-state');
 
-    function updateTable(hearits) {
-        const tableBody = document.getElementById('hearit-table-body');
-        tableBody.innerHTML = '';
+        if (show) {
+            spinner.style.display = 'block';
+            cardsContainer.style.display = 'none';
+            emptyState.style.display = 'none';
+        } else {
+            spinner.style.display = 'none';
+            cardsContainer.style.display = 'block';
+        }
+    }
+
+    function updateCards(hearits) {
+        const container = document.getElementById('hearit-cards-container');
+        container.innerHTML = '';
+
         hearits.forEach(hearit => {
-            const row = document.createElement('tr');
-
-            const sourcesHtml = Array.isArray(hearit.sources) && hearit.sources.length > 0
-                ? hearit.sources.map(s => {
-                    if (s.sourceUrl) { // URL이 있으면 링크로 표시
-                        return `<a href="${s.sourceUrl}" target="_blank" rel="noopener noreferrer">${s.sourceName}</a>`;
-                    } else { // URL이 없으면 텍스트로만 표시
-                        return `<span>${s.sourceName}</span>`;
-                    }
-                }).join('<br>')
-                : '없음';
-
-            if (editingId === hearit.id) {
-                const editSourcesHtml = `
-                    <div id="edit-sources-container-${hearit.id}">
-                        ${hearit.sources.map(s => `
-                            <div class="input-group input-group-sm mb-1 source-group">
-                                <input type="text" class="form-control source-name-input" value="${s.sourceName || ''}" placeholder="이름">
-                                <input type="text" class="form-control source-url-input" value="${s.sourceUrl || ''}" placeholder="URL (선택사항)">
-                                <button type="button" class="btn btn-outline-danger" onclick="this.closest('.source-group').remove()">삭제</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="addSourceRowToEdit(${hearit.id})">출처 추가</button>
-                `;
-
-                row.innerHTML = `
-                    <td>
-                        ${hearit.id}
-                        <input type="hidden" id="original-audio-url-${hearit.id}" value="${hearit.originalAudioUrl || ''}">
-                        <input type="hidden" id="short-audio-url-${hearit.id}" value="${hearit.shortAudioUrl || ''}">
-                        <input type="hidden" id="script-url-${hearit.id}" value="${hearit.scriptUrl || ''}">
-                    </td>
-                    <td><input type="text" class="form-control" value="${hearit.title}" id="edit-title-${hearit.id}" style="min-width: 120px;"></td>
-                    <td><input type="text" class="form-control" value="${hearit.summary || ''}" id="edit-summary-${hearit.id}" style="min-width: 120px;"></td>
-                    <td><input type="number" class="form-control" value="${hearit.playTime}" id="edit-playtime-${hearit.id}" style="min-width: 120px;"></td>
-                    <td>${hearit.originalAudioUrl || 'N/A'}</td>
-                    <td>${hearit.shortAudioUrl || 'N/A'}</td>
-                    <td>${hearit.scriptUrl || 'N/A'}</td>
-                    <td>${editSourcesHtml}</td>
-                    <td>${hearit.createdAt ? new Date(hearit.createdAt).toLocaleString() : ''}</td>
-                    <td>
-                        ${hearit.category?.name || ''}
-                        <input type="hidden" id="edit-category-id-${hearit.id}" value="${hearit.category?.id || ''}">
-                    </td>
-                    <td>${
-                    Array.isArray(hearit.keywords)
-                        ? hearit.keywords.map(k => `<span class="badge text-bg-secondary me-1">${k.name}</span>`).join('')
-                        : ''
-                }</td>
-                    <td>
-                        <button class="btn btn-success btn-sm" onclick="updateMetadata(${hearit.id})">저장</button>
-                        <button class="btn btn-secondary btn-sm" onclick="cancelEditHearit()">취소</button>
-                    </td>
-                `;
-            } else {
-                row.innerHTML = `
-                    <td>${hearit.id}</td>
-                    <td>${hearit.title}</td>
-                    <td>${hearit.summary || ''}</td>
-                    <td>${hearit.playTime}초</td>
-                    <td>
-                        <div>${hearit.originalAudioUrl || '없음'}</div>
-                        <form class="file-upload-form" onsubmit="updateFile(event, ${hearit.id}, 'original-audio')">
-                            <div class="input-group input-group-sm">
-                                <input type="file" class="form-control" name="file" required>
-                                <button class="btn btn-outline-secondary" type="submit">OriginalAudio 수정</button>
-                            </div>
-                        </form>
-                    </td>
-                    <td>
-                        <div>${hearit.shortAudioUrl || '없음'}</div>
-                        <form class="file-upload-form" onsubmit="updateFile(event, ${hearit.id}, 'short-audio')">
-                            <div class="input-group input-group-sm">
-                                <input type="file" class="form-control" name="file" required>
-                                <button class="btn btn-outline-secondary" type="submit">ShortAudio 수정</button>
-                            </div>
-                        </form>
-                    </td>
-                    <td>
-                        <div>${hearit.scriptUrl || '없음'}</div>
-                        <form class="file-upload-form" onsubmit="updateFile(event, ${hearit.id}, 'script')">
-                             <div class="input-group input-group-sm">
-                                <input type="file" class="form-control" name="file" required>
-                                <button class="btn btn-outline-secondary" type="submit">Script 수정</button>
-                            </div>
-                        </form>
-                    </td>
-                    <td>${sourcesHtml}</td>
-                    <td>${hearit.createdAt ? new Date(hearit.createdAt).toLocaleString() : ''}</td>
-                    <td>${hearit.category?.name || ''}</td>
-                    <td>${
-                    Array.isArray(hearit.keywords)
-                        ? hearit.keywords.map(k => `<span class="badge text-bg-secondary me-1">${k.name}</span>`).join('')
-                        : ''
-                }</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick="editHearit(${hearit.id})">수정</button>
-                    </td>
-                `;
-            }
-            tableBody.appendChild(row);
+            const card = createHearitCard(hearit);
+            container.appendChild(card);
         });
+    }
+
+    function createHearitCard(hearit) {
+        const card = document.createElement('div');
+        card.className = 'hearit-card';
+
+        const sourcesHtml = Array.isArray(hearit.sources) && hearit.sources.length > 0
+            ? hearit.sources.map(s => {
+                if (s.sourceUrl) {
+                    return `<a href="${s.sourceUrl}" target="_blank" rel="noopener noreferrer" class="source-link">${s.sourceName}</a>`;
+                } else {
+                    return `<span class="source-link">${s.sourceName}</span>`;
+                }
+            }).join('')
+            : '<span class="text-muted">출처 없음</span>';
+
+        const keywordsHtml = Array.isArray(hearit.keywords) && hearit.keywords.length > 0
+            ? hearit.keywords.map(k => `<span class="keyword-badge">${k.name}</span>`).join('')
+            : '<span class="text-muted">키워드 없음</span>';
+
+        card.innerHTML = `
+            <div class="card hearit-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0" title="${hearit.title}">${hearit.id}. ${hearit.title}</h6>
+                        </div>
+                        <button class="btn btn-dark btn-sm" onclick="editHearit(${hearit.id})">
+                            <i class="bi bi-pencil me-1"></i>수정
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="summary-section">
+                                <h6><i class="bi bi-text-paragraph me-1"></i>요약</h6>
+                                <div class="summary-text">${hearit.summary || '요약 없음'}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="info-badges">
+                                <div class="info-badge">
+                                    <span class="badge bg-secondary me-1">카테고리: ${hearit.category?.name || '미분류'}</span>
+                                    <span class="badge bg-secondary me-1">${hearit.playTime}초</span>
+                                    <span class="badge bg-secondary me-1">${hearit.createdAt ? new Date(hearit.createdAt).toLocaleDateString() : 'N/A'}</span>
+                                </div>
+                                <div class="keywords-badges mt-1">
+                                    ${keywordsHtml}
+                                </div>
+                                <div class="sources-badges mt-1">
+                                    ${sourcesHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="file-section">
+                                <div class="file-items-container">
+                                    <div class="file-item">
+                                        <span class="file-status ${hearit.originalAudioUrl ? 'has-file' : 'no-file'}">
+                                            ${hearit.originalAudioUrl ? 'Original Audio ✓' : 'Original Audio ✗'}
+                                        </span>
+                                        <form class="file-upload-form" onsubmit="updateFile(event, ${hearit.id}, 'original-audio')">
+                                            <div class="input-group input-group-sm">
+                                                <input type="file" class="form-control" name="file" accept="audio/*" required>
+                                                <button class="btn btn-outline-primary btn-sm" type="submit">업로드</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="file-item">
+                                        <span class="file-status ${hearit.shortAudioUrl ? 'has-file' : 'no-file'}">
+                                            ${hearit.shortAudioUrl ? 'Short Audio ✓' : 'Short Audio ✗'}
+                                        </span>
+                                        <form class="file-upload-form" onsubmit="updateFile(event, ${hearit.id}, 'short-audio')">
+                                            <div class="input-group input-group-sm">
+                                                <input type="file" class="form-control" name="file" accept="audio/*" required>
+                                                <button class="btn btn-outline-primary btn-sm" type="submit">업로드</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="file-item">
+                                        <span class="file-status ${hearit.scriptUrl ? 'has-file' : 'no-file'}">
+                                            ${hearit.scriptUrl ? 'Script ✓' : 'Script ✗'}
+                                        </span>
+                                        <form class="file-upload-form" onsubmit="updateFile(event, ${hearit.id}, 'script')">
+                                            <div class="input-group input-group-sm">
+                                                <input type="file" class="form-control" name="file" accept=".json,.txt" required>
+                                                <button class="btn btn-outline-primary btn-sm" type="submit">업로드</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return card;
     }
 
     function updatePagination(pagedData) {
         const paginationControls = document.getElementById('pagination-controls');
         paginationControls.innerHTML = '';
+
         const createPageItem = (text, page, isDisabled = false, isActive = false) => {
             const li = document.createElement('li');
             li.className = `page-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}`;
@@ -200,20 +449,96 @@
             li.appendChild(link);
             return li;
         };
-        paginationControls.appendChild(createPageItem('이전', currentPage - 1, pagedData.isFirst));
-        paginationControls.appendChild(createPageItem(`${pagedData.page + 1} / ${pagedData.totalPages}`, -1, true));
+
+        // 이전 버튼
+        paginationControls.appendChild(createPageItem('이전', Math.max(currentPage - 1, 0), pagedData.isFirst));
+
+        // 페이지 번호들
+        const startPage = 0;
+        const endPage = pagedData.totalPages - 1;
+        for (let i = startPage; i <= endPage; i++) {
+            paginationControls.appendChild(createPageItem(i + 1, i, false, i === pagedData.page));
+        }
+
+        // 다음 버튼
         paginationControls.appendChild(createPageItem('다음', currentPage + 1, pagedData.isLast));
     }
 
     function editHearit(hearitId) {
+        const hearit = lastFetchedHearits.find(h => h.id === hearitId);
+        if (!hearit) {
+            alert('데이터를 불러오지 못했습니다. 다시 시도해주세요.');
+            return;
+        }
         editingId = hearitId;
-        fetchHearits(currentPage);
+
+        const sources = Array.isArray(hearit.sources) ? hearit.sources : [];
+        const sourcesRowsHtml = (sources.length > 0 ? sources : [{ sourceName: '', sourceUrl: '' }])
+            .map(s => `
+                <div class="input-group input-group-lg mb-2 source-group">
+                    <input type="text" class="form-control source-name-input" value="${s.sourceName || ''}" placeholder="이름">
+                    <input type="text" class="form-control source-url-input" value="${s.sourceUrl || ''}" placeholder="URL (선택사항)">
+                    <button type="button" class="btn btn-outline-danger" onclick="this.closest('.source-group').remove()">삭제</button>
+                </div>
+            `).join('');
+
+        const modalBody = document.getElementById('edit-hearit-modal-body');
+        modalBody.innerHTML = `
+            <div class="container-fluid">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">제목</label>
+                        <input type="text" class="form-control" value="${hearit.title}" id="edit-title-${hearit.id}" style="min-width: 120px;">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">재생시간(초)</label>
+                        <input type="number" class="form-control" value="${hearit.playTime}" id="edit-playtime-${hearit.id}" style="min-width: 120px;">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">요약</label>
+                        <input type="text" class="form-control" value="${hearit.summary || ''}" id="edit-summary-${hearit.id}" style="min-width: 120px;">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">출처</label>
+                        <div id="edit-sources-container-${hearit.id}">
+                            ${sourcesRowsHtml}
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="addSourceRowToEdit(${hearit.id})">출처 추가</button>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Original Audio</label>
+                        <div>${hearit.originalAudioUrl || 'N/A'}</div>
+                        <input type="hidden" id="original-audio-url-${hearit.id}" value="${hearit.originalAudioUrl || ''}">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Short Audio</label>
+                        <div>${hearit.shortAudioUrl || 'N/A'}</div>
+                        <input type="hidden" id="short-audio-url-${hearit.id}" value="${hearit.shortAudioUrl || ''}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Script</label>
+                        <div>${hearit.scriptUrl || 'N/A'}</div>
+                        <input type="hidden" id="script-url-${hearit.id}" value="${hearit.scriptUrl || ''}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">카테고리</label>
+                        <div>${hearit.category?.name || ''}</div>
+                        <input type="hidden" id="edit-category-id-${hearit.id}" value="${hearit.category?.id || ''}">
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const modalEl = document.getElementById('editHearitModal');
+        const modal = new bootstrap.Modal(modalEl);
+        document.getElementById('edit-save-button').onclick = () => updateMetadata(hearitId);
+        modal.show();
     }
 
     function addSourceRowToEdit(hearitId) {
         const container = document.getElementById(`edit-sources-container-${hearitId}`);
         const newRow = document.createElement('div');
-        newRow.className = 'input-group input-group-sm mb-1 source-group';
+        newRow.className = 'input-group input-group-lg mb-2 source-group';
         newRow.innerHTML = `
             <input type="text" class="form-control source-name-input" placeholder="이름">
             <input type="text" class="form-control source-url-input" placeholder="URL (선택사항)">
@@ -272,6 +597,11 @@
             if (response.ok) {
                 alert('수정되었습니다.');
                 editingId = null;
+                const modalEl = document.getElementById('editHearitModal');
+                const instance = bootstrap.Modal.getInstance(modalEl);
+                if (instance) {
+                    instance.hide();
+                }
                 fetchHearits(currentPage);
             } else {
                 const err = await response.json();
@@ -310,7 +640,6 @@
             if (response.ok) {
                 alert(`파일이 성공적으로 수정되었습니다.`);
                 fetchHearits(currentPage);
-
             } else {
                 const err = await response.json();
                 alert('파일 수정 실패: ' + (err.detail || '서버 오류 발생'));
@@ -323,6 +652,11 @@
 
     function cancelEditHearit() {
         editingId = null;
+        const modalEl = document.getElementById('editHearitModal');
+        const instance = bootstrap.Modal.getInstance(modalEl);
+        if (instance) {
+            instance.hide();
+        }
         fetchHearits(currentPage);
     }
 

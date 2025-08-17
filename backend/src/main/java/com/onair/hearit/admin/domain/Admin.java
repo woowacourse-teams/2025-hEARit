@@ -31,8 +31,33 @@ public class Admin {
     private String nickname;
 
     public Admin(String loginId, String rawPassword, String nickname) {
+        validate(loginId, rawPassword, nickname);
         this.loginId = loginId;
         this.password = new Password(rawPassword);
         this.nickname = nickname;
+    }
+
+    private void validate(String loginId, String rawPassword, String nickname) {
+        validateLoginId(loginId);
+        validatePassword(rawPassword);
+        validateNickname(nickname);
+    }
+
+    private void validateNickname(String nickname) {
+        if (nickname == null) {
+            throw new IllegalArgumentException("닉네임은 null이 될 수 없습니다.");
+        }
+    }
+
+    private void validatePassword(String rawPassword) {
+        if (rawPassword == null) {
+            throw new IllegalArgumentException("비밀번호는 null이 될 수 없습니다.");
+        }
+    }
+
+    void validateLoginId(String loginId) {
+        if (loginId == null) {
+            throw new IllegalArgumentException("로그인 id는 null이 될 수 없습니다.");
+        }
     }
 }

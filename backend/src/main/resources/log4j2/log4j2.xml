@@ -26,18 +26,15 @@
 
         <!-- 로그 파일 저장되는 디렉토리(상대경로) -->
         <Property name="logDir">log</Property>
+
+        <!-- APP_ENV 환경변수 바인딩 -->
+        <Property name="env">${spring:ENV}</Property>
     </Properties>
 
     <Appenders>
         <!-- 콘솔 출력 설정 -->
         <Console name="Console" target="SYSTEM_OUT">
-            <!-- 콘솔에 출력할 로그 패턴 설정 -->
-            <JsonLayout
-                pretty="true"
-                complete="false"
-                eventEol="true"
-                objectMessageAsJsonObject="true"
-                charset="UTF-8"/>
+            <PatternLayout pattern="${consoleLogPattern}" charset="UTF-8"/>
         </Console>
 
         <!-- 파일 출력 설정 -->
@@ -53,7 +50,9 @@
                 compact="true"
                 eventEol="true"
                 objectMessageAsJsonObject="true"
-                charset="UTF-8"/>
+                charset="UTF-8">
+                <KeyValuePair key="env" value="${env}"/>
+            </JsonLayout>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
@@ -71,7 +70,9 @@
                         compact="true"
                         eventEol="true"
                         objectMessageAsJsonObject="true"
-                        includeStacktrace="true"/>
+                        includeStacktrace="true">
+                <KeyValuePair key="env" value="${env}"/>
+            </JsonLayout>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
@@ -86,6 +87,16 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
         </Root>
+
+        <!-- 콘솔 Logger-->
+        <Logger name="consoleLogger" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- JSON 파일 Logger-->
+        <Logger name="jsonLogger" level="info" additivity="false">
+            <AppenderRef ref="RollingFile"/>
+        </Logger>
 
         <!-- 에러 Logger-->
         <Logger name="errorLogger" level="error" additivity="false">

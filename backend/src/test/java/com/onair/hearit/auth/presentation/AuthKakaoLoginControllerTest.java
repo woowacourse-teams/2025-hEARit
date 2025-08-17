@@ -13,9 +13,9 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
+import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
-import com.onair.hearit.auth.infrastructure.client.KakaoUserInfoClient;
+import com.onair.hearit.auth.infrastructure.oauth.kakao.KakaoOAuthService;
 import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.fixture.IntegrationTest;
 import io.restassured.RestAssured;
@@ -35,7 +35,7 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
     private static WireMockServer wireMockServer;
 
     @Autowired
-    KakaoUserInfoClient kakaoUserInfoClient;
+    KakaoOAuthService kakaoOAuthService;
 
     @BeforeAll
     static void setup() {
@@ -64,7 +64,7 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
                                     }
                                 """)));
 
-        KakaoLoginRequest kakaoLoginRequest = new KakaoLoginRequest("accessToken-test-example");
+        OAuthLoginRequest kakaoLoginRequest = new OAuthLoginRequest("accessToken-test-example");
         LoginTokenResponse loginTokenResponse = RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(kakaoLoginRequest)
@@ -73,7 +73,7 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
                                 .tag("Auth API")
                                 .summary("카카오 로그인")
                                 .description("카카오 액세스토큰으로 로그인하여 서비스 토큰을 발급받습니다.")
-                                .requestSchema(Schema.schema("KakaoLoginRequest"))
+                                .requestSchema(Schema.schema("OAuthLoginRequest"))
                                 .requestFields(
                                         fieldWithPath("accessToken").description("카카오에서 발급받은 Access Token")
                                 )
@@ -112,7 +112,7 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
                                 }
                                 """)));
 
-        KakaoLoginRequest kakaoLoginRequest = new KakaoLoginRequest("accessToken-test-example");
+        OAuthLoginRequest kakaoLoginRequest = new OAuthLoginRequest("accessToken-test-example");
         ProblemDetail problemDetail = given(this.spec)
                 .contentType(ContentType.JSON)
                 .body(kakaoLoginRequest)
@@ -120,7 +120,7 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
                                 .summary("카카오 로그인")
-                                .requestSchema(Schema.schema("KakaoLoginRequest"))
+                                .requestSchema(Schema.schema("OAuthLoginRequest"))
                                 .requestFields(
                                         fieldWithPath("accessToken").description("카카오에서 발급받은 Access Token")
                                 )
@@ -136,7 +136,7 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
 
         assertAll(() -> {
             assertThat(problemDetail).isNotNull();
-            assertThat(problemDetail.getDetail()).isEqualTo("this access token is already expired");
+            assertThat(problemDetail.getDetail()).contains("this access token is already expired");
         });
     }
 

@@ -2,7 +2,7 @@ package com.onair.hearit.auth.application;
 
 import com.onair.hearit.admin.domain.Admin;
 import com.onair.hearit.admin.domain.AdminUserDetails;
-import com.onair.hearit.admin.infrastructure.AdminRepository;
+import com.onair.hearit.admin.infrastructure.jpa.AdminRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

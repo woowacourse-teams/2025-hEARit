@@ -4,7 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.domain.Member;
+import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
@@ -19,8 +19,8 @@ class ApiSecurityConfigTest extends IntegrationTest {
     JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("화이트리스트 경로는 인증 없이 접근할 수 있다")
-    void canAccessWhitelistedPathWithoutAuth() {
+    @DisplayName("PUBLIC GET API 경로는 HTTP Method GET만 인증 없이 접근할 수 있다")
+    void canAccessPublicGetListPathWithoutAuth() {
         // when & then
         RestAssured.given().log().all()
                 .when()

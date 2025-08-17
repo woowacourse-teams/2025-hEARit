@@ -1,7 +1,5 @@
 package com.onair.hearit.auth.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import com.onair.hearit.auth.application.AdminUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +18,6 @@ public class AdminSecurityConfig {
     @Bean
     public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(withDefaults())
                 .securityMatcher("/admin/**", "/api/v1/admin/**")
                 .userDetailsService(adminUserDetailsService)
                 .authorizeHttpRequests(auth -> auth

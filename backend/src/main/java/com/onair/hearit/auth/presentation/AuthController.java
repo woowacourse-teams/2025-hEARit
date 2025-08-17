@@ -1,13 +1,15 @@
 package com.onair.hearit.auth.presentation;
 
 import com.onair.hearit.auth.application.AuthService;
-import com.onair.hearit.auth.dto.CurrentMember;
-import com.onair.hearit.auth.dto.request.KakaoLoginRequest;
+import com.onair.hearit.auth.domain.OAuthProvider;
+import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.auth.dto.request.LoginRequest;
+import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.request.TokenReissueRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,25 +29,25 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginTokenResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginTokenResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginTokenResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/kakao-login")
-    public ResponseEntity<LoginTokenResponse> loginOrSignupWithKakao(@RequestBody KakaoLoginRequest request) {
-        LoginTokenResponse response = authService.loginOrSignupWithKakao(request);
+    public ResponseEntity<LoginTokenResponse> loginOrSignupWithKakao(@Valid @RequestBody OAuthLoginRequest request) {
+        LoginTokenResponse response = authService.loginOrSignUp(request, OAuthProvider.KAKAO);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody SignupRequest request) {
+    public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest request) {
         authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/token/refresh")
-    public ResponseEntity<TokenReissueResponse> reissue(@RequestBody TokenReissueRequest request) {
+    public ResponseEntity<TokenReissueResponse> reissue(@Valid @RequestBody TokenReissueRequest request) {
         String newAccessToken = authService.reissue(request.refreshToken());
         return ResponseEntity.ok(new TokenReissueResponse(newAccessToken));
     }
@@ -56,8 +58,8 @@ public class AuthController {
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<Void> withdraw(@AuthenticationPrincipal CurrentMember currentMember) {
-        authService.withdraw(currentMember.memberId());
+    public ResponseEntity<Void> withdraw(@AuthenticationPrincipal UserContext userContext) {
+        authService.withdraw(userContext.memberId());
         return ResponseEntity.noContent().build();
     }
 }
