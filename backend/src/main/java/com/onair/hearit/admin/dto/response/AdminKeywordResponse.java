@@ -1,6 +1,6 @@
 package com.onair.hearit.admin.dto.response;
 
-import com.onair.hearit.domain.Keyword;
+import com.onair.hearit.common.domain.Keyword;
 
 public record AdminKeywordResponse(
         Long id,

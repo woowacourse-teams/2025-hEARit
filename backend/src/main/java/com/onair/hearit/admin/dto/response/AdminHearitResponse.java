@@ -1,7 +1,7 @@
 package com.onair.hearit.admin.dto.response;
 
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Source;
+import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.Source;
 import java.time.LocalDateTime;
 import java.util.List;
 
