@@ -84,28 +84,3 @@ jobs:
 
       - name: Run deploy script with sudo
         run: sudo bash ~/hearit/deploy.sh
-
-      - name: Point Nginx (dev) upstream to this private IP
-        shell: bash
-        run: |
-          set -euo pipefail
-          PUBLIC_EC2_ID="${{ secrets.PUBLIC_NGINX_EC2_ID }}"
-          PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-
-          cat > /tmp/ssm-params.json <<'EOF'
-          {
-            "commands": [
-              "cat >/etc/nginx/conf.d/upstream_dev.conf <<UP\nupstream backend_dev { server __PRIVATE_IP__:80; keepalive 32; }\nUP",
-              "sudo nginx -t",
-              "sudo systemctl reload nginx"
-            ]
-          }
-          EOF
-          sed -i "s|__PRIVATE_IP__|$PRIVATE_IP|g" /tmp/ssm-params.json
-
-          aws ssm send-command \
-            --instance-ids "$PUBLIC_EC2_ID" \
-            --document-name "AWS-RunShellScript" \
-            --parameters file:///tmp/ssm-params.json \
-            --region ap-northeast-2 \
-            --comment "Update backend_dev upstream to $PRIVATE_IP:80 and reload Nginx"
