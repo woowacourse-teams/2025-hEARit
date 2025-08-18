@@ -61,11 +61,11 @@ jobs:
           path: .android/app/build/outputs/bundle/release/app-release.aab
           overwrite: 'true'
 
-#      - name: Deploy AAB On Google Play Console
-#        uses: r0adkll/upload-google-play@v1.1.3
-#        with:
-#          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
-#          packageName: com.onair.hearit
-#          releaseFiles: ./android/app/build/outputs/bundle/release/app-release.aab
-#          track: alpha
-#          whatsNewDirectory: ./android/app/whatsnew
+      - name: Deploy AAB On Google Play Console
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          packageName: com.onair.hearit
+          releaseFiles: ./android/app/build/outputs/bundle/release/app-release.aab
+          track: alpha
+          whatsNewDirectory: ./android/app/whatsnew
