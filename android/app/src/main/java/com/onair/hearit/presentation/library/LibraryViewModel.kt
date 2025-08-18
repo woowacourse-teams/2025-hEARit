@@ -11,9 +11,6 @@ import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.library.BookmarkUiState.LoggedIn
-import com.onair.hearit.presentation.library.BookmarkUiState.NoBookmarks
-import com.onair.hearit.presentation.library.BookmarkUiState.NotLoggedIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -33,7 +30,7 @@ class LibraryViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private val _isLoading = MutableLiveData<Boolean>(false)
+    private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
     private var nextPage: Int? = 0
@@ -54,7 +51,7 @@ class LibraryViewModel(
     }
 
     private fun fetchData(page: Int) {
-        if (_isLoading.value == true || nextPage == null) return
+        if (isLoading.value == true || nextPage == null) return
 
         _isLoading.value = true
         viewModelScope.launch {
@@ -62,19 +59,14 @@ class LibraryViewModel(
                 .getBookmarks(page = page, size = null)
                 .onSuccess { pageResult ->
                     val currentList = _bookmarks.value.orEmpty()
-                    _bookmarks.value = currentList + pageResult.items
-
-                    _uiState.value = if (_bookmarks.value.isNullOrEmpty()) NoBookmarks else LoggedIn
-
-                    nextPage =
-                        if (!pageResult.paging.isLast) {
-                            pageResult.paging.page + 1
-                        } else {
-                            null
-                        }
+                    val newList = currentList + pageResult.items
+                    _bookmarks.value = newList
+                    _uiState.value =
+                        if (newList.isEmpty()) BookmarkUiState.NoBookmarks else BookmarkUiState.LoggedIn
+                    nextPage = if (!pageResult.paging.isLast) pageResult.paging.page + 1 else null
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegistered -> _uiState.value = NotLoggedIn
+                        is UserNotRegistered -> _uiState.value = BookmarkUiState.NotLoggedIn
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.library_toast_bookmark_load_fail
@@ -90,8 +82,13 @@ class LibraryViewModel(
             bookmarkRepository
                 .deleteBookmark(bookmarkId)
                 .onSuccess {
-                    _bookmarks.value =
-                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }
+                    val updatedList =
+                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }.orEmpty()
+                    _bookmarks.value = updatedList
+
+                    if (updatedList.isEmpty()) {
+                        _uiState.value = BookmarkUiState.NoBookmarks
+                    }
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_delete_bookmark_fail
                 }
@@ -104,11 +101,10 @@ class LibraryViewModel(
                 .getUserInfo()
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo
-                    _uiState.value = if (_bookmarks.value.isNullOrEmpty()) NoBookmarks else LoggedIn
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
-                            _uiState.value = NotLoggedIn
+                            _uiState.value = BookmarkUiState.NotLoggedIn
                         }
 
                         else -> {
