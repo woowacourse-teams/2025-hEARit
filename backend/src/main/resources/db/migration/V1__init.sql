@@ -82,7 +82,7 @@ CREATE TABLE `hearit_source` (
                                  `hearit_id` bigint NOT NULL,
                                  `source_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
                                  `source_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                 PRIMARY KEY (`hearit_id`),
+                                 KEY (`hearit_id`),
                                  CONSTRAINT `fk_hearit_source_hearit` FOREIGN KEY (`hearit_id`) REFERENCES `hearit` (`id`)
 );
 
