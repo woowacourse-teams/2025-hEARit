@@ -13,6 +13,7 @@ fun BookmarkResponse.Content.toDomain(): Bookmark =
         summary = summary,
         playTime = playTime,
         categoryColor = categoryColor,
+        audioUrl = null,
     )
 
 fun BookmarkResponse.toDomain(): PageResult<Bookmark> =

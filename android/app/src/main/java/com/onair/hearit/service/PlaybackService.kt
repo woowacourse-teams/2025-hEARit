@@ -55,17 +55,8 @@ class PlaybackService : MediaSessionService() {
                 return START_NOT_STICKY
             }
 
-            ACTION_PLAY_SINGLE -> {
-                handlePlaySingle(intent)
-            }
-
-            ACTION_PLAY_PLAYLIST -> {
-                handlePlayPlaylist(intent)
-            }
-
-            ACTION_APPEND_PLAYLIST -> {
-                handleAppendPlaylist(intent)
-            }
+            ACTION_PLAY_SINGLE -> handlePlaySingle(intent)
+            ACTION_APPEND_PLAYLIST -> handleAppendPlaylist(intent)
         }
 
         initializeAndStartForeground()
@@ -86,28 +77,6 @@ class PlaybackService : MediaSessionService() {
 
         val item = createMediaItem(audioUrl, title, hearitId, source)
         player.setMediaItems(listOf(item), 0, startPosition.coerceAtLeast(0L))
-        player.prepare()
-        player.play()
-    }
-
-    private fun handlePlayPlaylist(intent: Intent) {
-        val urls = intent.getStringArrayListExtra(EXTRA_AUDIO_URLS) ?: return
-        val titles = intent.getStringArrayListExtra(EXTRA_TITLES) ?: return
-        val hearitIds = intent.getLongArrayExtra(EXTRA_HEARIT_IDS) ?: return
-        val sources = intent.getStringArrayListExtra(EXTRA_SOURCES) ?: return
-        val startIndex = intent.getIntExtra(EXTRA_START_INDEX, 0)
-
-        val items =
-            urls.mapIndexed { index, url ->
-                createMediaItem(
-                    url,
-                    titles.getOrElse(index) { "hEARit" },
-                    hearitIds.getOrElse(index) { -1L },
-                    sources.getOrElse(index) { "hEARit" },
-                )
-            }
-
-        player.setMediaItems(items, startIndex.coerceAtLeast(0), 0L)
         player.prepare()
         player.play()
     }
@@ -197,15 +166,8 @@ class PlaybackService : MediaSessionService() {
         private const val EXTRA_START_POSITION = "START_POSITION"
         private const val EXTRA_SOURCE = "SOURCE"
 
-        private const val EXTRA_AUDIO_URLS = "AUDIO_URLS"
-        private const val EXTRA_TITLES = "TITLES"
-        private const val EXTRA_HEARIT_IDS = "HEARIT_IDS"
-        private const val EXTRA_SOURCES = "SOURCES"
-        private const val EXTRA_START_INDEX = "START_INDEX"
-
         const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
         const val ACTION_PLAY_SINGLE = "hearit.ACTION_PLAY_SINGLE"
-        const val ACTION_PLAY_PLAYLIST = "hearit.ACTION_PLAY_PLAYLIST"
         const val ACTION_APPEND_PLAYLIST = "hearit.ACTION_APPEND_PLAYLIST"
 
         fun newIntentSingle(
@@ -222,22 +184,6 @@ class PlaybackService : MediaSessionService() {
             putExtra(EXTRA_HEARIT_ID, hearitId)
             putExtra(EXTRA_START_POSITION, startPosition)
             putExtra(EXTRA_SOURCE, source)
-        }
-
-        fun newIntentPlaylist(
-            context: Context,
-            audioUrls: ArrayList<String>,
-            titles: ArrayList<String>,
-            hearitIds: LongArray,
-            sources: ArrayList<String>,
-            startIndex: Int = 0,
-        ) = Intent(context, PlaybackService::class.java).apply {
-            action = ACTION_PLAY_PLAYLIST
-            putStringArrayListExtra(EXTRA_AUDIO_URLS, audioUrls)
-            putStringArrayListExtra(EXTRA_TITLES, titles)
-            putExtra(EXTRA_HEARIT_IDS, hearitIds)
-            putStringArrayListExtra(EXTRA_SOURCES, sources)
-            putExtra(EXTRA_START_INDEX, startIndex)
         }
 
         fun appendIntent(

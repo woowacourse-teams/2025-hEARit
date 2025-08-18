@@ -10,6 +10,7 @@ import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.MemberRepository
+import com.onair.hearit.domain.usecase.GetBookmarkUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.library.BookmarkUiState.LoggedIn
 import com.onair.hearit.presentation.library.BookmarkUiState.NoBookmarks
@@ -20,8 +21,9 @@ import timber.log.Timber
 class LibraryViewModel(
     private val bookmarkRepository: BookmarkRepository,
     private val memberRepository: MemberRepository,
+    private val getBookmarkUseCase: GetBookmarkUseCase,
 ) : ViewModel() {
-    private val _bookmarks: MutableLiveData<List<Bookmark>> = MutableLiveData()
+    private val _bookmarks = MutableLiveData<List<Bookmark>>()
     val bookmarks: LiveData<List<Bookmark>> = _bookmarks
 
     private val _uiState = MutableLiveData<BookmarkUiState>()
@@ -58,8 +60,7 @@ class LibraryViewModel(
 
         _isLoading.value = true
         viewModelScope.launch {
-            bookmarkRepository
-                .getBookmarks(page = page, size = null)
+            getBookmarkUseCase(page = page, size = null)
                 .onSuccess { pageResult ->
                     val currentList = _bookmarks.value.orEmpty()
                     _bookmarks.value = currentList + pageResult.items
