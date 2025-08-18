@@ -93,5 +93,5 @@ jobs:
           aws ssm send-command \
               --instance-ids "$PUBLIC_EC2_ID" \
               --document-name "AWS-RunShellScript" \
-              --parameters commands="sudo sed -i 's/proxy_pass http:\/\/.*:80/proxy_pass http:\/\/'$PRIVATE_IP':80/g' /etc/nginx/sites-available/default; sudo nginx -t && sudo nginx -s reload" \
+              --parameters commands="sudo sed -i 's|proxy_pass http://.*:80|proxy_pass http://$PRIVATE_IP:80|g' /etc/nginx/sites-available/default; sudo nginx -t && sudo nginx -s reload" \
               --region ap-northeast-2
