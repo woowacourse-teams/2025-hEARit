@@ -1,10 +1,15 @@
 name: Backend CD to EC2 for dev
 
+#on:
+#  push:
+#    branches: [ "develop-be" ]
+#    paths:
+#      - 'backend/**'
+#  workflow_dispatch:
+    
 on:
   push:
-    branches: [ "develop-be" ]
-    paths:
-      - 'backend/**'
+    branches: [ "develop-be", "chore/#424-private-subnet-ci-cd" ]
   workflow_dispatch:
 
 jobs:
