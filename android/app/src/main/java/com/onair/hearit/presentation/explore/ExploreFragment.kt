@@ -312,15 +312,15 @@ class ExploreFragment :
     }
 
     override fun onPause() {
+        super.onPause()
         val position = currentIndex()
         viewModel.onPause(position, playerManager.getCurrentPosition(), adapter.itemCount)
         playerManager.pause()
-        super.onPause()
     }
 
     override fun onStop() {
-        playerManager.stop()
         super.onStop()
+        playerManager.stop()
     }
 
     override fun onDestroyView() {
