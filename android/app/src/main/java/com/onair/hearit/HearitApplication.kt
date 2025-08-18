@@ -58,7 +58,10 @@ class HearitApplication : Application() {
                 if (priority == Log.ERROR) {
                     CrashlyticsProvider.get().recordException(t)
                 } else if (priority == Log.WARN) {
-                    CrashlyticsProvider.get().log(t.message ?: ERROR_UNKNOWN_MESSAGE)
+                    val warningMessage = t.message ?: ERROR_UNKNOWN_MESSAGE
+                    CrashlyticsProvider.get().recordException(
+                        RuntimeException(warningMessage, t),
+                    )
                 }
             }
         }

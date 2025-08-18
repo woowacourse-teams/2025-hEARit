@@ -31,7 +31,10 @@ object RepositoryProvider {
     }
 
     val authRepository: AuthRepository by lazy {
-        AuthRepositoryImpl(authRemoteDataSource = DataSourceProvider.authRemoteDataSource)
+        AuthRepositoryImpl(
+            authRemoteDataSource = DataSourceProvider.authRemoteDataSource,
+            preferencesLocalDataSource = DataSourceProvider.preferencesLocalDataSource,
+        )
     }
 
     val bookmarkRepository: BookmarkRepository by lazy {

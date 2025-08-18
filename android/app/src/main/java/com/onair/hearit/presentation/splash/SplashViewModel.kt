@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.DomainException.NetworkConnection
 import com.onair.hearit.domain.DomainException.UserNotRegistered
@@ -17,7 +16,6 @@ import timber.log.Timber
 
 class SplashViewModel(
     private val authRepository: AuthRepository,
-    private val preferencesLocalDataSource: PreferencesLocalDataSource,
 ) : ViewModel() {
     private val _checkToken: MutableLiveData<Boolean> = MutableLiveData()
     val checkToken: LiveData<Boolean> = _checkToken
@@ -28,64 +26,70 @@ class SplashViewModel(
     fun checkValidAccessTokenWithDelay() {
         viewModelScope.launch {
             delay(DELAY_TIME)
-            checkValidAccessToken()
+            fetchTokensAndValidate()
         }
     }
 
-    private fun checkValidAccessToken() {
-        viewModelScope.launch {
-            val accessToken = preferencesLocalDataSource.getAccessToken().getOrNull()
-            val refreshToken = preferencesLocalDataSource.getRefreshToken().getOrNull()
-            if (accessToken.isNullOrBlank() || refreshToken.isNullOrBlank()) {
+    private suspend fun fetchTokensAndValidate() {
+        authRepository
+            .getTokens()
+            .onSuccess { (accessToken, refreshToken) ->
+                validateAccessToken(accessToken, refreshToken)
+            }.onFailure {
                 _checkToken.value = false
-                return@launch
             }
+    }
 
-            val result = authRepository.checkAccessToken(accessToken)
-            result
-                .onSuccess {
-                    _checkToken.value = true
-                    TokenInterceptorProvider.setAccessToken(accessToken)
-                }.onFailure { throwable ->
-                    when (throwable) {
-                        is NetworkConnection -> {
-                            _toastMessage.value = R.string.splash_toast_network_check_fail
-                        }
+    private suspend fun validateAccessToken(
+        accessToken: String,
+        refreshToken: String,
+    ) {
+        authRepository
+            .checkAccessToken(accessToken)
+            .onSuccess {
+                _checkToken.value = true
+                TokenInterceptorProvider.setAccessToken(accessToken)
+            }.onFailure { throwable ->
+                handleAccessTokenError(throwable, refreshToken)
+            }
+    }
 
-                        is UserNotRegistered -> {
-                            refreshAccessToken(refreshToken)
-                        }
-
-                        else -> {
-                            Timber.w(throwable)
-                            _checkToken.value = false
-                            _toastMessage.value = R.string.splash_toast_token_check_fail
-                        }
-                    }
-                }
+    private fun handleAccessTokenError(
+        throwable: Throwable,
+        refreshToken: String,
+    ) {
+        when (throwable) {
+            is NetworkConnection -> _toastMessage.value = R.string.splash_toast_network_check_fail
+            is UserNotRegistered -> reissueAccessToken(refreshToken)
+            else -> {
+                Timber.w(throwable)
+                _checkToken.value = false
+                _toastMessage.value = R.string.splash_toast_token_check_fail
+            }
         }
     }
 
-    private fun refreshAccessToken(refreshToken: String) {
+    private fun reissueAccessToken(refreshToken: String) {
         viewModelScope.launch {
             authRepository
                 .reissue(refreshToken)
                 .onSuccess { newToken ->
-                    preferencesLocalDataSource.saveAccessToken(newToken)
                     _checkToken.value = true
+                    TokenInterceptorProvider.setAccessToken(newToken)
                 }.onFailure { throwable ->
-                    when (throwable) {
-                        is UserNotRegistered -> {
-                            _checkToken.value = false
-                        }
-
-                        else -> {
-                            Timber.w(throwable)
-                            _checkToken.value = false
-                            _toastMessage.value = R.string.splash_toast_refresh_token_fail
-                        }
-                    }
+                    handleReissueError(throwable)
                 }
+        }
+    }
+
+    private fun handleReissueError(throwable: Throwable) {
+        when (throwable) {
+            is UserNotRegistered -> _checkToken.value = false
+            else -> {
+                Timber.w(throwable)
+                _checkToken.value = false
+                _toastMessage.value = R.string.splash_toast_refresh_token_fail
+            }
         }
     }
 
