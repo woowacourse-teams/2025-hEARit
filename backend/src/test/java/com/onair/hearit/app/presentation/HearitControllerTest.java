@@ -9,8 +9,15 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.onair.hearit.app.dto.response.CursorResponse;
+import com.onair.hearit.app.dto.response.ExploredHearitResponse;
+import com.onair.hearit.app.dto.response.HearitDetailResponse;
+import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
+import com.onair.hearit.app.dto.response.HearitSearchResponse;
+import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
+import com.onair.hearit.app.dto.response.PagedResponse;
+import com.onair.hearit.app.dto.response.RecommendHearitResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
@@ -18,13 +25,7 @@ import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.RecommendHearit;
 import com.onair.hearit.common.domain.Source;
-import com.onair.hearit.app.dto.response.CursorResponse;
-import com.onair.hearit.app.dto.response.ExploredHearitResponse;
-import com.onair.hearit.app.dto.response.HearitDetailResponse;
-import com.onair.hearit.app.dto.response.HearitSearchResponse;
-import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
-import com.onair.hearit.app.dto.response.PagedResponse;
-import com.onair.hearit.app.dto.response.RecommendHearitResponse;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
@@ -416,7 +417,7 @@ class HearitControllerTest extends IntegrationTest {
         Hearit hearit3 = saveHearitWithCategoryAndKeyword(category2, keyword); // 카테고리 2의 히어릿
 
         // when
-        PagedResponse<HearitSearchResponse> pagedResponse = RestAssured.given(this.spec)
+        PagedResponse<HearitOfCategoryResponse> pagedResponse = RestAssured.given(this.spec)
                 .queryParam("categoryId", category1.getId())
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -453,7 +454,7 @@ class HearitControllerTest extends IntegrationTest {
                 .extract()
                 .as(new TypeRef<>() {
                 });
-        List<HearitSearchResponse> responses = pagedResponse.content();
+        List<HearitOfCategoryResponse> responses = pagedResponse.content();
 
         // then
         assertAll(
