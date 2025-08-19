@@ -20,12 +20,23 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-#-keep class com.onair.hearit.** { *; }
-
 # -------------------------
 # kakao SDK
 # -------------------------
 -keep class com.kakao.sdk.**.model.* { <fields>; }
+
+# https://github.com/square/okhttp/pull/6792
+-dontwarn org.bouncycastle.jsse.**
+-dontwarn org.conscrypt.*
+-dontwarn org.openjsse.**
+
+# refrofit2 (with r8 full mode)
+-if interface * { @retrofit2.http.* <methods>; }
+-keep,allowobfuscation interface <1>
+-keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+-if interface * { @retrofit2.http.* public *** *(...); }
+-keep,allowoptimization,allowshrinking,allowobfuscation class <3>
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
 
 # Retrofit does reflection on generic parameters.
 -keepattributes Signature, InnerClasses, EnclosingMethod
@@ -77,6 +88,8 @@
     @kotlinx.serialization.SerialName <fields>;
 }
 -dontnote kotlinx.serialization.**
+
+-keep class com.onair.hearit.data.dto.** { *; }
 
 # -------------------------
 # Timber 로그 제거 (릴리즈)

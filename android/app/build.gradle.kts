@@ -60,6 +60,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            val baseUrl =
+                gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
+            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
             if (releaseSigningConfig != null) {
                 signingConfig = releaseSigningConfig
             }
@@ -74,6 +79,10 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
             resValue("string", "app_name", "hEARit (Dev)")
+
+            val devBaseUrl =
+                gradleLocalProperties(rootDir, providers).getProperty("DEV_BASE_URL") ?: ""
+            buildConfigField("String", "BASE_URL", "\"$devBaseUrl\"")
         }
     }
     compileOptions {
