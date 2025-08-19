@@ -6,4 +6,6 @@ interface ExploreDataStoreRepository {
     suspend fun updateExploreCount(count: Int): Result<Boolean>
 
     suspend fun clearExploreCount(): Result<Boolean>
+
+    suspend fun shouldShowAnimation(): Result<Boolean>
 }
