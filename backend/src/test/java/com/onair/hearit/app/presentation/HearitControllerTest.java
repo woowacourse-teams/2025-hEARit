@@ -9,15 +9,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.docs.ApiDocSnippets;
-import com.onair.hearit.common.domain.Category;
-import com.onair.hearit.common.domain.Hearit;
-import com.onair.hearit.common.domain.HearitKeyword;
-import com.onair.hearit.common.domain.Keyword;
-import com.onair.hearit.common.domain.Member;
-import com.onair.hearit.common.domain.RecommendHearit;
-import com.onair.hearit.common.domain.Source;
 import com.onair.hearit.app.dto.response.CursorResponse;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.app.dto.response.HearitDetailResponse;
@@ -25,6 +16,15 @@ import com.onair.hearit.app.dto.response.HearitSearchResponse;
 import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.app.dto.response.RecommendHearitResponse;
+import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.common.domain.Category;
+import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.HearitKeyword;
+import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.RecommendHearit;
+import com.onair.hearit.common.domain.Source;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
@@ -531,7 +531,9 @@ class HearitControllerTest extends IntegrationTest {
                 fieldWithPath("createdAt").type(JsonFieldType.STRING).description("생성 일시"),
                 fieldWithPath("isBookmarked").type(JsonFieldType.BOOLEAN).description("현재 사용자의 북마크 여부"),
                 fieldWithPath("bookmarkId").type(JsonFieldType.NUMBER).description("북마크 ID (북마크된 경우)").optional(),
-                fieldWithPath("category").type(JsonFieldType.STRING).description("카테고리 이름"),
+                fieldWithPath("category").description("카테고리 정보"),
+                fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                fieldWithPath("category.name").type(JsonFieldType.STRING).description("카테고리 이름"),
                 fieldWithPath("keywords").type(JsonFieldType.ARRAY).description("키워드 목록"),
                 fieldWithPath("keywords[].id").type(JsonFieldType.NUMBER).description("키워드 ID"),
                 fieldWithPath("keywords[].name").type(JsonFieldType.STRING).description("키워드 이름")
