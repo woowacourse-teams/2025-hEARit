@@ -26,18 +26,15 @@ class SplashViewModel(
     fun checkValidAccessTokenWithDelay() {
         viewModelScope.launch {
             delay(DELAY_TIME)
-            fetchTokensAndValidate()
-        }
-    }
-
-    private suspend fun fetchTokensAndValidate() {
-        authRepository
-            .getTokens()
-            .onSuccess { (accessToken, refreshToken) ->
-                validateAccessToken(accessToken, refreshToken)
-            }.onFailure {
+            val tokens = authRepository.getTokens().getOrNull()
+            if (tokens == null) {
                 _checkToken.value = false
+                return@launch
             }
+
+            val (accessToken, refreshToken) = tokens
+            validateAccessToken(accessToken, refreshToken)
+        }
     }
 
     private suspend fun validateAccessToken(
@@ -45,7 +42,7 @@ class SplashViewModel(
         refreshToken: String,
     ) {
         authRepository
-            .checkAccessToken(accessToken)
+            .checkAccessToken()
             .onSuccess {
                 _checkToken.value = true
                 TokenInterceptorProvider.setAccessToken(accessToken)

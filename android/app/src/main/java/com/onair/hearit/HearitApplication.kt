@@ -65,6 +65,11 @@ class HearitApplication : Application() {
                 }
             }
         }
+
+        override fun isLoggable(
+            tag: String?,
+            priority: Int,
+        ): Boolean = priority >= Log.INFO
     }
 
     companion object {

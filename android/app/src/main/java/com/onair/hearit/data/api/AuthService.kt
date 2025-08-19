@@ -13,9 +13,7 @@ import retrofit2.http.POST
 
 interface AuthService {
     @GET("auth/check")
-    suspend fun getAuthCheck(
-        @Header("Authorization") accessToken: String,
-    ): Response<Unit>
+    suspend fun getAuthCheck(): Response<Unit>
 
     @POST("auth/kakao-login")
     suspend fun postLogin(

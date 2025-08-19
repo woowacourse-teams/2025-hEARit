@@ -3,7 +3,7 @@ package com.onair.hearit.domain.repository
 import com.onair.hearit.domain.model.LoginToken
 
 interface AuthRepository {
-    suspend fun checkAccessToken(accessToken: String): Result<Unit>
+    suspend fun checkAccessToken(): Result<Unit>
 
     suspend fun getTokens(): Result<Pair<String, String>>
 
