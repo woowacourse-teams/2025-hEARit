@@ -10,7 +10,10 @@ import com.onair.hearit.domain.model.PlaybackInfo
 @UnstableApi
 class PlaybackMediaItemManager {
     // info 재생에 필요한 오디오 정보와 메타데이터를 담고 있는 PlaybackInfo 객체를 가지고 플레이어에서 실행하기 위한 MediaItem을 구성함
-    fun buildMediaItem(info: PlaybackInfo): MediaItem =
+    fun buildMediaItem(
+        info: PlaybackInfo,
+        playbackMode: String? = null,
+    ): MediaItem =
         MediaItem
             .Builder()
             .setUri(info.audioUrl.toUri())
@@ -21,7 +24,8 @@ class PlaybackMediaItemManager {
                     .setTitle(info.title)
                     .setArtist(info.source)
                     .build(),
-            ).build()
+            ).setTag(playbackMode)
+            .build()
 
     /** PlaybackInfo를 기반으로 미디어 아이템 리스트와 시작 위치 정보를 포함하는 객체를 생성함
      * 이 메서드는 앱 재시작 시 마지막 재생 위치에서 이어 재생하기 위해 필요함
@@ -33,4 +37,8 @@ class PlaybackMediaItemManager {
             0,
             info.lastPosition,
         )
+
+    companion object {
+        const val PLAYBACK_MODE_LIBRARY = "library"
+    }
 }

@@ -165,6 +165,7 @@ class PlaybackService : MediaSessionService() {
         private const val EXTRA_HEARIT_ID = "HEARIT_ID"
         private const val EXTRA_START_POSITION = "START_POSITION"
         private const val EXTRA_SOURCE = "SOURCE"
+        private const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
 
         const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
         const val ACTION_PLAY_SINGLE = "hearit.ACTION_PLAY_SINGLE"
@@ -177,6 +178,7 @@ class PlaybackService : MediaSessionService() {
             hearitId: Long,
             startPosition: Long = 0L,
             source: String,
+            playbackMode: String? = null,
         ) = Intent(context, PlaybackService::class.java).apply {
             action = ACTION_PLAY_SINGLE
             putExtra(EXTRA_AUDIO_URL, audioUrl)
@@ -184,6 +186,7 @@ class PlaybackService : MediaSessionService() {
             putExtra(EXTRA_HEARIT_ID, hearitId)
             putExtra(EXTRA_START_POSITION, startPosition)
             putExtra(EXTRA_SOURCE, source)
+            putExtra(EXTRA_PLAYBACK_MODE, playbackMode)
         }
 
         fun appendIntent(

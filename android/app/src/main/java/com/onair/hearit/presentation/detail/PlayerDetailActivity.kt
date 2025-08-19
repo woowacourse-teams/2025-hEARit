@@ -174,18 +174,6 @@ class PlayerDetailActivity :
                 )
             }
 
-            // 연속 재생: 라이브러리 화면에서만
-            controller.addListener(
-                object : Player.Listener {
-                    override fun onPlaybackStateChanged(playbackState: Int) {
-                        if (playbackState == Player.STATE_ENDED && previousScreen == LIBRARY_SCREEN_ID) {
-                            viewModel.refreshData()
-                            Timber.d("Timber: ${viewModel.hearit.value.title}")
-                        }
-                    }
-                },
-            )
-
             startScriptSync(controller)
         }
     }
@@ -283,7 +271,12 @@ class PlayerDetailActivity :
         val source = hearit.sources.first().name
 
         if (isDifferentHearit) {
-            startPlaybackService(hearit.audioUrl, hearit.title, startPosition, source)
+            startPlaybackService(
+                hearit.audioUrl,
+                hearit.title,
+                startPosition,
+                source,
+            )
         } else {
             if (!controller.isPlaying) controller.play()
             if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
@@ -311,6 +304,7 @@ class PlayerDetailActivity :
                 hearitId = hearitId,
                 startPosition = startPosition,
                 source = source,
+                playbackMode = previousScreen,
             )
         startForegroundService(serviceIntent)
     }

@@ -56,7 +56,6 @@ class PlayerDetailViewModel(
     fun refreshData() {
         getNextBookmark()
         val nextId = _nextHearitId.value ?: return
-        Timber.d("Timber: $nextId")
 
         viewModelScope.launch {
             getHearitUseCase(nextId)
