@@ -36,7 +36,22 @@ class ExploreDataStoreRepositoryImpl(
             true
         }
 
+    override suspend fun shouldShowAnimation(): Result<Boolean> =
+        runCatching {
+            var shouldShow = false
+
+            exploreDataStore.edit { preferences ->
+                val current = preferences[EXPLORE_COUNT] ?: 0
+                shouldShow = current < MAX_ANIMATION_COUNT
+                if (shouldShow) {
+                    preferences[EXPLORE_COUNT] = current + 1
+                }
+            }
+            shouldShow
+        }
+
     companion object {
         private val EXPLORE_COUNT = intPreferencesKey("explore_count")
+        private const val MAX_ANIMATION_COUNT = 2
     }
 }

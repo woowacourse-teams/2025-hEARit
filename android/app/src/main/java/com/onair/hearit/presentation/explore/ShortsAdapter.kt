@@ -24,6 +24,11 @@ class ShortsAdapter(
 
     override fun getItemCount(): Int = currentList.size
 
+    override fun onViewRecycled(holder: ShortsViewHolder) {
+        holder.onRecycled()
+        super.onViewRecycled(holder)
+    }
+
     companion object {
         private val DiffCallback =
             object : DiffUtil.ItemCallback<ShortsHearit>() {
