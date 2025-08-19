@@ -2,6 +2,7 @@ package com.onair.hearit.service
 
 import android.os.Bundle
 import androidx.concurrent.futures.CallbackToFutureAdapter
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
@@ -15,13 +16,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.Executor
 
 @UnstableApi
 class PlaybackSessionCallback(
-    private val player: Player,
     private val serviceScope: CoroutineScope,
 ) : MediaSession.Callback {
-    // PlaybackInfo 객체 자체를 mediaItem으로 변환하는 로직을 담은 Manager를 선언해줌
     private val mediaItemHelper = PlaybackMediaItemManager()
 
     /**
@@ -47,6 +47,48 @@ class PlaybackSessionCallback(
             .build()
     }
 
+    override fun onSetMediaItems(
+        mediaSession: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        mediaItems: List<MediaItem>,
+        startIndex: Int,
+        startPositionMs: Long,
+    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> =
+        CallbackToFutureAdapter.getFuture { completer ->
+            val job =
+                serviceScope.launch {
+                    try {
+                        val resolved = mediaItems.map { resolve(it) }
+                        if (resolved.isEmpty()) {
+                            completer.set(EMPTY_MEDIA_ITEMS_WITH_START)
+                            return@launch
+                        }
+                        val extrasStart =
+                            mediaItems
+                                .getOrNull(0)
+                                ?.mediaMetadata
+                                ?.extras
+                                ?.getLong("startPosition", -1L) ?: -1L
+                        val startPosition =
+                            (if (startPositionMs > 0) startPositionMs else extrasStart)
+                                .coerceAtLeast(0L)
+                        completer.set(
+                            MediaSession.MediaItemsWithStartPosition(
+                                resolved,
+                                0,
+                                startPosition,
+                            ),
+                        )
+                    } catch (_: Throwable) {
+                        completer.set(
+                            EMPTY_MEDIA_ITEMS_WITH_START,
+                        )
+                    }
+                }
+            completer.addCancellationListener({ job.cancel() }, Executor { it.run() })
+            "onSetMediaItems"
+        }
+
     /**
      * 외부 컨트롤러로부터 커스텀 명령을 받을 때 호출됨 + 외부에서 호출할때 'hearit.PRELOAD_RECENT'를 전달함
      * 처음에 앱을 실행할때, 마지막에 저장된 위치와 더불어서 아이템을 미리 화면에 뿌려주기 위함
@@ -64,13 +106,15 @@ class PlaybackSessionCallback(
         return CallbackToFutureAdapter.getFuture { completer ->
             val job =
                 serviceScope.launch {
-                    try {
+                    runCatching {
                         loadRecentInfo()?.let { info ->
-                            prepareIfNeeded(info)
+                            prepareIfNeeded(session, info)
                         }
-                        completer.set(SessionResult(SessionResult.RESULT_SUCCESS))
-                    } catch (e: Exception) {
-                        completer.setException(e)
+                        SessionResult(SessionResult.RESULT_SUCCESS)
+                    }.onSuccess {
+                        completer.set(it)
+                    }.onFailure {
+                        completer.setException(it)
                     }
                 }
             completer.addCancellationListener({ job.cancel() }, Runnable::run)
@@ -89,17 +133,14 @@ class PlaybackSessionCallback(
         CallbackToFutureAdapter.getFuture { completer ->
             val job =
                 serviceScope.launch {
-                    try {
-                        val info = loadRecentInfo()
-                        val result =
-                            info?.let { mediaItemHelper.toItemsWithStart(it) }
-                                ?: EMPTY_MEDIA_ITEMS_WITH_START
-                        completer.set(result)
-                    } catch (_: Exception) {
-                        completer.set(
-                            EMPTY_MEDIA_ITEMS_WITH_START,
-                        )
-                    }
+                    val info = runCatching { loadRecentInfo() }.getOrNull()
+                    val result =
+                        info?.let {
+                            mediaItemHelper.toItemsWithStart(it)
+                        } ?: run {
+                            EMPTY_MEDIA_ITEMS_WITH_START
+                        }
+                    completer.set(result)
                 }
             completer.addCancellationListener({ job.cancel() }, Runnable::run)
             "onPlaybackResumption"
@@ -119,16 +160,29 @@ class PlaybackSessionCallback(
 
     // 현재 재생 중인 미디어 아이템과 준비 상태를 확인하여,
     // 동일하지 않은 경우 아이템인 경우 새로운 미디어 아이템으로 설정하고 플레이어를 준비시킴
-    private fun prepareIfNeeded(info: PlaybackInfo) {
+    private fun prepareIfNeeded(
+        session: MediaSession,
+        info: PlaybackInfo,
+    ) {
+        val player = session.player
         val item = mediaItemHelper.buildMediaItem(info)
         val sameItem = player.currentMediaItem?.mediaId == item.mediaId
         val preparedOrBuffering =
-            player.playbackState == Player.STATE_READY || player.playbackState == Player.STATE_BUFFERING
+            player.playbackState == Player.STATE_READY ||
+                player.playbackState == Player.STATE_BUFFERING
         if (!(sameItem && preparedOrBuffering)) {
             player.setMediaItems(listOf(item), 0, info.lastPosition)
             player.prepare()
         }
     }
+
+    private suspend fun resolve(item: MediaItem): MediaItem =
+        withContext(Dispatchers.IO) {
+            val id = item.mediaId.toLongOrNull() ?: return@withContext item
+            val info =
+                UseCaseProvider.getPlaybackInfoUseCase(id).getOrNull() ?: return@withContext item
+            mediaItemHelper.buildMediaItem(info)
+        }
 
     companion object {
         private const val COMMAND_PRELOAD_RECENT = "hearit.PRELOAD_RECENT"
