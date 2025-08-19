@@ -53,23 +53,6 @@ class PlayerDetailViewModel(
         }
     }
 
-    fun refreshData() {
-        getNextBookmark()
-        val nextId = _nextHearitId.value ?: return
-
-        viewModelScope.launch {
-            getHearitUseCase(nextId)
-                .onSuccess { nextHearit ->
-                    _hearit.value = nextHearit
-                    _bookmarkId.value = nextHearit.bookmarkId
-                    saveRecentHearit()
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
-                }
-        }
-    }
-
     private fun deleteBookmark() {
         val id = _bookmarkId.value ?: return
         viewModelScope.launch {
@@ -141,18 +124,5 @@ class PlayerDetailViewModel(
                     _toastMessage.value = R.string.library_toast_bookmark_load_fail
                 }
         }
-    }
-
-    private fun getNextBookmark() {
-        val currentId = _bookmarkId.value ?: return
-        val bookmarkList = _bookmarks.value ?: return
-
-        // 현재 bookmarkId보다 큰 것 중 가장 작은 bookmarkId 찾기
-        val next =
-            bookmarkList
-                .filter { it.bookmarkId > currentId }
-                .minByOrNull { it.bookmarkId }
-
-        _nextHearitId.value = next?.hearitId
     }
 }

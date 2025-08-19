@@ -2,7 +2,6 @@ package com.onair.hearit.service
 
 import android.os.Bundle
 import androidx.concurrent.futures.CallbackToFutureAdapter
-import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
@@ -17,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 @UnstableApi
 class PlaybackSessionCallback(
@@ -37,22 +37,30 @@ class PlaybackSessionCallback(
                 // 현재 재생이 끝난 아이템을 가져옴
                 val currentItem = player.currentMediaItem ?: return
 
+                val extras = currentItem.mediaMetadata.extras
+                val bookmarkId = extras?.getLong("BOOKMARK_ID", -1L) ?: -1L
+
+                Timber.d("▶️ 북마크 ID 찾음: $bookmarkId")
+
                 // 1단계에서 설정한 태그를 확인
                 val mode = currentItem.localConfiguration?.tag as? String
-                if (mode != PlayerDetailActivity.LIBRARY_SCREEN_ID) {
-                    return // 라이브러리에서 시작한 재생이 아니면 아무것도 안 함
-                }
 
-                val currentId = currentItem.mediaId.toLongOrNull() ?: return
+                Timber.d("🧐 사용하는 쪽 mode: $mode")
+                if (mode != PlayerDetailActivity.LIBRARY_SCREEN_ID || bookmarkId == -1L) {
+                    return
+                }
 
                 // 코루틴으로 다음 북마크(재생할 아이템)를 가져옴
                 serviceScope.launch {
+                    Timber.d("▶️ 연속 재생 로직 시작. 현재 ID: $bookmarkId")
                     val nextBookmark =
-                        RepositoryProvider.bookmarkRepository
-                            .getNextBookmark(currentId)
-                            .getOrNull()
+                        UseCaseProvider.getNextBookmarkUseCase.invoke(bookmarkId).getOrNull()
+
+                    Timber.d("✅ 다음 북마크: ${nextBookmark?.title}")
+                    Timber.d("✅ 다음 북마크: ${nextBookmark?.audioUrl}")
 
                     if (nextBookmark != null) {
+                        Timber.d("✅ 다음 북마크 찾음: ${nextBookmark.title}")
                         val playbackInfo =
                             PlaybackInfo(
                                 hearitId = nextBookmark.hearitId,
@@ -70,11 +78,11 @@ class PlaybackSessionCallback(
 
                         // 플레이어의 재생 목록에 다음 아이템을 추가
                         player.addMediaItem(nextMediaItem)
+                        Timber.d("➕ 플레이어에 다음 아이템 추가 완료. 총 아이템 수: ${player.mediaItemCount}")
 
-                        // 만약 플레이어가 멈춰있다면 다음 아이템을 재생하도록 준비
-                        if (!player.playWhenReady) {
-                            player.prepare()
-                        }
+                        player.seekToNextMediaItem() // 다음 아이템으로 이동
+                        player.play() // 재생 시작
+                        Timber.d("⏯️ 다음 아이템으로 이동 및 재생 명령 실행!")
                     }
                 }
             }
@@ -164,48 +172,6 @@ class PlaybackSessionCallback(
                 }
             completer.addCancellationListener({ job.cancel() }, Runnable::run)
             "onPlaybackResumption"
-        }
-
-    override fun onAddMediaItems(
-        mediaSession: MediaSession,
-        controller: MediaSession.ControllerInfo,
-        mediaItems: MutableList<MediaItem>,
-    ): ListenableFuture<MutableList<MediaItem>> =
-        CallbackToFutureAdapter.getFuture { completer ->
-            serviceScope.launch {
-                val resolved = mutableListOf<MediaItem>()
-
-                mediaItems.forEach { item ->
-                    val mode = item.localConfiguration?.tag as? String
-                    val currentId = item.mediaId.toLongOrNull()
-
-                    if (mode == PlaybackMediaItemManager.PLAYBACK_MODE_LIBRARY && currentId != null) {
-                        val nextBookmark =
-                            RepositoryProvider.bookmarkRepository
-                                .getNextBookmark(currentId)
-                                .getOrNull()
-
-                        if (nextBookmark != null) {
-                            val playbackInfo =
-                                PlaybackInfo(
-                                    hearitId = nextBookmark.hearitId,
-                                    audioUrl = nextBookmark.audioUrl ?: "",
-                                    title = nextBookmark.title,
-                                    source = "hEARit", // 추후 수정 예정
-                                )
-                            resolved.add(
-                                mediaItemHelper.buildMediaItem(playbackInfo),
-                            )
-                        }
-                    }
-                }
-
-                if (resolved.isEmpty()) {
-                    resolved.addAll(mediaItems)
-                }
-
-                completer.set(resolved)
-            }
         }
 
     // 데이터베이스에서 최근 재생 정보를 비동기적으로 불러오는 부분으로

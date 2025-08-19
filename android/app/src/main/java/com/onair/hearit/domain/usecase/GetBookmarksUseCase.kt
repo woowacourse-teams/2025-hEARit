@@ -5,7 +5,7 @@ import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
 
-class GetBookmarkUseCase(
+class GetBookmarksUseCase(
     private val bookmarkRepository: BookmarkRepository,
     private val mediaFileRepository: MediaFileRepository,
 ) {

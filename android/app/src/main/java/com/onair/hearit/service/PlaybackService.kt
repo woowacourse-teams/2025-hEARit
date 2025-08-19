@@ -3,6 +3,7 @@ package com.onair.hearit.service
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
@@ -11,11 +12,13 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.UNKNOWN_SCREEN_ID
 import com.onair.hearit.presentation.main.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import timber.log.Timber
 
 @OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
@@ -69,13 +72,26 @@ class PlaybackService : MediaSessionService() {
         val hearitId = intent.getLongExtra(EXTRA_HEARIT_ID, -1L)
         val startPosition = intent.getLongExtra(EXTRA_START_POSITION, 0L)
         val source = intent.getStringExtra(EXTRA_SOURCE) ?: "hEARit"
+        val playbackMode = intent.getStringExtra(EXTRA_PLAYBACK_MODE) ?: UNKNOWN_SCREEN_ID
+        val bookmarkId = intent.getLongExtra(EXTRA_BOOKMARK_ID, -1L)
+
+        Timber.d("🚚 도착한 쪽 playbackMode: $playbackMode")
+        Timber.d("🚚 북마크: $bookmarkId")
 
         if (audioUrl.isNullOrEmpty() || hearitId == -1L) {
             stopSelf()
             return
         }
 
-        val item = createMediaItem(audioUrl, title, hearitId, source)
+        val item =
+            createMediaItem(
+                audioUrl,
+                title,
+                hearitId,
+                source,
+                playbackMode,
+                bookmarkId,
+            )
         player.setMediaItems(listOf(item), 0, startPosition.coerceAtLeast(0L))
         player.prepare()
         player.play()
@@ -125,8 +141,16 @@ class PlaybackService : MediaSessionService() {
         title: String,
         id: Long,
         source: String,
-    ): MediaItem =
-        MediaItem
+        playbackMode: String? = null,
+        bookmarkId: Long? = null,
+    ): MediaItem {
+        Timber.d("북마크 createMediaItem: $bookmarkId")
+        val extras =
+            Bundle().apply {
+                bookmarkId?.let { putLong(EXTRA_BOOKMARK_ID, it) }
+            }
+
+        return MediaItem
             .Builder()
             .setUri(url.toUri())
             .setMediaId(id.toString())
@@ -135,8 +159,11 @@ class PlaybackService : MediaSessionService() {
                     .Builder()
                     .setTitle(title)
                     .setArtist(source)
+                    .setExtras(extras)
                     .build(),
-            ).build()
+            ).setTag(playbackMode)
+            .build()
+    }
 
     private fun initializeAndStartForeground() {
         if (!isServiceStarted) {
@@ -166,6 +193,7 @@ class PlaybackService : MediaSessionService() {
         private const val EXTRA_START_POSITION = "START_POSITION"
         private const val EXTRA_SOURCE = "SOURCE"
         private const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
+        private const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
 
         const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
         const val ACTION_PLAY_SINGLE = "hearit.ACTION_PLAY_SINGLE"
@@ -179,6 +207,7 @@ class PlaybackService : MediaSessionService() {
             startPosition: Long = 0L,
             source: String,
             playbackMode: String? = null,
+            bookmarkId: Long? = null,
         ) = Intent(context, PlaybackService::class.java).apply {
             action = ACTION_PLAY_SINGLE
             putExtra(EXTRA_AUDIO_URL, audioUrl)
@@ -187,6 +216,7 @@ class PlaybackService : MediaSessionService() {
             putExtra(EXTRA_START_POSITION, startPosition)
             putExtra(EXTRA_SOURCE, source)
             putExtra(EXTRA_PLAYBACK_MODE, playbackMode)
+            putExtra(EXTRA_BOOKMARK_ID, bookmarkId)
         }
 
         fun appendIntent(

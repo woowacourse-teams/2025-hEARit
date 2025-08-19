@@ -71,6 +71,8 @@ class PlayerDetailActivity :
         PlayerDetailViewModelFactory(hearitId)
     }
 
+    private var isPlaybackInitiated = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -214,11 +216,17 @@ class PlayerDetailActivity :
             keywordAdapter.submitList(hearit.keywords)
             scriptAdapter.submitList(hearit.script)
             sourceAdapter.submitList(hearit.sources)
-            handlePlayback(hearit)
         }
 
         viewModel.bookmarkId.observe(this) { bookmarkId ->
             binding.baseController.setBookmarkSelected(bookmarkId != null)
+
+            val hearit = viewModel.hearit.value
+            // 👈 재생이 아직 시작되지 않았고, hearit 데이터가 준비되었다면 재생 시작!
+            if (!isPlaybackInitiated && hearit != null) {
+                isPlaybackInitiated = true
+                handlePlayback(hearit)
+            }
         }
 
         viewModel.toastMessage.observe(this) { msgResId ->
@@ -255,6 +263,7 @@ class PlayerDetailActivity :
     }
 
     private fun handlePlayback(hearit: Hearit) {
+        Timber.d("▶️ handlePlayback 호출 시점의 북마크 ID: ${viewModel.bookmarkId.value}")
         val controller = mediaController ?: return
         val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
         val isDifferentHearit = currentlyPlayingId != hearit.id
@@ -268,6 +277,7 @@ class PlayerDetailActivity :
                 hearit.title,
                 startPosition,
                 source,
+                hearit.bookmarkId,
             )
         } else {
             if (!controller.isPlaying) controller.play()
@@ -287,7 +297,9 @@ class PlayerDetailActivity :
         title: String,
         startPosition: Long = 0L,
         source: String,
+        bookmarkId: Long?,
     ) {
+        Timber.d("🚀 보내는 쪽 playbackMode: $previousScreen")
         val serviceIntent =
             PlaybackService.newIntentSingle(
                 context = this,
@@ -297,6 +309,7 @@ class PlayerDetailActivity :
                 startPosition = startPosition,
                 source = source,
                 playbackMode = previousScreen,
+                bookmarkId = bookmarkId,
             )
         startForegroundService(serviceIntent)
     }

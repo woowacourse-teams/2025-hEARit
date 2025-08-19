@@ -37,8 +37,4 @@ class PlaybackMediaItemManager {
             0,
             info.lastPosition,
         )
-
-    companion object {
-        const val PLAYBACK_MODE_LIBRARY = "library"
-    }
 }
