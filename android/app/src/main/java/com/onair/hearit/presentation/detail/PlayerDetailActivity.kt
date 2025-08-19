@@ -77,7 +77,6 @@ class PlayerDetailActivity :
     }
 
     private val updateInterval = 500L
-
     private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,9 +128,7 @@ class PlayerDetailActivity :
             },
         )
 
-        binding.ibPlayerDetailBack.setOnClickListener {
-            backAction()
-        }
+        binding.ibPlayerDetailBack.setOnClickListener { backAction() }
     }
 
     private fun setupWindowInsets() {
@@ -177,6 +174,18 @@ class PlayerDetailActivity :
                 )
             }
 
+            // 연속 재생: 라이브러리 화면에서만
+            controller.addListener(
+                object : Player.Listener {
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_ENDED && previousScreen == LIBRARY_SCREEN_ID) {
+                            viewModel.refreshData()
+                            Timber.d("Timber: ${viewModel.hearit.value.title}")
+                        }
+                    }
+                },
+            )
+
             startScriptSync(controller)
         }
     }
@@ -201,9 +210,7 @@ class PlayerDetailActivity :
                 },
             )
 
-        binding.rvScript.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-        }
+        binding.rvScript.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
     }
 
     private fun setupRecyclerView() {
@@ -215,7 +222,6 @@ class PlayerDetailActivity :
                 flexWrap = FlexWrap.WRAP
                 justifyContent = JustifyContent.FLEX_START
             }
-
         binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
         binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
         binding.layoutDetailSource.rvDetailSource.adapter = sourceAdapter
@@ -249,16 +255,12 @@ class PlayerDetailActivity :
             lifecycleScope.launch {
                 while (isActive) {
                     val position = controller.currentPosition
-
                     val currentItem =
                         scriptAdapter.currentList.firstOrNull { position in it.start until it.end }
-
                     if (currentItem != null) {
                         scriptAdapter.highlightScriptLine(currentItem.id)
-
                         val currentIndex = scriptAdapter.currentList.indexOf(currentItem)
                         val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-
                         (binding.rvScript.layoutManager as LinearLayoutManager)
                             .scrollToPositionWithOffset(currentIndex, centerOffset)
                     }
@@ -269,9 +271,7 @@ class PlayerDetailActivity :
 
     @OptIn(UnstableApi::class)
     private fun setupBaseControllerBookmark() {
-        binding.baseController.setOnBookmarkClickListener {
-            viewModel.toggleBookmark()
-        }
+        binding.baseController.setOnBookmarkClickListener { viewModel.toggleBookmark() }
     }
 
     private fun handlePlayback(hearit: Hearit) {
@@ -293,9 +293,8 @@ class PlayerDetailActivity :
     }
 
     private fun showLoginRequiredDialog() {
-        LoginRequiredDialogFragment {
-            navigateToLogin()
-        }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+        LoginRequiredDialogFragment { navigateToLogin() }
+            .show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
     }
 
     private fun startPlaybackService(
@@ -317,12 +316,9 @@ class PlayerDetailActivity :
     }
 
     private fun navigateToLogin() {
-        val intent = LoginActivity.newIntent(this)
-        startActivity(intent)
-
-        val serviceIntent = Intent(this, PlaybackService::class.java)
-        this.stopService(serviceIntent)
-
+        startActivity(LoginActivity.newIntent(this))
+        val intent = Intent(this, PlaybackService::class.java)
+        stopService(intent)
         finish()
     }
 
@@ -338,41 +334,37 @@ class PlayerDetailActivity :
                 showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
                 return
             }
-
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            startActivity(intent)
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
         } catch (e: Exception) {
             Timber.w(e)
-            showToast(ERROR_INVALID_LINK_MESSAGE)
+            showToast(ERROR_OPEN_LINK_FAILED)
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        scriptSyncJob?.cancel()
-        binding.playerView.player = null
-        mediaController?.release()
-    }
-
     companion object {
-        const val UNKNOWN_SCREEN_ID = "unknown"
+        const val HEARIT_ID = "hearitId"
+        const val LAST_POSITION = "lastPosition"
+        const val BOOKMARK_ID = "bookmarkId"
+        const val LIBRARY_SCREEN_ID = "library"
         const val EXPLORE_SCREEN_ID = "explore"
+        const val UNKNOWN_SCREEN_ID = "unknown"
         const val LOGIN_REQUIRED_DIALOG_ID = "login_required_dialog"
-        const val HEARIT_ID = "hearit_id"
-        const val BOOKMARK_ID = "bookmark_id"
-        const val LAST_POSITION = "last_position"
-        private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
-        private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
-        private const val SCRIPT_ITEM_HEIGHT_DP = 16
+        private const val SCRIPT_ITEM_HEIGHT_DP = 48
+        private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다."
+        private const val ERROR_OPEN_LINK_FAILED = "링크를 열 수 없습니다."
 
         fun newIntent(
             context: Context,
             hearitId: Long,
             lastPosition: Long? = null,
+            bookmarkId: Long? = null,
+            source: String = UNKNOWN_SCREEN_ID,
         ): Intent =
             Intent(context, PlayerDetailActivity::class.java).apply {
                 putExtra(HEARIT_ID, hearitId)
                 lastPosition?.let { putExtra(LAST_POSITION, it) }
+                bookmarkId?.let { putExtra(BOOKMARK_ID, it) }
+                putExtra(AnalyticsParamKeys.SOURCE, source)
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
     }

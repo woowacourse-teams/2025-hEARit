@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
@@ -128,7 +129,10 @@ class LibraryFragment :
     }
 
     override fun onClickBookmarkedHearit(hearitId: Long) {
-        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
+        val intent =
+            PlayerDetailActivity.newIntent(requireActivity(), hearitId).apply {
+                putExtra(AnalyticsParamKeys.SOURCE, PlayerDetailActivity.LIBRARY_SCREEN_ID)
+            }
         playerDetailLauncher.launch(intent)
     }
 
