@@ -14,11 +14,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.TYPE_KEY
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.search.SearchFragment
 
 class LibraryFragment :
     Fragment(),
@@ -33,6 +37,20 @@ class LibraryFragment :
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
+                val type = result.data?.getStringExtra(TYPE_KEY)
+                when (type) {
+                    "category", "keyword" -> {
+                        val bundle = result.data?.extras ?: return@registerForActivityResult
+                        (requireActivity() as MainActivity).selectTab(R.id.nav_search)
+                        val searchFragment = SearchFragment().apply { arguments = bundle }
+                        requireActivity()
+                            .supportFragmentManager
+                            .beginTransaction()
+                            .replace(R.id.fragment_container_view, searchFragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                }
                 viewModel.refreshBookmarks()
             }
         }
