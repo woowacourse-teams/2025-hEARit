@@ -174,7 +174,7 @@ class MainActivity :
     }
 
     private fun attachController() {
-        if (mediaControllerFuture != null) {
+        if (mediaController != null || mediaControllerFuture != null) {
             maybePreloadRecent()
             return
         }
@@ -379,6 +379,8 @@ class MainActivity :
         super.onDestroy()
         mediaController?.release()
         mediaController = null
+        mediaControllerFuture?.cancel(true)
+        mediaControllerFuture = null
     }
 
     override fun startPlayback() {

@@ -307,7 +307,7 @@ class PlayerDetailActivity :
                         .build(),
                 ).build()
 
-        controller.setMediaItem(item)
+        controller.setMediaItem(item, startPosition)
         controller.prepare()
         controller.play()
     }
