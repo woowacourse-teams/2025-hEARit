@@ -41,7 +41,6 @@ import com.onair.hearit.presentation.splash.SplashViewModel
 import com.onair.hearit.presentation.splash.SplashViewModelFactory
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
-import timber.log.Timber
 
 @OptIn(UnstableApi::class)
 class MainActivity :
@@ -94,8 +93,6 @@ class MainActivity :
                     val data = result.data ?: return@registerForActivityResult
                     val extras = data.extras ?: return@registerForActivityResult
                     navigateToSearchResult(extras)
-                } else {
-                    Timber.d("Detail closed with no search input")
                 }
                 setPlayerControlViewVisibility()
             }
