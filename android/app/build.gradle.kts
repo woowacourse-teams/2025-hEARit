@@ -21,8 +21,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1013
-        versionName = "1.0.13"
+        versionCode = 1016
+        versionName = "1.0.16"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -60,6 +60,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            val baseUrl =
+                gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
+            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
             if (releaseSigningConfig != null) {
                 signingConfig = releaseSigningConfig
             }
@@ -74,6 +79,10 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
             resValue("string", "app_name", "hEARit (Dev)")
+
+            val devBaseUrl =
+                gradleLocalProperties(rootDir, providers).getProperty("DEV_BASE_URL") ?: ""
+            buildConfigField("String", "BASE_URL", "\"$devBaseUrl\"")
         }
     }
     compileOptions {
@@ -85,9 +94,6 @@ android {
     }
     defaultConfig {
         manifestPlaceholders += mapOf()
-        val baseUrl =
-            gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
-        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
         val kakaoNativeKey =
             gradleLocalProperties(rootDir, providers).getProperty("KAKAO_NATIVE_KEY") ?: ""

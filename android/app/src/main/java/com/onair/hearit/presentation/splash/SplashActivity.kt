@@ -38,16 +38,7 @@ class SplashActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_splash)
         setupWindowInsets()
-
-        updateResultLauncher =
-            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    checkTokenAndNavigate()
-                } else {
-                    finish()
-                }
-            }
-
+        setupUpdateLauncher()
         observeViewModel()
         checkForUpdate()
     }
@@ -59,6 +50,17 @@ class SplashActivity : AppCompatActivity() {
             insets
         }
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
+    }
+
+    private fun setupUpdateLauncher() {
+        updateResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    viewModel.checkValidAccessTokenWithDelay()
+                } else {
+                    finish()
+                }
+            }
     }
 
     private fun checkForUpdate() {
@@ -74,31 +76,19 @@ class SplashActivity : AppCompatActivity() {
                         AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build(),
                     )
                 } else {
-                    checkTokenAndNavigate()
+                    viewModel.checkValidAccessTokenWithDelay()
                 }
             }.addOnFailureListener {
-                checkTokenAndNavigate()
+                viewModel.checkValidAccessTokenWithDelay()
             }
     }
 
-    private fun checkTokenAndNavigate() {
-        viewModel.checkValidAccessTokenWithDelay()
-    }
-
     private fun observeViewModel() {
-        viewModel.checkToken.observe(this) { checkToken ->
-            navigateByToken(checkToken)
+        viewModel.checkToken.observe(this) { isValid ->
+            if (isValid) navigateToMain() else navigateToLogin()
         }
         viewModel.toastMessage.observe(this) { messageResId ->
             Toast.makeText(this, getString(messageResId), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun navigateByToken(checkToken: Boolean) {
-        if (checkToken) {
-            navigateToMain()
-        } else {
-            navigateToLogin()
         }
     }
 
