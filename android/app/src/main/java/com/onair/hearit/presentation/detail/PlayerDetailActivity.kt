@@ -263,7 +263,6 @@ class PlayerDetailActivity :
     }
 
     private fun handlePlayback(hearit: Hearit) {
-        Timber.d("▶️ handlePlayback 호출 시점의 북마크 ID: ${viewModel.bookmarkId.value}")
         val controller = mediaController ?: return
         val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
         val isDifferentHearit = currentlyPlayingId != hearit.id
@@ -299,7 +298,6 @@ class PlayerDetailActivity :
         source: String,
         bookmarkId: Long?,
     ) {
-        Timber.d("🚀 보내는 쪽 playbackMode: $previousScreen")
         val serviceIntent =
             PlaybackService.newIntentSingle(
                 context = this,

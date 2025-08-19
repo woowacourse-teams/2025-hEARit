@@ -11,12 +11,10 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.UseCaseProvider
 import com.onair.hearit.domain.model.PlaybackInfo
-import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 @UnstableApi
 class PlaybackSessionCallback(
@@ -26,71 +24,15 @@ class PlaybackSessionCallback(
     // PlaybackInfo 객체 자체를 mediaItem으로 변환하는 로직을 담은 Manager를 선언해줌
     private val mediaItemHelper = PlaybackMediaItemManager()
 
-    private val playerListener =
-        object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                // 재생이 정상적으로 끝났을 때만 로직을 실행
-                if (playbackState != Player.STATE_ENDED) {
-                    return
-                }
-
-                // 현재 재생이 끝난 아이템을 가져옴
-                val currentItem = player.currentMediaItem ?: return
-
-                val extras = currentItem.mediaMetadata.extras
-                val bookmarkId = extras?.getLong("BOOKMARK_ID", -1L) ?: -1L
-
-                Timber.d("▶️ 북마크 ID 찾음: $bookmarkId")
-
-                // 1단계에서 설정한 태그를 확인
-                val mode = currentItem.localConfiguration?.tag as? String
-
-                Timber.d("🧐 사용하는 쪽 mode: $mode")
-                if (mode != PlayerDetailActivity.LIBRARY_SCREEN_ID || bookmarkId == -1L) {
-                    return
-                }
-
-                // 코루틴으로 다음 북마크(재생할 아이템)를 가져옴
-                serviceScope.launch {
-                    Timber.d("▶️ 연속 재생 로직 시작. 현재 ID: $bookmarkId")
-                    val nextBookmark =
-                        UseCaseProvider.getNextBookmarkUseCase.invoke(bookmarkId).getOrNull()
-
-                    Timber.d("✅ 다음 북마크: ${nextBookmark?.title}")
-                    Timber.d("✅ 다음 북마크: ${nextBookmark?.audioUrl}")
-
-                    if (nextBookmark != null) {
-                        Timber.d("✅ 다음 북마크 찾음: ${nextBookmark.title}")
-                        val playbackInfo =
-                            PlaybackInfo(
-                                hearitId = nextBookmark.hearitId,
-                                audioUrl = nextBookmark.audioUrl ?: "",
-                                title = nextBookmark.title,
-                                source = "hEARit",
-                            )
-
-                        // 다음 MediaItem을 만들 때도 똑같이 라이브러리 모드 태그를 붙여줌
-                        val nextMediaItem =
-                            mediaItemHelper.buildMediaItem(
-                                playbackInfo,
-                                PlayerDetailActivity.LIBRARY_SCREEN_ID,
-                            )
-
-                        // 플레이어의 재생 목록에 다음 아이템을 추가
-                        player.addMediaItem(nextMediaItem)
-                        Timber.d("➕ 플레이어에 다음 아이템 추가 완료. 총 아이템 수: ${player.mediaItemCount}")
-
-                        player.seekToNextMediaItem() // 다음 아이템으로 이동
-                        player.play() // 재생 시작
-                        Timber.d("⏯️ 다음 아이템으로 이동 및 재생 명령 실행!")
-                    }
-                }
-            }
-        }
-
     init {
-        // 콜백이 생성될 때 플레이어에 리스너를 등록!
-        player.addListener(playerListener)
+        // 👈 새로 만든 ContinuousPlaybackListener를 생성하여 등록합니다.
+        val continuousPlaybackListener =
+            ContinuousPlaybackListener(
+                player = player,
+                serviceScope = serviceScope,
+                mediaItemHelper = mediaItemHelper,
+            )
+        player.addListener(continuousPlaybackListener)
     }
 
     /**
