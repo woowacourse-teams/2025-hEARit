@@ -87,7 +87,7 @@ fun HearitResponse.toDomain(): SingleHearit =
         createdAt = this.createdAt,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
-        category = this.category,
+        category = this.category.toDomain(),
         keywords = this.keywords.map { it.toDomain() },
     )
 

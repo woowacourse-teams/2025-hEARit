@@ -59,25 +59,17 @@ class PlayerDetailActivity :
 
     private var mediaController: MediaController? = null
     private var scriptSyncJob: Job? = null
-
+    private val updateInterval = 500L
+    private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
     private val previousScreen by lazy {
         intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: UNKNOWN_SCREEN_ID
     }
-
-    private val hearitId: Long by lazy {
-        intent.getLongExtra(HEARIT_ID, -1)
-    }
-
-    private val lastPosition: Long by lazy {
-        intent.getLongExtra(LAST_POSITION, 0)
-    }
+    private val hearitId: Long by lazy { intent.getLongExtra(HEARIT_ID, -1) }
+    private val lastPosition: Long by lazy { intent.getLongExtra(LAST_POSITION, 0) }
 
     private val viewModel: PlayerDetailViewModel by viewModels {
         PlayerDetailViewModelFactory(hearitId)
     }
-
-    private val updateInterval = 500L
-    private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

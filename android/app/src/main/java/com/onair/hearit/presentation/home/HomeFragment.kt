@@ -247,7 +247,7 @@ class HomeFragment :
 
     private fun navigateToPlayerDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
+        (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
     override fun onClick(hearitId: Long) {

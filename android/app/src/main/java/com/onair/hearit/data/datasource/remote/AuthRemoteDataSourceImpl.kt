@@ -9,15 +9,14 @@ import com.onair.hearit.data.dto.KakaoLoginRequest
 import com.onair.hearit.data.dto.KakaoLoginResponse
 import com.onair.hearit.data.dto.TokenReissueRequest
 import com.onair.hearit.data.dto.TokenReissueResponse
-import com.onair.hearit.presentation.toBearerToken
 
 class AuthRemoteDataSourceImpl(
     private val authService: AuthService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : AuthRemoteDataSource {
-    override suspend fun checkAccessToken(accessToken: String): Result<NetworkResult<Unit>> =
+    override suspend fun checkAccessToken(): Result<NetworkResult<Unit>> =
         handleApiCall(
-            apiCall = { authService.getAuthCheck(accessToken.toBearerToken()) },
+            apiCall = { authService.getAuthCheck() },
             transform = { },
             errorHandler = errorResponseHandler,
         )

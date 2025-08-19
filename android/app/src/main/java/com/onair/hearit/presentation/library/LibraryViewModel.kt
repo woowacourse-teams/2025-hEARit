@@ -56,7 +56,7 @@ class LibraryViewModel(
     }
 
     private fun fetchData(page: Int) {
-        if (_isLoading.value == true || nextPage == null) return
+        if (isLoading.value == true || nextPage == null) return
 
         _isLoading.value = true
         viewModelScope.launch {
@@ -111,7 +111,6 @@ class LibraryViewModel(
                 .getUserInfo()
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo
-                    _uiState.value = if (_bookmarks.value.isNullOrEmpty()) NoBookmarks else LoggedIn
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
