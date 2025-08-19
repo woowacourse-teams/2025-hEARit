@@ -59,12 +59,12 @@ public record HearitDetailResponse(
         return sources.stream().map(SourceResponse::from).toList();
     }
 
-    private record KeywordResponse(
+    public record KeywordResponse(
             Long id,
             String name
     ) {
 
-        public static KeywordResponse from(Keyword keyword) {
+        private static KeywordResponse from(Keyword keyword) {
             return new KeywordResponse(
                     keyword.getId(),
                     keyword.getName()
@@ -72,12 +72,12 @@ public record HearitDetailResponse(
         }
     }
 
-    private record SourceResponse(
+    public record SourceResponse(
             String sourceName,
             String sourceUrl
     ) {
 
-        public static SourceResponse from(Source source) {
+        private static SourceResponse from(Source source) {
             return new SourceResponse(
                     source.getSourceName(),
                     source.getSourceUrl()
