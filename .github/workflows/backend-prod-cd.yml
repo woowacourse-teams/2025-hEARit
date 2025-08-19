@@ -63,7 +63,7 @@ jobs:
   deploy:
     name: Deploy on EC2 for prod
     needs: build
-    runs-on: [ self-hosted, backend, Linux, ARM64 ]
+    runs-on: [ self-hosted, backend-prod, Linux, ARM64 ]
 
     steps:
       - name: Download jar artifact

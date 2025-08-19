@@ -40,32 +40,36 @@
         <!-- 파일 출력 설정 -->
         <!-- INFO, WARN, ERROR, FATAL 로그 파일 -->
         <!-- txt 파일로 저장 -->
-        <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/2025_08_07/log.zip) -->
+        <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/all-level/2025_08_07.zip) -->
         <!-- 7개 파일 쌓이면 오래된 로그부터 삭제 -->
         <RollingFile name="RollingFile">
             <FileName>${logDir}/all-level.log</FileName>
-            <FilePattern>${logDir}/archive/%d{yyyy_MM_dd}/all-level.zip</FilePattern>
+            <FilePattern>${logDir}/archive/all-level/%d{yyyy_MM_dd}.zip</FilePattern>
             <JsonLayout
-                complete="false"
-                compact="true"
-                eventEol="true"
-                objectMessageAsJsonObject="true"
-                charset="UTF-8">
+                    complete="false"
+                    compact="true"
+                    eventEol="true"
+                    objectMessageAsJsonObject="true"
+                    charset="UTF-8">
                 <KeyValuePair key="env" value="${env}"/>
             </JsonLayout>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
-            <DefaultRolloverStrategy max="7"/>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${logDir}/archive/all-level" maxDepth="1">
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
 
         <!-- ERROR, FATAL 로그 파일-->
         <!-- json 파일로 저장 -->
-        <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/2025_08_07/error-log.zip) -->
+        <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/error/2025_08_07.zip) -->
         <!-- 20개 파일 쌓이면 오래된 로그부터 삭제 -->
         <RollingFile name="RollingErrorFile">
             <FileName>${logDir}/error.log</FileName>
-            <FilePattern>${logDir}/archive/%d{yyyy_MM_dd}/error.zip</FilePattern>
+            <FilePattern>${logDir}/archive/error/%d{yyyy_MM_dd}.zip</FilePattern>
             <JsonLayout complete="false"
                         compact="true"
                         eventEol="true"
@@ -76,7 +80,11 @@
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
-            <DefaultRolloverStrategy max="20"/>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${logDir}/archive/error" maxDepth="1">
+                    <IfLastModified age="20d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
     </Appenders>
 

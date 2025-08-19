@@ -1,6 +1,7 @@
 package com.onair.hearit.app.dto.response;
 
 import com.onair.hearit.common.domain.Bookmark;
+import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Source;
@@ -16,7 +17,7 @@ public record HearitDetailResponse(
         LocalDateTime createdAt,
         Boolean isBookmarked,
         Long bookmarkId,
-        String category,
+        CategoryResponse category,
         List<KeywordResponse> keywords
 ) {
     public static HearitDetailResponse from(Hearit hearit, List<Keyword> keywords) {
@@ -31,7 +32,7 @@ public record HearitDetailResponse(
                 hearit.getCreatedAt(),
                 false,
                 null,
-                hearit.getCategory().getName(),
+                CategoryResponse.of(hearit.getCategory()),
                 keywordNames);
     }
 
@@ -47,7 +48,7 @@ public record HearitDetailResponse(
                 hearit.getCreatedAt(),
                 true,
                 bookmark.getId(),
-                hearit.getCategory().getName(),
+                CategoryResponse.of(hearit.getCategory()),
                 keywordNames);
     }
 
@@ -59,12 +60,23 @@ public record HearitDetailResponse(
         return sources.stream().map(SourceResponse::from).toList();
     }
 
-    private record KeywordResponse(
+    public record CategoryResponse(
+            Long id,
+            String name,
+            String colorCode
+    ) {
+
+        private static CategoryResponse of(Category category) {
+            return new CategoryResponse(category.getId(), category.getName(), category.getColorCode());
+        }
+    }
+
+    public record KeywordResponse(
             Long id,
             String name
     ) {
 
-        public static KeywordResponse from(Keyword keyword) {
+        private static KeywordResponse from(Keyword keyword) {
             return new KeywordResponse(
                     keyword.getId(),
                     keyword.getName()
@@ -72,12 +84,12 @@ public record HearitDetailResponse(
         }
     }
 
-    private record SourceResponse(
+    public record SourceResponse(
             String sourceName,
             String sourceUrl
     ) {
 
-        public static SourceResponse from(Source source) {
+        private static SourceResponse from(Source source) {
             return new SourceResponse(
                     source.getSourceName(),
                     source.getSourceUrl()

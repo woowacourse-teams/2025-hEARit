@@ -26,12 +26,12 @@ public record HearitsWithRecommendCategoryResponse(
                 .toList();
     }
 
-    private record HearitResponse(
+    public record HearitResponse(
             Long hearitId,
             String title,
             LocalDateTime createdAt
     ) {
-        public static HearitResponse from(Hearit hearit) {
+        private static HearitResponse from(Hearit hearit) {
             return new HearitResponse(
                     hearit.getId(),
                     hearit.getTitle(),

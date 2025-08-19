@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.onair'
-version = '1.0.10-SNAPSHOT'
+version = '1.1.0-SNAPSHOT'
 
 java {
     toolchain {
@@ -77,6 +77,10 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Flyaway
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
 }
 
 tasks.named('jar') {
@@ -92,9 +96,9 @@ swaggerSources {
 
 openapi3 {
     servers = [
-            { url = "http://localhost:8080"; description = "로컬 서버" },
-            { url = "http://hearit.o-r.kr"; description = "운영 서버" },
-            { url = "http://hearit-dev.o-r.kr"; description = "개발 서버" }
+            { url = "http://localhost:80"; description = "로컬 서버" },
+            { url = "https://hearit.o-r.kr"; description = "운영 서버" },
+            { url = "https://hearit-dev.o-r.kr"; description = "개발 서버" }
     ]
     title = "Hearit API 문서"
     description = "Spring REST Docs와 Swagger UI를 이용한 API 명세서"
