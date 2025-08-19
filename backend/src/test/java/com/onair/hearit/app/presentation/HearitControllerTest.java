@@ -534,6 +534,7 @@ class HearitControllerTest extends IntegrationTest {
                 fieldWithPath("category").description("카테고리 정보"),
                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                 fieldWithPath("category.name").type(JsonFieldType.STRING).description("카테고리 이름"),
+                fieldWithPath("category.colorCode").type(JsonFieldType.STRING).description("카테고리 컬러코드"),
                 fieldWithPath("keywords").type(JsonFieldType.ARRAY).description("키워드 목록"),
                 fieldWithPath("keywords[].id").type(JsonFieldType.NUMBER).description("키워드 ID"),
                 fieldWithPath("keywords[].name").type(JsonFieldType.STRING).description("키워드 이름")
