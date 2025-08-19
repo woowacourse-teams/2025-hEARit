@@ -1,6 +1,5 @@
 package com.onair.hearit.presentation
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
@@ -91,7 +90,7 @@ class MainActivity :
     private fun setupResultLauncher() {
         detailResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
+                if (result.resultCode == RESULT_OK) {
                     setPlayerControlViewVisibility()
                 }
             }
@@ -300,7 +299,7 @@ class MainActivity :
         }
     }
 
-    fun setPlayerControlViewVisibility() {
+    private fun setPlayerControlViewVisibility() {
         val controller = mediaController
         val isPreparedOrPlaying =
             controller?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
