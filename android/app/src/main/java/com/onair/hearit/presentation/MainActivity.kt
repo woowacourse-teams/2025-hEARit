@@ -91,12 +91,13 @@ class MainActivity :
         detailResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    setPlayerControlViewVisibility()
-                    Timber.d("${result.data?.extras}")
                     val data = result.data ?: return@registerForActivityResult
                     val extras = data.extras ?: return@registerForActivityResult
                     navigateToSearchResult(extras)
+                } else {
+                    Timber.d("Detail closed with no search input")
                 }
+                setPlayerControlViewVisibility()
             }
     }
 
@@ -324,7 +325,7 @@ class MainActivity :
 
     private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(this, hearitId)
-        startActivity(intent)
+        launchDetailActivity(intent)
     }
 
     private fun navigateToSearchResult(bundle: Bundle) {

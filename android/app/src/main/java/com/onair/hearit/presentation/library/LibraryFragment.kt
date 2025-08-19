@@ -51,8 +51,8 @@ class LibraryFragment :
                             .commit()
                     }
                 }
-                viewModel.refreshBookmarks()
             }
+            viewModel.refreshBookmarks()
         }
 
     override fun onCreateView(

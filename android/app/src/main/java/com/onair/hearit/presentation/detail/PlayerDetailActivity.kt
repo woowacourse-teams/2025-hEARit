@@ -114,7 +114,7 @@ class PlayerDetailActivity :
                         }
                 }
             }
-            setResult(RESULT_OK, intent)
+            setResult(RESULT_CANCELED)
             finish()
         }
 
