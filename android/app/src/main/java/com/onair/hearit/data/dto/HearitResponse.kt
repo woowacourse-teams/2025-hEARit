@@ -22,7 +22,7 @@ data class HearitResponse(
     @SerialName("bookmarkId")
     val bookmarkId: Long?,
     @SerialName("category")
-    val category: String,
+    val category: CategoryResponse.Content,
     @SerialName("keywords")
     val keywords: List<KeywordResponse>,
 )

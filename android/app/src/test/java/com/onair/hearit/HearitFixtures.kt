@@ -1,6 +1,7 @@
 package com.onair.hearit
 
 import com.onair.hearit.data.dto.CategoryHearitResponse
+import com.onair.hearit.data.dto.CategoryResponse
 import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.KeywordResponse
@@ -24,7 +25,7 @@ object HearitFixtures {
             createdAt = "2025-08-05T12:00:00Z",
             isBookmarked = true,
             bookmarkId = 100L,
-            category = "Android",
+            category = CategoryResponse.Content(id = 1, colorCode = "#555555", name = "Kotlin"),
             keywords =
                 listOf(
                     KeywordResponse(id = 1, name = "Activity"),

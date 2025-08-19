@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentSearchResultBinding
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.home.HearitClickListener
 
@@ -115,7 +116,7 @@ class SearchResultFragment :
 
     override fun onClick(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
+        (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
     override fun onDestroyView() {
