@@ -5,9 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.application.recommend.FixedRecommendedHearitStrategy;
+import com.onair.hearit.app.dto.request.PagingRequest;
+import com.onair.hearit.app.dto.response.HearitDetailResponse;
+import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
+import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
+import com.onair.hearit.app.dto.response.PagedResponse;
+import com.onair.hearit.app.dto.response.RecommendHearitResponse;
 import com.onair.hearit.auth.domain.UserContext;
-import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
@@ -15,20 +19,16 @@ import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.RecommendHearit;
-import com.onair.hearit.app.dto.request.PagingRequest;
-import com.onair.hearit.app.dto.response.HearitDetailResponse;
-import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
-import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
-import com.onair.hearit.app.dto.response.PagedResponse;
-import com.onair.hearit.app.dto.response.RecommendHearitResponse;
-import com.onair.hearit.fixture.DbHelper;
-import com.onair.hearit.fixture.TestFixture;
+import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.common.infrastructure.jpa.RecommendHearitRepository;
+import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -104,7 +104,8 @@ class HearitServiceTest {
                 () -> assertThat(response.summary()).isEqualTo(hearit.getSummary()),
                 () -> assertThat(response.isBookmarked()).isTrue(),
                 () -> assertThat(response.bookmarkId()).isEqualTo(bookmark.getId()),
-                () -> assertThat(response.category()).isEqualTo(hearit.getCategory().getName()),
+                () -> assertThat(response.category().id()).isEqualTo(hearit.getCategory().getId()),
+                () -> assertThat(response.category().name()).isEqualTo(hearit.getCategory().getName()),
                 () -> assertThat(response.keywords()).hasSize(1)
         );
     }
@@ -129,13 +130,13 @@ class HearitServiceTest {
         LocalDate today = LocalDate.now();
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         IntStream.rangeClosed(1, 3)
-                .forEach((num) -> {
+                .forEach(num -> {
                     Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
                     dbHelper.insertRecommendHearit(new RecommendHearit(hearit, today));
                 });
         LocalDate yesterday = today.minusDays(1);
         IntStream.rangeClosed(1, 5)
-                .forEach((num) -> {
+                .forEach(num -> {
                     Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
                     dbHelper.insertRecommendHearit(new RecommendHearit(hearit, yesterday));
                 });

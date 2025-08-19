@@ -1,6 +1,7 @@
 package com.onair.hearit.app.dto.response;
 
 import com.onair.hearit.common.domain.Bookmark;
+import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Source;
@@ -16,7 +17,7 @@ public record HearitDetailResponse(
         LocalDateTime createdAt,
         Boolean isBookmarked,
         Long bookmarkId,
-        String category,
+        CategoryResponse category,
         List<KeywordResponse> keywords
 ) {
     public static HearitDetailResponse from(Hearit hearit, List<Keyword> keywords) {
@@ -31,7 +32,7 @@ public record HearitDetailResponse(
                 hearit.getCreatedAt(),
                 false,
                 null,
-                hearit.getCategory().getName(),
+                CategoryResponse.of(hearit.getCategory()),
                 keywordNames);
     }
 
@@ -47,7 +48,7 @@ public record HearitDetailResponse(
                 hearit.getCreatedAt(),
                 true,
                 bookmark.getId(),
-                hearit.getCategory().getName(),
+                CategoryResponse.of(hearit.getCategory()),
                 keywordNames);
     }
 
@@ -57,6 +58,16 @@ public record HearitDetailResponse(
 
     private static List<SourceResponse> getSources(List<Source> sources) {
         return sources.stream().map(SourceResponse::from).toList();
+    }
+
+    public record CategoryResponse(
+            Long id,
+            String name
+    ) {
+
+        private static CategoryResponse of(Category category) {
+            return new CategoryResponse(category.getId(), category.getName());
+        }
     }
 
     public record KeywordResponse(
