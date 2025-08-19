@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
@@ -7,6 +8,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AlertDialog
@@ -52,6 +55,7 @@ class MainActivity :
     private var mediaController: MediaController? = null
     private var currentSelectedItemId: Int = R.id.nav_home
     private var hasSentPreload = false
+    private lateinit var detailResultLauncher: ActivityResultLauncher<Intent>
 
     private val mainViewModel: MainViewModel by viewModels { MainViewModelFactory() }
     private val splashViewModel: SplashViewModel by viewModels { SplashViewModelFactory() }
@@ -63,6 +67,7 @@ class MainActivity :
         binding.layoutDrawer.viewModel = mainViewModel
         binding.lifecycleOwner = this
 
+        setupResultLauncher()
         setupBackPressHandler()
         setupWindowInsets()
         setupNavigation()
@@ -73,8 +78,21 @@ class MainActivity :
         setupBottomControllerClick()
     }
 
+    fun launchDetailActivity(intent: Intent) {
+        detailResultLauncher.launch(intent)
+    }
+
     fun selectTab(itemId: Int) {
         binding.layoutBottomNavigation.selectedItemId = itemId
+    }
+
+    private fun setupResultLauncher() {
+        detailResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    setPlayerControlViewVisibility()
+                }
+            }
     }
 
     private fun setupBackPressHandler() {
@@ -277,7 +295,7 @@ class MainActivity :
         }
     }
 
-    private fun setPlayerControlViewVisibility() {
+    fun setPlayerControlViewVisibility() {
         val controller = mediaController
         val isPreparedOrPlaying =
             controller?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
