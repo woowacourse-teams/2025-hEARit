@@ -12,6 +12,7 @@ import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.app.dto.response.CursorResponse;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.app.dto.response.HearitDetailResponse;
+import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.app.dto.response.HearitSearchResponse;
 import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
@@ -416,7 +417,7 @@ class HearitControllerTest extends IntegrationTest {
         Hearit hearit3 = saveHearitWithCategoryAndKeyword(category2, keyword); // 카테고리 2의 히어릿
 
         // when
-        PagedResponse<HearitSearchResponse> pagedResponse = RestAssured.given(this.spec)
+        PagedResponse<HearitOfCategoryResponse> pagedResponse = RestAssured.given(this.spec)
                 .queryParam("categoryId", category1.getId())
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -453,7 +454,7 @@ class HearitControllerTest extends IntegrationTest {
                 .extract()
                 .as(new TypeRef<>() {
                 });
-        List<HearitSearchResponse> responses = pagedResponse.content();
+        List<HearitOfCategoryResponse> responses = pagedResponse.content();
 
         // then
         assertAll(

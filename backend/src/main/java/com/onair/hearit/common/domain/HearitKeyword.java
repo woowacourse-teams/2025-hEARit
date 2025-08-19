@@ -43,13 +43,13 @@ public class HearitKeyword {
         validateKeyword(keyword);
     }
 
-    private static void validateHearit(Hearit hearit) {
+    private void validateHearit(Hearit hearit) {
         if (hearit == null) {
-            throw new InvalidInputException("키워드는 null이 될 수 없습니다.");
+            throw new InvalidInputException("히어릿은 null이 될 수 없습니다.");
         }
     }
 
-    private static void validateKeyword(Keyword keyword) {
+    private void validateKeyword(Keyword keyword) {
         if (keyword == null) {
             throw new InvalidInputException("키워드는 null이 될 수 없습니다.");
         }
