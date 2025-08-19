@@ -32,11 +32,14 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.analytics.AnalyticsParamKeys.KEYWORD_NAME
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.dpToPx
@@ -76,6 +79,7 @@ class PlayerDetailActivity :
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
         binding.lifecycleOwner = this
+        binding.clickListener = this
         binding.viewModel = viewModel
 
         setupBackPressHandler()
@@ -321,6 +325,23 @@ class PlayerDetailActivity :
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
+    override fun onClickCategory(
+        id: Long,
+        name: String,
+    ) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
+            mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
+        )
+        val input = SearchInput.Category(id, name)
+        val resultIntent =
+            Intent().apply {
+                putExtras(input.toBundle())
+            }
+        setResult(RESULT_OK, resultIntent)
+        finish()
+    }
+
     override fun onClickSource(sourceUrl: String) {
         try {
             val uri = sourceUrl.toUri()
@@ -336,6 +357,20 @@ class PlayerDetailActivity :
             Timber.w(e)
             showToast(ERROR_INVALID_LINK_MESSAGE)
         }
+    }
+
+    override fun onClickKeyword(term: String) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.SEARCH_KEYWORD_SELECTED,
+            mapOf(KEYWORD_NAME to term),
+        )
+        val input = SearchInput.Keyword(term)
+        val resultIntent =
+            Intent().apply {
+                putExtras(input.toBundle())
+            }
+        setResult(RESULT_OK, resultIntent)
+        finish()
     }
 
     override fun onDestroy() {

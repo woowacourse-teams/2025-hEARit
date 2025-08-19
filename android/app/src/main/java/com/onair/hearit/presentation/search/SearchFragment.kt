@@ -59,6 +59,9 @@ class SearchFragment : Fragment() {
         setupFragmentResultListeners()
         setupBackAndCancelButtons()
         updateAppBarUIOnBackStackChanged()
+
+        val input = arguments?.let { SearchInput.from(it) }
+        input?.let { navigateToSearchResult(input) }
     }
 
     override fun onResume() {

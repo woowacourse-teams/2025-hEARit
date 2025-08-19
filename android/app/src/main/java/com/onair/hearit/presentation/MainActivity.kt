@@ -91,6 +91,10 @@ class MainActivity :
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     setPlayerControlViewVisibility()
+
+                    val data = result.data ?: return@registerForActivityResult
+                    val extras = data.extras ?: return@registerForActivityResult
+                    navigateToSearchResult(extras)
                 }
             }
     }
@@ -295,7 +299,7 @@ class MainActivity :
         }
     }
 
-    fun setPlayerControlViewVisibility() {
+    private fun setPlayerControlViewVisibility() {
         val controller = mediaController
         val isPreparedOrPlaying =
             controller?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
@@ -320,6 +324,19 @@ class MainActivity :
     private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(this, hearitId)
         startActivity(intent)
+    }
+
+    private fun navigateToSearchResult(bundle: Bundle) {
+        selectTab(R.id.nav_search)
+        val fragment =
+            SearchFragment().apply {
+                arguments = bundle
+            }
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container_view, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun showToast(message: String?) {
