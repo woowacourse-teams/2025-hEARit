@@ -62,11 +62,12 @@ public record HearitDetailResponse(
 
     public record CategoryResponse(
             Long id,
-            String name
+            String name,
+            String colorCode
     ) {
 
         private static CategoryResponse of(Category category) {
-            return new CategoryResponse(category.getId(), category.getName());
+            return new CategoryResponse(category.getId(), category.getName(), category.getColorCode());
         }
     }
 
