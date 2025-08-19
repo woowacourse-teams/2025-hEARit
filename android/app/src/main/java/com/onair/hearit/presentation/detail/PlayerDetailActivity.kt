@@ -21,6 +21,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
@@ -280,10 +282,9 @@ class PlayerDetailActivity :
         val isDifferentHearit = currentlyPlayingId != hearit.id
         val shouldResume = intent.hasExtra(LAST_POSITION) && lastPosition > 0L
         val startPosition = if (shouldResume) lastPosition else 0L
-        val source = hearit.sources.first().name
 
         if (isDifferentHearit) {
-            startPlaybackService(hearit.audioUrl, hearit.title, startPosition, source)
+            setMediaItem(hearit, startPosition, controller)
         } else {
             if (!controller.isPlaying) controller.play()
             if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
@@ -298,22 +299,26 @@ class PlayerDetailActivity :
         }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
     }
 
-    private fun startPlaybackService(
-        audioUrl: String,
-        title: String,
-        startPosition: Long = 0L,
-        source: String,
+    private fun setMediaItem(
+        hearit: Hearit,
+        startPosition: Long,
+        controller: MediaController,
     ) {
-        val serviceIntent =
-            PlaybackService.newIntent(
-                context = this,
-                audioUrl = audioUrl,
-                title = title,
-                hearitId = hearitId,
-                startPosition = startPosition,
-                source = source,
-            )
-        startForegroundService(serviceIntent)
+        val item =
+            MediaItem
+                .Builder()
+                .setMediaId(hearit.id.toString())
+                .setMediaMetadata(
+                    MediaMetadata
+                        .Builder()
+                        .setTitle(hearit.title)
+                        .setExtras(Bundle().apply { putLong("startPosition", startPosition) })
+                        .build(),
+                ).build()
+
+        controller.setMediaItem(item)
+        controller.prepare()
+        controller.play()
     }
 
     private fun navigateToLogin() {

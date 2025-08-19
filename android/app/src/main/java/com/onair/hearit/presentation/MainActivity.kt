@@ -24,6 +24,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -52,6 +53,7 @@ class MainActivity :
     private var mediaController: MediaController? = null
     private var currentSelectedItemId: Int = R.id.nav_home
     private var hasSentPreload = false
+    private var mediaControllerFuture: ListenableFuture<MediaController>? = null
 
     private val mainViewModel: MainViewModel by viewModels { MainViewModelFactory() }
     private val splashViewModel: SplashViewModel by viewModels { SplashViewModelFactory() }
@@ -63,11 +65,11 @@ class MainActivity :
         binding.layoutDrawer.viewModel = mainViewModel
         binding.lifecycleOwner = this
 
+        attachController()
         setupBackPressHandler()
         setupWindowInsets()
         setupNavigation()
         setupDrawer()
-        attachController()
         observeViewModel()
         showFragment(HomeFragment())
         setupBottomControllerClick()
@@ -155,23 +157,26 @@ class MainActivity :
     }
 
     private fun attachController() {
-        if (mediaController != null) {
+        if (mediaControllerFuture != null) {
             maybePreloadRecent()
             return
         }
-        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
-        val future = MediaController.Builder(this, token).buildAsync()
-        future.addListener(
-            {
-                mediaController = future.get()
+
+        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        mediaControllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
+
+        mediaControllerFuture?.addListener({
+            try {
+                mediaController = mediaControllerFuture?.get()
                 mediaController?.let { controller ->
                     binding.layoutBottomPlayerController.setPlayer(controller)
                     setPlayerControlViewVisibility()
                     maybePreloadRecent()
                 }
-            },
-            ContextCompat.getMainExecutor(this),
-        )
+            } catch (_: Exception) {
+                mediaControllerFuture = null
+            }
+        }, ContextCompat.getMainExecutor(this))
     }
 
     private fun observeViewModel() {
@@ -366,19 +371,11 @@ class MainActivity :
             return
         }
 
-        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
-        val future = MediaController.Builder(this, token).buildAsync()
-        future.addListener(
-            {
-                mediaController =
-                    future.get().also {
-                        binding.layoutBottomPlayerController.setPlayer(it)
-                        it.play()
-                    }
-                setPlayerControlViewVisibility()
-            },
-            ContextCompat.getMainExecutor(this),
-        )
+        attachController()
+        mediaControllerFuture?.addListener({
+            mediaController?.play()
+            setPlayerControlViewVisibility()
+        }, ContextCompat.getMainExecutor(this))
     }
 
     override fun onNewIntent(intent: Intent) {
