@@ -19,16 +19,20 @@ import androidx.media3.common.Player
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.TYPE_KEY
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.service.PlaybackService
 
 class ExploreFragment :
@@ -49,17 +53,36 @@ class ExploreFragment :
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                (activity as? PlayerControllerView)?.apply {
-                    pause()
-                    hidePlayerControlView()
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
 
-                    val hearitId = result.data?.getLongExtra(HEARIT_ID, -1) ?: -1
-                    val bookmarkId =
-                        result.data?.getLongExtra(BOOKMARK_ID, -1L).takeIf { it != -1L }
+            (activity as? PlayerControllerView)?.apply {
+                pause()
+                hidePlayerControlView()
 
-                    if (hearitId != -1L) {
-                        updateBookmarkState(hearitId, bookmarkId)
+                val type = result.data?.getStringExtra(TYPE_KEY)
+                when (type) {
+                    "explore" -> {
+                        val hearitId = result.data?.getLongExtra(HEARIT_ID, -1) ?: -1
+                        val bookmarkId =
+                            result.data
+                                ?.getLongExtra(BOOKMARK_ID, -1L)
+                                .takeIf { it != -1L }
+
+                        if (hearitId != -1L) {
+                            updateBookmarkState(hearitId, bookmarkId)
+                        }
+                    }
+
+                    "category", "keyword" -> {
+                        val bundle = result.data?.extras ?: return@apply
+                        (requireActivity() as MainActivity).selectTab(R.id.nav_search)
+                        val searchFragment = SearchFragment().apply { arguments = bundle }
+                        requireActivity()
+                            .supportFragmentManager
+                            .beginTransaction()
+                            .replace(R.id.fragment_container_view, searchFragment)
+                            .addToBackStack(null)
+                            .commit()
                     }
                 }
             }

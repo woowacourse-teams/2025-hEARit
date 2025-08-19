@@ -56,7 +56,7 @@ class PlayerDetailActivity :
     AppCompatActivity(),
     PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private val keywordAdapter: PlayerDetailKeywordAdapter by lazy { PlayerDetailKeywordAdapter() }
+    private val keywordAdapter: PlayerDetailKeywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
     private val scriptAdapter: PlayerDetailScriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val sourceAdapter: PlayerDetailSourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
@@ -67,7 +67,7 @@ class PlayerDetailActivity :
     private val previousScreen by lazy {
         intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: UNKNOWN_SCREEN_ID
     }
-    private val hearitId: Long by lazy { intent.getLongExtra(HEARIT_ID, -1) }
+    private val hearitId: Long by lazy { intent.getLongExtra(HEARIT_ID_KEY, -1) }
     private val lastPosition: Long by lazy { intent.getLongExtra(LAST_POSITION, 0) }
 
     private val viewModel: PlayerDetailViewModel by viewModels {
@@ -108,8 +108,9 @@ class PlayerDetailActivity :
                 viewModel.bookmarkId.value?.let { bookmarkId ->
                     intent =
                         Intent().apply {
-                            putExtra(HEARIT_ID, hearitId)
-                            putExtra(BOOKMARK_ID, bookmarkId)
+                            putExtra(TYPE_KEY, "explore")
+                            putExtra(HEARIT_ID_KEY, hearitId)
+                            putExtra(BOOKMARK_ID_KEY, bookmarkId)
                         }
                 }
             }
@@ -334,10 +335,7 @@ class PlayerDetailActivity :
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
         val input = SearchInput.Category(id, name)
-        val resultIntent =
-            Intent().apply {
-                putExtras(input.toBundle())
-            }
+        val resultIntent = Intent().apply { putExtras(input.toBundle()) }
         setResult(RESULT_OK, resultIntent)
         finish()
     }
@@ -384,8 +382,9 @@ class PlayerDetailActivity :
         const val UNKNOWN_SCREEN_ID = "unknown"
         const val EXPLORE_SCREEN_ID = "explore"
         const val LOGIN_REQUIRED_DIALOG_ID = "login_required_dialog"
-        const val HEARIT_ID = "hearit_id"
-        const val BOOKMARK_ID = "bookmark_id"
+        const val TYPE_KEY = "type"
+        const val HEARIT_ID_KEY = "hearit_id"
+        const val BOOKMARK_ID_KEY = "bookmark_id"
         const val LAST_POSITION = "last_position"
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
@@ -397,7 +396,7 @@ class PlayerDetailActivity :
             lastPosition: Long? = null,
         ): Intent =
             Intent(context, PlayerDetailActivity::class.java).apply {
-                putExtra(HEARIT_ID, hearitId)
+                putExtra(HEARIT_ID_KEY, hearitId)
                 lastPosition?.let { putExtra(LAST_POSITION, it) }
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }

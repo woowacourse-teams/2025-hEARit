@@ -41,6 +41,7 @@ import com.onair.hearit.presentation.splash.SplashViewModel
 import com.onair.hearit.presentation.splash.SplashViewModelFactory
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
+import timber.log.Timber
 
 @OptIn(UnstableApi::class)
 class MainActivity :
@@ -91,7 +92,7 @@ class MainActivity :
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     setPlayerControlViewVisibility()
-
+                    Timber.d("${result.data?.extras}")
                     val data = result.data ?: return@registerForActivityResult
                     val extras = data.extras ?: return@registerForActivityResult
                     navigateToSearchResult(extras)
