@@ -94,9 +94,6 @@ android {
     }
     defaultConfig {
         manifestPlaceholders += mapOf()
-        val baseUrl =
-            gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
-        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
         val kakaoNativeKey =
             gradleLocalProperties(rootDir, providers).getProperty("KAKAO_NATIVE_KEY") ?: ""
