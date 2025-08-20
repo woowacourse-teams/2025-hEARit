@@ -40,6 +40,13 @@ import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.LAST_POSITION_KEY
+import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
+import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
+import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
+import com.onair.hearit.presentation.IntentValues.KEYWORD_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.dpToPx
@@ -65,10 +72,10 @@ class PlayerDetailActivity :
     private val updateInterval = 500L
     private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
     private val previousScreen by lazy {
-        intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: UNKNOWN_SCREEN_ID
+        intent.getStringExtra(PREVIOUS_SCREEN_KEY) ?: UNKNOWN_SCREEN_ID
     }
     private val hearitId: Long by lazy { intent.getLongExtra(HEARIT_ID_KEY, -1) }
-    private val lastPosition: Long by lazy { intent.getLongExtra(LAST_POSITION, 0) }
+    private val lastPosition: Long by lazy { intent.getLongExtra(LAST_POSITION_KEY, 0) }
 
     private val viewModel: PlayerDetailViewModel by viewModels {
         PlayerDetailViewModelFactory(hearitId)
@@ -104,17 +111,19 @@ class PlayerDetailActivity :
 
     private fun setupBackPressHandler() {
         val backAction = {
-            if (previousScreen == EXPLORE_SCREEN_ID) {
+            if (previousScreen == EXPLORE_VALUE) {
                 viewModel.bookmarkId.value?.let { bookmarkId ->
-                    intent =
+                    val resultIntent =
                         Intent().apply {
-                            putExtra(TYPE_KEY, "explore")
+                            putExtra(TYPE_KEY, EXPLORE_VALUE)
                             putExtra(HEARIT_ID_KEY, hearitId)
                             putExtra(BOOKMARK_ID_KEY, bookmarkId)
                         }
+                    setResult(RESULT_OK, resultIntent)
                 }
+            } else {
+                setResult(RESULT_CANCELED)
             }
-            setResult(RESULT_CANCELED)
             finish()
         }
 
@@ -274,7 +283,7 @@ class PlayerDetailActivity :
         val controller = mediaController ?: return
         val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
         val isDifferentHearit = currentlyPlayingId != hearit.id
-        val shouldResume = intent.hasExtra(LAST_POSITION) && lastPosition > 0L
+        val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
         val startPosition = if (shouldResume) lastPosition else 0L
         val source = hearit.sources.first().name
 
@@ -291,7 +300,7 @@ class PlayerDetailActivity :
     private fun showLoginRequiredDialog() {
         LoginRequiredDialogFragment {
             navigateToLogin()
-        }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+        }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun startPlaybackService(
@@ -365,6 +374,7 @@ class PlayerDetailActivity :
         val input = SearchInput.Keyword(term)
         val resultIntent =
             Intent().apply {
+                putExtra(TYPE_KEY, KEYWORD_VALUE)
                 putExtras(input.toBundle())
             }
         setResult(RESULT_OK, resultIntent)
@@ -380,12 +390,7 @@ class PlayerDetailActivity :
 
     companion object {
         const val UNKNOWN_SCREEN_ID = "unknown"
-        const val EXPLORE_SCREEN_ID = "explore"
-        const val LOGIN_REQUIRED_DIALOG_ID = "login_required_dialog"
-        const val TYPE_KEY = "type"
-        const val HEARIT_ID_KEY = "hearit_id"
-        const val BOOKMARK_ID_KEY = "bookmark_id"
-        const val LAST_POSITION = "last_position"
+        const val LOGIN_REQUIRED_DIALOG_TAG = "login_required_dialog"
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
         private const val SCRIPT_ITEM_HEIGHT_DP = 16
@@ -397,7 +402,7 @@ class PlayerDetailActivity :
         ): Intent =
             Intent(context, PlayerDetailActivity::class.java).apply {
                 putExtra(HEARIT_ID_KEY, hearitId)
-                lastPosition?.let { putExtra(LAST_POSITION, it) }
+                lastPosition?.let { putExtra(LAST_POSITION_KEY, it) }
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
     }

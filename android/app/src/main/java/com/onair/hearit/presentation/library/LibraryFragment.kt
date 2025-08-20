@@ -18,9 +18,11 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
+import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.TYPE_KEY
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.search.SearchFragment
 
@@ -39,7 +41,7 @@ class LibraryFragment :
             if (result.resultCode == Activity.RESULT_OK) {
                 val type = result.data?.getStringExtra(TYPE_KEY)
                 when (type) {
-                    "category", "keyword" -> {
+                    CATEGORY_KEY, KEYWORD_KEY -> {
                         val bundle = result.data?.extras ?: return@registerForActivityResult
                         (requireActivity() as MainActivity).selectTab(R.id.nav_search)
                         val searchFragment = SearchFragment().apply { arguments = bundle }

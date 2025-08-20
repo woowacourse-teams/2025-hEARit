@@ -25,15 +25,25 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.DetailResult
+import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.EXPLORE_KEY
+import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
+import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
+import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
-import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.TYPE_KEY
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.search.SearchFragment
+import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
+import timber.log.Timber
 
 class ExploreFragment :
     Fragment(),
@@ -271,7 +281,7 @@ class ExploreFragment :
     ) {
         val intent =
             PlayerDetailActivity.newIntent(requireActivity(), hearitId, lastPosition).apply {
-                putExtra(AnalyticsParamKeys.SOURCE, PlayerDetailActivity.EXPLORE_SCREEN_ID)
+                putExtra(PREVIOUS_SCREEN_KEY, EXPLORE_VALUE)
             }
         playerDetailLauncher.launch(intent)
     }
@@ -279,7 +289,7 @@ class ExploreFragment :
     private fun showLoginRequiredDialog() {
         LoginRequiredDialogFragment {
             navigateToLogin()
-        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {
@@ -363,10 +373,5 @@ class ExploreFragment :
     override fun onDestroy() {
         super.onDestroy()
         playerManager.release()
-    }
-
-    companion object {
-        const val HEARIT_ID = "hearit_id"
-        const val BOOKMARK_ID = "bookmark_id"
     }
 }
