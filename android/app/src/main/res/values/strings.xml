@@ -76,6 +76,7 @@
     <string name="explore_load_new_shorts_hearit">새로운 히어릿 불러오기</string>
 
     <!-- SettingFragment-->
+    <string name="setting_feedback">피드백 및 문의하기</string>
     <string name="setting_notification">알림</string>
     <string name="setting_recommend_notification">히어릿 추천 알림</string>
     <string name="setting_app_version">앱 버전 v%s</string>

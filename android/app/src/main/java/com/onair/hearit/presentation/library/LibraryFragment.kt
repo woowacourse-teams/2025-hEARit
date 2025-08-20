@@ -11,14 +11,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.MainActivity
+import com.onair.hearit.presentation.MainViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.navigate
+import com.onair.hearit.presentation.toDetailResult
 
 class LibraryFragment :
     Fragment(),
@@ -27,14 +32,16 @@ class LibraryFragment :
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
 
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
     private val bookmarkAdapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                viewModel.refreshBookmarks()
-            }
+            viewModel.refreshBookmarks()
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+            val detailResult = result.data.toDetailResult() ?: return@registerForActivityResult
+            (requireActivity() as MainActivity).apply { detailResult.navigate(this) }
         }
 
     override fun onCreateView(
@@ -82,6 +89,10 @@ class LibraryFragment :
     }
 
     private fun observeViewModel() {
+        mainViewModel.bookmarkUpdated.observe(viewLifecycleOwner) {
+            viewModel.refreshBookmarks()
+        }
+
         viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarks ->
             bookmarkAdapter.submitList(bookmarks)
         }

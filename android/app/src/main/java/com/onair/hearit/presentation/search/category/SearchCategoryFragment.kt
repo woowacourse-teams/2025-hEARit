@@ -14,9 +14,9 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentSearchCategoryBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.search.CategoryClickListener
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory

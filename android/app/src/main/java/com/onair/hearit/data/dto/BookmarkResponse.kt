@@ -32,5 +32,7 @@ data class BookmarkResponse(
         val summary: String,
         @SerialName("playTime")
         val playTime: Int,
+        @SerialName("categoryColor")
+        val categoryColor: String,
     )
 }
