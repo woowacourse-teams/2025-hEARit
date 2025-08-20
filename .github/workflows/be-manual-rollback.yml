@@ -1,0 +1,85 @@
+name: Manual Rollback (Prod)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "롤백 대상 (예: v1.2.3 또는 LKG)"
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: rollback-prod
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    name: Fetch app.jar from Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (for tag list/validation)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve target tag (LKG → LKG_PROD)
+        id: res
+        shell: bash
+        run: |
+          set -e
+          t='${{ github.event.inputs.target }}'
+          if [[ "$t" =~ ^(LKG|lkg|LKG_PROD)$ ]]; then
+            TAG="LKG_PROD"
+          else
+            TAG="$t"
+          fi
+          git fetch --tags --force --prune
+          if ! git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "::error::Tag not found: ${TAG}"
+            echo "---- Latest tags ----"
+            git tag --list --sort=-creatordate | head -n 20
+            exit 1
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Download app.jar from GitHub Release
+        uses: robinraju/release-downloader@v1.10
+        with:
+          repository: ${{ github.repository }}
+          tag: ${{ steps.res.outputs.tag }}
+          fileName: "app.jar"
+          out-file-path: "rollback"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify file
+        run: |
+          test -f rollback/app.jar
+          ls -al rollback
+          sha256sum rollback/app.jar || shasum -a 256 rollback/app.jar
+
+      - name: Upload artifact (app.jar)
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-jar
+          path: rollback/app.jar
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    needs: fetch
+    runs-on: [ self-hosted, backend-prod, Linux, ARM64 ]
+    steps:
+      - name: Download rollback artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rollback-jar
+          path: ~/hearit
+
+      - name: Sanity check
+        run: test -f ~/hearit/app.jar
+
+      - name: Run deploy script
+        run: sudo bash ~/hearit/deploy.sh
