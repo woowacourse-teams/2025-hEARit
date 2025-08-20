@@ -83,6 +83,18 @@
             app:layout_constraintTop_toBottomOf="@id/tv_setting_nickname" />
 
         <TextView
+            android:id="@+id/tv_setting_feedback"
+            style="@style/pretendard_sub_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:padding="12dp"
+            android:text="@string/setting_feedback"
+            app:layout_constraintEnd_toEndOf="@id/divider1"
+            app:layout_constraintStart_toStartOf="@id/divider1"
+            app:layout_constraintTop_toBottomOf="@id/divider1" />
+
+        <TextView
             style="@style/pretendard_main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -125,7 +137,7 @@
             app:layout_constraintBottom_toTopOf="@id/tv_setting_app_email"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="앱 버전 v1.0.05-DEBUG" />
+            tools:text="앱 버전 v1.1.1-DEBUG" />
 
         <TextView
             android:id="@+id/tv_setting_app_email"

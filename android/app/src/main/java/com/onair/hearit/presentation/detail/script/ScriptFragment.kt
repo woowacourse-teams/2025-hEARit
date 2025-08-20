@@ -3,8 +3,6 @@ package com.onair.hearit.presentation.detail.script
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +11,9 @@ import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -21,13 +21,20 @@ import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentScriptBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
-import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
+import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class ScriptFragment : Fragment() {
@@ -38,25 +45,24 @@ class ScriptFragment : Fragment() {
     private var isUserScrolling = false
     private var lastUserScrollTime = 0L
 
-    private lateinit var mediaController: MediaController
-    private lateinit var updateRunnable: Runnable
+    private var mediaController: MediaController? = null
 
-    private val adapter by lazy { ScriptAdapter() }
+    private val adapter: ScriptAdapter by lazy {
+        ScriptAdapter({ item ->
+            mediaController?.seekTo(item.start)
+        })
+    }
 
     private val hearitId: Long by lazy {
-        requireArguments().getLong(HEARIT_ID)
+        requireArguments().getLong(HEARIT_ID_KEY)
     }
     private val viewModel: PlayerDetailViewModel by activityViewModels {
         PlayerDetailViewModelFactory(hearitId)
     }
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateInterval = 300L
+    private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
 
-    private val itemHeightPx by lazy {
-        val scale = resources.displayMetrics.density
-        (16 * scale + 0.5f).toInt()
-    }
+    private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(requireContext()) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,6 +98,7 @@ class ScriptFragment : Fragment() {
 
     private fun setupRecyclerView() {
         binding.rvScript.adapter = adapter
+
         binding.rvScript.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(
@@ -167,50 +174,50 @@ class ScriptFragment : Fragment() {
             mediaController =
                 MediaController.Builder(requireContext(), sessionToken).buildAsync().await()
 
-            binding.playerView.player = mediaController
-            binding.baseController.setPlayer(mediaController)
+            mediaController?.let { controller ->
+                binding.playerView.player = controller
+                binding.baseController.setPlayer(controller)
 
-            startScriptSync(mediaController)
+                startScriptSync(controller)
+            }
         }
     }
 
+    @UnstableApi
     private fun startScriptSync(controller: Player) {
-        updateRunnable =
-            object : Runnable {
-                override fun run() {
-                    val now = System.currentTimeMillis()
-
-                    val pos = controller.currentPosition
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (isActive) {
+                    val position = controller.currentPosition
                     val currentItem =
-                        adapter.currentList.firstOrNull { pos in it.start until it.end }
+                        adapter.currentList
+                            .firstOrNull { position in it.start until it.end }
                     val currentIndex = adapter.currentList.indexOf(currentItem)
 
-                    // 사용자가 스크롤을 멈춘 시점을 체크함
-                    // 사용자가 스크롤을 멈춤 + 하이라이트 부분을 보고 있을 때 3초 후에 다시 포커싱함
+                    val now = System.currentTimeMillis()
+
                     if (isUserScrolling) {
                         val isVisible = isItemVisible(currentIndex)
-
-                        if (now - lastUserScrollTime > 3000L && isVisible) {
+                        if (now - lastUserScrollTime > USER_SCROLL_IDLE_THRESHOLD_MS && isVisible) {
                             isUserScrolling = false
                         }
                     }
 
-                    // 하이라이트는 항상 진행하도록 함
-                    if (currentItem != null) {
-                        adapter.highlightScriptLine(currentItem.id)
-                    }
+                    currentItem?.let { adapter.highlightScriptLine(it.id) }
 
-                    // 스크롤 이동은 사용자가 스크롤 중이 아닐 때만
                     if (!isUserScrolling && currentItem != null) {
-                        val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-                        (binding.rvScript.layoutManager as LinearLayoutManager)
-                            .scrollToPositionWithOffset(currentIndex, centerOffset)
+                        val scriptHeight = binding.rvScript.height
+                        if (scriptHeight > 0) {
+                            val centerOffset = scriptHeight / 2 - itemHeightPx / 2
+                            (binding.rvScript.layoutManager as? LinearLayoutManager)
+                                ?.scrollToPositionWithOffset(currentIndex, centerOffset)
+                        }
                     }
 
-                    handler.postDelayed(this, updateInterval)
+                    delay(updateInterval)
                 }
             }
-        handler.post(updateRunnable)
+        }
     }
 
     private fun isItemVisible(position: Int): Boolean {
@@ -223,10 +230,15 @@ class ScriptFragment : Fragment() {
     private fun showLoginRequiredDialog() {
         LoginRequiredDialogFragment {
             navigateToLogin()
-        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "script_login"),
+        )
+
         val intent = LoginActivity.newIntent(requireContext())
         startActivity(intent)
 
@@ -241,19 +253,19 @@ class ScriptFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        handler.removeCallbacks(updateRunnable)
-        if (::mediaController.isInitialized) {
-            mediaController.release()
-        }
+        binding.playerView.player = null
+        mediaController?.release()
         _binding = null
     }
 
     companion object {
-        private const val HEARIT_ID = "hearit_id"
+        private const val SCRIPT_SYNC_INTERVAL_MS = 300L
+        private const val USER_SCROLL_IDLE_THRESHOLD_MS = 3000L
+        private const val SCRIPT_ITEM_HEIGHT_DP = 16
 
         fun newInstance(hearitId: Long) =
             ScriptFragment().apply {
-                arguments = Bundle().apply { putLong(HEARIT_ID, hearitId) }
+                arguments = Bundle().apply { putLong(HEARIT_ID_KEY, hearitId) }
             }
     }
 }

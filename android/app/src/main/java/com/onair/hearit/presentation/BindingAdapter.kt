@@ -125,6 +125,14 @@ fun setBookmarkVisibleIfNotLogin(
     view.isVisible = state is BookmarkUiState.NotLoggedIn
 }
 
+@BindingAdapter("visibleBookmarkIfNoBookmarks")
+fun setBookmarkIfNoBookmarks(
+    view: View,
+    state: BookmarkUiState?,
+) {
+    view.isVisible = state is BookmarkUiState.NoBookmarks
+}
+
 @BindingAdapter("backgroundColor")
 fun setBackgroundColor(
     view: View,

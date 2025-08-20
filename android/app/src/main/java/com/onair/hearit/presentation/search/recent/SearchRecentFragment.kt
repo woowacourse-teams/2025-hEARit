@@ -12,7 +12,7 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import com.onair.hearit.databinding.FragmentSearchRecentBinding
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.domain.model.SearchInput.Companion.KEYWORD_KEY
+import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 
@@ -23,7 +23,7 @@ class SearchRecentFragment :
     private var _binding: FragmentSearchRecentBinding? = null
     private val binding get() = _binding!!
 
-    private val recentSearchAdapter by lazy { RecentSearchAdapter(this) }
+    private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
         SearchViewModelFactory()

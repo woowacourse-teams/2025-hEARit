@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.UserNotRegisteredException
+import com.onair.hearit.domain.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
@@ -30,32 +30,50 @@ class LibraryViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private var nextPage: Int? = 0
+
     init {
-        fetchData(page = 0)
         getUserInfo()
+        refreshBookmarks()
     }
 
-    fun fetchData(page: Int) {
+    fun refreshBookmarks() {
+        nextPage = 0
+        _bookmarks.value = emptyList()
+        fetchData(page = 0)
+    }
+
+    fun loadNextPage() {
+        nextPage?.let { fetchData(it) }
+    }
+
+    private fun fetchData(page: Int) {
+        if (isLoading.value == true || nextPage == null) return
+
+        _isLoading.value = true
         viewModelScope.launch {
             bookmarkRepository
                 .getBookmarks(page = page, size = null)
-                .onSuccess {
-                    _uiState.value = BookmarkUiState.LoggedIn
-                    _bookmarks.value = it
+                .onSuccess { pageResult ->
+                    val currentList = _bookmarks.value.orEmpty()
+                    val newList = currentList + pageResult.items
+                    _bookmarks.value = newList
+                    _uiState.value =
+                        if (newList.isEmpty()) BookmarkUiState.NoBookmarks else BookmarkUiState.LoggedIn
+                    nextPage = if (!pageResult.paging.isLast) pageResult.paging.page + 1 else null
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegisteredException -> {
-                            _uiState.value = BookmarkUiState.NotLoggedIn
-                        }
-
+                        is UserNotRegistered -> _uiState.value = BookmarkUiState.NotLoggedIn
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.library_toast_bookmark_load_fail
                         }
                     }
-                    val defaultUserInfo = UserInfo(-1, "hEARit", null)
-                    _userInfo.value = defaultUserInfo
                 }
+            _isLoading.value = false
         }
     }
 
@@ -64,8 +82,13 @@ class LibraryViewModel(
             bookmarkRepository
                 .deleteBookmark(bookmarkId)
                 .onSuccess {
-                    _bookmarks.value =
-                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }
+                    val updatedList =
+                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }.orEmpty()
+                    _bookmarks.value = updatedList
+
+                    if (updatedList.isEmpty()) {
+                        _uiState.value = BookmarkUiState.NoBookmarks
+                    }
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_delete_bookmark_fail
                 }
@@ -77,11 +100,10 @@ class LibraryViewModel(
             memberRepository
                 .getUserInfo()
                 .onSuccess { userInfo ->
-                    _uiState.value = BookmarkUiState.LoggedIn
                     _userInfo.value = userInfo
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegisteredException -> {
+                        is UserNotRegistered -> {
                             _uiState.value = BookmarkUiState.NotLoggedIn
                         }
 

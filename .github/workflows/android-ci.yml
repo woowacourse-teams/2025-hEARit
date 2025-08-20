@@ -2,13 +2,13 @@ name: Hearit Android CI
 
 on:
   pull_request:
-    branches: [ "main", "develop-an" ]
+    branches: [ "develop-an" ]
     paths:
       - 'android/**'
 
 env:
   BASE_URL: ${{ secrets.BASE_URL }}
-  GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}        
+  GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
 jobs:
   build:
@@ -26,6 +26,16 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: gradle
+
+      - name: Restore Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

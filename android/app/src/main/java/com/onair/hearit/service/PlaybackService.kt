@@ -22,40 +22,55 @@ class PlaybackService : MediaSessionService() {
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
     private lateinit var stateSaver: PlaybackStateSaver
-    private lateinit var notificationManager: NotificationManager
+    private lateinit var playerNotificationManager: PlayerNotificationManager
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var isServiceStarted = false
 
     override fun onCreate() {
         super.onCreate()
-        notificationManager = NotificationManager(this)
+        playerNotificationManager = PlayerNotificationManager(this)
         initializePlayer()
         initializeMediaSession()
-        initializeAndStartForeground()
-        stateSaver = PlaybackStateSaver(player, serviceScope)
+        stateSaver = PlaybackStateSaver(player, serviceScope, this)
         player.addListener(stateSaver.listener)
     }
 
-    // startService나 startForegroundService와 같은 메서드를 사용해서, 서비스가 명시적으로 시작되는 경우,
+    // startForegroundService와 같은 메서드를 사용해서, 서비스가 명시적으로 시작되는 경우,
     // 외부 컴포넌트가 서비스를 시작하도록 요청할 때 호출됨
     override fun onStartCommand(
         intent: Intent?,
         flags: Int,
         startId: Int,
     ): Int {
+        if (intent?.action == ACTION_STOP_SERVICE) {
+            runCatching {
+                player.pause()
+                player.clearMediaItems()
+            }
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         super.onStartCommand(intent, flags, startId)
+        initializeAndStartForeground()
+
         val audioUrl = intent?.getStringExtra(EXTRA_AUDIO_URL)
-        val title = intent?.getStringExtra(EXTRA_TITLE) ?: "hearit"
+        val title = intent?.getStringExtra(EXTRA_TITLE) ?: "hEARit"
         val hearitId = intent?.getLongExtra(EXTRA_HEARIT_ID, -1L) ?: -1L
         val startPosition = intent?.getLongExtra(EXTRA_START_POSITION, 0L) ?: 0L
+        val source = intent?.getStringExtra(EXTRA_SOURCE) ?: "hEARit"
 
-        if (!audioUrl.isNullOrEmpty() && hearitId != -1L) {
-            player.setMediaItem(createMediaItem(audioUrl, title, hearitId))
-            player.prepare()
-            player.seekTo(startPosition.coerceAtLeast(0L))
-            player.play()
+        if (audioUrl.isNullOrEmpty() || hearitId == -1L) {
+            stopSelf()
+            return START_NOT_STICKY
         }
+
+        val item = createMediaItem(audioUrl, title, hearitId, source)
+        player.setMediaItems(listOf(item), 0, startPosition.coerceAtLeast(0L))
+        player.prepare()
+        player.play()
+
         return START_STICKY
     }
 
@@ -90,6 +105,7 @@ class PlaybackService : MediaSessionService() {
         url: String,
         title: String,
         id: Long,
+        source: String,
     ): MediaItem =
         MediaItem
             .Builder()
@@ -99,14 +115,16 @@ class PlaybackService : MediaSessionService() {
                 MediaMetadata
                     .Builder()
                     .setTitle(title)
+                    .setArtist(source)
                     .build(),
             ).build()
 
     private fun initializeAndStartForeground() {
-        if (isServiceStarted) return
-        val notification = notificationManager.buildForegroundNotification()
-        startForeground(NOTIFICATION_ID, notification)
-        isServiceStarted = true
+        if (!isServiceStarted) {
+            val notification = playerNotificationManager.buildForegroundNotification()
+            startForeground(NOTIFICATION_ID, notification)
+            isServiceStarted = true
+        }
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession = mediaSession
@@ -127,6 +145,9 @@ class PlaybackService : MediaSessionService() {
         private const val EXTRA_TITLE = "TITLE"
         private const val EXTRA_HEARIT_ID = "HEARIT_ID"
         private const val EXTRA_START_POSITION = "START_POSITION"
+        private const val EXTRA_SOURCE = "SOURCE"
+
+        const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
 
         fun newIntent(
             context: Context,
@@ -134,11 +155,18 @@ class PlaybackService : MediaSessionService() {
             title: String,
             hearitId: Long,
             startPosition: Long,
+            source: String,
         ) = Intent(context, PlaybackService::class.java).apply {
             putExtra(EXTRA_AUDIO_URL, audioUrl)
             putExtra(EXTRA_TITLE, title)
             putExtra(EXTRA_HEARIT_ID, hearitId)
             putExtra(EXTRA_START_POSITION, startPosition)
+            putExtra(EXTRA_SOURCE, source)
         }
+
+        fun stopIntent(context: Context) =
+            Intent(context, PlaybackService::class.java).apply {
+                action = ACTION_STOP_SERVICE
+            }
     }
 }

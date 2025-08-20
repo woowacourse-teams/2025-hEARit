@@ -32,6 +32,7 @@
 
             <TextView
                 android:id="@+id/exo_position"
+                style="@style/pretendard_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
@@ -43,6 +44,7 @@
 
             <TextView
                 android:id="@+id/exo_duration"
+                style="@style/pretendard_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
@@ -66,7 +68,7 @@
                 android:layout_width="36dp"
                 android:layout_height="42dp"
                 android:layout_marginEnd="32dp"
-                android:background="@drawable/bookmark_selector"
+                android:background="@drawable/bookmark_selector_player_detail"
                 android:contentDescription="@null"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/exo_rew"
@@ -114,6 +116,7 @@
 
             <TextView
                 android:id="@+id/play_speed"
+                style="@style/pretendard_sub_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="28dp"

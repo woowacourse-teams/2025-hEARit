@@ -1,5 +1,15 @@
 package com.onair.hearit.presentation.detail
 
 interface PlayerDetailClickListener {
-    fun onClickSource(sourceUrl: String)
+    fun onClickCategory(
+        id: Long,
+        name: String,
+    )
+
+    fun onClickSource(
+        name: String,
+        url: String,
+    )
+
+    fun onClickKeyword(term: String)
 }

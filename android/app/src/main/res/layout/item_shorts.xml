@@ -112,7 +112,7 @@
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="14dp"
             android:background="@drawable/bg_gray1_radius_8dp"
-            android:onClick="@{() -> shortsClickListener.onClickHearitInfo(hearitItem.id)}"
+            android:onClick="@{() -> shortsClickListener.onClickHearitInfo(hearitItem.id, hearitItem.title)}"
             app:layout_constraintBottom_toTopOf="@id/layout_explore_player"
             app:layout_constraintEnd_toStartOf="@id/btn_explore_item_bookmark"
             app:layout_constraintStart_toStartOf="parent">

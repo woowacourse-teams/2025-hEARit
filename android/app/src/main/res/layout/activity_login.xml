@@ -51,10 +51,10 @@
             android:layout_marginHorizontal="40dp"
             android:contentDescription="@null"
             android:src="@drawable/img_kakao_login"
-            app:layout_constraintBottom_toTopOf="@id/tv_login_hearit" />
+            app:layout_constraintBottom_toTopOf="@id/tv_no_login_hearit" />
 
         <TextView
-            android:id="@+id/tv_login_hearit"
+            android:id="@+id/tv_no_login_hearit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="90dp"
@@ -73,9 +73,9 @@
             android:layout_marginHorizontal="10dp"
             android:layout_marginTop="-12dp"
             android:background="@color/hearit_gray4"
-            app:layout_constraintEnd_toEndOf="@id/tv_login_hearit"
-            app:layout_constraintStart_toStartOf="@id/tv_login_hearit"
-            app:layout_constraintTop_toBottomOf="@id/tv_login_hearit" />
+            app:layout_constraintEnd_toEndOf="@id/tv_no_login_hearit"
+            app:layout_constraintStart_toStartOf="@id/tv_no_login_hearit"
+            app:layout_constraintTop_toBottomOf="@id/tv_no_login_hearit" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentSearchResultBinding
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.home.HearitClickListener
 
@@ -33,7 +34,7 @@ class SearchResultFragment :
     private val viewModel: SearchResultViewModel by viewModels {
         SearchResultViewModelFactory(searchedTerm)
     }
-    private val adapter by lazy { SearchedHearitAdapter(this) }
+    private val searchedAdapter: SearchedHearitAdapter by lazy { SearchedHearitAdapter(this) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,29 +70,36 @@ class SearchResultFragment :
     }
 
     private fun setupRecyclerView() {
-        binding.rvSearchedHearit.adapter = adapter
-        binding.rvSearchedHearit.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(
-                    rv: RecyclerView,
-                    dx: Int,
-                    dy: Int,
-                ) {
-                    val lm = rv.layoutManager as? LinearLayoutManager ?: return
-                    val total = lm.itemCount
-                    val last = lm.findLastVisibleItemPosition()
+        binding.rvSearchedHearit.apply {
+            adapter = searchedAdapter
+            addOnScrollListener(
+                object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(
+                        recyclerView: RecyclerView,
+                        dx: Int,
+                        dy: Int,
+                    ) {
+                        val layoutManager =
+                            recyclerView.layoutManager as? LinearLayoutManager ?: return
+                        val threshold = layoutManager.itemCount - REFRESH_THRESHOLD
+                        val last = layoutManager.findLastVisibleItemPosition()
 
-                    if (last >= total - 3) viewModel.loadNextPageIfPossible()
-                }
-            },
-        )
+                        if (last >= threshold) viewModel.loadNextPageIfPossible()
+                    }
+                },
+            )
+        }
     }
 
     private fun observeViewModel() {
-        viewModel.uiState.observe(viewLifecycleOwner) { binding.uiState = it }
-        viewModel.searchedHearits.observe(viewLifecycleOwner) { adapter.submitList(it) }
-        viewModel.toastMessage.observe(viewLifecycleOwner) {
-            showToast(getString(it))
+        viewModel.uiState.observe(viewLifecycleOwner) { state ->
+            binding.uiState = state
+        }
+        viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
+            searchedAdapter.submitList(searchedHearits)
+        }
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
         }
     }
 
@@ -108,7 +116,7 @@ class SearchResultFragment :
 
     override fun onClick(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
+        (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
     override fun onDestroyView() {
@@ -117,6 +125,8 @@ class SearchResultFragment :
     }
 
     companion object {
+        private const val REFRESH_THRESHOLD = 3
+
         fun newInstance(input: SearchInput): SearchResultFragment =
             SearchResultFragment().apply {
                 arguments = input.toBundle()
