@@ -15,9 +15,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentLibraryBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.MainViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -64,14 +62,6 @@ class LibraryFragment :
         setupWindowInsets()
         observeViewModel()
         setupInfiniteScroll()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Library.NAME,
-            screenClass = AnalyticsScreenInfo.Library.CLASS,
-        )
     }
 
     private fun setupWindowInsets() {

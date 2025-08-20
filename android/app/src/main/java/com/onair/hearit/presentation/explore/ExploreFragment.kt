@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.DetailResult
@@ -112,10 +111,6 @@ class ExploreFragment :
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Explore.NAME,
-            screenClass = AnalyticsScreenInfo.Explore.CLASS,
-        )
         val player = playerManager.player
         if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
             player.play()
@@ -302,11 +297,17 @@ class ExploreFragment :
         adapter.submitList(updatedList)
     }
 
-    override fun onClickHearitInfo(hearitId: Long) {
+    override fun onClickHearitInfo(
+        hearitId: Long,
+        title: String,
+    ) {
         val lastPosition = playerManager.getCurrentPosition()
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,
-            mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+            mapOf(
+                AnalyticsParamKeys.ITEM_NAME to title,
+                AnalyticsParamKeys.ITEM_INDEX to currentIndex().toString(),
+            ),
         )
 
         navigateToDetail(hearitId, lastPosition)
