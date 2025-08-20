@@ -57,6 +57,12 @@ class LibraryFragment :
         setupWindowInsets()
         observeViewModel()
         setupInfiniteScroll()
+
+        binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish()
+        }
     }
 
     override fun onResume() {
@@ -72,12 +78,6 @@ class LibraryFragment :
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
-        }
-
-        binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
-            val intent = Intent(requireContext(), LoginActivity::class.java)
-            startActivity(intent)
-            requireActivity().finish()
         }
     }
 
