@@ -52,6 +52,9 @@ class ExploreViewModel(
     private val _currentIndex = MutableLiveData<Int>(0)
     val currentIndex: LiveData<Int> = _currentIndex
 
+    private val _showHearitError = MutableLiveData<Boolean>(false)
+    val showHearitError: LiveData<Boolean> = _showHearitError
+
     private var lastPlayerPosition: Long = 0L
     private var lastItem: ShortsHearit? = null
 
@@ -78,6 +81,7 @@ class ExploreViewModel(
             }
         }
         saveLastPlayerPosition(lastPlayerPosition)
+        _showHearitError.value = false
     }
 
     fun onPageSnapped(index: Int) {
@@ -120,6 +124,29 @@ class ExploreViewModel(
         }
     }
 
+    fun showHearitError() {
+        _shortsHearits.value = emptyList()
+        _showHearitError.value = true
+    }
+
+    fun reFetchData() {
+        _currentIndex.value = 0
+
+        _shortsHearits.value?.lastOrNull()?.let { shortsLastItem ->
+            val lastBookmarkId = _bookmarkId.value?.get(shortsLastItem.id)
+            lastItem =
+                shortsLastItem.copy(
+                    bookmarkId = lastBookmarkId,
+                    isBookmarked = lastBookmarkId != null,
+                )
+        }
+
+        _shortsHearits.value = emptyList()
+        _bookmarkId.value = emptyMap()
+        fetchData(0)
+        _showHearitError.value = false
+    }
+
     private fun fetchData(cursorId: Long) {
         if (isFetchingData) return
         isFetchingData = true
@@ -145,22 +172,6 @@ class ExploreViewModel(
                 isFetchingData = false
             }
         }
-    }
-
-    private fun reFetchData() {
-        _shortsHearits.value?.lastOrNull()?.let { shortsLastItem ->
-            val lastBookmarkId = _bookmarkId.value?.get(shortsLastItem.id)
-            lastItem =
-                shortsLastItem.copy(
-                    bookmarkId = lastBookmarkId,
-                    isBookmarked = lastBookmarkId != null,
-                )
-        }
-
-        _currentIndex.value = 0
-        _bookmarkId.value = emptyMap()
-        _shortsHearits.value = emptyList()
-        fetchData(0)
     }
 
     private fun addBookmark(

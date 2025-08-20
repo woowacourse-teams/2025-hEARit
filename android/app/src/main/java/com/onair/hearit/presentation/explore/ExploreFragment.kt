@@ -89,12 +89,17 @@ class ExploreFragment :
                 lifecycleScope = viewLifecycleOwner.lifecycleScope,
                 onPlaybackEnded = { scrollToNextItem() },
                 onPositionUpdated = { position -> highlightScript(position) },
+                onPlayError = { viewModel.showHearitError() },
             )
 
         setupRecyclerView()
         observeViewModel()
 
         (activity as? PlayerControllerView)?.pause()
+
+        binding.layoutExploreShortsError.btnExploreLoadShortsHearit.setOnClickListener {
+            viewModel.reFetchData()
+        }
     }
 
     override fun onResume() {
