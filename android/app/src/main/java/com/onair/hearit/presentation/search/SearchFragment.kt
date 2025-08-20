@@ -16,9 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentSearchBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -65,14 +63,6 @@ class SearchFragment : Fragment() {
                 ?.let { bundle -> SearchInput.from(bundle) }
                 ?.let { input -> navigateToSearchResult(input) }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Search.NAME,
-            screenClass = AnalyticsScreenInfo.Search.CLASS,
-        )
     }
 
     @SuppressLint("ClickableViewAccessibility")

@@ -35,7 +35,6 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.KEYWORD_NAME
-import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
@@ -95,12 +94,6 @@ class PlayerDetailActivity :
         observeViewModel()
         setupMediaController()
         setupBaseControllerBookmark()
-
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Detail.NAME,
-            screenClass = AnalyticsScreenInfo.Detail.CLASS,
-            previousScreen = previousScreen,
-        )
 
         supportFragmentManager.addOnBackStackChangedListener {
             val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view)
@@ -320,6 +313,11 @@ class PlayerDetailActivity :
     }
 
     private fun navigateToLogin() {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "detail_login"),
+        )
+
         val intent = LoginActivity.newIntent(this)
         startActivity(intent)
 
@@ -338,7 +336,7 @@ class PlayerDetailActivity :
         name: String,
     ) {
         AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
+            AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
         val input = SearchInput.Category(id, name)
@@ -347,14 +345,22 @@ class PlayerDetailActivity :
         finish()
     }
 
-    override fun onClickSource(sourceUrl: String) {
+    override fun onClickSource(
+        name: String,
+        url: String,
+    ) {
         try {
-            val uri = sourceUrl.toUri()
+            val uri = url.toUri()
             if (uri.scheme !in listOf("http", "https")) {
                 Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
                 showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
                 return
             }
+
+            AnalyticsProvider.get().logEvent(
+                AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
+                mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
+            )
 
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
@@ -366,7 +372,7 @@ class PlayerDetailActivity :
 
     override fun onClickKeyword(term: String) {
         AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.SEARCH_KEYWORD_SELECTED,
+            AnalyticsEventNames.DETAIL_KEYWORD_SELECTED,
             mapOf(KEYWORD_NAME to term),
         )
         val input = SearchInput.Keyword(term)

@@ -15,7 +15,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.analytics.AnalyticsScreenInfo
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.MainActivity
@@ -66,14 +67,6 @@ class LibraryFragment :
         setupInfiniteScroll()
     }
 
-    override fun onResume() {
-        super.onResume()
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Library.NAME,
-            screenClass = AnalyticsScreenInfo.Library.CLASS,
-        )
-    }
-
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -82,6 +75,11 @@ class LibraryFragment :
         }
 
         binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
+            AnalyticsProvider.get().logEvent(
+                AnalyticsEventNames.LOGIN_EVENT,
+                mapOf(AnalyticsParamKeys.SOURCE_NAME to "library_login"),
+            )
+
             val intent = Intent(requireContext(), LoginActivity::class.java)
             startActivity(intent)
             requireActivity().finish()
