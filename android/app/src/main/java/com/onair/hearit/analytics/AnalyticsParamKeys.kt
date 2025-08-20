@@ -1,7 +1,6 @@
 package com.onair.hearit.analytics
 
 object AnalyticsParamKeys {
-    const val LOGIN_SCREEN = "login_screen"
     const val CATEGORY_NAME = "category_name"
     const val SOURCE_NAME = "source_name"
     const val KEYWORD_NAME = "keyword_name"
