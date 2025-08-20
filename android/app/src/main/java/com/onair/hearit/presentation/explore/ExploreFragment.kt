@@ -69,31 +69,18 @@ class ExploreFragment :
                 pause()
                 hidePlayerControlView()
 
-                val type = result.data?.getStringExtra(TYPE_KEY)
-                when (type) {
-                    "explore" -> {
-                        val hearitId = result.data?.getLongExtra(HEARIT_ID, -1) ?: -1
-                        val bookmarkId =
-                            result.data
-                                ?.getLongExtra(BOOKMARK_ID, -1L)
-                                .takeIf { it != -1L }
-
-                        if (hearitId != -1L) {
-                            updateBookmarkState(hearitId, bookmarkId)
-                        }
+                when (val detailResult = result.data.toDetailResult()) {
+                    is DetailResult.Explore -> {
+                        updateBookmarkState(detailResult.hearitId, detailResult.bookmarkId)
                     }
 
-                    "category", "keyword" -> {
-                        val bundle = result.data?.extras ?: return@apply
-                        (requireActivity() as MainActivity).selectTab(R.id.nav_search)
-                        val searchFragment = SearchFragment().apply { arguments = bundle }
-                        requireActivity()
-                            .supportFragmentManager
-                            .beginTransaction()
-                            .replace(R.id.fragment_container_view, searchFragment)
-                            .addToBackStack(null)
-                            .commit()
+                    is DetailResult.Category,
+                    is DetailResult.Keyword,
+                    -> {
+                        detailResult.navigate(requireActivity() as MainActivity)
                     }
+
+                    null -> Timber.w("Invalid detail result")
                 }
             }
         }

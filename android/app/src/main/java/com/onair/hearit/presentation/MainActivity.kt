@@ -90,10 +90,11 @@ class MainActivity :
         detailResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    val data = result.data ?: return@registerForActivityResult
-                    val extras = data.extras ?: return@registerForActivityResult
-                    navigateToSearchResult(extras)
+                    val detailResult =
+                        result.data.toDetailResult() ?: return@registerForActivityResult
+                    detailResult.navigate(this)
                 }
+                mainViewModel.bookmarkUpdated.value = Unit
                 setPlayerControlViewVisibility()
             }
     }
@@ -323,19 +324,6 @@ class MainActivity :
     private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(this, hearitId)
         launchDetailActivity(intent)
-    }
-
-    private fun navigateToSearchResult(bundle: Bundle) {
-        selectTab(R.id.nav_search)
-        val fragment =
-            SearchFragment().apply {
-                arguments = bundle
-            }
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment_container_view, fragment)
-            .addToBackStack(null)
-            .commit()
     }
 
     private fun showToast(message: String?) {
