@@ -12,6 +12,7 @@ fun BookmarkResponse.Content.toDomain(): Bookmark =
         title = title,
         summary = summary,
         playTime = playTime,
+        categoryColor = categoryColor,
     )
 
 fun BookmarkResponse.toDomain(): PageResult<Bookmark> =
