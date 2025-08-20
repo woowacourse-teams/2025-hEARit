@@ -21,6 +21,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
@@ -70,6 +71,23 @@ class PlayerDetailActivity :
     private val viewModel: PlayerDetailViewModel by viewModels {
         PlayerDetailViewModelFactory(hearitId)
     }
+
+    private val playerListener =
+        object : Player.Listener {
+            override fun onMediaItemTransition(
+                mediaItem: MediaItem?,
+                reason: Int,
+            ) {
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK ||
+                    reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO
+                ) {
+                    val newHearitId = mediaItem?.mediaId?.toLongOrNull()
+                    if (newHearitId != null) {
+                        viewModel.refreshData(newHearitId)
+                    }
+                }
+            }
+        }
 
     private var isPlaybackInitiated = false
 
@@ -148,6 +166,8 @@ class PlayerDetailActivity :
             mediaController = controller
             binding.playerView.player = controller
             binding.baseController.setPlayer(controller)
+
+            controller.addListener(playerListener)
 
             val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
             val isDifferentHearit = playingId != hearitId
@@ -336,6 +356,11 @@ class PlayerDetailActivity :
             Timber.w(e)
             showToast(ERROR_OPEN_LINK_FAILED)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaController?.removeListener(playerListener)
     }
 
     companion object {

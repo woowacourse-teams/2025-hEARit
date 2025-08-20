@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.DomainException.UserNotRegistered
-import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
@@ -17,7 +16,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class PlayerDetailViewModel(
-    private val hearitId: Long,
+    private var hearitId: Long,
     private val recentHearitRepository: RecentHearitRepository,
     private val getHearitUseCase: GetHearitUseCase,
     private val bookmarkRepository: BookmarkRepository,
@@ -25,14 +24,8 @@ class PlayerDetailViewModel(
     private val _hearit: MutableLiveData<Hearit> = MutableLiveData()
     val hearit: LiveData<Hearit> = _hearit
 
-    private val _bookmarks: MutableLiveData<List<Bookmark>> = MutableLiveData()
-    val bookmarks: LiveData<List<Bookmark>> = _bookmarks
-
     private val _bookmarkId: MutableLiveData<Long?> = MutableLiveData()
     val bookmarkId: LiveData<Long?> = _bookmarkId
-
-    private val _nextHearitId: MutableLiveData<Long?> = MutableLiveData()
-    val nextHearitId: LiveData<Long?> = _nextHearitId
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -42,7 +35,6 @@ class PlayerDetailViewModel(
 
     init {
         fetchData()
-        fetchBookmarks()
     }
 
     fun toggleBookmark() {
@@ -51,6 +43,15 @@ class PlayerDetailViewModel(
         } else {
             addBookmark()
         }
+    }
+
+    fun refreshData(newHearitId: Long) {
+        if (hearitId == newHearitId) {
+            return
+        }
+        this.hearitId = newHearitId
+
+        fetchData()
     }
 
     private fun deleteBookmark() {
@@ -108,20 +109,6 @@ class PlayerDetailViewModel(
                 ).onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.player_detail_toast_recent_save_fail
-                }
-        }
-    }
-
-    private fun fetchBookmarks() {
-        viewModelScope.launch {
-            bookmarkRepository
-                .getBookmarks(page = null, size = null)
-                .onSuccess { pageResult ->
-                    val bookmarks = pageResult.items
-                    _bookmarks.value = bookmarks
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.library_toast_bookmark_load_fail
                 }
         }
     }
