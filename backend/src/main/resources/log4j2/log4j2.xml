@@ -51,6 +51,7 @@
                     eventEol="true"
                     objectMessageAsJsonObject="true"
                     charset="UTF-8">
+                <KeyValuePair key="port" value="${spring:server.port}"/>
                 <KeyValuePair key="env" value="${env}"/>
             </JsonLayout>
             <Policies>
@@ -75,6 +76,7 @@
                         eventEol="true"
                         objectMessageAsJsonObject="true"
                         includeStacktrace="true">
+                <KeyValuePair key="port" value="${spring:server.port}"/>
                 <KeyValuePair key="env" value="${env}"/>
             </JsonLayout>
             <Policies>

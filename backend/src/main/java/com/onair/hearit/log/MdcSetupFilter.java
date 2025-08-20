@@ -19,6 +19,7 @@ public class MdcSetupFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
+        MDC.put("server.port", String.valueOf(httpServletRequest.getLocalPort()));
         MDC.put("id", UUID.randomUUID().toString());
         MDC.put("ip", httpServletRequest.getRemoteAddr());
         MDC.put("httpMethod", httpServletRequest.getMethod());
