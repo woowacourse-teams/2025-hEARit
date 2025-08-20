@@ -166,6 +166,7 @@ class MainActivity :
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
+        binding.layoutDrawer.tvTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
         binding.layoutDrawer.tvOpenLicense.setOnClickListener { navigateToLicense() }
         binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
         binding.layoutDrawer.tvDrawerLogout.setOnClickListener {

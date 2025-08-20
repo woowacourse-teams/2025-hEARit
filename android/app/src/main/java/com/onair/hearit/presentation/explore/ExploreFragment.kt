@@ -19,18 +19,12 @@ import androidx.media3.common.Player
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.DetailResult
-import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
-import com.onair.hearit.presentation.IntentKeys.EXPLORE_KEY
-import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
-import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
@@ -40,7 +34,6 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.navigate
-import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
 import timber.log.Timber
