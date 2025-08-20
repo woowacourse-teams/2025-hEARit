@@ -313,6 +313,11 @@ class PlayerDetailActivity :
     }
 
     private fun navigateToLogin() {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "detail_login"),
+        )
+
         val intent = LoginActivity.newIntent(this)
         startActivity(intent)
 
