@@ -37,7 +37,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:onClick="@{() -> clickListener.onClickSource(source.url)}"
+            android:onClick="@{() -> clickListener.onClickSource(source.name, source.url)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/iv_source_link"
             app:layout_constraintTop_toTopOf="parent"

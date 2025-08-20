@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
@@ -7,6 +8,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AlertDialog
@@ -25,7 +28,10 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.ActivityMainBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
@@ -52,6 +58,7 @@ class MainActivity :
     private var mediaController: MediaController? = null
     private var currentSelectedItemId: Int = R.id.nav_home
     private var hasSentPreload = false
+    private lateinit var detailResultLauncher: ActivityResultLauncher<Intent>
 
     private val mainViewModel: MainViewModel by viewModels { MainViewModelFactory() }
     private val splashViewModel: SplashViewModel by viewModels { SplashViewModelFactory() }
@@ -63,6 +70,7 @@ class MainActivity :
         binding.layoutDrawer.viewModel = mainViewModel
         binding.lifecycleOwner = this
 
+        setupResultLauncher()
         setupBackPressHandler()
         setupWindowInsets()
         setupNavigation()
@@ -73,8 +81,25 @@ class MainActivity :
         setupBottomControllerClick()
     }
 
+    fun launchDetailActivity(intent: Intent) {
+        detailResultLauncher.launch(intent)
+    }
+
     fun selectTab(itemId: Int) {
         binding.layoutBottomNavigation.selectedItemId = itemId
+    }
+
+    private fun setupResultLauncher() {
+        detailResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val detailResult =
+                        result.data.toDetailResult() ?: return@registerForActivityResult
+                    detailResult.navigate(this)
+                }
+                mainViewModel.bookmarkUpdated.value = Unit
+                setPlayerControlViewVisibility()
+            }
     }
 
     private fun setupBackPressHandler() {
@@ -144,6 +169,7 @@ class MainActivity :
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
+        binding.layoutDrawer.tvTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
         binding.layoutDrawer.tvOpenLicense.setOnClickListener { navigateToLicense() }
         binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
         binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
@@ -291,6 +317,11 @@ class MainActivity :
     }
 
     private fun navigateToLogin() {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "drawer_login"),
+        )
+
         val intent =
             Intent(this, LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -301,7 +332,7 @@ class MainActivity :
 
     private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(this, hearitId)
-        startActivity(intent)
+        launchDetailActivity(intent)
     }
 
     private fun showToast(message: String?) {

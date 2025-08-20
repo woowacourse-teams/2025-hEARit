@@ -2,6 +2,13 @@ package com.onair.hearit.domain.model
 
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
+import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
+import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
+import com.onair.hearit.presentation.IntentValues.CATEGORY_VALUE
+import com.onair.hearit.presentation.IntentValues.KEYWORD_VALUE
 
 sealed class SearchInput {
     data class Keyword(
@@ -15,21 +22,16 @@ sealed class SearchInput {
 
     fun toBundle(): Bundle =
         when (this) {
-            is Keyword -> bundleOf(TYPE_KEY to KEYWORD_KEY, KEYWORD_KEY to this.term)
+            is Keyword -> bundleOf(TYPE_KEY to KEYWORD_VALUE, KEYWORD_KEY to this.term)
             is Category ->
                 bundleOf(
-                    TYPE_KEY to CATEGORY_KEY,
+                    TYPE_KEY to CATEGORY_VALUE,
                     CATEGORY_ID_KEY to this.id,
                     CATEGORY_NAME_KEY to this.name,
                 )
         }
 
     companion object {
-        const val KEYWORD_KEY = "keyword"
-        const val CATEGORY_KEY = "category"
-        const val CATEGORY_ID_KEY = "categoryId"
-        const val CATEGORY_NAME_KEY = "categoryName"
-        private const val TYPE_KEY = "type"
         private const val ERROR_INVALID_TERM_MESSAGE = "유효하지 않은 검색어입니다"
 
         fun from(bundle: Bundle): SearchInput =

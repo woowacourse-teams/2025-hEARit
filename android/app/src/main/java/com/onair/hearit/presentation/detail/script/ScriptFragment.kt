@@ -21,9 +21,13 @@ import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentScriptBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
-import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
 import com.onair.hearit.presentation.dpToPx
@@ -50,7 +54,7 @@ class ScriptFragment : Fragment() {
     }
 
     private val hearitId: Long by lazy {
-        requireArguments().getLong(HEARIT_ID)
+        requireArguments().getLong(HEARIT_ID_KEY)
     }
     private val viewModel: PlayerDetailViewModel by activityViewModels {
         PlayerDetailViewModelFactory(hearitId)
@@ -226,10 +230,15 @@ class ScriptFragment : Fragment() {
     private fun showLoginRequiredDialog() {
         LoginRequiredDialogFragment {
             navigateToLogin()
-        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "script_login"),
+        )
+
         val intent = LoginActivity.newIntent(requireContext())
         startActivity(intent)
 
@@ -250,14 +259,13 @@ class ScriptFragment : Fragment() {
     }
 
     companion object {
-        private const val HEARIT_ID = "hearit_id"
         private const val SCRIPT_SYNC_INTERVAL_MS = 300L
         private const val USER_SCROLL_IDLE_THRESHOLD_MS = 3000L
         private const val SCRIPT_ITEM_HEIGHT_DP = 16
 
         fun newInstance(hearitId: Long) =
             ScriptFragment().apply {
-                arguments = Bundle().apply { putLong(HEARIT_ID, hearitId) }
+                arguments = Bundle().apply { putLong(HEARIT_ID_KEY, hearitId) }
             }
     }
 }

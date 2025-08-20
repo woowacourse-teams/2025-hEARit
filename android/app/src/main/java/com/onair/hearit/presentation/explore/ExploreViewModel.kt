@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
 import com.onair.hearit.domain.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.CursorInfo
@@ -45,18 +46,56 @@ class ExploreViewModel(
     private val _isLoading = MutableLiveData<Boolean>(true)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _currentIndex = MutableLiveData<Int>(0)
+    val currentIndex: LiveData<Int> = _currentIndex
+
     private lateinit var cursorInfo: CursorInfo
+
     private var isFetchingData = false
+    private var lastPlayerPosition: Long = 0L
+    private var lastItem: ShortsHearit? = null
 
     init {
         _isLoading.value = true
-        setAnimation()
-        fetchData(cursorId = 0)
+        fetchData(0)
     }
 
     fun fetchNextPage() {
-        if (cursorInfo.isEmpty || isFetchingData) return
+        if (isFetchingData || cursorInfo.isEmpty) return
         fetchData(cursorInfo.cursorId)
+    }
+
+    fun saveCurrentState(
+        position: Int,
+        lastPlayerPosition: Long,
+        itemCount: Int,
+    ) {
+        refreshBookmarkState()
+
+        if (position == itemCount - 1) {
+            reFetchData()
+        } else {
+            if (position != RecyclerView.NO_POSITION) {
+                onPageSnapped(position)
+            }
+        }
+        saveLastPlayerPosition(lastPlayerPosition)
+    }
+
+    fun onPageSnapped(index: Int) {
+        if (_currentIndex.value != index) {
+            _currentIndex.value = index
+        }
+    }
+
+    fun saveLastPlayerPosition(position: Long) {
+        lastPlayerPosition = position
+    }
+
+    fun getLastPlayerPosition(): Long {
+        val position = lastPlayerPosition
+        lastPlayerPosition = 0L
+        return position
     }
 
     fun toggleBookmark(
@@ -71,20 +110,13 @@ class ExploreViewModel(
         }
     }
 
-    private fun setAnimation() {
+    fun loadAnimation() {
         viewModelScope.launch {
             exploreDataStoreRepository
-                .getExploreCount()
-                .onSuccess { currentCount ->
-                    if (currentCount < MAX_ANIMATION_COUNT) {
-                        val newCount = currentCount + 1
-                        exploreDataStoreRepository.updateExploreCount(newCount)
-                        _shouldPlayAnimation.value = true
-                    } else {
-                        _shouldPlayAnimation.value = false
-                    }
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
+                .shouldShowAnimation()
+                .onSuccess { shouldShow ->
+                    _shouldPlayAnimation.value = shouldShow
+                }.onFailure {
                     _shouldPlayAnimation.value = false
                 }
         }
@@ -115,6 +147,15 @@ class ExploreViewModel(
                 isFetchingData = false
             }
         }
+    }
+
+    private fun reFetchData() {
+        lastItem = _shortsHearits.value?.lastOrNull()
+
+        _currentIndex.value = 0
+        _bookmarkId.value = emptyMap()
+        _shortsHearits.value = emptyList()
+        fetchData(0)
     }
 
     private fun addBookmark(
@@ -163,6 +204,27 @@ class ExploreViewModel(
         }
     }
 
+    private fun refreshBookmarkState() {
+        val currentShortsList = _shortsHearits.value ?: return
+        val bookmarkStateMap = _bookmarkId.value ?: return
+
+        val updatedShortsList =
+            currentShortsList.map { shortsHearit ->
+                val latestBookmarkId = bookmarkStateMap[shortsHearit.id]
+
+                if (shortsHearit.bookmarkId != latestBookmarkId) {
+                    shortsHearit.copy(
+                        bookmarkId = latestBookmarkId,
+                        isBookmarked = (latestBookmarkId != null),
+                    )
+                } else {
+                    shortsHearit
+                }
+            }
+
+        _shortsHearits.value = updatedShortsList
+    }
+
     private fun updateBookmarkState(
         hearitId: Long,
         bookmarkId: Long?,
@@ -182,17 +244,17 @@ class ExploreViewModel(
         }
 
     private fun updateShortsHearit(newItems: List<ShortsHearit>) {
-        _shortsHearits.value = _shortsHearits.value.orEmpty() + newItems
-
-        _bookmarkId.value =
-            _bookmarkId.value.orEmpty().toMutableMap().apply {
-                newItems.forEach { item ->
-                    this[item.id] = item.bookmarkId
-                }
+        val combinedList =
+            if (lastItem != null) {
+                val uniqueNewItems = newItems.filter { it.id != lastItem?.id }
+                listOf(lastItem!!) + uniqueNewItems
+            } else {
+                _shortsHearits.value.orEmpty() + newItems
             }
-    }
 
-    companion object {
-        private const val MAX_ANIMATION_COUNT = 2
+        _shortsHearits.value = combinedList
+        _bookmarkId.value = combinedList.associate { it.id to it.bookmarkId }
+
+        lastItem = null
     }
 }

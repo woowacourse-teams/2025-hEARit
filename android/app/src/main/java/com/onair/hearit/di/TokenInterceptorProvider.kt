@@ -27,7 +27,7 @@ object TokenInterceptorProvider {
                 val newRequest =
                     originalRequest
                         .newBuilder()
-                        .addHeader(AUTH_HEADER_NAME, "$BEARER_PREFIX $token")
+                        .header(AUTH_HEADER_NAME, "$BEARER_PREFIX $token")
                         .build()
                 chain.proceed(newRequest)
             } ?: chain.proceed(originalRequest)

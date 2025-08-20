@@ -11,6 +11,6 @@ data class Hearit(
     val createdAt: String,
     val isBookmarked: Boolean,
     val bookmarkId: Long?,
-    val category: String,
+    val category: Category,
     val keywords: List<Keyword>,
 )

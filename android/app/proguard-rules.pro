@@ -12,71 +12,45 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
-#-keep class com.onair.hearit.** { *; }
+# ==========================================
+# ProGuard / R8 Rules for Hearit App
+# ==========================================
 
 # -------------------------
 # kakao SDK
 # -------------------------
+# Kakao SDK 모델 클래스 유지
 -keep class com.kakao.sdk.**.model.* { <fields>; }
 
-# Retrofit does reflection on generic parameters.
+# 외부 보안 라이브러리 관련 경고 무시
+# https://github.com/square/okhttp/pull/6792
+-dontwarn org.bouncycastle.jsse.**
+-dontwarn org.conscrypt.*
+-dontwarn org.openjsse.**
+
+# -------------------------
+# Retrofit
+# -------------------------
+# Retrofit이 reflection으로 사용하는 어노테이션 및 시그니처 유지
 -keepattributes Signature, InnerClasses, EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations, AnnotationDefault
 
-# Retrofit does reflection on method and parameter annotations.
--keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
-
-# Keep annotation default values (e.g., retrofit2.http.Field.encoded).
--keepattributes AnnotationDefault
-
-# Retain service method parameters when optimizing.
--keepclassmembers,allowshrinking,allowobfuscation interface * {
-    @retrofit2.http.* <methods>;
-}
-
-# Ignore annotation used for build tooling.
--dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
-
-# Ignore JSR 305 annotations for embedding nullability information.
--dontwarn javax.annotation.**
-
-# Guarded by a NoClassDefFoundError try/catch and only used when on the classpath.
--dontwarn kotlin.Unit
-
-# Kotlin extension for suspend support
--dontwarn retrofit2.KotlinExtensions
--dontwarn retrofit2.KotlinExtensions$*
-
-# Proxy 기반 인터페이스 보존
--if interface * { @retrofit2.http.* <methods>; }
--keep,allowobfuscation interface <1>
--if interface * { @retrofit2.http.* <methods>; }
--keep,allowobfuscation interface * extends <1>
+# Retrofit 서비스 인터페이스 유지
+-keepclassmembers,allowshrinking,allowobfuscation interface * { @retrofit2.http.* <methods>; }
 
 # -------------------------
 # Kotlin & Coroutine
 # -------------------------
+# 코루틴 Continuation 클래스 유지
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
 -keepattributes *Annotation*
-
-# Retrofit Response wrapper
--keep,allowobfuscation,allowshrinking class retrofit2.Response
 
 # -------------------------
 # kotlinx-serialization
 # -------------------------
+# 직렬화용 클래스와 필드 유지
 -keepclassmembers class kotlinx.serialization.** { *; }
--keepclassmembers class * {
-    @kotlinx.serialization.SerialName <fields>;
-}
--dontnote kotlinx.serialization.**
+-keepclassmembers class * { @kotlinx.serialization.SerialName <fields>; }
 
 # -------------------------
 # Timber 로그 제거 (릴리즈)
@@ -92,6 +66,7 @@
 # -------------------------
 # Firebase Crashlytics
 # -------------------------
+# 소스파일, 라인번호 유지
 -keepattributes SourceFile,LineNumberTable
 -keep class com.google.firebase.crashlytics.** { *; }
 -dontwarn com.google.firebase.crashlytics.**

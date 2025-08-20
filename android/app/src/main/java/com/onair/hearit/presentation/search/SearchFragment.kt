@@ -16,15 +16,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentSearchBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
-import com.onair.hearit.domain.model.SearchInput.Companion.KEYWORD_KEY
 import com.onair.hearit.domain.term
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
+import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import com.onair.hearit.presentation.search.result.SearchResultFragment
@@ -52,21 +50,19 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        showCategoryFragment()
         setupWindowInsets()
         setupSearchInput()
         observeViewModel()
         setupFragmentResultListeners()
         setupBackAndCancelButtons()
         updateAppBarUIOnBackStackChanged()
-    }
 
-    override fun onResume() {
-        super.onResume()
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Search.NAME,
-            screenClass = AnalyticsScreenInfo.Search.CLASS,
-        )
+        if (savedInstanceState == null) {
+            showCategoryFragment()
+            arguments
+                ?.let { bundle -> SearchInput.from(bundle) }
+                ?.let { input -> navigateToSearchResult(input) }
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

@@ -15,16 +15,16 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsScreenInfo
+import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.MainViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -76,14 +76,6 @@ class HomeFragment :
         setupListeners()
         setupRecyclerView()
         observeViewModel()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Home.NAME,
-            screenClass = AnalyticsScreenInfo.Home.CLASS,
-        )
     }
 
     private fun setupWindowInsets() {
@@ -214,6 +206,8 @@ class HomeFragment :
     }
 
     private fun navigateToExplore() {
+        AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_EXPLORE_SELECTED)
+
         parentFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_container_view, ExploreFragment())
@@ -247,7 +241,7 @@ class HomeFragment :
 
     private fun navigateToPlayerDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
-        startActivity(intent)
+        (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
     override fun onClick(hearitId: Long) {
