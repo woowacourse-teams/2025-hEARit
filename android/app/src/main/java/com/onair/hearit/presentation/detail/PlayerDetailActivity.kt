@@ -331,7 +331,7 @@ class PlayerDetailActivity :
         name: String,
     ) {
         AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
+            AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
         val input = SearchInput.Category(id, name)
@@ -340,14 +340,22 @@ class PlayerDetailActivity :
         finish()
     }
 
-    override fun onClickSource(sourceUrl: String) {
+    override fun onClickSource(
+        name: String,
+        url: String,
+    ) {
         try {
-            val uri = sourceUrl.toUri()
+            val uri = url.toUri()
             if (uri.scheme !in listOf("http", "https")) {
                 Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
                 showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
                 return
             }
+
+            AnalyticsProvider.get().logEvent(
+                AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
+                mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
+            )
 
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
@@ -359,7 +367,7 @@ class PlayerDetailActivity :
 
     override fun onClickKeyword(term: String) {
         AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.SEARCH_KEYWORD_SELECTED,
+            AnalyticsEventNames.DETAIL_KEYWORD_SELECTED,
             mapOf(KEYWORD_NAME to term),
         )
         val input = SearchInput.Keyword(term)
