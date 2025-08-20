@@ -90,7 +90,7 @@ class MainActivity :
     private fun setupResultLauncher() {
         detailResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
+                if (result.resultCode == RESULT_OK) {
                     val detailResult =
                         result.data.toDetailResult() ?: return@registerForActivityResult
                     detailResult.navigate(this)
