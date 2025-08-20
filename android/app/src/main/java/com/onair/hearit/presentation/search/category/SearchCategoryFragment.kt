@@ -96,7 +96,6 @@ class SearchCategoryFragment :
             AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
-
         navigateToSearchResult(id, name)
     }
 
