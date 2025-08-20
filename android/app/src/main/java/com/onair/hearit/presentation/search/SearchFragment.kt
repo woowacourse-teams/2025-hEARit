@@ -52,7 +52,6 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        showCategoryFragment()
         setupWindowInsets()
         setupSearchInput()
         observeViewModel()
@@ -60,8 +59,12 @@ class SearchFragment : Fragment() {
         setupBackAndCancelButtons()
         updateAppBarUIOnBackStackChanged()
 
-        val input = arguments?.let { SearchInput.from(it) }
-        input?.let { navigateToSearchResult(input) }
+        if (savedInstanceState == null) {
+            showCategoryFragment()
+            arguments
+                ?.let { bundle -> SearchInput.from(bundle) }
+                ?.let { input -> navigateToSearchResult(input) }
+        }
     }
 
     override fun onResume() {
