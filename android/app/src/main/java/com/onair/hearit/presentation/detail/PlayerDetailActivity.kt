@@ -112,15 +112,13 @@ class PlayerDetailActivity :
     private fun setupBackPressHandler() {
         val backAction = {
             if (previousScreen == EXPLORE_VALUE) {
-                viewModel.bookmarkId.value?.let { bookmarkId ->
-                    val resultIntent =
-                        Intent().apply {
-                            putExtra(TYPE_KEY, EXPLORE_VALUE)
-                            putExtra(HEARIT_ID_KEY, hearitId)
-                            putExtra(BOOKMARK_ID_KEY, bookmarkId)
-                        }
-                    setResult(RESULT_OK, resultIntent)
-                }
+                val resultIntent =
+                    Intent().apply {
+                        putExtra(TYPE_KEY, EXPLORE_VALUE)
+                        putExtra(HEARIT_ID_KEY, hearitId)
+                        viewModel.bookmarkId.value?.let { putExtra(BOOKMARK_ID_KEY, it) }
+                    }
+                setResult(RESULT_OK, resultIntent)
             } else {
                 setResult(RESULT_CANCELED)
             }
