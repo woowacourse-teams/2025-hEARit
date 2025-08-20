@@ -71,6 +71,9 @@
     <string name="explore_toast_random_hearits_load_fail">랜덤 히어릿 목록 조회에 실패했습니다.</string>
     <string name="explore_toast_shorts_hearits_load_fail">탐색 쇼츠 목록 조회에 실패했습니다.</string>
     <string name="explore_navigate_to_detail_hearit">팟캐스트 이어 듣기</string>
+    <string name="explore_shorts_hearit_load_fail"><font color="#B677F3">히어릿</font>을 재생할 수 없습니다</string>
+    <string name="explore_shorts_hearit_problem">문제가 발생했습니다</string>
+    <string name="explore_load_new_shorts_hearit">새로운 히어릿 불러오기</string>
 
     <!-- SettingFragment-->
     <string name="setting_notification">알림</string>

@@ -176,3 +176,11 @@ fun setShimmerVisibility(
 ) {
     view.isVisible = isLoading
 }
+
+@BindingAdapter("setError")
+fun setErrorVisibility(
+    view: View,
+    isLoading: Boolean,
+) {
+    view.isVisible = isLoading
+}

@@ -64,5 +64,10 @@
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
             app:lottie_rawRes="@raw/swipe_up" />
+
+        <include
+            android:id="@+id/layout_explore_shorts_error"
+            layout="@layout/explore_shorts_error"
+            app:setError="@{viewModel.showHearitError}" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
