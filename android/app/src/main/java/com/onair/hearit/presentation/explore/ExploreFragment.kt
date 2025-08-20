@@ -314,7 +314,7 @@ class ExploreFragment :
     override fun onPause() {
         super.onPause()
         val position = currentIndex()
-        viewModel.onPause(position, playerManager.getCurrentPosition(), adapter.itemCount)
+        viewModel.saveCurrentState(position, playerManager.getCurrentPosition(), adapter.itemCount)
         playerManager.pause()
     }
 

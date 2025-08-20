@@ -65,7 +65,7 @@ class ExploreViewModel(
         fetchData(cursorInfo.cursorId)
     }
 
-    fun onPause(
+    fun saveCurrentState(
         position: Int,
         lastPlayerPosition: Long,
         itemCount: Int,
@@ -150,14 +150,7 @@ class ExploreViewModel(
     }
 
     private fun reFetchData() {
-        _shortsHearits.value?.lastOrNull()?.let { shortsLastItem ->
-            val lastBookmarkId = _bookmarkId.value?.get(shortsLastItem.id)
-            lastItem =
-                shortsLastItem.copy(
-                    bookmarkId = lastBookmarkId,
-                    isBookmarked = lastBookmarkId != null,
-                )
-        }
+        lastItem = _shortsHearits.value?.lastOrNull()
 
         _currentIndex.value = 0
         _bookmarkId.value = emptyMap()
