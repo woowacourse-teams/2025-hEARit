@@ -12,6 +12,10 @@
         <variable
             name="viewModel"
             type="com.onair.hearit.presentation.detail.PlayerDetailViewModel" />
+
+        <variable
+            name="clickListener"
+            type="com.onair.hearit.presentation.detail.PlayerDetailClickListener" />
     </data>
 
     <FrameLayout
@@ -47,6 +51,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="56dp"
+                    android:onClick="@{() -> clickListener.onClickCategory(hearit.category.id, hearit.category.name)}"
                     android:text="@{hearit.category.name}"
                     app:layout_constraintBottom_toBottomOf="@id/ib_player_detail_back"
                     app:layout_constraintEnd_toEndOf="parent"

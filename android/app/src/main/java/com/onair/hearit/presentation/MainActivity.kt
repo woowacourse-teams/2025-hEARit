@@ -90,8 +90,12 @@ class MainActivity :
         detailResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    setPlayerControlViewVisibility()
+                    val detailResult =
+                        result.data.toDetailResult() ?: return@registerForActivityResult
+                    detailResult.navigate(this)
                 }
+                mainViewModel.bookmarkUpdated.value = Unit
+                setPlayerControlViewVisibility()
             }
     }
 
@@ -162,6 +166,7 @@ class MainActivity :
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
+        binding.layoutDrawer.tvTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
         binding.layoutDrawer.tvOpenLicense.setOnClickListener { navigateToLicense() }
         binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
         binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
@@ -295,7 +300,7 @@ class MainActivity :
         }
     }
 
-    fun setPlayerControlViewVisibility() {
+    private fun setPlayerControlViewVisibility() {
         val controller = mediaController
         val isPreparedOrPlaying =
             controller?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
@@ -319,7 +324,7 @@ class MainActivity :
 
     private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(this, hearitId)
-        startActivity(intent)
+        launchDetailActivity(intent)
     }
 
     private fun showToast(message: String?) {

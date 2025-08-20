@@ -21,10 +21,10 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_ID_KEY
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_KEY
-import com.onair.hearit.domain.model.SearchInput.Companion.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.MainViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailActivity

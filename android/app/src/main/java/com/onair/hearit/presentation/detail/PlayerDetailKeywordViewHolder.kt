@@ -8,16 +8,21 @@ import com.onair.hearit.domain.model.Keyword
 
 class PlayerDetailKeywordViewHolder private constructor(
     private val binding: ItemKeywordBinding,
+    private val clickListener: PlayerDetailClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(keyword: Keyword) {
         binding.keyword = keyword
+        binding.clickListener = clickListener
     }
 
     companion object {
-        fun create(parent: ViewGroup): PlayerDetailKeywordViewHolder {
+        fun create(
+            parent: ViewGroup,
+            clickListener: PlayerDetailClickListener,
+        ): PlayerDetailKeywordViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemKeywordBinding.inflate(inflater, parent, false)
-            return PlayerDetailKeywordViewHolder(binding)
+            return PlayerDetailKeywordViewHolder(binding, clickListener)
         }
     }
 }

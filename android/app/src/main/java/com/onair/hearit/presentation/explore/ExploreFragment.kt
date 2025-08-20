@@ -24,12 +24,19 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.DetailResult
+import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
+import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_ID
+import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.navigate
+import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
+import timber.log.Timber
 
 class ExploreFragment :
     Fragment(),
@@ -49,18 +56,24 @@ class ExploreFragment :
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                (activity as? PlayerControllerView)?.apply {
-                    pause()
-                    hidePlayerControlView()
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
 
-                    val hearitId = result.data?.getLongExtra(HEARIT_ID, -1) ?: -1
-                    val bookmarkId =
-                        result.data?.getLongExtra(BOOKMARK_ID, -1L).takeIf { it != -1L }
+            (activity as? PlayerControllerView)?.apply {
+                pause()
+                hidePlayerControlView()
 
-                    if (hearitId != -1L) {
-                        updateBookmarkState(hearitId, bookmarkId)
+                when (val detailResult = result.data.toDetailResult()) {
+                    is DetailResult.Explore -> {
+                        updateBookmarkState(detailResult.hearitId, detailResult.bookmarkId)
                     }
+
+                    is DetailResult.Category,
+                    is DetailResult.Keyword,
+                    -> {
+                        detailResult.navigate(requireActivity() as MainActivity)
+                    }
+
+                    null -> Timber.w("Invalid detail result")
                 }
             }
         }
@@ -248,7 +261,7 @@ class ExploreFragment :
     ) {
         val intent =
             PlayerDetailActivity.newIntent(requireActivity(), hearitId, lastPosition).apply {
-                putExtra(AnalyticsParamKeys.SOURCE, PlayerDetailActivity.EXPLORE_SCREEN_ID)
+                putExtra(PREVIOUS_SCREEN_KEY, EXPLORE_VALUE)
             }
         playerDetailLauncher.launch(intent)
     }
@@ -256,7 +269,7 @@ class ExploreFragment :
     private fun showLoginRequiredDialog() {
         LoginRequiredDialogFragment {
             navigateToLogin()
-        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {
@@ -340,10 +353,5 @@ class ExploreFragment :
     override fun onDestroy() {
         super.onDestroy()
         playerManager.release()
-    }
-
-    companion object {
-        const val HEARIT_ID = "hearit_id"
-        const val BOOKMARK_ID = "bookmark_id"
     }
 }
