@@ -1,4 +1,4 @@
-name: Manual Rollback (Prod)
+name: BE Manual Rollback (Prod)
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   fetch:
-    name: Fetch app.jar from Release
+    name: Fetch backend-app.jar from Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (for tag list/validation)
@@ -29,42 +29,40 @@ jobs:
         id: res
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           t='${{ github.event.inputs.target }}'
-          if [[ "$t" =~ ^(LKG|lkg|LKG_PROD)$ ]]; then
-            TAG="LKG_PROD"
-          else
-            TAG="$t"
-          fi
+          if [[ "$t" =~ ^(LKG|lkg|LKG_PROD)$ ]]; then TAG="LKG_PROD"; else TAG="$t"; fi
           git fetch --tags --force --prune
-          if ! git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+          git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null || {
             echo "::error::Tag not found: ${TAG}"
-            echo "---- Latest tags ----"
-            git tag --list --sort=-creatordate | head -n 20
+            echo "---- Latest tags ----"; git tag --list --sort=-creatordate | head -n 20
             exit 1
-          fi
+          }
           echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Resolved rollback tag: $TAG"
 
-      - name: Download app.jar from GitHub Release
+      - name: Download backend-app.jar from GitHub Release
         uses: robinraju/release-downloader@v1.10
         with:
           repository: ${{ github.repository }}
           tag: ${{ steps.res.outputs.tag }}
-          fileName: "app.jar"
+          fileName: "backend-app.jar"
           out-file-path: "rollback"
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify file
+        shell: bash
         run: |
-          test -f rollback/app.jar
+          set -euo pipefail
+          test -f rollback/backend-app.jar
           ls -al rollback
-          sha256sum rollback/app.jar || shasum -a 256 rollback/app.jar
+          sha256sum rollback/backend-app.jar || shasum -a 256 rollback/backend-app.jar
 
-      - name: Upload artifact (app.jar)
+      - name: Upload artifact (backend-app.jar)
         uses: actions/upload-artifact@v4
         with:
           name: rollback-jar
-          path: rollback/app.jar
+          path: rollback/backend-app.jar
           if-no-files-found: error
           retention-days: 7
 
@@ -79,7 +77,7 @@ jobs:
           path: ~/hearit
 
       - name: Sanity check
-        run: test -f ~/hearit/app.jar
+        run: test -f ~/hearit/backend-app.jar
 
       - name: Run deploy script
         run: sudo bash ~/hearit/deploy.sh
