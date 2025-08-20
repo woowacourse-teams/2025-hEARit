@@ -52,14 +52,3 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build -x test
-
-      - name: Upload app.jar to S3
-        run: |
-          COMMIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          BUILD_TIME=$(TZ=Asia/Seoul date +'%Y-%m-%d_%H-%M-%S')
-          aws s3 cp backend/build/libs/app.jar \
-            s3://techcourse-project-2025-artifacts/hearit/builds/${BUILD_TIME}_${COMMIT_SHA}/app.jar \
-            --no-sign-request \
-            --only-show-errors \
-            --content-type application/java-archive \
-            --region ap-northeast-2
