@@ -134,9 +134,11 @@ class ExploreViewModel(
     fun reFetchData() {
         lastItem = _shortsHearits.value?.lastOrNull()
 
+        _showHearitError.value = false
         _currentIndex.value = 0
-        _bookmarkId.value = emptyMap()
         _shortsHearits.value = emptyList()
+        _bookmarkId.value = emptyMap()
+
         fetchData(0)
     }
 
