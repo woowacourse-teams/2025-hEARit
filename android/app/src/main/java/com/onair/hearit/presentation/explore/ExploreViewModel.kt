@@ -46,12 +46,12 @@ class ExploreViewModel(
     private val _isLoading = MutableLiveData<Boolean>(true)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private lateinit var cursorInfo: CursorInfo
-    private var isFetchingData = false
-
     private val _currentIndex = MutableLiveData<Int>(0)
     val currentIndex: LiveData<Int> = _currentIndex
 
+    private lateinit var cursorInfo: CursorInfo
+
+    private var isFetchingData = false
     private var lastPlayerPosition: Long = 0L
     private var lastItem: ShortsHearit? = null
 
@@ -65,11 +65,13 @@ class ExploreViewModel(
         fetchData(cursorInfo.cursorId)
     }
 
-    fun onPause(
+    fun saveCurrentState(
         position: Int,
         lastPlayerPosition: Long,
         itemCount: Int,
     ) {
+        refreshBookmarkState()
+
         if (position == itemCount - 1) {
             reFetchData()
         } else {
@@ -148,14 +150,7 @@ class ExploreViewModel(
     }
 
     private fun reFetchData() {
-        _shortsHearits.value?.lastOrNull()?.let { shortsLastItem ->
-            val lastBookmarkId = _bookmarkId.value?.get(shortsLastItem.id)
-            lastItem =
-                shortsLastItem.copy(
-                    bookmarkId = lastBookmarkId,
-                    isBookmarked = lastBookmarkId != null,
-                )
-        }
+        lastItem = _shortsHearits.value?.lastOrNull()
 
         _currentIndex.value = 0
         _bookmarkId.value = emptyMap()
@@ -207,6 +202,27 @@ class ExploreViewModel(
                     onFinished(null)
                 }
         }
+    }
+
+    private fun refreshBookmarkState() {
+        val currentShortsList = _shortsHearits.value ?: return
+        val bookmarkStateMap = _bookmarkId.value ?: return
+
+        val updatedShortsList =
+            currentShortsList.map { shortsHearit ->
+                val latestBookmarkId = bookmarkStateMap[shortsHearit.id]
+
+                if (shortsHearit.bookmarkId != latestBookmarkId) {
+                    shortsHearit.copy(
+                        bookmarkId = latestBookmarkId,
+                        isBookmarked = (latestBookmarkId != null),
+                    )
+                } else {
+                    shortsHearit
+                }
+            }
+
+        _shortsHearits.value = updatedShortsList
     }
 
     private fun updateBookmarkState(

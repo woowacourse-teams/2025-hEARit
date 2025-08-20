@@ -90,9 +90,13 @@ class MainActivity :
     private fun setupResultLauncher() {
         detailResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    setPlayerControlViewVisibility()
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val detailResult =
+                        result.data.toDetailResult() ?: return@registerForActivityResult
+                    detailResult.navigate(this)
                 }
+                mainViewModel.bookmarkUpdated.value = Unit
+                setPlayerControlViewVisibility()
             }
     }
 
@@ -163,6 +167,7 @@ class MainActivity :
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
+        binding.layoutDrawer.tvTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
         binding.layoutDrawer.tvOpenLicense.setOnClickListener { navigateToLicense() }
         binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
         binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
@@ -323,7 +328,7 @@ class MainActivity :
 
     private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(this, hearitId)
-        startActivity(intent)
+        launchDetailActivity(intent)
     }
 
     private fun showToast(message: String?) {

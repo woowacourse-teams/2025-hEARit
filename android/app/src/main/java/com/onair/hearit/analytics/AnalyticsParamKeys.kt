@@ -7,6 +7,6 @@ object AnalyticsParamKeys {
     const val SCREEN_CLASS = FirebaseAnalytics.Param.SCREEN_CLASS
     const val PREVIOUS_SCREEN = "previous_screen"
     const val CATEGORY_NAME = "category_name"
-    const val SOURCE = "source"
+    const val KEYWORD_NAME = "keyword_name"
     const val ITEM_ID = "item_id"
 }
