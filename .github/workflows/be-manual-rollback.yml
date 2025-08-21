@@ -1,0 +1,83 @@
+name: BE Manual Rollback (Prod)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "롤백 대상 (예: v1.2.3 또는 LKG)"
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: rollback-prod
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    name: Fetch backend-app.jar from Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (for tag list/validation)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve target tag (LKG → LKG_PROD)
+        id: res
+        shell: bash
+        run: |
+          set -euo pipefail
+          t='${{ github.event.inputs.target }}'
+          if [[ "$t" =~ ^(LKG|lkg|LKG_PROD)$ ]]; then TAG="LKG_PROD"; else TAG="$t"; fi
+          git fetch --tags --force --prune
+          git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null || {
+            echo "::error::Tag not found: ${TAG}"
+            echo "---- Latest tags ----"; git tag --list --sort=-creatordate | head -n 20
+            exit 1
+          }
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Resolved rollback tag: $TAG"
+
+      - name: Download backend-app.jar from GitHub Release
+        uses: robinraju/release-downloader@v1.10
+        with:
+          repository: ${{ github.repository }}
+          tag: ${{ steps.res.outputs.tag }}
+          fileName: "backend-app.jar"
+          out-file-path: "rollback"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify file
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f rollback/backend-app.jar
+          ls -al rollback
+          sha256sum rollback/backend-app.jar || shasum -a 256 rollback/backend-app.jar
+
+      - name: Upload artifact (backend-app.jar)
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-jar
+          path: rollback/backend-app.jar
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    needs: fetch
+    runs-on: [ self-hosted, backend-prod, Linux, ARM64 ]
+    steps:
+      - name: Download rollback artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rollback-jar
+          path: ~/hearit
+
+      - name: Sanity check
+        run: test -f ~/hearit/backend-app.jar
+
+      - name: Run deploy script
+        run: sudo bash ~/hearit/deploy.sh

@@ -1,0 +1,62 @@
+name: BE Manual Release (Prod, build from release)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "예: v1.2.3"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: release
+
+      - name: Print commit info
+        run: |
+          echo "Release branch HEAD:"
+          git rev-parse HEAD
+          git log -1 --pretty=oneline
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build backend-app.jar
+        working-directory: backend
+        run: |
+          ./gradlew clean build -x test
+          ls -al build/libs
+          cp "$(ls build/libs/*.jar | head -n 1)" ../backend-app.jar
+
+      - name: Create/Update GitHub Release (attach backend-app.jar)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.release_tag }}
+          name: ${{ github.event.inputs.release_tag }}
+          generate_release_notes: true
+          files: backend-app.jar
+
+      - name: Promote LKG (move LKG_PROD tag)
+        run: |
+          git fetch --tags --force --prune
+          COMMIT=$(git rev-parse "${{ github.event.inputs.release_tag }}^{}")
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag -f LKG_PROD "$COMMIT"
+          git push origin -f refs/tags/LKG_PROD
