@@ -232,7 +232,7 @@ class ExploreFragment :
                 addListener(
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator) {
-                            binding.lavExploreSwipeUp.visibility = View.INVISIBLE
+                            _binding?.lavExploreSwipeUp?.visibility = View.INVISIBLE
                         }
                     },
                 )
@@ -344,15 +344,12 @@ class ExploreFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
-
         animator?.cancel()
         animator?.removeAllListeners()
         animator?.setTarget(null)
-
         binding.rvExplore.clearOnScrollListeners()
         snapHelper.attachToRecyclerView(null)
         binding.rvExplore.adapter = null
-
         _binding = null
     }
 
