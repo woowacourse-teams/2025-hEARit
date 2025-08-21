@@ -70,9 +70,7 @@ class ExploreViewModel(
         lastPlayerPosition: Long,
         itemCount: Int,
     ) {
-        Timber.d("Bookmark: ${shortsHearits.value.map { it.bookmarkId }}")
         refreshBookmarkState()
-        Timber.d("Bookmark: ${shortsHearits.value.map { it.bookmarkId }}")
 
         if (position == itemCount - 1) {
             reFetchData()
@@ -206,7 +204,7 @@ class ExploreViewModel(
         }
     }
 
-    private fun refreshBookmarkState() {
+    fun refreshBookmarkState() {
         val currentShortsList = _shortsHearits.value ?: return
         val bookmarkStateMap = _bookmarkId.value ?: return
 
