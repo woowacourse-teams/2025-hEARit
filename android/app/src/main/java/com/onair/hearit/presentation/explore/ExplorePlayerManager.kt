@@ -46,7 +46,6 @@ class ExplorePlayerManager(
             player.setMediaItem(mediaItem)
         }
         player.prepare()
-        player.playWhenReady = true
         startScriptSync()
     }
 

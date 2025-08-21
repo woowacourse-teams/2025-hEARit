@@ -15,7 +15,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.media3.common.Player
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -112,9 +111,7 @@ class ExploreFragment :
     override fun onResume() {
         super.onResume()
         val player = playerManager.player
-        if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
-            player.play()
-        }
+        player.playWhenReady = true
     }
 
     private fun setupWindowInsets() {
@@ -288,6 +285,7 @@ class ExploreFragment :
         hearitId: Long,
         bookmarkId: Long?,
     ) {
+        viewModel.updateBookmarkState(hearitId, bookmarkId)
         val updatedList =
             adapter.currentList.map { item ->
                 if (item.id == hearitId) {
@@ -306,6 +304,8 @@ class ExploreFragment :
         hearitId: Long,
         title: String,
     ) {
+        player.playWhenReady = false
+
         val lastPosition = playerManager.getCurrentPosition()
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,
@@ -332,9 +332,9 @@ class ExploreFragment :
 
     override fun onPause() {
         super.onPause()
+        player.playWhenReady = false
         val position = currentIndex()
         viewModel.saveCurrentState(position, playerManager.getCurrentPosition(), adapter.itemCount)
-        playerManager.pause()
     }
 
     override fun onStop() {
