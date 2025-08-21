@@ -46,11 +46,6 @@ public class AdminGlobalExceptionHandler {
         return buildProblemDetail(AdminErrorCode.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다.", request);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ProblemDetail handleUnhandledException(Exception ex, HttpServletRequest request) {
-        return buildProblemDetail(AdminErrorCode.INTERNAL_SERVER_ERROR, AdminErrorCode.INTERNAL_SERVER_ERROR.getTitle(), request);
-    }
-
     private String extractValidationDetail(MethodArgumentNotValidException ex) {
         return ex.getBindingResult()
                 .getFieldErrors()
