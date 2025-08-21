@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.onair.hearit.R
@@ -189,7 +190,7 @@ class HomeFragment :
     }
 
     private fun scrollToMiddlePosition() {
-        binding.rvHomeRecommend.post {
+        if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             val middlePosition = recommendAdapter.currentList.size / 2
             val layoutManager = binding.rvHomeRecommend.layoutManager as LinearLayoutManager
             val recyclerViewCenter = binding.rvHomeRecommend.width / 2
@@ -249,12 +250,12 @@ class HomeFragment :
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         centerScrollListener?.let {
             binding.rvHomeRecommend.removeOnScrollListener(it)
         }
         centerScrollListener = null
         _binding = null
+        super.onDestroyView()
     }
 
     private companion object {
