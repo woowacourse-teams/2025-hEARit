@@ -122,6 +122,15 @@ class ExploreViewModel(
         }
     }
 
+    fun updateBookmarkState(
+        hearitId: Long,
+        bookmarkId: Long?,
+    ) {
+        val currentBookmarkId = _bookmarkId.value.orEmpty().toMutableMap()
+        currentBookmarkId[hearitId] = bookmarkId
+        _bookmarkId.value = currentBookmarkId
+    }
+
     private fun fetchData(cursorId: Long) {
         if (isFetchingData) return
         isFetchingData = true
@@ -204,7 +213,7 @@ class ExploreViewModel(
         }
     }
 
-    fun refreshBookmarkState() {
+    private fun refreshBookmarkState() {
         val currentShortsList = _shortsHearits.value ?: return
         val bookmarkStateMap = _bookmarkId.value ?: return
 
@@ -223,15 +232,6 @@ class ExploreViewModel(
             }
 
         _shortsHearits.value = updatedShortsList
-    }
-
-    private fun updateBookmarkState(
-        hearitId: Long,
-        bookmarkId: Long?,
-    ) {
-        val currentBookmarkId = _bookmarkId.value.orEmpty().toMutableMap()
-        currentBookmarkId[hearitId] = bookmarkId
-        _bookmarkId.value = currentBookmarkId
     }
 
     private suspend fun buildShortsHearit(cursorItems: CursorResult<RandomHearit>): List<ShortsHearit> =

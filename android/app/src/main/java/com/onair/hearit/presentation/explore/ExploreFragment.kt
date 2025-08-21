@@ -281,6 +281,25 @@ class ExploreFragment :
             .commit()
     }
 
+    private fun updateBookmarkState(
+        hearitId: Long,
+        bookmarkId: Long?,
+    ) {
+        viewModel.updateBookmarkState(hearitId, bookmarkId)
+        val updatedList =
+            adapter.currentList.map { item ->
+                if (item.id == hearitId) {
+                    item.copy(
+                        bookmarkId = bookmarkId,
+                        isBookmarked = bookmarkId != null,
+                    )
+                } else {
+                    item
+                }
+            }
+        adapter.submitList(updatedList)
+    }
+
     override fun onClickHearitInfo(
         hearitId: Long,
         title: String,
@@ -297,24 +316,6 @@ class ExploreFragment :
         )
 
         navigateToDetail(hearitId, lastPosition)
-    }
-
-    private fun updateBookmarkState(
-        hearitId: Long,
-        bookmarkId: Long?,
-    ) {
-        val updatedList =
-            adapter.currentList.map { item ->
-                if (item.id == hearitId) {
-                    item.copy(
-                        bookmarkId = bookmarkId,
-                        isBookmarked = bookmarkId != null,
-                    )
-                } else {
-                    item
-                }
-            }
-        adapter.submitList(updatedList)
     }
 
     override fun onClickBookmark(
