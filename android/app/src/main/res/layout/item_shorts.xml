@@ -108,13 +108,12 @@
             android:id="@+id/layout_explore_hearit_info"
             android:layout_width="0dp"
             android:layout_height="60dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="14dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/bg_gray1_radius_8dp"
             android:onClick="@{() -> shortsClickListener.onClickHearitInfo(hearitItem.id, hearitItem.title)}"
             app:layout_constraintBottom_toTopOf="@id/layout_explore_player"
-            app:layout_constraintEnd_toStartOf="@id/btn_explore_item_bookmark"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
             <TextView
@@ -141,17 +140,17 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <ImageView
-            android:id="@+id/btn_explore_item_bookmark"
-            android:layout_width="42dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/bookmark_selector"
-            android:contentDescription="@null"
-            app:layout_constraintBottom_toBottomOf="@id/layout_explore_hearit_info"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/layout_explore_hearit_info"
-            app:layout_constraintTop_toTopOf="@id/layout_explore_hearit_info" />
+        <!--        <ImageView-->
+        <!--            android:id="@+id/btn_explore_item_bookmark"-->
+        <!--            android:layout_width="42dp"-->
+        <!--            android:layout_height="48dp"-->
+        <!--            android:layout_marginEnd="10dp"-->
+        <!--            android:background="@drawable/bookmark_selector"-->
+        <!--            android:contentDescription="@null"-->
+        <!--            app:layout_constraintBottom_toBottomOf="@id/layout_explore_hearit_info"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toEndOf="@id/layout_explore_hearit_info"-->
+        <!--            app:layout_constraintTop_toTopOf="@id/layout_explore_hearit_info" />-->
 
         <androidx.media3.ui.PlayerControlView
             android:id="@+id/layout_explore_player"
