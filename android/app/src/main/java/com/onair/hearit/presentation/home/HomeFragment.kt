@@ -55,7 +55,6 @@ class HomeFragment :
     }
     private val snapHelper = PagerSnapHelper()
     private var centerScrollListener: CenterScrollListener? = null
-    private lateinit var indicatorContainer: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -151,8 +150,8 @@ class HomeFragment :
     }
 
     private fun setupIndicator(size: Int) {
-        indicatorContainer = binding.indicatorContainer
-        indicatorContainer.removeAllViews()
+        val container = binding.indicatorContainer
+        container.removeAllViews()
         val density = resources.displayMetrics.density
 
         repeat(size) {
@@ -166,13 +165,14 @@ class HomeFragment :
                             marginEnd = marginPx
                         }
                 }
-            indicatorContainer.addView(dot)
+            container.addView(dot)
         }
         setCurrentIndicator(INITIAL_INDICATOR_POSITION)
     }
 
     private fun updateIndicator(position: Int) {
-        val count = indicatorContainer.childCount
+        val container = binding.indicatorContainer
+        val count = container.childCount
         if (count == 0) return
 
         val indicatorIndex = position - 1
@@ -182,10 +182,15 @@ class HomeFragment :
     }
 
     private fun setCurrentIndicator(selectedIndex: Int) {
-        (0 until indicatorContainer.childCount).forEach { i ->
+        val container = binding.indicatorContainer
+        for (i in 0 until container.childCount) {
             val drawableRes =
-                if (i == selectedIndex) R.drawable.indicator_selected else R.drawable.indicator_unselected
-            indicatorContainer.getChildAt(i).setBackgroundResource(drawableRes)
+                if (i == selectedIndex) {
+                    R.drawable.indicator_selected
+                } else {
+                    R.drawable.indicator_unselected
+                }
+            container.getChildAt(i).setBackgroundResource(drawableRes)
         }
     }
 
@@ -257,9 +262,6 @@ class HomeFragment :
         snapHelper.attachToRecyclerView(null)
         binding.rvHomeRecommend.adapter = null
         binding.rvHomeGroupedCategory.adapter = null
-        if (::indicatorContainer.isInitialized) {
-            indicatorContainer.removeAllViews()
-        }
         _binding = null
         super.onDestroyView()
     }
