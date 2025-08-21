@@ -254,6 +254,12 @@ class HomeFragment :
             binding.rvHomeRecommend.removeOnScrollListener(it)
         }
         centerScrollListener = null
+        snapHelper.attachToRecyclerView(null)
+        binding.rvHomeRecommend.adapter = null
+        binding.rvHomeGroupedCategory.adapter = null
+        if (::indicatorContainer.isInitialized) {
+            indicatorContainer.removeAllViews()
+        }
         _binding = null
         super.onDestroyView()
     }
