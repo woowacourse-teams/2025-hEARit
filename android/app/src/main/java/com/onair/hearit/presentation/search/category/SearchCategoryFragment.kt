@@ -30,7 +30,7 @@ class SearchCategoryFragment :
     private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
 
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
-        SearchViewModelFactory()
+        SearchViewModelFactory(null)
     }
 
     override fun onCreateView(

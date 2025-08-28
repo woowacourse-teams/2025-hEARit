@@ -8,8 +8,11 @@ import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RecentSearch
+import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
+import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -17,12 +20,20 @@ import timber.log.Timber
 class SearchViewModel(
     private val categoryRepository: CategoryRepository,
     private val recentKeywordRepository: RecentKeywordRepository,
+    private val getSearchResultUseCase: GetSearchResultUseCase,
+    initialInput: SearchInput?,
 ) : ViewModel() {
+    private val _searchUiState = MutableLiveData<SearchUiState>()
+    val searchUiState: LiveData<SearchUiState> = _searchUiState
+
     private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
     val categories: LiveData<List<Category>> = _categories
 
     private val _recentKeywords: MutableLiveData<List<RecentSearch>> = MutableLiveData()
     val recentKeywords: LiveData<List<RecentSearch>> = _recentKeywords
+
+    private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
+    val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -30,6 +41,9 @@ class SearchViewModel(
     private lateinit var paging: Paging
     private var currentPage = 0
     private var isLastPage = false
+    private var isLoading = false
+
+    private var currentInput: SearchInput? = initialInput
 
     init {
         getCategories()
@@ -77,5 +91,64 @@ class SearchViewModel(
                     _toastMessage.value = R.string.search_toast_recent_keyword_delete_fail
                 }
         }
+    }
+
+    fun loadNextPageIfPossible() {
+        if (isLoading || paging.isLast) return
+        fetchResultData(isInitial = false)
+    }
+
+    fun fetchResultData(isInitial: Boolean) {
+        if (isLoading) return
+        isLoading = true
+
+        val input = currentInput ?: return
+        viewModelScope.launch {
+            try {
+                val page = if (isInitial) 0 else currentPage + 1
+                val result = getSearchResultUseCase(input, page)
+
+                result
+                    .onSuccess { pageResult ->
+                        paging = pageResult.paging
+                        currentPage = pageResult.paging.page
+
+                        val updatedList =
+                            if (isInitial) {
+                                pageResult.items
+                            } else {
+                                _searchedHearits.value.orEmpty() + pageResult.items
+                            }
+
+                        _searchedHearits.value = updatedList
+                        updateUiState(updatedList)
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
+                    }
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun saveRecentKeyword(recentKeyword: String) {
+        viewModelScope.launch {
+            recentKeywordRepository
+                .saveKeyword(recentKeyword)
+                .onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
+                }
+        }
+    }
+
+    private fun updateUiState(hearits: List<SearchedHearit>) {
+        _searchUiState.value =
+            if (hearits.isEmpty()) {
+                SearchUiState.NoHearits
+            } else {
+                SearchUiState.HearitsExist(hearits)
+            }
     }
 }

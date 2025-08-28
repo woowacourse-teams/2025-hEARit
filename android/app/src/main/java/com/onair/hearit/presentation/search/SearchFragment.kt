@@ -32,7 +32,7 @@ class SearchFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory() }
+    private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory(null) }
     private val categoryFragment by lazy { SearchCategoryFragment.newInstance() }
     private val recentFragment by lazy { SearchRecentFragment.newInstance() }
 
@@ -180,6 +180,7 @@ class SearchFragment : Fragment() {
     private fun navigateToSearchResult(input: SearchInput) {
         binding.etSearch.setText(input.term())
         binding.etSearch.setSelection(binding.etSearch.text?.length ?: 0)
+        viewModel.saveRecentKeyword(input.term())
         replaceFragment(SearchResultFragment.newInstance(input), TAG_SEARCH_RESULT)
     }
 

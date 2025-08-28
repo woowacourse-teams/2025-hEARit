@@ -26,7 +26,7 @@ class SearchRecentFragment :
     private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
-        SearchViewModelFactory()
+        SearchViewModelFactory(null)
     }
 
     override fun onCreateView(

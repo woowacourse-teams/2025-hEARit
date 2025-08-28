@@ -19,6 +19,8 @@ import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.search.SearchViewModel
+import com.onair.hearit.presentation.search.SearchViewModelFactory
 
 class SearchResultFragment :
     Fragment(),
@@ -27,12 +29,9 @@ class SearchResultFragment :
     private var _binding: FragmentSearchResultBinding? = null
     private val binding get() = _binding!!
 
-    private val searchedTerm: SearchInput by lazy {
-        SearchInput.from(requireArguments())
-    }
-
-    private val viewModel: SearchResultViewModel by viewModels {
-        SearchResultViewModelFactory(searchedTerm)
+    private val viewModel: SearchViewModel by viewModels {
+        val input = requireArguments().let { SearchInput.from(it) }
+        SearchViewModelFactory(input)
     }
     private val searchedAdapter: SearchedHearitAdapter by lazy { SearchedHearitAdapter(this) }
 
@@ -53,6 +52,7 @@ class SearchResultFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
+        viewModel.fetchResultData(true)
         setupRecyclerView()
         observeViewModel()
     }
@@ -88,7 +88,7 @@ class SearchResultFragment :
     }
 
     private fun observeViewModel() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
+        viewModel.searchUiState.observe(viewLifecycleOwner) { state ->
             binding.uiState = state
         }
         viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
