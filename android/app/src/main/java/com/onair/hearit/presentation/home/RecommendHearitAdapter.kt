@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.domain.model.RecommendHearits
+import com.onair.hearit.presentation.HearitClickListener
 
 class RecommendHearitAdapter(
     private val hearitClickListener: HearitClickListener,

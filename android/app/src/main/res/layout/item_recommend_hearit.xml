@@ -11,7 +11,7 @@
 
         <variable
             name="recommendClickListener"
-            type="com.onair.hearit.presentation.home.HearitClickListener" />
+            type="com.onair.hearit.presentation.HearitClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -4,7 +4,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.presentation.home.HearitClickListener
+import com.onair.hearit.presentation.HearitClickListener
 
 class SearchedHearitAdapter(
     private val clickListener: HearitClickListener,

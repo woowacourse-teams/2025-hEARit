@@ -4,6 +4,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.presentation.HearitClickListener
 
 class GroupedCategoryAdapter(
     private val hearitClickListener: HearitClickListener,
