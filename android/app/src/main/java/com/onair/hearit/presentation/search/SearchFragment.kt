@@ -1,13 +1,11 @@
 package com.onair.hearit.presentation.search
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -33,7 +31,6 @@ class SearchFragment :
     private val binding get() = _binding!!
     private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory(null) }
     private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
-    private val recentFragment by lazy { SearchRecentFragment.newInstance() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -108,7 +105,6 @@ class SearchFragment :
         binding.etSearch.setText(input.term())
         binding.etSearch.setSelection(binding.etSearch.text?.length ?: 0)
         viewModel.saveRecentKeyword(input.term())
-//        replaceFragment(SearchResultFragment.newInstance(input), TAG_SEARCH_RESULT)
     }
 
     private fun setupWindowInsets() {
@@ -117,13 +113,6 @@ class SearchFragment :
             v.setPadding(0, systemBars.top, 0, 0)
             insets
         }
-    }
-
-    private fun hideKeyboard() {
-        val inputMethodManager =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val view = requireActivity().currentFocus ?: binding.root
-        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun setupCategoryRecyclerView() {
@@ -143,7 +132,7 @@ class SearchFragment :
     private fun navigateToRecent() {
         parentFragmentManager
             .beginTransaction()
-            .replace(R.id.fragment_container_view, recentFragment)
+            .replace(R.id.fragment_container_view, SearchRecentFragment())
             .addToBackStack(null)
             .commit()
     }

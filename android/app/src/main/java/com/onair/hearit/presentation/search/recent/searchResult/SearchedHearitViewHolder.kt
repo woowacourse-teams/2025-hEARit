@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.result
+package com.onair.hearit.presentation.search.recent.searchResult
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

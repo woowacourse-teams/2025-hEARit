@@ -1,12 +1,10 @@
-package com.onair.hearit.presentation.search.result
+package com.onair.hearit.presentation.search.recent.searchResult
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -14,7 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.databinding.FragmentSearchResultBinding
+import com.onair.hearit.databinding.FragmentSearchResultPageBinding
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.MainActivity
@@ -22,11 +20,11 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 
-class SearchResultFragment :
+class SearchResultPageFragment :
     Fragment(),
     HearitClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
-    private var _binding: FragmentSearchResultBinding? = null
+    private var _binding: FragmentSearchResultPageBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: SearchViewModel by viewModels {
@@ -40,7 +38,7 @@ class SearchResultFragment :
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentSearchResultBinding.inflate(inflater, container, false)
+        _binding = FragmentSearchResultPageBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
@@ -103,13 +101,6 @@ class SearchResultFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun hideKeyboard() {
-        val inputMethodManager =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val view = requireActivity().currentFocus ?: binding.root
-        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-
     override fun onClick(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         (activity as? MainActivity)?.launchDetailActivity(intent)
@@ -123,8 +114,8 @@ class SearchResultFragment :
     companion object {
         private const val REFRESH_THRESHOLD = 3
 
-        fun newInstance(input: SearchInput): SearchResultFragment =
-            SearchResultFragment().apply {
+        fun newInstance(input: SearchInput): SearchResultPageFragment =
+            SearchResultPageFragment().apply {
                 arguments = input.toBundle()
             }
     }

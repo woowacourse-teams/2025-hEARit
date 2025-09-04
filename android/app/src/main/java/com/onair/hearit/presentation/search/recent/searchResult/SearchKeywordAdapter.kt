@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.result
+package com.onair.hearit.presentation.search.recent.searchResult
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
