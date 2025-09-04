@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
     id("com.google.gms.google-services")
     id("org.jlleitschuh.gradle.ktlint")
@@ -101,6 +102,7 @@ android {
     buildFeatures {
         buildConfig = true
         dataBinding = true
+        compose = true
     }
     ktlint {
         debug = true
@@ -111,7 +113,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -122,6 +123,17 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Compose
+    val composeBom = platform("androidx.compose:compose-bom:2025.08.01")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.activity.compose)
+
+    // Preview
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
 
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
