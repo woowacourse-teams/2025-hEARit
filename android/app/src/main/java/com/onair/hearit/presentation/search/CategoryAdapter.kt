@@ -1,10 +1,9 @@
-package com.onair.hearit.presentation.search.category
+package com.onair.hearit.presentation.search
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.Category
-import com.onair.hearit.presentation.search.CategoryClickListener
 
 class CategoryAdapter(
     private val listener: CategoryClickListener,

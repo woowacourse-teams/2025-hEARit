@@ -1,9 +1,13 @@
 package com.onair.hearit.presentation.search.recent
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -44,8 +48,10 @@ class SearchRecentFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
+        setupListeners()
         setupRecyclerView()
-        setupDeleteButton()
+        setupSearchInput()
+        focusSearch()
         observeViewModel()
         viewModel.getRecentKeywords()
     }
@@ -58,14 +64,56 @@ class SearchRecentFragment :
         }
     }
 
+    private fun setupListeners() {
+        binding.ibSearchRecentBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        binding.tvSearchRecentDelete.setOnClickListener {
+            viewModel.deleteKeywords()
+        }
+    }
+
     private fun setupRecyclerView() {
         binding.rvRecentKeyword.adapter = recentSearchAdapter
     }
 
-    private fun setupDeleteButton() {
-        binding.tvSearchRecentDelete.setOnClickListener {
-            viewModel.deleteKeywords()
+    private fun setupSearchInput() {
+        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performSearchFromInput()
+            }
+            false
         }
+        binding.tilSearch.setEndIconOnClickListener {
+            performSearchFromInput()
+        }
+    }
+
+    private fun performSearchFromInput() {
+        binding.etSearch.text
+            ?.toString()
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { searchTerm ->
+                navigateToSearchResult(SearchInput.Keyword(searchTerm))
+//                hideKeyboard()
+            }
+    }
+
+    private fun focusSearch() {
+        binding.etSearch.viewTreeObserver.addOnGlobalLayoutListener(
+            object :
+                ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    binding.etSearch.requestFocus()
+                    val imm =
+                        requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
+                    binding.etSearch.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            },
+        )
     }
 
     private fun observeViewModel() {

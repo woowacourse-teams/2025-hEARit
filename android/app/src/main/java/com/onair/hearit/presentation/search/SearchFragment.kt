@@ -22,10 +22,7 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
-import com.onair.hearit.presentation.search.category.CategoryAdapter
-import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
-import com.onair.hearit.presentation.search.result.SearchResultFragment
 import kotlinx.coroutines.launch
 
 class SearchFragment :
@@ -36,7 +33,6 @@ class SearchFragment :
     private val binding get() = _binding!!
     private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory(null) }
     private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
-    private val categoryFragment by lazy { SearchCategoryFragment.newInstance() }
     private val recentFragment by lazy { SearchRecentFragment.newInstance() }
 
     override fun onCreateView(
@@ -58,10 +54,8 @@ class SearchFragment :
         setupSearchInput()
         observeViewModel()
         setupFragmentResultListeners()
-        setupBackAndCancelButtons()
 
         if (savedInstanceState == null) {
-            showCategoryFragment()
             arguments
                 ?.let { bundle -> SearchInput.from(bundle) }
                 ?.let { input -> navigateToSearchResult(input) }
@@ -70,36 +64,14 @@ class SearchFragment :
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupSearchInput() {
-//        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
-//            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-//                performSearchFromInput()
-//            }
-//            false
-//        }
-//        binding.tilSearch.setEndIconOnClickListener {
-//            performSearchFromInput()
-//        }
+        binding.btnSearch.setOnClickListener { navigateToRecent() }
+
         binding.etSearch.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
-                parentFragmentManager
-                    .beginTransaction()
-                    .replace(R.id.fragment_container_view, recentFragment)
-                    .addToBackStack(null)
-                    .commit()
+                navigateToRecent()
             }
             false
         }
-    }
-
-    private fun performSearchFromInput() {
-        binding.etSearch.text
-            ?.toString()
-            ?.trim()
-            ?.takeIf { it.isNotEmpty() }
-            ?.let { searchTerm ->
-                navigateToSearchResult(SearchInput.Keyword(searchTerm))
-                hideKeyboard()
-            }
     }
 
     private fun setupFragmentResultListeners() {
@@ -132,74 +104,11 @@ class SearchFragment :
         }
     }
 
-    private fun setupBackAndCancelButtons() {
-//        binding.ivBack.setOnClickListener {
-//            showCategoryFragment()
-//        }
-//
-//        binding.tvSearchCancel.setOnClickListener {
-//            binding.etSearch.text?.clear()
-//            showCategoryFragment()
-//        }
-    }
-
-//    private fun updateAppBarUIOnBackStackChanged() {
-//        childFragmentManager.addOnBackStackChangedListener {
-//            updateAppBarUI()
-//        }
-//        updateAppBarUI()
-//    }
-
-//    private fun updateAppBarUI() {
-//        val currentFragment =
-//            childFragmentManager.findFragmentById(R.id.fl_search_container)
-//
-//        when (currentFragment) {
-//            is SearchCategoryFragment -> {
-//                binding.tvSearchLogo.visibility = View.VISIBLE
-//                binding.ivBack.visibility = View.GONE
-//                binding.tvSearchCancel.visibility = View.GONE
-//            }
-//
-//            is SearchRecentFragment -> {
-//                binding.tvSearchLogo.visibility = View.VISIBLE
-//                binding.ivBack.visibility = View.GONE
-//                binding.tvSearchCancel.visibility = View.VISIBLE
-//            }
-//
-//            is SearchResultFragment -> {
-//                binding.tvSearchLogo.visibility = View.GONE
-//                binding.ivBack.visibility = View.VISIBLE
-//                binding.tvSearchCancel.visibility = View.GONE
-//            }
-//        }
-//    }
-
-    private fun showCategoryFragment() {
-        binding.etSearch.text?.clear()
-        replaceFragment(categoryFragment, TAG_SEARCH_CATEGORY)
-    }
-
-    private fun showRecentFragment() {
-        replaceFragment(recentFragment, TAG_SEARCH_RECENT)
-    }
-
     private fun navigateToSearchResult(input: SearchInput) {
         binding.etSearch.setText(input.term())
         binding.etSearch.setSelection(binding.etSearch.text?.length ?: 0)
         viewModel.saveRecentKeyword(input.term())
-        replaceFragment(SearchResultFragment.newInstance(input), TAG_SEARCH_RESULT)
-    }
-
-    private fun replaceFragment(
-        fragment: Fragment,
-        tag: String,
-    ) {
-        childFragmentManager
-            .beginTransaction()
-//            .replace(R.id.fl_search_container, fragment, tag)
-            .addToBackStack(tag)
-            .commit()
+//        replaceFragment(SearchResultFragment.newInstance(input), TAG_SEARCH_RESULT)
     }
 
     private fun setupWindowInsets() {
@@ -231,6 +140,14 @@ class SearchFragment :
         }
     }
 
+    private fun navigateToRecent() {
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container_view, recentFragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
@@ -244,11 +161,5 @@ class SearchFragment :
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    companion object {
-        private const val TAG_SEARCH_CATEGORY = "SearchCategory"
-        private const val TAG_SEARCH_RECENT = "SearchRecent"
-        private const val TAG_SEARCH_RESULT = "SearchResult"
     }
 }
