@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.ViewCompat
@@ -23,16 +22,20 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
+import com.onair.hearit.presentation.search.category.CategoryAdapter
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import com.onair.hearit.presentation.search.result.SearchResultFragment
 import kotlinx.coroutines.launch
 
-class SearchFragment : Fragment() {
+class SearchFragment :
+    Fragment(),
+    CategoryClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory(null) }
+    private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
     private val categoryFragment by lazy { SearchCategoryFragment.newInstance() }
     private val recentFragment by lazy { SearchRecentFragment.newInstance() }
 
@@ -51,11 +54,11 @@ class SearchFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
+        setupCategoryRecyclerView()
         setupSearchInput()
         observeViewModel()
         setupFragmentResultListeners()
         setupBackAndCancelButtons()
-        updateAppBarUIOnBackStackChanged()
 
         if (savedInstanceState == null) {
             showCategoryFragment()
@@ -67,18 +70,22 @@ class SearchFragment : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupSearchInput() {
-        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                performSearchFromInput()
-            }
-            false
-        }
-        binding.tilSearch.setEndIconOnClickListener {
-            performSearchFromInput()
-        }
+//        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
+//            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+//                performSearchFromInput()
+//            }
+//            false
+//        }
+//        binding.tilSearch.setEndIconOnClickListener {
+//            performSearchFromInput()
+//        }
         binding.etSearch.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
-                showRecentFragment()
+                parentFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container_view, recentFragment)
+                    .addToBackStack(null)
+                    .commit()
             }
             false
         }
@@ -126,47 +133,47 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupBackAndCancelButtons() {
-        binding.ivBack.setOnClickListener {
-            showCategoryFragment()
-        }
-
-        binding.tvSearchCancel.setOnClickListener {
-            binding.etSearch.text?.clear()
-            showCategoryFragment()
-        }
+//        binding.ivBack.setOnClickListener {
+//            showCategoryFragment()
+//        }
+//
+//        binding.tvSearchCancel.setOnClickListener {
+//            binding.etSearch.text?.clear()
+//            showCategoryFragment()
+//        }
     }
 
-    private fun updateAppBarUIOnBackStackChanged() {
-        childFragmentManager.addOnBackStackChangedListener {
-            updateAppBarUI()
-        }
-        updateAppBarUI()
-    }
+//    private fun updateAppBarUIOnBackStackChanged() {
+//        childFragmentManager.addOnBackStackChangedListener {
+//            updateAppBarUI()
+//        }
+//        updateAppBarUI()
+//    }
 
-    private fun updateAppBarUI() {
-        val currentFragment =
-            childFragmentManager.findFragmentById(R.id.fl_search_container)
-
-        when (currentFragment) {
-            is SearchCategoryFragment -> {
-                binding.tvSearchLogo.visibility = View.VISIBLE
-                binding.ivBack.visibility = View.GONE
-                binding.tvSearchCancel.visibility = View.GONE
-            }
-
-            is SearchRecentFragment -> {
-                binding.tvSearchLogo.visibility = View.VISIBLE
-                binding.ivBack.visibility = View.GONE
-                binding.tvSearchCancel.visibility = View.VISIBLE
-            }
-
-            is SearchResultFragment -> {
-                binding.tvSearchLogo.visibility = View.GONE
-                binding.ivBack.visibility = View.VISIBLE
-                binding.tvSearchCancel.visibility = View.GONE
-            }
-        }
-    }
+//    private fun updateAppBarUI() {
+//        val currentFragment =
+//            childFragmentManager.findFragmentById(R.id.fl_search_container)
+//
+//        when (currentFragment) {
+//            is SearchCategoryFragment -> {
+//                binding.tvSearchLogo.visibility = View.VISIBLE
+//                binding.ivBack.visibility = View.GONE
+//                binding.tvSearchCancel.visibility = View.GONE
+//            }
+//
+//            is SearchRecentFragment -> {
+//                binding.tvSearchLogo.visibility = View.VISIBLE
+//                binding.ivBack.visibility = View.GONE
+//                binding.tvSearchCancel.visibility = View.VISIBLE
+//            }
+//
+//            is SearchResultFragment -> {
+//                binding.tvSearchLogo.visibility = View.GONE
+//                binding.ivBack.visibility = View.VISIBLE
+//                binding.tvSearchCancel.visibility = View.GONE
+//            }
+//        }
+//    }
 
     private fun showCategoryFragment() {
         binding.etSearch.text?.clear()
@@ -190,7 +197,7 @@ class SearchFragment : Fragment() {
     ) {
         childFragmentManager
             .beginTransaction()
-            .replace(R.id.fl_search_container, fragment, tag)
+//            .replace(R.id.fl_search_container, fragment, tag)
             .addToBackStack(tag)
             .commit()
     }
@@ -210,7 +217,15 @@ class SearchFragment : Fragment() {
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
+    private fun setupCategoryRecyclerView() {
+        binding.rvSearchCategories.adapter = categoryAdapter
+    }
+
     private fun observeViewModel() {
+        viewModel.categories.observe(viewLifecycleOwner) { categories ->
+            categoryAdapter.submitList(categories)
+        }
+
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
@@ -218,6 +233,12 @@ class SearchFragment : Fragment() {
 
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onCategoryClick(
+        id: Long,
+        name: String,
+    ) {
     }
 
     override fun onDestroyView() {
