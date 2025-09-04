@@ -18,6 +18,7 @@ import androidx.fragment.app.viewModels
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchRecentBinding
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchAdapter
@@ -105,14 +106,15 @@ class SearchRecentFragment :
     }
 
     private fun performSearchFromInput() {
-        binding.etSearch.text
-            ?.toString()
-            ?.trim()
-            ?.takeIf { it.isNotEmpty() }
-            ?.let { searchTerm ->
-                navigateToSearchResult(SearchInput.Keyword(searchTerm))
-                hideKeyboard()
-            }
+        val searchTerm =
+            binding.etSearch.text
+                ?.toString()
+                ?.trim()
+        if (searchTerm.isNullOrEmpty()) return
+
+        viewModel.saveRecentKeyword(searchTerm)
+        navigateToSearchResult(SearchInput.Keyword(searchTerm))
+        hideKeyboard()
     }
 
     private fun observeViewModel() {
@@ -124,8 +126,19 @@ class SearchRecentFragment :
         }
     }
 
+    fun showSearchResultPage(input: SearchInput) {
+        childFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.fragment_search_container_view,
+                SearchResultPageFragment.newInstance(input),
+            ).commit()
+        viewModel.saveRecentKeyword(input.term())
+        hideKeyboard()
+    }
+
     private fun navigateToRecent() {
-        parentFragmentManager
+        childFragmentManager
             .beginTransaction()
             .replace(
                 R.id.fragment_search_container_view,
@@ -134,11 +147,11 @@ class SearchRecentFragment :
     }
 
     private fun navigateToSearchResult(input: SearchInput) {
-        parentFragmentManager
+        childFragmentManager
             .beginTransaction()
             .replace(
                 R.id.fragment_search_container_view,
-                SearchResultPageFragment.Companion.newInstance(input),
+                SearchResultPageFragment.newInstance(input),
             ).commit()
     }
 

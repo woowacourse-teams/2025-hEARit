@@ -11,17 +11,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
-import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.domain.term
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
-import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
-import kotlinx.coroutines.launch
 
 class SearchFragment :
     Fragment(),
@@ -50,13 +42,7 @@ class SearchFragment :
         setupCategoryRecyclerView()
         setupSearchInput()
         observeViewModel()
-        setupFragmentResultListeners()
-
-        if (savedInstanceState == null) {
-            arguments
-                ?.let { bundle -> SearchInput.from(bundle) }
-                ?.let { input -> navigateToSearchResult(input) }
-        }
+        viewModel.getCategories()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -69,42 +55,6 @@ class SearchFragment :
             }
             false
         }
-    }
-
-    private fun setupFragmentResultListeners() {
-        parentFragmentManager.setFragmentResultListener(
-            CATEGORY_KEY,
-            viewLifecycleOwner,
-        ) { _, bundle ->
-            val id = bundle.getLong(CATEGORY_ID_KEY)
-            val name = bundle.getString(CATEGORY_NAME_KEY).orEmpty()
-            viewLifecycleOwner.lifecycleScope.launch {
-                navigateToSearchResult(SearchInput.Category(id, name))
-            }
-        }
-
-        childFragmentManager.setFragmentResultListener(
-            KEYWORD_KEY,
-            viewLifecycleOwner,
-        ) { _, bundle ->
-            val keyword = bundle.getString(KEYWORD_KEY).orEmpty()
-            navigateToSearchResult(SearchInput.Keyword(keyword))
-        }
-
-        childFragmentManager.setFragmentResultListener(
-            CATEGORY_KEY,
-            viewLifecycleOwner,
-        ) { _, bundle ->
-            val id = bundle.getLong(CATEGORY_ID_KEY)
-            val name = bundle.getString(CATEGORY_NAME_KEY).orEmpty()
-            navigateToSearchResult(SearchInput.Category(id, name))
-        }
-    }
-
-    private fun navigateToSearchResult(input: SearchInput) {
-        binding.etSearch.setText(input.term())
-        binding.etSearch.setSelection(binding.etSearch.text?.length ?: 0)
-        viewModel.saveRecentKeyword(input.term())
     }
 
     private fun setupWindowInsets() {

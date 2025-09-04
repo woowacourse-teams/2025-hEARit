@@ -45,11 +45,7 @@ class SearchViewModel(
 
     private var currentInput: SearchInput? = initialInput
 
-    init {
-        getCategories()
-    }
-
-    private fun getCategories() {
+    fun getCategories() {
         viewModelScope.launch {
             categoryRepository
                 .getCategories(page = 0)

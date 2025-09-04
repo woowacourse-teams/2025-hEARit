@@ -28,7 +28,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_search_state"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginTop="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_searched_hearit">
@@ -44,14 +44,12 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_searched_hearit"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="72dp"
-                android:nestedScrollingEnabled="false"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_searched_hearit"
+                app:layout_constraintTop_toTopOf="parent"
                 app:visibleIfHearitsExist="@{uiState}"
                 tools:itemCount="6"
                 tools:listitem="@layout/item_searched_hearit" />

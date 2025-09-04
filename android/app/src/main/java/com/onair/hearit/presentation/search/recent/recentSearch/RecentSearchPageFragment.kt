@@ -1,6 +1,7 @@
 package com.onair.hearit.presentation.search.recent.recentSearch
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,13 +9,12 @@ import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import com.onair.hearit.databinding.FragmentRecentSearchPageBinding
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
+import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
 class RecentSearchPageFragment :
     Fragment(),
@@ -78,7 +78,8 @@ class RecentSearchPageFragment :
     }
 
     private fun navigateToSearchResult(input: SearchInput) {
-        setFragmentResult(KEYWORD_KEY, input.toBundle())
+        (parentFragment as? SearchRecentFragment)?.showSearchResultPage(input)
+        Log.d("meeple_log", "click")
     }
 
     private fun showToast(message: String?) {

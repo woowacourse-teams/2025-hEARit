@@ -50,8 +50,8 @@ class SearchResultPageFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
-        viewModel.fetchResultData(true)
         setupRecyclerView()
+        fetchData()
         observeViewModel()
     }
 
@@ -83,6 +83,10 @@ class SearchResultPageFragment :
                 },
             )
         }
+    }
+
+    private fun fetchData() {
+        viewModel.fetchResultData(true)
     }
 
     private fun observeViewModel() {
