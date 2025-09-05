@@ -12,23 +12,12 @@ public interface ExploredHearitQueryRepository extends JpaRepository<Hearit, Lon
             SELECT h.*
             FROM explore_score es
             JOIN hearit h ON es.hearit_id = h.id
-            WHERE es.member_id = :memberId
+            WHERE es.user_uuid = :userUuid
               AND es.cursor_id > :cursorId
             ORDER BY es.cursor_id ASC
             LIMIT :size
             """, nativeQuery = true)
-    List<Hearit> findExploredHearitsForMember(@Param("memberId") Long memberId,
+    List<Hearit> findExploredHearits(@Param("userUuid") String userUuid,
                                               @Param("cursorId") Long cursorId,
                                               @Param("size") int size);
-
-    @Query(value = """
-            SELECT h.*
-            FROM explore_score es
-            JOIN hearit h ON es.hearit_id = h.id
-            WHERE es.member_id = -1
-              AND es.cursor_id > :cursorId
-            ORDER BY es.cursor_id ASC
-            LIMIT :size
-            """, nativeQuery = true)
-    List<Hearit> findExploredHearitsForGuest(@Param("cursorId") Long cursorId, @Param("size") int size);
 }

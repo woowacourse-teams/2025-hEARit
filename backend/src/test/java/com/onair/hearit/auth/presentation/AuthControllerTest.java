@@ -26,6 +26,7 @@ import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ class AuthControllerTest extends IntegrationTest {
     void login_success() {
         // given
         Member member = Member.createLocalUser(
+                UUID.randomUUID(),
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234"),
@@ -139,6 +141,7 @@ class AuthControllerTest extends IntegrationTest {
     @DisplayName("비밀번호 틀리면 401 Unauthorized 반환한다.")
     void login_invalidPassword() {
         Member member = Member.createLocalUser(
+                UUID.randomUUID(),
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234"),
@@ -224,6 +227,7 @@ class AuthControllerTest extends IntegrationTest {
     void signup_fail_with_duplicate_id() {
         // given
         Member existingMember = Member.createLocalUser(
+                UUID.randomUUID(),
                 "existingUser",
                 "existingNickname",
                 passwordEncoder.encode("password1234"),
@@ -256,7 +260,7 @@ class AuthControllerTest extends IntegrationTest {
     void check_success() {
         // given
         Member member = dbHelper.insertMember(
-                Member.createLocalUser("localId", "nickname", "password", "profile.jpg"));
+                Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", "password", "profile.jpg"));
         String validAccessToken = jwtTokenProvider.createAccessToken(member.getId());
 
         // when & then

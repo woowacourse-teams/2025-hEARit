@@ -24,6 +24,7 @@ import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +57,7 @@ public class HearitExploreService {
         }
 
         Member member = getMemberByUserContext(userContext);
-        List<Hearit> exploredHearits = getExploredHearitsForMember(cursorRequest.cursorId(), member.getId(), cursorRequest.size());
+        List<Hearit> exploredHearits = getExploredHearitsForMember(cursorRequest.cursorId(), member, cursorRequest.size());
         List<ExploredHearitResponse> exploredHearitsDto = exploredHearits.stream()
                 .map(hearit -> toExploredHearitResponseWithBookmark(hearit, member))
                 .toList();
@@ -87,27 +88,29 @@ public class HearitExploreService {
         return ExploredHearitResponse.from(hearit, keywords);
     }
 
-    private List<Hearit> getExploredHearitsForMember(Long cursorId, Long memberId, int size) {
+    private List<Hearit> getExploredHearitsForMember(Long cursorId, Member member, int size) {
         if (isFirstExploreRequest(cursorId)) {
             List<Hearit> hearits = hearitRepository.findAll();
             List<ScoreFactor> scoreFactors = List.of(bookmarkScoreFactor, recencyScoreFactor, randomScoreFactor);
-            Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(memberId, hearits, scoreFactors);
-            exploreScoreCommandRepository.insertScores(memberId, scores);
-            exploreScoreCommandRepository.updateCursorIds(memberId);
+            Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(member.getId(), hearits, scoreFactors);
+            exploreScoreCommandRepository.insertScores(member.getUuid(), scores);
+            exploreScoreCommandRepository.updateCursorIds(member.getUuid());
         }
-        return exploredHearitQueryRepository.findExploredHearitsForMember(memberId, cursorId, size);
+        return exploredHearitQueryRepository.findExploredHearits(member.getUuid(), cursorId, size);
     }
 
     private List<Hearit> getExploredHearitsForGuest(Long cursorId, int size) {
-        Long guestId = -1L;
+        //TODO: 임시 비회원 UUID 랜덤처리
+        String guestId = UUID.randomUUID().toString();
+
         if (isFirstExploreRequest(cursorId)) {
             List<Hearit> hearits = hearitRepository.findAll();
             List<ScoreFactor> scoreFactors = List.of(recencyScoreFactor, randomScoreFactor);
-            Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(guestId, hearits, scoreFactors);
+            Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(-1L, hearits, scoreFactors); //FIXME: -1L 하드코딩 수정
             exploreScoreCommandRepository.insertScores(guestId, scores);
             exploreScoreCommandRepository.updateCursorIds(guestId);
         }
-        return exploredHearitQueryRepository.findExploredHearitsForGuest(cursorId, size);
+        return exploredHearitQueryRepository.findExploredHearits(guestId, cursorId, size);
     }
 
     private boolean isFirstExploreRequest(Long cursorId) {

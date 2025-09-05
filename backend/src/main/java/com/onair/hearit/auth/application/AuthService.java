@@ -15,6 +15,7 @@ import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,7 +58,7 @@ public class AuthService {
     public void signup(SignupRequest request) {
         validateDuplicatedId(request);
         String hash = passwordEncoder.encode(request.password());
-        memberRepository.save(Member.createLocalUser(request.localId(), request.nickname(), hash, defaultProfileImage));
+        memberRepository.save(Member.createLocalUser(UUID.randomUUID(), request.localId(), request.nickname(), hash, defaultProfileImage));
     }
 
     private void validateDuplicatedId(SignupRequest request) {
@@ -77,7 +78,7 @@ public class AuthService {
 
     private Member signupWithUserInfo(OAuthUserInfoResponse userInfo, OAuthProvider provider) {
         Member member = Member.createSocialUser(
-                userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl(), provider);
+                UUID.randomUUID(), userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl(), provider);
         return memberRepository.save(member);
     }
 

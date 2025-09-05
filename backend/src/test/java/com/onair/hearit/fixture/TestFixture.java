@@ -7,11 +7,13 @@ import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.Source;
 import java.util.List;
+import java.util.UUID;
 
 public class TestFixture {
 
     public static Member createFixedMember() {
         return Member.createLocalUser(
+                UUID.randomUUID(),
                 "memberID",
                 "nickname",
                 "password",

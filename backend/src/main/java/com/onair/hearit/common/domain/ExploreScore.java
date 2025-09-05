@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "explore_score",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "hearit_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_uuid", "hearit_id"})
 )
 public class ExploreScore {
 
@@ -25,8 +26,8 @@ public class ExploreScore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "member_id")
-    private Long memberId;
+    @Column(name = "user_uuid")
+    private String userUuid;
 
     @Column(name = "hearit_id", nullable = false)
     private Long hearitId;
@@ -37,9 +38,9 @@ public class ExploreScore {
     @Column(name = "cursor_id")
     private Long cursorId;
 
-    public ExploreScore(Long memberId, Long hearitId, Double score, Long cursorId) {
+    public ExploreScore(UUID userUuid, Long hearitId, Double score, Long cursorId) {
         validate(hearitId, score);
-        this.memberId = memberId;
+        this.userUuid = userUuid.toString();
         this.hearitId = hearitId;
         this.score = score;
         this.cursorId = cursorId;

@@ -10,6 +10,7 @@ import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class ExploreScoreCommandRepositoryTest {
     @DisplayName("회원의 개인화된 탐색 점수들을 일괄 저장할 수 있다.")
     void insertScores() {
         // given
-        Long memberId = 1L;
+        String userUuid = UUID.randomUUID().toString();
         Map<Long, Double> scores = Map.of(
                 10L, 15.5,
                 20L, 20.0,
@@ -47,11 +48,11 @@ public class ExploreScoreCommandRepositoryTest {
         );
 
         // when
-        exploreScoreCommandRepository.insertScores(memberId, scores);
+        exploreScoreCommandRepository.insertScores(userUuid, scores);
 
         // then
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM explore_score WHERE member_id = ?", Integer.class, memberId);
+                "SELECT COUNT(*) FROM explore_score WHERE user_uuid = ?", Integer.class, userUuid);
         assertThat(count).isEqualTo(scores.size());
     }
 
@@ -64,12 +65,15 @@ public class ExploreScoreCommandRepositoryTest {
                 200L, 25.0
         );
 
+        String guestId = UUID.randomUUID().toString();
+
         // when
-        exploreScoreCommandRepository.insertScores(-1L, scores);
+        exploreScoreCommandRepository.insertScores(guestId, scores);
 
         // then
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM explore_score WHERE member_id = -1", Integer.class); //memberId null인 경우 -1 취급
+                "SELECT COUNT(*) FROM explore_score WHERE user_uuid = ?", Integer.class,
+                guestId);
         assertThat(count).isEqualTo(scores.size());
     }
 
@@ -82,27 +86,27 @@ public class ExploreScoreCommandRepositoryTest {
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        Long memberId = member.getId();
+        String userUuid = member.getUuid();
         Map<Long, Double> scores = Map.of(
                 hearit1.getId(), 10.0,
                 hearit2.getId(), 20.0
         );
-        exploreScoreCommandRepository.insertScores(memberId, scores);
+        exploreScoreCommandRepository.insertScores(userUuid, scores);
 
         // when
-        exploreScoreCommandRepository.updateCursorIds(memberId);
+        exploreScoreCommandRepository.updateCursorIds(userUuid);
 
         // then
         Integer cursorHigh = jdbcTemplate.queryForObject(
-                "SELECT cursor_id FROM explore_score WHERE member_id = ? AND hearit_id = ?",
+                "SELECT cursor_id FROM explore_score WHERE user_uuid = ? AND hearit_id = ?",
                 Integer.class,
-                memberId,
+                userUuid,
                 hearit1.getId()
         );
         Integer cursorLow = jdbcTemplate.queryForObject(
-                "SELECT cursor_id FROM explore_score WHERE member_id = ? AND hearit_id = ?",
+                "SELECT cursor_id FROM explore_score WHERE user_uuid = ? AND hearit_id = ?",
                 Integer.class,
-                memberId,
+                userUuid,
                 hearit2.getId()
         );
 
