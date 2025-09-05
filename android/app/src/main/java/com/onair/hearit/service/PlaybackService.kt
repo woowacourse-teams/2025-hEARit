@@ -73,7 +73,7 @@ class PlaybackService : MediaSessionService() {
         val startPosition = intent.getLongExtra(EXTRA_START_POSITION, 0L)
         val source = intent.getStringExtra(EXTRA_SOURCE) ?: "hEARit"
         val playbackMode = intent.getStringExtra(EXTRA_PLAYBACK_MODE) ?: UNKNOWN_SCREEN_ID
-        val bookmarkId = intent.getLongExtra(EXTRA_BOOKMARK_ID, -1L)
+        val bookmarkId = intent.getLongExtra(EXTRA_BOOKMARK_ID, -1L).takeIf { it > 0 }
 
         Timber.d("🚚 도착한 쪽 playbackMode: $playbackMode")
         Timber.d("🚚 북마크: $bookmarkId")
@@ -148,6 +148,7 @@ class PlaybackService : MediaSessionService() {
         val extras =
             Bundle().apply {
                 bookmarkId?.let { putLong(EXTRA_BOOKMARK_ID, it) }
+                playbackMode?.let { putString(EXTRA_PLAYBACK_MODE, it) }
             }
 
         return MediaItem
