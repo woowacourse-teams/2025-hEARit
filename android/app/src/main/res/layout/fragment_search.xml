@@ -50,8 +50,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
+                android:layout_marginHorizontal="12dp"
                 android:layout_marginVertical="4dp"
+                android:baselineAligned="false"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -60,11 +61,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:boxBackgroundMode="none"
-                    app:endIconDrawable="@drawable/ic_search"
-                    app:endIconMode="custom"
-                    app:endIconTint="@color/hearit_gray1"
-                    app:hintEnabled="false">
+                    app:endIconMode="clear_text"
+                    app:hintEnabled="false"
+                    app:startIconDrawable="@drawable/ic_search"
+                    app:startIconTint="@color/hearit_gray4">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_search"
@@ -72,7 +72,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:autofillHints="@null"
-                        android:background="@drawable/bg_gray4_radius_8dp"
                         android:hint="@string/search_keyword"
                         android:imeOptions="actionSearch"
                         android:inputType="text|textNoSuggestions"
@@ -82,15 +81,6 @@
                         android:textColorHint="@color/hearit_gray2" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    android:id="@+id/tv_search_cancel"
-                    style="@style/pretendard_sub_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:layout_marginStart="12dp"
-                    android:gravity="center"
-                    android:text="@string/all_cancel"
-                    android:visibility="gone" />
             </LinearLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
