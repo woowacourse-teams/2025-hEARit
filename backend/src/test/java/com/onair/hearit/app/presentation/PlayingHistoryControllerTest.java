@@ -11,6 +11,7 @@ import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.Source;
 import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.fixture.IntegrationTest;
@@ -28,8 +29,8 @@ class PlayingHistoryControllerTest extends IntegrationTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("로그인한 사용자가 재생기록 저장 시, 201 CREATED를 반환한다.")
-    void createBookmarkTest() {
+    @DisplayName("로그인한 사용자가 처음 재생기록 저장 시, 201 CREATED를 반환한다.")
+    void createPlayingHistory() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
@@ -55,9 +56,43 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .post("/api/v1/playing-histories")
+                .put("/api/v1/playing-histories")
                 .then()
                 .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자가 다시 재생기록 저장 시, 200 OK를 반환한다.")
+    void updatePlayingHistory() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
+        Category category = dbHelper.insertCategory(new Category("name", "#000000"));
+        Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 20));
+
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50);
+
+        // when & then
+        RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .contentType("application/json")
+                .body(request)
+                .filter(document("playing-history",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Playing History API")
+                                .summary("재생기록 생성")
+                                .description("로그인한 회원의 재생기록을 저장합니다.")
+                                .requestFields(
+                                        fieldWithPath("hearitId").description("히어릿 ID"),
+                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간")
+                                )
+                                .build())
+                ))
+                .when()
+                .put("/api/v1/playing-histories")
+                .then()
+                .statusCode(HttpStatus.OK.value());
     }
 
     @Test
@@ -87,7 +122,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .post("/api/v1/playing-histories")
+                .put("/api/v1/playing-histories")
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
     }

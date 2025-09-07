@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,11 +19,14 @@ public class PlayingHistoryController {
 
     private final PlayingHistoryService playingHistoryService;
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<Void> createPlayingHistory(
             @RequestBody PlayingHistoryRequest request,
             @AuthenticationPrincipal UserContext userContext) {
-        playingHistoryService.addPlayingHistory(userContext, request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        boolean isCreated = playingHistoryService.addPlayingHistory(userContext, request);
+        if (isCreated) {
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

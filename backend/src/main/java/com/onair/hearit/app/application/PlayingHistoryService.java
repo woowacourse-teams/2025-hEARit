@@ -20,11 +20,19 @@ public class PlayingHistoryService {
     private final HearitRepository hearitRepository;
 
     @Transactional
-    public void addPlayingHistory(UserContext userContext, PlayingHistoryRequest request) {
+    public boolean addPlayingHistory(UserContext userContext, PlayingHistoryRequest request) {
         checkMember(userContext);
         Hearit hearit = getHearitById(request.hearitId());
-        PlayingHistory playingHistory = new PlayingHistory(userContext.memberId(), hearit, request.lastPlayTime());
-        playingHistoryRepository.save(playingHistory);
+        return playingHistoryRepository.findByHearitIdAndMemberId(request.hearitId(), userContext.memberId())
+                .map(ph -> {
+                    ph.setLastPlayTime(request.lastPlayTime());
+                    return false;
+                })
+                .orElseGet(() -> {
+                    playingHistoryRepository.save(
+                            new PlayingHistory(userContext.memberId(), hearit, request.lastPlayTime()));
+                    return true;
+                });
     }
 
     private void checkMember(UserContext userContext) {
