@@ -96,9 +96,9 @@ class SearchViewModel(
 
     fun fetchResultData(isInitial: Boolean) {
         if (isLoading) return
+        val input = currentInput ?: return
         isLoading = true
 
-        val input = currentInput ?: return
         viewModelScope.launch {
             try {
                 val page = if (isInitial) 0 else currentPage + 1
