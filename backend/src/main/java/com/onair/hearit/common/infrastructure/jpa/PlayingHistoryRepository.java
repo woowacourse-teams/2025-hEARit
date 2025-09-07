@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PlayingHistoryRepository extends JpaRepository<PlayingHistory, Long> {
 
     Optional<PlayingHistory> findByHearitIdAndMemberId(Long hearitId, Long memberId);
+
+    boolean existsByHearitIdAndMemberId(Long hearitId, Long memberId);
 }

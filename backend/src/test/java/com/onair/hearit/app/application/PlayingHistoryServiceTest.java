@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
+import com.onair.hearit.app.infrastructure.scheduler.PlayingHistoryBuffer;
 import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
@@ -13,6 +14,7 @@ import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.Source;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
@@ -23,13 +25,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
-@Import({DbHelper.class, TestJpaAuditingConfig.class})
-@ActiveProfiles("fake-test")
+@Sql("/dbclean.sql")
+@ActiveProfiles("integration-test")
+@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Import({DbHelper.class, TestJpaAuditingConfig.class, PlayingHistoryBuffer.class,
+        PlayingHistoryCommandRepository.class})
 class PlayingHistoryServiceTest {
 
     @Autowired
@@ -39,18 +47,22 @@ class PlayingHistoryServiceTest {
     private PlayingHistoryRepository playingHistoryRepository;
 
     @Autowired
+    private PlayingHistoryBuffer playingHistoryBuffer;
+
+    @Autowired
     private HearitRepository hearitRepository;
 
     private PlayingHistoryService playingHistoryService;
 
     @BeforeEach
     void setup() {
-        playingHistoryService = new PlayingHistoryService(playingHistoryRepository, hearitRepository);
+        playingHistoryService = new PlayingHistoryService(playingHistoryRepository, playingHistoryBuffer,
+                hearitRepository);
     }
 
     @Test
     @DisplayName("로그인한 회원은 재생기록을 저장할 수 있다.")
-    void addPlayHistory() {
+    void addPlayHistory() throws InterruptedException {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
@@ -59,6 +71,7 @@ class PlayingHistoryServiceTest {
 
         // when
         playingHistoryService.addPlayingHistory(UserContext.member(member.getId()), request);
+        playingHistoryBuffer.flush();
 
         // then
         List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();

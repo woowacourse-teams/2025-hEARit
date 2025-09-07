@@ -1,14 +1,13 @@
 package com.onair.hearit.app.application;
 
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
+import com.onair.hearit.app.infrastructure.scheduler.PlayingHistoryBuffer;
 import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Hearit;
-import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,22 +16,20 @@ import org.springframework.stereotype.Service;
 public class PlayingHistoryService {
 
     private final PlayingHistoryRepository playingHistoryRepository;
+    private final PlayingHistoryBuffer playingHistoryBuffer;
     private final HearitRepository hearitRepository;
 
-    @Transactional
     public boolean addPlayingHistory(UserContext userContext, PlayingHistoryRequest request) {
+        validateHearit(request.hearitId());
         checkMember(userContext);
-        Hearit hearit = getHearitById(request.hearitId());
-        return playingHistoryRepository.findByHearitIdAndMemberId(request.hearitId(), userContext.memberId())
-                .map(ph -> {
-                    ph.setLastPlayTime(request.lastPlayTime());
-                    return false;
-                })
-                .orElseGet(() -> {
-                    playingHistoryRepository.save(
-                            new PlayingHistory(userContext.memberId(), hearit, request.lastPlayTime()));
-                    return true;
-                });
+        playingHistoryBuffer.addPlayingHistory(userContext.memberId(), request.hearitId(), request.lastPlayTime());
+        return !playingHistoryRepository.existsByHearitIdAndMemberId(request.hearitId(), userContext.memberId());
+    }
+
+    private void validateHearit(Long hearitId) {
+        if (!hearitRepository.existsById(hearitId)) {
+            throw new NotFoundException("hearitId", hearitId.toString());
+        }
     }
 
     private void checkMember(UserContext userContext) {

@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,9 +19,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
-@Table(name = "playing_history")
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "playing_history",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uq_playing_history_member_hearit", columnNames = {"member_id", "hearit_id"})
+        }
+)
 public class PlayingHistory {
 
     private static final int FINISHED_TIME_RANGE = 10;
