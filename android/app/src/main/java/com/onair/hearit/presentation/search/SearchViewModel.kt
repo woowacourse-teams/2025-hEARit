@@ -38,7 +38,7 @@ class SearchViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private lateinit var paging: Paging
+    private var paging: Paging? = null
     private var currentPage = 0
     private var isLastPage = false
     private var isLoading = false
@@ -52,7 +52,7 @@ class SearchViewModel(
                 .onSuccess { pageCategories ->
                     paging = pageCategories.paging
                     _categories.value = pageCategories.items
-                    isLastPage = paging.isLast
+                    isLastPage = pageCategories.paging.isLast
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.all_toast_categories_load_fail
@@ -90,7 +90,7 @@ class SearchViewModel(
     }
 
     fun loadNextPageIfPossible() {
-        if (isLoading || paging.isLast) return
+        if (isLoading || paging?.isLast == true) return
         fetchResultData(isInitial = false)
     }
 
