@@ -86,9 +86,7 @@ class SearchResultPageFragment :
     }
 
     private fun fetchData() {
-        if (viewModel.searchedHearits.value.isNullOrEmpty()) {
-            viewModel.fetchResultData(true)
-        }
+        viewModel.fetchResultData(true)
     }
 
     private fun observeViewModel() {

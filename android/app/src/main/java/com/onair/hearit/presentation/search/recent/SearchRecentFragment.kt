@@ -39,6 +39,7 @@ class SearchRecentFragment :
         SearchViewModelFactory(null)
     }
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+    private var lastSearchTerm: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -110,6 +111,9 @@ class SearchRecentFragment :
                 ?.toString()
                 ?.trim()
         if (searchTerm.isNullOrEmpty()) return
+
+        if (searchTerm == lastSearchTerm) return
+        lastSearchTerm = searchTerm
 
         viewModel.saveRecentKeyword(searchTerm)
         navigateToSearchResult(SearchInput.Keyword(searchTerm))
