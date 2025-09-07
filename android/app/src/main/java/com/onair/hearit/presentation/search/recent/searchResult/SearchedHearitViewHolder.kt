@@ -9,18 +9,14 @@ import com.onair.hearit.presentation.HearitClickListener
 
 class SearchedHearitViewHolder(
     private val binding: ItemSearchedHearitBinding,
-    private val clickListener: HearitClickListener,
+    private val hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
-    private val keywordAdapter = SearchKeywordAdapter()
-
-    init {
-        binding.rvKeyword.adapter = keywordAdapter
-    }
-
     fun bind(searchedHearit: SearchedHearit) {
-        binding.item = searchedHearit
-        keywordAdapter.submitList(searchedHearit.keywords)
-        binding.clickListener = clickListener
+        binding.apply {
+            item = searchedHearit
+            clickListener = hearitClickListener
+            tvKeywords.text = searchedHearit.keywords.joinToString("  ") { "#${it.name}" }
+        }
     }
 
     companion object {

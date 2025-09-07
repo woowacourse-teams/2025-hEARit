@@ -1,7 +1,6 @@
 package com.onair.hearit.presentation.search.recent.recentSearch
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -79,7 +78,6 @@ class RecentSearchPageFragment :
 
     private fun navigateToSearchResult(input: SearchInput) {
         (parentFragment as? SearchRecentFragment)?.showSearchResultPage(input)
-        Log.d("meeple_log", "click")
     }
 
     private fun showToast(message: String?) {

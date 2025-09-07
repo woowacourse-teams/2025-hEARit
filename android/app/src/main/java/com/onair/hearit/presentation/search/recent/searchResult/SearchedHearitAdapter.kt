@@ -17,10 +17,7 @@ class SearchedHearitAdapter(
     override fun onBindViewHolder(
         holder: SearchedHearitViewHolder,
         position: Int,
-    ) {
-        val item: SearchedHearit = getItem(position)
-        holder.bind(item)
-    }
+    ) = holder.bind(getItem(position))
 
     companion object {
         private val DiffCallback =
