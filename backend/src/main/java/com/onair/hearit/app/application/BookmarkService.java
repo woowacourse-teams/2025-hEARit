@@ -1,19 +1,21 @@
 package com.onair.hearit.app.application;
 
-import com.onair.hearit.auth.domain.UserContext;
-import com.onair.hearit.common.exception.custom.AlreadyExistException;
-import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
-import com.onair.hearit.common.domain.Bookmark;
-import com.onair.hearit.common.domain.Hearit;
-import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
 import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
+import com.onair.hearit.auth.domain.UserContext;
+import com.onair.hearit.common.domain.Bookmark;
+import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
+import com.onair.hearit.common.exception.custom.AlreadyExistException;
+import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +30,7 @@ public class BookmarkService {
     private final HearitRepository hearitRepository;
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final PlayingHistoryRepository playingHistoryRepository;
 
     public PagedResponse<BookmarkHearitResponse> getBookmarkHearits(
             UserContext userContext,
@@ -35,9 +38,16 @@ public class BookmarkService {
         Member member = getMemberByUserContext(userContext);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(member, pageable);
-        Page<BookmarkHearitResponse> bookmarkHearits = bookmarks.map(
-                bookmark -> BookmarkHearitResponse.of(bookmark, bookmark.getHearit()));
-        return PagedResponse.from(bookmarkHearits);
+
+        return PagedResponse.from(bookmarks.map(hearit -> toBookmarkHearitResponse(hearit, member)));
+    }
+
+    private BookmarkHearitResponse toBookmarkHearitResponse(Bookmark bookmark, Member member) {
+        Hearit hearit = bookmark.getHearit();
+        Integer lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
+                .map(PlayingHistory::getLastPlayTime)
+                .orElse(null);
+        return BookmarkHearitResponse.of(bookmark, hearit, lastPlayTime);
     }
 
     @Transactional

@@ -1,30 +1,31 @@
 package com.onair.hearit.app.application;
 
 import com.onair.hearit.app.application.recommend.RecommendHearitStrategy;
-import com.onair.hearit.auth.domain.UserContext;
-import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
-import com.onair.hearit.common.domain.Bookmark;
-import com.onair.hearit.common.domain.Category;
-import com.onair.hearit.common.domain.Hearit;
-import com.onair.hearit.common.domain.Keyword;
-import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.HearitDetailResponse;
 import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.app.dto.response.RecommendHearitResponse;
+import com.onair.hearit.auth.domain.UserContext;
+import com.onair.hearit.common.domain.Bookmark;
+import com.onair.hearit.common.domain.Category;
+import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
+import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -46,21 +47,24 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final CategoryRepository categoryRepository;
+    private final PlayingHistoryRepository playingHistoryRepository;
     private final RecommendHearitStrategy recommendHearitStrategy;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, UserContext userContext) {
         Hearit hearit = getHearitById(hearitId);
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId());
         if (userContext == null || userContext.isGuest()) {
-            return HearitDetailResponse.from(hearit, keywords);
+            return HearitDetailResponse.of(hearit, keywords, null, null);
         }
 
         Member member = getMemberByUserContext(userContext);
-        Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitAndMember(hearit, member);
-        if (bookmarkOptional.isPresent()) {
-            return HearitDetailResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
-        }
-        return HearitDetailResponse.from(hearit, keywords);
+        Long bookmarkId = bookmarkRepository.findByHearitAndMember(hearit, member)
+                .map(Bookmark::getId)
+                .orElse(null);
+        Integer lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
+                .map(PlayingHistory::getLastPlayTime)
+                .orElse(null);
+        return HearitDetailResponse.of(hearit, keywords, lastPlayTime, bookmarkId);
     }
 
     private Hearit getHearitById(Long hearitId) {

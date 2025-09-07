@@ -9,15 +9,17 @@ public record BookmarkHearitResponse(
         String title,
         String summary,
         Integer playTime,
+        Integer lastPlayTime,
         String categoryColor
 ) {
-    public static BookmarkHearitResponse of(Bookmark bookmark, Hearit hearit) {
+    public static BookmarkHearitResponse of(Bookmark bookmark, Hearit hearit, Integer lastPlayTime) {
         return new BookmarkHearitResponse(
                 hearit.getId(),
                 bookmark.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
                 hearit.getPlayTime(),
+                lastPlayTime,
                 hearit.getCategory().getColorCode());
     }
 }

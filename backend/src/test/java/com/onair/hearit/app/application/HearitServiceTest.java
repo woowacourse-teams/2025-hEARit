@@ -25,6 +25,7 @@ import com.onair.hearit.common.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import com.onair.hearit.common.infrastructure.jpa.RecommendHearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
 import com.onair.hearit.fixture.DbHelper;
@@ -64,6 +65,9 @@ class HearitServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
+    private PlayingHistoryRepository playingHistoryRepository;
+
+    @Autowired
     private RecommendHearitRepository recommendHearitRepository;
 
     private FixedRecommendedHearitStrategy recommendHearitProvider;
@@ -79,6 +83,7 @@ class HearitServiceTest {
                 bookmarkRepository,
                 hearitKeywordRepository,
                 categoryRepository,
+                playingHistoryRepository,
                 recommendHearitProvider);
     }
 

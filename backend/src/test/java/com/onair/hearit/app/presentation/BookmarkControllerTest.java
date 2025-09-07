@@ -9,13 +9,13 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
-import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
@@ -70,6 +70,8 @@ class BookmarkControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(초)"),
                                                         fieldWithPath("content[].categoryColor").description(
                                                                 "해당 히어릿 카테고리 ColoCode")
                                                 }),

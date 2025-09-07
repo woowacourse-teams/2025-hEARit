@@ -23,6 +23,7 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.RecommendHearit;
 import com.onair.hearit.common.domain.Source;
 import com.onair.hearit.docs.ApiDocSnippets;
@@ -54,6 +55,7 @@ class HearitControllerTest extends IntegrationTest {
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 1));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
         Keyword keyword2 = dbHelper.insertKeyword(new Keyword("Spring"));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
@@ -77,7 +79,7 @@ class HearitControllerTest extends IntegrationTest {
                 ))
                 .when()
                 .get("/api/v1/hearits/{hearitId}", hearit.getId())
-                .then()
+                .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(HearitDetailResponse.class);
 
@@ -273,6 +275,8 @@ class HearitControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(초)").optional(),
                                                         fieldWithPath("content[].keywords").description(
                                                                 "히어릿에 포함된 키워드 목록"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
@@ -529,6 +533,7 @@ class HearitControllerTest extends IntegrationTest {
                 fieldWithPath("sources[].sourceName").description("출처의 이름"),
                 fieldWithPath("sources[].sourceUrl").description("출처의 URL"),
                 fieldWithPath("playTime").type(JsonFieldType.NUMBER).description("재생 시간(초)"),
+                fieldWithPath("lastPlayTime").type(JsonFieldType.NUMBER).description("마지막 재생 시간(초)").optional(),
                 fieldWithPath("createdAt").type(JsonFieldType.STRING).description("생성 일시"),
                 fieldWithPath("isBookmarked").type(JsonFieldType.BOOLEAN).description("현재 사용자의 북마크 여부"),
                 fieldWithPath("bookmarkId").type(JsonFieldType.NUMBER).description("북마크 ID (북마크된 경우)").optional(),

@@ -4,22 +4,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.app.dto.request.PagingRequest;
+import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.auth.domain.UserContext;
-import com.onair.hearit.common.exception.custom.AlreadyExistException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
-import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
-import com.onair.hearit.app.dto.request.PagingRequest;
-import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
-import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
-import com.onair.hearit.fixture.DbHelper;
-import com.onair.hearit.fixture.TestFixture;
+import com.onair.hearit.common.exception.custom.AlreadyExistException;
+import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
+import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,11 +47,15 @@ class BookmarkServiceTest {
     @Autowired
     private BookmarkRepository bookmarkRepository;
 
+    @Autowired
+    private PlayingHistoryRepository playingHistoryRepository;
+
     private BookmarkService bookmarkService;
 
     @BeforeEach
     void setup() {
-        bookmarkService = new BookmarkService(hearitRepository, memberRepository, bookmarkRepository);
+        bookmarkService = new BookmarkService(hearitRepository, memberRepository, bookmarkRepository,
+                playingHistoryRepository);
     }
 
     @Test
