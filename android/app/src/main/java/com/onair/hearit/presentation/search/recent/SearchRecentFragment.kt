@@ -38,6 +38,7 @@ class SearchRecentFragment :
     private val viewModel: SearchViewModel by viewModels({ requireActivity() }) {
         SearchViewModelFactory(null)
     }
+    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,18 +75,16 @@ class SearchRecentFragment :
             parentFragmentManager.popBackStack()
         }
 
-        binding.etSearch.viewTreeObserver.addOnGlobalLayoutListener(
-            object :
-                ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    binding.etSearch.requestFocus()
-                    val imm =
-                        requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
-                    binding.etSearch.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                }
-            },
-        )
+        globalLayoutListener =
+            ViewTreeObserver.OnGlobalLayoutListener {
+                binding.etSearch.requestFocus()
+                val imm =
+                    requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
+                binding.etSearch.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+                globalLayoutListener = null
+            }
+        binding.etSearch.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
         binding.etSearch.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
@@ -172,6 +171,9 @@ class SearchRecentFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+        globalLayoutListener?.let {
+            binding.etSearch.viewTreeObserver.removeOnGlobalLayoutListener(it)
+        }
         _binding = null
     }
 }
