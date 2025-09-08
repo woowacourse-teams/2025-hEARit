@@ -73,7 +73,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].lastPlayTime").description(
                                                                 "히어릿 마지막 재생 시간(초)"),
                                                         fieldWithPath("content[].categoryColor").description(
-                                                                "해당 히어릿 카테고리 ColoCode")
+                                                                "해당 히어릿 카테고리 ColorCode")
                                                 }),
                                                 Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
