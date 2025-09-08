@@ -16,6 +16,9 @@ import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,16 +41,30 @@ public class BookmarkService {
         Member member = getMemberByUserContext(userContext);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(member, pageable);
+        Map<Long, Long> playTimeMap = getPlayTimeMap(member.getId(), bookmarks.getContent());
+        Page<BookmarkHearitResponse> response = mapToResponsePage(bookmarks, playTimeMap);
 
-        return PagedResponse.from(bookmarks.map(hearit -> toBookmarkHearitResponse(hearit, member)));
+        return PagedResponse.from(response);
     }
 
-    private BookmarkHearitResponse toBookmarkHearitResponse(Bookmark bookmark, Member member) {
-        Hearit hearit = bookmark.getHearit();
-        Long lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
-                .map(PlayingHistory::getLastPlayTime)
-                .orElse(null);
-        return BookmarkHearitResponse.of(bookmark, hearit, lastPlayTime);
+    private Map<Long, Long> getPlayTimeMap(Long memberId, List<Bookmark> bookmarks) {
+        List<Long> hearitIds = bookmarks.stream()
+                .map(bookmark -> bookmark.getHearit().getId())
+                .toList();
+        return playingHistoryRepository.findByMemberIdAndHearitIdIn(memberId, hearitIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        PlayingHistory::getHearitId,
+                        PlayingHistory::getLastPlayTime
+                ));
+    }
+
+    private Page<BookmarkHearitResponse> mapToResponsePage(Page<Bookmark> bookmarks, Map<Long, Long> playTimeMap) {
+        return bookmarks.map(bookmark -> {
+            Hearit hearit = bookmark.getHearit();
+            Long lastPlayTime = playTimeMap.getOrDefault(hearit.getId(), null);
+            return BookmarkHearitResponse.of(bookmark, hearit, lastPlayTime);
+        });
     }
 
     @Transactional
