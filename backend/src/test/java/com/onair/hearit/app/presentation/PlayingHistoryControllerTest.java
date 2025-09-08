@@ -78,17 +78,6 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .contentType("application/json")
                 .body(request)
-                .filter(document("playing-history",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Playing History API")
-                                .summary("재생기록 생성")
-                                .description("로그인한 회원의 재생기록을 저장합니다.")
-                                .requestFields(
-                                        fieldWithPath("hearitId").description("히어릿 ID"),
-                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간")
-                                )
-                                .build())
-                ))
                 .when()
                 .put("/api/v1/playing-histories")
                 .then()
