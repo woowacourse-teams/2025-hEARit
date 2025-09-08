@@ -1,12 +1,10 @@
-package com.onair.hearit.presentation.search.result
+package com.onair.hearit.presentation.search.recent.searchResult
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -14,25 +12,26 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.databinding.FragmentSearchResultBinding
+import com.onair.hearit.databinding.FragmentSearchResultPageBinding
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.HearitClickListener
+import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.search.SearchViewModel
+import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.home.HearitClickListener
 import com.onair.hearit.presentation.main.MainActivity
 
-class SearchResultFragment :
+class SearchResultPageFragment :
     Fragment(),
     HearitClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
-    private var _binding: FragmentSearchResultBinding? = null
+    private var _binding: FragmentSearchResultPageBinding? = null
     private val binding get() = _binding!!
 
-    private val searchedTerm: SearchInput by lazy {
-        SearchInput.from(requireArguments())
-    }
-
-    private val viewModel: SearchResultViewModel by viewModels {
-        SearchResultViewModelFactory(searchedTerm)
+    private val viewModel: SearchViewModel by viewModels {
+        val input = requireArguments().let { SearchInput.from(it) }
+        SearchViewModelFactory(input)
     }
     private val searchedAdapter: SearchedHearitAdapter by lazy { SearchedHearitAdapter(this) }
 
@@ -41,7 +40,7 @@ class SearchResultFragment :
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentSearchResultBinding.inflate(inflater, container, false)
+        _binding = FragmentSearchResultPageBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
@@ -54,11 +53,8 @@ class SearchResultFragment :
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
         setupRecyclerView()
+        fetchData()
         observeViewModel()
-        binding.nsvSearchResult.setOnTouchListener { _, _ ->
-            hideKeyboard()
-            false
-        }
     }
 
     private fun setupWindowInsets() {
@@ -91,8 +87,12 @@ class SearchResultFragment :
         }
     }
 
+    private fun fetchData() {
+        viewModel.fetchResultData(true)
+    }
+
     private fun observeViewModel() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
+        viewModel.searchUiState.observe(viewLifecycleOwner) { state ->
             binding.uiState = state
         }
         viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
@@ -105,13 +105,6 @@ class SearchResultFragment :
 
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun hideKeyboard() {
-        val inputMethodManager =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val view = requireActivity().currentFocus ?: binding.root
-        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     override fun onClick(hearitId: Long) {
@@ -127,8 +120,8 @@ class SearchResultFragment :
     companion object {
         private const val REFRESH_THRESHOLD = 3
 
-        fun newInstance(input: SearchInput): SearchResultFragment =
-            SearchResultFragment().apply {
+        fun newInstance(input: SearchInput): SearchResultPageFragment =
+            SearchResultPageFragment().apply {
                 arguments = input.toBundle()
             }
     }

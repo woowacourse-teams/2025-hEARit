@@ -29,7 +29,10 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.ActivityMainBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.PlaybackStarter
 import com.onair.hearit.presentation.PlayerControllerView
@@ -95,8 +98,12 @@ class MainActivity :
         detailResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    setPlayerControlViewVisibility()
+                    val detailResult =
+                        result.data.toDetailResult() ?: return@registerForActivityResult
+                    detailResult.navigate(this)
                 }
+                mainViewModel.bookmarkUpdated.value = Unit
+                setPlayerControlViewVisibility()
             }
     }
 
@@ -167,6 +174,7 @@ class MainActivity :
             binding.drawerLayout.closeDrawer(GravityCompat.END)
         }
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
+        binding.layoutDrawer.tvTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
         binding.layoutDrawer.tvOpenLicense.setOnClickListener { navigateToLicense() }
         binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
         binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
@@ -300,7 +308,7 @@ class MainActivity :
         }
     }
 
-    fun setPlayerControlViewVisibility() {
+    private fun setPlayerControlViewVisibility() {
         val controller = mediaController
         val isPreparedOrPlaying =
             controller?.let { it.isPlaying || it.playbackState == Player.STATE_READY } == true
@@ -314,6 +322,11 @@ class MainActivity :
     }
 
     private fun navigateToLogin() {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "drawer_login"),
+        )
+
         val intent =
             Intent(this, LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -324,7 +337,7 @@ class MainActivity :
 
     private fun navigateToDetail(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(this, hearitId)
-        startActivity(intent)
+        launchDetailActivity(intent)
     }
 
     private fun showToast(message: String?) {

@@ -1,10 +1,10 @@
-package com.onair.hearit.presentation.search.result
+package com.onair.hearit.presentation.search.recent.searchResult
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.presentation.home.HearitClickListener
+import com.onair.hearit.presentation.HearitClickListener
 
 class SearchedHearitAdapter(
     private val clickListener: HearitClickListener,
@@ -17,10 +17,7 @@ class SearchedHearitAdapter(
     override fun onBindViewHolder(
         holder: SearchedHearitViewHolder,
         position: Int,
-    ) {
-        val item: SearchedHearit = getItem(position)
-        holder.bind(item)
-    }
+    ) = holder.bind(getItem(position))
 
     companion object {
         private val DiffCallback =

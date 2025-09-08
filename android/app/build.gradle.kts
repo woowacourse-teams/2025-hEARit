@@ -21,9 +21,15 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 10100
-        versionName = "1.1.0"
+        versionCode = 10103
+        versionName = "1.1.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders += mapOf()
+        val kakaoNativeKey =
+            gradleLocalProperties(rootDir, providers).getProperty("KAKAO_NATIVE_KEY") ?: ""
+        buildConfigField("String", "KAKAO_NATIVE_KEY", "\"$kakaoNativeKey\"")
+        manifestPlaceholders["kakaoNativeKey"] = kakaoNativeKey
     }
 
     val signingFile = rootProject.file("keystore.properties")
@@ -91,15 +97,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "21"
-    }
-    defaultConfig {
-        manifestPlaceholders += mapOf()
-
-        val kakaoNativeKey =
-            gradleLocalProperties(rootDir, providers).getProperty("KAKAO_NATIVE_KEY") ?: ""
-        buildConfigField("String", "KAKAO_NATIVE_KEY", "\"$kakaoNativeKey\"")
-
-        manifestPlaceholders["kakaoNativeKey"] = kakaoNativeKey
     }
     buildFeatures {
         buildConfig = true

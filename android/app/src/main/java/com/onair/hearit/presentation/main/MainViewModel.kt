@@ -32,6 +32,8 @@ class MainViewModel(
     private val _withdrawState = MutableLiveData<Boolean>()
     val withdrawState: LiveData<Boolean> = _withdrawState
 
+    val bookmarkUpdated = MutableLiveData<Unit>()
+
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 

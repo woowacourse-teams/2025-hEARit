@@ -33,11 +33,20 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.analytics.AnalyticsScreenInfo
+import com.onair.hearit.analytics.AnalyticsParamKeys.KEYWORD_NAME
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.LAST_POSITION_KEY
+import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
+import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
+import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
+import com.onair.hearit.presentation.IntentValues.KEYWORD_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.dpToPx
@@ -54,7 +63,7 @@ class PlayerDetailActivity :
     AppCompatActivity(),
     PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private val keywordAdapter: PlayerDetailKeywordAdapter by lazy { PlayerDetailKeywordAdapter() }
+    private val keywordAdapter: PlayerDetailKeywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
     private val scriptAdapter: PlayerDetailScriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val sourceAdapter: PlayerDetailSourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
@@ -63,10 +72,10 @@ class PlayerDetailActivity :
     private val updateInterval = 500L
     private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
     private val previousScreen by lazy {
-        intent.getStringExtra(AnalyticsParamKeys.SOURCE) ?: UNKNOWN_SCREEN_ID
+        intent.getStringExtra(PREVIOUS_SCREEN_KEY) ?: UNKNOWN_SCREEN_ID
     }
-    private val hearitId: Long by lazy { intent.getLongExtra(HEARIT_ID, -1) }
-    private val lastPosition: Long by lazy { intent.getLongExtra(LAST_POSITION, 0) }
+    private val hearitId: Long by lazy { intent.getLongExtra(HEARIT_ID_KEY, -1) }
+    private val lastPosition: Long by lazy { intent.getLongExtra(LAST_POSITION_KEY, 0) }
 
     private val viewModel: PlayerDetailViewModel by viewModels {
         PlayerDetailViewModelFactory(hearitId)
@@ -96,6 +105,7 @@ class PlayerDetailActivity :
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
         binding.lifecycleOwner = this
+        binding.clickListener = this
         binding.viewModel = viewModel
 
         setupBackPressHandler()
@@ -104,12 +114,6 @@ class PlayerDetailActivity :
         observeViewModel()
         setupMediaController()
         setupBaseControllerBookmark()
-
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Detail.NAME,
-            screenClass = AnalyticsScreenInfo.Detail.CLASS,
-            previousScreen = previousScreen,
-        )
 
         supportFragmentManager.addOnBackStackChangedListener {
             val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view)
@@ -120,16 +124,17 @@ class PlayerDetailActivity :
 
     private fun setupBackPressHandler() {
         val backAction = {
-            if (previousScreen == EXPLORE_SCREEN_ID) {
-                viewModel.bookmarkId.value?.let { bookmarkId ->
-                    intent =
-                        Intent().apply {
-                            putExtra(HEARIT_ID, hearitId)
-                            putExtra(BOOKMARK_ID, bookmarkId)
-                        }
-                }
+            if (previousScreen == EXPLORE_VALUE) {
+                val resultIntent =
+                    Intent().apply {
+                        putExtra(TYPE_KEY, EXPLORE_VALUE)
+                        putExtra(HEARIT_ID_KEY, hearitId)
+                        viewModel.bookmarkId.value?.let { putExtra(BOOKMARK_ID_KEY, it) }
+                    }
+                setResult(RESULT_OK, resultIntent)
+            } else {
+                setResult(RESULT_CANCELED)
             }
-            setResult(RESULT_OK, intent)
             finish()
         }
 
@@ -286,7 +291,7 @@ class PlayerDetailActivity :
         val controller = mediaController ?: return
         val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
         val isDifferentHearit = currentlyPlayingId != hearit.id
-        val shouldResume = intent.hasExtra(LAST_POSITION) && lastPosition > 0L
+        val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
         val startPosition = if (shouldResume) lastPosition else 0L
         val source = hearit.sources.first().name
 
@@ -307,8 +312,9 @@ class PlayerDetailActivity :
     }
 
     private fun showLoginRequiredDialog() {
-        LoginRequiredDialogFragment { navigateToLogin() }
-            .show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_ID)
+        LoginRequiredDialogFragment {
+            navigateToLogin()
+        }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun startPlaybackService(
@@ -333,9 +339,17 @@ class PlayerDetailActivity :
     }
 
     private fun navigateToLogin() {
-        startActivity(LoginActivity.newIntent(this))
-        val intent = Intent(this, PlaybackService::class.java)
-        stopService(intent)
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "detail_login"),
+        )
+
+        val intent = LoginActivity.newIntent(this)
+        startActivity(intent)
+
+        val serviceIntent = Intent(this, PlaybackService::class.java)
+        this.stopService(serviceIntent)
+
         finish()
     }
 
@@ -343,19 +357,58 @@ class PlayerDetailActivity :
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onClickSource(sourceUrl: String) {
+    override fun onClickCategory(
+        id: Long,
+        name: String,
+    ) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
+            mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
+        )
+//        val input = SearchInput.Category(id, name)
+//        val resultIntent = Intent().apply { putExtras(input.toBundle()) }
+//        setResult(RESULT_OK, resultIntent)
+        finish()
+    }
+
+    override fun onClickSource(
+        name: String,
+        url: String,
+    ) {
         try {
-            val uri = sourceUrl.toUri()
+            val uri = url.toUri()
             if (uri.scheme !in listOf("http", "https")) {
                 Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
                 showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
                 return
             }
-            startActivity(Intent(Intent.ACTION_VIEW, uri))
+
+            AnalyticsProvider.get().logEvent(
+                AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
+                mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
+            )
+
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
         } catch (e: Exception) {
             Timber.w(e)
-            showToast(ERROR_OPEN_LINK_FAILED)
+            showToast(ERROR_INVALID_LINK_MESSAGE)
         }
+    }
+
+    override fun onClickKeyword(term: String) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.DETAIL_KEYWORD_SELECTED,
+            mapOf(KEYWORD_NAME to term),
+        )
+        val input = SearchInput.Keyword(term)
+        val resultIntent =
+            Intent().apply {
+                putExtra(TYPE_KEY, KEYWORD_VALUE)
+                putExtras(input.toBundle())
+            }
+        setResult(RESULT_OK, resultIntent)
+        finish()
     }
 
     override fun onDestroy() {
@@ -370,10 +423,10 @@ class PlayerDetailActivity :
         const val LIBRARY_SCREEN_ID = "library"
         const val EXPLORE_SCREEN_ID = "explore"
         const val UNKNOWN_SCREEN_ID = "unknown"
-        const val LOGIN_REQUIRED_DIALOG_ID = "login_required_dialog"
-        private const val SCRIPT_ITEM_HEIGHT_DP = 48
-        private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다."
-        private const val ERROR_OPEN_LINK_FAILED = "링크를 열 수 없습니다."
+        const val LOGIN_REQUIRED_DIALOG_TAG = "login_required_dialog"
+        private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
+        private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
+        private const val SCRIPT_ITEM_HEIGHT_DP = 16
 
         fun newIntent(
             context: Context,
@@ -383,8 +436,8 @@ class PlayerDetailActivity :
             source: String = UNKNOWN_SCREEN_ID,
         ): Intent =
             Intent(context, PlayerDetailActivity::class.java).apply {
-                putExtra(HEARIT_ID, hearitId)
-                lastPosition?.let { putExtra(LAST_POSITION, it) }
+                putExtra(HEARIT_ID_KEY, hearitId)
+                lastPosition?.let { putExtra(LAST_POSITION_KEY, it) }
                 bookmarkId?.let { putExtra(BOOKMARK_ID, it) }
                 putExtra(AnalyticsParamKeys.SOURCE, source)
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
