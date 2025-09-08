@@ -175,6 +175,7 @@ class ExploreFragment :
                 ) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         switchTo(currentIndex())
+                        player.play()
                         AnalyticsProvider.get().logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
                     }
                 }
@@ -304,7 +305,7 @@ class ExploreFragment :
         hearitId: Long,
         title: String,
     ) {
-        player.playWhenReady = false
+//        player.playWhenReady = false
 
         val lastPosition = playerManager.getCurrentPosition()
         AnalyticsProvider.get().logEvent(
