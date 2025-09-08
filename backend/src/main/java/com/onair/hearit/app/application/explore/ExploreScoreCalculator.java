@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,7 +21,7 @@ public class ExploreScoreCalculator {
 
     public Map<Long, Double> calculateTotalScores(String uuid, UserType userType) {
         List<ScoreFactor> supportedScoreFactors = getSupportedScoreFactors(userType);
-        List<Hearit> hearits = hearitRepository.findAll();
+        List<Hearit> hearits = hearitRepository.findAll(Pageable.ofSize(100)).getContent();
         Map<Long, Double> totalExploreScores = initTotalExploreScores(hearits);
         for (ScoreFactor scoreFactor : supportedScoreFactors) {
             Map<Long, Double> scores = scoreFactor.calculate(uuid, hearits);
