@@ -1,6 +1,5 @@
 package com.onair.hearit.common.domain;
 
-
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -65,7 +64,7 @@ public class PlayingHistory {
     }
 
     private void validateHearitPlayTime(Hearit hearit, long lastPlayTime) {
-        if (lastPlayTime > hearit.getPlayTime() * MILLISECONDS_PER_SECOND) {
+        if (lastPlayTime < 0 || lastPlayTime > hearit.getPlayTime() * MILLISECONDS_PER_SECOND) {
             throw new InvalidInputException("마지막 재생 시간은 히어릿의 총 재생 시간보다 작아야 합니다");
         }
     }

@@ -4,6 +4,7 @@ import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
 import com.onair.hearit.app.infrastructure.scheduler.PlayingHistoryBuffer;
 import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
@@ -20,16 +21,11 @@ public class PlayingHistoryService {
     private final HearitRepository hearitRepository;
 
     public boolean addPlayingHistory(UserContext userContext, PlayingHistoryRequest request) {
-        validateHearit(request.hearitId());
         checkMember(userContext);
-        playingHistoryBuffer.addPlayingHistory(userContext.memberId(), request.hearitId(), request.lastPlayTime());
+        Hearit hearit = getHearitById(request.hearitId());
+        PlayingHistory history = new PlayingHistory(userContext.memberId(), hearit, request.lastPlayTime());
+        playingHistoryBuffer.add(history);
         return !playingHistoryRepository.existsByHearitIdAndMemberId(request.hearitId(), userContext.memberId());
-    }
-
-    private void validateHearit(Long hearitId) {
-        if (!hearitRepository.existsById(hearitId)) {
-            throw new NotFoundException("hearitId", hearitId.toString());
-        }
     }
 
     private void checkMember(UserContext userContext) {
