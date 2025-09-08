@@ -23,10 +23,10 @@ class BookmarkRepositoryImpl(
             val sortedBookmarks = pageResult.items.sortedBy { it.bookmarkId }
 
             val currentIndex = sortedBookmarks.indexOfFirst { it.bookmarkId == currentId }
-            if (currentIndex != -1 && currentIndex + 1 < sortedBookmarks.size) {
-                sortedBookmarks[currentIndex + 1]
+            if (currentIndex > 0) {
+                sortedBookmarks[currentIndex - 1]
             } else {
-                null // 마지막 북마크거나 존재하지 않으면 null 반환
+                null
             }
         }
 }
