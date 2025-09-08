@@ -27,7 +27,7 @@ public class PlayingHistoryCommandRepository {
         jdbcTemplate.batchUpdate(sql, histories, histories.size(), (ps, history) -> {
             ps.setLong(1, history.getMemberId());
             ps.setLong(2, history.getHearitId());
-            ps.setInt(3, history.getLastPlayTime());
+            ps.setLong(3, history.getLastPlayTime());
             ps.setBoolean(4, history.isFinished());
             ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
         });

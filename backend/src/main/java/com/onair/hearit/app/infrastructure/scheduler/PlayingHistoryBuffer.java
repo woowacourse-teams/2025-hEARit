@@ -24,8 +24,8 @@ public class PlayingHistoryBuffer {
 
     private final BlockingQueue<HistoryRecord> queue = new LinkedBlockingQueue<>();
 
-    public void addPlayingHistory(Long memberId, Long hearitId, int lastPlayTime) {
-        if (memberId == null || hearitId == null) {
+    public void addPlayingHistory(Long memberId, Long hearitId, Long lastPlayTime) {
+        if (memberId == null || hearitId == null || lastPlayTime == null) {
             return;
         }
         queue.add(new HistoryRecord(memberId, hearitId, lastPlayTime));
@@ -63,6 +63,6 @@ public class PlayingHistoryBuffer {
         }
     }
 
-    private record HistoryRecord(Long memberId, Long hearitId, int lastPlayTime) {
+    private record HistoryRecord(Long memberId, Long hearitId, Long lastPlayTime) {
     }
 }

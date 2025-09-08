@@ -44,7 +44,7 @@ public class BookmarkService {
 
     private BookmarkHearitResponse toBookmarkHearitResponse(Bookmark bookmark, Member member) {
         Hearit hearit = bookmark.getHearit();
-        Integer lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
+        Long lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
                 .map(PlayingHistory::getLastPlayTime)
                 .orElse(null);
         return BookmarkHearitResponse.of(bookmark, hearit, lastPlayTime);

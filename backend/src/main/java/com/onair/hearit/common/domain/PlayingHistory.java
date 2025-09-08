@@ -30,6 +30,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class PlayingHistory {
 
     private static final int FINISHED_TIME_RANGE = 10;
+    private static final int MILLISECONDS_PER_SECOND = 1_000;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +43,7 @@ public class PlayingHistory {
     private Long hearitId;
 
     @Column(name = "last_play_time", nullable = false)
-    private int lastPlayTime;
+    private long lastPlayTime;
 
     @Column(name = "is_finished", nullable = false)
     private boolean isFinished;
@@ -51,7 +52,7 @@ public class PlayingHistory {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public PlayingHistory(Long memberId, Hearit hearit, int lastPlayTime) {
+    public PlayingHistory(Long memberId, Hearit hearit, long lastPlayTime) {
         validateHearitPlayTime(hearit, lastPlayTime);
         this.memberId = memberId;
         this.hearitId = hearit.getId();
@@ -59,17 +60,17 @@ public class PlayingHistory {
         this.isFinished = checkIsFinished(hearit, lastPlayTime);
     }
 
-    private boolean checkIsFinished(Hearit hearit, int lastPlayTime) {
-        return lastPlayTime >= hearit.getPlayTime() - FINISHED_TIME_RANGE;
+    private boolean checkIsFinished(Hearit hearit, long lastPlayTime) {
+        return lastPlayTime >= (long) (hearit.getPlayTime() - FINISHED_TIME_RANGE) * MILLISECONDS_PER_SECOND;
     }
 
-    private void validateHearitPlayTime(Hearit hearit, int lastPlayTime) {
-        if (lastPlayTime > hearit.getPlayTime()) {
+    private void validateHearitPlayTime(Hearit hearit, long lastPlayTime) {
+        if (lastPlayTime > hearit.getPlayTime() * MILLISECONDS_PER_SECOND) {
             throw new InvalidInputException("마지막 재생 시간은 히어릿의 총 재생 시간보다 작아야 합니다");
         }
     }
 
-    public void setLastPlayTime(Integer lastPlayTime) {
+    public void setLastPlayTime(long lastPlayTime) {
         this.lastPlayTime = lastPlayTime;
     }
 }

@@ -61,7 +61,7 @@ public class HearitService {
         Long bookmarkId = bookmarkRepository.findByHearitAndMember(hearit, member)
                 .map(Bookmark::getId)
                 .orElse(null);
-        Integer lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
+        Long lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
                 .map(PlayingHistory::getLastPlayTime)
                 .orElse(null);
         return HearitDetailResponse.of(hearit, keywords, lastPlayTime, bookmarkId);

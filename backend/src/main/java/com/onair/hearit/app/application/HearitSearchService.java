@@ -51,7 +51,7 @@ public class HearitSearchService {
     }
 
     private HearitSearchResponse toHearitSearchResponseForMember(Hearit hearit, Member member) {
-        Integer lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
+        Long lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
                 .map(PlayingHistory::getLastPlayTime)
                 .orElse(null);
         List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),

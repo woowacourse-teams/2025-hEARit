@@ -13,7 +13,7 @@ public record HearitDetailResponse(
         String summary,
         List<SourceResponse> sources,
         Integer playTime,
-        Integer lastPlayTime,
+        Long lastPlayTime,
         LocalDateTime createdAt,
         Boolean isBookmarked,
         Long bookmarkId,
@@ -22,7 +22,7 @@ public record HearitDetailResponse(
 ) {
     public static HearitDetailResponse of(Hearit hearit,
                                           List<Keyword> keywords,
-                                          Integer lastPlayTime,
+                                          Long lastPlayTime,
                                           Long bookmarkId) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         List<SourceResponse> sources = getSources(hearit.getSources());

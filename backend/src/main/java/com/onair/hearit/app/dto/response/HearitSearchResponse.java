@@ -8,10 +8,10 @@ public record HearitSearchResponse(
         Long id,
         String title,
         Integer playTime,
-        Integer lastPlayTime,
+        Long lastPlayTime,
         List<KeywordResponse> keywords
 ) {
-    public static HearitSearchResponse of(Hearit hearit, List<Keyword> keywords, Integer lastPlayTime) {
+    public static HearitSearchResponse of(Hearit hearit, List<Keyword> keywords, Long lastPlayTime) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         return new HearitSearchResponse(
                 hearit.getId(),

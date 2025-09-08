@@ -16,7 +16,7 @@ class PlayingHistoryTest {
         Hearit hearit = createHearitWith(100);
 
         // when & then
-        assertThatThrownBy(() -> new PlayingHistory(1L, hearit, 101));
+        assertThatThrownBy(() -> new PlayingHistory(1L, hearit, 101_000));
     }
 
     @Test
@@ -26,7 +26,7 @@ class PlayingHistoryTest {
         Hearit hearit = createHearitWith(100);
 
         // when
-        PlayingHistory playingHistory = new PlayingHistory(1L, hearit, 90);
+        PlayingHistory playingHistory = new PlayingHistory(1L, hearit, 90_000);
 
         // then
         assertThat(playingHistory.isFinished()).isTrue();

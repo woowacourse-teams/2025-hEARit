@@ -67,7 +67,7 @@ class PlayingHistoryServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
         Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
         // when
         playingHistoryService.addPlayingHistory(UserContext.member(member.getId()), request);
@@ -88,7 +88,7 @@ class PlayingHistoryServiceTest {
         // given
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
         Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
         // when & then
         assertThatThrownBy(() -> playingHistoryService.addPlayingHistory(UserContext.guest(), request))
@@ -100,7 +100,7 @@ class PlayingHistoryServiceTest {
     void checkHearit() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        PlayingHistoryRequest request = new PlayingHistoryRequest(1L, 100);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(1L, 100L);
 
         // when
         assertThatThrownBy(() -> playingHistoryService.addPlayingHistory(UserContext.member(member.getId()), request))
