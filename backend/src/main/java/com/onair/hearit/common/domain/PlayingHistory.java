@@ -68,8 +68,4 @@ public class PlayingHistory {
             throw new InvalidInputException("마지막 재생 시간은 히어릿의 총 재생 시간보다 작아야 합니다");
         }
     }
-
-    public void setLastPlayTime(long lastPlayTime) {
-        this.lastPlayTime = lastPlayTime;
-    }
 }

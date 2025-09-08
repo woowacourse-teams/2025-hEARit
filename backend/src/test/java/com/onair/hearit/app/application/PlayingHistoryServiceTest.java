@@ -83,6 +83,30 @@ class PlayingHistoryServiceTest {
     }
 
     @Test
+    @DisplayName("로그인한 회원은 재생기록을 수정할 수 있다.")
+    void modifyPlayHistory() throws InterruptedException {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(new Category("name", "#000000"));
+        Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
+                new PlayingHistory(member.getId(), hearit, 10_000));
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
+
+        // when
+        playingHistoryService.addPlayingHistory(UserContext.member(member.getId()), request);
+        playingHistoryBuffer.flush();
+
+        // then
+        List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
+        assertAll(() -> {
+            assertThat(playingHistories.size()).isEqualTo(1);
+            assertThat(playingHistories.getFirst().getMemberId()).isEqualTo(member.getId());
+            assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId());
+        });
+    }
+
+    @Test
     @DisplayName("로그인하지 않은 회원은 재생기록을 저장할 수 없다.")
     void checkMember() {
         // given
