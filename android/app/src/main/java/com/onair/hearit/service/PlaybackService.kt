@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
@@ -75,7 +77,21 @@ class PlaybackService : MediaSessionService() {
     }
 
     private fun initializePlayer() {
-        player = ExoPlayer.Builder(this).build().apply { playWhenReady = false }
+        val audioAttributes =
+            AudioAttributes
+                .Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                .build()
+
+        player =
+            ExoPlayer
+                .Builder(this)
+                .setAudioAttributes(audioAttributes, true)
+                .build()
+                .apply {
+                    playWhenReady = false
+                }
     }
 
     private fun initializeMediaSession() {
