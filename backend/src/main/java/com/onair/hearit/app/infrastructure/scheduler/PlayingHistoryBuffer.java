@@ -1,6 +1,7 @@
 package com.onair.hearit.app.infrastructure.scheduler;
 
 import com.onair.hearit.common.domain.PlayingHistory;
+import com.onair.hearit.common.exception.custom.BufferRequestException;
 import com.onair.hearit.common.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PlayingHistoryBuffer {
 
+    private static final int BUFFER_SIZE = 10_000;
+
     private final PlayingHistoryCommandRepository playingHistoryCommandRepository;
-    private final BlockingQueue<PlayingHistory> queue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<PlayingHistory> queue = new LinkedBlockingQueue<>(BUFFER_SIZE);
 
     public void add(PlayingHistory playingHistory) {
-        if (playingHistory != null) {
-            queue.add(playingHistory);
+        if (!queue.offer(playingHistory)) {
+            throw new BufferRequestException("큐가 가득 차서 요청을 처리할 수 없습니다.");
         }
     }
 
