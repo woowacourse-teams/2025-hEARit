@@ -63,8 +63,7 @@ class LibraryViewModel(
             getBookmarksUseCase(page = page, size = null)
                 .onSuccess { pageResult ->
                     val currentList = _bookmarks.value.orEmpty()
-                    _bookmarks.value =
-                        (currentList + pageResult.items).sortedBy { it.bookmarkId }
+                    _bookmarks.value = currentList + pageResult.items
 
                     _uiState.value = if (_bookmarks.value.isNullOrEmpty()) NoBookmarks else LoggedIn
 
