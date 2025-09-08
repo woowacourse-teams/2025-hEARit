@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -304,37 +305,45 @@ class HearitControllerTest extends IntegrationTest {
         );
     }
 
-    @Test
-    @DisplayName("검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")
-    void readHearitsByCategoryWithInvalidParams() {
-        // when & then
-        RestAssured.given(this.spec)
-                .queryParam("searchTerm", "spring")
-                .queryParam("page", -1)
-                .queryParam("size", 10)
-                .filter(document("hearit-search-bad-request",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Hearit API")
-                                .summary("히어릿 검색")
-                                .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
-                                .build())
-                ))
-                .when()
-                .get("/api/v1/hearits/search")
-                .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
+    @Nested
+    @DisplayName("검색 파라미터가 유효하지 않을 때")
+    class SearchWithInvalidParams_400Error {
 
-        RestAssured.given()
-                .queryParam("searchTerm", "spring")
-                .queryParam("page", 0)
-                .queryParam("size", -1)
-                .when()
-                .get("/api/v1/hearits/search")
-                .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
+        @Test
+        @DisplayName("페이지 번호가 음수이면 400 에러를 반환한다.")
+        void withNegativePage() {
+            RestAssured.given(spec)
+                    .queryParam("searchTerm", "spring")
+                    .queryParam("page", -1)
+                    .queryParam("size", 10)
+                    .filter(document("hearit-search-bad-request",
+                            resource(ResourceSnippetParameters.builder()
+                                    .tag("Hearit API")
+                                    .summary("히어릿 검색 (실패 케이스)")
+                                    .description("유효하지 않은 파라미터로 검색을 요청할 경우의 에러 응답입니다.")
+                                    .responseSchema(Schema.schema("ProblemDetail"))
+                                    .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                    .build())
+                    ))
+                    .when()
+                    .get("/api/v1/hearits/search")
+                    .then()
+                    .statusCode(HttpStatus.BAD_REQUEST.value());
+        }
+
+        @Test
+        @DisplayName("페이지 크기가 음수이면 400 에러를 반환한다.")
+        void withNegativeSize() {
+            RestAssured.given(spec)
+                    .queryParam("searchTerm", "spring")
+                    .queryParam("page", 0)
+                    .queryParam("size", -1)
+                    .when()
+                    .get("/api/v1/hearits/search")
+                    .then()
+                    .statusCode(HttpStatus.BAD_REQUEST.value());
+        }
     }
-
     @Test
     @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, 추천하는 3개의 카테고리와 히어릿들을 반환한다.")
     void readHomeCategoriesHearit() {

@@ -59,7 +59,7 @@ public class AuthController {
 
     @DeleteMapping("/withdraw")
     public ResponseEntity<Void> withdraw(@AuthenticationPrincipal UserContext userContext) {
-        authService.withdraw(userContext.memberId());
+        authService.withdraw(userContext.getMemberId());
         return ResponseEntity.noContent().build();
     }
 }

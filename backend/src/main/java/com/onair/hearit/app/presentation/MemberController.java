@@ -19,7 +19,7 @@ public class MemberController {
 
     @GetMapping("/me")
     public ResponseEntity<MemberInfoResponse> readCurrentMemberInfo(@AuthenticationPrincipal UserContext userContext) {
-        MemberInfoResponse response = memberService.getMember(userContext.memberId());
+        MemberInfoResponse response = memberService.getMember(userContext.getMemberId());
         return ResponseEntity.ok(response);
     }
 }

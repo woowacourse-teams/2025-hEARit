@@ -25,6 +25,7 @@ import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -141,7 +142,7 @@ class HearitExploreServiceTest {
 
         // when
         CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(
-                UserContext.guest(), new CursorRequest(0L, 10));
+                UserContext.guest(UUID.randomUUID().toString()), new CursorRequest(0L, 10));
 
         // then
         // 출력을 해보고 싶으면 아래 주석 해제

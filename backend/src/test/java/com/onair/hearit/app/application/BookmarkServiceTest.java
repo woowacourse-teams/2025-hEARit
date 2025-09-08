@@ -21,6 +21,7 @@ import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,7 +77,7 @@ class BookmarkServiceTest {
     void getBookmarkHearitsTest_() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserContext guestContext = UserContext.guest();
+        UserContext guestContext = UserContext.guest(UUID.randomUUID().toString());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 

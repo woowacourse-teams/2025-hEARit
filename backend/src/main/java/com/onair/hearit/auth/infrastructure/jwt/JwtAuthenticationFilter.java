@@ -24,6 +24,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String DEVICE_UUID_HEADER = "X-Device-UUID";
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final List<String> whitelist;
     private final ObjectMapper objectMapper;
@@ -39,8 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 화이트리스트면 그냥 통과
         if ((token == null || token.isBlank()) && isWhitelisted(request)) {
+            String deviceUuid = request.getHeader(DEVICE_UUID_HEADER);
             UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(UserContext.guest(), null, null);
+                    new UsernamePasswordAuthenticationToken(UserContext.guest(deviceUuid), null, null);
             SecurityContextHolder.getContext().setAuthentication(auth);
             chain.doFilter(request, response);
             return;

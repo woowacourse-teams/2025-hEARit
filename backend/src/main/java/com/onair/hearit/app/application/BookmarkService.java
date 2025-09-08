@@ -66,7 +66,7 @@ public class BookmarkService {
         if (userContext == null || userContext.isGuest()) {
             throw new UnauthorizedException("로그인한 회원이 아닙니다.");
         }
-        return getMemberById(userContext.memberId());
+        return getMemberById(userContext.getMemberId());
     }
 
     private Member getMemberById(Long memberId) {
