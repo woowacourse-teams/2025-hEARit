@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemGroupedCategoryBinding
 import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.dpToPx
 
 class GroupedCategoryViewHolder(
