@@ -3,6 +3,7 @@ package com.onair.hearit.common.infrastructure.jdbc;
 import com.onair.hearit.common.domain.PlayingHistory;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +16,7 @@ public class PlayingHistoryCommandRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public void bulkInsert(List<PlayingHistory> histories) {
+        LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         String sql = """
                 INSERT INTO playing_history (member_id, hearit_id, last_play_time, is_finished, updated_at)
                 VALUES (?, ?, ?, ?, ?)
@@ -29,7 +31,7 @@ public class PlayingHistoryCommandRepository {
             ps.setLong(2, history.getHearitId());
             ps.setLong(3, history.getLastPlayTime());
             ps.setBoolean(4, history.isFinished());
-            ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setTimestamp(5, Timestamp.valueOf(nowDateTime));
         });
     }
 }
