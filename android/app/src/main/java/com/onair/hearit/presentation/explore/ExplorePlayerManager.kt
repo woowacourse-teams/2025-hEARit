@@ -15,6 +15,7 @@ class ExplorePlayerManager(
     private val lifecycleScope: LifecycleCoroutineScope,
     private val onPlaybackEnded: () -> Unit,
     private val onPositionUpdated: (Long) -> Unit,
+    private val onPlayerStateChanged: (isPlaying: Boolean) -> Unit,
 ) {
     val player by lazy {
         ExoPlayer
@@ -32,6 +33,10 @@ class ExplorePlayerManager(
                 if (state == Player.STATE_ENDED) {
                     onPlaybackEnded()
                 }
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                onPlayerStateChanged(isPlaying)
             }
         }
 

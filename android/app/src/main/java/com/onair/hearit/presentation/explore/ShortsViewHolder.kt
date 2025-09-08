@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import androidx.annotation.OptIn
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,18 +47,24 @@ class ShortsViewHolder(
     init {
         binding.shortsClickListener = listener
 
-        // ACTION_DOWN -> 처음 화면에 터치했을 때
         binding.viewGestureLayer.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN && isOnInteractive(event)) return@setOnTouchListener false
-
-            // 손을 뗐을 떄 일어나는 현상 + 제스처를 중간에 취소하는 경우 -> 부스트 멈춤
-            if ((event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) && isBoosting) {
-                stopBoost()
+            // ACTION_DOWN -> 처음 화면에 터치했을 때, 상세 정보 영역(isOnInteractive)이 아닌 경우에만 터치 이벤트 처리
+            if (event.action == MotionEvent.ACTION_DOWN && isOnInteractive(event)) {
+                // 상세 정보 영역 터치 시 이벤트 처리를 하지 않고, RecyclerView로 이벤트를 전달
+                return@setOnTouchListener false
             }
 
-            // 단일탭, 롱탭 등의 이벤트를 사용하기 위한 호출 + 계속 이벤트를 받을 수 있도록 true로 설정
-            detector.onTouchEvent(event)
-            true
+            // ACTION_UP(손을 뗐을 때) 또는 ACTION_CANCEL(제스처 취소) 시 부스트 멈춤
+            val shouldStopBoost =
+                (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) && isBoosting
+            if (shouldStopBoost) stopBoost()
+
+            // detector가 터치 이벤트를 처리했는지(단일 탭, 롱 탭 등) 확인
+            val handled = detector.onTouchEvent(event)
+
+            // GestureDetector가 이벤트를 처리했거나(handled), 부스트를 멈췄을 때만 이벤트를 소비(true 반환)
+            // 그 외의 경우(스크롤 등)는 false를 반환하여 RecyclerView가 이벤트를 처리하도록 함
+            handled || shouldStopBoost
         }
     }
 
@@ -90,20 +95,6 @@ class ShortsViewHolder(
             },
         )
 
-    private val playerListener =
-        object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) resumeLpRotation() else pauseLpRotation()
-            }
-
-            override fun onPlaybackStateChanged(state: Int) {
-                when (state) {
-                    Player.STATE_ENDED, Player.STATE_IDLE -> stopLpRotation()
-                    Player.STATE_BUFFERING -> pauseLpRotation()
-                }
-            }
-        }
-
     @OptIn(UnstableApi::class)
     fun bind(item: ShortsHearit) {
         this.item = item
@@ -113,7 +104,6 @@ class ShortsViewHolder(
         scriptAdapter.submitList(item.script)
 
         binding.layoutExplorePlayer.player = player
-        player.addListener(playerListener)
 
 //        binding.btnExploreItemBookmark.apply {
 //            isSelected = item.isBookmarked
@@ -123,8 +113,6 @@ class ShortsViewHolder(
 //                }
 //            }
 //        }
-
-        syncRotationWithPlayer()
     }
 
     fun highlightScriptLine(positionMs: Long) {
@@ -140,7 +128,6 @@ class ShortsViewHolder(
     fun onRecycled() {
         // 다양한 job들을 cancelChildren을 통해서 모두 취소함
         scope.coroutineContext.cancelChildren()
-//        player.removeListener(playerListener)
         stopLpRotation()
         binding.rvExploreItemScript.adapter = null
         item = null
@@ -148,8 +135,8 @@ class ShortsViewHolder(
 
     // 상세로 넘어가는 부분에서는 일시정지/배속의 제스쳐를 허용하면 안되기 때문에 해당 위치를 제외할 수 있도록 하는 코드
     private fun isOnInteractive(event: MotionEvent): Boolean {
-        binding.layoutExploreHearitInfo.getHitRect(interactiveRect)
-        return interactiveRect.contains(event.x.toInt(), event.y.toInt())
+        binding.layoutExploreHearitInfo.getGlobalVisibleRect(interactiveRect)
+        return interactiveRect.contains(event.rawX.toInt(), event.rawY.toInt())
     }
 
     private fun togglePlayPause() {
@@ -188,6 +175,10 @@ class ShortsViewHolder(
         isBoosting = false
     }
 
+    fun updateLpRotation(isPlaying: Boolean) {
+        if (isPlaying) resumeLpRotation() else pauseLpRotation()
+    }
+
     private fun startLpRotation() {
         rotateAnimator?.cancel()
         rotateAnimator =
@@ -197,16 +188,6 @@ class ShortsViewHolder(
                 interpolator = LinearInterpolator()
                 start()
             }
-    }
-
-    private fun syncRotationWithPlayer() {
-        when {
-            player.playbackState == Player.STATE_ENDED ||
-                player.playbackState == Player.STATE_IDLE -> stopLpRotation()
-
-            player.isPlaying -> resumeLpRotation()
-            else -> pauseLpRotation()
-        }
     }
 
     private fun stopLpRotation() {

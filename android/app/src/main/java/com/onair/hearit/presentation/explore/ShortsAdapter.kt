@@ -10,6 +10,8 @@ class ShortsAdapter(
     private val player: ExoPlayer,
     private val shortsClickListener: ShortsClickListener,
 ) : ListAdapter<ShortsHearit, ShortsViewHolder>((DiffCallback)) {
+    private var currentViewHolder: ShortsViewHolder? = null
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
@@ -27,6 +29,12 @@ class ShortsAdapter(
     override fun onViewRecycled(holder: ShortsViewHolder) {
         holder.onRecycled()
         super.onViewRecycled(holder)
+    }
+
+    fun updateCurrentViewHolder(viewHolder: ShortsViewHolder?) {
+        currentViewHolder?.updateLpRotation(false)
+        currentViewHolder = viewHolder
+        currentViewHolder?.updateLpRotation(player.isPlaying)
     }
 
     companion object {

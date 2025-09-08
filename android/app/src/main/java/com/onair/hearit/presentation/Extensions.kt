@@ -18,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 fun Int.dpToPx(context: Context): Int = (this * context.resources.displayMetrics.density).toInt()
 
@@ -73,7 +74,6 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 private suspend fun View.awaitAlpha(
     target: Float,
     duration: Long,
@@ -82,7 +82,7 @@ private suspend fun View.awaitAlpha(
     animate()
         .alpha(target)
         .setDuration(duration.coerceAtLeast(0L))
-        .withEndAction { if (cont.isActive) cont.resume(Unit) {} } // 애니메이션이 끝났을 때 코루틴을 재개
+        .withEndAction { if (cont.isActive) cont.resume(Unit) } // 애니메이션이 끝났을 때 코루틴을 재개
         .start()
     cont.invokeOnCancellation { animate().cancel() } // 코루틴이 취소되면 진행 중인 애니메이션을 취소
 }
