@@ -1,5 +1,6 @@
-package com.onair.hearit.app.application.explore.score;
+package com.onair.hearit.app.application.explore.scorefactor;
 
+import com.onair.hearit.auth.domain.UserType;
 import com.onair.hearit.common.domain.Hearit;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,12 @@ public class RandomScoreFactor implements ScoreFactor {
     private final Random random = new Random();
 
     @Override
-    public Map<Long, Double> calculate(Long memberId, List<Hearit> hearits) {
+    public boolean isSupported(UserType userType) {
+        return userType == UserType.GUEST || userType == UserType.MEMBER;
+    }
+
+    @Override
+    public Map<Long, Double> calculate(String uuid, List<Hearit> hearits) {
         return hearits.stream()
                 .collect(Collectors.toMap(
                         Hearit::getId,

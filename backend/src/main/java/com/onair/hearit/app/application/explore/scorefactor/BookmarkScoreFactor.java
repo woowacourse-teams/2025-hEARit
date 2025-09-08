@@ -1,8 +1,12 @@
-package com.onair.hearit.app.application.explore.score;
+package com.onair.hearit.app.application.explore.scorefactor;
 
+import com.onair.hearit.auth.domain.UserType;
 import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryBookmarkCount;
+import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,18 +20,29 @@ public class BookmarkScoreFactor implements ScoreFactor {
     private static final double MAX_BOOKMARK_SCORE = 30.0;
     private static final double MIN_BOOKMARK_SCORE = 0.0;
 
+    private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
     @Override
-    public Map<Long, Double> calculate(Long memberId, List<Hearit> hearits) {
-        Map<Long, Long> bookmarkCountsByCategory = getBookmarkCountsByCategory(memberId);
-        long totalBookmarkCount = calculateTotalBookmarkCount(bookmarkCountsByCategory);
+    public boolean isSupported(UserType userType) {
+        return userType == UserType.MEMBER;
+    }
 
+    @Override
+    public Map<Long, Double> calculate(String uuid, List<Hearit> hearits) {
+        Member member = getMemberByUuid(uuid);
+        Map<Long, Long> bookmarkCountsByCategory = getBookmarkCountsByCategory(member.getId());
+        long totalBookmarkCount = calculateTotalBookmarkCount(bookmarkCountsByCategory);
         return hearits.stream()
                 .collect(Collectors.toMap(
                         Hearit::getId,
                         hearit -> calculateBookmarkScore(hearit, bookmarkCountsByCategory, totalBookmarkCount)
                 ));
+    }
+
+    private Member getMemberByUuid(String uuid) {
+        return memberRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("uuid", uuid));
     }
 
     private Map<Long, Long> getBookmarkCountsByCategory(Long memberId) {

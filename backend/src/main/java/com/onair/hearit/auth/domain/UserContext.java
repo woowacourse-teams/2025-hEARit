@@ -4,10 +4,30 @@ public class UserContext {
 
     private final Long memberId;
     private final String guestId;
+    private final UserType userType;
 
     private UserContext(Long memberId, String guestId) {
+        validate(memberId, guestId);
         this.memberId = memberId;
         this.guestId = guestId;
+        this.userType = (memberId != null) ? UserType.MEMBER : UserType.GUEST;
+    }
+
+    private void validate(Long memberId, String guestId) {
+        if (memberId == null && guestId == null) {
+            //FIXME: 커스텀 예외
+            throw new IllegalStateException("UserContext를 생성할 수 없습니다.");
+        }
+        if(guestId != null) {
+            validateGuestId(guestId);
+        }
+    }
+
+    private void validateGuestId(String guestId) {
+        if(guestId == null || guestId.length() != 36) {
+            //FIXME: 커스텀 예외
+            throw new IllegalStateException("유효하지 않은 guestId입니다.");
+        }
     }
 
     public static UserContext guest(String guestId) {
@@ -25,11 +45,11 @@ public class UserContext {
     }
 
     public boolean isMember() {
-        return this.memberId != null;
+        return this.userType == UserType.MEMBER;
     }
 
     public boolean isGuest() {
-        return this.guestId != null;
+        return this.userType == UserType.GUEST;
     }
 
     public Long getMemberId() {
@@ -44,5 +64,9 @@ public class UserContext {
             throw new IllegalStateException("회원 컨텍스트에서는 guestId를 가져올 수 없습니다.");
         }
         return this.guestId;
+    }
+
+    public UserType getUserType() {
+        return this.userType;
     }
 }

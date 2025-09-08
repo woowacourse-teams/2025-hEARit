@@ -2,7 +2,7 @@ package com.onair.hearit.app.presentation;
 
 import com.onair.hearit.app.application.HearitSearchService;
 import com.onair.hearit.app.application.HearitService;
-import com.onair.hearit.app.application.HearitExploreService;
+import com.onair.hearit.app.application.explore.HearitExploreService;
 import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.app.dto.request.CursorRequest;
 import com.onair.hearit.app.dto.request.PagingRequest;

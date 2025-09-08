@@ -3,9 +3,12 @@ package com.onair.hearit.app.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.onair.hearit.app.application.explore.ExploreScoreCalculator;
-import com.onair.hearit.app.application.explore.score.BookmarkScoreFactor;
-import com.onair.hearit.app.application.explore.score.RandomScoreFactor;
-import com.onair.hearit.app.application.explore.score.RecencyScoreFactor;
+import com.onair.hearit.app.application.explore.HearitExploreService;
+import com.onair.hearit.app.application.explore.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.app.application.explore.scorefactor.RandomScoreFactor;
+import com.onair.hearit.app.application.explore.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.application.explore.scoreprocessor.GuestExploreScoreProcessor;
+import com.onair.hearit.app.application.explore.scoreprocessor.MemberExploreScoreProcessor;
 import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
 import com.onair.hearit.common.domain.Bookmark;
@@ -83,10 +86,15 @@ class HearitExploreServiceTest {
 
     @BeforeEach
     void setup() {
-        hearitExploreService = new HearitExploreService(
-                exploreScoreCommandRepository, exploredHearitQueryRepository, memberRepository, hearitRepository,
-                hearitKeywordRepository, bookmarkRepository, exploreScoreCalculator,
-                bookmarkScoreFactor, recencyScoreFactor, randomScoreFactor);
+        hearitExploreService = new HearitExploreService(List.of(
+                new GuestExploreScoreProcessor(
+                        exploreScoreCalculator, exploreScoreCommandRepository,
+                        exploredHearitQueryRepository, hearitKeywordRepository),
+                new MemberExploreScoreProcessor(
+                        exploreScoreCalculator, exploreScoreCommandRepository,
+                        exploredHearitQueryRepository, memberRepository,
+                        hearitKeywordRepository, bookmarkRepository)
+        ));
     }
 
     @DisplayName("회원 점수판 생성 - 북마크한카테고리, 최신성, 랜덤성")
