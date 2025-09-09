@@ -26,11 +26,11 @@ import com.onair.hearit.presentation.DetailResult
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
-import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService

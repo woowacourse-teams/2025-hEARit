@@ -19,10 +19,11 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.presentation.main.MainActivity
-import com.onair.hearit.presentation.main.MainViewModel
+import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.main.MainActivity
+import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.toDetailResult
 
@@ -139,7 +140,8 @@ class LibraryFragment :
     override fun onClickBookmarkedHearit(hearitId: Long) {
         val intent =
             PlayerDetailActivity.newIntent(requireActivity(), hearitId).apply {
-                putExtra(AnalyticsParamKeys.SOURCE, PlayerDetailActivity.LIBRARY_SCREEN_ID)
+                putExtra(AnalyticsParamKeys.SOURCE_NAME, PlayerDetailActivity.LIBRARY_SCREEN_ID)
+                putExtra(PREVIOUS_SCREEN_KEY, PlayerDetailActivity.LIBRARY_SCREEN_ID)
             }
         playerDetailLauncher.launch(intent)
     }

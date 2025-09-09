@@ -15,12 +15,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.FragmentSearchResultPageBinding
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
-import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
-import com.onair.hearit.presentation.home.HearitClickListener
-import com.onair.hearit.presentation.main.MainActivity
 
 class SearchResultPageFragment :
     Fragment(),

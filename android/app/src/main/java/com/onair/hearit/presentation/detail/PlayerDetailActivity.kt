@@ -417,8 +417,6 @@ class PlayerDetailActivity :
     }
 
     companion object {
-        const val HEARIT_ID = "hearitId"
-        const val LAST_POSITION = "lastPosition"
         const val BOOKMARK_ID = "bookmarkId"
         const val LIBRARY_SCREEN_ID = "library"
         const val EXPLORE_SCREEN_ID = "explore"
@@ -439,7 +437,7 @@ class PlayerDetailActivity :
                 putExtra(HEARIT_ID_KEY, hearitId)
                 lastPosition?.let { putExtra(LAST_POSITION_KEY, it) }
                 bookmarkId?.let { putExtra(BOOKMARK_ID, it) }
-                putExtra(AnalyticsParamKeys.SOURCE, source)
+                putExtra(AnalyticsParamKeys.SOURCE_NAME, source)
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
     }

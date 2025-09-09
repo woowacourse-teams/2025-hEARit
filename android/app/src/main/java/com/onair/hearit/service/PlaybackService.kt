@@ -220,20 +220,6 @@ class PlaybackService : MediaSessionService() {
             putExtra(EXTRA_BOOKMARK_ID, bookmarkId)
         }
 
-        fun appendIntent(
-            context: Context,
-            audioUrl: String,
-            title: String,
-            hearitId: Long,
-            source: String,
-        ) = Intent(context, PlaybackService::class.java).apply {
-            action = ACTION_APPEND_PLAYLIST
-            putExtra(EXTRA_AUDIO_URL, audioUrl)
-            putExtra(EXTRA_TITLE, title)
-            putExtra(EXTRA_HEARIT_ID, hearitId)
-            putExtra(EXTRA_SOURCE, source)
-        }
-
         fun stopIntent(context: Context) =
             Intent(context, PlaybackService::class.java).apply {
                 action = ACTION_STOP_SERVICE

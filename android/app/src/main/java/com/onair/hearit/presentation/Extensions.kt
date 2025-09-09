@@ -9,6 +9,7 @@ import com.onair.hearit.presentation.IntentKeys.EXPLORE_KEY
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
+import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.search.SearchFragment
 
 fun Int.dpToPx(context: Context): Int = (this * context.resources.displayMetrics.density).toInt()
