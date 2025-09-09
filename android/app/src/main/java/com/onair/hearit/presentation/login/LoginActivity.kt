@@ -19,6 +19,7 @@ import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityLoginBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
+import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.UserIdManager
 import kotlinx.coroutines.launch
@@ -113,7 +114,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private suspend fun setUserId(kakaoId: Long?) {
-        val userId = kakaoId?.toString() ?: UserIdManager.getOrCreateUserId(this)
+        val uuid = UserIdManager.getOrCreateUserId(this)
+        val userId = kakaoId?.toString() ?: uuid
+        TokenInterceptorProvider.setDeviceUuid(uuid)
         AnalyticsProvider.get().setUserId(userId)
         CrashlyticsProvider.get().setUserId(userId)
     }

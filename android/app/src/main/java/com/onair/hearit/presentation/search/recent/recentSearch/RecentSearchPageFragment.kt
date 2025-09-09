@@ -1,9 +1,7 @@
-package com.onair.hearit.presentation.search
+package com.onair.hearit.presentation.search.recent.recentSearch
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -11,25 +9,31 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.onair.hearit.R
-import com.onair.hearit.databinding.FragmentSearchBinding
+import com.onair.hearit.databinding.FragmentRecentSearchPageBinding
+import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.search.SearchViewModel
+import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
-class SearchFragment :
+class RecentSearchPageFragment :
     Fragment(),
-    CategoryClickListener {
+    RecentSearchClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
-    private var _binding: FragmentSearchBinding? = null
+    private var _binding: FragmentRecentSearchPageBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory(null) }
-    private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
+
+    private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
+
+    private val viewModel: SearchViewModel by viewModels({ requireActivity() }) {
+        SearchViewModelFactory(null)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentSearchBinding.inflate(inflater, container, false)
+        _binding = FragmentRecentSearchPageBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -39,22 +43,10 @@ class SearchFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
-        setupCategoryRecyclerView()
-        setupSearchInput()
+        setupListeners()
+        setupRecyclerView()
         observeViewModel()
-        viewModel.getCategories()
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupSearchInput() {
-        binding.btnSearch.setOnClickListener { navigateToRecent() }
-
-        binding.etSearch.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                navigateToRecent()
-            }
-            false
-        }
+        viewModel.getRecentKeywords()
     }
 
     private fun setupWindowInsets() {
@@ -65,36 +57,35 @@ class SearchFragment :
         }
     }
 
-    private fun setupCategoryRecyclerView() {
-        binding.rvSearchCategories.adapter = categoryAdapter
+    private fun setupListeners() {
+        binding.tvSearchRecentDelete.setOnClickListener {
+            viewModel.deleteKeywords()
+        }
+    }
+
+    private fun setupRecyclerView() {
+        binding.rvRecentKeyword.adapter = recentSearchAdapter
     }
 
     private fun observeViewModel() {
-        viewModel.categories.observe(viewLifecycleOwner) { categories ->
-            categoryAdapter.submitList(categories)
+        viewModel.recentKeywords.observe(viewLifecycleOwner) { keywords ->
+            recentSearchAdapter.submitList(keywords)
         }
-
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
     }
 
-    private fun navigateToRecent() {
-        parentFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment_container_view, SearchRecentFragment())
-            .addToBackStack(null)
-            .commit()
+    private fun navigateToSearchResult(input: SearchInput) {
+        (parentFragment as? SearchRecentFragment)?.showSearchResultPage(input)
     }
 
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onCategoryClick(
-        id: Long,
-        name: String,
-    ) {
+    override fun onRecentSearchClick(term: String) {
+        navigateToSearchResult(SearchInput.Keyword(term))
     }
 
     override fun onDestroyView() {
