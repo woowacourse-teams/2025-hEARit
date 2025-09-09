@@ -29,12 +29,10 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
 
     @Override
     public List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId, int size) {
-        System.out.println("======== getExploredHearits() -> List<ExploredHearitInfo> =========");
         List<ExploredHearitInfo> exploredHearitInfos = getExploredHearits(userInfo, cursorId, size);
         if (exploredHearitInfos.isEmpty()) {
             return List.of();
         }
-        System.out.println("======== exploredHearitInfos -> List<ExploredHearitResponse> ==========");
         return mapToExploredHearitResponses(exploredHearitInfos, userInfo);
     }
 
