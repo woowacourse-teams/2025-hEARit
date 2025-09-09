@@ -92,8 +92,8 @@ class HearitExploreServiceTest {
                         exploredHearitQueryRepository, hearitKeywordRepository),
                 new MemberExploreScoreProcessor(
                         exploreScoreCalculator, exploreScoreCommandRepository,
-                        exploredHearitQueryRepository, memberRepository,
-                        hearitKeywordRepository, bookmarkRepository)
+                        exploredHearitQueryRepository, hearitKeywordRepository,
+                        memberRepository, bookmarkRepository)
         ));
     }
 

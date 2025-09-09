@@ -9,51 +9,32 @@ import com.onair.hearit.common.infrastructure.jdbc.ExploreScoreCommandRepository
 import com.onair.hearit.common.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import java.util.List;
-import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-public class GuestExploreScoreProcessor implements ExploreScoreProcessor {
+public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
 
-    private static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
-
-    private final ExploreScoreCalculator exploreScoreCalculator;
-    private final ExploreScoreCommandRepository exploreScoreCommandRepository;
-    private final ExploredHearitQueryRepository exploredHearitQueryRepository;
-    private final HearitKeywordRepository hearitKeywordRepository;
+    public GuestExploreScoreProcessor(ExploreScoreCalculator exploreScoreCalculator,
+                                      ExploreScoreCommandRepository exploreScoreCommandRepository,
+                                      ExploredHearitQueryRepository exploredHearitQueryRepository,
+                                      HearitKeywordRepository hearitKeywordRepository) {
+        super(exploreScoreCalculator, exploreScoreCommandRepository,
+                exploredHearitQueryRepository, hearitKeywordRepository);
+    }
 
     @Override
     public boolean isSupported(UserContext userContext) {
-        if (userContext == null || userContext.isGuest()) {
-            return true;
-        }
-        return false;
+        return userContext == null || userContext.isGuest();
     }
 
     @Override
-    public List<ExploredHearitResponse> getExploreHearitsResponse(UserContext userContext, long cursorId, int size) {
-        List<Hearit> exploredHearits = getExploredHearits(userContext, cursorId, size);
-        return exploredHearits.stream()
-                .map(this::toExploredHearitResponse)
-                .toList();
+    protected String getUserUuId(UserContext userContext) {
+        return userContext.getGuestId();
     }
 
-    private List<Hearit> getExploredHearits(UserContext userContext, Long cursorId, int size) {
-        String uuid = userContext.getGuestId();
-
-        if (cursorId == 0L) {
-            Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(uuid, userContext.getUserType());
-            exploreScoreCommandRepository.insertScores(uuid, scores);
-            exploreScoreCommandRepository.updateCursorIds(uuid);
-        }
-        return exploredHearitQueryRepository.findExploredHearits(uuid, cursorId, size);
-    }
-
-    private ExploredHearitResponse toExploredHearitResponse(Hearit hearit) {
-        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(
-                hearit.getId(), KEYWORDS_PER_HEARIT_FOR_RANDOM);
+    @Override
+    protected ExploredHearitResponse toExploredHearitResponse(Hearit hearit, UserContext userContext) {
+        List<Keyword> keywords = getKeywords(hearit); // 부모 클래스의 공통 메소드 사용
         return ExploredHearitResponse.from(hearit, keywords);
     }
 }
