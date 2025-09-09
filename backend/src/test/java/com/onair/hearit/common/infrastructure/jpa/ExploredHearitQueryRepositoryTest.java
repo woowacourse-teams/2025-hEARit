@@ -7,6 +7,7 @@ import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.ExploreScore;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -31,7 +33,7 @@ class ExploredHearitQueryRepositoryTest {
     private DbHelper dbHelper;
 
     @Test
-    @DisplayName("회원의 점수 기반 히어릿을 커서 이후부터 조회한다")
+    @DisplayName("회원의 점수 기반 히어릿과 cursorId를 커서 이후부터 조회한다")
     void findExploredHearits_ForMember_byMember() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -41,13 +43,16 @@ class ExploredHearitQueryRepositoryTest {
                 .toList();
 
         // when
-        List<Hearit> result = exploredHearitQueryRepository.findExploredHearits(member.getUuid(), 2L, 3);
+        List<ExploredHearitInfo> result = exploredHearitQueryRepository.findExploredHearits(
+                member.getUuid(), 2L, Pageable.ofSize(3));
 
         // then
         assertAll(() -> {
             assertThat(result).hasSize(3);
-            assertThat(result).extracting(Hearit::getId) // cusorId 이후 size 만큼 조회
+            assertThat(result).extracting(exploredHearitInfo -> exploredHearitInfo.getHearit().getId()) // cusorId 이후 size 만큼 조회
                     .contains(exploreScoreHearitIds.get(2), exploreScoreHearitIds.get(3), exploreScoreHearitIds.get(4));
+            assertThat(result).extracting(ExploredHearitInfo::getCursorId)
+                    .contains(3L, 4L, 5L);
         });
     }
 

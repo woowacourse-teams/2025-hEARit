@@ -3,10 +3,10 @@ package com.onair.hearit.app.application.explore.scoreprocessor;
 import com.onair.hearit.app.application.explore.ExploreScoreCalculator;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.auth.domain.UserContext;
-import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
 import com.onair.hearit.common.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.ExploredHearitQueryRepository;
@@ -46,13 +46,13 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    protected ExploredHearitResponse toExploredHearitResponse(Hearit hearit, UserContext userContext) {
+    protected ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo info, UserContext userContext) {
         Member member = getMemberById(userContext.getMemberId());
-        List<Keyword> keywords = getKeywords(hearit);
+        List<Keyword> keywords = getKeywords(info.getHearit());
 
-        return bookmarkRepository.findByHearitAndMember(hearit, member)
-                .map(bookmark -> ExploredHearitResponse.fromWithBookmark(hearit, bookmark, keywords))
-                .orElseGet(() -> ExploredHearitResponse.from(hearit, keywords));
+        return bookmarkRepository.findByHearitAndMember(info.getHearit(), member)
+                .map(bookmark -> ExploredHearitResponse.fromWithBookmark(info.getHearit(), bookmark, keywords, info.getCursorId()))
+                .orElseGet(() -> ExploredHearitResponse.from(info.getHearit(), keywords, info.getCursorId()));
     }
 
     private Member getMemberById(Long memberId) {

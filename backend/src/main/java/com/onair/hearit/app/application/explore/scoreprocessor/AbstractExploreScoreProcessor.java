@@ -5,6 +5,7 @@ import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
 import com.onair.hearit.common.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractExploreScoreProcessor implements ExploreScoreProcessor {
@@ -25,13 +27,13 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
 
     @Override
     public List<ExploredHearitResponse> getExploreHearitsResponse(UserContext userContext, long cursorId, int size) {
-        List<Hearit> exploredHearits = getExploredHearits(userContext, cursorId, size);
-        return exploredHearits.stream()
-                .map(hearit -> toExploredHearitResponse(hearit, userContext))
+        List<ExploredHearitInfo> exploredHearitInfos = getExploredHearits(userContext, cursorId, size);
+        return exploredHearitInfos.stream()
+                .map(info -> toExploredHearitResponse(info, userContext))
                 .toList();
     }
 
-    private List<Hearit> getExploredHearits(UserContext userContext, Long cursorId, int size) {
+    private List<ExploredHearitInfo> getExploredHearits(UserContext userContext, Long cursorId, int size) {
         String userId = getUserUuId(userContext);
 
         if (cursorId == 0L) {
@@ -39,7 +41,7 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
             exploreScoreCommandRepository.insertScores(userId, scores);
             exploreScoreCommandRepository.updateCursorIds(userId);
         }
-        return exploredHearitQueryRepository.findExploredHearits(userId, cursorId, size);
+        return exploredHearitQueryRepository.findExploredHearits(userId, cursorId, Pageable.ofSize(size));
     }
 
     protected List<Keyword> getKeywords(Hearit hearit) {
@@ -48,5 +50,5 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
     }
 
     protected abstract String getUserUuId(UserContext userContext);
-    protected abstract ExploredHearitResponse toExploredHearitResponse(Hearit hearit, UserContext userContext);
+    protected abstract ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo exploredHearitInfo, UserContext userContext);
 }

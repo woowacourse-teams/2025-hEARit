@@ -4,14 +4,12 @@ import java.util.List;
 
 public record CursorResponse<T>(
         List<T> content,
-        boolean isEmpty,
-        Long cursorId
+        boolean isEmpty
 ) {
-    public static <T> CursorResponse<T> from(List<T> cursorResult, Long cursorId) {
+    public static <T> CursorResponse<T> from(List<T> cursorResult) {
         return new CursorResponse<>(
                 cursorResult,
-                cursorResult.isEmpty(),
-                cursorId
+                cursorResult.isEmpty()
         );
     }
 }

@@ -23,8 +23,7 @@ public class HearitExploreService {
                         userContext,
                         cursorRequest.cursorId(),
                         cursorRequest.size());
-        long updatedCursorId = cursorRequest.cursorId() + exploreHearitsResponses.size();
-        return CursorResponse.from(exploreHearitsResponses, updatedCursorId);
+        return CursorResponse.from(exploreHearitsResponses);
     }
 
     private ExploreScoreProcessor getExploreScoreProcessor(UserContext userContext) {

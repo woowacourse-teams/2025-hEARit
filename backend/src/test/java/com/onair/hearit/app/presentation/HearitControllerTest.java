@@ -176,7 +176,8 @@ class HearitControllerTest extends IntegrationTest {
                                                                 "히어릿에 포함된 키워드 목록"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description(
-                                                                "키워드 이름")
+                                                                "키워드 이름"),
+                                                        fieldWithPath("content[].cursorId").description("커서 ID"),
                                                 }),
                                                 Arrays.stream(ApiDocSnippets.getCustomCursorResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
@@ -195,7 +196,6 @@ class HearitControllerTest extends IntegrationTest {
         assertAll(() -> {
             assertThat(responses.content()).hasSize(3);
             assertThat(responses.isEmpty()).isFalse();
-            assertThat(responses.cursorId()).isEqualTo(3);
         });
     }
 
