@@ -130,7 +130,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT);
 
-        Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
+        Hearit updatedHearit = hearitRepository.findByIdWithDetail(hearit.getId()).orElseThrow();
         assertAll(() -> {
             assertThat(updatedHearit.getTitle()).isEqualTo("수정 제목");
             assertThat(updatedHearit.getSummary()).isEqualTo("수정 요약");
@@ -166,7 +166,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT);
 
-        Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
+        Hearit updatedHearit = hearitRepository.findByIdWithDetail(hearit.getId()).orElseThrow();
         assertAll(() -> {
             assertThat(updatedHearit.getSources().get(0).getSourceName()).isEqualTo("수정출처1");
             assertThat(updatedHearit.getSources().get(1).getSourceName()).isEqualTo("수정출처2");

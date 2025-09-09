@@ -11,6 +11,15 @@ import org.springframework.data.repository.query.Param;
 
 public interface HearitRepository extends JpaRepository<Hearit, Long> {
 
+    @Query("""
+        SELECT DISTINCT h
+        FROM Hearit h
+        LEFT JOIN FETCH h.category c
+        LEFT JOIN FETCH h.sources s
+        WHERE h.id = :id
+    """)
+    Optional<Hearit> findByIdWithDetail(@Param("id") Long id);
+
     @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id = :id")
     Optional<Hearit> findWithCategoryById(Long id);
 
