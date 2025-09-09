@@ -20,41 +20,22 @@ import org.springframework.data.domain.Pageable;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractExploreScoreProcessor implements ExploreScoreProcessor {
 
-    private static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
+    protected static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
 
     private final ExploreScoreCalculator exploreScoreCalculator;
     private final ExploreScoreCommandRepository exploreScoreCommandRepository;
     private final ExploredHearitQueryRepository exploredHearitQueryRepository;
-    private final HearitKeywordRepository hearitKeywordRepository;
+    protected final HearitKeywordRepository hearitKeywordRepository;
 
     @Override
     public List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId, int size) {
         System.out.println("======== getExploredHearits() -> List<ExploredHearitInfo> =========");
         List<ExploredHearitInfo> exploredHearitInfos = getExploredHearits(userInfo, cursorId, size);
-
+        if (exploredHearitInfos.isEmpty()) {
+            return List.of();
+        }
         System.out.println("======== exploredHearitInfos -> List<ExploredHearitResponse> ==========");
-        List<Hearit> hearits = exploredHearitInfos.stream()
-                .map(ExploredHearitInfo::getHearit)
-                .toList();
-
-        Map<Hearit, List<HearitKeyword>> allHearitKeywordsMap = hearitKeywordRepository.findAllByHearitIn(hearits).stream()
-                .collect(Collectors.groupingBy(HearitKeyword::getHearit));
-        Map<Hearit, List<Keyword>> keywordsMap = allHearitKeywordsMap.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().stream()
-                                .sorted((hk1, hk2) -> hk2.getId().compareTo(hk1.getId()))
-                                .limit(KEYWORDS_PER_HEARIT_FOR_RANDOM)
-                                .map(HearitKeyword::getKeyword)
-                                .toList()
-                ));
-
-        return exploredHearitInfos.stream()
-                .map(info -> {
-                    List<Keyword> keywords = keywordsMap.getOrDefault(info.getHearit(), List.of());
-                    return toExploredHearitResponse(info, keywords, userInfo);
-                })
-                .toList();
+        return mapToExploredHearitResponses(exploredHearitInfos, userInfo);
     }
 
     private List<ExploredHearitInfo> getExploredHearits(UserInfo userInfo, Long cursorId, int size) {
@@ -68,11 +49,26 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
         return exploredHearitQueryRepository.findExploredHearits(userId, cursorId, Pageable.ofSize(size));
     }
 
+    protected Map<Hearit, List<Keyword>> prepareKeywordsMap(List<Hearit> hearits) {
+        Map<Hearit, List<HearitKeyword>> allHearitKeywordsMap = hearitKeywordRepository.findAllByHearitIn(hearits)
+                .stream()
+                .collect(Collectors.groupingBy(HearitKeyword::getHearit));
+
+        return allHearitKeywordsMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .sorted((hk1, hk2) -> hk2.getId().compareTo(hk1.getId()))
+                                .limit(KEYWORDS_PER_HEARIT_FOR_RANDOM)
+                                .map(HearitKeyword::getKeyword)
+                                .toList()
+                ));
+    }
+
     protected abstract String getUserUuId(UserInfo userInfo);
 
-    protected abstract ExploredHearitResponse toExploredHearitResponse(
-            ExploredHearitInfo exploredHearitInfo,
-            List<Keyword> keywords,
+    protected abstract List<ExploredHearitResponse> mapToExploredHearitResponses(
+            List<ExploredHearitInfo> infos,
             UserInfo userInfo
     );
 }
