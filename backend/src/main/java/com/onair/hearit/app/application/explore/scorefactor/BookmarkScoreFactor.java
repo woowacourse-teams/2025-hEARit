@@ -1,8 +1,8 @@
 package com.onair.hearit.app.application.explore.scorefactor;
 
-import com.onair.hearit.auth.domain.UserType;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.UserType;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryBookmarkCount;
@@ -22,6 +22,20 @@ public class BookmarkScoreFactor implements ScoreFactor {
 
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
+
+    private static long calculateTotalBookmarkCount(Map<Long, Long> bookmarkCountsByCategory) {
+        return Math.max(1, bookmarkCountsByCategory.values().stream()
+                .mapToLong(Long::longValue)
+                .sum());
+    }
+
+    private static double calculateBookmarkScore(Hearit hearit,
+                                                 Map<Long, Long> bookmarkCountsByCategory,
+                                                 long totalBookmarkCount) {
+        long sameCategoryCount = bookmarkCountsByCategory
+                .getOrDefault(hearit.getCategory().getId(), 0L);
+        return Math.max(MIN_BOOKMARK_SCORE, ((double) sameCategoryCount / totalBookmarkCount) * MAX_BOOKMARK_SCORE);
+    }
 
     @Override
     public boolean isSupported(UserType userType) {
@@ -51,19 +65,5 @@ public class BookmarkScoreFactor implements ScoreFactor {
                         CategoryBookmarkCount::getCategoryId,
                         CategoryBookmarkCount::getCount
                 ));
-    }
-
-    private static long calculateTotalBookmarkCount(Map<Long, Long> bookmarkCountsByCategory) {
-        return Math.max(1, bookmarkCountsByCategory.values().stream()
-                .mapToLong(Long::longValue)
-                .sum());
-    }
-
-    private static double calculateBookmarkScore(Hearit hearit,
-                                                 Map<Long, Long> bookmarkCountsByCategory,
-                                                 long totalBookmarkCount) {
-        long sameCategoryCount = bookmarkCountsByCategory
-                .getOrDefault(hearit.getCategory().getId(), 0L);
-        return Math.max(MIN_BOOKMARK_SCORE, ((double) sameCategoryCount / totalBookmarkCount) * MAX_BOOKMARK_SCORE);
     }
 }

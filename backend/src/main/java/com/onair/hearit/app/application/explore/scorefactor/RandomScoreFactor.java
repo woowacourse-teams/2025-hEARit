@@ -1,7 +1,7 @@
 package com.onair.hearit.app.application.explore.scorefactor;
 
-import com.onair.hearit.auth.domain.UserType;
 import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.UserType;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;

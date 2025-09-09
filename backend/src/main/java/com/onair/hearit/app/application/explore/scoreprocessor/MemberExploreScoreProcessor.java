@@ -2,9 +2,9 @@ package com.onair.hearit.app.application.explore.scoreprocessor;
 
 import com.onair.hearit.app.application.explore.ExploreScoreCalculator;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
 import com.onair.hearit.common.infrastructure.jdbc.ExploreScoreCommandRepository;
@@ -25,7 +25,8 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
                                        ExploreScoreCommandRepository exploreScoreCommandRepository,
                                        ExploredHearitQueryRepository exploredHearitQueryRepository,
                                        HearitKeywordRepository hearitKeywordRepository,
-                                       MemberRepository memberRepository, BookmarkRepository bookmarkRepository) {
+                                       MemberRepository memberRepository,
+                                       BookmarkRepository bookmarkRepository) {
         super(exploreScoreCalculator, exploreScoreCommandRepository,
                 exploredHearitQueryRepository, hearitKeywordRepository);
         this.memberRepository = memberRepository;
@@ -33,25 +34,29 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    public boolean isSupported(UserContext userContext) {
-        if (userContext == null || userContext.isGuest()) {
+    public boolean isSupported(UserInfo userInfo) {
+        if (userInfo == null || userInfo.isGuest()) {
             return false;
         }
-        return userContext.isMember() && memberRepository.existsById(userContext.getMemberId());
+        return userInfo.isMember() && memberRepository.existsById(userInfo.getMemberId());
     }
 
     @Override
-    protected String getUserUuId(UserContext userContext) {
-        return getMemberById(userContext.getMemberId()).getUuid();
+    protected String getUserUuId(UserInfo userInfo) {
+        return getMemberById(userInfo.getMemberId()).getUuid();
     }
 
     @Override
-    protected ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo info, UserContext userContext) {
-        Member member = getMemberById(userContext.getMemberId());
+    protected ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo info, UserInfo userInfo) {
+        Member member = getMemberById(userInfo.getMemberId());
         List<Keyword> keywords = getKeywords(info.getHearit());
 
         return bookmarkRepository.findByHearitAndMember(info.getHearit(), member)
-                .map(bookmark -> ExploredHearitResponse.fromWithBookmark(info.getHearit(), bookmark, keywords, info.getCursorId()))
+                .map(bookmark ->
+                        ExploredHearitResponse.fromWithBookmark(
+                                info.getHearit(),
+                                bookmark, keywords,
+                                info.getCursorId()))
                 .orElseGet(() -> ExploredHearitResponse.from(info.getHearit(), keywords, info.getCursorId()));
     }
 

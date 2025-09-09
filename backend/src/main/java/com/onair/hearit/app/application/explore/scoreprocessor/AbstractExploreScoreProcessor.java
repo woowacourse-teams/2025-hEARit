@@ -2,9 +2,9 @@ package com.onair.hearit.app.application.explore.scoreprocessor;
 
 import com.onair.hearit.app.application.explore.ExploreScoreCalculator;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
 import com.onair.hearit.common.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.ExploredHearitQueryRepository;
@@ -26,18 +26,18 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
     private final HearitKeywordRepository hearitKeywordRepository;
 
     @Override
-    public List<ExploredHearitResponse> getExploreHearitsResponse(UserContext userContext, long cursorId, int size) {
-        List<ExploredHearitInfo> exploredHearitInfos = getExploredHearits(userContext, cursorId, size);
+    public List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId, int size) {
+        List<ExploredHearitInfo> exploredHearitInfos = getExploredHearits(userInfo, cursorId, size);
         return exploredHearitInfos.stream()
-                .map(info -> toExploredHearitResponse(info, userContext))
+                .map(info -> toExploredHearitResponse(info, userInfo))
                 .toList();
     }
 
-    private List<ExploredHearitInfo> getExploredHearits(UserContext userContext, Long cursorId, int size) {
-        String userId = getUserUuId(userContext);
+    private List<ExploredHearitInfo> getExploredHearits(UserInfo userInfo, Long cursorId, int size) {
+        String userId = getUserUuId(userInfo);
 
         if (cursorId == 0L) {
-            Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(userId, userContext.getUserType());
+            Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(userId, userInfo.getUserType());
             exploreScoreCommandRepository.insertScores(userId, scores);
             exploreScoreCommandRepository.updateCursorIds(userId);
         }
@@ -49,6 +49,8 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
                 hearit.getId(), KEYWORDS_PER_HEARIT_FOR_RANDOM);
     }
 
-    protected abstract String getUserUuId(UserContext userContext);
-    protected abstract ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo exploredHearitInfo, UserContext userContext);
+    protected abstract String getUserUuId(UserInfo userInfo);
+
+    protected abstract ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo exploredHearitInfo,
+                                                                       UserInfo userInfo);
 }

@@ -2,8 +2,8 @@ package com.onair.hearit.app.application.explore.scoreprocessor;
 
 import com.onair.hearit.app.application.explore.ExploreScoreCalculator;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
 import com.onair.hearit.common.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.ExploredHearitQueryRepository;
@@ -23,17 +23,17 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    public boolean isSupported(UserContext userContext) {
-        return userContext == null || userContext.isGuest();
+    public boolean isSupported(UserInfo userInfo) {
+        return userInfo == null || userInfo.isGuest();
     }
 
     @Override
-    protected String getUserUuId(UserContext userContext) {
-        return userContext.getGuestId();
+    protected String getUserUuId(UserInfo userInfo) {
+        return userInfo.getGuestId();
     }
 
     @Override
-    protected ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo info, UserContext userContext) {
+    protected ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo info, UserInfo userInfo) {
         List<Keyword> keywords = getKeywords(info.getHearit());
         return ExploredHearitResponse.from(info.getHearit(), keywords, info.getCursorId());
     }

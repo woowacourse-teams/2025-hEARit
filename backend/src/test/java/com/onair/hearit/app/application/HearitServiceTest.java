@@ -11,7 +11,7 @@ import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.app.dto.response.RecommendHearitResponse;
-import com.onair.hearit.auth.domain.UserContext;
+import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
@@ -95,7 +95,7 @@ class HearitServiceTest {
 
         // when
         HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(),
-                UserContext.member(member.getId()));
+                RequestUser.member(member.getId()).getUserInfo());
 
         // then
         assertAll(
@@ -118,7 +118,8 @@ class HearitServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // when & then
-        assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId, UserContext.member(notExistHearitId)))
+        assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId,
+                RequestUser.member(notExistHearitId).getUserInfo()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
     }
@@ -174,7 +175,7 @@ class HearitServiceTest {
 
         // when
         List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(
-                UserContext.member(member.getId()));
+                RequestUser.member(member.getId()).getUserInfo());
 
         // then
         assertAll(() -> {
@@ -210,9 +211,9 @@ class HearitServiceTest {
 
         // when
         List<HearitsWithRecommendCategoryResponse> firstResponses = hearitService.getHearitsWithRecommendCategory(
-                UserContext.member(member.getId()));
+                RequestUser.member(member.getId()).getUserInfo());
         List<HearitsWithRecommendCategoryResponse> secondResponses = hearitService.getHearitsWithRecommendCategory(
-                UserContext.member(member.getId()));
+                RequestUser.member(member.getId()).getUserInfo());
 
         // then
         assertAll(() -> {

@@ -1,4 +1,4 @@
-package com.onair.hearit.auth.domain;
+package com.onair.hearit.common.domain;
 
 public enum UserType {
     MEMBER,
