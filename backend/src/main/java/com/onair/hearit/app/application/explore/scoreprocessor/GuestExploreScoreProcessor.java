@@ -33,8 +33,9 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    protected ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo info, UserInfo userInfo) {
-        List<Keyword> keywords = getKeywords(info.getHearit());
+    protected ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo info,
+                                                              List<Keyword> keywords,
+                                                              UserInfo userInfo) {
         return ExploredHearitResponse.from(info.getHearit(), keywords, info.getCursorId());
     }
 }

@@ -47,16 +47,13 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    protected ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo info, UserInfo userInfo) {
+    protected ExploredHearitResponse toExploredHearitResponse(ExploredHearitInfo info,
+                                                              List<Keyword> keywords,
+                                                              UserInfo userInfo) {
         Member member = getMemberById(userInfo.getMemberId());
-        List<Keyword> keywords = getKeywords(info.getHearit());
-
         return bookmarkRepository.findByHearitAndMember(info.getHearit(), member)
-                .map(bookmark ->
-                        ExploredHearitResponse.fromWithBookmark(
-                                info.getHearit(),
-                                bookmark, keywords,
-                                info.getCursorId()))
+                .map(bookmark -> ExploredHearitResponse.fromWithBookmark(
+                        info.getHearit(), bookmark, keywords, info.getCursorId()))
                 .orElseGet(() -> ExploredHearitResponse.from(info.getHearit(), keywords, info.getCursorId()));
     }
 
