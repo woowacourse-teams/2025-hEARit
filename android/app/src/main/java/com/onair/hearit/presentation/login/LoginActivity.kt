@@ -21,8 +21,8 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.presentation.UserIdManager
-import kotlinx.coroutines.launch
 import com.onair.hearit.presentation.main.MainActivity
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class LoginActivity : AppCompatActivity() {
