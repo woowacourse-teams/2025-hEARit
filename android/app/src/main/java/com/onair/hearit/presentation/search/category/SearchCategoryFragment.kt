@@ -1,0 +1,124 @@
+package com.onair.hearit.presentation.search.category
+
+import android.annotation.SuppressLint
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.databinding.FragmentSearchCategoryBinding
+import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.HearitClickListener
+import com.onair.hearit.presentation.MainActivity
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.search.SearchViewModel
+import com.onair.hearit.presentation.search.SearchViewModelFactory
+import com.onair.hearit.presentation.search.recent.searchResult.SearchedHearitAdapter
+
+class SearchCategoryFragment :
+    Fragment(),
+    HearitClickListener {
+    @Suppress("ktlint:standard:backing-property-naming")
+    private var _binding: FragmentSearchCategoryBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: SearchViewModel by viewModels {
+        val input = requireArguments().let { SearchInput.from(it) }
+        SearchViewModelFactory(input)
+    }
+    private val searchedAdapter: SearchedHearitAdapter by lazy { SearchedHearitAdapter(this) }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        _binding = FragmentSearchCategoryBinding.inflate(inflater, container, false)
+        binding.lifecycleOwner = viewLifecycleOwner
+        return binding.root
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
+        super.onViewCreated(view, savedInstanceState)
+        setupWindowInsets()
+        setupRecyclerView()
+        fetchData()
+        observeViewModel()
+    }
+
+    private fun setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, systemBars.top, 0, 0)
+            insets
+        }
+    }
+
+    private fun setupRecyclerView() {
+        binding.rvSearchedHearit.apply {
+            adapter = searchedAdapter
+            addOnScrollListener(
+                object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(
+                        recyclerView: RecyclerView,
+                        dx: Int,
+                        dy: Int,
+                    ) {
+                        val layoutManager =
+                            recyclerView.layoutManager as? LinearLayoutManager ?: return
+                        val threshold = layoutManager.itemCount - REFRESH_THRESHOLD
+                        val last = layoutManager.findLastVisibleItemPosition()
+
+                        if (last >= threshold) viewModel.loadNextPageIfPossible()
+                    }
+                },
+            )
+        }
+    }
+
+    private fun fetchData() {
+        viewModel.fetchResultData(true)
+    }
+
+    private fun observeViewModel() {
+        viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
+            searchedAdapter.submitList(searchedHearits)
+        }
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
+        }
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onClick(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
+        (activity as? MainActivity)?.launchDetailActivity(intent)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    companion object {
+        private const val REFRESH_THRESHOLD = 3
+
+        fun newInstance(input: SearchInput): SearchCategoryFragment =
+            SearchCategoryFragment().apply {
+                arguments = input.toBundle()
+            }
+    }
+}

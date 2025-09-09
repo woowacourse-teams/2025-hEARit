@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.result
+package com.onair.hearit.presentation.search.category
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

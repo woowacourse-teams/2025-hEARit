@@ -35,14 +35,6 @@
                     app:layout_constraintTop_toTopOf="parent" />
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="12dp"
-                android:layout_marginVertical="4dp"
-                android:baselineAligned="false"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_search"
                 android:layout_width="match_parent"
@@ -55,16 +47,6 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_search"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:endIconMode="clear_text"
-                    app:hintEnabled="false"
-                    app:startIconDrawable="@drawable/ic_search"
-                    app:startIconTint="@color/hearit_gray4">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_search"
@@ -82,7 +64,6 @@
                         android:textColorHint="@color/hearit_gray2"
                         android:textCursorDrawable="@drawable/search_cursor" />
 
-            </LinearLayout>
                     <ImageButton
                         android:id="@+id/btn_search"
                         android:layout_width="48dp"

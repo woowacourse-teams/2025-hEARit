@@ -13,6 +13,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
+import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
 class SearchFragment :
@@ -95,6 +97,18 @@ class SearchFragment :
         id: Long,
         name: String,
     ) {
+        parentFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.fragment_container_view,
+                SearchCategoryFragment.newInstance(
+                    SearchInput.Category(
+                        id,
+                        name,
+                    ),
+                ),
+            ).addToBackStack(null)
+            .commit()
     }
 
     override fun onDestroyView() {

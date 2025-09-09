@@ -14,6 +14,8 @@ import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.presentation.SingleLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -34,6 +36,9 @@ class SearchViewModel(
 
     private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
     val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
+
+    private val _categoryHearits = MutableStateFlow<List<SearchedHearit>>(emptyList())
+    val categoryHearits: StateFlow<List<SearchedHearit>> = _categoryHearits
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
