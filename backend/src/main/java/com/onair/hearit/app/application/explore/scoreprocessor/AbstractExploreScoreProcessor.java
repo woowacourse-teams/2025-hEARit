@@ -33,7 +33,7 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
         if (exploredHearitInfos.isEmpty()) {
             return List.of();
         }
-        return mapToExploredHearitResponses(exploredHearitInfos, userInfo);
+        return convertToExploredHearitResponses(exploredHearitInfos, userInfo);
     }
 
     private List<ExploredHearitInfo> getExploredHearits(UserInfo userInfo, Long cursorId, int size) {
@@ -65,7 +65,7 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
 
     protected abstract String getUserUuId(UserInfo userInfo);
 
-    protected abstract List<ExploredHearitResponse> mapToExploredHearitResponses(
+    protected abstract List<ExploredHearitResponse> convertToExploredHearitResponses(
             List<ExploredHearitInfo> infos,
             UserInfo userInfo
     );

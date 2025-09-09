@@ -51,8 +51,9 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    protected List<ExploredHearitResponse> mapToExploredHearitResponses(List<ExploredHearitInfo> exploredHearitInfos,
-                                                                        UserInfo userInfo) {
+    protected List<ExploredHearitResponse> convertToExploredHearitResponses(
+            List<ExploredHearitInfo> exploredHearitInfos,
+            UserInfo userInfo) {
         List<Hearit> hearits = exploredHearitInfos.stream()
                 .map(ExploredHearitInfo::getHearit)
                 .toList();
