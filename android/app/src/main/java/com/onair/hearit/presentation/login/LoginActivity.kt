@@ -114,9 +114,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private suspend fun setUserId(kakaoId: Long?) {
-        val guid = UserIdManager.getOrCreateUserId(this)
-        val userId = kakaoId?.toString() ?: guid
-        TokenInterceptorProvider.setDeviceUuid(guid)
+        val uuid = UserIdManager.getOrCreateUserId(this)
+        val userId = kakaoId?.toString() ?: uuid
+        TokenInterceptorProvider.setDeviceUuid(uuid)
         AnalyticsProvider.get().setUserId(userId)
         CrashlyticsProvider.get().setUserId(userId)
     }
