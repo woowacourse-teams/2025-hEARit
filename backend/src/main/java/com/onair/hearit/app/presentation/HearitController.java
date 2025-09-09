@@ -82,10 +82,11 @@ public class HearitController {
     public ResponseEntity<PagedResponse<HearitOfCategoryResponse>> readHearitsByCategory(
             @RequestParam(name = "categoryId") Long categoryId,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size) {
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @AuthenticationPrincipal UserContext userContext) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<HearitOfCategoryResponse> response = hearitService.getHearitsByCategory(categoryId,
-                pagingRequest);
+                pagingRequest, userContext);
         return ResponseEntity.ok(response);
     }
 }

@@ -241,7 +241,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category1.getId(),
-                request);
+                request, UserContext.guest());
 
         // then
         assertAll(() -> {
@@ -265,7 +265,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request);
+                request, UserContext.guest());
 
         // then
         assertAll(
@@ -287,7 +287,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request);
+                request, UserContext.guest());
 
         // then
         assertAll(

@@ -443,7 +443,8 @@ class HearitControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].keywords").description("관련 키워드 목록"),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(밀리초)"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description("키워드 이름")
                                                 }),

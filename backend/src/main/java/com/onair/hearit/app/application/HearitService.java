@@ -11,6 +11,7 @@ import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
@@ -26,7 +27,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -113,7 +116,6 @@ public class HearitService {
                 .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
     }
 
-
     private List<Long> pickTodayRandomCategoryIds(List<Category> recommendCategories, int count) {
         long seed = LocalDate.now().toEpochDay();
         List<Long> categoryIds = getAllCategoryIdsWithoutRecommend(recommendCategories);
@@ -135,16 +137,54 @@ public class HearitService {
         return HearitsWithRecommendCategoryResponse.from(category, hearits);
     }
 
-    public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
+    public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(
+            Long categoryId,
+            PagingRequest pagingRequest,
+            UserContext userContext) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::toHearitOfCategoryResponse);
-        return PagedResponse.from(hearitResponses);
+        List<Long> hearitIds = hearits.getContent().stream().map(Hearit::getId).toList();
+        Map<Long, List<Keyword>> keywordsMap = getKeywordsMap(hearitIds);
+        Map<Long, Long> playTimeMap;
+        if (userContext == null || userContext.isGuest()) {
+            playTimeMap = Collections.emptyMap();
+        } else {
+            playTimeMap = getPlayTimeMap(userContext.memberId(), hearitIds);
+        }
+        Page<HearitOfCategoryResponse> response = hearits.map(hearit -> {
+            List<Keyword> keywords = keywordsMap.getOrDefault(hearit.getId(), Collections.emptyList());
+            Long lastPlayTime = playTimeMap.get(hearit.getId());
+            return HearitOfCategoryResponse.from(hearit, keywords, lastPlayTime);
+        });
+
+        return PagedResponse.from(response);
     }
 
-    private HearitOfCategoryResponse toHearitOfCategoryResponse(Hearit hearit) {
-        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-                KEYWORDS_PER_CATEGORIZED_HEARIT);
-        return HearitOfCategoryResponse.from(hearit, keywords);
+    private Map<Long, List<Keyword>> getKeywordsMap(List<Long> hearitIds) {
+        List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
+        return hearitKeywords.stream()
+                .collect(Collectors.groupingBy(
+                        hk -> hk.getHearit().getId(),
+                        Collectors.mapping(HearitKeyword::getKeyword, Collectors.toList())
+                ))
+                .entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .limit(KEYWORDS_PER_CATEGORIZED_HEARIT)
+                                .toList()
+                ));
+    }
+
+    private Map<Long, Long> getPlayTimeMap(Long memberId, List<Long> hearitIds) {
+        if (hearitIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return playingHistoryRepository.findByMemberIdAndHearitIdIn(memberId, hearitIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        PlayingHistory::getHearitId,
+                        PlayingHistory::getLastPlayTime
+                ));
     }
 }
