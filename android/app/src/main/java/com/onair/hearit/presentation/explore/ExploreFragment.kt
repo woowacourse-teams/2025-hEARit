@@ -325,8 +325,6 @@ class ExploreFragment :
         hearitId: Long,
         title: String,
     ) {
-//        player.playWhenReady = false
-
         val lastPosition = playerManager.getCurrentPosition()
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,

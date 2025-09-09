@@ -140,21 +140,16 @@ class ShortsViewHolder(
     }
 
     private fun togglePlayPause() {
+        playJob?.cancel()
+        pauseJob?.cancel()
+
         if (player.isPlaying) {
-            playJob?.cancel()
             binding.viewExplorePlay.hideFlashImmediately()
-
-            pauseJob?.cancel()
             pauseJob = binding.viewExplorePause.flash(scope)
-
             player.pause()
         } else {
-            pauseJob?.cancel()
             binding.viewExplorePause.hideFlashImmediately()
-
-            playJob?.cancel()
             playJob = binding.viewExplorePlay.flash(scope)
-
             player.play()
         }
     }
