@@ -1,6 +1,5 @@
 package com.onair.hearit.presentation.main
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
@@ -99,7 +98,7 @@ class MainActivity :
     private fun setupResultLauncher() {
         detailResultLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
+                if (result.resultCode == RESULT_OK) {
                     val detailResult =
                         result.data.toDetailResult() ?: return@registerForActivityResult
                     detailResult.navigate(this)

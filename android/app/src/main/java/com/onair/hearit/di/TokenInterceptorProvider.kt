@@ -6,9 +6,13 @@ object TokenInterceptorProvider {
     private const val NO_AUTH_KEY = "No-Auth"
     private const val AUTH_HEADER_NAME = "Authorization"
     private const val BEARER_PREFIX = "Bearer"
+    private const val DEVICE_UUID_HEADER = "X-Device-UUID"
 
     @Volatile
     private var accessToken: String? = null
+
+    @Volatile
+    private var deviceUuid: String? = null
 
     fun provide(): Interceptor =
         Interceptor { chain ->
@@ -23,17 +27,24 @@ object TokenInterceptorProvider {
                 return@Interceptor chain.proceed(newRequest)
             }
 
+            val builder = originalRequest.newBuilder()
+
+            // Authorization 추가
             accessToken?.let { token ->
-                val newRequest =
-                    originalRequest
-                        .newBuilder()
-                        .header(AUTH_HEADER_NAME, "$BEARER_PREFIX $token")
-                        .build()
-                chain.proceed(newRequest)
-            } ?: chain.proceed(originalRequest)
+                builder.header(AUTH_HEADER_NAME, "$BEARER_PREFIX $token")
+            }
+
+            // Device UUID 추가
+            deviceUuid?.let { builder.header(DEVICE_UUID_HEADER, it) }
+
+            chain.proceed(builder.build())
         }
 
     fun setAccessToken(token: String?) {
         accessToken = token
+    }
+
+    fun setDeviceUuid(uuid: String) {
+        deviceUuid = uuid
     }
 }
