@@ -19,19 +19,13 @@ public class PlayingHistoryService {
     private final PlayingHistoryBuffer playingHistoryBuffer;
     private final HearitRepository hearitRepository;
 
-    public boolean addPlayingHistory(UserContext userContext, PlayingHistoryRequest request) {
+    public void addPlayingHistory(UserContext userContext, PlayingHistoryRequest request) {
         if (userContext == null || userContext.isGuest()) {
-            return false;
+            return;
         }
         Hearit hearit = getHearitById(request.hearitId());
         PlayingHistory history = new PlayingHistory(userContext.memberId(), hearit, request.lastPlayTime());
-        return !addPlayingHistory(history, request.hearitId(), userContext.memberId());
-    }
-
-    private boolean addPlayingHistory(PlayingHistory history, Long hearitId, Long memberId) {
-        boolean isExited = playingHistoryRepository.existsByHearitIdAndMemberId(hearitId, memberId);
         playingHistoryBuffer.add(history);
-        return isExited;
     }
 
     private Hearit getHearitById(Long hearitId) {

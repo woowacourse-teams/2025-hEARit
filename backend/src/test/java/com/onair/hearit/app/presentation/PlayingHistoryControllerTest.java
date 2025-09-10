@@ -47,8 +47,8 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                 .filter(document("playing-history-createad",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Playing History API")
-                                .summary("재생기록 생성")
-                                .description("로그인한 회원의 처음 재생기록을 저장합니다.")
+                                .summary("재생기록 생성 또는 수정")
+                                .description("사용자의 재생 기록을 생성하거나 업데이트합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
                                         fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
@@ -56,9 +56,9 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .put("/api/v1/playing-histories")
+                .post("/api/v1/playing-histories")
                 .then()
-                .statusCode(HttpStatus.CREATED.value());
+                .statusCode(HttpStatus.OK.value());
     }
 
     @Test
@@ -82,8 +82,8 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                 .filter(document("playing-history-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Playing History API")
-                                .summary("재생기록 생성")
-                                .description("로그인한 회원의 기존 재생기록을 수정합니다.")
+                                .summary("재생기록 생성 또는 저장")
+                                .description("사용자의 재생 기록을 생성하거나 업데이트합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
                                         fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
@@ -91,7 +91,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .put("/api/v1/playing-histories")
+                .post("/api/v1/playing-histories")
                 .then()
                 .statusCode(HttpStatus.OK.value());
     }
@@ -112,8 +112,8 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                 .filter(document("playing-history-unauthorized",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Playing History API")
-                                .summary("재생기록 생성")
-                                .description("로그인하지 않은 사용자는 재생기록을 저장할 수 없습니다.")
+                                .summary("재생기록 생성 또는 저장")
+                                .description("사용자의 재생 기록을 생성하거나 업데이트합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
                                         fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
