@@ -100,7 +100,6 @@ class HearitControllerTest extends IntegrationTest {
 
         // when & then
         HearitDetailResponse response = RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
                 .when()
                 .get("/api/v1/hearits/{hearitId}", hearit.getId())
                 .then()
