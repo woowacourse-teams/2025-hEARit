@@ -96,6 +96,7 @@ class SearchFragment :
     override fun onCategoryClick(
         id: Long,
         name: String,
+        colorCode: String,
     ) {
         parentFragmentManager
             .beginTransaction()
@@ -105,6 +106,7 @@ class SearchFragment :
                     SearchInput.Category(
                         id,
                         name,
+                        colorCode,
                     ),
                 ),
             ).addToBackStack(null)

@@ -334,14 +334,15 @@ class PlayerDetailActivity :
     override fun onClickCategory(
         id: Long,
         name: String,
+        colorCode: String,
     ) {
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
-//        val input = SearchInput.Category(id, name)
-//        val resultIntent = Intent().apply { putExtras(input.toBundle()) }
-//        setResult(RESULT_OK, resultIntent)
+        val input = SearchInput.Category(id, name, colorCode)
+        val resultIntent = Intent().apply { putExtras(input.toBundle()) }
+        setResult(RESULT_OK, resultIntent)
         finish()
     }
 

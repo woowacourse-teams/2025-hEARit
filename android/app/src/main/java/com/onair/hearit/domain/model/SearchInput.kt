@@ -2,6 +2,7 @@ package com.onair.hearit.domain.model
 
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
@@ -18,6 +19,7 @@ sealed class SearchInput {
     data class Category(
         val id: Long,
         val name: String,
+        val colorCode: String,
     ) : SearchInput()
 
     fun toBundle(): Bundle =
@@ -28,6 +30,7 @@ sealed class SearchInput {
                     TYPE_KEY to CATEGORY_VALUE,
                     CATEGORY_ID_KEY to this.id,
                     CATEGORY_NAME_KEY to this.name,
+                    CATEGORY_COLOR_KEY to this.colorCode,
                 )
         }
 
@@ -41,7 +44,8 @@ sealed class SearchInput {
                 CATEGORY_KEY -> {
                     val id = bundle.getLong(CATEGORY_ID_KEY)
                     val name = bundle.getString(CATEGORY_NAME_KEY) ?: ""
-                    Category(id, name)
+                    val colorCode = bundle.getString(CATEGORY_COLOR_KEY) ?: ""
+                    Category(id, name, colorCode)
                 }
 
                 else -> throw IllegalArgumentException(ERROR_INVALID_TERM_MESSAGE)

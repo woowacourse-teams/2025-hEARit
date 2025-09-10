@@ -1,20 +1,25 @@
 package com.onair.hearit.presentation.search.category
 
-import android.annotation.SuppressLint
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchCategoryBinding
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.search.SearchViewModel
@@ -27,6 +32,13 @@ class SearchCategoryFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchCategoryBinding? = null
     private val binding get() = _binding!!
+
+    private val categoryName: String by lazy {
+        requireArguments().getString(CATEGORY_NAME_KEY) ?: "카테고리"
+    }
+    private val categoryColor: String by lazy {
+        requireArguments().getString(CATEGORY_COLOR_KEY) ?: "#000000"
+    }
 
     private val viewModel: SearchViewModel by viewModels {
         val input = requireArguments().let { SearchInput.from(it) }
@@ -44,13 +56,14 @@ class SearchCategoryFragment :
         return binding.root
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
+        setupUI()
+        setupListeners()
         setupRecyclerView()
         fetchData()
         observeViewModel()
@@ -61,6 +74,30 @@ class SearchCategoryFragment :
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
+        }
+    }
+
+    private fun setupUI() {
+        binding.tvSearchCategoryName.text = categoryName
+        binding.root.background = createGradientBackground()
+    }
+
+    private fun createGradientBackground(): GradientDrawable {
+        val startColor = categoryColor.toColorInt()
+        val endColor = ContextCompat.getColor(requireContext(), R.color.hearit_black1)
+
+        return GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(startColor, endColor),
+        ).apply {
+            gradientType = GradientDrawable.LINEAR_GRADIENT
+            setColors(intArrayOf(startColor, endColor), floatArrayOf(0f, 0.2f))
+        }
+    }
+
+    private fun setupListeners() {
+        binding.ibBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
         }
     }
 
