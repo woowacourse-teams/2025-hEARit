@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
@@ -96,9 +97,16 @@ class SearchCategoryFragment :
     }
 
     private fun setupListeners() {
+        // 아이콘 뒤로가기
         binding.ibBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+        // 휴대폰 뒤로가기
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(viewLifecycleOwner) {
+                parentFragmentManager.popBackStack()
+            }
     }
 
     private fun setupRecyclerView() {
