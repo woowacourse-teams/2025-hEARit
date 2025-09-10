@@ -91,6 +91,8 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("로그인 하지 않은 사용자가 히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
     void readHearitWithSuccessWithNotMember() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
@@ -98,6 +100,7 @@ class HearitControllerTest extends IntegrationTest {
 
         // when & then
         HearitDetailResponse response = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .when()
                 .get("/api/v1/hearits/{hearitId}", hearit.getId())
                 .then()
@@ -114,10 +117,13 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("히어릿 단일 조회 시, 존재하지 않는 아이디인 경우 404 NOT_FOUND를 반환한다.")
     void readHearitWithNotFound() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         Long notFoundHearitId = 9999L;
 
         // when & then
         RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .filter(document("hearit-read-detail-not-found",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
@@ -246,6 +252,8 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("히어릿 검색 요청 시 200 OK 및 제목 또는 키워드에 검색어가 포함된 히어릿을 최신순으로 반환한다.")
     void readHearitsByCategoryWithPagination() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         Keyword keyword = dbHelper.insertKeyword(new Keyword("Spring"));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("noKeyword"));
 
@@ -256,6 +264,7 @@ class HearitControllerTest extends IntegrationTest {
 
         // when
         PagedResponse<HearitSearchResponse> pagedResponse = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .queryParam("searchTerm", "spring")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -312,8 +321,11 @@ class HearitControllerTest extends IntegrationTest {
     @Test
     @DisplayName("검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")
     void readHearitsByCategoryWithInvalidParams() {
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         // when & then
         RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .queryParam("searchTerm", "spring")
                 .queryParam("page", -1)
                 .queryParam("size", 10)
@@ -331,6 +343,7 @@ class HearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.BAD_REQUEST.value());
 
         RestAssured.given()
+                .header("Authorization", "Bearer " + token)
                 .queryParam("searchTerm", "spring")
                 .queryParam("page", 0)
                 .queryParam("size", -1)
@@ -413,6 +426,8 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("카테고리로 히어릿 검색 시 200 OK 및 해당 카테고리의 히어릿들을 최신순으로 반환한다.")
     void searchHearitsByCategoryWithPagination() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         Category category1 = dbHelper.insertCategory(new Category("Spring", "#000001"));
         Category category2 = dbHelper.insertCategory(new Category("Java", "#000002"));
 
@@ -423,6 +438,7 @@ class HearitControllerTest extends IntegrationTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> pagedResponse = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .queryParam("categoryId", category1.getId())
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -473,8 +489,12 @@ class HearitControllerTest extends IntegrationTest {
     @Test
     @DisplayName("전체 카테고리 조회 시 유효하지 않은 페이지 번호를 보내면 400 BAD_REQUEST를 반환한다.")
     void readAllCategoriesWithInvalidPage() {
+        //given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         // when & then
         RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .param("page", -1)
                 .param("size", 10)
                 .filter(document("category-read-list-bad-request",
