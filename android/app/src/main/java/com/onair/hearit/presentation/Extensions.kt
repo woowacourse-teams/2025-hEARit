@@ -2,6 +2,7 @@ package com.onair.hearit.presentation
 
 import android.content.Context
 import android.content.Intent
+import androidx.fragment.app.FragmentManager
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
@@ -12,6 +13,7 @@ import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
+import com.onair.hearit.presentation.search.recent.searchResult.SearchResultPageFragment
 
 fun Int.dpToPx(context: Context): Int = (this * context.resources.displayMetrics.density).toInt()
 
@@ -42,25 +44,34 @@ fun Intent?.toDetailResult(): DetailResult? {
 fun DetailResult.navigate(mainActivity: MainActivity) {
     when (this) {
         is DetailResult.Category -> {
-            mainActivity.selectTab(R.id.nav_search)
-            val searchCategoryFragment =
-                SearchCategoryFragment.newInstance(SearchInput.Category(id, name, colorCode))
+            val fm = mainActivity.supportFragmentManager
+            val tag = SearchCategoryFragment::class.java.simpleName
 
-            mainActivity.supportFragmentManager
+            // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
+            fm.popBackStack(tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            fm
                 .beginTransaction()
-                .replace(R.id.fragment_container_view, searchCategoryFragment)
-                .addToBackStack(null)
+                .replace(
+                    R.id.fragment_container_view,
+                    SearchCategoryFragment.newInstance(SearchInput.Category(id, name, colorCode)),
+                    tag,
+                ).addToBackStack(tag)
                 .commit()
         }
 
         is DetailResult.Keyword -> {
             mainActivity.selectTab(R.id.nav_search)
-            val searchRecentFragment = SearchRecentFragment.newInstance(term)
+            val fm = mainActivity.supportFragmentManager
+            val tag = SearchResultPageFragment::class.java.simpleName
 
-            mainActivity.supportFragmentManager
+            fm.popBackStack(tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            fm
                 .beginTransaction()
-                .replace(R.id.fragment_container_view, searchRecentFragment)
-                .addToBackStack(null)
+                .replace(
+                    R.id.fragment_container_view,
+                    SearchRecentFragment.newInstance(term),
+                    tag,
+                ).addToBackStack(tag)
                 .commit()
         }
 
