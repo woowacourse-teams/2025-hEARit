@@ -30,7 +30,7 @@ class MemberRepositoryTest {
     @DisplayName("localId로 활성 회원을 조회할 수 있다")
     void findByLocalId_whenActiveMember_thenReturnMember() {
         // given
-        dbHelper.insertMember(Member.createLocalUser(UUID.randomUUID(), "user123", "닉네임", "비번", null));
+        dbHelper.insertMember(Member.createLocalUser(UUID.randomUUID().toString(), "user123", "닉네임", "비번", null));
 
         // when
         Optional<Member> result = memberRepository.findByLocalId("user123");
@@ -46,7 +46,8 @@ class MemberRepositoryTest {
     @DisplayName("localId로 탈퇴한 회원은 조회되지 않는다")
     void findByLocalId_whenDeletedMember_thenEmpty() {
         // given
-        Member member = dbHelper.insertMember(Member.createLocalUser(UUID.randomUUID(), "user123", "닉네임", "비번", null));
+        Member member = dbHelper.insertMember(
+                Member.createLocalUser(UUID.randomUUID().toString(), "user123", "닉네임", "비번", null));
         memberRepository.save(member);
         member.withdraw();
 
@@ -62,7 +63,7 @@ class MemberRepositoryTest {
     void findBySocialId_whenActiveMember_thenReturnMember() {
         // given
         OAuthProvider kakao = OAuthProvider.KAKAO;
-        dbHelper.insertMember(Member.createSocialUser(UUID.randomUUID(), "social123", "닉네임", null, kakao));
+        dbHelper.insertMember(Member.createSocialUser(UUID.randomUUID().toString(), "social123", "닉네임", null, kakao));
 
         // when
         Optional<Member> result = memberRepository.findBySocialIdAndOAuthProvider("social123", kakao);
@@ -78,7 +79,7 @@ class MemberRepositoryTest {
     @DisplayName("localId가 존재하는 활성 회원이 있을 때 true를 반환한다")
     void existsByLocalId_whenActiveMember_thenTrue() {
         // given
-        dbHelper.insertMember(Member.createLocalUser(UUID.randomUUID(), "user123", "닉네임", "비번", null));
+        dbHelper.insertMember(Member.createLocalUser(UUID.randomUUID().toString(), "user123", "닉네임", "비번", null));
 
         // when
         boolean exists = memberRepository.existsByLocalId("user123");
@@ -91,7 +92,8 @@ class MemberRepositoryTest {
     @DisplayName("localId가 존재하더라도 탈퇴한 회원이면 false를 반환한다")
     void existsByLocalId_whenDeletedMember_thenFalse() {
         // given
-        Member member = dbHelper.insertMember(Member.createLocalUser(UUID.randomUUID(), "user123", "닉네임", "비번", null));
+        Member member = dbHelper.insertMember(
+                Member.createLocalUser(UUID.randomUUID().toString(), "user123", "닉네임", "비번", null));
         member.withdraw();
 
         // when

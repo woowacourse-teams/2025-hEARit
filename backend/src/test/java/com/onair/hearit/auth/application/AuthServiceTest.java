@@ -11,13 +11,13 @@ import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
+import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
-import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
-import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Disabled;
@@ -87,7 +87,8 @@ class AuthServiceTest {
         void signup_duplicate_id() {
             // given
             dbHelper.insertMember(
-                    Member.createLocalUser(UUID.randomUUID(), "sameId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
+                    Member.createLocalUser(UUID.randomUUID().toString(), "sameId", "nickname",
+                            passwordEncoder.encode("password"), "profile.jpg"));
 
             SignupRequest signupRequest = new SignupRequest("sameId", "another", "password");
 
@@ -107,7 +108,8 @@ class AuthServiceTest {
         void login_success() {
             // given
             dbHelper.insertMember(
-                    Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", passwordEncoder.encode("password"), "profile.jpg"));
+                    Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                            passwordEncoder.encode("password"), "profile.jpg"));
 
             LoginRequest loginRequest = new LoginRequest("localId", "password");
 
@@ -142,7 +144,9 @@ class AuthServiceTest {
         @DisplayName("비밀번호가 틀릴 경우 인증예외가 발생한다")
         void login_fail_wrong_password() {
             // given
-            dbHelper.insertMember(Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", "password", "profile.jpg"));
+            dbHelper.insertMember(
+                    Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname", "password",
+                            "profile.jpg"));
 
             LoginRequest loginRequest = new LoginRequest("localId", "wrongpassword");
 
@@ -179,7 +183,8 @@ class AuthServiceTest {
             void reissue_success() {
                 // given
                 Member member = dbHelper.insertMember(
-                        Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", passwordEncoder.encode("password"),
+                        Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                                passwordEncoder.encode("password"),
                                 "profile.jpg"));
                 String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
                 refreshTokenRepository.save(new RefreshToken(member.getId(), refreshTokenValue, LocalDateTime.now()));
@@ -197,7 +202,8 @@ class AuthServiceTest {
             void reissue_fail_when_refreshToken_expired() throws InterruptedException {
                 // given
                 Member member = dbHelper.insertMember(
-                        Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", passwordEncoder.encode("password"),
+                        Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                                passwordEncoder.encode("password"),
                                 "profile.jpg"));
                 String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
                 refreshTokenRepository.save(new RefreshToken(member.getId(), refreshTokenValue, LocalDateTime.now()));
@@ -215,7 +221,8 @@ class AuthServiceTest {
             void reissue_fail_when_refreshToken_not_found_in_db() {
                 // given
                 Member member = dbHelper.insertMember(
-                        Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", passwordEncoder.encode("password"),
+                        Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                                passwordEncoder.encode("password"),
                                 "profile.jpg"));
                 String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
                 // 리프레시토큰 DB에 저장 안 함
@@ -231,7 +238,8 @@ class AuthServiceTest {
             void reissue_fail_when_refreshToken_mismatch() {
                 // given
                 Member member = dbHelper.insertMember(
-                        Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", passwordEncoder.encode("password"),
+                        Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                                passwordEncoder.encode("password"),
                                 "profile.jpg"));
                 String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
                 // 다른 리프레시토큰 저장

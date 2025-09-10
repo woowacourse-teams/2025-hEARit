@@ -13,7 +13,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -65,10 +64,10 @@ public class Member {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    private Member(UUID uuid, String localId, String password, String socialId, String nickname, String profileImage,
+    private Member(String uuid, String localId, String password, String socialId, String nickname, String profileImage,
                    OAuthProvider provider) {
-        validate(nickname);
-        this.uuid = uuid.toString();
+        validate(uuid, nickname);
+        this.uuid = uuid;
         this.localId = localId;
         this.password = password;
         this.socialId = socialId;
@@ -77,18 +76,24 @@ public class Member {
         this.oAuthProvider = provider;
     }
 
-    private void validate(String nickname) {
+    private void validate(String uuid, String nickname) {
+        if (uuid == null) {
+            throw new IllegalArgumentException("userUuid는 null일 수 없습니다.");
+        }
+        if (uuid.length() != 36) {
+            throw new IllegalArgumentException("userUuid 형식이 올바르지 않습니다.");
+        }
         if (nickname == null) {
             throw new IllegalArgumentException("닉네임은 null이 될 수 없습니다.");
         }
     }
 
-    public static Member createLocalUser(UUID uuid, String memberId, String nickname, String password,
+    public static Member createLocalUser(String uuid, String memberId, String nickname, String password,
                                          String profileImage) {
         return new Member(uuid, memberId, password, null, nickname, profileImage, OAuthProvider.NONE);
     }
 
-    public static Member createSocialUser(UUID uuid, String socialId, String nickname, String profileImage,
+    public static Member createSocialUser(String uuid, String socialId, String nickname, String profileImage,
                                           OAuthProvider provider) {
         return new Member(uuid, null, null, socialId, nickname, profileImage, provider);
     }

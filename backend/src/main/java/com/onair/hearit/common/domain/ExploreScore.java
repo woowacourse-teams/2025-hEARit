@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.Objects;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,17 +37,27 @@ public class ExploreScore {
     @Column(name = "cursor_id")
     private Long cursorId;
 
-    public ExploreScore(UUID userUuid, Long hearitId, Double score, Long cursorId) {
-        validate(hearitId, score);
+    public ExploreScore(String userUuid, Long hearitId, Double score, Long cursorId) {
+        validate(userUuid, hearitId, score);
         this.userUuid = userUuid.toString();
         this.hearitId = hearitId;
         this.score = score;
         this.cursorId = cursorId;
     }
 
-    private void validate(Long hearitId, Double score) {
+    private void validate(String userUuid, Long hearitId, Double score) {
+        validateUserUuid(userUuid);
         validateHearit(hearitId);
         validateScore(score);
+    }
+
+    private void validateUserUuid(String userUuid) {
+        if (userUuid == null) {
+            throw new IllegalArgumentException("userUuid는 null일 수 없습니다.");
+        }
+        if (userUuid.length() != 36) {
+            throw new IllegalArgumentException("userUuid 형식이 올바르지 않습니다.");
+        }
     }
 
     private void validateHearit(Long hearitId) {

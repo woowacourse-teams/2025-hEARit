@@ -17,12 +17,12 @@ import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
-import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
-import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDateTime;
@@ -55,7 +55,7 @@ class AuthControllerTest extends IntegrationTest {
     void login_success() {
         // given
         Member member = Member.createLocalUser(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234"),
@@ -141,7 +141,7 @@ class AuthControllerTest extends IntegrationTest {
     @DisplayName("비밀번호 틀리면 401 Unauthorized 반환한다.")
     void login_invalidPassword() {
         Member member = Member.createLocalUser(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234"),
@@ -227,7 +227,7 @@ class AuthControllerTest extends IntegrationTest {
     void signup_fail_with_duplicate_id() {
         // given
         Member existingMember = Member.createLocalUser(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 "existingUser",
                 "existingNickname",
                 passwordEncoder.encode("password1234"),
@@ -260,7 +260,7 @@ class AuthControllerTest extends IntegrationTest {
     void check_success() {
         // given
         Member member = dbHelper.insertMember(
-                Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", "password", "profile.jpg"));
+                Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname", "password", "profile.jpg"));
         String validAccessToken = jwtTokenProvider.createAccessToken(member.getId());
 
         // when & then

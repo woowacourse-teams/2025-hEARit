@@ -13,7 +13,7 @@ public class TestFixture {
 
     public static Member createFixedMember() {
         return Member.createLocalUser(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 "memberID",
                 "nickname",
                 "password",

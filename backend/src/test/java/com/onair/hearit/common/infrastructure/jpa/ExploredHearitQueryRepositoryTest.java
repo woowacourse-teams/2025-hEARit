@@ -12,7 +12,6 @@ import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ class ExploredHearitQueryRepositoryTest {
     void findExploredHearits_ForMember_byMember() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        List<ExploreScore> exploreScores = insertTestExploreScoreByMemberIdAndCount(UUID.fromString(member.getUuid()), 5);
+        List<ExploreScore> exploreScores = insertTestExploreScoreByMemberIdAndCount(member.getUuid(), 5);
         List<Long> exploreScoreHearitIds = exploreScores.stream()
                 .map(ExploreScore::getHearitId)
                 .toList();
@@ -49,14 +48,15 @@ class ExploredHearitQueryRepositoryTest {
         // then
         assertAll(() -> {
             assertThat(result).hasSize(3);
-            assertThat(result).extracting(exploredHearitInfo -> exploredHearitInfo.getHearit().getId()) // cusorId 이후 size 만큼 조회
+            assertThat(result).extracting(
+                            exploredHearitInfo -> exploredHearitInfo.getHearit().getId()) // cusorId 이후 size 만큼 조회
                     .contains(exploreScoreHearitIds.get(2), exploreScoreHearitIds.get(3), exploreScoreHearitIds.get(4));
             assertThat(result).extracting(ExploredHearitInfo::getCursorId)
                     .contains(3L, 4L, 5L);
         });
     }
 
-    private List<ExploreScore> insertTestExploreScoreByMemberIdAndCount(UUID userUuid, int count) {
+    private List<ExploreScore> insertTestExploreScoreByMemberIdAndCount(String userUuid, int count) {
         List<ExploreScore> exploreScores = new ArrayList<>();
 
         Category category = dbHelper.insertCategory(new Category("Test", "#000000"));
