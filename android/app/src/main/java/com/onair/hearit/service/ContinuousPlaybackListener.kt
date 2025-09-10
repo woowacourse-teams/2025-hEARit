@@ -128,14 +128,9 @@ class ContinuousPlaybackListener(
     }
 
     companion object {
-        // MediaMetadata.extras 로 주고받는 커스텀 키들
         private const val KEY_BOOKMARK_ID = "BOOKMARK_ID"
         private const val KEY_PLAYBACK_MODE = "PLAYBACK_MODE"
-
-        // extras 에서 읽어온 북마크 ID 가 없거나 잘못된 경우에 대비한 상수
         private const val INVALID_BOOKMARK_ID = -1L
-
-        // 연속 재생을 허용하는 "출처" 식별자. Service/Manager/Client 전 구간에서 동일 문자열 사용 권장
         private const val LIBRARY_SOURCE_TAG = "LIBRARY"
     }
 }
