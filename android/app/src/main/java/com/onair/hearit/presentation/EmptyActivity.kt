@@ -48,12 +48,12 @@ import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.presentation.search.result.SearchResultViewModel
-import com.onair.hearit.presentation.search.result.SearchResultViewModelFactory
+import com.onair.hearit.presentation.search.SearchViewModel
+import com.onair.hearit.presentation.search.SearchViewModelFactory
 
 class EmptyActivity : AppCompatActivity() {
-    private val viewModel: SearchResultViewModel by viewModels {
-        SearchResultViewModelFactory(SearchInput.Category(2, "Android"))
+    private val viewModel: SearchViewModel by viewModels {
+        SearchViewModelFactory(SearchInput.Category(2, "Android", "#73A01A"))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,7 +73,7 @@ class EmptyActivity : AppCompatActivity() {
 
 @Composable
 fun SearchResultScreen(
-    viewModel: SearchResultViewModel,
+    viewModel: SearchViewModel,
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
 ) {
@@ -97,7 +97,7 @@ fun GradientBackgroundScreen(
     val startColor =
         try {
             Color(colorCode.toColorInt())
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             Color.Black
         }
 
