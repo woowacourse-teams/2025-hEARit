@@ -49,4 +49,17 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     Page<Hearit> findAll(Pageable pageable);
 
     List<Hearit> findAllByIdIn(List<Long> hearitIds);
+
+    @Query("""
+            SELECT h AS hearit, ph.lastPlayTime AS lastPlayTime
+            FROM Hearit h
+            LEFT JOIN PlayingHistory ph ON h.id = ph.hearitId AND ph.memberId = :memberId
+            WHERE h.category.id = :categoryId
+            ORDER BY h.createdAt DESC
+            """)
+    Page<HearitWithPlayTime> findWithPlayTimeByCategoryId(
+            @Param("categoryId") Long categoryId,
+            @Param("memberId") Long memberId,
+            Pageable pageable
+    );
 }

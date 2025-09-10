@@ -21,6 +21,7 @@ import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
+import com.onair.hearit.common.infrastructure.jpa.HearitWithPlayTime;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import java.time.LocalDate;
@@ -142,21 +143,21 @@ public class HearitService {
             PagingRequest pagingRequest,
             UserContext userContext) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        List<Long> hearitIds = hearits.getContent().stream().map(Hearit::getId).toList();
+
+        Long memberId = (userContext == null || userContext.isGuest()) ? null : userContext.memberId();
+        Page<HearitWithPlayTime> hearitsWithPlayTime =
+                hearitRepository.findWithPlayTimeByCategoryId(categoryId, memberId, pageable);
+        List<Hearit> hearits = hearitsWithPlayTime.getContent().stream()
+                .map(HearitWithPlayTime::getHearit)
+                .toList();
+        List<Long> hearitIds = hearits.stream().map(Hearit::getId).toList();
         Map<Long, List<Keyword>> keywordsMap = getKeywordsMap(hearitIds);
-        Map<Long, Long> playTimeMap;
-        if (userContext == null || userContext.isGuest()) {
-            playTimeMap = Collections.emptyMap();
-        } else {
-            playTimeMap = getPlayTimeMap(userContext.memberId(), hearitIds);
-        }
-        Page<HearitOfCategoryResponse> response = hearits.map(hearit -> {
+        Page<HearitOfCategoryResponse> response = hearitsWithPlayTime.map(projection -> {
+            Hearit hearit = projection.getHearit();
+            Long lastPlayTime = projection.getLastPlayTime();
             List<Keyword> keywords = keywordsMap.getOrDefault(hearit.getId(), Collections.emptyList());
-            Long lastPlayTime = playTimeMap.get(hearit.getId());
             return HearitOfCategoryResponse.from(hearit, keywords, lastPlayTime);
         });
-
         return PagedResponse.from(response);
     }
 
@@ -173,18 +174,6 @@ public class HearitService {
                         entry -> entry.getValue().stream()
                                 .limit(KEYWORDS_PER_CATEGORIZED_HEARIT)
                                 .toList()
-                ));
-    }
-
-    private Map<Long, Long> getPlayTimeMap(Long memberId, List<Long> hearitIds) {
-        if (hearitIds.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        return playingHistoryRepository.findByMemberIdAndHearitIdIn(memberId, hearitIds)
-                .stream()
-                .collect(Collectors.toMap(
-                        PlayingHistory::getHearitId,
-                        PlayingHistory::getLastPlayTime
                 ));
     }
 }
