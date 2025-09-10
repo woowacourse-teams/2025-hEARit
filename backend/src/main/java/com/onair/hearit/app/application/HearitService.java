@@ -10,22 +10,27 @@ import com.onair.hearit.app.dto.response.RecommendHearitResponse;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.infrastructure.dto.HearitWithPlayTimeProjection;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -46,21 +51,24 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final CategoryRepository categoryRepository;
+    private final PlayingHistoryRepository playingHistoryRepository;
     private final RecommendHearitStrategy recommendHearitStrategy;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
         Hearit hearit = getHearitById(hearitId);
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId());
         if (userInfo == null || userInfo.isGuest()) {
-            return HearitDetailResponse.from(hearit, keywords);
+            return HearitDetailResponse.of(hearit, keywords, null, null);
         }
 
-        Member member = getMemberByUserContext(userInfo);
-        Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByHearitAndMember(hearit, member);
-        if (bookmarkOptional.isPresent()) {
-            return HearitDetailResponse.fromWithBookmark(hearit, bookmarkOptional.get(), keywords);
-        }
-        return HearitDetailResponse.from(hearit, keywords);
+        Member member = getMemberByUserInfo(userInfo);
+        Long bookmarkId = bookmarkRepository.findByHearitAndMember(hearit, member)
+                .map(Bookmark::getId)
+                .orElse(null);
+        Long lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
+                .map(PlayingHistory::getLastPlayTime)
+                .orElse(null);
+        return HearitDetailResponse.of(hearit, keywords, lastPlayTime, bookmarkId);
     }
 
     private Hearit getHearitById(Long hearitId) {
@@ -92,12 +100,12 @@ public class HearitService {
         if (userInfo == null || userInfo.isGuest()) {
             return new ArrayList<>();
         }
-        Member member = getMemberByUserContext(userInfo);
+        Member member = getMemberByUserInfo(userInfo);
         return categoryRepository.findTopCategoriesByMemberBookmarks(member.getId(), RECOMMEND_CATEGORY_COUNT);
 
     }
 
-    private Member getMemberByUserContext(UserInfo userInfo) {
+    private Member getMemberByUserInfo(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
             throw new UnauthorizedException("로그인한 회원이 아닙니다.");
         }
@@ -108,7 +116,6 @@ public class HearitService {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
     }
-
 
     private List<Long> pickTodayRandomCategoryIds(List<Category> recommendCategories, int count) {
         long seed = LocalDate.now().toEpochDay();
@@ -131,16 +138,42 @@ public class HearitService {
         return HearitsWithRecommendCategoryResponse.from(category, hearits);
     }
 
-    public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(Long categoryId, PagingRequest pagingRequest) {
+    public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(
+            Long categoryId,
+            PagingRequest pagingRequest,
+            UserInfo userInfo) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<Hearit> hearits = hearitRepository.findByCategoryIdOrderByCreatedAtDesc(categoryId, pageable);
-        Page<HearitOfCategoryResponse> hearitResponses = hearits.map(this::toHearitOfCategoryResponse);
-        return PagedResponse.from(hearitResponses);
+
+        Long memberId = (userInfo == null || userInfo.isGuest()) ? null : userInfo.getMemberId();
+        Page<HearitWithPlayTimeProjection> hearitsWithPlayTime =
+                hearitRepository.findWithPlayTimeByCategoryId(categoryId, memberId, pageable);
+        List<Hearit> hearits = hearitsWithPlayTime.getContent().stream()
+                .map(HearitWithPlayTimeProjection::getHearit)
+                .toList();
+        List<Long> hearitIds = hearits.stream().map(Hearit::getId).toList();
+        Map<Long, List<Keyword>> keywordsMap = getKeywordsMap(hearitIds);
+        Page<HearitOfCategoryResponse> response = hearitsWithPlayTime.map(projection -> {
+            Hearit hearit = projection.getHearit();
+            Long lastPlayTime = projection.getLastPlayTime();
+            List<Keyword> keywords = keywordsMap.getOrDefault(hearit.getId(), Collections.emptyList());
+            return HearitOfCategoryResponse.from(hearit, keywords, lastPlayTime);
+        });
+        return PagedResponse.from(response);
     }
 
-    private HearitOfCategoryResponse toHearitOfCategoryResponse(Hearit hearit) {
-        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-                KEYWORDS_PER_CATEGORIZED_HEARIT);
-        return HearitOfCategoryResponse.from(hearit, keywords);
+    private Map<Long, List<Keyword>> getKeywordsMap(List<Long> hearitIds) {
+        List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
+        return hearitKeywords.stream()
+                .collect(Collectors.groupingBy(
+                        hk -> hk.getHearit().getId(),
+                        Collectors.mapping(HearitKeyword::getKeyword, Collectors.toList())
+                ))
+                .entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .limit(KEYWORDS_PER_CATEGORIZED_HEARIT)
+                                .toList()
+                ));
     }
 }

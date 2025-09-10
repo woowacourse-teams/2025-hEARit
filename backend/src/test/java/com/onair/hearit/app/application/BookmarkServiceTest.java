@@ -12,12 +12,14 @@ import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
@@ -48,6 +50,9 @@ class BookmarkServiceTest {
     @Autowired
     private BookmarkRepository bookmarkRepository;
 
+    @Autowired
+    private PlayingHistoryRepository playingHistoryRepository;
+
     private BookmarkService bookmarkService;
 
     @BeforeEach
@@ -62,15 +67,20 @@ class BookmarkServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 1));
 
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
         List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(
                 RequestUser.member(member.getId()).getUserInfo(), new PagingRequest(0, 20)).content();
 
         // then
-        assertThat(responses).hasSize(1);
+        assertAll(() -> {
+            assertThat(responses).hasSize(1);
+            assertThat(responses.getFirst().bookmarkId()).isEqualTo(bookmark.getId());
+            assertThat(responses.getFirst().lastPlayTime()).isEqualTo(playingHistory.getLastPlayTime());
+        });
     }
 
     @Test

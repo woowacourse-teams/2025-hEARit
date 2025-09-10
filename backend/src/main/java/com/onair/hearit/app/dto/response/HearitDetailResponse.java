@@ -1,6 +1,5 @@
 package com.onair.hearit.app.dto.response;
 
-import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
@@ -14,42 +13,33 @@ public record HearitDetailResponse(
         String summary,
         List<SourceResponse> sources,
         Integer playTime,
+        Long lastPlayTime,
         LocalDateTime createdAt,
         Boolean isBookmarked,
         Long bookmarkId,
         CategoryResponse category,
         List<KeywordResponse> keywords
 ) {
-    public static HearitDetailResponse from(Hearit hearit, List<Keyword> keywords) {
-        List<KeywordResponse> keywordNames = getKeywordNames(keywords);
+    public static HearitDetailResponse of(Hearit hearit,
+                                          List<Keyword> keywords,
+                                          Long lastPlayTime,
+                                          Long bookmarkId) {
+        List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         List<SourceResponse> sources = getSources(hearit.getSources());
-        return new HearitDetailResponse(
-                hearit.getId(),
-                hearit.getTitle(),
-                hearit.getSummary(),
-                sources,
-                hearit.getPlayTime(),
-                hearit.getCreatedAt(),
-                false,
-                null,
-                CategoryResponse.of(hearit.getCategory()),
-                keywordNames);
-    }
 
-    public static HearitDetailResponse fromWithBookmark(Hearit hearit, Bookmark bookmark, List<Keyword> keywords) {
-        List<KeywordResponse> keywordNames = getKeywordNames(keywords);
-        List<SourceResponse> sources = getSources(hearit.getSources());
         return new HearitDetailResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
                 sources,
                 hearit.getPlayTime(),
+                lastPlayTime,
                 hearit.getCreatedAt(),
-                true,
-                bookmark.getId(),
+                bookmarkId != null,
+                bookmarkId,
                 CategoryResponse.of(hearit.getCategory()),
-                keywordNames);
+                keywordResponses
+        );
     }
 
     private static List<KeywordResponse> getKeywordNames(List<Keyword> keywords) {

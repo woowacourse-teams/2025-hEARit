@@ -1,6 +1,7 @@
 package com.onair.hearit.common.infrastructure.jpa;
 
 import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.infrastructure.dto.HearitWithPlayTimeProjection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -22,8 +23,6 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
 
     @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id = :id")
     Optional<Hearit> findWithCategoryById(Long id);
-
-    Page<Hearit> findByCategoryIdOrderByCreatedAtDesc(Long categoryId, Pageable pageable);
 
     @Query(value = """
             SELECT DISTINCT h.*
@@ -58,4 +57,17 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     Page<Hearit> findAll(Pageable pageable);
 
     List<Hearit> findAllByIdIn(List<Long> hearitIds);
+
+    @Query("""
+            SELECT h AS hearit, ph.lastPlayTime AS lastPlayTime
+            FROM Hearit h
+            LEFT JOIN PlayingHistory ph ON h.id = ph.hearitId AND ph.memberId = :memberId
+            WHERE h.category.id = :categoryId
+            ORDER BY h.createdAt DESC
+            """)
+    Page<HearitWithPlayTimeProjection> findWithPlayTimeByCategoryId(
+            @Param("categoryId") Long categoryId,
+            @Param("memberId") Long memberId,
+            Pageable pageable
+    );
 }
