@@ -1,9 +1,8 @@
 package com.onair.hearit.app.presentation;
 
+import com.onair.hearit.app.application.HearitExploreService;
 import com.onair.hearit.app.application.HearitSearchService;
 import com.onair.hearit.app.application.HearitService;
-import com.onair.hearit.app.application.HearitExploreService;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.app.dto.request.CursorRequest;
 import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.CursorResponse;
@@ -14,6 +13,7 @@ import com.onair.hearit.app.dto.response.HearitSearchResponse;
 import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.app.dto.response.RecommendHearitResponse;
+import com.onair.hearit.auth.domain.UserContext;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -62,9 +62,11 @@ public class HearitController {
     public ResponseEntity<PagedResponse<HearitSearchResponse>> readSearchedHearits(
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size) {
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @AuthenticationPrincipal UserContext userContext) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<HearitSearchResponse> response = hearitSearchService.search(searchTerm, pagingRequest);
+        PagedResponse<HearitSearchResponse> response = hearitSearchService.search(searchTerm, pagingRequest,
+                userContext);
         return ResponseEntity.ok(response);
     }
 
@@ -80,10 +82,11 @@ public class HearitController {
     public ResponseEntity<PagedResponse<HearitOfCategoryResponse>> readHearitsByCategory(
             @RequestParam(name = "categoryId") Long categoryId,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size) {
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @AuthenticationPrincipal UserContext userContext) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<HearitOfCategoryResponse> response = hearitService.getHearitsByCategory(categoryId,
-                pagingRequest);
+                pagingRequest, userContext);
         return ResponseEntity.ok(response);
     }
 }

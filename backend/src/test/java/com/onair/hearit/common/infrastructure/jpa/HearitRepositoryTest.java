@@ -7,7 +7,10 @@ import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.Source;
+import com.onair.hearit.common.infrastructure.dto.HearitWithPlayTimeProjection;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
@@ -140,6 +143,43 @@ class HearitRepositoryTest {
             assertThat(hearits.get(0).getId()).isEqualTo(hearit1.getId());
             assertThat(hearits.get(1).getId()).isEqualTo(hearit2.getId());
             assertThat(hearits.get(2).getId()).isEqualTo(hearit3.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("멤버별 카테고리 내 히어릿 조회 시 마지막 재생 시간도 포함된다.")
+    void findWithPlayTimeByCategoryIdTest() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        PlayingHistory playingHistory1 = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit1, 14));
+        PlayingHistory playingHistory2 = dbHelper.insertPlayingHistory(
+                new PlayingHistory(member.getId(), hearit3, 300));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<HearitWithPlayTimeProjection> result =
+                hearitRepository.findWithPlayTimeByCategoryId(category.getId(), member.getId(), pageable);
+
+        HearitWithPlayTimeProjection projection3 = result.getContent().get(0);
+        HearitWithPlayTimeProjection projection2 = result.getContent().get(1);
+        HearitWithPlayTimeProjection projection1 = result.getContent().get(2);
+
+        // then
+        assertAll(() -> {
+            assertThat(result.getContent()).hasSize(3);
+            assertThat(projection1.getHearit().getId()).isEqualTo(hearit1.getId());
+            assertThat(projection1.getLastPlayTime()).isEqualTo(playingHistory1.getLastPlayTime());
+            assertThat(projection2.getHearit().getId()).isEqualTo(hearit2.getId());
+            assertThat(projection2.getLastPlayTime()).isNull();
+            assertThat(projection3.getHearit().getId()).isEqualTo(hearit3.getId());
+            assertThat(projection3.getLastPlayTime()).isEqualTo(playingHistory2.getLastPlayTime());
         });
     }
 

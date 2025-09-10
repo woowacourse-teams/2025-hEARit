@@ -1,16 +1,17 @@
 package com.onair.hearit.app.application;
 
-import com.onair.hearit.auth.domain.UserContext;
-import com.onair.hearit.common.exception.custom.AlreadyExistException;
-import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
-import com.onair.hearit.common.domain.Bookmark;
-import com.onair.hearit.common.domain.Hearit;
-import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
 import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
+import com.onair.hearit.auth.domain.UserContext;
+import com.onair.hearit.common.domain.Bookmark;
+import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.exception.custom.AlreadyExistException;
+import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlaytimeProjection;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
@@ -34,10 +35,19 @@ public class BookmarkService {
             PagingRequest pagingRequest) {
         Member member = getMemberByUserContext(userContext);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(member, pageable);
-        Page<BookmarkHearitResponse> bookmarkHearits = bookmarks.map(
-                bookmark -> BookmarkHearitResponse.of(bookmark, bookmark.getHearit()));
-        return PagedResponse.from(bookmarkHearits);
+        Page<BookmarkWithPlaytimeProjection> projections = bookmarkRepository.findAllByMemberOrderByRecent(
+                member.getId(),
+                pageable);
+        Page<BookmarkHearitResponse> response = toBookmarkHearitResponse(projections);
+        return PagedResponse.from(response);
+    }
+
+    private Page<BookmarkHearitResponse> toBookmarkHearitResponse(Page<BookmarkWithPlaytimeProjection> projections) {
+        return projections.map(p -> BookmarkHearitResponse.of(
+                p.getBookmark(),
+                p.getBookmark().getHearit(),
+                p.getLastPlayTime()
+        ));
     }
 
     @Transactional

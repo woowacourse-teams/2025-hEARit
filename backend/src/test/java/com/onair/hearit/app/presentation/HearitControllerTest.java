@@ -23,6 +23,7 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.RecommendHearit;
 import com.onair.hearit.common.domain.Source;
 import com.onair.hearit.docs.ApiDocSnippets;
@@ -54,6 +55,8 @@ class HearitControllerTest extends IntegrationTest {
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
+                new PlayingHistory(member.getId(), hearit, 1_000));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
         Keyword keyword2 = dbHelper.insertKeyword(new Keyword("Spring"));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
@@ -77,7 +80,7 @@ class HearitControllerTest extends IntegrationTest {
                 ))
                 .when()
                 .get("/api/v1/hearits/{hearitId}", hearit.getId())
-                .then()
+                .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(HearitDetailResponse.class);
 
@@ -88,6 +91,8 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("로그인 하지 않은 사용자가 히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
     void readHearitWithSuccessWithNotMember() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
@@ -111,10 +116,13 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("히어릿 단일 조회 시, 존재하지 않는 아이디인 경우 404 NOT_FOUND를 반환한다.")
     void readHearitWithNotFound() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         Long notFoundHearitId = 9999L;
 
         // when & then
         RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .filter(document("hearit-read-detail-not-found",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
@@ -243,6 +251,8 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("히어릿 검색 요청 시 200 OK 및 제목 또는 키워드에 검색어가 포함된 히어릿을 최신순으로 반환한다.")
     void readHearitsByCategoryWithPagination() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         Keyword keyword = dbHelper.insertKeyword(new Keyword("Spring"));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("noKeyword"));
 
@@ -253,6 +263,7 @@ class HearitControllerTest extends IntegrationTest {
 
         // when
         PagedResponse<HearitSearchResponse> pagedResponse = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .queryParam("searchTerm", "spring")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -273,6 +284,8 @@ class HearitControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
                                                         fieldWithPath("content[].keywords").description(
                                                                 "히어릿에 포함된 키워드 목록"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
@@ -307,8 +320,11 @@ class HearitControllerTest extends IntegrationTest {
     @Test
     @DisplayName("검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")
     void readHearitsByCategoryWithInvalidParams() {
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         // when & then
         RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .queryParam("searchTerm", "spring")
                 .queryParam("page", -1)
                 .queryParam("size", 10)
@@ -326,6 +342,7 @@ class HearitControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.BAD_REQUEST.value());
 
         RestAssured.given()
+                .header("Authorization", "Bearer " + token)
                 .queryParam("searchTerm", "spring")
                 .queryParam("page", 0)
                 .queryParam("size", -1)
@@ -408,6 +425,8 @@ class HearitControllerTest extends IntegrationTest {
     @DisplayName("카테고리로 히어릿 검색 시 200 OK 및 해당 카테고리의 히어릿들을 최신순으로 반환한다.")
     void searchHearitsByCategoryWithPagination() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         Category category1 = dbHelper.insertCategory(new Category("Spring", "#000001"));
         Category category2 = dbHelper.insertCategory(new Category("Java", "#000002"));
 
@@ -418,6 +437,7 @@ class HearitControllerTest extends IntegrationTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> pagedResponse = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .queryParam("categoryId", category1.getId())
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -438,7 +458,8 @@ class HearitControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].keywords").description("관련 키워드 목록"),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description("키워드 이름")
                                                 }),
@@ -467,8 +488,12 @@ class HearitControllerTest extends IntegrationTest {
     @Test
     @DisplayName("전체 카테고리 조회 시 유효하지 않은 페이지 번호를 보내면 400 BAD_REQUEST를 반환한다.")
     void readAllCategoriesWithInvalidPage() {
+        //given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
         // when & then
         RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
                 .param("page", -1)
                 .param("size", 10)
                 .filter(document("category-read-list-bad-request",
@@ -529,6 +554,7 @@ class HearitControllerTest extends IntegrationTest {
                 fieldWithPath("sources[].sourceName").description("출처의 이름"),
                 fieldWithPath("sources[].sourceUrl").description("출처의 URL"),
                 fieldWithPath("playTime").type(JsonFieldType.NUMBER).description("재생 시간(초)"),
+                fieldWithPath("lastPlayTime").type(JsonFieldType.NUMBER).description("마지막 재생 시간(ms)").optional(),
                 fieldWithPath("createdAt").type(JsonFieldType.STRING).description("생성 일시"),
                 fieldWithPath("isBookmarked").type(JsonFieldType.BOOLEAN).description("현재 사용자의 북마크 여부"),
                 fieldWithPath("bookmarkId").type(JsonFieldType.NUMBER).description("북마크 ID (북마크된 경우)").optional(),
