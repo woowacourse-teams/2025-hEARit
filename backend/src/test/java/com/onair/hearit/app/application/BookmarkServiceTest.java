@@ -12,6 +12,7 @@ import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
@@ -64,15 +65,20 @@ class BookmarkServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 1));
 
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
         List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(
                 UserContext.member(member.getId()), new PagingRequest(0, 20)).content();
 
         // then
-        assertThat(responses).hasSize(1);
+        assertAll(() -> {
+            assertThat(responses).hasSize(1);
+            assertThat(responses.getFirst().bookmarkId()).isEqualTo(bookmark.getId());
+            assertThat(responses.getFirst().lastPlayTime()).isEqualTo(playingHistory.getLastPlayTime());
+        });
     }
 
     @Test
