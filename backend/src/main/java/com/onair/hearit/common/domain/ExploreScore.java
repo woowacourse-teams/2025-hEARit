@@ -26,7 +26,7 @@ public class ExploreScore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_uuid")
+    @Column(name = "user_uuid", nullable = false, length = 36)
     private String userUuid;
 
     @Column(name = "hearit_id", nullable = false)

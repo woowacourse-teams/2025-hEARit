@@ -36,7 +36,7 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "uuid")
+    @Column(name = "uuid", nullable = false, unique = true, length = 36)
     private String uuid;
 
     @Column(name = "local_id")
@@ -83,7 +83,8 @@ public class Member {
         }
     }
 
-    public static Member createLocalUser(UUID uuid, String memberId, String nickname, String password, String profileImage) {
+    public static Member createLocalUser(UUID uuid, String memberId, String nickname, String password,
+                                         String profileImage) {
         return new Member(uuid, memberId, password, null, nickname, profileImage, OAuthProvider.NONE);
     }
 
