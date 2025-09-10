@@ -27,9 +27,6 @@ public class PlayingHistoryBuffer {
         }
     }
 
-    /*
-     * 5초마다 또는 500개 이상 모이면 DB에 flush()
-     */
     @Transactional
     @Scheduled(fixedDelay = 5000)
     public void flush() {

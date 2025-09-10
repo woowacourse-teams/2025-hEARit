@@ -6,7 +6,6 @@ import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,17 +20,18 @@ public class PlayingHistoryService {
     private final HearitRepository hearitRepository;
 
     public boolean addPlayingHistory(UserContext userContext, PlayingHistoryRequest request) {
-        checkMember(userContext);
+        if (userContext == null || userContext.isGuest()) {
+            return false;
+        }
         Hearit hearit = getHearitById(request.hearitId());
         PlayingHistory history = new PlayingHistory(userContext.memberId(), hearit, request.lastPlayTime());
-        playingHistoryBuffer.add(history);
-        return !playingHistoryRepository.existsByHearitIdAndMemberId(request.hearitId(), userContext.memberId());
+        return !addPlayingHistory(history, request.hearitId(), userContext.memberId());
     }
 
-    private void checkMember(UserContext userContext) {
-        if (userContext == null || userContext.isGuest()) {
-            throw new UnauthorizedException("로그인한 회원이 아닙니다.");
-        }
+    private boolean addPlayingHistory(PlayingHistory history, Long hearitId, Long memberId) {
+        boolean isExited = playingHistoryRepository.existsByHearitIdAndMemberId(hearitId, memberId);
+        playingHistoryBuffer.add(history);
+        return isExited;
     }
 
     private Hearit getHearitById(Long hearitId) {
