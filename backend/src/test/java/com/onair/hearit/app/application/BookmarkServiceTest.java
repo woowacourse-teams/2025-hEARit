@@ -54,8 +54,7 @@ class BookmarkServiceTest {
 
     @BeforeEach
     void setup() {
-        bookmarkService = new BookmarkService(hearitRepository, memberRepository, bookmarkRepository,
-                playingHistoryRepository);
+        bookmarkService = new BookmarkService(hearitRepository, memberRepository, bookmarkRepository);
     }
 
     @Test

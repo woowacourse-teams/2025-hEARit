@@ -13,7 +13,6 @@ import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.Source;
 import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
@@ -114,9 +113,11 @@ class PlayingHistoryServiceTest {
         Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
-        // when & then
-        assertThatThrownBy(() -> playingHistoryService.addPlayingHistory(UserContext.guest(), request))
-                .isInstanceOf(UnauthorizedException.class);
+        // when
+        boolean isSaved = playingHistoryService.addPlayingHistory(UserContext.guest(), request);
+
+        // then
+        assertThat(isSaved).isFalse();
     }
 
     @Test
