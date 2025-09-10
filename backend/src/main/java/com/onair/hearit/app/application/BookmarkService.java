@@ -8,17 +8,13 @@ import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
-import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlaytimeProjection;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
-import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,38 +29,29 @@ public class BookmarkService {
     private final HearitRepository hearitRepository;
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
-    private final PlayingHistoryRepository playingHistoryRepository;
 
     public PagedResponse<BookmarkHearitResponse> getBookmarkHearits(
             UserContext userContext,
             PagingRequest pagingRequest) {
         Member member = getMemberByUserContext(userContext);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(member, pageable);
-        Map<Long, Long> playTimeMap = getPlayTimeMap(member.getId(), bookmarks.getContent());
-        Page<BookmarkHearitResponse> response = mapToResponsePage(bookmarks, playTimeMap);
-
+        Page<BookmarkWithPlaytimeProjection> projections = bookmarkRepository.findAllByMemberOrderByRecent(
+                member.getId(),
+                pageable);
+        Page<BookmarkHearitResponse> response = toBookmarkHearitResponse(projections);
         return PagedResponse.from(response);
     }
 
-    private Map<Long, Long> getPlayTimeMap(Long memberId, List<Bookmark> bookmarks) {
-        List<Long> hearitIds = bookmarks.stream()
-                .map(bookmark -> bookmark.getHearit().getId())
-                .toList();
-        return playingHistoryRepository.findByMemberIdAndHearitIdIn(memberId, hearitIds)
-                .stream()
-                .collect(Collectors.toMap(
-                        PlayingHistory::getHearitId,
-                        PlayingHistory::getLastPlayTime
-                ));
-    }
-
-    private Page<BookmarkHearitResponse> mapToResponsePage(Page<Bookmark> bookmarks, Map<Long, Long> playTimeMap) {
-        return bookmarks.map(bookmark -> {
-            Hearit hearit = bookmark.getHearit();
-            Long lastPlayTime = playTimeMap.getOrDefault(hearit.getId(), null);
-            return BookmarkHearitResponse.of(bookmark, hearit, lastPlayTime);
-        });
+    private Page<BookmarkHearitResponse> toBookmarkHearitResponse(Page<BookmarkWithPlaytimeProjection> projections) {
+        return projections.map(p -> new BookmarkHearitResponse(
+                p.getBookmark().getHearit().getId(),
+                p.getBookmark().getId(),
+                p.getBookmark().getHearit().getTitle(),
+                p.getBookmark().getHearit().getSummary(),
+                p.getBookmark().getHearit().getPlayTime(),
+                p.getLastPlayTime(),
+                p.getBookmark().getHearit().getCategory().getColorCode()
+        ));
     }
 
     @Transactional
