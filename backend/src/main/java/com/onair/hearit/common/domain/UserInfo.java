@@ -30,7 +30,7 @@ public class UserInfo {
     private void validate(Long memberId, String guestId) {
         if (memberId == null && guestId == null) {
             //FIXME: 커스텀 예외
-            throw new IllegalStateException("UserContext를 생성할 수 없습니다.");
+            throw new IllegalStateException("UserInfo를 생성할 수 없습니다.");
         }
         if (guestId != null) {
             validateGuestId(guestId);

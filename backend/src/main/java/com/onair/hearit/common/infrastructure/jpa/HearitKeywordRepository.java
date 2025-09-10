@@ -32,7 +32,7 @@ public interface HearitKeywordRepository extends JpaRepository<HearitKeyword, Lo
             FROM HearitKeyword hk
             JOIN FETCH hk.keyword
             WHERE hk.hearit IN :hearits""")
-    List<HearitKeyword> findAllByHearitIn(List<Hearit> hearits);
+    List<HearitKeyword> findAllByHearitIn(@Param("hearits") List<Hearit> hearits);
 
     @Query("""
                 SELECT k

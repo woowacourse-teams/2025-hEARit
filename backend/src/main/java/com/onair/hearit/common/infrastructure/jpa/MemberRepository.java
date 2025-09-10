@@ -17,5 +17,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT count(m) > 0 FROM Member m WHERE m.localId = :localId AND m.deletedAt IS NULL")
     boolean existsByLocalId(String localId);
 
+    @Query("SELECT m FROM Member m WHERE m.uuid = :uuid AND m.deletedAt IS NULL")
     Optional<Member> findByUuid(String uuid);
 }
