@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -39,7 +40,7 @@ class BottomPlayerView
 
         private val window = Timeline.Window()
 
-        private val uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        private var uiScope: CoroutineScope? = null
         private var progressJob: Job? = null
 
         init {
@@ -83,10 +84,7 @@ class BottomPlayerView
                         position: Long,
                         canceled: Boolean,
                     ) {
-                        player?.let {
-                            it.seekTo(position)
-                            updateProgressOnce()
-                        }
+                        player?.seekTo(position)
                     }
                 },
             )
@@ -98,8 +96,6 @@ class BottomPlayerView
                 updateTimeline(it)
                 updatePlayPauseButton(it)
                 updateTitle(it)
-                // 프로그레스 바 업데이트 루프를 시작하거나 유지함
-                ensureProgress()
             }
         }
 
@@ -143,18 +139,18 @@ class BottomPlayerView
                 if (currentPlayer.duration != C.TIME_UNSET) {
                     currentPlayer.duration
                 } else {
-                    window.durationMs.takeIf { it > 0 }
-                        ?: 0L
+                    window.durationMs.takeIf { it > 0 } ?: 0L
                 }
             binding.exoProgress.setDuration(duration)
             binding.exoProgress.setPosition(currentPlayer.currentPosition)
+            binding.exoProgress.setBufferedPosition(currentPlayer.bufferedPosition)
         }
 
         // 프로그레스 바 업데이트를 위한 코루틴 루프를 시작
         private fun startProgressLoop() {
             progressJob?.cancel()
             progressJob =
-                uiScope.launch {
+                uiScope?.launch {
                     while (isActive && isAttachedToWindow) {
                         updateProgressOnce()
                         val preferred = binding.exoProgress.preferredUpdateDelay
@@ -162,6 +158,12 @@ class BottomPlayerView
                         delay(delayMs)
                     }
                 }
+        }
+
+        // 프로그레스 바 업데이트 루프를 멈춤
+        private fun stopProgressLoop() {
+            progressJob?.cancel()
+            progressJob = null
         }
 
         private fun updatePlayPauseButton(current: Player) {
@@ -195,15 +197,18 @@ class BottomPlayerView
         // 뷰가 화면에 붙을 때 호출되는 콜백.
         override fun onAttachedToWindow() {
             super.onAttachedToWindow()
-            // 뷰가 다시 붙을 때 프로그레스 루프를 다시 시작하도록 함 -> job이 window에서 떨어지면 사라지기 떄문
-            if (progressJob?.isActive != true && player != null) startProgressLoop()
+            uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+            // 뷰가 다시 붙으면 프로그레스 루프를 다시 시작
+            if (player != null && player?.isPlaying == true) {
+                startProgressLoop()
+            }
         }
 
-        // onDetachedFromWindow()는 뷰(View)가 화면에서 분리될 때 호출되는 안드로이드 생명주기 메서드
-        // remove와 같은 정리 작업을 하는 경우에 사용됨.
-        // detachPlayer()는 Player 객체와의 연결을 해제하는 함수
+        // 뷰가 화면에서 분리될 때 호출되는 콜백
         override fun onDetachedFromWindow() {
             super.onDetachedFromWindow()
+            uiScope?.cancel()
+            uiScope = null
             detachPlayer()
         }
 
@@ -229,7 +234,11 @@ class BottomPlayerView
                     )
                 ) {
                     updatePlayPauseButton(player)
-                    ensureProgress()
+                    if (player.isPlaying) {
+                        startProgressLoop()
+                    } else {
+                        stopProgressLoop()
+                    }
                 }
             }
         }
