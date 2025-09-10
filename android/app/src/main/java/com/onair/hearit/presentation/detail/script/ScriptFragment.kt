@@ -143,7 +143,7 @@ class ScriptFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.hearit.observe(viewLifecycleOwner) { hearit ->
             binding.hearit = hearit
-            adapter.submitList(hearit.script)
+            adapter.submitList(hearit?.script)
         }
 
         viewModel.bookmarkId.observe(viewLifecycleOwner) { bookmarkId ->

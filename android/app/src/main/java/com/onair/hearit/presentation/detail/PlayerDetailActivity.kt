@@ -238,9 +238,9 @@ class PlayerDetailActivity :
     private fun observeViewModel() {
         viewModel.hearit.observe(this) { hearit ->
             binding.hearit = hearit
-            keywordAdapter.submitList(hearit.keywords)
-            scriptAdapter.submitList(hearit.script)
-            sourceAdapter.submitList(hearit.sources)
+            keywordAdapter.submitList(hearit?.keywords)
+            scriptAdapter.submitList(hearit?.script)
+            sourceAdapter.submitList(hearit?.sources)
         }
 
         viewModel.bookmarkId.observe(this) { bookmarkId ->
