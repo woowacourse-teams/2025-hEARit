@@ -10,6 +10,12 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutBottomPlayerControllerBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 @UnstableApi
 class BottomPlayerView
@@ -30,7 +36,7 @@ class BottomPlayerView
             )
 
         private val window = Timeline.Window()
-        private val progressRunnable = Runnable { updateProgress() }
+        private var progressJob: Job? = null
 
         init {
             setupScrubListener()
@@ -45,6 +51,7 @@ class BottomPlayerView
                 player = newPlayer
                 listener = PlayerListener().also { newPlayer.addListener(it) }
                 refresh()
+
                 // post를 이용해서 UI가 완전히 그려진 후에 연결되도록 함.
                 post { updateProgress() }
             }
@@ -61,14 +68,12 @@ class BottomPlayerView
                     override fun onScrubStart(
                         timeBar: TimeBar,
                         position: Long,
-                    ) {
-                    }
+                    ) = Unit
 
                     override fun onScrubMove(
                         timeBar: TimeBar,
                         position: Long,
-                    ) {
-                    }
+                    ) = Unit
 
                     override fun onScrubStop(
                         timeBar: TimeBar,
@@ -122,16 +127,19 @@ class BottomPlayerView
             if (!isAttachedToWindow) return
             val currentPlayer = player ?: return
 
-            removeCallbacks(progressRunnable)
+            // 이미 실행 중인 경우 다시 시작하지 않음
+            if (progressJob?.isActive == true) return
 
-            if (currentPlayer.playbackState == Player.STATE_READY) {
-                binding.exoProgress.setPosition(currentPlayer.currentPosition)
-                binding.exoProgress.setBufferedPosition(currentPlayer.bufferedPosition)
-            }
-
-            if (currentPlayer.playWhenReady && currentPlayer.playbackState == Player.STATE_READY) {
-                postDelayed(progressRunnable, binding.exoProgress.preferredUpdateDelay)
-            }
+            progressJob =
+                CoroutineScope(Dispatchers.Main.immediate).launch {
+                    while (isActive) {
+                        if (currentPlayer.playbackState == Player.STATE_READY && currentPlayer.playWhenReady) {
+                            binding.exoProgress.setPosition(currentPlayer.currentPosition)
+                            binding.exoProgress.setBufferedPosition(currentPlayer.bufferedPosition)
+                        }
+                        delay(binding.exoProgress.preferredUpdateDelay)
+                    }
+                }
         }
 
         private fun updatePlayPauseButton(current: Player) {
@@ -155,6 +163,7 @@ class BottomPlayerView
         }
 
         private fun detachPlayer() {
+            progressJob?.cancel()
             listener?.let { player?.removeListener(it) }
             listener = null
             player = null
@@ -165,7 +174,8 @@ class BottomPlayerView
         // detachPlayer()는 Player 객체와의 연결을 해제하는 함수
         override fun onDetachedFromWindow() {
             super.onDetachedFromWindow()
-            removeCallbacks(progressRunnable)
+            progressJob?.cancel()
+            progressJob = null
             detachPlayer()
         }
 
@@ -174,20 +184,18 @@ class BottomPlayerView
                 player: Player,
                 events: Player.Events,
             ) {
-                if (events.contains(Player.EVENT_MEDIA_METADATA_CHANGED) ||
-                    events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
-                    events.contains(Player.EVENT_TIMELINE_CHANGED)
+                if (events.containsAny(
+                        Player.EVENT_MEDIA_METADATA_CHANGED,
+                        Player.EVENT_MEDIA_ITEM_TRANSITION,
+                        Player.EVENT_TIMELINE_CHANGED,
+                    )
                 ) {
-                    updateTitle(player)
-                }
-                if (events.contains(Player.EVENT_TIMELINE_CHANGED)) {
-                    updateTimeline(player)
-                }
-                if (
-                    events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) ||
-                    events.contains(Player.EVENT_IS_PLAYING_CHANGED)
+                    refresh()
+                } else if (events.containsAny(
+                        Player.EVENT_PLAYBACK_STATE_CHANGED,
+                        Player.EVENT_IS_PLAYING_CHANGED,
+                    )
                 ) {
-                    updateTitle(player)
                     updatePlayPauseButton(player)
                     updateProgress()
                 }
