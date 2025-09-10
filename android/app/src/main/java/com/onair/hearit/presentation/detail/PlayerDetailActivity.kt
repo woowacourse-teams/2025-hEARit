@@ -341,7 +341,10 @@ class PlayerDetailActivity :
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
         val input = SearchInput.Category(id, name, colorCode)
-        val resultIntent = Intent().apply { putExtras(input.toBundle()) }
+        val resultIntent =
+            Intent().apply {
+                putExtras(input.toBundle())
+            }
         setResult(RESULT_OK, resultIntent)
         finish()
     }
