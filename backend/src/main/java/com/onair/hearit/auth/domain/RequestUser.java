@@ -1,8 +1,12 @@
 package com.onair.hearit.auth.domain;
 
 import com.onair.hearit.common.domain.UserInfo;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class RequestUser {
+
+    private static final String FALLBACK_GUEST_ID = "00000000-0000-0000-0000-000000000000";
 
     private final Long memberId;
     private final String guestId;
@@ -15,7 +19,8 @@ public class RequestUser {
 
     public static RequestUser guest(String guestId) {
         if (guestId == null || guestId.isBlank()) {
-            throw new IllegalStateException("guestId는 null이거나 비어있을 수 없습니다.");
+            log.warn("현재 X-Device-UUID Header가 비어있습니다.");
+            return new RequestUser(null, FALLBACK_GUEST_ID);
         }
         return new RequestUser(null, guestId);
     }
