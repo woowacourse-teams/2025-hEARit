@@ -319,7 +319,7 @@ class HearitServiceTest {
                 category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(1L, hearit1, 450));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit1, 450));
         PagingRequest request = new PagingRequest(1, 2);
 
         // when

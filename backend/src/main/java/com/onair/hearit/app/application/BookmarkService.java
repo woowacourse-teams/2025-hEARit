@@ -43,14 +43,10 @@ public class BookmarkService {
     }
 
     private Page<BookmarkHearitResponse> toBookmarkHearitResponse(Page<BookmarkWithPlaytimeProjection> projections) {
-        return projections.map(p -> new BookmarkHearitResponse(
-                p.getBookmark().getHearit().getId(),
-                p.getBookmark().getId(),
-                p.getBookmark().getHearit().getTitle(),
-                p.getBookmark().getHearit().getSummary(),
-                p.getBookmark().getHearit().getPlayTime(),
-                p.getLastPlayTime(),
-                p.getBookmark().getHearit().getCategory().getColorCode()
+        return projections.map(p -> BookmarkHearitResponse.of(
+                p.getBookmark(),
+                p.getBookmark().getHearit(),
+                p.getLastPlayTime()
         ));
     }
 
