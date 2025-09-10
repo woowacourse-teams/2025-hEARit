@@ -293,7 +293,7 @@ class PlayerDetailActivity :
         val isDifferentHearit = currentlyPlayingId != hearit.id
         val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
         val startPosition = if (shouldResume) lastPosition else 0L
-        val source = hearit.sources.first().name
+        val source = hearit.sources.firstOrNull()?.name ?: "hEARit"
 
         if (isDifferentHearit) {
             startPlaybackService(
@@ -414,6 +414,9 @@ class PlayerDetailActivity :
     override fun onDestroy() {
         super.onDestroy()
         mediaController?.removeListener(playerListener)
+        scriptSyncJob?.cancel()
+        mediaController?.release()
+        mediaController = null
     }
 
     companion object {

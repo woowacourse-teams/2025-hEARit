@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
@@ -30,7 +31,7 @@ class PlaylistBottomSheet : BottomSheetDialogFragment() {
     private val playerListener =
         object : Player.Listener {
             override fun onMediaItemTransition(
-                mediaItem: androidx.media3.common.MediaItem?,
+                mediaItem: MediaItem?,
                 reason: Int,
             ) {
                 publishFromMetadata(mediaItem?.mediaMetadata)
