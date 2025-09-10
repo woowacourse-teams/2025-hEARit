@@ -31,12 +31,6 @@ class ShortsAdapter(
         super.onViewRecycled(holder)
     }
 
-    fun updateCurrentViewHolder(viewHolder: ShortsViewHolder?) {
-        currentViewHolder?.updateLpRotation(false)
-        currentViewHolder = viewHolder
-        currentViewHolder?.updateLpRotation(player.isPlaying)
-    }
-
     companion object {
         private val DiffCallback =
             object : DiffUtil.ItemCallback<ShortsHearit>() {

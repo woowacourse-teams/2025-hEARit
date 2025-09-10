@@ -18,8 +18,10 @@ import com.onair.hearit.databinding.ItemShortsBinding
 import com.onair.hearit.domain.model.ShortsHearit
 import com.onair.hearit.presentation.flash
 import com.onair.hearit.presentation.hideFlashImmediately
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 
 @SuppressLint("ClickableViewAccessibility")
@@ -37,7 +39,7 @@ class ShortsViewHolder(
 
     // 코루틴 스코프: UI 스레드에서 코루틴을 실행하고 관리
     // MainScope의 경우 최상위 스코프이기 떄문에 자식 스코프를 무조건 취소해줘야 하고, 간단한 애니메이션 같은 경우를 여기서 실행하는 경우가 많음
-    private val scope = MainScope()
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     // 각각의 job을 부여하고 cancel하면서 멈추지 않을 수도 있는 오류를 방지함
     private var playJob: Job? = null
@@ -126,10 +128,16 @@ class ShortsViewHolder(
     }
 
     fun onRecycled() {
-        // 다양한 job들을 cancelChildren을 통해서 모두 취소함
         scope.coroutineContext.cancelChildren()
+
+        if (isBoosting) stopBoost() else player.setPlaybackSpeed(DEFAULT_SPEED)
         stopLpRotation()
+
         binding.rvExploreItemScript.adapter = null
+
+        playJob = null
+        pauseJob = null
+        boostJob = null
         item = null
     }
 
@@ -168,10 +176,6 @@ class ShortsViewHolder(
         binding.viewExploreBoost.hideFlashImmediately()
         player.setPlaybackSpeed(DEFAULT_SPEED)
         isBoosting = false
-    }
-
-    fun updateLpRotation(isPlaying: Boolean) {
-        if (isPlaying) resumeLpRotation() else pauseLpRotation()
     }
 
     private fun startLpRotation() {

@@ -100,14 +100,6 @@ class ExploreFragment :
                 lifecycleScope = viewLifecycleOwner.lifecycleScope,
                 onPlaybackEnded = { scrollToNextItem() },
                 onPositionUpdated = { position -> highlightScript(position) },
-                onPlayerStateChanged = { isPlaying ->
-                    // ExoPlayer의 상태 변화를 어댑터에 전달하여 LP 회전 업데이트
-                    adapter.updateCurrentViewHolder(
-                        binding.rvExplore.findViewHolderForAdapterPosition(
-                            currentIndex(),
-                        ) as? ShortsViewHolder,
-                    )
-                },
             )
 
         setupRecyclerView()
@@ -195,9 +187,6 @@ class ExploreFragment :
                 ) {
                     super.onScrolled(recyclerView, dx, dy)
                     // 스크롤 중일 때 현재 뷰홀더를 파악하여 어댑터에 전달 (UI 업데이트용)
-                    val currentViewHolder =
-                        binding.rvExplore.findViewHolderForAdapterPosition(currentIndex()) as? ShortsViewHolder
-                    adapter.updateCurrentViewHolder(currentViewHolder)
                 }
             },
         )
