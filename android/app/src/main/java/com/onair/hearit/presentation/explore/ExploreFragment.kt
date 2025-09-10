@@ -179,15 +179,6 @@ class ExploreFragment :
                         AnalyticsProvider.get().logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
                     }
                 }
-
-                override fun onScrolled(
-                    recyclerView: RecyclerView,
-                    dx: Int,
-                    dy: Int,
-                ) {
-                    super.onScrolled(recyclerView, dx, dy)
-                    // 스크롤 중일 때 현재 뷰홀더를 파악하여 어댑터에 전달 (UI 업데이트용)
-                }
             },
         )
     }
