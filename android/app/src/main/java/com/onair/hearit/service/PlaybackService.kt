@@ -18,7 +18,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import timber.log.Timber
 
 @OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
@@ -58,15 +57,14 @@ class PlaybackService : MediaSessionService() {
                 return START_NOT_STICKY
             }
 
-            ACTION_PLAY_SINGLE -> handlePlaySingle(intent)
-            ACTION_APPEND_PLAYLIST -> handleAppendPlaylist(intent)
+            ACTION_PLAY_SINGLE -> handlePlay(intent)
         }
 
         initializeAndStartForeground()
         return START_STICKY
     }
 
-    private fun handlePlaySingle(intent: Intent) {
+    private fun handlePlay(intent: Intent) {
         val audioUrl = intent.getStringExtra(EXTRA_AUDIO_URL)
         val title = intent.getStringExtra(EXTRA_TITLE) ?: "hEARit"
         val hearitId = intent.getLongExtra(EXTRA_HEARIT_ID, -1L)
@@ -92,18 +90,6 @@ class PlaybackService : MediaSessionService() {
         player.setMediaItems(listOf(item), 0, startPosition.coerceAtLeast(0L))
         player.prepare()
         player.play()
-    }
-
-    private fun handleAppendPlaylist(intent: Intent) {
-        val audioUrl = intent.getStringExtra(EXTRA_AUDIO_URL) ?: return
-        val title = intent.getStringExtra(EXTRA_TITLE) ?: "hEARit"
-        val hearitId = intent.getLongExtra(EXTRA_HEARIT_ID, -1L)
-        val source = intent.getStringExtra(EXTRA_SOURCE) ?: "hEARit"
-
-        if (hearitId == -1L) return
-
-        val item = createMediaItem(audioUrl, title, hearitId, source)
-        player.addMediaItem(item)
     }
 
     private fun initializePlayer() {
@@ -194,9 +180,8 @@ class PlaybackService : MediaSessionService() {
 
         const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
         const val ACTION_PLAY_SINGLE = "hearit.ACTION_PLAY_SINGLE"
-        const val ACTION_APPEND_PLAYLIST = "hearit.ACTION_APPEND_PLAYLIST"
 
-        fun newIntentSingle(
+        fun newIntent(
             context: Context,
             audioUrl: String,
             title: String,

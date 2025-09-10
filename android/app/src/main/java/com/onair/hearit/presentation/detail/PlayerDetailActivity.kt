@@ -325,7 +325,7 @@ class PlayerDetailActivity :
         bookmarkId: Long?,
     ) {
         val serviceIntent =
-            PlaybackService.newIntentSingle(
+            PlaybackService.newIntent(
                 context = this,
                 audioUrl = audioUrl,
                 title = title,
