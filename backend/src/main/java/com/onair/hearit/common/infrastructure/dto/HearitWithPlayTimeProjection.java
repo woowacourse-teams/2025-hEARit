@@ -1,8 +1,8 @@
-package com.onair.hearit.common.infrastructure.jpa;
+package com.onair.hearit.common.infrastructure.dto;
 
 import com.onair.hearit.common.domain.Hearit;
 
-public interface HearitWithPlayTime {
+public interface HearitWithPlayTimeProjection {
     Hearit getHearit();
 
     Long getLastPlayTime();

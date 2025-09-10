@@ -17,11 +17,11 @@ import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.infrastructure.dto.HearitWithPlayTimeProjection;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
-import com.onair.hearit.common.infrastructure.jpa.HearitWithPlayTime;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import java.time.LocalDate;
@@ -145,10 +145,10 @@ public class HearitService {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
 
         Long memberId = (userContext == null || userContext.isGuest()) ? null : userContext.memberId();
-        Page<HearitWithPlayTime> hearitsWithPlayTime =
+        Page<HearitWithPlayTimeProjection> hearitsWithPlayTime =
                 hearitRepository.findWithPlayTimeByCategoryId(categoryId, memberId, pageable);
         List<Hearit> hearits = hearitsWithPlayTime.getContent().stream()
-                .map(HearitWithPlayTime::getHearit)
+                .map(HearitWithPlayTimeProjection::getHearit)
                 .toList();
         List<Long> hearitIds = hearits.stream().map(Hearit::getId).toList();
         Map<Long, List<Keyword>> keywordsMap = getKeywordsMap(hearitIds);
