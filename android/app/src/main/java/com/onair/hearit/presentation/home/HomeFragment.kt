@@ -147,9 +147,13 @@ class HomeFragment :
                 addAll(contentItems)
                 add(RecommendHearits.NavigateItem(Direction.RIGHT))
             }
+
         recommendAdapter.submitList(items) {
-            scrollToMiddlePosition()
-            setupIndicator(contentItems.size)
+            // view가 살아있을 때만 실행
+            if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                scrollToMiddlePosition()
+                setupIndicator(contentItems.size)
+            }
         }
     }
 
