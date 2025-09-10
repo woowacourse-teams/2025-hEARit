@@ -27,7 +27,7 @@ public class RequestUser {
 
     public static RequestUser member(Long memberId) {
         if (memberId == null) {
-            throw new IllegalStateException("guestId는 null일 수 없습니다.");
+            throw new IllegalStateException("memberId는 null일 수 없습니다.");
         }
         return new RequestUser(memberId, null);
     }

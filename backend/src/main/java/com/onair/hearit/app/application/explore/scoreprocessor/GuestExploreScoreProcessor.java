@@ -26,7 +26,7 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
 
     @Override
     public boolean isSupported(UserInfo userInfo) {
-        return userInfo == null || userInfo.isGuest();
+        return userInfo != null && userInfo.isGuest();
     }
 
     @Override
