@@ -24,7 +24,12 @@ sealed class SearchInput {
 
     fun toBundle(): Bundle =
         when (this) {
-            is Keyword -> bundleOf(TYPE_KEY to KEYWORD_VALUE, KEYWORD_KEY to this.term)
+            is Keyword ->
+                bundleOf(
+                    TYPE_KEY to KEYWORD_VALUE,
+                    KEYWORD_KEY to this.term,
+                )
+
             is Category ->
                 bundleOf(
                     TYPE_KEY to CATEGORY_VALUE,

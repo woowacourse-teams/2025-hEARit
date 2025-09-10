@@ -10,8 +10,8 @@ import com.onair.hearit.presentation.IntentKeys.EXPLORE_KEY
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
-import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
+import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
 fun Int.dpToPx(context: Context): Int = (this * context.resources.displayMetrics.density).toInt()
 
@@ -55,10 +55,11 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
 
         is DetailResult.Keyword -> {
             mainActivity.selectTab(R.id.nav_search)
-            val searchFragment = SearchFragment().apply { arguments = this@navigate.bundle }
+            val searchRecentFragment = SearchRecentFragment.newInstance(term)
+
             mainActivity.supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container_view, searchFragment)
+                .replace(R.id.fragment_container_view, searchRecentFragment)
                 .addToBackStack(null)
                 .commit()
         }

@@ -45,7 +45,6 @@ import com.onair.hearit.presentation.IntentKeys.LAST_POSITION_KEY
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
-import com.onair.hearit.presentation.IntentValues.KEYWORD_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.dpToPx
@@ -365,7 +364,6 @@ class PlayerDetailActivity :
                 AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
                 mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
             )
-
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
         } catch (e: Exception) {
@@ -382,7 +380,6 @@ class PlayerDetailActivity :
         val input = SearchInput.Keyword(term)
         val resultIntent =
             Intent().apply {
-                putExtra(TYPE_KEY, KEYWORD_VALUE)
                 putExtras(input.toBundle())
             }
         setResult(RESULT_OK, resultIntent)

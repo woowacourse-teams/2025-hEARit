@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
+import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 
 sealed class DetailResult {
     data class Explore(
@@ -24,6 +25,10 @@ sealed class DetailResult {
     }
 
     data class Keyword(
-        val bundle: Bundle,
-    ) : DetailResult()
+        val term: String,
+    ) : DetailResult() {
+        constructor(bundle: Bundle) : this(
+            term = bundle.getString(KEYWORD_KEY) ?: "hEARit",
+        )
+    }
 }
