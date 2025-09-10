@@ -10,10 +10,10 @@ import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.OAuthUserInfoResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
 import com.onair.hearit.common.domain.Member;
-import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
+import com.onair.hearit.fixture.DbHelper;
 import java.util.UUID;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
@@ -81,7 +81,7 @@ class AuthKakaoServiceTest {
         String profileImage = "프로필이미지.URL";
         OAuthProvider provider = OAuthProvider.KAKAO;
         Member saved = memberRepository.save(
-                Member.createSocialUser(UUID.randomUUID(), kakaoId, nickname, profileImage, provider));
+                Member.createSocialUser(UUID.randomUUID().toString(), kakaoId, nickname, profileImage, provider));
         assertThat(memberRepository.findBySocialIdAndOAuthProvider(kakaoId, provider)).isPresent(); // 회원 정보가 이미 있음을 확인
 
         String accessToken = "test-access-token";
