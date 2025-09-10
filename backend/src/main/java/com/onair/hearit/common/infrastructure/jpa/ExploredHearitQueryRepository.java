@@ -1,7 +1,7 @@
 package com.onair.hearit.common.infrastructure.jpa;
 
 import com.onair.hearit.common.domain.Hearit;
-import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitProjection;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,7 +20,7 @@ public interface ExploredHearitQueryRepository extends JpaRepository<Hearit, Lon
               AND es.cursorId > :cursorId
             ORDER BY es.cursorId ASC
             """)
-    List<ExploredHearitInfo> findExploredHearits(@Param("userUuid") String userUuid,
-                                                 @Param("cursorId") Long cursorId,
-                                                 Pageable pageable);
+    List<ExploredHearitProjection> findExploredHearits(@Param("userUuid") String userUuid,
+                                                       @Param("cursorId") Long cursorId,
+                                                       Pageable pageable);
 }

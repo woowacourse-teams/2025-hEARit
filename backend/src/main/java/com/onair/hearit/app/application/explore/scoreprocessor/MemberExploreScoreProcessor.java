@@ -8,7 +8,7 @@ import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitProjection;
 import com.onair.hearit.common.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.ExploredHearitQueryRepository;
@@ -52,15 +52,15 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
 
     @Override
     protected List<ExploredHearitResponse> convertToExploredHearitResponses(
-            List<ExploredHearitInfo> exploredHearitInfos,
+            List<ExploredHearitProjection> exploredHearitProjections,
             UserInfo userInfo) {
-        List<Hearit> hearits = exploredHearitInfos.stream()
-                .map(ExploredHearitInfo::getHearit)
+        List<Hearit> hearits = exploredHearitProjections.stream()
+                .map(ExploredHearitProjection::getHearit)
                 .toList();
         Map<Hearit, List<Keyword>> keywordsMap = prepareKeywordsMap(hearits);
         Map<Long, Bookmark> bookmarksMap = prepareBookmarksMap(hearits, userInfo);
 
-        return exploredHearitInfos.stream()
+        return exploredHearitProjections.stream()
                 .map(info -> {
                     Hearit hearit = info.getHearit();
                     List<Keyword> keywords = keywordsMap.getOrDefault(hearit, List.of());
@@ -77,7 +77,7 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
                 .collect(Collectors.toMap(bookmark -> bookmark.getHearit().getId(), bookmark -> bookmark));
     }
 
-    private ExploredHearitResponse assembleExploredHearitResponse(ExploredHearitInfo info, Bookmark bookmark,
+    private ExploredHearitResponse assembleExploredHearitResponse(ExploredHearitProjection info, Bookmark bookmark,
                                                                   Hearit hearit, List<Keyword> keywords) {
         if (bookmark == null) {
             return ExploredHearitResponse.from(hearit, keywords, info.getCursorId());

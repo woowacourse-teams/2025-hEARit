@@ -5,7 +5,7 @@ import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.UserInfo;
-import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitProjection;
 import com.onair.hearit.common.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
@@ -36,14 +36,14 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
 
     @Override
     protected List<ExploredHearitResponse> convertToExploredHearitResponses(
-            List<ExploredHearitInfo> exploredHearitInfos,
+            List<ExploredHearitProjection> exploredHearitProjections,
             UserInfo userInfo) {
-        List<Hearit> hearits = exploredHearitInfos.stream()
-                .map(ExploredHearitInfo::getHearit)
+        List<Hearit> hearits = exploredHearitProjections.stream()
+                .map(ExploredHearitProjection::getHearit)
                 .toList();
         Map<Hearit, List<Keyword>> keywordsMap = prepareKeywordsMap(hearits);
 
-        return exploredHearitInfos.stream()
+        return exploredHearitProjections.stream()
                 .map(info -> {
                     List<Keyword> keywords = keywordsMap.getOrDefault(info.getHearit(), List.of());
                     return ExploredHearitResponse.from(info.getHearit(), keywords, info.getCursorId());

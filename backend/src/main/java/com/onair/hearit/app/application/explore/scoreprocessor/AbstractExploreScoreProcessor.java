@@ -6,7 +6,7 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.UserInfo;
-import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitProjection;
 import com.onair.hearit.common.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
@@ -31,14 +31,14 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
     @Override
     @Transactional
     public List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId, int size) {
-        List<ExploredHearitInfo> exploredHearitInfos = getExploredHearits(userInfo, cursorId, size);
-        if (exploredHearitInfos.isEmpty()) {
+        List<ExploredHearitProjection> exploredHearitProjections = getExploredHearits(userInfo, cursorId, size);
+        if (exploredHearitProjections.isEmpty()) {
             return List.of();
         }
-        return convertToExploredHearitResponses(exploredHearitInfos, userInfo);
+        return convertToExploredHearitResponses(exploredHearitProjections, userInfo);
     }
 
-    private List<ExploredHearitInfo> getExploredHearits(UserInfo userInfo, Long cursorId, int size) {
+    private List<ExploredHearitProjection> getExploredHearits(UserInfo userInfo, Long cursorId, int size) {
         String userId = getUserUuId(userInfo);
 
         if (cursorId == 0L) {
@@ -68,7 +68,7 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
     protected abstract String getUserUuId(UserInfo userInfo);
 
     protected abstract List<ExploredHearitResponse> convertToExploredHearitResponses(
-            List<ExploredHearitInfo> infos,
+            List<ExploredHearitProjection> infos,
             UserInfo userInfo
     );
 }

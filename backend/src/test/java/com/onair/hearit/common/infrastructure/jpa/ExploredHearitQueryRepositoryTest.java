@@ -7,7 +7,7 @@ import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.ExploreScore;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
-import com.onair.hearit.common.infrastructure.dto.ExploredHearitInfo;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitProjection;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ class ExploredHearitQueryRepositoryTest {
                 .toList();
 
         // when
-        List<ExploredHearitInfo> result = exploredHearitQueryRepository.findExploredHearits(
+        List<ExploredHearitProjection> result = exploredHearitQueryRepository.findExploredHearits(
                 member.getUuid(), 2L, Pageable.ofSize(3));
 
         // then
@@ -51,7 +51,7 @@ class ExploredHearitQueryRepositoryTest {
             assertThat(result).extracting(
                             exploredHearitInfo -> exploredHearitInfo.getHearit().getId()) // cusorId 이후 size 만큼 조회
                     .contains(exploreScoreHearitIds.get(2), exploreScoreHearitIds.get(3), exploreScoreHearitIds.get(4));
-            assertThat(result).extracting(ExploredHearitInfo::getCursorId)
+            assertThat(result).extracting(ExploredHearitProjection::getCursorId)
                     .contains(3L, 4L, 5L);
         });
     }
