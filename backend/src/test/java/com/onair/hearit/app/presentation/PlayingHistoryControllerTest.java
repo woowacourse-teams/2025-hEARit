@@ -48,11 +48,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Playing History API")
                                 .summary("재생기록 생성 또는 수정")
-                                .description("""
-                                        사용자의 재생 기록을 생성하거나 업데이트합니다.
-                                        - 사용자가 특정 히어릿에 대한 재생 기록이 없을 경우, 새로운 기록을 생성하고 `201 Created`를 반환합니다.
-                                        - 사용자가 특정 히어릿에 대한 재생 기록이 있을 경우, 기존 기록을 수정하고 `200 OK`를 반환합니다.
-                                        """)
+                                .description("사용자의 재생 기록을 생성하거나 업데이트합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
                                         fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
@@ -87,11 +83,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Playing History API")
                                 .summary("재생기록 생성 또는 저장")
-                                .description("""
-                                        사용자의 재생 기록을 생성하거나 업데이트합니다.
-                                        - 사용자가 특정 히어릿에 대한 재생 기록이 없을 경우, 새로운 기록을 생성하고 `201 Created`를 반환합니다.
-                                        - 사용자가 특정 히어릿에 대한 재생 기록이 있을 경우, 기존 기록을 수정하고 `200 OK`를 반환합니다.
-                                        """)
+                                .description("사용자의 재생 기록을 생성하거나 업데이트합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
                                         fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
@@ -121,11 +113,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Playing History API")
                                 .summary("재생기록 생성 또는 저장")
-                                .description("""
-                                        사용자의 재생 기록을 생성하거나 업데이트합니다.
-                                        - 사용자가 특정 히어릿에 대한 재생 기록이 없을 경우, 새로운 기록을 생성하고 `201 Created`를 반환합니다.
-                                        - 사용자가 특정 히어릿에 대한 재생 기록이 있을 경우, 기존 기록을 수정하고 `200 OK`를 반환합니다.
-                                        """)
+                                .description("사용자의 재생 기록을 생성하거나 업데이트합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
                                         fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
