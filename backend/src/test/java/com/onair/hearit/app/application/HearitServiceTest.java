@@ -18,7 +18,9 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.RecommendHearit;
+import com.onair.hearit.common.domain.Source;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryRepository;
@@ -103,16 +105,16 @@ class HearitServiceTest {
                 UserContext.member(member.getId()));
 
         // then
-        assertAll(
-                () -> assertThat(response.id()).isEqualTo(hearit.getId()),
-                () -> assertThat(response.title()).isEqualTo(hearit.getTitle()),
-                () -> assertThat(response.summary()).isEqualTo(hearit.getSummary()),
-                () -> assertThat(response.isBookmarked()).isTrue(),
-                () -> assertThat(response.bookmarkId()).isEqualTo(bookmark.getId()),
-                () -> assertThat(response.category().id()).isEqualTo(hearit.getCategory().getId()),
-                () -> assertThat(response.category().name()).isEqualTo(hearit.getCategory().getName()),
-                () -> assertThat(response.keywords()).hasSize(1)
-        );
+        assertAll(() -> {
+            assertThat(response.id()).isEqualTo(hearit.getId());
+            assertThat(response.title()).isEqualTo(hearit.getTitle());
+            assertThat(response.summary()).isEqualTo(hearit.getSummary());
+            assertThat(response.isBookmarked()).isTrue();
+            assertThat(response.bookmarkId()).isEqualTo(bookmark.getId());
+            assertThat(response.category().id()).isEqualTo(hearit.getCategory().getId());
+            assertThat(response.category().name()).isEqualTo(hearit.getCategory().getName());
+            assertThat(response.keywords()).hasSize(1);
+        });
     }
 
     @Test
@@ -230,7 +232,7 @@ class HearitServiceTest {
 
     @Test
     @DisplayName("히어릿 목록을 카테고리 조회 시 카테고리에 해당하는 히어릿만 반환한다.")
-    void searchHearitsByCategory_onlyMatchingCategory() {
+    void getHearitsByCategory_onlyMatchingCategory() {
         // given
         Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -253,7 +255,7 @@ class HearitServiceTest {
 
     @Test
     @DisplayName("카테고리 내의 히어릿들을 조회 시 각 히어릿에 키워드가 포함되어 반환된다.")
-    void searchHearitsByCategory_includesKeywords() {
+    void getHearitsByCategory_includesKeywords() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
@@ -268,16 +270,16 @@ class HearitServiceTest {
                 request, UserContext.guest());
 
         // then
-        assertAll(
-                () -> assertThat(result.content()).hasSize(1),
-                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
-                () -> assertThat(result.content().get(0).keywords()).hasSize(2)
-        );
+        assertAll(() -> {
+            assertThat(result.content()).hasSize(1);
+            assertThat(result.content().get(0).id()).isEqualTo(hearit.getId());
+            assertThat(result.content().get(0).keywords()).hasSize(2);
+        });
     }
 
     @Test
     @DisplayName("카테고리 내의 히어릿들을 조회 시 최신순으로 페이지네이션이 적용된다.")
-    void searchHearitsByCategory_pagination() {
+    void getHearitsByCategory_pagination() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
@@ -290,9 +292,47 @@ class HearitServiceTest {
                 request, UserContext.guest());
 
         // then
+        assertAll(() -> {
+            assertThat(result.content()).hasSize(1);
+            assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("멤버 로그인한 사용자가 카테고리 내의 히어릿들을 조회 시 마지막 재생 시간도 함께 조회된다.")
+    void getHearitsByCategory_lastPlayTime() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(new Hearit(
+                "title",
+                "summary",
+                500,
+                "/hearit/audio/original/ORG_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
+                "/hearit/audio/short/SHR_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
+                "/hearit/script/SCR_bf7c513e-579e-4224-8505-3824bb22ed01.json",
+                List.of(
+                        new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
+                                "https://example.com/1"),
+                        new Source("원본은 CC BY 4.0 라이선스를 따릅니다.", "https://example.com/2")
+                ),
+                category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(1L, hearit1, 450));
+        PagingRequest request = new PagingRequest(1, 2);
+
+        // when
+        PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
+                request, UserContext.member(member.getId()));
+
+        // then
         assertAll(
-                () -> assertThat(result.content()).hasSize(1),
-                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
+                () -> {
+                    assertThat(result.content()).hasSize(1);
+                    assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId());
+                    assertThat(result.content().get(0).lastPlayTime()).isEqualTo(playingHistory.getLastPlayTime());
+                }
         );
     }
 }
