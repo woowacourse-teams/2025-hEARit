@@ -15,8 +15,6 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id = :id")
     Optional<Hearit> findWithCategoryById(Long id);
 
-    Page<Hearit> findByCategoryIdOrderByCreatedAtDesc(Long categoryId, Pageable pageable);
-
     @Query(value = """
             SELECT DISTINCT h.*
             FROM hearit h
