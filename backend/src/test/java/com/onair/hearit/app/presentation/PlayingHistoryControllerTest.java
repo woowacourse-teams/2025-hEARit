@@ -60,9 +60,9 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .put("/api/v1/playing-histories")
+                .post("/api/v1/playing-histories")
                 .then()
-                .statusCode(HttpStatus.CREATED.value());
+                .statusCode(HttpStatus.OK.value());
     }
 
     @Test
@@ -99,7 +99,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .put("/api/v1/playing-histories")
+                .post("/api/v1/playing-histories")
                 .then()
                 .statusCode(HttpStatus.OK.value());
     }
