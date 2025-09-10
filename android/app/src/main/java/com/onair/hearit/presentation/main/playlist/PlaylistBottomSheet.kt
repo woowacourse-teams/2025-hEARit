@@ -69,17 +69,6 @@ class PlaylistBottomSheet : BottomSheetDialogFragment() {
         observeViewModel()
     }
 
-    private fun observeViewModel() {
-        viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarks ->
-            playlistAdapter.submitList(bookmarks)
-        }
-    }
-
-    private fun publishFromMetadata(metadata: MediaMetadata?) {
-        val id = metadata?.extras?.getLong(EXTRA_BOOKMARK_ID, -1L)?.takeIf { it > 0 }
-        playlistAdapter.updatePlaying(id)
-    }
-
     override fun onStart() {
         super.onStart()
 
@@ -95,6 +84,17 @@ class PlaylistBottomSheet : BottomSheetDialogFragment() {
 
         behavior.isFitToContents = false
         behavior.skipCollapsed = false
+    }
+
+    private fun observeViewModel() {
+        viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarks ->
+            playlistAdapter.submitList(bookmarks)
+        }
+    }
+
+    private fun publishFromMetadata(metadata: MediaMetadata?) {
+        val id = metadata?.extras?.getLong(EXTRA_BOOKMARK_ID, -1L)?.takeIf { it > 0 }
+        playlistAdapter.updatePlaying(id)
     }
 
     override fun onStop() {

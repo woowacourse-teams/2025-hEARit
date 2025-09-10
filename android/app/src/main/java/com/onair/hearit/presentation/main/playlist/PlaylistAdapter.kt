@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.main.playlist
 
+import android.util.LongSparseArray
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -11,6 +12,7 @@ class PlaylistAdapter : ListAdapter<Bookmark, PlaylistViewHolder>(DiffCallback) 
     }
 
     private var currentPlayingId: Long? = null
+    private val idToPosition = LongSparseArray<Int>()
 
     fun updatePlaying(newId: Long?) {
         if (currentPlayingId == newId) return
@@ -23,7 +25,7 @@ class PlaylistAdapter : ListAdapter<Bookmark, PlaylistViewHolder>(DiffCallback) 
         newPos?.let { notifyItemChanged(it, PAYLOAD_PLAY_STATE) }
     }
 
-    private fun findPositionById(id: Long): Int? = currentList.indexOfFirst { it.bookmarkId == id }.takeIf { it >= 0 }
+    private fun findPositionById(id: Long): Int? = idToPosition.get(id)?.takeIf { it >= 0 }
 
     override fun getItemId(position: Int): Long = getItem(position).bookmarkId
 
@@ -50,6 +52,21 @@ class PlaylistAdapter : ListAdapter<Bookmark, PlaylistViewHolder>(DiffCallback) 
             holder.updatePlayState(isPlaying = (item.bookmarkId == currentPlayingId))
         } else {
             super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
+    override fun onCurrentListChanged(
+        previousList: MutableList<Bookmark>,
+        currentList: MutableList<Bookmark>,
+    ) {
+        super.onCurrentListChanged(previousList, currentList)
+        rebuildIndex(currentList)
+    }
+
+    private fun rebuildIndex(list: List<Bookmark>) {
+        idToPosition.clear()
+        list.forEachIndexed { index, item ->
+            idToPosition.put(item.bookmarkId, index)
         }
     }
 
