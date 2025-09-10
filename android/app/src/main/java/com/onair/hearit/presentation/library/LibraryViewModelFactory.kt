@@ -10,11 +10,9 @@ class LibraryViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val bookmarkRepository = RepositoryProvider.bookmarkRepository
         val memberRepository = RepositoryProvider.memberRepository
-        val getBookmarkUseCase = UseCaseProvider.getBookmarksUseCase
         return LibraryViewModel(
             bookmarkRepository,
             memberRepository,
-            getBookmarkUseCase,
         ) as T
     }
 }
