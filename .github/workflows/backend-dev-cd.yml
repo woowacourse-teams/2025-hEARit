@@ -16,7 +16,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_TEST_USER_PASSWORD }}
           MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
         ports:
           - 13307:3306
@@ -27,7 +27,7 @@ jobs:
           --health-retries=5
 
     env:
-      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      MYSQL_TEST_USER_PASSWORD: ${{ secrets.MYSQL_TEST_USER_PASSWORD }}
       TEST_MYSQL_PORT: ${{ secrets.TEST_MYSQL_PORT }}
       DB_MYSQL_HOST: ${{ secrets.DB_MYSQL_HOST }}
 
