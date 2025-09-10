@@ -32,7 +32,7 @@ public class HearitExploreService {
                 return exploreScoreProcessor;
             }
         }
-        //FIXME : 커스텀예외
-        throw new UnsupportedOperationException("지원하지 않는 유저입니다.");
+        //TODO: 커스텀예외
+        throw new IllegalStateException("지원하지 않는 유저입니다.");
     }
 }
