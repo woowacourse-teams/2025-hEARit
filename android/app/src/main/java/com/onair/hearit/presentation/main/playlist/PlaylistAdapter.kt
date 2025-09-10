@@ -12,20 +12,30 @@ class PlaylistAdapter : ListAdapter<Bookmark, PlaylistViewHolder>(DiffCallback) 
     }
 
     private var currentPlayingId: Long? = null
+    private var currentPlayMode: String? = null
     private val idToPosition = LongSparseArray<Int>()
 
-    fun updatePlaying(newId: Long?) {
-        if (currentPlayingId == newId) return
+    fun updatePlaying(
+        newId: Long?,
+        newMode: String?,
+    ) {
+        if (currentPlayingId == newId && currentPlayMode.equals(newMode, ignoreCase = true)) return
 
         val oldPos = currentPlayingId?.let { findPositionById(it) }
         val newPos = newId?.let { findPositionById(it) }
         currentPlayingId = newId
+        currentPlayMode = newMode
 
         oldPos?.let { notifyItemChanged(it, PAYLOAD_PLAY_STATE) }
         newPos?.let { notifyItemChanged(it, PAYLOAD_PLAY_STATE) }
     }
 
     private fun findPositionById(id: Long): Int? = idToPosition.get(id)?.takeIf { it >= 0 }
+
+    private fun isActiveForBg(itemId: Long): Boolean {
+        val isLibrary = currentPlayMode?.equals("LIBRARY", ignoreCase = true) == true
+        return isLibrary && (itemId == currentPlayingId)
+    }
 
     override fun getItemId(position: Int): Long = getItem(position).bookmarkId
 
@@ -39,7 +49,8 @@ class PlaylistAdapter : ListAdapter<Bookmark, PlaylistViewHolder>(DiffCallback) 
         position: Int,
     ) {
         val item: Bookmark = getItem(position)
-        holder.bind(item, isPlaying = (item.bookmarkId == currentPlayingId))
+        idToPosition.put(item.bookmarkId, position)
+        holder.bind(item, isPlaying = isActiveForBg(item.bookmarkId))
     }
 
     override fun onBindViewHolder(
@@ -49,7 +60,7 @@ class PlaylistAdapter : ListAdapter<Bookmark, PlaylistViewHolder>(DiffCallback) 
     ) {
         if (payloads.contains(PAYLOAD_PLAY_STATE)) {
             val item = getItem(position)
-            holder.updatePlayState(isPlaying = (item.bookmarkId == currentPlayingId))
+            holder.updatePlayState(isPlaying = isActiveForBg(item.bookmarkId))
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }

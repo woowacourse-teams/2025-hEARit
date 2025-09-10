@@ -94,7 +94,8 @@ class PlaylistBottomSheet : BottomSheetDialogFragment() {
 
     private fun publishFromMetadata(metadata: MediaMetadata?) {
         val id = metadata?.extras?.getLong(EXTRA_BOOKMARK_ID, -1L)?.takeIf { it > 0 }
-        playlistAdapter.updatePlaying(id)
+        val mode = metadata?.extras?.getString("PLAYBACK_MODE")
+        playlistAdapter.updatePlaying(id, mode)
     }
 
     override fun onStop() {
