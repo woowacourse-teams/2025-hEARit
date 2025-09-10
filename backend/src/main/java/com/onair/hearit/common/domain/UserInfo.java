@@ -13,20 +13,6 @@ public class UserInfo {
         this.userType = (memberId != null) ? UserType.MEMBER : UserType.GUEST;
     }
 
-    public static UserInfo guest(String guestId) {
-        if (guestId == null || guestId.isBlank()) {
-            throw new IllegalStateException("guestId는 null이거나 비어있을 수 없습니다.");
-        }
-        return new UserInfo(null, guestId);
-    }
-
-    public static UserInfo member(Long memberId) {
-        if (memberId == null) {
-            throw new IllegalStateException("memberId는 null일 수 없습니다.");
-        }
-        return new UserInfo(memberId, null);
-    }
-
     private void validate(Long memberId, String guestId) {
         if (memberId == null && guestId == null) {
             //FIXME: 커스텀 예외
