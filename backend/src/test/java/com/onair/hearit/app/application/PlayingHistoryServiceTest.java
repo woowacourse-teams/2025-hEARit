@@ -114,10 +114,10 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
         // when
-        boolean isSaved = playingHistoryService.addPlayingHistory(UserContext.guest(), request);
+        playingHistoryService.addPlayingHistory(UserContext.guest(), request);
 
         // then
-        assertThat(isSaved).isFalse();
+        assertThat(playingHistoryRepository.findAll()).hasSize(0);
     }
 
     @Test
