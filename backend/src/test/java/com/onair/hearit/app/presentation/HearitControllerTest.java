@@ -277,7 +277,7 @@ class HearitControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
                                                         fieldWithPath("content[].lastPlayTime").description(
-                                                                "히어릿 마지막 재생 시간(초)").optional(),
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
                                                         fieldWithPath("content[].keywords").description(
                                                                 "히어릿에 포함된 키워드 목록"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
@@ -444,7 +444,7 @@ class HearitControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
                                                         fieldWithPath("content[].lastPlayTime").description(
-                                                                "히어릿 마지막 재생 시간(밀리초)"),
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description("키워드 이름")
                                                 }),
@@ -535,7 +535,7 @@ class HearitControllerTest extends IntegrationTest {
                 fieldWithPath("sources[].sourceName").description("출처의 이름"),
                 fieldWithPath("sources[].sourceUrl").description("출처의 URL"),
                 fieldWithPath("playTime").type(JsonFieldType.NUMBER).description("재생 시간(초)"),
-                fieldWithPath("lastPlayTime").type(JsonFieldType.NUMBER).description("마지막 재생 시간(초)").optional(),
+                fieldWithPath("lastPlayTime").type(JsonFieldType.NUMBER).description("마지막 재생 시간(ms)").optional(),
                 fieldWithPath("createdAt").type(JsonFieldType.STRING).description("생성 일시"),
                 fieldWithPath("isBookmarked").type(JsonFieldType.BOOLEAN).description("현재 사용자의 북마크 여부"),
                 fieldWithPath("bookmarkId").type(JsonFieldType.NUMBER).description("북마크 ID (북마크된 경우)").optional(),

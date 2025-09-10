@@ -44,14 +44,14 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .contentType("application/json")
                 .body(request)
-                .filter(document("playing-history",
+                .filter(document("playing-history-createad",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Playing History API")
                                 .summary("재생기록 생성")
-                                .description("로그인한 회원의 재생기록을 저장합니다.")
+                                .description("로그인한 회원의 처음 재생기록을 저장합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
-                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간")
+                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
                                 )
                                 .build())
                 ))
@@ -79,6 +79,17 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .contentType("application/json")
                 .body(request)
+                .filter(document("playing-history-ok",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Playing History API")
+                                .summary("재생기록 생성")
+                                .description("로그인한 회원의 기존 재생기록을 수정합니다.")
+                                .requestFields(
+                                        fieldWithPath("hearitId").description("히어릿 ID"),
+                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
+                                )
+                                .build())
+                ))
                 .when()
                 .put("/api/v1/playing-histories")
                 .then()
@@ -105,7 +116,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 .description("로그인하지 않은 사용자는 재생기록을 저장할 수 없습니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
-                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간")
+                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
                                 )
                                 .responseSchema(Schema.schema("ProblemDetail"))
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFields())

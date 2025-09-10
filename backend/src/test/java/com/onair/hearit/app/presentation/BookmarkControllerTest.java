@@ -71,7 +71,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
                                                         fieldWithPath("content[].lastPlayTime").description(
-                                                                "히어릿 마지막 재생 시간(초)"),
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
                                                         fieldWithPath("content[].category.id").description("카테고리 ID"),
                                                         fieldWithPath("content[].category.name").description("카테고리 이름"),
                                                         fieldWithPath("content[].category.colorCode").description("카테고리 색상 코드")
