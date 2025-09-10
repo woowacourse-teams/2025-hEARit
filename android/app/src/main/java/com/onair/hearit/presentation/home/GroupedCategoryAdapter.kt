@@ -8,7 +8,7 @@ import com.onair.hearit.presentation.HearitClickListener
 
 class GroupedCategoryAdapter(
     private val hearitClickListener: HearitClickListener,
-    private val navigateClickListener: (Long, String) -> Unit,
+    private val navigateClickListener: (Long, String, String) -> Unit,
 ) : ListAdapter<GroupedCategory, GroupedCategoryViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,

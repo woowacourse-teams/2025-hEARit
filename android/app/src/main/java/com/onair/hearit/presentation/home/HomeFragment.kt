@@ -24,6 +24,7 @@ import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
 import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.HearitClickListener
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
@@ -51,7 +52,13 @@ class HomeFragment :
     private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy {
         GroupedCategoryAdapter(
             this,
-            navigateClickListener = { id, name -> navigateToSearch(id, name) },
+            navigateClickListener = { id, name, colorCode ->
+                navigateToSearch(
+                    id,
+                    name,
+                    colorCode,
+                )
+            },
         )
     }
     private val snapHelper = PagerSnapHelper()
@@ -227,6 +234,7 @@ class HomeFragment :
     private fun navigateToSearch(
         id: Long,
         name: String,
+        colorCode: String,
     ) {
         parentFragmentManager
             .beginTransaction()
@@ -242,6 +250,7 @@ class HomeFragment :
             bundleOf(
                 CATEGORY_ID_KEY to id,
                 CATEGORY_NAME_KEY to name,
+                CATEGORY_COLOR_KEY to colorCode,
             ),
         )
     }

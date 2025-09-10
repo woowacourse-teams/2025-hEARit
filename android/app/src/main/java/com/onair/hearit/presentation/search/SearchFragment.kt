@@ -14,6 +14,10 @@ import androidx.fragment.app.viewModels
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
@@ -45,6 +49,16 @@ class SearchFragment :
         setupSearchInput()
         observeViewModel()
         viewModel.getCategories()
+
+        parentFragmentManager.setFragmentResultListener(
+            CATEGORY_KEY,
+            viewLifecycleOwner,
+        ) { _, bundle ->
+            val id = bundle.getLong(CATEGORY_ID_KEY)
+            val name = bundle.getString(CATEGORY_NAME_KEY) ?: return@setFragmentResultListener
+            val colorCode = bundle.getString(CATEGORY_COLOR_KEY) ?: "#000000"
+            onCategoryClick(id, name, colorCode)
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
