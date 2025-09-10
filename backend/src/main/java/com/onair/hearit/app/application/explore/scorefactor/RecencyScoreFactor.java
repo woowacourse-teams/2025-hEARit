@@ -27,8 +27,8 @@ public class RecencyScoreFactor implements ScoreFactor {
                 .collect(Collectors.toMap(
                         Hearit::getId,
                         hearit -> {
-                            long daysFromCreatedAt = Duration.between(hearit.getCreatedAt(), LocalDateTime.now())
-                                    .toDays();
+                            long daysFromCreatedAt =
+                                    Math.max(0, Duration.between(hearit.getCreatedAt(), LocalDateTime.now()).toDays());
                             double score = MAX_RECENCY_SCORE - (daysFromCreatedAt / DAYS_PER_POINT);
                             return Math.max(MIN_RECENCY_SCORE, score);
                         }
