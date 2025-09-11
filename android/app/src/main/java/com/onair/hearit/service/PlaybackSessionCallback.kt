@@ -16,7 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Executor
+import timber.log.Timber
 
 @UnstableApi
 class PlaybackSessionCallback(
@@ -24,16 +24,8 @@ class PlaybackSessionCallback(
 ) : MediaSession.Callback {
     private val mediaItemHelper = PlaybackMediaItemManager()
 
-    init {
-        // 👈 새로 만든 ContinuousPlaybackListener를 생성하여 등록합니다.
-        val continuousPlaybackListener =
-            ContinuousPlaybackListener(
-                player = player,
-                serviceScope = serviceScope,
-                mediaItemHelper = mediaItemHelper,
-            )
-        player.addListener(continuousPlaybackListener)
-    }
+    private var nextPage: Int? = null
+    private var pageSize: Int = 10
 
     /**
      * 외부 컨트롤러가 미디어 세션에 연결을 시도할 때 호출됨
@@ -48,6 +40,8 @@ class PlaybackSessionCallback(
             base.availableSessionCommands
                 .buildUpon()
                 .add(PRELOAD_RECENT_COMMAND)
+                .add(START_LIBRARY_PLAY)
+                .add(PREFETCH_NEXT)
                 .build()
         val playerCommands = base.availablePlayerCommands
 
@@ -69,34 +63,47 @@ class PlaybackSessionCallback(
             val job =
                 serviceScope.launch {
                     try {
+                        // 1) 정규화(resolve). 실패 시 원본 사용
                         val resolved = mediaItems.map { resolve(it) }
-                        if (resolved.isEmpty()) {
-                            completer.set(EMPTY_MEDIA_ITEMS_WITH_START)
-                            return@launch
-                        }
+                        val finalItems = resolved.ifEmpty { mediaItems }
+
+                        // 2) startIndex 보존 (범위 안전화)
+                        val finalStartIndex =
+                            startIndex.coerceIn(0, (finalItems.size - 1).coerceAtLeast(0))
+
+                        // 3) 시작 위치: 파라미터 우선, 없으면 "시작 아이템의 extras"에서
                         val extrasStart =
-                            mediaItems
-                                .getOrNull(0)
+                            finalItems
+                                .getOrNull(finalStartIndex)
                                 ?.mediaMetadata
                                 ?.extras
-                                ?.getLong("startPosition", -1L) ?: -1L
-                        val startPosition =
-                            (if (startPositionMs > 0) startPositionMs else extrasStart)
-                                .coerceAtLeast(0L)
+                                ?.getLong(EXTRA_START_POSITION, -1L)
+                                ?: -1L
+
+                        val finalStartPosition =
+                            (
+                                if (startPositionMs > 0) startPositionMs else extrasStart
+                            ).coerceAtLeast(0L)
+
                         completer.set(
                             MediaSession.MediaItemsWithStartPosition(
-                                resolved,
-                                0,
-                                startPosition,
+                                finalItems,
+                                finalStartIndex,
+                                finalStartPosition,
                             ),
                         )
                     } catch (_: Throwable) {
+                        // 4) 완전 실패시에도 "빈 리스트" 대신 최소한 원본으로 복구
                         completer.set(
-                            EMPTY_MEDIA_ITEMS_WITH_START,
+                            MediaSession.MediaItemsWithStartPosition(
+                                mediaItems,
+                                0,
+                                0L,
+                            ),
                         )
                     }
                 }
-            completer.addCancellationListener({ job.cancel() }, Executor { it.run() })
+            completer.addCancellationListener({ job.cancel() }, { it.run() })
             "onSetMediaItems"
         }
 
@@ -110,28 +117,110 @@ class PlaybackSessionCallback(
         controller: MediaSession.ControllerInfo,
         command: SessionCommand,
         args: Bundle,
-    ): ListenableFuture<SessionResult> {
-        if (command.customAction != COMMAND_PRELOAD_RECENT) {
-            return super.onCustomCommand(session, controller, command, args)
-        }
-        return CallbackToFutureAdapter.getFuture { completer ->
+    ): ListenableFuture<SessionResult> =
+        CallbackToFutureAdapter.getFuture { completer ->
             val job =
                 serviceScope.launch {
                     runCatching {
-                        loadRecentInfo()?.let { info ->
-                            prepareIfNeeded(session, info)
+                        when (command.customAction) {
+                            CMD_START_LIBRARY_PLAY -> {
+                                Timber.d("library")
+                                val limitFromArgs = args.getInt(EXTRA_LIMIT, 10)
+                                pageSize = limitFromArgs
+
+                                val firstPage =
+                                    UseCaseProvider
+                                        .getBookmarksUseCase(page = 0, size = pageSize)
+                                        .getOrThrow()
+
+                                Timber.d("library $firstPage")
+
+                                val items =
+                                    firstPage.items.map { bookmark ->
+                                        mediaItemHelper.buildMediaItem(
+                                            info =
+                                                PlaybackInfo(
+                                                    hearitId = bookmark.hearitId,
+                                                    audioUrl = bookmark.audioUrl!!,
+                                                    title = bookmark.title,
+                                                    source = "hEARit",
+                                                ),
+                                            playbackMode = "LIBRARY",
+                                            bookmarkId = bookmark.bookmarkId,
+                                        )
+                                    }
+
+                                // 다음 페이지 인덱스 갱신
+                                nextPage =
+                                    if (!firstPage.paging.isLast) {
+                                        firstPage.paging.page + 1
+                                    } else {
+                                        null
+                                    }
+
+                                withContext(Dispatchers.Main) {
+                                    session.player.setMediaItems(items, 0, 0L)
+                                    session.player.prepare()
+                                    session.player.play()
+                                }
+                                SessionResult(SessionResult.RESULT_SUCCESS)
+                            }
+
+                            // 다음 페이지 프리패치
+                            CMD_PREFETCH_NEXT -> {
+                                val pageToLoad =
+                                    nextPage
+                                        ?: return@runCatching SessionResult(SessionResult.RESULT_SUCCESS)
+
+                                val next =
+                                    UseCaseProvider
+                                        .getBookmarksUseCase(page = pageToLoad, size = pageSize)
+                                        .getOrThrow()
+
+                                val items =
+                                    next.items.map { bookmark ->
+                                        mediaItemHelper.buildMediaItem(
+                                            info =
+                                                PlaybackInfo(
+                                                    hearitId = bookmark.hearitId,
+                                                    audioUrl = bookmark.audioUrl!!,
+                                                    title = bookmark.title,
+                                                    source = "hEARit",
+                                                ),
+                                            playbackMode = "LIBRARY",
+                                            bookmarkId = bookmark.bookmarkId,
+                                        )
+                                    }
+
+                                // 다음 페이지 인덱스 갱신
+                                nextPage =
+                                    if (!next.paging.isLast) {
+                                        next.paging.page + 1
+                                    } else {
+                                        null
+                                    }
+
+                                withContext(Dispatchers.Main) {
+                                    session.player.addMediaItems(items)
+                                }
+                                SessionResult(SessionResult.RESULT_SUCCESS)
+                            }
+
+                            COMMAND_PRELOAD_RECENT -> {
+                                loadRecentInfo()?.let { prepareIfNeeded(session, it) }
+                                SessionResult(SessionResult.RESULT_SUCCESS)
+                            }
+
+                            else ->
+                                return@runCatching super
+                                    .onCustomCommand(session, controller, command, args)
+                                    .get()
                         }
-                        SessionResult(SessionResult.RESULT_SUCCESS)
-                    }.onSuccess {
-                        completer.set(it)
-                    }.onFailure {
-                        completer.setException(it)
-                    }
+                    }.onSuccess(completer::set).onFailure(completer::setException)
                 }
             completer.addCancellationListener({ job.cancel() }, Runnable::run)
-            "preload_recent_command"
+            "customCommand"
         }
-    }
 
     /**
      * 앱이 종료된 후 사용자가 미디어 알림에서 재생 버튼을 눌렀을 때 호출됨
@@ -155,6 +244,23 @@ class PlaybackSessionCallback(
                 }
             completer.addCancellationListener({ job.cancel() }, Runnable::run)
             "onPlaybackResumption"
+        }
+
+    override fun onAddMediaItems(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        mediaItems: List<MediaItem>,
+    ): ListenableFuture<List<MediaItem>> =
+        CallbackToFutureAdapter.getFuture { completer ->
+            val job =
+                serviceScope.launch {
+                    runCatching {
+                        mediaItems.map { resolve(it) }.ifEmpty { mediaItems }
+                    }.onSuccess(completer::set)
+                        .onFailure(completer::setException)
+                }
+            completer.addCancellationListener({ job.cancel() }, Runnable::run)
+            "onAddMediaItems"
         }
 
     // 데이터베이스에서 최근 재생 정보를 비동기적으로 불러오는 부분으로
@@ -196,13 +302,24 @@ class PlaybackSessionCallback(
         }
 
     companion object {
-        private const val COMMAND_PRELOAD_RECENT = "hearit.PRELOAD_RECENT"
+        private const val COMMAND_PRELOAD_RECENT = "PRELOAD_RECENT"
+        private const val EXTRA_START_POSITION = "START_POSITION"
         private val EMPTY_MEDIA_ITEMS_WITH_START =
             MediaSession.MediaItemsWithStartPosition(
                 emptyList(),
                 0,
                 0L,
             )
+
+        private const val CMD_START_LIBRARY_PLAY = "START_LIBRARY_PLAY"
+        private const val CMD_PREFETCH_NEXT = "PREFETCH_NEXT"
+        private const val EXTRA_MODE = "MODE"
+        private const val EXTRA_SEED_BOOKMARK_ID = "SEED_BOOKMARK_ID"
+        private const val EXTRA_LIMIT = "LIMIT"
+
+        val START_LIBRARY_PLAY: SessionCommand =
+            SessionCommand(CMD_START_LIBRARY_PLAY, Bundle.EMPTY)
+        val PREFETCH_NEXT: SessionCommand = SessionCommand(CMD_PREFETCH_NEXT, Bundle.EMPTY)
         val PRELOAD_RECENT_COMMAND: SessionCommand =
             SessionCommand(COMMAND_PRELOAD_RECENT, Bundle.EMPTY)
     }
