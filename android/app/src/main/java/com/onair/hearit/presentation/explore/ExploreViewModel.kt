@@ -125,6 +125,7 @@ class ExploreViewModel(
                 }
         }
     }
+
     fun updateBookmarkState(
         hearitId: Long,
         bookmarkId: Long?,
@@ -134,9 +135,9 @@ class ExploreViewModel(
         _bookmarkId.value = currentBookmarkId
     }
 
-
     fun showHearitError() {
         _shortsHearits.value = emptyList()
+        _isLoading.value = false
         _showHearitError.value = true
     }
 
@@ -144,6 +145,7 @@ class ExploreViewModel(
         lastItem = _shortsHearits.value?.lastOrNull()
 
         _showHearitError.value = false
+        _isLoading.value = true
         _currentIndex.value = 0
         _shortsHearits.value = emptyList()
         _bookmarkId.value = emptyMap()
