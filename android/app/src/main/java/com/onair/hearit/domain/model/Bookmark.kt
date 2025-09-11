@@ -6,6 +6,7 @@ data class Bookmark(
     val title: String,
     val summary: String,
     val playTime: Int,
+    val lastPlayTime: Long? = null,
     val category: Category,
     val audioUrl: String?,
 )

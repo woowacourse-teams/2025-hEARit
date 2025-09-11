@@ -35,6 +35,7 @@ fun SingleHearit.toHearit(
         audioUrl = audioUrl,
         script = script,
         playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
         createdAt = this.createdAt,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
