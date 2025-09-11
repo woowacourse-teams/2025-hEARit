@@ -6,6 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
@@ -93,13 +95,23 @@ class PlaybackService : MediaSessionService() {
     }
 
     private fun initializePlayer() {
+        val audioAttributes =
+            AudioAttributes
+                .Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                .build()
+
         player =
             ExoPlayer
                 .Builder(this)
+                .setAudioAttributes(audioAttributes, true)
                 .setSeekBackIncrementMs(REW_MS)
                 .setSeekForwardIncrementMs(FFWD_MS)
                 .build()
-                .apply { playWhenReady = false }
+                .apply {
+                    playWhenReady = false
+                }
     }
 
     private fun initializeMediaSession() {
