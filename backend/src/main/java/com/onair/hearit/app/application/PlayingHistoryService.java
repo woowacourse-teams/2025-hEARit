@@ -7,7 +7,6 @@ import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
-import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PlayingHistoryService {
 
-    private final PlayingHistoryRepository playingHistoryRepository;
     private final PlayingHistoryBuffer playingHistoryBuffer;
     private final HearitRepository hearitRepository;
 
