@@ -25,23 +25,9 @@ public class UserInfo {
 
     private void validateGuestId(String guestId) {
         if (guestId == null || guestId.length() != 36) {
-            //FIXME: 커스텀 예외
+            //TODO: 커스텀 도메인 예외
             throw new IllegalStateException("유효하지 않은 guestId입니다.");
         }
-    }
-
-    public static UserInfo guest(String guestId) {
-        if (guestId == null || guestId.isBlank()) {
-            throw new IllegalStateException("guestId는 null이거나 비어있을 수 없습니다.");
-        }
-        return new UserInfo(null, guestId);
-    }
-
-    public static UserInfo member(Long memberId) {
-        if (memberId == null) {
-            throw new IllegalStateException("memberId는 null일 수 없습니다.");
-        }
-        return new UserInfo(memberId, null);
     }
 
     public boolean isMember() {

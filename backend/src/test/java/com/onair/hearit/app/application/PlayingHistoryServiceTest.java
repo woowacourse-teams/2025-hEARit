@@ -11,7 +11,6 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.Source;
-import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
@@ -70,7 +69,7 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
         // when
-        playingHistoryService.addPlayingHistory(UserInfo.member(member.getId()), request);
+        playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
         playingHistoryBuffer.flush();
 
         // then
@@ -94,7 +93,7 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
 
         // when
-        playingHistoryService.addPlayingHistory(UserInfo.member(member.getId()), request);
+        playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
         playingHistoryBuffer.flush();
 
         // then
@@ -115,7 +114,7 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
         // when
-        playingHistoryService.addPlayingHistory(UserInfo.guest(UUID.randomUUID().toString()), request);
+        playingHistoryService.addPlayingHistory(TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), request);
 
         // then
         assertThat(playingHistoryRepository.findAll()).hasSize(0);
@@ -129,7 +128,7 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(1L, 100L);
 
         // when
-        assertThatThrownBy(() -> playingHistoryService.addPlayingHistory(UserInfo.member(member.getId()), request))
+        assertThatThrownBy(() -> playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request))
                 .isInstanceOf(NotFoundException.class);
     }
 

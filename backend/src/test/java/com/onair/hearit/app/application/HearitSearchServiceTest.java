@@ -12,7 +12,6 @@ import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.Source;
-import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
@@ -72,7 +71,7 @@ class HearitSearchServiceTest {
 
         // when
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
-                UserInfo.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -97,7 +96,7 @@ class HearitSearchServiceTest {
 
         // when
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
-                UserInfo.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -122,7 +121,7 @@ class HearitSearchServiceTest {
 
         // when
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request,
-                UserInfo.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -146,7 +145,7 @@ class HearitSearchServiceTest {
 
         // when
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
-                UserInfo.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -167,7 +166,7 @@ class HearitSearchServiceTest {
 
         // when
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
-                UserInfo.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -190,7 +189,7 @@ class HearitSearchServiceTest {
 
         // when
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request,
-                UserInfo.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(

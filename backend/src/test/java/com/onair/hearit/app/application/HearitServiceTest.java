@@ -21,7 +21,6 @@ import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.RecommendHearit;
 import com.onair.hearit.common.domain.Source;
-import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryRepository;
@@ -246,7 +245,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category1.getId(),
-                request, UserInfo.guest(UUID.randomUUID().toString()));
+                request, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()));
 
         // then
         assertAll(() -> {
@@ -270,7 +269,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request, UserInfo.guest(UUID.randomUUID().toString()));
+                request, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()));
 
         // then
         assertAll(() -> {
@@ -292,7 +291,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request, UserInfo.guest(UUID.randomUUID().toString()));
+                request, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()));
 
         // then
         assertAll(() -> {
@@ -327,7 +326,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request, UserInfo.member(member.getId()));
+                request, TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
