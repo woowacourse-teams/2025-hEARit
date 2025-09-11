@@ -25,6 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String DEVICE_UUID_HEADER = "X-Device-UUID";
+
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final List<String> whitelist;
     private final ObjectMapper objectMapper;
