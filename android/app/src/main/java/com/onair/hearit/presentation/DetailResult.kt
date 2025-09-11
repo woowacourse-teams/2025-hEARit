@@ -17,19 +17,25 @@ sealed class DetailResult {
         val name: String,
         val colorCode: String,
     ) : DetailResult() {
-        constructor(bundle: Bundle) : this(
-            id = bundle.getLong(CATEGORY_ID_KEY),
-            name = bundle.getString(CATEGORY_NAME_KEY) ?: DEFAULT_CATEGORY_NAME,
-            colorCode = bundle.getString(CATEGORY_COLOR_KEY) ?: DEFAULT_CATEGORY_COLOR,
-        )
+        companion object {
+            fun fromBundle(bundle: Bundle): Category =
+                Category(
+                    id = bundle.getLong(CATEGORY_ID_KEY),
+                    name = bundle.getString(CATEGORY_NAME_KEY) ?: DEFAULT_CATEGORY_NAME,
+                    colorCode = bundle.getString(CATEGORY_COLOR_KEY) ?: DEFAULT_CATEGORY_COLOR,
+                )
+        }
     }
 
     data class Keyword(
         val term: String,
     ) : DetailResult() {
-        constructor(bundle: Bundle) : this(
-            term = bundle.getString(KEYWORD_KEY) ?: DEFAULT_KEYWORD_NAME,
-        )
+        companion object {
+            fun fromBundle(bundle: Bundle): Keyword =
+                Keyword(
+                    term = bundle.getString(KEYWORD_KEY) ?: DEFAULT_KEYWORD_NAME,
+                )
+        }
     }
 
     companion object {

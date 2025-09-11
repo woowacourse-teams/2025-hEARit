@@ -39,11 +39,11 @@ fun Intent?.toDetailResult(): DetailResult? {
         }
 
         CATEGORY_KEY -> {
-            extras?.let { DetailResult.Category(it) }
+            extras?.let { DetailResult.Category.fromBundle(it) }
         }
 
         KEYWORD_KEY -> {
-            extras?.let { DetailResult.Keyword(it) }
+            extras?.let { DetailResult.Keyword.fromBundle(it) }
         }
 
         else -> null
