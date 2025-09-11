@@ -115,6 +115,7 @@ class ShortsViewHolder(
 //                }
 //            }
 //        }
+        startLpRotation()
     }
 
     fun highlightScriptLine(positionMs: Long) {
@@ -160,6 +161,8 @@ class ShortsViewHolder(
             playJob = binding.viewExplorePlay.flash(scope)
             player.play()
         }
+
+        updateLpRotation(player.isPlaying)
     }
 
     private fun startBoost() {
@@ -192,6 +195,10 @@ class ShortsViewHolder(
     private fun stopLpRotation() {
         rotateAnimator?.cancel()
         rotateAnimator = null
+    }
+
+    fun updateLpRotation(isPlaying: Boolean) {
+        if (isPlaying) resumeLpRotation() else pauseLpRotation()
     }
 
     private fun resumeLpRotation() {

@@ -10,8 +10,6 @@ class ShortsAdapter(
     private val player: ExoPlayer,
     private val shortsClickListener: ShortsClickListener,
 ) : ListAdapter<ShortsHearit, ShortsViewHolder>((DiffCallback)) {
-    private var currentViewHolder: ShortsViewHolder? = null
-
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
