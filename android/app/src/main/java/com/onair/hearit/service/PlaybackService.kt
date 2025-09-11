@@ -3,17 +3,16 @@ package com.onair.hearit.service
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import androidx.annotation.OptIn
-import androidx.core.net.toUri
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.UNKNOWN_SCREEN_ID
 import com.onair.hearit.presentation.main.MainActivity
 import kotlinx.coroutines.CoroutineScope
@@ -28,15 +27,18 @@ class PlaybackService : MediaSessionService() {
     private lateinit var stateSaver: PlaybackStateSaver
     private lateinit var playerNotificationManager: PlayerNotificationManager
     private lateinit var foregroundController: ForegroundController
+    private lateinit var mediaItemManager: PlaybackMediaItemManager
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private var isServiceStarted = false
 
     override fun onCreate() {
         super.onCreate()
         playerNotificationManager = PlayerNotificationManager(this)
+        mediaItemManager = PlaybackMediaItemManager()
+
         initializePlayer()
         initializeMediaSession()
+
         stateSaver = PlaybackStateSaver(player, serviceScope, this)
         player.addListener(stateSaver.listener)
 
@@ -47,6 +49,24 @@ class PlaybackService : MediaSessionService() {
                 notificationId = NOTIFICATION_ID,
             )
         player.addListener(foregroundController)
+
+        // ✅ 최소한의 수명/에러 관리
+        player.addListener(
+            object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    val nothingQueued = player.mediaItemCount == 0
+                    if (state == Player.STATE_ENDED && nothingQueued) {
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                        stopSelf()
+                    }
+                }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    player.pause()
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                }
+            },
+        )
     }
 
     // startForegroundService와 같은 메서드를 사용해서, 서비스가 명시적으로 시작되는 경우,
@@ -64,6 +84,7 @@ class PlaybackService : MediaSessionService() {
                     player.pause()
                     player.clearMediaItems()
                 }
+                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
                 return START_NOT_STICKY
             }
@@ -71,7 +92,6 @@ class PlaybackService : MediaSessionService() {
             ACTION_PLAY_SINGLE -> handlePlay(intent)
         }
 
-        initializeAndStartForeground()
         return START_STICKY
     }
 
@@ -89,12 +109,18 @@ class PlaybackService : MediaSessionService() {
             return
         }
 
+        val info =
+            PlaybackInfo(
+                hearitId = hearitId,
+                title = title,
+                source = source,
+                audioUrl = audioUrl,
+                lastPosition = startPosition,
+            )
+
         val item =
-            createMediaItem(
-                audioUrl,
-                title,
-                hearitId,
-                source,
+            mediaItemManager.buildMediaItem(
+                info,
                 playbackMode,
                 bookmarkId,
             )
@@ -102,17 +128,6 @@ class PlaybackService : MediaSessionService() {
         player.prepare()
         player.play()
     }
-
-//    if (intent?.action == ACTION_STOP_SERVICE) {
-//        stopForeground(STOP_FOREGROUND_REMOVE)
-//        stopSelf()
-//        // 서비스가 종료되면 시스템이 서비스를 다시 시작하지 않도록 지시
-//        return START_NOT_STICKY
-//    }
-//
-//    super.onStartCommand(intent, flags, startId)
-//    // 서비스가 예기치 않게 종료된 경우, 시스템이 서비스를 다시 시작하도록 지시
-//    return START_STICKY
 
     private fun initializePlayer() {
         val audioAttributes =
@@ -129,6 +144,8 @@ class PlaybackService : MediaSessionService() {
                 .build()
                 .apply {
                     playWhenReady = false
+                    // 이어폰 뺐을 때 바로 정지되도록
+                    setHandleAudioBecomingNoisy(true)
                 }
     }
 
@@ -142,9 +159,7 @@ class PlaybackService : MediaSessionService() {
             PendingIntent.getActivity(
                 this,
                 0,
-                Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                },
+                mainActivityIntent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
 
@@ -157,55 +172,24 @@ class PlaybackService : MediaSessionService() {
                 .build()
     }
 
-    override fun onGetSession(info: MediaSession.ControllerInfo) = mediaSession
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession = mediaSession
 
-    private fun createMediaItem(
-        url: String,
-        title: String,
-        id: Long,
-        source: String,
-        playbackMode: String? = null,
-        bookmarkId: Long? = null,
-    ): MediaItem {
-        val extras =
-            Bundle().apply {
-                bookmarkId?.let { putLong(EXTRA_BOOKMARK_ID, it) }
-                playbackMode?.let { putString(EXTRA_PLAYBACK_MODE, it) }
-            }
-
-        return MediaItem
-            .Builder()
-            .setUri(url.toUri())
-            .setMediaId(id.toString())
-            .setMediaMetadata(
-                MediaMetadata
-                    .Builder()
-                    .setTitle(title)
-                    .setArtist(source)
-                    .setExtras(extras)
-                    .build(),
-            ).setTag(playbackMode)
-            .build()
-    }
-
-    private fun initializeAndStartForeground() {
-        if (!isServiceStarted) {
-            val notification = playerNotificationManager.buildForegroundNotification()
-            startForeground(NOTIFICATION_ID, notification)
-            isServiceStarted = true
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        if (!player.isPlaying) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
         }
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession = mediaSession
-
     override fun onDestroy() {
+        super.onDestroy()
         serviceScope.cancel()
         stateSaver.release()
         mediaSession.release()
         player.removeListener(stateSaver.listener)
         player.removeListener(foregroundController)
         player.release()
-        super.onDestroy()
     }
 
     companion object {
@@ -222,26 +206,6 @@ class PlaybackService : MediaSessionService() {
 
         const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
         const val ACTION_PLAY_SINGLE = "hearit.ACTION_PLAY_SINGLE"
-
-        fun newIntent(
-            context: Context,
-            audioUrl: String,
-            title: String,
-            hearitId: Long,
-            startPosition: Long = 0L,
-            source: String,
-            playbackMode: String? = null,
-            bookmarkId: Long? = null,
-        ) = Intent(context, PlaybackService::class.java).apply {
-            action = ACTION_PLAY_SINGLE
-            putExtra(EXTRA_AUDIO_URL, audioUrl)
-            putExtra(EXTRA_TITLE, title)
-            putExtra(EXTRA_HEARIT_ID, hearitId)
-            putExtra(EXTRA_START_POSITION, startPosition)
-            putExtra(EXTRA_SOURCE, source)
-            putExtra(EXTRA_PLAYBACK_MODE, playbackMode)
-            putExtra(EXTRA_BOOKMARK_ID, bookmarkId)
-        }
 
         fun stopIntent(context: Context) =
             Intent(context, PlaybackService::class.java).apply {

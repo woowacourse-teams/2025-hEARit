@@ -1,5 +1,6 @@
 package com.onair.hearit.service
 
+import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -13,8 +14,15 @@ class PlaybackMediaItemManager {
     fun buildMediaItem(
         info: PlaybackInfo,
         playbackMode: String? = null,
-    ): MediaItem =
-        MediaItem
+        bookmarkId: Long? = null,
+    ): MediaItem {
+        val extras =
+            Bundle().apply {
+                bookmarkId?.let { putLong(EXTRA_BOOKMARK_ID, it) }
+                playbackMode?.let { putString(EXTRA_PLAYBACK_MODE, it) }
+            }
+
+        return MediaItem
             .Builder()
             .setUri(info.audioUrl.toUri())
             .setMediaId(info.hearitId.toString())
@@ -23,9 +31,11 @@ class PlaybackMediaItemManager {
                     .Builder()
                     .setTitle(info.title)
                     .setArtist(info.source)
+                    .setExtras(extras)
                     .build(),
             ).setTag(playbackMode)
             .build()
+    }
 
     /** PlaybackInfo를 기반으로 미디어 아이템 리스트와 시작 위치 정보를 포함하는 객체를 생성함
      * 이 메서드는 앱 재시작 시 마지막 재생 위치에서 이어 재생하기 위해 필요함
@@ -37,4 +47,9 @@ class PlaybackMediaItemManager {
             0,
             info.lastPosition,
         )
+
+    companion object {
+        private const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
+        private const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
+    }
 }
