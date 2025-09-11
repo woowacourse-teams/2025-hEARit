@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -14,6 +15,7 @@ import androidx.databinding.BindingAdapter
 import coil.load
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
+import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.presentation.library.BookmarkUiState
 import com.onair.hearit.presentation.search.SearchUiState
 import java.text.SimpleDateFormat
@@ -175,4 +177,20 @@ fun setShimmerVisibility(
     isLoading: Boolean,
 ) {
     view.isVisible = isLoading
+}
+
+@BindingAdapter("progressRatio")
+fun setProgressBarRatio(
+    progressBar: ProgressBar,
+    item: SearchedHearit?,
+) {
+    val ratio =
+        item
+            ?.lastPlayTime
+            ?.takeIf { item.playTime > 0 }
+            ?.toFloat()
+            ?.div(item.playTime) ?: 0f
+
+    val percent = (ratio.coerceIn(0f, 1f) * 100).toInt()
+    progressBar.progress = percent
 }
