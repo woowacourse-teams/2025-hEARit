@@ -63,11 +63,11 @@ class SearchCategoryFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
-        setupUI()
+        setupBinding()
         setupListeners()
         setupRecyclerView()
-        fetchData()
         observeViewModel()
+        viewModel.fetchResultData(true)
     }
 
     private fun setupWindowInsets() {
@@ -78,7 +78,7 @@ class SearchCategoryFragment :
         }
     }
 
-    private fun setupUI() {
+    private fun setupBinding() {
         binding.tvSearchCategoryName.text = categoryName
         binding.root.background = createGradientBackground()
     }
@@ -129,10 +129,6 @@ class SearchCategoryFragment :
                 },
             )
         }
-    }
-
-    private fun fetchData() {
-        viewModel.fetchResultData(true)
     }
 
     private fun observeViewModel() {

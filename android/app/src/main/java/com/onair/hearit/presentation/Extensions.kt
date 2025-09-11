@@ -16,7 +16,6 @@ import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
-import com.onair.hearit.presentation.search.recent.searchResult.SearchResultPageFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -72,7 +71,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
         is DetailResult.Keyword -> {
             mainActivity.selectTab(R.id.nav_search)
             val fm = mainActivity.supportFragmentManager
-            val tag = SearchResultPageFragment::class.java.simpleName
+            val tag = SearchRecentFragment::class.java.simpleName
 
             fm.popBackStack(tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             fm

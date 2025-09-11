@@ -19,8 +19,8 @@ sealed class DetailResult {
     ) : DetailResult() {
         constructor(bundle: Bundle) : this(
             id = bundle.getLong(CATEGORY_ID_KEY),
-            name = bundle.getString(CATEGORY_NAME_KEY) ?: "hEARit",
-            colorCode = bundle.getString(CATEGORY_COLOR_KEY) ?: "#000000",
+            name = bundle.getString(CATEGORY_NAME_KEY) ?: DEFAULT_CATEGORY_NAME,
+            colorCode = bundle.getString(CATEGORY_COLOR_KEY) ?: DEFAULT_CATEGORY_COLOR,
         )
     }
 
@@ -28,7 +28,13 @@ sealed class DetailResult {
         val term: String,
     ) : DetailResult() {
         constructor(bundle: Bundle) : this(
-            term = bundle.getString(KEYWORD_KEY) ?: "hEARit",
+            term = bundle.getString(KEYWORD_KEY) ?: DEFAULT_KEYWORD_NAME,
         )
+    }
+
+    companion object {
+        private const val DEFAULT_KEYWORD_NAME = "hEARit"
+        private const val DEFAULT_CATEGORY_NAME = "hEARit"
+        private const val DEFAULT_CATEGORY_COLOR = "#000000"
     }
 }

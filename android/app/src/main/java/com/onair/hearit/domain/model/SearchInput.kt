@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
@@ -44,9 +43,9 @@ sealed class SearchInput {
 
         fun from(bundle: Bundle): SearchInput =
             when (bundle.getString(TYPE_KEY)) {
-                KEYWORD_KEY -> Keyword(bundle.getString(KEYWORD_KEY).orEmpty())
+                KEYWORD_VALUE -> Keyword(bundle.getString(KEYWORD_KEY).orEmpty())
 
-                CATEGORY_KEY -> {
+                CATEGORY_VALUE -> {
                     val id = bundle.getLong(CATEGORY_ID_KEY)
                     val name = bundle.getString(CATEGORY_NAME_KEY) ?: ""
                     val colorCode = bundle.getString(CATEGORY_COLOR_KEY) ?: ""
