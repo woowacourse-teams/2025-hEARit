@@ -20,8 +20,8 @@ import com.onair.hearit.databinding.ActivityLoginBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.di.TokenInterceptorProvider
-import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.UserIdManager
+import com.onair.hearit.presentation.main.MainActivity
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
