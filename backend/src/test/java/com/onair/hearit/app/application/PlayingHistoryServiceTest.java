@@ -55,7 +55,7 @@ class PlayingHistoryServiceTest {
 
     @BeforeEach
     void setup() {
-        playingHistoryService = new PlayingHistoryService(playingHistoryRepository, playingHistoryBuffer,
+        playingHistoryService = new PlayingHistoryService(playingHistoryBuffer,
                 hearitRepository);
     }
 
