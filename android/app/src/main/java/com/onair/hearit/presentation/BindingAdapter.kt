@@ -145,6 +145,22 @@ fun setBackgroundColor(
     }
 }
 
+@BindingAdapter("roundedBackgroundColor")
+fun setRoundedBackgroundColor(
+    view: View,
+    colorCode: String?,
+) {
+    if (colorCode.isNullOrBlank()) return
+
+    val radiusPx = 8f * view.resources.displayMetrics.density
+    val drawable =
+        GradientDrawable().apply {
+            cornerRadius = radiusPx
+            setColor(colorCode.toColorInt())
+        }
+    view.background = drawable
+}
+
 @BindingAdapter("visibleIfNoHearits")
 fun setVisibleIfNoHearits(
     view: View,
