@@ -53,34 +53,34 @@ fun Intent?.toDetailResult(): DetailResult? {
 fun DetailResult.navigate(mainActivity: MainActivity) {
     when (this) {
         is DetailResult.Category -> {
-            val fm = mainActivity.supportFragmentManager
-            val tag = SearchCategoryFragment::class.java.simpleName
+            val fragmentManager = mainActivity.supportFragmentManager
+            val backStackTag = SearchCategoryFragment::class.java.simpleName
 
             // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
-            fm.popBackStack(tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            fm
+            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            fragmentManager
                 .beginTransaction()
                 .replace(
                     R.id.fragment_container_view,
                     SearchCategoryFragment.newInstance(SearchInput.Category(id, name, colorCode)),
-                    tag,
-                ).addToBackStack(tag)
+                    backStackTag,
+                ).addToBackStack(backStackTag)
                 .commit()
         }
 
         is DetailResult.Keyword -> {
             mainActivity.selectTab(R.id.nav_search)
-            val fm = mainActivity.supportFragmentManager
-            val tag = SearchRecentFragment::class.java.simpleName
+            val fragmentManager = mainActivity.supportFragmentManager
+            val backStackTag = SearchCategoryFragment::class.java.simpleName
 
-            fm.popBackStack(tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            fm
+            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            fragmentManager
                 .beginTransaction()
                 .replace(
                     R.id.fragment_container_view,
                     SearchRecentFragment.newInstance(term),
-                    tag,
-                ).addToBackStack(tag)
+                    backStackTag,
+                ).addToBackStack(backStackTag)
                 .commit()
         }
 
