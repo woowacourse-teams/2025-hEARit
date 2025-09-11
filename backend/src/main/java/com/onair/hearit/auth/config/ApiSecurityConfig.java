@@ -36,7 +36,8 @@ public class ApiSecurityConfig {
     private static final String[] PUBLIC_GET_ENDPOINTS = {
             "/api/v1/hearits/**",
             "/api/v1/categories/**",
-            "/api/v1/keywords/**"
+            "/api/v1/keywords/**",
+            "/api/v1/playing-histories"
     };
 
     private final ObjectMapper objectMapper;

@@ -55,8 +55,7 @@ class PlayingHistoryServiceTest {
 
     @BeforeEach
     void setup() {
-        playingHistoryService = new PlayingHistoryService(playingHistoryBuffer,
-                hearitRepository);
+        playingHistoryService = new PlayingHistoryService(playingHistoryBuffer, hearitRepository);
     }
 
     @Test
@@ -114,7 +113,8 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
         // when
-        playingHistoryService.addPlayingHistory(TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), request);
+        playingHistoryService.addPlayingHistory(TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()),
+                request);
 
         // then
         assertThat(playingHistoryRepository.findAll()).hasSize(0);
@@ -128,7 +128,8 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(1L, 100L);
 
         // when
-        assertThatThrownBy(() -> playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request))
+        assertThatThrownBy(
+                () -> playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request))
                 .isInstanceOf(NotFoundException.class);
     }
 

@@ -5,7 +5,6 @@ import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.do
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.domain.Category;
@@ -13,7 +12,6 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.Source;
-import com.onair.hearit.docs.ApiDocSnippets;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
@@ -29,7 +27,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("로그인한 사용자가 처음 재생기록 저장 시, 201 CREATED를 반환한다.")
+    @DisplayName("로그인한 사용자가 처음 재생기록 저장 시, 200 OK를 반환한다.")
     void createPlayingHistory() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -97,7 +95,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인하지 않은 사용자가 재생기록 저장 시, 추가 후 401 UNAUTHORIZED 반환한다.")
+    @DisplayName("로그인하지 않은 사용자는 재생기록 저장를 저장하지 않고, 200 OK를 반환한다.")
     void createBookmarkTestWithConflict() {
         // given
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
@@ -118,14 +116,12 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                         fieldWithPath("hearitId").description("히어릿 ID"),
                                         fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
                                 )
-                                .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ))
                 .when()
-                .put("/api/v1/playing-histories")
+                .post("/api/v1/playing-histories")
                 .then()
-                .statusCode(HttpStatus.UNAUTHORIZED.value());
+                .statusCode(HttpStatus.OK.value());
     }
 
     private Hearit createHearitWith(int playTime, Category category) {
