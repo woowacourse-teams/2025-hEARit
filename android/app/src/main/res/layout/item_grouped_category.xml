@@ -11,7 +11,7 @@
 
         <variable
             name="navigateClickListener"
-            type="kotlin.jvm.functions.Function2&lt;Long, String, kotlin.Unit&gt;" />
+            type="kotlin.jvm.functions.Function3&lt;Long, String, String, kotlin.Unit&gt;" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -37,7 +37,7 @@
             android:layout_height="48dp"
             android:background="@color/transparent"
             android:contentDescription="@null"
-            android:onClick="@{() -> navigateClickListener.invoke(groupedCategory.categoryId, groupedCategory.categoryName)}"
+            android:onClick="@{() -> navigateClickListener.invoke(groupedCategory.categoryId, groupedCategory.categoryName, groupedCategory.colorCode)}"
             android:src="@drawable/ic_right"
             app:layout_constraintBottom_toBottomOf="@id/tv_category_title"
             app:layout_constraintStart_toEndOf="@id/tv_category_title"

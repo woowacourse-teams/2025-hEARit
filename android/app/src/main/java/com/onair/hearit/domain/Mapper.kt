@@ -59,4 +59,5 @@ fun SingleHearit.toPlaybackInfo(
 fun SearchInput.term(): String =
     when (this) {
         is SearchInput.Keyword -> this.term
+        is SearchInput.Category -> this.name
     }

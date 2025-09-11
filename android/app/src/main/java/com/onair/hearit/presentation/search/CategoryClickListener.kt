@@ -4,5 +4,6 @@ interface CategoryClickListener {
     fun onCategoryClick(
         id: Long,
         name: String,
+        colorCode: String,
     )
 }

@@ -8,6 +8,7 @@ object IntentKeys {
     const val CATEGORY_KEY = "category"
     const val CATEGORY_ID_KEY = "category_id"
     const val CATEGORY_NAME_KEY = "category_name"
+    const val CATEGORY_COLOR_KEY = "category_color"
     const val KEYWORD_KEY = "keyword"
     const val LAST_POSITION_KEY = "last_position"
     const val PREVIOUS_SCREEN_KEY = "previous_screen"
