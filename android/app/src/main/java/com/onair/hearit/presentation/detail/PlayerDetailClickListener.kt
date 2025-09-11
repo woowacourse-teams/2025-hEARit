@@ -6,7 +6,10 @@ interface PlayerDetailClickListener {
         name: String,
     )
 
-    fun onClickSource(sourceUrl: String)
+    fun onClickSource(
+        name: String,
+        url: String,
+    )
 
     fun onClickKeyword(term: String)
 }

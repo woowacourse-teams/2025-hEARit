@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation
+package com.onair.hearit.presentation.main
 
 import android.content.ComponentName
 import android.content.Intent
@@ -21,23 +21,33 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.ActivityMainBinding
+import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.PlaybackStarter
+import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.navigate
+import com.onair.hearit.presentation.observeOnce
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.presentation.splash.SplashActivity
 import com.onair.hearit.presentation.splash.SplashViewModel
 import com.onair.hearit.presentation.splash.SplashViewModelFactory
+import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
 
@@ -252,7 +262,7 @@ class MainActivity :
     }
 
     private fun showFragment(
-        fragment: androidx.fragment.app.Fragment,
+        fragment: Fragment,
         addToBackStack: Boolean = false,
     ) {
         supportFragmentManager
@@ -313,6 +323,11 @@ class MainActivity :
     }
 
     private fun navigateToLogin() {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "drawer_login"),
+        )
+
         val intent =
             Intent(this, LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

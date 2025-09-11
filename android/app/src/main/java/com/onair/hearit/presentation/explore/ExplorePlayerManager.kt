@@ -103,12 +103,7 @@ class ExplorePlayerManager(
         }
 
         player.prepare()
-        player.playWhenReady = true
         startScriptSync()
-    }
-
-    fun pause() {
-        player.pause()
     }
 
     fun stop() {

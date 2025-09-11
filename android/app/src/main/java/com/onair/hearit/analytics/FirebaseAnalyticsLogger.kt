@@ -19,23 +19,6 @@ class FirebaseAnalyticsLogger(
         firebaseAnalytics.logEvent(name, bundle)
     }
 
-    override fun logScreenView(
-        screenName: String,
-        screenClass: String,
-        previousScreen: String?,
-    ) {
-        if (BuildConfig.DEBUG) return
-        val bundle =
-            Bundle().apply {
-                putString(AnalyticsParamKeys.SCREEN_NAME, screenName)
-                putString(AnalyticsParamKeys.SCREEN_CLASS, screenClass)
-                previousScreen?.let {
-                    putString(AnalyticsParamKeys.PREVIOUS_SCREEN, it)
-                }
-            }
-        firebaseAnalytics.logEvent(AnalyticsEventNames.SCREEN_VIEW, bundle)
-    }
-
     override fun setUserId(userId: String) {
         firebaseAnalytics.setUserId(userId)
     }
