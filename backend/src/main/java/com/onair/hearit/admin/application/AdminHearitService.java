@@ -146,7 +146,7 @@ public class AdminHearitService {
     }
 
     private Hearit getHearitById(Long hearitId) {
-        return hearitRepository.findByIdWithDetail(hearitId)
+        return hearitRepository.findByIdWithCategoryAndSources(hearitId)
                 .orElseThrow(() -> new AdminNotFoundException("hearitId", hearitId.toString()));
     }
 }
