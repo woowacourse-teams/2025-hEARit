@@ -11,7 +11,6 @@ import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.app.dto.response.RecommendHearitResponse;
-import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
@@ -103,7 +102,7 @@ class HearitServiceTest {
 
         // when
         HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(),
-                RequestUser.member(member.getId()).getUserInfo());
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(() -> {
@@ -127,7 +126,7 @@ class HearitServiceTest {
 
         // when & then
         assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId,
-                RequestUser.member(notExistHearitId).getUserInfo()))
+                TestFixture.createFixedMemberUserInfo(member)))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
     }
@@ -183,7 +182,7 @@ class HearitServiceTest {
 
         // when
         List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(
-                RequestUser.member(member.getId()).getUserInfo());
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(() -> {
@@ -219,9 +218,9 @@ class HearitServiceTest {
 
         // when
         List<HearitsWithRecommendCategoryResponse> firstResponses = hearitService.getHearitsWithRecommendCategory(
-                RequestUser.member(member.getId()).getUserInfo());
+                TestFixture.createFixedMemberUserInfo(member));
         List<HearitsWithRecommendCategoryResponse> secondResponses = hearitService.getHearitsWithRecommendCategory(
-                RequestUser.member(member.getId()).getUserInfo());
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(() -> {

@@ -18,6 +18,11 @@ public class UserInfo {
             //FIXME: 커스텀 예외
             throw new IllegalStateException("UserInfo를 생성할 수 없습니다.");
         }
+
+        if (memberId != null && guestId != null) {
+            //FIXME: 커스텀 예외
+            throw new IllegalStateException("memberId와 guestId는 동시에 지정할 수 없습니다.");
+        }
         if (guestId != null) {
             validateGuestId(guestId);
         }
