@@ -166,7 +166,9 @@ class ShortsViewHolder(
     }
 
     private fun startBoost() {
-        if (isBoosting) return
+        if (isBoosting || !player.isPlaying) {
+            return
+        }
         boostJob?.cancel()
         boostJob = binding.viewExploreBoost.flash(scope)
         player.setPlaybackSpeed(BOOST_SPEED)
