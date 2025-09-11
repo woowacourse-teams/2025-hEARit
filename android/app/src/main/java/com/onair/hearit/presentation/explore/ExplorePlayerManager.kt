@@ -49,10 +49,6 @@ class ExplorePlayerManager(
         startScriptSync()
     }
 
-    fun pause() {
-        player.pause()
-    }
-
     fun stop() {
         player.stop()
         scriptSyncJob?.cancel()

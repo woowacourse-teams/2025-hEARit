@@ -12,4 +12,6 @@ interface BookmarkRepository {
     suspend fun addBookmark(hearitId: Long): Result<Long>
 
     suspend fun deleteBookmark(bookmarkId: Long): Result<Unit>
+
+    suspend fun getNextBookmark(currentId: Long): Result<Bookmark?>
 }

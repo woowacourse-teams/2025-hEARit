@@ -36,10 +36,23 @@
             android:id="@+id/exo_play"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginEnd="4dp"
+            android:layout_marginEnd="16dp"
             android:background="@color/transparent"
             android:contentDescription="@null"
             android:src="@drawable/ic_bottom_play"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/exo_playlist"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/exo_playlist"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="16dp"
+            android:background="@color/transparent"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_playlist"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

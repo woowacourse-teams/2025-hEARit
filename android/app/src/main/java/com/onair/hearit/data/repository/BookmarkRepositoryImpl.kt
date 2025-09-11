@@ -17,4 +17,16 @@ class BookmarkRepositoryImpl(
     override suspend fun addBookmark(hearitId: Long): Result<Long> = bookmarkDataSource.addBookmark(hearitId).mapOrThrowDomain { it.id }
 
     override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> = bookmarkDataSource.deleteBookmark(bookmarkId).mapOrThrowDomain { }
+
+    override suspend fun getNextBookmark(currentId: Long): Result<Bookmark?> =
+        getBookmarks(page = null, size = null).map { pageResult ->
+            val sortedBookmarks = pageResult.items.sortedBy { it.bookmarkId }
+
+            val currentIndex = sortedBookmarks.indexOfFirst { it.bookmarkId == currentId }
+            if (currentIndex > 0) {
+                sortedBookmarks[currentIndex - 1]
+            } else {
+                null
+            }
+        }
 }

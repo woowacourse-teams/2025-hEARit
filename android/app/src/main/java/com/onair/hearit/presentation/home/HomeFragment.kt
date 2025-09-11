@@ -26,9 +26,15 @@ import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.MainViewModel
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.search.category.SearchCategoryFragment
+import com.onair.hearit.presentation.main.MainActivity
+import com.onair.hearit.presentation.main.MainViewModel
+import com.onair.hearit.presentation.search.SearchFragment
 
 class HomeFragment :
     Fragment(),

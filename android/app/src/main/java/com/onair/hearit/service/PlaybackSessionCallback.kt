@@ -24,6 +24,17 @@ class PlaybackSessionCallback(
     // PlaybackInfo 객체 자체를 mediaItem으로 변환하는 로직을 담은 Manager를 선언해줌
     private val mediaItemHelper = PlaybackMediaItemManager()
 
+    init {
+        // 👈 새로 만든 ContinuousPlaybackListener를 생성하여 등록합니다.
+        val continuousPlaybackListener =
+            ContinuousPlaybackListener(
+                player = player,
+                serviceScope = serviceScope,
+                mediaItemHelper = mediaItemHelper,
+            )
+        player.addListener(continuousPlaybackListener)
+    }
+
     /**
      * 외부 컨트롤러가 미디어 세션에 연결을 시도할 때 호출됨
      * 이 메서드는 세션이 허용하는 명령 목록에 '최근 들은 히어릿'을 미리 로드하는 커스텀 명령을 추가함
