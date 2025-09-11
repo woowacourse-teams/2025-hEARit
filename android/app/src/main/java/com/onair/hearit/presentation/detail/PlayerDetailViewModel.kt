@@ -12,17 +12,18 @@ import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class PlayerDetailViewModel(
-    private val hearitId: Long,
+    private var hearitId: Long,
     private val recentHearitRepository: RecentHearitRepository,
     private val getHearitUseCase: GetHearitUseCase,
     private val bookmarkRepository: BookmarkRepository,
 ) : ViewModel() {
-    private val _hearit: MutableLiveData<Hearit> = MutableLiveData()
-    val hearit: LiveData<Hearit> = _hearit
+    private val _hearit: MutableLiveData<Hearit?> = MutableLiveData()
+    val hearit: LiveData<Hearit?> = _hearit
 
     private val _bookmarkId: MutableLiveData<Long?> = MutableLiveData()
     val bookmarkId: LiveData<Long?> = _bookmarkId
@@ -32,6 +33,8 @@ class PlayerDetailViewModel(
 
     private val _showLoginDialog = SingleLiveData<Unit>()
     val showLoginDialog: LiveData<Unit> = _showLoginDialog
+
+    private var fetchJob: Job? = null
 
     init {
         fetchData()
@@ -43,6 +46,15 @@ class PlayerDetailViewModel(
         } else {
             addBookmark()
         }
+    }
+
+    fun refreshData(newHearitId: Long) {
+        if (hearitId == newHearitId) return
+        fetchJob?.cancel()
+        _bookmarkId.value = null
+        _hearit.value = null
+        hearitId = newHearitId
+        fetchData()
     }
 
     private fun deleteBookmark() {
@@ -60,17 +72,19 @@ class PlayerDetailViewModel(
     }
 
     private fun fetchData() {
-        viewModelScope.launch {
-            getHearitUseCase(hearitId)
-                .onSuccess {
-                    _hearit.value = it
-                    _bookmarkId.value = it.bookmarkId
-                    saveRecentHearit()
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
-                }
-        }
+        fetchJob?.cancel()
+        fetchJob =
+            viewModelScope.launch {
+                getHearitUseCase(hearitId)
+                    .onSuccess {
+                        _hearit.value = it
+                        _bookmarkId.value = it.bookmarkId
+                        saveRecentHearit()
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
+                    }
+            }
     }
 
     private fun addBookmark() {
