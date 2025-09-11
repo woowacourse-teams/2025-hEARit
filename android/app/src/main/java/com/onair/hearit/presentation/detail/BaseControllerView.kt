@@ -151,6 +151,12 @@ class BaseControllerView
             updateProgress()
         }
 
+        private fun calcUpdateIntervalMs(): Long {
+            val speed = player.playbackParameters.speed.coerceAtLeast(0.1f)
+            val interval = (PROGRESS_UPDATE_BASE_MS / speed)
+            return interval.coerceIn(PROGRESS_UPDATE_MIN_MS, PROGRESS_UPDATE_MAX_MS).toLong()
+        }
+
         private fun updateProgress() {
             if (!isAttachedToWindow) return
 
@@ -167,7 +173,7 @@ class BaseControllerView
 
             removeCallbacks(progressRunnable)
             if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-                postDelayed(progressRunnable, PROGRESS_UPDATE_INTERVAL)
+                postDelayed(progressRunnable, calcUpdateIntervalMs())
             }
         }
 
@@ -200,19 +206,19 @@ class BaseControllerView
                 player: Player,
                 events: Player.Events,
             ) {
+                if (events.contains(Player.EVENT_PLAYBACK_PARAMETERS_CHANGED)) {
+                    syncSpeedIndexWithPlayer()
+                    removeCallbacks(progressRunnable)
+                    updateProgress()
+                }
+
                 if (events.containsAny(
                         Player.EVENT_MEDIA_ITEM_TRANSITION,
                         Player.EVENT_TIMELINE_CHANGED,
                         Player.EVENT_PLAYBACK_STATE_CHANGED,
                         Player.EVENT_IS_PLAYING_CHANGED,
-                        Player.EVENT_PLAYBACK_PARAMETERS_CHANGED,
                     )
                 ) {
-                    if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
-                        events.contains(Player.EVENT_PLAYBACK_PARAMETERS_CHANGED)
-                    ) {
-                        syncSpeedIndexWithPlayer()
-                    }
                     updateUI()
                 }
             }
@@ -243,7 +249,9 @@ class BaseControllerView
 
         companion object {
             private const val DEFAULT_SPEED_INDEX = 1
-            private const val PROGRESS_UPDATE_INTERVAL = 1000L
+            private const val PROGRESS_UPDATE_BASE_MS = 1000f
+            private const val PROGRESS_UPDATE_MIN_MS = 100f
+            private const val PROGRESS_UPDATE_MAX_MS = 2000f
             private const val FLOAT_EQUALITY_TOLERANCE = 0.001f
 
             private fun floatsAreEqualWithinTolerance(
