@@ -68,6 +68,11 @@ class LibraryFragment :
         setupInfiniteScroll()
 
         binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
+            AnalyticsProvider.get().logEvent(
+                AnalyticsEventNames.LOGIN_EVENT,
+                mapOf(AnalyticsParamKeys.SOURCE_NAME to "library_login"),
+            )
+
             val intent = Intent(requireContext(), LoginActivity::class.java)
             startActivity(intent)
             requireActivity().finish()
@@ -79,17 +84,6 @@ class LibraryFragment :
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
-        }
-
-        binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
-            AnalyticsProvider.get().logEvent(
-                AnalyticsEventNames.LOGIN_EVENT,
-                mapOf(AnalyticsParamKeys.SOURCE_NAME to "library_login"),
-            )
-
-            val intent = Intent(requireContext(), LoginActivity::class.java)
-            startActivity(intent)
-            requireActivity().finish()
         }
     }
 
