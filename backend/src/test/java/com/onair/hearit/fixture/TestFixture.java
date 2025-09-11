@@ -6,16 +6,27 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.Source;
+import com.onair.hearit.common.domain.UserInfo;
 import java.util.List;
+import java.util.UUID;
 
 public class TestFixture {
 
     public static Member createFixedMember() {
         return Member.createLocalUser(
+                UUID.randomUUID().toString(),
                 "memberID",
                 "nickname",
                 "password",
                 "profile-image.jpg");
+    }
+
+    public static UserInfo createFixedMemberUserInfo(Member member) {
+        return new UserInfo(member.getId(), null);
+    }
+
+    public static UserInfo createFixedGuestUserInfo(String guestId) {
+        return new UserInfo(null, guestId);
     }
 
     public static Keyword createFixedKeyword() {

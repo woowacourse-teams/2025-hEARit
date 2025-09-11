@@ -1,8 +1,8 @@
 package com.onair.hearit.app.presentation;
 
-import com.onair.hearit.app.application.HearitExploreService;
 import com.onair.hearit.app.application.HearitSearchService;
 import com.onair.hearit.app.application.HearitService;
+import com.onair.hearit.app.application.explore.HearitExploreService;
 import com.onair.hearit.app.dto.request.CursorRequest;
 import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.CursorResponse;
@@ -13,7 +13,7 @@ import com.onair.hearit.app.dto.response.HearitSearchResponse;
 import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.app.dto.response.RecommendHearitResponse;
-import com.onair.hearit.auth.domain.UserContext;
+import com.onair.hearit.auth.domain.RequestUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,19 +36,19 @@ public class HearitController {
     @GetMapping("/{hearitId}")
     public ResponseEntity<HearitDetailResponse> readHearit(
             @PathVariable Long hearitId,
-            @AuthenticationPrincipal UserContext userContext) {
-        HearitDetailResponse response = hearitService.getHearitDetail(hearitId, userContext);
+            @AuthenticationPrincipal RequestUser requestUser) {
+        HearitDetailResponse response = hearitService.getHearitDetail(hearitId, requestUser.getUserInfo());
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/explore")
     public ResponseEntity<CursorResponse<ExploredHearitResponse>> readExploredHearits(
-            @AuthenticationPrincipal UserContext userContext,
+            @AuthenticationPrincipal RequestUser requestUser,
             @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         CursorRequest cursorRequest = new CursorRequest(cursorId, size);
-        CursorResponse<ExploredHearitResponse> responses = hearitExploreService.getExploredHearits(userContext,
-                cursorRequest);
+        CursorResponse<ExploredHearitResponse> responses =
+                hearitExploreService.getExploredHearits(requestUser.getUserInfo(), cursorRequest);
         return ResponseEntity.ok(responses);
     }
 
@@ -63,18 +63,18 @@ public class HearitController {
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
-            @AuthenticationPrincipal UserContext userContext) {
+            @AuthenticationPrincipal RequestUser requestUser) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<HearitSearchResponse> response = hearitSearchService.search(searchTerm, pagingRequest,
-                userContext);
+        PagedResponse<HearitSearchResponse> response =
+                hearitSearchService.search(searchTerm, pagingRequest, requestUser.getUserInfo());
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/recommend-category")
     public ResponseEntity<List<HearitsWithRecommendCategoryResponse>> readHearitsWithRecommendCategory(
-            @AuthenticationPrincipal UserContext userContext) {
-        List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(
-                userContext);
+            @AuthenticationPrincipal RequestUser requestUser) {
+        List<HearitsWithRecommendCategoryResponse> responses =
+                hearitService.getHearitsWithRecommendCategory(requestUser.getUserInfo());
         return ResponseEntity.ok(responses);
     }
 
@@ -83,10 +83,10 @@ public class HearitController {
             @RequestParam(name = "categoryId") Long categoryId,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
-            @AuthenticationPrincipal UserContext userContext) {
+            @AuthenticationPrincipal RequestUser requestUser) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<HearitOfCategoryResponse> response = hearitService.getHearitsByCategory(categoryId,
-                pagingRequest, userContext);
+                pagingRequest, requestUser.getUserInfo());
         return ResponseEntity.ok(response);
     }
 }

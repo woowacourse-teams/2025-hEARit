@@ -7,7 +7,6 @@ import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.app.dto.response.RecommendHearitResponse;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
@@ -15,6 +14,7 @@ import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
+import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.dto.HearitWithPlayTimeProjection;
@@ -54,14 +54,14 @@ public class HearitService {
     private final PlayingHistoryRepository playingHistoryRepository;
     private final RecommendHearitStrategy recommendHearitStrategy;
 
-    public HearitDetailResponse getHearitDetail(Long hearitId, UserContext userContext) {
+    public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
         Hearit hearit = getHearitById(hearitId);
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId());
-        if (userContext == null || userContext.isGuest()) {
+        if (userInfo == null || userInfo.isGuest()) {
             return HearitDetailResponse.of(hearit, keywords, null, null);
         }
 
-        Member member = getMemberByUserContext(userContext);
+        Member member = getMemberByUserInfo(userInfo);
         Long bookmarkId = bookmarkRepository.findByHearitAndMember(hearit, member)
                 .map(Bookmark::getId)
                 .orElse(null);
@@ -83,8 +83,8 @@ public class HearitService {
                 .toList();
     }
 
-    public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(UserContext userContext) {
-        List<Category> recommendCategories = getRecommendCategories(userContext);
+    public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(UserInfo userInfo) {
+        List<Category> recommendCategories = getRecommendCategories(userInfo);
         if (recommendCategories.size() < RECOMMEND_CATEGORY_COUNT) {
             int extraCount = RECOMMEND_CATEGORY_COUNT - recommendCategories.size();
             List<Long> randomCategoryIds = pickTodayRandomCategoryIds(recommendCategories, extraCount);
@@ -96,20 +96,20 @@ public class HearitService {
                 .toList();
     }
 
-    private List<Category> getRecommendCategories(UserContext userContext) {
-        if (userContext == null || userContext.isGuest()) {
+    private List<Category> getRecommendCategories(UserInfo userInfo) {
+        if (userInfo == null || userInfo.isGuest()) {
             return new ArrayList<>();
         }
-        Member member = getMemberByUserContext(userContext);
+        Member member = getMemberByUserInfo(userInfo);
         return categoryRepository.findTopCategoriesByMemberBookmarks(member.getId(), RECOMMEND_CATEGORY_COUNT);
 
     }
 
-    private Member getMemberByUserContext(UserContext userContext) {
-        if (userContext == null || userContext.isGuest()) {
+    private Member getMemberByUserInfo(UserInfo userInfo) {
+        if (userInfo == null || userInfo.isGuest()) {
             throw new UnauthorizedException("로그인한 회원이 아닙니다.");
         }
-        return getMemberById(userContext.memberId());
+        return getMemberById(userInfo.getMemberId());
     }
 
     private Member getMemberById(Long memberId) {
@@ -141,10 +141,10 @@ public class HearitService {
     public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(
             Long categoryId,
             PagingRequest pagingRequest,
-            UserContext userContext) {
+            UserInfo userInfo) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
 
-        Long memberId = (userContext == null || userContext.isGuest()) ? null : userContext.memberId();
+        Long memberId = (userInfo == null || userInfo.isGuest()) ? null : userInfo.getMemberId();
         Page<HearitWithPlayTimeProjection> hearitsWithPlayTime =
                 hearitRepository.findWithPlayTimeByCategoryId(categoryId, memberId, pageable);
         List<Hearit> hearits = hearitsWithPlayTime.getContent().stream()

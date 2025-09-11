@@ -8,6 +8,7 @@ import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.fixture.IntegrationTest;
 import com.onair.hearit.fixture.TestFixture;
 import io.restassured.RestAssured;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
     void canAccessPublicGetListPathWithoutAuth() {
         // when & then
         RestAssured.given().log().all()
+                .header("X-Device-UUID", UUID.randomUUID().toString())
                 .when()
                 .get("/api/v1/categories") // 인증 필요없는 경로
                 .then().log().all()

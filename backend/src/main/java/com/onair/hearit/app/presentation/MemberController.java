@@ -1,8 +1,9 @@
 package com.onair.hearit.app.presentation;
 
 import com.onair.hearit.app.application.MemberService;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.app.dto.response.MemberInfoResponse;
+import com.onair.hearit.auth.domain.RequestUser;
+import com.onair.hearit.common.domain.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,8 +19,9 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/me")
-    public ResponseEntity<MemberInfoResponse> readCurrentMemberInfo(@AuthenticationPrincipal UserContext userContext) {
-        MemberInfoResponse response = memberService.getMember(userContext.memberId());
+    public ResponseEntity<MemberInfoResponse> readCurrentMemberInfo(@AuthenticationPrincipal RequestUser requestUser) {
+        UserInfo userInfo = requestUser.getUserInfo();
+        MemberInfoResponse response = memberService.getMember(userInfo.getMemberId());
         return ResponseEntity.ok(response);
     }
 }

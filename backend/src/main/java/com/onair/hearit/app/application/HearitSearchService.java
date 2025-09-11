@@ -3,11 +3,11 @@ package com.onair.hearit.app.application;
 import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.HearitSearchResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
+import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
@@ -33,14 +33,14 @@ public class HearitSearchService {
     private final PlayingHistoryRepository playingHistoryRepository;
 
     public PagedResponse<HearitSearchResponse> search(String searchTerm, PagingRequest pagingRequest,
-                                                      UserContext userContext) {
+                                                      UserInfo userInfo) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.searchByTerm(searchTerm, pageable);
-        if (userContext == null || userContext.isGuest()) {
+        if (userInfo == null || userInfo.isGuest()) {
             return PagedResponse.from(hearits.map(this::toHearitSearchResponseForGuest));
         }
 
-        Member member = getMemberByUserContext(userContext);
+        Member member = getMemberByUserInfo(userInfo);
         return PagedResponse.from(hearits.map(hearit -> toHearitSearchResponseForMember(hearit, member)));
     }
 
@@ -59,11 +59,11 @@ public class HearitSearchService {
         return HearitSearchResponse.of(hearit, keywords, lastPlayTime);
     }
 
-    private Member getMemberByUserContext(UserContext userContext) {
-        if (userContext == null || userContext.isGuest()) {
+    private Member getMemberByUserInfo(UserInfo useruserInfo) {
+        if (useruserInfo == null || useruserInfo.isGuest()) {
             throw new UnauthorizedException("로그인한 회원이 아닙니다.");
         }
-        return getMemberById(userContext.memberId());
+        return getMemberById(useruserInfo.getMemberId());
     }
 
     private Member getMemberById(Long memberId) {

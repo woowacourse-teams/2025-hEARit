@@ -2,7 +2,7 @@ package com.onair.hearit.app.presentation;
 
 import com.onair.hearit.app.application.PlayingHistoryService;
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
-import com.onair.hearit.auth.domain.UserContext;
+import com.onair.hearit.auth.domain.RequestUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +22,8 @@ public class PlayingHistoryController {
     @PostMapping
     public ResponseEntity<Void> createPlayingHistory(
             @RequestBody PlayingHistoryRequest request,
-            @AuthenticationPrincipal UserContext userContext) {
-        playingHistoryService.addPlayingHistory(userContext, request);
+            @AuthenticationPrincipal RequestUser requestUser) {
+        playingHistoryService.addPlayingHistory(requestUser.getUserInfo(), request);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

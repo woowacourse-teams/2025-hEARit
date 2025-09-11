@@ -31,6 +31,8 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     Optional<Bookmark> findByHearitAndMember(Hearit hearit, Member member);
 
+    List<Bookmark> findAllByHearitInAndMember(List<Hearit> hearits, Member member);
+
     @Query("""
                 SELECT b.hearit.category.id AS categoryId, COUNT(b) AS count
                 FROM Bookmark b

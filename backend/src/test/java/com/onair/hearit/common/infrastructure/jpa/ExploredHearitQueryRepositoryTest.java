@@ -7,6 +7,7 @@ import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.ExploreScore;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitProjection;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -30,47 +32,31 @@ class ExploredHearitQueryRepositoryTest {
     private DbHelper dbHelper;
 
     @Test
-    @DisplayName("회원의 점수 기반 히어릿을 커서 이후부터 조회한다")
+    @DisplayName("회원의 점수 기반 히어릿과 cursorId를 커서 이후부터 조회한다")
     void findExploredHearits_ForMember_byMember() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        List<ExploreScore> exploreScores = insertTestExploreScoreByMemberIdAndCount(member.getId(), 5);
+        List<ExploreScore> exploreScores = insertTestExploreScoreByMemberIdAndCount(member.getUuid(), 5);
         List<Long> exploreScoreHearitIds = exploreScores.stream()
                 .map(ExploreScore::getHearitId)
                 .toList();
 
         // when
-        List<Hearit> result = exploredHearitQueryRepository.findExploredHearitsForMember(member.getId(), 2L, 3);
+        List<ExploredHearitProjection> result = exploredHearitQueryRepository.findExploredHearits(
+                member.getUuid(), 2L, Pageable.ofSize(3));
 
         // then
         assertAll(() -> {
             assertThat(result).hasSize(3);
-            assertThat(result).extracting(Hearit::getId) // cusorId 이후 size 만큼 조회
+            assertThat(result).extracting(
+                            exploredHearitInfo -> exploredHearitInfo.getHearit().getId()) // cusorId 이후 size 만큼 조회
                     .contains(exploreScoreHearitIds.get(2), exploreScoreHearitIds.get(3), exploreScoreHearitIds.get(4));
+            assertThat(result).extracting(ExploredHearitProjection::getCursorId)
+                    .contains(3L, 4L, 5L);
         });
     }
 
-    @Test
-    @DisplayName("비회원의 점수 기반 히어릿을 커서 이후부터 조회한다")
-    void findExploredHearits_ForMember_byGuest() {
-        // given
-        List<ExploreScore> exploreScores = insertTestExploreScoreByMemberIdAndCount(-1L, 5);
-        List<Long> exploreScoreHearitIds = exploreScores.stream()
-                .map(ExploreScore::getHearitId)
-                .toList();
-
-        // when
-        List<Hearit> result = exploredHearitQueryRepository.findExploredHearitsForGuest(2L, 3);
-
-        // then
-        assertAll(() -> {
-            assertThat(result).hasSize(3);
-            assertThat(result).extracting(Hearit::getId) // cusorId 이후 size 만큼 조회
-                    .contains(exploreScoreHearitIds.get(2), exploreScoreHearitIds.get(3), exploreScoreHearitIds.get(4));
-        });
-    }
-
-    private List<ExploreScore> insertTestExploreScoreByMemberIdAndCount(Long memberId, int count) {
+    private List<ExploreScore> insertTestExploreScoreByMemberIdAndCount(String userUuid, int count) {
         List<ExploreScore> exploreScores = new ArrayList<>();
 
         Category category = dbHelper.insertCategory(new Category("Test", "#000000"));
@@ -78,7 +64,7 @@ class ExploredHearitQueryRepositoryTest {
         for (int i = 1; i <= count; i++) {
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             exploreScores.add(dbHelper.insertMemberExploreScore(
-                    new ExploreScore(memberId, hearit.getId(), i * 10.0, (long) i))); // cursorId = i
+                    new ExploreScore(userUuid, hearit.getId(), i * 10.0, (long) i))); // cursorId = i
         }
         return exploreScores;
     }

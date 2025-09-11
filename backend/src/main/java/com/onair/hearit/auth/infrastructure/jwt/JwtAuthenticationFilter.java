@@ -1,7 +1,7 @@
 package com.onair.hearit.auth.infrastructure.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.auth.domain.UserContext;
+import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.common.exception.ErrorCode;
 import com.onair.hearit.log.exception.FilterExceptionLogger;
 import jakarta.servlet.FilterChain;
@@ -24,6 +24,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String DEVICE_UUID_HEADER = "X-Device-UUID";
+
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final List<String> whitelist;
     private final ObjectMapper objectMapper;
@@ -39,8 +41,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 화이트리스트면 그냥 통과
         if ((token == null || token.isBlank()) && isWhitelisted(request)) {
+            String deviceUuid = request.getHeader(DEVICE_UUID_HEADER);
             UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(UserContext.guest(), null, null);
+                    new UsernamePasswordAuthenticationToken(RequestUser.guest(deviceUuid), null, null);
             SecurityContextHolder.getContext().setAuthentication(auth);
             chain.doFilter(request, response);
             return;
@@ -54,10 +57,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         Long memberId = jwtTokenProvider.getMemberId(token);
-        UserContext userContext = UserContext.member(memberId);
+        RequestUser requestUser = RequestUser.member(memberId);
 
         UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(userContext, null, Collections.emptyList());
+                new UsernamePasswordAuthenticationToken(requestUser, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         chain.doFilter(request, response);

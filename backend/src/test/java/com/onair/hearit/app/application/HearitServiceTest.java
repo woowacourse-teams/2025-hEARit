@@ -11,7 +11,6 @@ import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
 import com.onair.hearit.app.dto.response.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.app.dto.response.RecommendHearitResponse;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
@@ -34,6 +33,7 @@ import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -102,7 +102,7 @@ class HearitServiceTest {
 
         // when
         HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(),
-                UserContext.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(() -> {
@@ -125,7 +125,8 @@ class HearitServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // when & then
-        assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId, UserContext.member(notExistHearitId)))
+        assertThatThrownBy(() -> hearitService.getHearitDetail(notExistHearitId,
+                TestFixture.createFixedMemberUserInfo(member)))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
     }
@@ -181,7 +182,7 @@ class HearitServiceTest {
 
         // when
         List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(
-                UserContext.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(() -> {
@@ -217,9 +218,9 @@ class HearitServiceTest {
 
         // when
         List<HearitsWithRecommendCategoryResponse> firstResponses = hearitService.getHearitsWithRecommendCategory(
-                UserContext.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
         List<HearitsWithRecommendCategoryResponse> secondResponses = hearitService.getHearitsWithRecommendCategory(
-                UserContext.member(member.getId()));
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(() -> {
@@ -243,7 +244,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category1.getId(),
-                request, UserContext.guest());
+                request, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()));
 
         // then
         assertAll(() -> {
@@ -267,7 +268,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request, UserContext.guest());
+                request, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()));
 
         // then
         assertAll(() -> {
@@ -289,7 +290,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request, UserContext.guest());
+                request, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()));
 
         // then
         assertAll(() -> {
@@ -324,7 +325,7 @@ class HearitServiceTest {
 
         // when
         PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request, UserContext.member(member.getId()));
+                request, TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(

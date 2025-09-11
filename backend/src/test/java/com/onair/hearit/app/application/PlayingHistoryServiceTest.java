@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
 import com.onair.hearit.app.infrastructure.scheduler.PlayingHistoryBuffer;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
@@ -20,6 +19,7 @@ import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,8 +55,7 @@ class PlayingHistoryServiceTest {
 
     @BeforeEach
     void setup() {
-        playingHistoryService = new PlayingHistoryService(playingHistoryRepository, playingHistoryBuffer,
-                hearitRepository);
+        playingHistoryService = new PlayingHistoryService(playingHistoryBuffer, hearitRepository);
     }
 
     @Test
@@ -69,7 +68,7 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
         // when
-        playingHistoryService.addPlayingHistory(UserContext.member(member.getId()), request);
+        playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
         playingHistoryBuffer.flush();
 
         // then
@@ -93,7 +92,7 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
 
         // when
-        playingHistoryService.addPlayingHistory(UserContext.member(member.getId()), request);
+        playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
         playingHistoryBuffer.flush();
 
         // then
@@ -114,7 +113,8 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
         // when
-        playingHistoryService.addPlayingHistory(UserContext.guest(), request);
+        playingHistoryService.addPlayingHistory(TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()),
+                request);
 
         // then
         assertThat(playingHistoryRepository.findAll()).hasSize(0);
@@ -128,7 +128,8 @@ class PlayingHistoryServiceTest {
         PlayingHistoryRequest request = new PlayingHistoryRequest(1L, 100L);
 
         // when
-        assertThatThrownBy(() -> playingHistoryService.addPlayingHistory(UserContext.member(member.getId()), request))
+        assertThatThrownBy(
+                () -> playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request))
                 .isInstanceOf(NotFoundException.class);
     }
 

@@ -35,6 +35,9 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "uuid", nullable = false, unique = true, length = 36)
+    private String uuid;
+
     @Column(name = "local_id")
     private String localId; // 자체 회원용
 
@@ -61,9 +64,10 @@ public class Member {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    private Member(String localId, String password, String socialId, String nickname, String profileImage,
+    private Member(String uuid, String localId, String password, String socialId, String nickname, String profileImage,
                    OAuthProvider provider) {
-        validate(nickname);
+        validate(uuid, nickname);
+        this.uuid = uuid;
         this.localId = localId;
         this.password = password;
         this.socialId = socialId;
@@ -72,19 +76,26 @@ public class Member {
         this.oAuthProvider = provider;
     }
 
-    private void validate(String nickname) {
+    private void validate(String uuid, String nickname) {
+        if (uuid == null) {
+            throw new IllegalArgumentException("userUuid는 null일 수 없습니다.");
+        }
+        if (uuid.length() != 36) {
+            throw new IllegalArgumentException("userUuid 형식이 올바르지 않습니다.");
+        }
         if (nickname == null) {
             throw new IllegalArgumentException("닉네임은 null이 될 수 없습니다.");
         }
     }
 
-    public static Member createLocalUser(String memberId, String nickname, String password, String profileImage) {
-        return new Member(memberId, password, null, nickname, profileImage, OAuthProvider.NONE);
+    public static Member createLocalUser(String uuid, String memberId, String nickname, String password,
+                                         String profileImage) {
+        return new Member(uuid, memberId, password, null, nickname, profileImage, OAuthProvider.NONE);
     }
 
-    public static Member createSocialUser(String socialId, String nickname, String profileImage,
+    public static Member createSocialUser(String uuid, String socialId, String nickname, String profileImage,
                                           OAuthProvider provider) {
-        return new Member(null, null, socialId, nickname, profileImage, provider);
+        return new Member(uuid, null, null, socialId, nickname, profileImage, provider);
     }
 
     public void withdraw() {
