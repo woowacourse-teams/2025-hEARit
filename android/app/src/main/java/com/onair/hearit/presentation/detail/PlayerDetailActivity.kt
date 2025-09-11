@@ -20,10 +20,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -52,25 +53,26 @@ import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.abs
 
+@OptIn(UnstableApi::class)
 class PlayerDetailActivity :
     AppCompatActivity(),
     PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
-    private val keywordAdapter: PlayerDetailKeywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
-    private val scriptAdapter: PlayerDetailScriptAdapter by lazy { PlayerDetailScriptAdapter() }
-    private val sourceAdapter: PlayerDetailSourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
+
+    private val keywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
+    private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
+    private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
     private var mediaController: MediaController? = null
-    private var scriptSyncJob: Job? = null
-    private val updateInterval = 500L
-    private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
+
+    private val updateIntervalMs = 500L
+    private val itemHeightPx by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
+
     private val previousScreen by lazy {
         intent.getStringExtra(PREVIOUS_SCREEN_KEY) ?: UNKNOWN_SCREEN_ID
     }
@@ -90,10 +92,7 @@ class PlayerDetailActivity :
                 if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK ||
                     reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO
                 ) {
-                    val newHearitId = mediaItem?.mediaId?.toLongOrNull()
-                    if (newHearitId != null) {
-                        viewModel.refreshData(newHearitId)
-                    }
+                    mediaItem?.mediaId?.toLongOrNull()?.let { viewModel.refreshData(it) }
                 }
             }
         }
@@ -103,6 +102,7 @@ class PlayerDetailActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
         binding.lifecycleOwner = this
         binding.clickListener = this
@@ -112,13 +112,188 @@ class PlayerDetailActivity :
         setupWindowInsets()
         setupRecyclerView()
         observeViewModel()
-        setupMediaController()
-        setupBaseControllerBookmark()
+        startScriptSyncLoop()
 
         supportFragmentManager.addOnBackStackChangedListener {
             val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view)
             binding.fragmentContainerView.visibility =
-                if (fragment != null && fragment.isVisible) View.VISIBLE else View.GONE
+                if (fragment?.isVisible == true) View.VISIBLE else View.GONE
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        connectController()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        disconnectController()
+    }
+
+    private fun connectController() {
+        if (mediaController != null) return
+        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+
+        lifecycleScope.launch {
+            runCatching {
+                MediaController
+                    .Builder(this@PlayerDetailActivity, sessionToken)
+                    .buildAsync()
+                    .await()
+            }.onSuccess { controller ->
+                mediaController = controller
+                binding.playerView.player = controller
+                binding.baseController.setPlayer(controller)
+                controller.addListener(playerListener)
+
+                viewModel.hearit.value?.let { maybeStartPlayback(controller, it) }
+            }
+        }
+    }
+
+    private fun disconnectController() {
+        mediaController?.removeListener(playerListener)
+        mediaController?.release()
+        mediaController = null
+    }
+
+    private fun setupRecyclerView() {
+        binding.rvScript.adapter = scriptAdapter
+        setupScriptTapGesture()
+
+        val layoutManager =
+            FlexboxLayoutManager(this).apply {
+                flexDirection = FlexDirection.ROW
+                flexWrap = FlexWrap.WRAP
+                justifyContent = JustifyContent.FLEX_START
+            }
+        binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
+        binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
+        binding.layoutDetailSource.rvDetailSource.adapter = sourceAdapter
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupScriptTapGesture() {
+        val detector =
+            GestureDetector(
+                this,
+                object : GestureDetector.SimpleOnGestureListener() {
+                    override fun onSingleTapUp(e: MotionEvent): Boolean {
+                        supportFragmentManager
+                            .beginTransaction()
+                            .setCustomAnimations(R.anim.slide_up, 0)
+                            .replace(
+                                R.id.fragment_container_view,
+                                ScriptFragment.newInstance(hearitId),
+                            ).addToBackStack(null)
+                            .commit()
+                        return true
+                    }
+                },
+            )
+        binding.rvScript.setOnTouchListener { _, event -> detector.onTouchEvent(event) }
+    }
+
+    private fun observeViewModel() {
+        viewModel.hearit.observe(this) { hearit ->
+            binding.hearit = hearit
+            keywordAdapter.submitList(hearit?.keywords)
+            scriptAdapter.submitList(hearit?.script)
+            sourceAdapter.submitList(hearit?.sources)
+
+            // hearit 로드 뒤, 아직 재생 시작 안했으면 시도
+            if (!isPlaybackInitiated && hearit != null) {
+                isPlaybackInitiated = true
+                handlePlayback(hearit)
+            }
+        }
+
+        viewModel.bookmarkId.observe(this) { bookmarkId ->
+            binding.baseController.setBookmarkSelected(bookmarkId != null)
+        }
+
+        viewModel.toastMessage.observe(this) { resId ->
+            Toast.makeText(this, getString(resId), Toast.LENGTH_SHORT).show()
+        }
+
+        viewModel.showLoginDialog.observe(this) {
+            showLoginRequiredDialog()
+        }
+    }
+
+    private fun maybeStartPlayback(
+        controller: Player,
+        hearit: Hearit,
+    ) {
+        val currentId = controller.currentMediaItem?.mediaId?.toLongOrNull()
+        val isDifferent = currentId != hearit.id
+        val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
+        val startPosition = if (shouldResume) lastPosition else 0L
+        val source = hearit.sources.firstOrNull()?.name ?: "hEARit"
+
+        if (isDifferent) {
+            startPlaybackService(
+                audioUrl = hearit.audioUrl,
+                title = hearit.title,
+                startPosition = startPosition,
+                source = source,
+                bookmarkId = hearit.bookmarkId,
+            )
+        } else {
+            if (!controller.isPlaying) controller.play()
+            if (shouldResume && abs(controller.currentPosition - startPosition) > 1_000) {
+                controller.seekTo(startPosition)
+            }
+        }
+    }
+
+    private fun handlePlayback(hearit: Hearit) {
+        val controller = mediaController ?: return
+        maybeStartPlayback(controller, hearit)
+    }
+
+    private fun startPlaybackService(
+        audioUrl: String,
+        title: String,
+        startPosition: Long,
+        source: String,
+        bookmarkId: Long?,
+    ) {
+        val intent =
+            PlaybackService.newIntent(
+                context = this,
+                audioUrl = audioUrl,
+                title = title,
+                hearitId = hearitId,
+                startPosition = startPosition,
+                source = source,
+                playbackMode = previousScreen,
+                bookmarkId = bookmarkId,
+            )
+        startForegroundService(intent)
+    }
+
+    private fun startScriptSyncLoop() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    val controller = mediaController
+                    if (controller != null) {
+                        val position = controller.currentPosition
+                        val current =
+                            scriptAdapter.currentList.firstOrNull { position in it.start until it.end }
+                        if (current != null) {
+                            scriptAdapter.highlightScriptLine(current.id)
+                            val index = scriptAdapter.currentList.indexOf(current)
+                            val center = binding.rvScript.height / 2 - itemHeightPx / 2
+                            (binding.rvScript.layoutManager as LinearLayoutManager)
+                                .scrollToPositionWithOffset(index, center)
+                        }
+                    }
+                    delay(updateIntervalMs)
+                }
+            }
         }
     }
 
@@ -157,185 +332,9 @@ class PlayerDetailActivity :
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
-    @OptIn(UnstableApi::class)
-    private fun setupMediaController() {
-        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
-
-        lifecycleScope.launch {
-            val controller =
-                MediaController
-                    .Builder(this@PlayerDetailActivity, sessionToken)
-                    .buildAsync()
-                    .await()
-
-            mediaController = controller
-            binding.playerView.player = controller
-            binding.baseController.setPlayer(controller)
-
-            controller.addListener(playerListener)
-
-            val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
-            val isDifferentHearit = playingId != hearitId
-
-            if (isDifferentHearit) {
-                controller.addListener(
-                    object : Player.Listener {
-                        override fun onTimelineChanged(
-                            timeline: Timeline,
-                            reason: Int,
-                        ) {
-                            if (timeline.windowCount > 0) {
-                                controller.removeListener(this)
-                                controller.play()
-                            }
-                        }
-                    },
-                )
-            }
-
-            startScriptSync(controller)
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupGestureListener() {
-        val gestureDetector =
-            GestureDetector(
-                this,
-                object : GestureDetector.SimpleOnGestureListener() {
-                    override fun onSingleTapUp(e: MotionEvent): Boolean {
-                        supportFragmentManager
-                            .beginTransaction()
-                            .setCustomAnimations(R.anim.slide_up, 0)
-                            .replace(
-                                R.id.fragment_container_view,
-                                ScriptFragment.newInstance(hearitId),
-                            ).addToBackStack(null)
-                            .commit()
-                        return true
-                    }
-                },
-            )
-
-        binding.rvScript.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
-    }
-
-    private fun setupRecyclerView() {
-        binding.rvScript.adapter = scriptAdapter
-        setupGestureListener()
-        val layoutManager =
-            FlexboxLayoutManager(this).apply {
-                flexDirection = FlexDirection.ROW
-                flexWrap = FlexWrap.WRAP
-                justifyContent = JustifyContent.FLEX_START
-            }
-        binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
-        binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
-        binding.layoutDetailSource.rvDetailSource.adapter = sourceAdapter
-    }
-
-    @OptIn(UnstableApi::class)
-    private fun observeViewModel() {
-        viewModel.hearit.observe(this) { hearit ->
-            binding.hearit = hearit
-            keywordAdapter.submitList(hearit?.keywords)
-            scriptAdapter.submitList(hearit?.script)
-            sourceAdapter.submitList(hearit?.sources)
-        }
-
-        viewModel.bookmarkId.observe(this) { bookmarkId ->
-            binding.baseController.setBookmarkSelected(bookmarkId != null)
-
-            val hearit = viewModel.hearit.value
-            // 👈 재생이 아직 시작되지 않았고, hearit 데이터가 준비되었다면 재생 시작!
-            if (!isPlaybackInitiated && hearit != null) {
-                isPlaybackInitiated = true
-                handlePlayback(hearit)
-            }
-        }
-
-        viewModel.toastMessage.observe(this) { msgResId ->
-            Toast.makeText(this, getString(msgResId), Toast.LENGTH_SHORT).show()
-        }
-
-        viewModel.showLoginDialog.observe(this) {
-            showLoginRequiredDialog()
-        }
-    }
-
-    private fun startScriptSync(controller: Player) {
-        scriptSyncJob =
-            lifecycleScope.launch {
-                while (isActive) {
-                    val position = controller.currentPosition
-                    val currentItem =
-                        scriptAdapter.currentList.firstOrNull { position in it.start until it.end }
-                    if (currentItem != null) {
-                        scriptAdapter.highlightScriptLine(currentItem.id)
-                        val currentIndex = scriptAdapter.currentList.indexOf(currentItem)
-                        val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-                        (binding.rvScript.layoutManager as LinearLayoutManager)
-                            .scrollToPositionWithOffset(currentIndex, centerOffset)
-                    }
-                    delay(updateInterval)
-                }
-            }
-    }
-
-    @OptIn(UnstableApi::class)
-    private fun setupBaseControllerBookmark() {
-        binding.baseController.setOnBookmarkClickListener { viewModel.toggleBookmark() }
-    }
-
-    private fun handlePlayback(hearit: Hearit) {
-        val controller = mediaController ?: return
-        val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
-        val isDifferentHearit = currentlyPlayingId != hearit.id
-        val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
-        val startPosition = if (shouldResume) lastPosition else 0L
-        val source = hearit.sources.firstOrNull()?.name ?: "hEARit"
-
-        if (isDifferentHearit) {
-            startPlaybackService(
-                hearit.audioUrl,
-                hearit.title,
-                startPosition,
-                source,
-                hearit.bookmarkId,
-            )
-        } else {
-            if (!controller.isPlaying) controller.play()
-            if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
-                controller.seekTo(startPosition)
-            }
-        }
-    }
-
     private fun showLoginRequiredDialog() {
-        LoginRequiredDialogFragment {
-            navigateToLogin()
-        }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
-    }
-
-    private fun startPlaybackService(
-        audioUrl: String,
-        title: String,
-        startPosition: Long = 0L,
-        source: String,
-        bookmarkId: Long?,
-    ) {
-        val serviceIntent =
-            PlaybackService.newIntent(
-                context = this,
-                audioUrl = audioUrl,
-                title = title,
-                hearitId = hearitId,
-                startPosition = startPosition,
-                source = source,
-                playbackMode = previousScreen,
-                bookmarkId = bookmarkId,
-            )
-        startForegroundService(serviceIntent)
+        LoginRequiredDialogFragment { navigateToLogin() }
+            .show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {
@@ -343,18 +342,13 @@ class PlayerDetailActivity :
             AnalyticsEventNames.LOGIN_EVENT,
             mapOf(AnalyticsParamKeys.SOURCE_NAME to "detail_login"),
         )
-
-        val intent = LoginActivity.newIntent(this)
-        startActivity(intent)
-
-        val serviceIntent = Intent(this, PlaybackService::class.java)
-        this.stopService(serviceIntent)
-
+        startActivity(LoginActivity.newIntent(this))
+        stopService(Intent(this, PlaybackService::class.java))
         finish()
     }
 
     private fun showToast(message: String?) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, message ?: "", Toast.LENGTH_SHORT).show()
     }
 
     override fun onClickCategory(
@@ -365,9 +359,6 @@ class PlayerDetailActivity :
             AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
-//        val input = SearchInput.Category(id, name)
-//        val resultIntent = Intent().apply { putExtras(input.toBundle()) }
-//        setResult(RESULT_OK, resultIntent)
         finish()
     }
 
@@ -375,23 +366,22 @@ class PlayerDetailActivity :
         name: String,
         url: String,
     ) {
-        try {
-            val uri = url.toUri()
-            if (uri.scheme !in listOf("http", "https")) {
-                Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
-                showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
-                return
-            }
+        val uri = runCatching { url.toUri() }.getOrNull()
+        if (uri == null || uri.scheme !in SUPPORTED_SCHEMES) {
+            Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
+            showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
+            return
+        }
 
-            AnalyticsProvider.get().logEvent(
-                AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
-                mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
-            )
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
+        )
 
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            startActivity(intent)
-        } catch (e: Exception) {
-            Timber.w(e)
+        runCatching {
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
+        }.onFailure {
+            Timber.w(it, ERROR_INVALID_LINK_MESSAGE)
             showToast(ERROR_INVALID_LINK_MESSAGE)
         }
     }
@@ -402,19 +392,18 @@ class PlayerDetailActivity :
             mapOf(KEYWORD_NAME to term),
         )
         val input = SearchInput.Keyword(term)
-        val resultIntent =
+        val result =
             Intent().apply {
                 putExtra(TYPE_KEY, KEYWORD_VALUE)
                 putExtras(input.toBundle())
             }
-        setResult(RESULT_OK, resultIntent)
+        setResult(RESULT_OK, result)
         finish()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mediaController?.removeListener(playerListener)
-        scriptSyncJob?.cancel()
         mediaController?.release()
         mediaController = null
     }
@@ -422,9 +411,9 @@ class PlayerDetailActivity :
     companion object {
         const val BOOKMARK_ID = "bookmarkId"
         const val LIBRARY_SCREEN_ID = "library"
-        const val EXPLORE_SCREEN_ID = "explore"
         const val UNKNOWN_SCREEN_ID = "unknown"
         const val LOGIN_REQUIRED_DIALOG_TAG = "login_required_dialog"
+        private val SUPPORTED_SCHEMES = setOf("http", "https")
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
         private const val SCRIPT_ITEM_HEIGHT_DP = 16
