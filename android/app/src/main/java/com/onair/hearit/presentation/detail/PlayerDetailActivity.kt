@@ -22,7 +22,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
@@ -54,6 +53,7 @@ import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
+import com.onair.hearit.service.PlaybackSessionCallback
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -61,6 +61,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.abs
 
+@OptIn(UnstableApi::class)
 class PlayerDetailActivity :
     AppCompatActivity(),
     PlayerDetailClickListener {
@@ -73,6 +74,7 @@ class PlayerDetailActivity :
     private var scriptSyncJob: Job? = null
     private val updateInterval = 500L
     private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
+
     private val previousScreen by lazy {
         intent.getStringExtra(PREVIOUS_SCREEN_KEY) ?: UNKNOWN_SCREEN_ID
     }
@@ -96,6 +98,24 @@ class PlayerDetailActivity :
                     if (newHearitId != null) {
                         viewModel.refreshData(newHearitId)
                     }
+                }
+            }
+        }
+
+    // (옵션) 남은 곡이 적으면 서비스에 프리패치 명령을 보내고 싶다면 사용
+    private val prefetchListener =
+        object : Player.Listener {
+            override fun onMediaItemTransition(
+                item: MediaItem?,
+                reason: Int,
+            ) {
+                val controller = mediaController ?: return
+                val remaining = controller.mediaItemCount - (controller.currentMediaItemIndex + 1)
+                if (remaining <= 2) {
+                    controller.sendCustomCommand(
+                        PlaybackSessionCallback.PREFETCH_NEXT,
+                        Bundle.EMPTY,
+                    )
                 }
             }
         }
@@ -159,7 +179,6 @@ class PlayerDetailActivity :
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
-    @OptIn(UnstableApi::class)
     private fun setupMediaController() {
         val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
 
@@ -175,6 +194,11 @@ class PlayerDetailActivity :
             binding.baseController.setPlayer(controller)
 
             controller.addListener(playerListener)
+
+            // 라이브러리 모드일 땐 프리패치 리스너 등록
+            if (previousScreen == LIBRARY_SCREEN_ID) {
+                controller.addListener(prefetchListener)
+            }
 
             val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
             val isDifferentHearit = playingId != hearitId
@@ -249,7 +273,6 @@ class PlayerDetailActivity :
             binding.baseController.setBookmarkSelected(bookmarkId != null)
 
             val hearit = viewModel.hearit.value
-            // 👈 재생이 아직 시작되지 않았고, hearit 데이터가 준비되었다면 재생 시작!
             if (!isPlaybackInitiated && hearit != null) {
                 isPlaybackInitiated = true
                 handlePlayback(hearit)
@@ -295,14 +318,23 @@ class PlayerDetailActivity :
         val isDifferentHearit = currentlyPlayingId != hearit.id
         val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
         val startPosition = if (shouldResume) lastPosition else 0L
-        val source = hearit.sources.firstOrNull()?.name ?: "hEARit"
 
-        if (isDifferentHearit) {
-            startPlaybackService(hearit.audioUrl, hearit.title, startPosition, source)
+        if (previousScreen == LIBRARY_SCREEN_ID) {
+            // 재생목록 모드: 서비스가 큐 세팅을 담당
+            if (isDifferentHearit || controller.mediaItemCount == 0) {
+                startLibraryPlayback(limit = 10)
+            } else {
+                if (!controller.isPlaying) controller.play()
+            }
         } else {
-            if (!controller.isPlaying) controller.play()
-            if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
-                controller.seekTo(startPosition)
+            // 단일 재생 모드
+            if (isDifferentHearit) {
+                playSingleWithController(hearit, startPosition, previousScreen)
+            } else {
+                if (!controller.isPlaying) controller.play()
+                if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
+                    controller.seekTo(startPosition)
+                }
             }
         }
     }
@@ -313,41 +345,42 @@ class PlayerDetailActivity :
         }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
-    private fun startPlaybackService(
-        audioUrl: String,
-        title: String,
-        startPosition: Long = 0L,
-        source: String,
-        bookmarkId: Long?,
-    ) {
-        val serviceIntent =
-            PlaybackService.newIntent(
-                context = this,
-                audioUrl = audioUrl,
-                title = title,
-                hearitId = hearitId,
-                startPosition = startPosition,
-                source = source,
-                playbackMode = previousScreen,
-                bookmarkId = bookmarkId,
-            )
-        startForegroundService(serviceIntent)
+    // 라이브러리 재생 시작: 커맨드만 전송
+    @OptIn(UnstableApi::class)
+    private fun startLibraryPlayback(limit: Int) {
+        val controller = mediaController ?: return
+        controller.sendCustomCommand(
+            PlaybackSessionCallback.START_LIBRARY_PLAY,
+            Bundle().apply { putInt(EXTRA_LIMIT, limit) },
+        )
     }
 
-    private fun setMediaItem(
+    // 단일 재생 전용: 커맨드 전송 없이 setMediaItem만 수행
+    private fun playSingleWithController(
         hearit: Hearit,
-        startPosition: Long,
-        controller: MediaController,
+        startPosition: Long = 0L,
+        previousScreen: String,
     ) {
+        val controller = mediaController ?: return
+
+        val extras =
+            Bundle().apply {
+                putLong(KEY_BOOKMARK_ID, hearit.bookmarkId ?: -1L)
+                putString(KEY_PLAYBACK_MODE, previousScreen)
+                putLong(KEY_START_POSITION, startPosition)
+            }
+
         val item =
             MediaItem
                 .Builder()
                 .setMediaId(hearit.id.toString())
+                .setUri(hearit.audioUrl.toUri())
                 .setMediaMetadata(
                     MediaMetadata
                         .Builder()
                         .setTitle(hearit.title)
-                        .setExtras(Bundle().apply { putLong("startPosition", startPosition) })
+                        .setArtist(hearit.sources.firstOrNull()?.name ?: "hEARit")
+                        .setExtras(extras)
                         .build(),
                 ).build()
 
@@ -383,9 +416,6 @@ class PlayerDetailActivity :
             AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
-//        val input = SearchInput.Category(id, name)
-//        val resultIntent = Intent().apply { putExtras(input.toBundle()) }
-//        setResult(RESULT_OK, resultIntent)
         finish()
     }
 
@@ -432,6 +462,9 @@ class PlayerDetailActivity :
     override fun onDestroy() {
         super.onDestroy()
         mediaController?.removeListener(playerListener)
+        if (previousScreen == LIBRARY_SCREEN_ID) {
+            mediaController?.removeListener(prefetchListener)
+        }
         scriptSyncJob?.cancel()
         mediaController?.release()
         mediaController = null
@@ -446,6 +479,11 @@ class PlayerDetailActivity :
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
         private const val SCRIPT_ITEM_HEIGHT_DP = 16
+
+        private const val KEY_BOOKMARK_ID = "BOOKMARK_ID"
+        private const val KEY_PLAYBACK_MODE = "PLAYBACK_MODE"
+        private const val KEY_START_POSITION = "START_POSITION"
+        private const val EXTRA_LIMIT = "LIMIT"
 
         fun newIntent(
             context: Context,
