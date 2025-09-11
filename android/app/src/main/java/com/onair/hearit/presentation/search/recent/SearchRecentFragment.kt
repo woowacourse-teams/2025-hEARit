@@ -1,20 +1,30 @@
 package com.onair.hearit.presentation.search.recent
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
+import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchRecentBinding
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
+import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
+import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchAdapter
+import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchClickListener
+import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchPageFragment
+import com.onair.hearit.presentation.search.recent.searchResult.SearchResultPageFragment
 
 class SearchRecentFragment :
     Fragment(),
@@ -25,9 +35,11 @@ class SearchRecentFragment :
 
     private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
-    private val viewModel: SearchViewModel by viewModels({ requireParentFragment() }) {
-        SearchViewModelFactory()
+    private val viewModel: SearchViewModel by viewModels({ requireActivity() }) {
+        SearchViewModelFactory(null)
     }
+    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+    private var lastSearchTerm: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,9 +56,9 @@ class SearchRecentFragment :
     ) {
         super.onViewCreated(view, savedInstanceState)
         setupWindowInsets()
-        setupRecyclerView()
-        setupDeleteButton()
+        setupListeners()
         observeViewModel()
+        navigateToRecent()
         viewModel.getRecentKeywords()
     }
 
@@ -58,14 +70,54 @@ class SearchRecentFragment :
         }
     }
 
-    private fun setupRecyclerView() {
-        binding.rvRecentKeyword.adapter = recentSearchAdapter
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupListeners() {
+        binding.ibSearchRecentBack.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        globalLayoutListener =
+            ViewTreeObserver.OnGlobalLayoutListener {
+                binding.etSearch.requestFocus()
+                val imm =
+                    requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
+                binding.etSearch.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+                globalLayoutListener = null
+            }
+        binding.etSearch.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+
+        binding.etSearch.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                navigateToRecent()
+            }
+            false
+        }
+
+        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performSearchFromInput()
+            }
+            false
+        }
+        binding.btnSearch.setOnClickListener {
+            performSearchFromInput()
+        }
     }
 
-    private fun setupDeleteButton() {
-        binding.tvSearchRecentDelete.setOnClickListener {
-            viewModel.deleteKeywords()
-        }
+    private fun performSearchFromInput() {
+        val searchTerm =
+            binding.etSearch.text
+                ?.toString()
+                ?.trim()
+        if (searchTerm.isNullOrEmpty()) return
+
+        if (searchTerm == lastSearchTerm) return
+        lastSearchTerm = searchTerm
+
+        viewModel.saveRecentKeyword(searchTerm)
+        navigateToSearchResult(SearchInput.Keyword(searchTerm))
+        hideKeyboard()
     }
 
     private fun observeViewModel() {
@@ -77,12 +129,44 @@ class SearchRecentFragment :
         }
     }
 
+    fun showSearchResultPage(input: SearchInput) {
+        childFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.fragment_search_container_view,
+                SearchResultPageFragment.newInstance(input),
+            ).commit()
+        viewModel.saveRecentKeyword(input.term())
+        hideKeyboard()
+    }
+
+    private fun navigateToRecent() {
+        childFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.fragment_search_container_view,
+                RecentSearchPageFragment(),
+            ).commit()
+    }
+
     private fun navigateToSearchResult(input: SearchInput) {
-        setFragmentResult(KEYWORD_KEY, input.toBundle())
+        childFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.fragment_search_container_view,
+                SearchResultPageFragment.newInstance(input),
+            ).commit()
     }
 
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun hideKeyboard() {
+        val inputMethodManager =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val view = requireActivity().currentFocus ?: binding.root
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     override fun onRecentSearchClick(term: String) {
@@ -91,10 +175,9 @@ class SearchRecentFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+        globalLayoutListener?.let {
+            binding.etSearch.viewTreeObserver.removeOnGlobalLayoutListener(it)
+        }
         _binding = null
-    }
-
-    companion object {
-        fun newInstance(): SearchRecentFragment = SearchRecentFragment()
     }
 }

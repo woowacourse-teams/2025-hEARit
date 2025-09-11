@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemCategoryHearitBinding
 import com.onair.hearit.domain.model.CategoryHearit
+import com.onair.hearit.presentation.HearitClickListener
 
 class CategoryItemViewHolder private constructor(
     private val binding: ItemCategoryHearitBinding,

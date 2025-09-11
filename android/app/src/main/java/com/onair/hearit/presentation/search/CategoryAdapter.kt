@@ -1,18 +1,20 @@
-package com.onair.hearit.presentation.search.result
+package com.onair.hearit.presentation.search
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.model.Keyword
+import com.onair.hearit.domain.model.Category
 
-class SearchKeywordAdapter : ListAdapter<Keyword, SearchKeywordViewHolder>(DiffCallback) {
+class CategoryAdapter(
+    private val listener: CategoryClickListener,
+) : ListAdapter<Category, CategoryViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): SearchKeywordViewHolder = SearchKeywordViewHolder.create(parent)
+    ): CategoryViewHolder = CategoryViewHolder.create(parent, listener)
 
     override fun onBindViewHolder(
-        holder: SearchKeywordViewHolder,
+        holder: CategoryViewHolder,
         position: Int,
     ) {
         holder.bind(getItem(position))
@@ -20,15 +22,15 @@ class SearchKeywordAdapter : ListAdapter<Keyword, SearchKeywordViewHolder>(DiffC
 
     companion object {
         private val DiffCallback =
-            object : DiffUtil.ItemCallback<Keyword>() {
+            object : DiffUtil.ItemCallback<Category>() {
                 override fun areItemsTheSame(
-                    oldItem: Keyword,
-                    newItem: Keyword,
+                    oldItem: Category,
+                    newItem: Category,
                 ): Boolean = oldItem.id == newItem.id
 
                 override fun areContentsTheSame(
-                    oldItem: Keyword,
-                    newItem: Keyword,
+                    oldItem: Category,
+                    newItem: Category,
                 ): Boolean = oldItem == newItem
             }
     }

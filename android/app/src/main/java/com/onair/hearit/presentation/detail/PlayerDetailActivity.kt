@@ -22,6 +22,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
@@ -37,7 +38,6 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.KEYWORD_NAME
-import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
@@ -83,6 +83,25 @@ class PlayerDetailActivity :
         PlayerDetailViewModelFactory(hearitId)
     }
 
+    private val playerListener =
+        object : Player.Listener {
+            override fun onMediaItemTransition(
+                mediaItem: MediaItem?,
+                reason: Int,
+            ) {
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK ||
+                    reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO
+                ) {
+                    val newHearitId = mediaItem?.mediaId?.toLongOrNull()
+                    if (newHearitId != null) {
+                        viewModel.refreshData(newHearitId)
+                    }
+                }
+            }
+        }
+
+    private var isPlaybackInitiated = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -97,12 +116,6 @@ class PlayerDetailActivity :
         observeViewModel()
         setupMediaController()
         setupBaseControllerBookmark()
-
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Detail.NAME,
-            screenClass = AnalyticsScreenInfo.Detail.CLASS,
-            previousScreen = previousScreen,
-        )
 
         supportFragmentManager.addOnBackStackChangedListener {
             val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view)
@@ -134,9 +147,7 @@ class PlayerDetailActivity :
             },
         )
 
-        binding.ibPlayerDetailBack.setOnClickListener {
-            backAction()
-        }
+        binding.ibPlayerDetailBack.setOnClickListener { backAction() }
     }
 
     private fun setupWindowInsets() {
@@ -162,6 +173,8 @@ class PlayerDetailActivity :
             mediaController = controller
             binding.playerView.player = controller
             binding.baseController.setPlayer(controller)
+
+            controller.addListener(playerListener)
 
             val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
             val isDifferentHearit = playingId != hearitId
@@ -206,9 +219,7 @@ class PlayerDetailActivity :
                 },
             )
 
-        binding.rvScript.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-        }
+        binding.rvScript.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
     }
 
     private fun setupRecyclerView() {
@@ -220,7 +231,6 @@ class PlayerDetailActivity :
                 flexWrap = FlexWrap.WRAP
                 justifyContent = JustifyContent.FLEX_START
             }
-
         binding.layoutDetailSummaryKeywords.rvKeyword.layoutManager = layoutManager
         binding.layoutDetailSummaryKeywords.rvKeyword.adapter = keywordAdapter
         binding.layoutDetailSource.rvDetailSource.adapter = sourceAdapter
@@ -230,14 +240,20 @@ class PlayerDetailActivity :
     private fun observeViewModel() {
         viewModel.hearit.observe(this) { hearit ->
             binding.hearit = hearit
-            keywordAdapter.submitList(hearit.keywords)
-            scriptAdapter.submitList(hearit.script)
-            sourceAdapter.submitList(hearit.sources)
-            handlePlayback(hearit)
+            keywordAdapter.submitList(hearit?.keywords)
+            scriptAdapter.submitList(hearit?.script)
+            sourceAdapter.submitList(hearit?.sources)
         }
 
         viewModel.bookmarkId.observe(this) { bookmarkId ->
             binding.baseController.setBookmarkSelected(bookmarkId != null)
+
+            val hearit = viewModel.hearit.value
+            // 👈 재생이 아직 시작되지 않았고, hearit 데이터가 준비되었다면 재생 시작!
+            if (!isPlaybackInitiated && hearit != null) {
+                isPlaybackInitiated = true
+                handlePlayback(hearit)
+            }
         }
 
         viewModel.toastMessage.observe(this) { msgResId ->
@@ -254,16 +270,12 @@ class PlayerDetailActivity :
             lifecycleScope.launch {
                 while (isActive) {
                     val position = controller.currentPosition
-
                     val currentItem =
                         scriptAdapter.currentList.firstOrNull { position in it.start until it.end }
-
                     if (currentItem != null) {
                         scriptAdapter.highlightScriptLine(currentItem.id)
-
                         val currentIndex = scriptAdapter.currentList.indexOf(currentItem)
                         val centerOffset = binding.rvScript.height / 2 - itemHeightPx / 2
-
                         (binding.rvScript.layoutManager as LinearLayoutManager)
                             .scrollToPositionWithOffset(currentIndex, centerOffset)
                     }
@@ -274,9 +286,7 @@ class PlayerDetailActivity :
 
     @OptIn(UnstableApi::class)
     private fun setupBaseControllerBookmark() {
-        binding.baseController.setOnBookmarkClickListener {
-            viewModel.toggleBookmark()
-        }
+        binding.baseController.setOnBookmarkClickListener { viewModel.toggleBookmark() }
     }
 
     private fun handlePlayback(hearit: Hearit) {
@@ -285,9 +295,10 @@ class PlayerDetailActivity :
         val isDifferentHearit = currentlyPlayingId != hearit.id
         val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
         val startPosition = if (shouldResume) lastPosition else 0L
+        val source = hearit.sources.firstOrNull()?.name ?: "hEARit"
 
         if (isDifferentHearit) {
-            setMediaItem(hearit, startPosition, controller)
+            startPlaybackService(hearit.audioUrl, hearit.title, startPosition, source)
         } else {
             if (!controller.isPlaying) controller.play()
             if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
@@ -300,6 +311,27 @@ class PlayerDetailActivity :
         LoginRequiredDialogFragment {
             navigateToLogin()
         }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
+    }
+
+    private fun startPlaybackService(
+        audioUrl: String,
+        title: String,
+        startPosition: Long = 0L,
+        source: String,
+        bookmarkId: Long?,
+    ) {
+        val serviceIntent =
+            PlaybackService.newIntent(
+                context = this,
+                audioUrl = audioUrl,
+                title = title,
+                hearitId = hearitId,
+                startPosition = startPosition,
+                source = source,
+                playbackMode = previousScreen,
+                bookmarkId = bookmarkId,
+            )
+        startForegroundService(serviceIntent)
     }
 
     private fun setMediaItem(
@@ -325,6 +357,11 @@ class PlayerDetailActivity :
     }
 
     private fun navigateToLogin() {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "detail_login"),
+        )
+
         val intent = LoginActivity.newIntent(this)
         startActivity(intent)
 
@@ -343,23 +380,31 @@ class PlayerDetailActivity :
         name: String,
     ) {
         AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
+            AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
-        val input = SearchInput.Category(id, name)
-        val resultIntent = Intent().apply { putExtras(input.toBundle()) }
-        setResult(RESULT_OK, resultIntent)
+//        val input = SearchInput.Category(id, name)
+//        val resultIntent = Intent().apply { putExtras(input.toBundle()) }
+//        setResult(RESULT_OK, resultIntent)
         finish()
     }
 
-    override fun onClickSource(sourceUrl: String) {
+    override fun onClickSource(
+        name: String,
+        url: String,
+    ) {
         try {
-            val uri = sourceUrl.toUri()
+            val uri = url.toUri()
             if (uri.scheme !in listOf("http", "https")) {
                 Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
                 showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
                 return
             }
+
+            AnalyticsProvider.get().logEvent(
+                AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
+                mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
+            )
 
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
@@ -371,7 +416,7 @@ class PlayerDetailActivity :
 
     override fun onClickKeyword(term: String) {
         AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.SEARCH_KEYWORD_SELECTED,
+            AnalyticsEventNames.DETAIL_KEYWORD_SELECTED,
             mapOf(KEYWORD_NAME to term),
         )
         val input = SearchInput.Keyword(term)
@@ -386,12 +431,16 @@ class PlayerDetailActivity :
 
     override fun onDestroy() {
         super.onDestroy()
+        mediaController?.removeListener(playerListener)
         scriptSyncJob?.cancel()
-        binding.playerView.player = null
         mediaController?.release()
+        mediaController = null
     }
 
     companion object {
+        const val BOOKMARK_ID = "bookmarkId"
+        const val LIBRARY_SCREEN_ID = "library"
+        const val EXPLORE_SCREEN_ID = "explore"
         const val UNKNOWN_SCREEN_ID = "unknown"
         const val LOGIN_REQUIRED_DIALOG_TAG = "login_required_dialog"
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
@@ -402,10 +451,14 @@ class PlayerDetailActivity :
             context: Context,
             hearitId: Long,
             lastPosition: Long? = null,
+            bookmarkId: Long? = null,
+            source: String = UNKNOWN_SCREEN_ID,
         ): Intent =
             Intent(context, PlayerDetailActivity::class.java).apply {
                 putExtra(HEARIT_ID_KEY, hearitId)
                 lastPosition?.let { putExtra(LAST_POSITION_KEY, it) }
+                bookmarkId?.let { putExtra(BOOKMARK_ID, it) }
+                putExtra(AnalyticsParamKeys.SOURCE_NAME, source)
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
     }

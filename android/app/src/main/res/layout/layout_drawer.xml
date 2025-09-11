@@ -6,7 +6,7 @@
 
         <variable
             name="viewModel"
-            type="com.onair.hearit.presentation.MainViewModel" />
+            type="com.onair.hearit.presentation.main.MainViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

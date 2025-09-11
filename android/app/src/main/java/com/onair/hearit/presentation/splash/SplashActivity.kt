@@ -22,8 +22,8 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivitySplashBinding
-import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.main.MainActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

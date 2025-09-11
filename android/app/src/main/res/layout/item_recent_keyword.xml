@@ -11,7 +11,7 @@
 
         <variable
             name="listener"
-            type="com.onair.hearit.presentation.search.recent.RecentSearchClickListener" />
+            type="com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

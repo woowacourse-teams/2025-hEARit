@@ -46,12 +46,7 @@ class ExplorePlayerManager(
             player.setMediaItem(mediaItem)
         }
         player.prepare()
-        player.playWhenReady = true
         startScriptSync()
-    }
-
-    fun pause() {
-        player.pause()
     }
 
     fun stop() {

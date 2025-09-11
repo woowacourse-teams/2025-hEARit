@@ -1,11 +1,10 @@
-package com.onair.hearit.presentation.search.category
+package com.onair.hearit.presentation.search
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemCategoryBinding
 import com.onair.hearit.domain.model.Category
-import com.onair.hearit.presentation.search.CategoryClickListener
 
 class CategoryViewHolder private constructor(
     private val binding: ItemCategoryBinding,

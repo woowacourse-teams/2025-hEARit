@@ -12,23 +12,25 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsScreenInfo
+import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
 import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
-import com.onair.hearit.presentation.MainActivity
-import com.onair.hearit.presentation.MainViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
+import com.onair.hearit.presentation.main.MainActivity
+import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchFragment
 
 class HomeFragment :
@@ -54,7 +56,6 @@ class HomeFragment :
     }
     private val snapHelper = PagerSnapHelper()
     private var centerScrollListener: CenterScrollListener? = null
-    private lateinit var indicatorContainer: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,14 +77,6 @@ class HomeFragment :
         setupListeners()
         setupRecyclerView()
         observeViewModel()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Home.NAME,
-            screenClass = AnalyticsScreenInfo.Home.CLASS,
-        )
     }
 
     private fun setupWindowInsets() {
@@ -158,8 +151,8 @@ class HomeFragment :
     }
 
     private fun setupIndicator(size: Int) {
-        indicatorContainer = binding.indicatorContainer
-        indicatorContainer.removeAllViews()
+        val container = binding.indicatorContainer
+        container.removeAllViews()
         val density = resources.displayMetrics.density
 
         repeat(size) {
@@ -173,13 +166,14 @@ class HomeFragment :
                             marginEnd = marginPx
                         }
                 }
-            indicatorContainer.addView(dot)
+            container.addView(dot)
         }
         setCurrentIndicator(INITIAL_INDICATOR_POSITION)
     }
 
     private fun updateIndicator(position: Int) {
-        val count = indicatorContainer.childCount
+        val container = binding.indicatorContainer
+        val count = container.childCount
         if (count == 0) return
 
         val indicatorIndex = position - 1
@@ -189,15 +183,20 @@ class HomeFragment :
     }
 
     private fun setCurrentIndicator(selectedIndex: Int) {
-        (0 until indicatorContainer.childCount).forEach { i ->
+        val container = binding.indicatorContainer
+        for (i in 0 until container.childCount) {
             val drawableRes =
-                if (i == selectedIndex) R.drawable.indicator_selected else R.drawable.indicator_unselected
-            indicatorContainer.getChildAt(i).setBackgroundResource(drawableRes)
+                if (i == selectedIndex) {
+                    R.drawable.indicator_selected
+                } else {
+                    R.drawable.indicator_unselected
+                }
+            container.getChildAt(i).setBackgroundResource(drawableRes)
         }
     }
 
     private fun scrollToMiddlePosition() {
-        binding.rvHomeRecommend.post {
+        if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             val middlePosition = recommendAdapter.currentList.size / 2
             val layoutManager = binding.rvHomeRecommend.layoutManager as LinearLayoutManager
             val recyclerViewCenter = binding.rvHomeRecommend.width / 2
@@ -214,6 +213,8 @@ class HomeFragment :
     }
 
     private fun navigateToExplore() {
+        AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_EXPLORE_SELECTED)
+
         parentFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_container_view, ExploreFragment())
@@ -255,12 +256,15 @@ class HomeFragment :
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         centerScrollListener?.let {
             binding.rvHomeRecommend.removeOnScrollListener(it)
         }
         centerScrollListener = null
+        snapHelper.attachToRecyclerView(null)
+        binding.rvHomeRecommend.adapter = null
+        binding.rvHomeGroupedCategory.adapter = null
         _binding = null
+        super.onDestroyView()
     }
 
     private companion object {

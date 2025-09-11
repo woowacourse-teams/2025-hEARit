@@ -12,13 +12,17 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
 import com.onair.hearit.databinding.ActivityLoginBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.presentation.MainActivity
+import com.onair.hearit.di.TokenInterceptorProvider
+import com.onair.hearit.presentation.UserIdManager
+import com.onair.hearit.presentation.main.MainActivity
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class LoginActivity : AppCompatActivity() {
@@ -30,7 +34,6 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
         setupWindowInsets()
         setupAnimation()
@@ -67,15 +70,18 @@ class LoginActivity : AppCompatActivity() {
                     Timber.w(throwable)
                 },
             )
-
-        binding.btnLoginKakao.setOnClickListener {
-            kakaoLoginHelper.startLogin()
-        }
     }
 
     private fun setupListeners() {
-        binding.tvLoginHearit.setOnClickListener {
-            navigateToMain()
+        binding.btnLoginKakao.setOnClickListener {
+            kakaoLoginHelper.startLogin()
+        }
+
+        binding.tvNoLoginHearit.setOnClickListener {
+            lifecycleScope.launch {
+                setUserId(null)
+                navigateToMain()
+            }
         }
     }
 
@@ -91,11 +97,10 @@ class LoginActivity : AppCompatActivity() {
 
     private fun handleKakaoLoginSuccess(token: OAuthToken) {
         UserApiClient.instance.me { user, _ ->
-            if (user != null) {
-                AnalyticsProvider.get().setUserId(user.id.toString())
-                CrashlyticsProvider.get().setUserId(user.id.toString())
+            lifecycleScope.launch {
+                setUserId(user?.id)
+                viewModel.kakaoLogin(token.accessToken)
             }
-            viewModel.kakaoLogin(token.accessToken)
         }
     }
 
@@ -106,6 +111,14 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private suspend fun setUserId(kakaoId: Long?) {
+        val uuid = UserIdManager.getOrCreateUserId(this)
+        val userId = kakaoId?.toString() ?: uuid
+        TokenInterceptorProvider.setDeviceUuid(uuid)
+        AnalyticsProvider.get().setUserId(userId)
+        CrashlyticsProvider.get().setUserId(userId)
     }
 
     companion object {

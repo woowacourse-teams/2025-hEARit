@@ -15,24 +15,22 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.media3.common.Player
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.analytics.AnalyticsScreenInfo
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.DetailResult
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
-import com.onair.hearit.presentation.MainActivity
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
@@ -112,14 +110,8 @@ class ExploreFragment :
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logScreenView(
-            screenName = AnalyticsScreenInfo.Explore.NAME,
-            screenClass = AnalyticsScreenInfo.Explore.CLASS,
-        )
         val player = playerManager.player
-        if (!player.isPlaying && player.playbackState == Player.STATE_READY) {
-            player.play()
-        }
+        player.playWhenReady = true
     }
 
     private fun setupWindowInsets() {
@@ -183,6 +175,7 @@ class ExploreFragment :
                 ) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         switchTo(currentIndex())
+                        player.play()
                         AnalyticsProvider.get().logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
                     }
                 }
@@ -237,7 +230,7 @@ class ExploreFragment :
                 addListener(
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator) {
-                            binding.lavExploreSwipeUp.visibility = View.INVISIBLE
+                            _binding?.lavExploreSwipeUp?.visibility = View.INVISIBLE
                         }
                     },
                 )
@@ -273,6 +266,11 @@ class ExploreFragment :
     }
 
     private fun navigateToLogin() {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LOGIN_EVENT,
+            mapOf(AnalyticsParamKeys.SOURCE_NAME to "explore_login"),
+        )
+
         val intent = LoginActivity.newIntent(requireContext())
         startActivity(intent)
 
@@ -288,6 +286,7 @@ class ExploreFragment :
         hearitId: Long,
         bookmarkId: Long?,
     ) {
+        viewModel.updateBookmarkState(hearitId, bookmarkId)
         val updatedList =
             adapter.currentList.map { item ->
                 if (item.id == hearitId) {
@@ -302,11 +301,17 @@ class ExploreFragment :
         adapter.submitList(updatedList)
     }
 
-    override fun onClickHearitInfo(hearitId: Long) {
+    override fun onClickHearitInfo(
+        hearitId: Long,
+        title: String,
+    ) {
         val lastPosition = playerManager.getCurrentPosition()
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,
-            mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+            mapOf(
+                AnalyticsParamKeys.ITEM_NAME to title,
+                AnalyticsParamKeys.ITEM_INDEX to currentIndex().toString(),
+            ),
         )
 
         navigateToDetail(hearitId, lastPosition)
@@ -326,9 +331,9 @@ class ExploreFragment :
 
     override fun onPause() {
         super.onPause()
+        player.playWhenReady = false
         val position = currentIndex()
         viewModel.saveCurrentState(position, playerManager.getCurrentPosition(), adapter.itemCount)
-        playerManager.pause()
     }
 
     override fun onStop() {
@@ -338,15 +343,12 @@ class ExploreFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
-
         animator?.cancel()
         animator?.removeAllListeners()
         animator?.setTarget(null)
-
         binding.rvExplore.clearOnScrollListeners()
         snapHelper.attachToRecyclerView(null)
         binding.rvExplore.adapter = null
-
         _binding = null
     }
 

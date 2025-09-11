@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -22,89 +23,101 @@
 
                 <TextView
                     android:id="@+id/tv_search_logo"
-                    style="@style/prompt_logo"
+                    style="@style/pretendard_nickname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="10dp"
-                    android:text="@string/all_logo"
+                    android:text="@string/menu_search"
                     app:layout_collapseMode="parallax"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/iv_back"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="18dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_back"
-                    android:visibility="gone"
-                    app:layout_collapseMode="parallax" />
-
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-            <LinearLayout
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginVertical="4dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                app:boxBackgroundMode="outline"
+                app:hintEnabled="false">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_search"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:boxBackgroundMode="none"
-                    app:endIconDrawable="@drawable/ic_search"
-                    app:endIconMode="custom"
-                    app:endIconTint="@color/hearit_gray1"
-                    app:hintEnabled="false">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_search"
                         style="@style/pretendard_body"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="48dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_weight="1"
                         android:autofillHints="@null"
-                        android:background="@drawable/bg_gray4_radius_8dp"
                         android:hint="@string/search_keyword"
                         android:imeOptions="actionSearch"
                         android:inputType="text|textNoSuggestions"
                         android:maxLines="1"
-                        android:paddingHorizontal="12dp"
-                        android:textColor="@color/hearit_gray1"
-                        android:textColorHint="@color/hearit_gray2" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:textColor="@color/hearit_gray4"
+                        android:textColorHint="@color/hearit_gray2"
+                        android:textCursorDrawable="@drawable/search_cursor" />
 
-                <TextView
-                    android:id="@+id/tv_search_cancel"
-                    style="@style/pretendard_sub_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:layout_marginStart="12dp"
-                    android:gravity="center"
-                    android:text="@string/all_cancel"
-                    android:visibility="gone" />
-            </LinearLayout>
+                    <ImageButton
+                        android:id="@+id/btn_search"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="12dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_search"
+                        app:tint="@color/hearit_gray4" />
+                </LinearLayout>
+            </com.google.android.material.textfield.TextInputLayout>
+
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.core.widget.NestedScrollView
-            android:id="@+id/nsv_search"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@color/hearit_black1"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <FrameLayout
-                android:id="@+id/fl_search_container"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/tv_search_categories"
+                    style="@style/pretendard_main_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/search_category_text"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_search_categories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="72dp"
+                    android:nestedScrollingEnabled="false"
+                    android:orientation="vertical"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_search_categories"
+                    app:spanCount="2"
+                    tools:itemCount="10"
+                    tools:listitem="@layout/item_category" />
+
+            </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
