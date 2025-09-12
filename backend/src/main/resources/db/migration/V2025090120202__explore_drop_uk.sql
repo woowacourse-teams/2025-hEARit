@@ -1,1 +1,0 @@
-ALTER TABLE explore_score DROP INDEX uq_explore_score_member_hearit;
