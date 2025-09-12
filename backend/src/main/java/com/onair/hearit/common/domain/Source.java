@@ -29,6 +29,9 @@ public class Source {
         if (sourceName == null || sourceName.isBlank() || sourceName.length() > 250) {
             throw new InvalidInputException("출처명(sourceName)은 250자 이하의 유효한 문자열이어야 합니다.");
         }
+        if (sourceUrl != null && sourceUrl.length() > 500) {
+            throw new InvalidInputException("출처 링크(sourceUrl)는 500자 이하의 문자열이어야 합니다.");
+        }
     }
 
     @Override
@@ -41,7 +44,7 @@ public class Source {
         }
         Source source = (Source) o;
         return Objects.equals(sourceName, source.sourceName) &&
-                Objects.equals(sourceUrl, source.sourceUrl);
+               Objects.equals(sourceUrl, source.sourceUrl);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.onair.hearit.common.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.onair.hearit.common.domain.Source;
 import com.onair.hearit.common.exception.custom.InvalidInputException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,5 +39,14 @@ class SourceTest {
         assertThatThrownBy(() -> new Source(longName, "https://example.com"))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("sourceName");
+    }
+
+    @Test
+    @DisplayName("sourceUrl이 500자를 초과하면 예외가 발생한다")
+    void createSourceWithTooLongUrl() {
+        String longUrl = "a".repeat(501);
+        assertThatThrownBy(() -> new Source("sourceName", longUrl))
+                .isInstanceOf(InvalidInputException.class)
+                .hasMessageContaining("sourceUrl");
     }
 }
