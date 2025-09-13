@@ -15,16 +15,19 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchRecentBinding
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.term
+import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchAdapter
 import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchClickListener
 import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchPageFragment
 import com.onair.hearit.presentation.search.recent.searchResult.SearchResultPageFragment
+import kotlinx.coroutines.launch
 
 class SearchRecentFragment :
     Fragment(),
@@ -40,6 +43,8 @@ class SearchRecentFragment :
     }
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private var lastSearchTerm: String? = null
+    private val initialKeyword: String?
+        get() = arguments?.getString(KEYWORD_KEY)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,6 +65,14 @@ class SearchRecentFragment :
         observeViewModel()
         navigateToRecent()
         viewModel.getRecentKeywords()
+
+        initialKeyword?.let { term ->
+            binding.etSearch.setText(term)
+            binding.etSearch.setSelection(term.length)
+            viewLifecycleOwner.lifecycleScope.launch {
+                navigateToSearchResult(SearchInput.Keyword(term))
+            }
+        }
     }
 
     private fun setupWindowInsets() {
@@ -179,5 +192,15 @@ class SearchRecentFragment :
             binding.etSearch.viewTreeObserver.removeOnGlobalLayoutListener(it)
         }
         _binding = null
+    }
+
+    companion object {
+        fun newInstance(term: String): SearchRecentFragment =
+            SearchRecentFragment().apply {
+                arguments =
+                    Bundle().apply {
+                        putString(KEYWORD_KEY, term)
+                    }
+            }
     }
 }

@@ -17,11 +17,11 @@ class GetSearchResultUseCase(
     ): Result<PageResult<SearchedHearit>> =
         when (input) {
             is SearchInput.Keyword -> hearitRepository.getSearchHearits(input.term, page, size)
-//            is SearchInput.Category ->
-//                categoryRepository.getHearitsByCategoryId(
-//                    input.id,
-//                    page,
-//                    size,
-//                )
+            is SearchInput.Category ->
+                categoryRepository.getHearitsByCategoryId(
+                    input.id,
+                    page,
+                    size,
+                )
         }
 }

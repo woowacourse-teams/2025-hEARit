@@ -47,7 +47,6 @@ import com.onair.hearit.presentation.IntentKeys.LAST_POSITION_KEY
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
-import com.onair.hearit.presentation.IntentValues.KEYWORD_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.dpToPx
@@ -354,11 +353,18 @@ class PlayerDetailActivity :
     override fun onClickCategory(
         id: Long,
         name: String,
+        colorCode: String,
     ) {
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
+        val input = SearchInput.Category(id, name, colorCode)
+        val resultIntent =
+            Intent().apply {
+                putExtras(input.toBundle())
+            }
+        setResult(RESULT_OK, resultIntent)
         finish()
     }
 
@@ -366,22 +372,22 @@ class PlayerDetailActivity :
         name: String,
         url: String,
     ) {
-        val uri = runCatching { url.toUri() }.getOrNull()
-        if (uri == null || uri.scheme !in SUPPORTED_SCHEMES) {
-            Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
-            showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
-            return
-        }
+        try {
+            val uri = url.toUri()
+            if (uri.scheme !in listOf("http", "https")) {
+                Timber.w(ERROR_UNSUPPORTED_LINK_MESSAGE)
+                showToast(ERROR_UNSUPPORTED_LINK_MESSAGE)
+                return
+            }
 
-        AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
-            mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
-        )
-
-        runCatching {
-            startActivity(Intent(Intent.ACTION_VIEW, uri))
-        }.onFailure {
-            Timber.w(it, ERROR_INVALID_LINK_MESSAGE)
+            AnalyticsProvider.get().logEvent(
+                AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
+                mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
+            )
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Timber.w(e)
             showToast(ERROR_INVALID_LINK_MESSAGE)
         }
     }
@@ -392,12 +398,11 @@ class PlayerDetailActivity :
             mapOf(KEYWORD_NAME to term),
         )
         val input = SearchInput.Keyword(term)
-        val result =
+        val resultIntent =
             Intent().apply {
-                putExtra(TYPE_KEY, KEYWORD_VALUE)
                 putExtras(input.toBundle())
             }
-        setResult(RESULT_OK, result)
+        setResult(RESULT_OK, resultIntent)
         finish()
     }
 
@@ -413,7 +418,6 @@ class PlayerDetailActivity :
         const val LIBRARY_SCREEN_ID = "library"
         const val UNKNOWN_SCREEN_ID = "unknown"
         const val LOGIN_REQUIRED_DIALOG_TAG = "login_required_dialog"
-        private val SUPPORTED_SCHEMES = setOf("http", "https")
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
         private const val SCRIPT_ITEM_HEIGHT_DP = 16

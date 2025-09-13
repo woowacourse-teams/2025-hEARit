@@ -27,7 +27,7 @@ class GroupedCategoryViewHolder(
 
     fun bind(
         groupedCategory: GroupedCategory,
-        clickListener: (Long, String) -> Unit,
+        clickListener: (Long, String, String) -> Unit,
     ) {
         binding.navigateClickListener = clickListener
         binding.groupedCategory = groupedCategory
