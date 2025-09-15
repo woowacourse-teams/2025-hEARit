@@ -50,6 +50,7 @@ private fun RandomHearitResponse.Content.toDomain(): RandomHearit =
             this.keywords.map {
                 it.toDomain()
             },
+        cursorId = this.cursorId,
     )
 
 fun RecentHearitEntity.toDomain(): RecentHearit =
@@ -70,11 +71,7 @@ fun RecommendHearitResponse.toDomain(): RecommendHearit =
 fun RandomHearitResponse.toDomain(): CursorResult<RandomHearit> =
     CursorResult(
         items = content.map { it.toDomain() },
-        cursorInfo =
-            CursorInfo(
-                isEmpty = this.isEmpty,
-                cursorId = this.cursorId,
-            ),
+        isEmpty = this.isEmpty,
     )
 
 fun HearitResponse.toDomain(): SingleHearit =
