@@ -230,6 +230,7 @@ class PlayerDetailActivity :
             startPlaybackService(
                 audioUrl = hearit.audioUrl,
                 title = hearit.title,
+                hearitId = hearit.id,
                 startPosition = startPosition,
                 source = source,
                 bookmarkId = hearit.bookmarkId,
@@ -250,6 +251,7 @@ class PlayerDetailActivity :
     private fun startPlaybackService(
         audioUrl: String,
         title: String,
+        hearitId: Long,
         startPosition: Long,
         source: String,
         bookmarkId: Long?,
