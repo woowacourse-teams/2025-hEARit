@@ -7,11 +7,6 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 
 sealed class DetailResult {
-    data class Explore(
-        val hearitId: Long,
-        val bookmarkId: Long?,
-    ) : DetailResult()
-
     data class Category(
         val id: Long,
         val name: String,
