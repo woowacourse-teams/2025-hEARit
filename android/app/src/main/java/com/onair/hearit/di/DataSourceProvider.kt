@@ -18,8 +18,6 @@ import com.onair.hearit.data.datasource.remote.CategoryRemoteDataSource
 import com.onair.hearit.data.datasource.remote.CategoryRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSourceImpl
-import com.onair.hearit.data.datasource.remote.KeywordRemoteDataSource
-import com.onair.hearit.data.datasource.remote.KeywordRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSource
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.MemberRemoteDataSource
@@ -59,13 +57,6 @@ object DataSourceProvider {
     val hearitRemoteDataSource: HearitRemoteDataSource by lazy {
         HearitRemoteDataSourceImpl(
             hearitService = NetworkProvider.hearitService,
-            errorResponseHandler = errorHandler,
-        )
-    }
-
-    val keywordRemoteDataSource: KeywordRemoteDataSource by lazy {
-        KeywordRemoteDataSourceImpl(
-            keywordService = NetworkProvider.keywordService,
             errorResponseHandler = errorHandler,
         )
     }
