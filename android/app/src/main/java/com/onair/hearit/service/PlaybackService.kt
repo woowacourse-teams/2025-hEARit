@@ -26,6 +26,7 @@ class PlaybackService : MediaSessionService() {
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
     private lateinit var stateSaver: PlaybackStateSaver
+    private lateinit var historyListener: PlaybackHistoryListener
     private lateinit var playerNotificationManager: PlayerNotificationManager
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -37,6 +38,7 @@ class PlaybackService : MediaSessionService() {
         initializePlayer()
         initializeMediaSession()
         stateSaver = PlaybackStateSaver(player, serviceScope, this)
+        historyListener = PlaybackHistoryListener(player, serviceScope).also { it.attach() }
         player.addListener(stateSaver.listener)
     }
 
@@ -79,6 +81,8 @@ class PlaybackService : MediaSessionService() {
             stopSelf()
             return
         }
+
+        historyListener.recordIfSwitchingTo(hearitId)
 
         val item =
             createMediaItem(
@@ -176,6 +180,7 @@ class PlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         serviceScope.cancel()
+        historyListener.detach()
         stateSaver.release()
         mediaSession.release()
         player.release()
