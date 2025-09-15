@@ -15,7 +15,6 @@ import androidx.databinding.BindingAdapter
 import coil.load
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
-import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.presentation.library.BookmarkUiState
 import com.onair.hearit.presentation.search.SearchUiState
 import java.text.SimpleDateFormat
@@ -179,18 +178,13 @@ fun setShimmerVisibility(
     view.isVisible = isLoading
 }
 
-@BindingAdapter("progressRatio")
+@BindingAdapter(value = ["lastPlayTime", "totalPlayTime"])
 fun setProgressBarRatio(
     progressBar: ProgressBar,
-    item: SearchedHearit?,
+    lastPlayTime: Long?,
+    totalPlayTime: Long,
 ) {
-    val ratio =
-        item
-            ?.lastPlayTime
-            ?.takeIf { item.playTime > 0 }
-            ?.toFloat()
-            ?.div(item.playTime) ?: 0f
-
+    val ratio = (lastPlayTime?.toFloat() ?: 0f) / totalPlayTime.toFloat()
     val percent = (ratio.coerceIn(0f, 1f) * 100).toInt()
     progressBar.progress = percent
 }
