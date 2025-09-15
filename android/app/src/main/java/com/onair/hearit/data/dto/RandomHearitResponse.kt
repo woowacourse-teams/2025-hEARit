@@ -9,8 +9,6 @@ data class RandomHearitResponse(
     val content: List<Content>,
     @SerialName("isEmpty")
     val isEmpty: Boolean,
-    @SerialName("cursorId")
-    val cursorId: Long,
 ) {
     @Serializable
     data class Content(
@@ -26,5 +24,7 @@ data class RandomHearitResponse(
         val bookmarkId: Long?,
         @SerialName("keywords")
         val keywords: List<KeywordResponse>,
+        @SerialName("cursorId")
+        val cursorId: Long,
     )
 }

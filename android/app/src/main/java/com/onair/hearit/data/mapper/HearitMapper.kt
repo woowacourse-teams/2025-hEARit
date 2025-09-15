@@ -11,7 +11,6 @@ import com.onair.hearit.data.dto.SearchHearitResponse
 import com.onair.hearit.data.dto.SourceResponse
 import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.domain.model.CategoryHearit
-import com.onair.hearit.domain.model.CursorInfo
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.Keyword
@@ -51,6 +50,7 @@ private fun RandomHearitResponse.Content.toDomain(): RandomHearit =
             this.keywords.map {
                 it.toDomain()
             },
+        cursorId = this.cursorId,
     )
 
 fun RecentHearitEntity.toDomain(): RecentHearit =
@@ -71,11 +71,7 @@ fun RecommendHearitResponse.toDomain(): RecommendHearit =
 fun RandomHearitResponse.toDomain(): CursorResult<RandomHearit> =
     CursorResult(
         items = content.map { it.toDomain() },
-        cursorInfo =
-            CursorInfo(
-                isEmpty = this.isEmpty,
-                cursorId = this.cursorId,
-            ),
+        isEmpty = this.isEmpty,
     )
 
 fun HearitResponse.toDomain(): SingleHearit =

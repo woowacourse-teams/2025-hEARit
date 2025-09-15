@@ -56,6 +56,7 @@ object HearitFixtures {
                             KeywordResponse(0, "키워드1"),
                             KeywordResponse(1, "키워드2"),
                         ),
+                    cursorId = 0L,
                 ),
                 RandomHearitResponse.Content(
                     id = 2L,
@@ -69,13 +70,13 @@ object HearitFixtures {
                             KeywordResponse(1, "키워드4"),
                             KeywordResponse(2, "키워드5"),
                         ),
+                    cursorId = 1L,
                 ),
             )
 
         return RandomHearitResponse(
             content = fakeContents,
             isEmpty = false,
-            cursorId = 0L,
         )
     }
 

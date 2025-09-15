@@ -151,18 +151,6 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!--        <ImageView-->
-        <!--            android:id="@+id/btn_explore_item_bookmark"-->
-        <!--            android:layout_width="42dp"-->
-        <!--            android:layout_height="48dp"-->
-        <!--            android:layout_marginEnd="10dp"-->
-        <!--            android:background="@drawable/bookmark_selector"-->
-        <!--            android:contentDescription="@null"-->
-        <!--            app:layout_constraintBottom_toBottomOf="@id/layout_explore_hearit_info"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent"-->
-        <!--            app:layout_constraintStart_toEndOf="@id/layout_explore_hearit_info"-->
-        <!--            app:layout_constraintTop_toTopOf="@id/layout_explore_hearit_info" />-->
-
         <androidx.media3.ui.PlayerControlView
             android:id="@+id/layout_explore_player"
             android:layout_width="match_parent"

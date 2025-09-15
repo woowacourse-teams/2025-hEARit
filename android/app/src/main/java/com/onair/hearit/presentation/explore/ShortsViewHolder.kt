@@ -106,15 +106,6 @@ class ShortsViewHolder(
         scriptAdapter.submitList(item.script)
 
         binding.layoutExplorePlayer.player = player
-
-//        binding.btnExploreItemBookmark.apply {
-//            isSelected = item.isBookmarked
-//            setOnClickListener {
-//                listener.onClickBookmark(item.id) { id ->
-//                    if (id != -1L) isSelected = !isSelected
-//                }
-//            }
-//        }
         startLpRotation()
     }
 
