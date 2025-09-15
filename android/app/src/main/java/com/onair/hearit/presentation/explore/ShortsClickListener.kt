@@ -5,9 +5,4 @@ interface ShortsClickListener {
         hearitId: Long,
         title: String,
     )
-
-    fun onClickBookmark(
-        hearitId: Long,
-        callback: (bookmarkId: Long?) -> Unit,
-    )
 }

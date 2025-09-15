@@ -42,6 +42,7 @@ class ExploreFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
+
     private val viewModel: ExploreViewModel by activityViewModels { ExploreViewModelFactory() }
 
     private lateinit var playerManager: ExplorePlayerManager
@@ -51,6 +52,7 @@ class ExploreFragment :
     private val snapHelper = PagerSnapHelper()
 
     private var animator: ObjectAnimator? = null
+    private var lastPlayingIndex: Int = RecyclerView.NO_POSITION
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -61,15 +63,8 @@ class ExploreFragment :
                 hidePlayerControlView()
 
                 when (val detailResult = result.data.toDetailResult()) {
-                    is DetailResult.Explore -> {
-                        updateBookmarkState(detailResult.hearitId, detailResult.bookmarkId)
-                    }
-
-                    is DetailResult.Category,
-                    is DetailResult.Keyword,
-                    -> {
+                    is DetailResult.Category, is DetailResult.Keyword ->
                         detailResult.navigate(requireActivity() as MainActivity)
-                    }
 
                     null -> Timber.w("Invalid detail result")
                 }
@@ -106,12 +101,44 @@ class ExploreFragment :
         observeViewModel()
 
         (activity as? PlayerControllerView)?.pause()
+
+        // 복귀 예약이 있다면 재개
+        viewModel.resumeIfScheduled()
     }
 
     override fun onResume() {
         super.onResume()
-        val player = playerManager.player
         player.playWhenReady = true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        player.playWhenReady = false
+
+        // 현재 카드/재생 위치 저장 → 다음 attach 때 재개
+        val index = currentIndex()
+        viewModel.scheduleResume(
+            resumeIndex = index,
+            playerPositionMs = playerManager.getCurrentPosition(),
+        )
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        animator?.removeAllListeners()
+        animator?.cancel()
+        animator?.setTarget(null)
+        binding.rvExplore.clearOnScrollListeners()
+        snapHelper.attachToRecyclerView(null)
+        binding.rvExplore.adapter = null
+        playerManager.stop()
+        _binding = null
+        lastPlayingIndex = RecyclerView.NO_POSITION
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        playerManager.release()
     }
 
     private fun setupWindowInsets() {
@@ -119,47 +146,6 @@ class ExploreFragment :
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, systemBars.top, 0, 0)
             insets
-        }
-    }
-
-    private fun currentIndex(): Int {
-        val layoutManager =
-            binding.rvExplore.layoutManager as? LinearLayoutManager
-                ?: return RecyclerView.NO_POSITION
-        val snapView = snapHelper.findSnapView(layoutManager) ?: return RecyclerView.NO_POSITION
-        return layoutManager.getPosition(snapView)
-    }
-
-    private fun highlightScript(positionMs: Long) {
-        val index = currentIndex()
-        if (index == RecyclerView.NO_POSITION) return
-        val holder = binding.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
-        holder?.highlightScriptLine(positionMs)
-    }
-
-    private fun playAudioAtIndex(
-        index: Int,
-        startPosition: Long = 0L,
-    ) {
-        val item = adapter.currentList.getOrNull(index) ?: return
-        playerManager.playAudio(item.audioUrl, startPosition)
-    }
-
-    private fun switchTo(newPosition: Int) {
-        if (newPosition == RecyclerView.NO_POSITION) return
-
-        val lastPosition = viewModel.getLastPlayerPosition()
-        viewModel.onPageSnapped(newPosition)
-
-        playAudioAtIndex(newPosition, lastPosition)
-        checkAndLoadNextPage(newPosition)
-    }
-
-    private fun scrollToNextItem() {
-        val currentPosition = currentIndex()
-        val nextPosition = currentPosition + 1
-        if (nextPosition < adapter.itemCount) {
-            binding.rvExplore.smoothScrollToPosition(nextPosition)
         }
     }
 
@@ -174,8 +160,12 @@ class ExploreFragment :
                     newState: Int,
                 ) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        switchTo(currentIndex())
-                        player.play()
+                        val index = currentIndex()
+                        if (index != RecyclerView.NO_POSITION && index != lastPlayingIndex) {
+                            switchTo(index)
+                        }
+
+                        viewModel.maybeLoadMore(index, adapter.itemCount)
                         AnalyticsProvider.get().logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
                     }
                 }
@@ -186,16 +176,15 @@ class ExploreFragment :
     private fun observeViewModel() {
         viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
             adapter.submitList(shortsHearits) {
-                _binding?.let { binding ->
-                    if (shortsHearits.isNotEmpty()) {
-                        val target = viewModel.currentIndex.value ?: 0
-                        val validTarget = target.coerceIn(0, shortsHearits.lastIndex)
+                val bindingSafe = _binding ?: return@submitList
+                if (shortsHearits.isNotEmpty()) {
+                    viewModel.loadAnimation()
 
-                        (binding.rvExplore.layoutManager as? LinearLayoutManager)
-                            ?.scrollToPositionWithOffset(validTarget, 0)
-
-                        switchTo(validTarget)
-                        viewModel.loadAnimation()
+                    // 초기/복귀 시: 스냅 정착 후 재생 + 프리패치
+                    bindingSafe.rvExplore.post {
+                        val index = currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
+                        switchTo(index)
+                        viewModel.maybeLoadMore(index, adapter.itemCount)
                     }
                 }
             }
@@ -220,6 +209,46 @@ class ExploreFragment :
         }
     }
 
+    private fun currentIndex(): Int {
+        val layoutManager =
+            binding.rvExplore.layoutManager as? LinearLayoutManager
+                ?: return RecyclerView.NO_POSITION
+        val snapView = snapHelper.findSnapView(layoutManager) ?: return RecyclerView.NO_POSITION
+        return layoutManager.getPosition(snapView)
+    }
+
+    private fun highlightScript(positionMs: Long) {
+        val bindingSafe = _binding ?: return
+        val index = currentIndex()
+        if (index == RecyclerView.NO_POSITION) return
+        val holder =
+            bindingSafe.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
+        holder?.highlightScriptLine(positionMs)
+    }
+
+    private fun playAudioAtIndex(
+        index: Int,
+        startPosition: Long = 0L,
+    ) {
+        val item = adapter.currentList.getOrNull(index) ?: return
+        playerManager.playAudio(item.audioUrl, startPosition)
+    }
+
+    private fun switchTo(newPosition: Int) {
+        if (newPosition == RecyclerView.NO_POSITION || newPosition == lastPlayingIndex) return
+        val startPos = viewModel.consumeResumePositionMs()
+        playAudioAtIndex(newPosition, startPos)
+        lastPlayingIndex = newPosition
+    }
+
+    private fun scrollToNextItem() {
+        val currentPosition = currentIndex()
+        val nextPosition = currentPosition + 1
+        if (nextPosition < adapter.itemCount) {
+            binding.rvExplore.smoothScrollToPosition(nextPosition)
+        }
+    }
+
     private fun startSwipeAnimation() {
         binding.lavExploreSwipeUp.visibility = View.VISIBLE
         animator =
@@ -238,16 +267,6 @@ class ExploreFragment :
             }
     }
 
-    private fun checkAndLoadNextPage(position: Int) {
-        if (position >= adapter.itemCount - 2) {
-            viewModel.fetchNextPage()
-        }
-    }
-
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-    }
-
     private fun navigateToDetail(
         hearitId: Long,
         lastPosition: Long = 0L,
@@ -260,9 +279,8 @@ class ExploreFragment :
     }
 
     private fun showLoginRequiredDialog() {
-        LoginRequiredDialogFragment {
-            navigateToLogin()
-        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
+        LoginRequiredDialogFragment { navigateToLogin() }
+            .show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {
@@ -276,29 +294,7 @@ class ExploreFragment :
 
         requireContext().stopService(PlaybackService.stopIntent(requireContext()))
 
-        parentFragmentManager
-            .beginTransaction()
-            .remove(this)
-            .commit()
-    }
-
-    private fun updateBookmarkState(
-        hearitId: Long,
-        bookmarkId: Long?,
-    ) {
-        viewModel.updateBookmarkState(hearitId, bookmarkId)
-        val updatedList =
-            adapter.currentList.map { item ->
-                if (item.id == hearitId) {
-                    item.copy(
-                        bookmarkId = bookmarkId,
-                        isBookmarked = bookmarkId != null,
-                    )
-                } else {
-                    item
-                }
-            }
-        adapter.submitList(updatedList)
+        parentFragmentManager.beginTransaction().remove(this).commit()
     }
 
     override fun onClickHearitInfo(
@@ -313,47 +309,10 @@ class ExploreFragment :
                 AnalyticsParamKeys.ITEM_INDEX to currentIndex().toString(),
             ),
         )
-
         navigateToDetail(hearitId, lastPosition)
     }
 
-    override fun onClickBookmark(
-        hearitId: Long,
-        callback: (bookmarkId: Long?) -> Unit,
-    ) {
-        viewModel.toggleBookmark(
-            hearitId = hearitId,
-            onFinished = { bookmarkId ->
-                callback(bookmarkId)
-            },
-        )
-    }
-
-    override fun onPause() {
-        super.onPause()
-        player.playWhenReady = false
-        val position = currentIndex()
-        viewModel.saveCurrentState(position, playerManager.getCurrentPosition(), adapter.itemCount)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        playerManager.stop()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        animator?.cancel()
-        animator?.removeAllListeners()
-        animator?.setTarget(null)
-        binding.rvExplore.clearOnScrollListeners()
-        snapHelper.attachToRecyclerView(null)
-        binding.rvExplore.adapter = null
-        _binding = null
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        playerManager.release()
+    private fun showToast(message: String?) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }
