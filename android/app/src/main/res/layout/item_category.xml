@@ -21,7 +21,7 @@
         android:layout_marginHorizontal="8dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/bg_gray1_radius_8dp"
-        android:onClick="@{() -> listener.onCategoryClick(item.id, item.name)}"
+        android:onClick="@{() -> listener.onCategoryClick(item.id, item.name, item.colorCode)}"
         android:paddingVertical="24dp"
         app:backgroundColor="@{item.colorCode}">
 

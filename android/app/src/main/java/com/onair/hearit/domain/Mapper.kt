@@ -36,6 +36,7 @@ fun SingleHearit.toHearit(
         audioUrl = audioUrl,
         script = script,
         playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
         createdAt = this.createdAt,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,
@@ -60,4 +61,5 @@ fun SingleHearit.toPlaybackInfo(
 fun SearchInput.term(): String =
     when (this) {
         is SearchInput.Keyword -> this.term
+        is SearchInput.Category -> this.name
     }
