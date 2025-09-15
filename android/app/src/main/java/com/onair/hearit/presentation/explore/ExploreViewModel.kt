@@ -99,7 +99,7 @@ class ExploreViewModel(
     ) {
         if (isLoadingPage || totalCount <= 0) return
 
-        // N=2 (currentIndex가 totalCount-3 이상이면 nearEnd)
+        // currentIndex가 totalCount-3 이상이면 nearEnd
         val nearEnd = currentIndex >= maxOf(0, totalCount - 3)
         if (!nearEnd) return
 
