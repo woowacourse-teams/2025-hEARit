@@ -52,6 +52,7 @@ class ExploreFragment :
     private val snapHelper = PagerSnapHelper()
 
     private var animator: ObjectAnimator? = null
+    private var lastPlayingIndex: Int = RecyclerView.NO_POSITION
 
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -124,14 +125,15 @@ class ExploreFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
-        animator?.cancel()
         animator?.removeAllListeners()
+        animator?.cancel()
         animator?.setTarget(null)
         binding.rvExplore.clearOnScrollListeners()
         snapHelper.attachToRecyclerView(null)
         binding.rvExplore.adapter = null
-        _binding = null
         playerManager.stop()
+        _binding = null
+        lastPlayingIndex = RecyclerView.NO_POSITION
     }
 
     override fun onDestroy() {
@@ -159,10 +161,11 @@ class ExploreFragment :
                 ) {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         val index = currentIndex()
-                        if (index != RecyclerView.NO_POSITION) {
+                        if (index != RecyclerView.NO_POSITION && index != lastPlayingIndex) {
                             switchTo(index)
-                            viewModel.maybeLoadMore(index, adapter.itemCount)
                         }
+
+                        viewModel.maybeLoadMore(index, adapter.itemCount)
                         AnalyticsProvider.get().logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
                     }
                 }
@@ -215,9 +218,11 @@ class ExploreFragment :
     }
 
     private fun highlightScript(positionMs: Long) {
+        val bindingSafe = _binding ?: return
         val index = currentIndex()
         if (index == RecyclerView.NO_POSITION) return
-        val holder = binding.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
+        val holder =
+            bindingSafe.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
         holder?.highlightScriptLine(positionMs)
     }
 
@@ -230,9 +235,10 @@ class ExploreFragment :
     }
 
     private fun switchTo(newPosition: Int) {
-        if (newPosition == RecyclerView.NO_POSITION) return
+        if (newPosition == RecyclerView.NO_POSITION || newPosition == lastPlayingIndex) return
         val startPos = viewModel.consumeResumePositionMs()
         playAudioAtIndex(newPosition, startPos)
+        lastPlayingIndex = newPosition
     }
 
     private fun scrollToNextItem() {

@@ -163,12 +163,11 @@ class ExploreViewModel(
         val combined =
             if (resumeItem != null) {
                 val uniqueNew = newItems.filter { it.id != resumeItem?.id }
-                listOf(resumeItem!!) + uniqueNew
+                (listOf(resumeItem!!) + uniqueNew)
             } else {
                 _shortsHearits.value.orEmpty() + newItems
             }
-
-        _shortsHearits.value = combined
+        _shortsHearits.value = combined.distinctBy { it.id }
         resumeItem = null
     }
 }
