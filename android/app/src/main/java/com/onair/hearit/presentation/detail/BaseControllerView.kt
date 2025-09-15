@@ -155,7 +155,7 @@ class BaseControllerView
             updateProgress()
         }
 
-        private fun calcUpdateIntervalMs(): Long {
+        private fun calculateUpdateIntervalMs(): Long {
             val speed = player.playbackParameters.speed.coerceAtLeast(0.1f)
             val interval = (PROGRESS_UPDATE_BASE_MS / speed)
             return interval.coerceIn(PROGRESS_UPDATE_MIN_MS, PROGRESS_UPDATE_MAX_MS).toLong()
@@ -177,7 +177,7 @@ class BaseControllerView
 
             removeCallbacks(progressRunnable)
             if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-                postDelayed(progressRunnable, calcUpdateIntervalMs())
+                postDelayed(progressRunnable, calculateUpdateIntervalMs())
             }
         }
 
