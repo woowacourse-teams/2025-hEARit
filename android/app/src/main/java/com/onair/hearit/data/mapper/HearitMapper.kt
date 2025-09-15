@@ -36,6 +36,7 @@ private fun SearchHearitResponse.Content.toDomain(): SearchedHearit =
         id = this.id,
         title = this.title,
         playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
         keywords = this.keywords.map { it.toDomain() },
     )
 
@@ -84,6 +85,7 @@ fun HearitResponse.toDomain(): SingleHearit =
         summary = this.summary,
         sources = this.sources.map { it.toDomain() },
         playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
         createdAt = this.createdAt,
         isBookmarked = this.isBookmarked,
         bookmarkId = this.bookmarkId,

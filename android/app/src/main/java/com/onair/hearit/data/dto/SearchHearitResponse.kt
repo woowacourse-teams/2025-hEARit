@@ -28,6 +28,8 @@ data class SearchHearitResponse(
         val title: String,
         @SerialName("playTime")
         val playTime: Int,
+        @SerialName("lastPlayTime")
+        val lastPlayTime: Long? = null,
         @SerialName("keywords")
         val keywords: List<KeywordResponse>,
     )

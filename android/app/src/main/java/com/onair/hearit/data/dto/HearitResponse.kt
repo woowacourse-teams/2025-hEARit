@@ -15,6 +15,8 @@ data class HearitResponse(
     val sources: List<SourceResponse>,
     @SerialName("playTime")
     val playTime: Int,
+    @SerialName("lastPlayTime")
+    val lastPlayTime: Long? = null,
     @SerialName("createdAt")
     val createdAt: String,
     @SerialName("isBookmarked")
