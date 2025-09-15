@@ -125,11 +125,6 @@ class PlayerDetailActivity :
         connectController()
     }
 
-    override fun onStop() {
-        super.onStop()
-        disconnectController()
-    }
-
     private fun connectController() {
         if (mediaController != null) return
         val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
@@ -408,9 +403,7 @@ class PlayerDetailActivity :
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaController?.removeListener(playerListener)
-        mediaController?.release()
-        mediaController = null
+        disconnectController()
     }
 
     companion object {
