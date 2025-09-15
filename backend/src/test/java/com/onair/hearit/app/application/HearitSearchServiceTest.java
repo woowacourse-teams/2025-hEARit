@@ -24,13 +24,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.transaction.TestTransaction;
 
 @DataJpaTest
+@Sql("/dbclean.sql")
+@ActiveProfiles("integration-test")
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import({DbHelper.class, TestJpaAuditingConfig.class})
-@ActiveProfiles("fake-test")
 class HearitSearchServiceTest {
 
     @Autowired
@@ -70,6 +76,10 @@ class HearitSearchServiceTest {
         saveHearitWithTitleAndKeyword("notitle", saveKeyword("noKeyword"));         // 검색에서 제외됨
 
         // when
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
                 TestFixture.createFixedMemberUserInfo(member));
 
@@ -95,6 +105,10 @@ class HearitSearchServiceTest {
         Hearit hearit4 = saveHearitWithTitleAndKeyword("noTitle", saveKeyword("noKeyword"));   // 검색에서 제외됨
 
         // when
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
                 TestFixture.createFixedMemberUserInfo(member));
 
@@ -120,6 +134,10 @@ class HearitSearchServiceTest {
         Hearit neither = saveHearitWithTitleAndKeyword("notitle", saveKeyword("nokeyword")); // 둘 다 매칭 안 됨
 
         // when
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request,
                 TestFixture.createFixedMemberUserInfo(member));
 
@@ -144,6 +162,10 @@ class HearitSearchServiceTest {
         Hearit hearit = saveHearitWithTitleAndKeyword("Spring in Action", keyword1);
 
         // when
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
                 TestFixture.createFixedMemberUserInfo(member));
 
@@ -165,6 +187,10 @@ class HearitSearchServiceTest {
         Hearit hearit3 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("springKeyword"));   // latest
 
         // when
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
                 TestFixture.createFixedMemberUserInfo(member));
 
@@ -188,6 +214,10 @@ class HearitSearchServiceTest {
         Hearit hearit3 = saveHearitWithTitleAndKeyword("otherTitle", saveKeyword("Spring"));
 
         // when
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
         PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request,
                 TestFixture.createFixedMemberUserInfo(member));
 

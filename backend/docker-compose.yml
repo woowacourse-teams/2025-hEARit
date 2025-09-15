@@ -12,6 +12,7 @@ services:
       TZ: Asia/Seoul
     volumes:
       - mysql-prod-data:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d
     restart: always
     platform: linux/amd64
 
@@ -28,8 +29,10 @@ services:
       TZ: Asia/Seoul
     volumes:
       - mysql-test-data:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d
     restart: unless-stopped
 
 volumes:
   mysql-prod-data:
   mysql-test-data:
+
