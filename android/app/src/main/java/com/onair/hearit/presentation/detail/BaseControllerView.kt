@@ -2,6 +2,7 @@ package com.onair.hearit.presentation.detail
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.PopupMenu
@@ -71,7 +72,10 @@ class BaseControllerView
         }
 
         fun setOnBookmarkClickListener(listener: () -> Unit) {
-            binding.btnDetailBookmark.setOnClickListener {
+            binding.btnDetailBookmark.setOnClickListener { it ->
+                if (!binding.btnDetailBookmark.isSelected) {
+                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                }
                 listener()
             }
         }
