@@ -38,6 +38,8 @@ class PlaybackHistoryListener(
         val newId = newPosition.mediaItem?.mediaId?.toLongOrNull()
         if (oldId == null || newId == null) return
         val itemChanged = oldId != newId
+        val isSeekReason =
+            reason == Player.DISCONTINUITY_REASON_SEEK || reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
 
         if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION && itemChanged) {
             val playedMs = oldPosition.positionMs.coerceAtLeast(0L)
@@ -47,10 +49,7 @@ class PlaybackHistoryListener(
             return
         }
 
-        if ((
-                reason == Player.DISCONTINUITY_REASON_SEEK || reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
-            ) && itemChanged
-        ) {
+        if (isSeekReason && itemChanged) {
             val playedMs = oldPosition.positionMs.coerceAtLeast(0L)
             if (playedMs >= 1_000L) {
                 record(oldId, playedMs)
