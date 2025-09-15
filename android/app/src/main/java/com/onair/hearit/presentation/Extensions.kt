@@ -7,7 +7,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
