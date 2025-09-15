@@ -9,13 +9,11 @@ import com.onair.hearit.di.UseCaseProvider
 class ExploreViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val hearitRepository = RepositoryProvider.hearitRepository
-        val bookmarkRepository = RepositoryProvider.bookmarkRepository
         val exploreDataStoreRepository = RepositoryProvider.exploreDataStoreRepository
         val getShortsHearitUseCase = UseCaseProvider.getShortsHearitUseCase
 
         return ExploreViewModel(
             hearitRepository,
-            bookmarkRepository,
             exploreDataStoreRepository,
             getShortsHearitUseCase,
         ) as T

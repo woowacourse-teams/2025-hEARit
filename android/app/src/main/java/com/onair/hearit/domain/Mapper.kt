@@ -21,6 +21,7 @@ fun RandomHearit.toHearitShorts(
         bookmarkId = this.bookmarkId,
         keywords = this.keywords,
         categoryColorCode = this.categoryColorCode,
+        cursorId = this.cursorId,
     )
 
 fun SingleHearit.toHearit(

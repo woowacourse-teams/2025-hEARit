@@ -4,14 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
-import com.onair.hearit.domain.DomainException.UserNotRegistered
-import com.onair.hearit.domain.model.CursorInfo
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.ShortsHearit
-import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
@@ -24,15 +20,11 @@ import timber.log.Timber
 
 class ExploreViewModel(
     private val hearitRepository: HearitRepository,
-    private val bookmarkRepository: BookmarkRepository,
     private val exploreDataStoreRepository: ExploreDataStoreRepository,
     private val getShortsHearitUseCase: GetShortsHearitUseCase,
 ) : ViewModel() {
     private val _shortsHearits = MutableLiveData<List<ShortsHearit>>()
     val shortsHearits: LiveData<List<ShortsHearit>> = _shortsHearits
-
-    private val _bookmarkId = MutableLiveData<Map<Long, Long?>>()
-    val bookmarkId: LiveData<Map<Long, Long?>> = _bookmarkId
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -43,105 +35,106 @@ class ExploreViewModel(
     private val _shouldPlayAnimation = MutableLiveData<Boolean>()
     val shouldPlayAnimation: LiveData<Boolean> = _shouldPlayAnimation
 
-    private val _isLoading = MutableLiveData<Boolean>(true)
+    private val _isLoading = MutableLiveData(true)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _currentIndex = MutableLiveData<Int>(0)
-    val currentIndex: LiveData<Int> = _currentIndex
+    private var isLoadingPage: Boolean = false // 서버 페이지 로딩 중 여부
+    private var isEndOfFeed: Boolean = false // 더 이상 페이지가 없는지
+    private var nextCursorId: Long? = -1L // 다음 페이지 시작 커서
 
-    private lateinit var cursorInfo: CursorInfo
-
-    private var isFetchingData = false
-    private var lastPlayerPosition: Long = 0L
-    private var lastItem: ShortsHearit? = null
+    private var resumeItem: ShortsHearit? = null // 복귀 시 표시할 아이템
+    private var resumePositionMs: Long = 0L // 복귀 시 플레이어 시작 위치(ms)
+    private var resumeScheduled: Boolean = false // 다음 attach 때 재개 예정인지
 
     init {
         _isLoading.value = true
-        fetchData(0)
+        fetchData(0L)
     }
 
-    fun fetchNextPage() {
-        if (isFetchingData || cursorInfo.isEmpty) return
-        fetchData(cursorInfo.cursorId)
+    // 다음 페이지 요청
+    fun loadNextPage() {
+        if (isLoadingPage || isEndOfFeed) return
+        fetchData(nextCursorId ?: 0L)
     }
 
-    fun saveCurrentState(
-        position: Int,
-        lastPlayerPosition: Long,
-        itemCount: Int,
+    // 탭 이탈 시점: 복귀를 위한 아이템/플레이어 위치를 저장하고 재개 예약
+    fun scheduleResume(
+        resumeIndex: Int,
+        playerPositionMs: Long,
     ) {
-        refreshBookmarkState()
-
-        if (position == itemCount - 1) {
-            reFetchData()
-        } else {
-            if (position != RecyclerView.NO_POSITION) {
-                onPageSnapped(position)
-            }
+        _shortsHearits.value?.getOrNull(resumeIndex)?.let { item ->
+            resumeItem = item
         }
-        saveLastPlayerPosition(lastPlayerPosition)
+        resumePositionMs = playerPositionMs
+        resumeScheduled = true
     }
 
-    fun onPageSnapped(index: Int) {
-        if (_currentIndex.value != index) {
-            _currentIndex.value = index
-        }
+    // attach 시점: 예약돼 있으면 리스트를 재로딩하고 즉시 프리패치 트리거
+    fun resumeIfScheduled() {
+        if (!resumeScheduled) return
+        resumeScheduled = false
+
+        _shortsHearits.value = emptyList()
+        _isLoading.value = true
+        isLoadingPage = false
+
+        val startCursor = resumeItem?.cursorId ?: 0L
+        fetchData(startCursor)
+
+        // 마지막 하나만 먼저 들어오는 순간 비어 보이는 느낌을 줄이기 위해 즉시 프리패치
+        maybeLoadMore(currentIndex = 0, totalCount = 1)
     }
 
-    fun saveLastPlayerPosition(position: Long) {
-        lastPlayerPosition = position
+    // 1회성 복원 위치(ms) 소비 후 0으로 리셋
+    fun consumeResumePositionMs(): Long {
+        val pos = resumePositionMs
+        resumePositionMs = 0L
+        return pos
     }
 
-    fun getLastPlayerPosition(): Long {
-        val position = lastPlayerPosition
-        lastPlayerPosition = 0L
-        return position
-    }
-
-    fun toggleBookmark(
-        hearitId: Long,
-        onFinished: (bookmarkId: Long?) -> Unit,
+    // 프리패치 정책: 끝에서 N개(=3) 이내면 다음 페이지, 끝났으면 0부터 다시 로드
+    fun maybeLoadMore(
+        currentIndex: Int,
+        totalCount: Int,
     ) {
-        val currentBookmarkId = _bookmarkId.value?.get(hearitId)
-        if (currentBookmarkId == null) {
-            addBookmark(hearitId, onFinished)
+        if (isLoadingPage || totalCount <= 0) return
+
+        // currentIndex가 totalCount-3 이상이면 nearEnd
+        val nearEnd = currentIndex >= maxOf(0, totalCount - 3)
+        if (!nearEnd) return
+
+        // 피드의 마지막이면 -> 서버에서 넘어온 데이터가 isEmpty이면.
+        if (isEndOfFeed) {
+            isEndOfFeed = false
+            nextCursorId = -1L
+            fetchData(0L)
         } else {
-            deleteBookmark(hearitId, currentBookmarkId, onFinished)
+            loadNextPage()
         }
     }
 
+    // 스와이프 가이드 애니메이션 노출 여부 로드
     fun loadAnimation() {
         viewModelScope.launch {
             exploreDataStoreRepository
                 .shouldShowAnimation()
-                .onSuccess { shouldShow ->
-                    _shouldPlayAnimation.value = shouldShow
-                }.onFailure {
-                    _shouldPlayAnimation.value = false
-                }
+                .onSuccess { _shouldPlayAnimation.value = it }
+                .onFailure { _shouldPlayAnimation.value = false }
         }
     }
 
-    fun updateBookmarkState(
-        hearitId: Long,
-        bookmarkId: Long?,
-    ) {
-        val currentBookmarkId = _bookmarkId.value.orEmpty().toMutableMap()
-        currentBookmarkId[hearitId] = bookmarkId
-        _bookmarkId.value = currentBookmarkId
-    }
-
     private fun fetchData(cursorId: Long) {
-        if (isFetchingData) return
-        isFetchingData = true
+        if (isLoadingPage) return
+        isLoadingPage = true
 
         viewModelScope.launch {
             try {
-                val result =
-                    hearitRepository.getRandomHearits(cursorId)
+                val result = hearitRepository.getRandomHearits(cursorId)
                 result
                     .onSuccess { randomItems ->
-                        cursorInfo = randomItems.cursorInfo
+                        isEndOfFeed = randomItems.isEmpty
+                        nextCursorId = randomItems.items.lastOrNull()?.cursorId
+
                         val shortsList = buildShortsHearit(randomItems)
                         updateShortsHearit(shortsList)
                         _isLoading.value = false
@@ -153,108 +146,28 @@ class ExploreViewModel(
                 Timber.w(e)
                 _toastMessage.value = R.string.explore_toast_shorts_hearits_load_fail
             } finally {
-                isFetchingData = false
+                isLoadingPage = false
             }
         }
-    }
-
-    private fun reFetchData() {
-        lastItem = _shortsHearits.value?.lastOrNull()
-
-        _currentIndex.value = 0
-        _bookmarkId.value = emptyMap()
-        _shortsHearits.value = emptyList()
-        fetchData(0)
-    }
-
-    private fun addBookmark(
-        hearitId: Long,
-        onFinished: (bookmarkId: Long?) -> Unit,
-    ) {
-        viewModelScope.launch {
-            bookmarkRepository
-                .addBookmark(hearitId)
-                .onSuccess { newBookmarkId ->
-                    updateBookmarkState(hearitId, newBookmarkId)
-                    onFinished(newBookmarkId)
-                }.onFailure { throwable ->
-                    when (throwable) {
-                        is UserNotRegistered -> {
-                            _showLoginDialog.call()
-                            onFinished(-1L)
-                        }
-
-                        else -> {
-                            Timber.w(throwable)
-                            _toastMessage.value = R.string.all_toast_add_bookmark_fail
-                            onFinished(null)
-                        }
-                    }
-                }
-        }
-    }
-
-    private fun deleteBookmark(
-        hearitId: Long,
-        bookmarkId: Long,
-        onFinished: (bookmarkId: Long?) -> Unit,
-    ) {
-        viewModelScope.launch {
-            bookmarkRepository
-                .deleteBookmark(bookmarkId)
-                .onSuccess {
-                    updateBookmarkState(hearitId, null)
-                    onFinished(bookmarkId)
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
-                    onFinished(null)
-                }
-        }
-    }
-
-    private fun refreshBookmarkState() {
-        val currentShortsList = _shortsHearits.value ?: return
-        val bookmarkStateMap = _bookmarkId.value ?: return
-
-        val updatedShortsList =
-            currentShortsList.map { shortsHearit ->
-                val latestBookmarkId = bookmarkStateMap[shortsHearit.id]
-
-                if (shortsHearit.bookmarkId != latestBookmarkId) {
-                    shortsHearit.copy(
-                        bookmarkId = latestBookmarkId,
-                        isBookmarked = (latestBookmarkId != null),
-                    )
-                } else {
-                    shortsHearit
-                }
-            }
-
-        _shortsHearits.value = updatedShortsList
     }
 
     private suspend fun buildShortsHearit(cursorItems: CursorResult<RandomHearit>): List<ShortsHearit> =
         coroutineScope {
             cursorItems.items
-                .map { item ->
-                    async { getShortsHearitUseCase(item).getOrNull() }
-                }.awaitAll()
+                .map { item -> async { getShortsHearitUseCase(item).getOrNull() } }
+                .awaitAll()
                 .mapNotNull { it }
         }
 
     private fun updateShortsHearit(newItems: List<ShortsHearit>) {
-        val combinedList =
-            if (lastItem != null) {
-                val uniqueNewItems = newItems.filter { it.id != lastItem?.id }
-                listOf(lastItem!!) + uniqueNewItems
+        val combined =
+            if (resumeItem != null) {
+                val uniqueNew = newItems.filter { it.id != resumeItem?.id }
+                (listOf(resumeItem!!) + uniqueNew)
             } else {
                 _shortsHearits.value.orEmpty() + newItems
             }
-
-        _shortsHearits.value = combinedList
-        _bookmarkId.value = combinedList.associate { it.id to it.bookmarkId }
-
-        lastItem = null
+        _shortsHearits.value = combined.distinctBy { it.id }
+        resumeItem = null
     }
 }
