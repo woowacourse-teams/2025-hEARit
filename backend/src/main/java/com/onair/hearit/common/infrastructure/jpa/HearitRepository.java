@@ -13,27 +13,43 @@ import org.springframework.data.repository.query.Param;
 public interface HearitRepository extends JpaRepository<Hearit, Long> {
 
     @Query("""
-        SELECT DISTINCT h
-        FROM Hearit h
-        LEFT JOIN FETCH h.category c
-        LEFT JOIN FETCH h.sources s
-        WHERE h.id = :id
-    """)
+                SELECT DISTINCT h
+                FROM Hearit h
+                LEFT JOIN FETCH h.category c
+                LEFT JOIN FETCH h.sources s
+                WHERE h.id = :id
+            """)
     Optional<Hearit> findByIdWithCategoryAndSources(@Param("id") Long id);
 
     @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id = :id")
     Optional<Hearit> findWithCategoryById(Long id);
 
-    @Query(value = """
-            SELECT DISTINCT h.*
-            FROM hearit h
-            JOIN hearit_keyword hk ON h.id = hk.hearit_id
-            JOIN keyword k ON hk.keyword_id = k.id
-            WHERE
-                LOWER(h.title) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
-                OR LOWER(k.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
-            ORDER BY h.created_at DESC
-            """, nativeQuery = true)
+    @Query(
+            value = """
+                    SELECT h.* FROM (
+                        SELECT * FROM hearit
+                        WHERE MATCH(title) AGAINST(:searchTerm IN BOOLEAN MODE)
+                        UNION
+                        SELECT h.* FROM hearit h
+                        JOIN hearit_keyword hk ON h.id = hk.hearit_id
+                        JOIN keyword k ON hk.keyword_id = k.id
+                        WHERE MATCH(k.name) AGAINST(:searchTerm IN BOOLEAN MODE)
+                    ) h
+                    ORDER BY h.created_at DESC
+                    """,
+            countQuery = """
+                    SELECT COUNT(*) FROM (
+                        SELECT h.id FROM hearit h
+                        WHERE MATCH(h.title) AGAINST(:searchTerm IN BOOLEAN MODE)
+                        UNION
+                        SELECT h.id FROM hearit h
+                        JOIN hearit_keyword hk ON h.id = hk.hearit_id
+                        JOIN keyword k ON hk.keyword_id = k.id
+                        WHERE MATCH(k.name) AGAINST(:searchTerm IN BOOLEAN MODE)
+                    ) AS total_count
+                    """,
+            nativeQuery = true
+    )
     Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
 
     @Query("""

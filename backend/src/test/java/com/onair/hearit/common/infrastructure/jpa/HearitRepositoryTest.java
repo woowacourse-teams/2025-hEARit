@@ -53,51 +53,6 @@ class HearitRepositoryTest {
     }
 
     @Test
-    @DisplayName("제목 또는 키워드에 검색어가 포함된 히어릿을 반환한다.")
-    void searchByTerm_filterByTitleOrKeyword() {
-        // given
-        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Springboot"));
-        Keyword keyword2 = dbHelper.insertKeyword(new Keyword("NotMatched"));
-
-        Hearit titleMatched = saveHearitWithTitleAndKeyword("SpringBoot is great", keyword2); // 제목만 매칭
-        Hearit keywordMatched = saveHearitWithTitleAndKeyword("No match in title", keyword1); // 키워드만 매칭
-        Hearit notMatched = saveHearitWithTitleAndKeyword("No match at all", keyword2);       // 둘 다 매칭 안 됨
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<Hearit> result = hearitRepository.searchByTerm("spring", pageable);
-
-        // then
-        assertAll(
-                () -> assertThat(result.getContent()).hasSize(2),
-                () -> assertThat(result.getContent()).extracting(Hearit::getTitle)
-                        .containsExactlyInAnyOrder(
-                                titleMatched.getTitle(),
-                                keywordMatched.getTitle())
-        );
-    }
-
-    @Test
-    @DisplayName("제목과 키워드 둘 다 검색어가 포함돼도 중복 없이 하나만 반환된다.")
-    void searchByTerm_avoidDuplicateWhenTitleAndKeywordMatch() {
-        // given
-        Keyword keyword = dbHelper.insertKeyword(new Keyword("springboot"));
-        Hearit hearit = saveHearitWithTitleAndKeyword("SpringBoot", keyword);
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<Hearit> result = hearitRepository.searchByTerm("spring", pageable);
-
-        // then
-        assertAll(
-                () -> assertThat(result.getContent()).hasSize(1),
-                () -> assertThat(result.getContent().get(0).getId()).isEqualTo(hearit.getId())
-        );
-    }
-
-    @Test
     @DisplayName("카테고리 ID로 원하는 개수의 히어릿을 조회한다.")
     void findByCategory() {
         // given

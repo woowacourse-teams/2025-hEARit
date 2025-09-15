@@ -14,7 +14,9 @@ import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,13 +37,25 @@ public class HearitSearchService {
     public PagedResponse<HearitSearchResponse> search(String searchTerm, PagingRequest pagingRequest,
                                                       UserInfo userInfo) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<Hearit> hearits = hearitRepository.searchByTerm(searchTerm, pageable);
+        Page<Hearit> hearits = hearitRepository.searchByTerm(toBooleanModeQuery(searchTerm), pageable);
         if (userInfo == null || userInfo.isGuest()) {
             return PagedResponse.from(hearits.map(this::toHearitSearchResponseForGuest));
         }
 
         Member member = getMemberByUserInfo(userInfo);
         return PagedResponse.from(hearits.map(hearit -> toHearitSearchResponseForMember(hearit, member)));
+    }
+
+    private String toBooleanModeQuery(String searchTerm) {
+        return Arrays.stream(searchTerm.trim().split("\\s+"))
+                .map(this::sanitizeToken)
+                .filter(token -> token.length() >= 2)
+                .map(token -> "+" + token + "*")
+                .collect(Collectors.joining(" "));
+    }
+
+    private String sanitizeToken(String token) {
+        return token.replaceAll("[+\\-~<>()\"*@]", "");
     }
 
     private HearitSearchResponse toHearitSearchResponseForGuest(Hearit hearit) {
