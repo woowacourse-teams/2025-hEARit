@@ -48,8 +48,7 @@ class PlaybackHistoryListener(
         }
 
         if ((
-                reason == Player.DISCONTINUITY_REASON_SEEK ||
-                    reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
+                reason == Player.DISCONTINUITY_REASON_SEEK || reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
             ) && itemChanged
         ) {
             val playedMs = oldPosition.positionMs.coerceAtLeast(0L)
