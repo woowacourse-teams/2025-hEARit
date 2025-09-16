@@ -10,16 +10,23 @@ import com.onair.hearit.domain.model.PlaybackInfo
 
 @UnstableApi
 class PlaybackMediaItemManager {
-    // info 재생에 필요한 오디오 정보와 메타데이터를 담고 있는 PlaybackInfo 객체를 가지고 플레이어에서 실행하기 위한 MediaItem을 구성함
+    /**
+     * PlaybackInfo -> MediaItem
+     * - bookmarkId / playbackMode 를 extras에 포함
+     * - startPositionMs가 주어지면 그 값을, 없으면 info.lastPosition을 START_POSITION 으로 포함
+     */
     fun buildMediaItem(
         info: PlaybackInfo,
         playbackMode: String? = null,
         bookmarkId: Long? = null,
+        startPositionMs: Long? = null,
     ): MediaItem {
         val extras =
             Bundle().apply {
                 bookmarkId?.let { putLong(EXTRA_BOOKMARK_ID, it) }
                 playbackMode?.let { putString(EXTRA_PLAYBACK_MODE, it) }
+                val start = (startPositionMs ?: info.lastPosition)
+                if (start > 0L) putLong(EXTRA_START_POSITION, start)
             }
 
         return MediaItem
@@ -37,19 +44,17 @@ class PlaybackMediaItemManager {
             .build()
     }
 
-    /** PlaybackInfo를 기반으로 미디어 아이템 리스트와 시작 위치 정보를 포함하는 객체를 생성함
-     * 이 메서드는 앱 재시작 시 마지막 재생 위치에서 이어 재생하기 위해 필요함
-     * build 후에 시작 위치까지 정해주기 위함
-     */
+    /** 이어듣기(재시작) 용: MediaItemsWithStartPosition 생성 */
     fun toItemsWithStart(info: PlaybackInfo): MediaSession.MediaItemsWithStartPosition =
         MediaSession.MediaItemsWithStartPosition(
-            listOf(buildMediaItem(info)),
+            listOf(buildMediaItem(info, startPositionMs = info.lastPosition)),
             0,
-            info.lastPosition,
+            info.lastPosition.coerceAtLeast(0L),
         )
 
     companion object {
-        private const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
-        private const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
+        const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
+        const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
+        const val EXTRA_START_POSITION = "START_POSITION"
     }
 }

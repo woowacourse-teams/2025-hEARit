@@ -322,7 +322,11 @@ class PlayerDetailActivity :
         if (previousScreen == LIBRARY_SCREEN_ID) {
             // 재생목록 모드: 서비스가 큐 세팅을 담당
             if (isDifferentHearit || controller.mediaItemCount == 0) {
-                startLibraryPlayback(limit = 10)
+                startLibraryPlayback(
+                    seedHearitId = hearit.id,
+                    seedBookmarkId = viewModel.bookmarkId.value,
+                    startPosMs = startPosition,
+                )
             } else {
                 if (!controller.isPlaying) controller.play()
             }
@@ -345,13 +349,23 @@ class PlayerDetailActivity :
         }.show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
-    // 라이브러리 재생 시작: 커맨드만 전송
     @OptIn(UnstableApi::class)
-    private fun startLibraryPlayback(limit: Int) {
+    private fun startLibraryPlayback(
+        seedHearitId: Long,
+        seedBookmarkId: Long?,
+        startPosMs: Long,
+    ) {
         val controller = mediaController ?: return
+        val args =
+            Bundle().apply {
+                putLong("SEED_HEARIT_ID", seedHearitId)
+                putLong("SEED_BOOKMARK_ID", seedBookmarkId ?: -1)
+                putLong("START_POSITION", startPosMs.coerceAtLeast(0L))
+            }
+
         controller.sendCustomCommand(
             PlaybackSessionCallback.START_LIBRARY_PLAY,
-            Bundle().apply { putInt(EXTRA_LIMIT, limit) },
+            args,
         )
     }
 

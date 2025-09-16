@@ -6,7 +6,7 @@ import androidx.media3.session.MediaSessionService
 
 class ForegroundController(
     private val service: MediaSessionService,
-    private val notificationManager: PlayerNotificationManager,
+    private val notificationManager: Notifi,
     private val notificationId: Int,
 ) : Player.Listener {
     private var isStarted = false

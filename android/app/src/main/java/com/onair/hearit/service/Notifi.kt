@@ -6,7 +6,7 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import com.onair.hearit.R
 
-class PlayerNotificationManager(
+class Notifi(
     private val context: Context,
 ) {
     private val notificationManager: NotificationManager =

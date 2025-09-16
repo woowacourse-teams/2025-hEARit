@@ -63,42 +63,43 @@ class PlaybackSessionCallback(
             val job =
                 serviceScope.launch {
                     try {
-                        // 1) 정규화(resolve). 실패 시 원본 사용
-                        val resolved = mediaItems.map { resolve(it) }
-                        val finalItems = resolved.ifEmpty { mediaItems }
+                        // 개별 실패시 원본 유지
+                        val resolved =
+                            mediaItems.map { mi -> runCatching { resolve(mi) }.getOrElse { mi } }
+                        val finalItems = if (resolved.isNotEmpty()) resolved else mediaItems
 
-                        // 2) startIndex 보존 (범위 안전화)
-                        val finalStartIndex =
-                            startIndex.coerceIn(0, (finalItems.size - 1).coerceAtLeast(0))
+                        val safeStartIndex =
+                            if (finalItems.isNotEmpty()) {
+                                startIndex.coerceIn(0, finalItems.size - 1)
+                            } else {
+                                0
+                            }
 
-                        // 3) 시작 위치: 파라미터 우선, 없으면 "시작 아이템의 extras"에서
                         val extrasStart =
                             finalItems
-                                .getOrNull(finalStartIndex)
+                                .getOrNull(safeStartIndex)
                                 ?.mediaMetadata
                                 ?.extras
-                                ?.getLong(EXTRA_START_POSITION, -1L)
-                                ?: -1L
+                                ?.getLong(EXTRA_START_POSITION, -1L) ?: -1L
 
-                        val finalStartPosition =
-                            (
-                                if (startPositionMs > 0) startPositionMs else extrasStart
-                            ).coerceAtLeast(0L)
+                        val safeStartPos =
+                            (if (startPositionMs > 0) startPositionMs else extrasStart).coerceAtLeast(
+                                0L,
+                            )
 
                         completer.set(
                             MediaSession.MediaItemsWithStartPosition(
                                 finalItems,
-                                finalStartIndex,
-                                finalStartPosition,
+                                safeStartIndex,
+                                safeStartPos,
                             ),
                         )
                     } catch (_: Throwable) {
-                        // 4) 완전 실패시에도 "빈 리스트" 대신 최소한 원본으로 복구
                         completer.set(
                             MediaSession.MediaItemsWithStartPosition(
                                 mediaItems,
-                                0,
-                                0L,
+                                startIndex.coerceAtLeast(0),
+                                startPositionMs.coerceAtLeast(0L),
                             ),
                         )
                     }
@@ -107,11 +108,6 @@ class PlaybackSessionCallback(
             "onSetMediaItems"
         }
 
-    /**
-     * 외부 컨트롤러로부터 커스텀 명령을 받을 때 호출됨 + 외부에서 호출할때 'hearit.PRELOAD_RECENT'를 전달함
-     * 처음에 앱을 실행할때, 마지막에 저장된 위치와 더불어서 아이템을 미리 화면에 뿌려주기 위함
-     * 비동기적으로 최근 재생 정보를 불러와 ExoPlayer를 준비
-     */
     override fun onCustomCommand(
         session: MediaSession,
         controller: MediaSession.ControllerInfo,
@@ -124,53 +120,83 @@ class PlaybackSessionCallback(
                     runCatching {
                         when (command.customAction) {
                             CMD_START_LIBRARY_PLAY -> {
-                                Timber.d("library")
-                                val limitFromArgs = args.getInt(EXTRA_LIMIT, 10)
-                                pageSize = limitFromArgs
+                                // 인자
+                                pageSize = 10
+                                val seedBookmarkId = args.getLong(EXTRA_SEED_BOOKMARK_ID, -1L)
+                                val seedHearitId = args.getLong(EXTRA_SEED_HEARIT_ID, -1L)
+                                val seedStartPosMs =
+                                    args.getLong(EXTRA_START_POSITION, 0L).coerceAtLeast(0L)
 
-                                val firstPage =
-                                    UseCaseProvider
-                                        .getBookmarksUseCase(page = 0, size = pageSize)
-                                        .getOrThrow()
+                                Timber.d(
+                                    "START_LIBRARY_PLAY seedBookmarkId=$seedBookmarkId seedHearitId=$seedHearitId startPos=$seedStartPosMs",
+                                )
 
-                                Timber.d("library $firstPage")
+                                // 여러 페이지 누적 로드하며 시드의 전역 인덱스 찾기
+                                val allItems = mutableListOf<MediaItem>()
+                                var page = 0
+                                var globalIndex = -1
+                                var isLast = false
 
-                                val items =
-                                    firstPage.items.map { bookmark ->
-                                        mediaItemHelper.buildMediaItem(
-                                            info =
-                                                PlaybackInfo(
-                                                    hearitId = bookmark.hearitId,
-                                                    audioUrl = bookmark.audioUrl!!,
-                                                    title = bookmark.title,
-                                                    source = "hEARit",
-                                                ),
-                                            playbackMode = "LIBRARY",
-                                            bookmarkId = bookmark.bookmarkId,
-                                        )
+                                while (true) {
+                                    val pageResult =
+                                        UseCaseProvider
+                                            .getBookmarksUseCase(page = page, size = pageSize)
+                                            .getOrThrow()
+
+                                    val batchItems =
+                                        pageResult.items.map { bookmark ->
+                                            mediaItemHelper.buildMediaItem(
+                                                info =
+                                                    PlaybackInfo(
+                                                        hearitId = bookmark.hearitId,
+                                                        audioUrl = checkNotNull(bookmark.audioUrl),
+                                                        title = bookmark.title,
+                                                        source = "hEARit",
+                                                    ),
+                                                playbackMode = "LIBRARY",
+                                                bookmarkId = bookmark.bookmarkId,
+                                            )
+                                        }
+
+                                    // seed 검사 (bookmarkId 우선, 없으면 hearitId)
+                                    if (seedBookmarkId > 0) {
+                                        val local =
+                                            pageResult.items.indexOfFirst { it.bookmarkId == seedBookmarkId }
+                                        if (local >= 0) globalIndex = allItems.size + local
+                                    }
+                                    if (globalIndex < 0 && seedHearitId > 0) {
+                                        val local =
+                                            pageResult.items.indexOfFirst { it.hearitId == seedHearitId }
+                                        if (local >= 0) globalIndex = allItems.size + local
                                     }
 
-                                // 다음 페이지 인덱스 갱신
-                                nextPage =
-                                    if (!firstPage.paging.isLast) {
-                                        firstPage.paging.page + 1
-                                    } else {
-                                        null
-                                    }
+                                    allItems += batchItems
+                                    isLast = pageResult.paging.isLast
+                                    nextPage = if (!isLast) pageResult.paging.page + 1 else null
+
+                                    if (globalIndex >= 0 || isLast) break
+                                    page += 1
+                                }
+
+                                if (globalIndex < 0) globalIndex = 0
 
                                 withContext(Dispatchers.Main) {
-                                    session.player.setMediaItems(items, 0, 0L)
+                                    session.player.setMediaItems(
+                                        allItems,
+                                        globalIndex,
+                                        seedStartPosMs,
+                                    )
                                     session.player.prepare()
                                     session.player.play()
                                 }
                                 SessionResult(SessionResult.RESULT_SUCCESS)
                             }
 
-                            // 다음 페이지 프리패치
                             CMD_PREFETCH_NEXT -> {
                                 val pageToLoad =
-                                    nextPage
-                                        ?: return@runCatching SessionResult(SessionResult.RESULT_SUCCESS)
+                                    nextPage ?: return@runCatching SessionResult(
+                                        SessionResult.RESULT_SUCCESS,
+                                    )
 
                                 val next =
                                     UseCaseProvider
@@ -183,7 +209,7 @@ class PlaybackSessionCallback(
                                             info =
                                                 PlaybackInfo(
                                                     hearitId = bookmark.hearitId,
-                                                    audioUrl = bookmark.audioUrl!!,
+                                                    audioUrl = checkNotNull(bookmark.audioUrl),
                                                     title = bookmark.title,
                                                     source = "hEARit",
                                                 ),
@@ -192,13 +218,7 @@ class PlaybackSessionCallback(
                                         )
                                     }
 
-                                // 다음 페이지 인덱스 갱신
-                                nextPage =
-                                    if (!next.paging.isLast) {
-                                        next.paging.page + 1
-                                    } else {
-                                        null
-                                    }
+                                nextPage = if (!next.paging.isLast) next.paging.page + 1 else null
 
                                 withContext(Dispatchers.Main) {
                                     session.player.addMediaItems(items)
@@ -213,8 +233,12 @@ class PlaybackSessionCallback(
 
                             else ->
                                 return@runCatching super
-                                    .onCustomCommand(session, controller, command, args)
-                                    .get()
+                                    .onCustomCommand(
+                                        session,
+                                        controller,
+                                        command,
+                                        args,
+                                    ).get()
                         }
                     }.onSuccess(completer::set).onFailure(completer::setException)
                 }
@@ -222,10 +246,6 @@ class PlaybackSessionCallback(
             "customCommand"
         }
 
-    /**
-     * 앱이 종료된 후 사용자가 미디어 알림에서 재생 버튼을 눌렀을 때 호출됨
-     * 이 메서드는 비동기적으로 최근 재생 정보를 불러와 해당 미디어 아이템과 마지막 재생 위치를 반환합니다.
-     */
     override fun onPlaybackResumption(
         session: MediaSession,
         controller: MediaSession.ControllerInfo,
@@ -235,11 +255,8 @@ class PlaybackSessionCallback(
                 serviceScope.launch {
                     val info = runCatching { loadRecentInfo() }.getOrNull()
                     val result =
-                        info?.let {
-                            mediaItemHelper.toItemsWithStart(it)
-                        } ?: run {
-                            EMPTY_MEDIA_ITEMS_WITH_START
-                        }
+                        info?.let { mediaItemHelper.toItemsWithStart(it) }
+                            ?: EMPTY_MEDIA_ITEMS_WITH_START
                     completer.set(result)
                 }
             completer.addCancellationListener({ job.cancel() }, Runnable::run)
@@ -256,71 +273,93 @@ class PlaybackSessionCallback(
                 serviceScope.launch {
                     runCatching {
                         mediaItems.map { resolve(it) }.ifEmpty { mediaItems }
-                    }.onSuccess(completer::set)
-                        .onFailure(completer::setException)
+                    }.onSuccess(completer::set).onFailure(completer::setException)
                 }
             completer.addCancellationListener({ job.cancel() }, Runnable::run)
             "onAddMediaItems"
         }
 
-    // 데이터베이스에서 최근 재생 정보를 비동기적으로 불러오는 부분으로
-    // 처음에 앱을 재생할 때 마지막까지 들은 히어릿을 불러오는 코드
     private suspend fun loadRecentInfo(): PlaybackInfo? =
         withContext(Dispatchers.IO) {
             RepositoryProvider.recentHearitRepository
                 .getRecentHearit()
                 .getOrNull()
-                ?.let { recent ->
-                    UseCaseProvider.getPlaybackInfoUseCase(recent.id).getOrNull()
-                }
+                ?.let { recent -> UseCaseProvider.getPlaybackInfoUseCase(recent.id).getOrNull() }
         }
 
-    // 현재 재생 중인 미디어 아이템과 준비 상태를 확인하여,
-    // 동일하지 않은 경우 아이템인 경우 새로운 미디어 아이템으로 설정하고 플레이어를 준비시킴
+    /**
+     * 최근 재생 정보로 준비:
+     * - 동일 아이템이 큐에 있으면 해당 인덱스로 이동만
+     * - 큐가 비었으면 단일 아이템으로 세팅
+     * - 아니면 뒤에 붙이고 그 위치로 이동
+     */
     private fun prepareIfNeeded(
         session: MediaSession,
         info: PlaybackInfo,
     ) {
         val player = session.player
         val item = mediaItemHelper.buildMediaItem(info)
-        val sameItem = player.currentMediaItem?.mediaId == item.mediaId
-        val preparedOrBuffering =
-            player.playbackState == Player.STATE_READY ||
-                player.playbackState == Player.STATE_BUFFERING
-        if (!(sameItem && preparedOrBuffering)) {
-            player.setMediaItems(listOf(item), 0, info.lastPosition)
-            player.prepare()
+        val resumePos = info.lastPosition.coerceAtLeast(0L)
+
+        val existingIndex =
+            (0 until player.mediaItemCount).indexOfFirst { player.getMediaItemAt(it).mediaId == item.mediaId }
+
+        if (existingIndex >= 0) {
+            player.seekTo(existingIndex, resumePos)
+            if (player.playbackState == Player.STATE_IDLE) player.prepare()
+            return
         }
+
+        if (player.mediaItemCount == 0) {
+            player.setMediaItems(listOf(item), 0, resumePos)
+            player.prepare()
+            return
+        }
+
+        player.addMediaItem(item)
+        val newIndex = player.mediaItemCount - 1
+        player.seekTo(newIndex, resumePos)
+        player.prepare()
     }
 
+    /**
+     * 넘어온 MediaItem을 id로 재조회하여, 기존 extras(BOOKMARK_ID/PLAYBACK_MODE/START_POSITION)를 보존해 재구성
+     */
     private suspend fun resolve(item: MediaItem): MediaItem =
         withContext(Dispatchers.IO) {
             val id = item.mediaId.toLongOrNull() ?: return@withContext item
             val info =
                 UseCaseProvider.getPlaybackInfoUseCase(id).getOrNull() ?: return@withContext item
-            mediaItemHelper.buildMediaItem(info)
+
+            val extras = item.mediaMetadata.extras
+            val mode = extras?.getString(EXTRA_PLAYBACK_MODE)
+            val bookmarkId = extras?.getLong(EXTRA_BOOKMARK_ID, -1L)?.takeIf { it > 0 }
+            mediaItemHelper.buildMediaItem(
+                info = info,
+                playbackMode = mode,
+                bookmarkId = bookmarkId,
+            )
         }
 
     companion object {
         private const val COMMAND_PRELOAD_RECENT = "PRELOAD_RECENT"
-        private const val EXTRA_START_POSITION = "START_POSITION"
-        private val EMPTY_MEDIA_ITEMS_WITH_START =
-            MediaSession.MediaItemsWithStartPosition(
-                emptyList(),
-                0,
-                0L,
-            )
-
         private const val CMD_START_LIBRARY_PLAY = "START_LIBRARY_PLAY"
         private const val CMD_PREFETCH_NEXT = "PREFETCH_NEXT"
-        private const val EXTRA_MODE = "MODE"
+
+        private const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
+        private const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
+        private const val EXTRA_START_POSITION = "START_POSITION"
+
         private const val EXTRA_SEED_BOOKMARK_ID = "SEED_BOOKMARK_ID"
-        private const val EXTRA_LIMIT = "LIMIT"
+        private const val EXTRA_SEED_HEARIT_ID = "SEED_HEARIT_ID"
 
         val START_LIBRARY_PLAY: SessionCommand =
             SessionCommand(CMD_START_LIBRARY_PLAY, Bundle.EMPTY)
         val PREFETCH_NEXT: SessionCommand = SessionCommand(CMD_PREFETCH_NEXT, Bundle.EMPTY)
         val PRELOAD_RECENT_COMMAND: SessionCommand =
             SessionCommand(COMMAND_PRELOAD_RECENT, Bundle.EMPTY)
+
+        private val EMPTY_MEDIA_ITEMS_WITH_START =
+            MediaSession.MediaItemsWithStartPosition(emptyList(), 0, 0L)
     }
 }
