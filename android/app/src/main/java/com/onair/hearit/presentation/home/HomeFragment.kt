@@ -28,7 +28,7 @@ import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.category.SearchCategoryFragment
+import com.onair.hearit.presentation.search.category.CategoryFragment
 
 class HomeFragment :
     Fragment(),
@@ -240,7 +240,7 @@ class HomeFragment :
             .beginTransaction()
             .replace(
                 R.id.fragment_container_view,
-                SearchCategoryFragment.newInstance(
+                CategoryFragment.newInstance(
                     SearchInput.Category(id, name, colorCode),
                 ),
             ).addToBackStack(null)
