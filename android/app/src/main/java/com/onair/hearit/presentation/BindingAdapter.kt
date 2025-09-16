@@ -184,7 +184,8 @@ fun setProgressBarRatio(
     lastPlayTime: Long?,
     totalPlayTime: Long,
 ) {
-    val ratio = (lastPlayTime?.toFloat() ?: 0f) / totalPlayTime.toFloat()
+    val lastPlayTimeSec = (lastPlayTime ?: 0L) / 1000f
+    val ratio = lastPlayTimeSec / totalPlayTime.toFloat()
     val percent = (ratio.coerceIn(0f, 1f) * 100).toInt()
     progressBar.progress = percent
 }
