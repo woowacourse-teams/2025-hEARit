@@ -2,8 +2,11 @@ package com.onair.hearit.presentation.detail
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.widget.LinearLayout
+import android.widget.PopupMenu
+import androidx.core.view.get
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
@@ -13,6 +16,7 @@ import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutControllerBinding
 import java.util.Formatter
 import java.util.Locale
+import kotlin.math.abs
 
 @UnstableApi
 class BaseControllerView
@@ -31,7 +35,7 @@ class BaseControllerView
         private val window = Timeline.Window()
         private var playSpeedIndex = DEFAULT_SPEED_INDEX
 
-        private val speedOptions = floatArrayOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
+        private val speedOptions = floatArrayOf(0.5f, 1f, 1.25f, 1.5f, 2f)
 
         private val progressRunnable = Runnable { updateProgress() }
 
@@ -47,6 +51,7 @@ class BaseControllerView
             apply {
                 this.player = player
                 setupListeners()
+                syncSpeedIndexWithPlayer()
                 updateUI()
             }
 
@@ -59,7 +64,7 @@ class BaseControllerView
             binding.exoPlay.setOnClickListener { togglePlayPause() }
             binding.exoRew.setOnClickListener { player.seekBack() }
             binding.exoFfwd.setOnClickListener { player.seekForward() }
-            binding.playSpeed.setOnClickListener { changeSpeed() }
+            binding.playSpeed.setOnClickListener { showSpeedMenu() }
         }
 
         fun setBookmarkSelected(isSelected: Boolean) {
@@ -67,7 +72,10 @@ class BaseControllerView
         }
 
         fun setOnBookmarkClickListener(listener: () -> Unit) {
-            binding.btnDetailBookmark.setOnClickListener {
+            binding.btnDetailBookmark.setOnClickListener { it ->
+                if (!binding.btnDetailBookmark.isSelected) {
+                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                }
                 listener()
             }
         }
@@ -81,11 +89,53 @@ class BaseControllerView
             updatePlayPauseButton()
         }
 
-        private fun changeSpeed() {
-            playSpeedIndex = (playSpeedIndex + 1) % speedOptions.size
-            val speed = speedOptions[playSpeedIndex]
+        private fun syncSpeedIndexWithPlayer() {
+            val currentSpeed = player.playbackParameters.speed
+            playSpeedIndex =
+                speedOptions
+                    .indexOfFirst { floatsAreEqualWithinTolerance(it, currentSpeed) }
+                    .takeIf { it >= 0 }
+                    ?: DEFAULT_SPEED_INDEX
+            updateSpeedLabel()
+        }
+
+        private fun applySpeed(speed: Float) {
             player.playbackParameters = player.playbackParameters.withSpeed(speed)
-            binding.playSpeed.text = "${speed}x"
+            playSpeedIndex = speedOptions
+                .indexOfFirst { floatsAreEqualWithinTolerance(it, speed) }
+                .takeIf { it >= 0 }
+                ?: DEFAULT_SPEED_INDEX
+            updateSpeedLabel()
+        }
+
+        private fun showSpeedMenu() {
+            val popup = PopupMenu(context, binding.playSpeed)
+
+            // 배속 메뉴 구성
+            speedOptions.forEachIndexed { index, speed ->
+                popup.menu.add(0, index, index, "${speed}x")
+            }
+
+            // 현재 속도 체크
+            val currentSpeed = player.playbackParameters.speed
+            val checkedIndex =
+                speedOptions
+                    .indexOfFirst { floatsAreEqualWithinTolerance(it, currentSpeed) }
+                    .takeIf { it >= 0 } ?: DEFAULT_SPEED_INDEX
+
+            popup.menu[checkedIndex].isChecked = true
+            popup.menu.setGroupCheckable(0, true, true)
+
+            popup.setOnMenuItemClickListener { item ->
+                val index = item.itemId
+                if (index in speedOptions.indices) {
+                    applySpeed(speedOptions[index])
+                    true
+                } else {
+                    false
+                }
+            }
+            popup.show()
         }
 
         private fun updateUI() {
@@ -105,6 +155,12 @@ class BaseControllerView
             updateProgress()
         }
 
+        private fun calculateUpdateIntervalMs(): Long {
+            val speed = player.playbackParameters.speed.coerceAtLeast(0.1f)
+            val interval = (PROGRESS_UPDATE_BASE_MS / speed)
+            return interval.coerceIn(PROGRESS_UPDATE_MIN_MS, PROGRESS_UPDATE_MAX_MS).toLong()
+        }
+
         private fun updateProgress() {
             if (!isAttachedToWindow) return
 
@@ -121,7 +177,7 @@ class BaseControllerView
 
             removeCallbacks(progressRunnable)
             if (player.playWhenReady && player.playbackState == Player.STATE_READY) {
-                postDelayed(progressRunnable, PROGRESS_UPDATE_INTERVAL)
+                postDelayed(progressRunnable, calculateUpdateIntervalMs())
             }
         }
 
@@ -154,11 +210,17 @@ class BaseControllerView
                 player: Player,
                 events: Player.Events,
             ) {
+                if (events.contains(Player.EVENT_PLAYBACK_PARAMETERS_CHANGED)) {
+                    syncSpeedIndexWithPlayer()
+                    removeCallbacks(progressRunnable)
+                    updateProgress()
+                }
+
                 if (events.containsAny(
+                        Player.EVENT_MEDIA_ITEM_TRANSITION,
                         Player.EVENT_TIMELINE_CHANGED,
                         Player.EVENT_PLAYBACK_STATE_CHANGED,
                         Player.EVENT_IS_PLAYING_CHANGED,
-                        Player.EVENT_PLAYBACK_PARAMETERS_CHANGED,
                     )
                 ) {
                     updateUI()
@@ -190,7 +252,15 @@ class BaseControllerView
         }
 
         companion object {
-            private const val DEFAULT_SPEED_INDEX = 3
-            private const val PROGRESS_UPDATE_INTERVAL = 1000L
+            private const val DEFAULT_SPEED_INDEX = 1
+            private const val PROGRESS_UPDATE_BASE_MS = 1000f
+            private const val PROGRESS_UPDATE_MIN_MS = 100f
+            private const val PROGRESS_UPDATE_MAX_MS = 2000f
+            private const val FLOAT_EQUALITY_TOLERANCE = 0.001f
+
+            private fun floatsAreEqualWithinTolerance(
+                first: Float,
+                second: Float,
+            ): Boolean = abs(first - second) < FLOAT_EQUALITY_TOLERANCE
         }
     }

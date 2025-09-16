@@ -110,6 +110,8 @@ class PlaybackService : MediaSessionService() {
             ExoPlayer
                 .Builder(this)
                 .setAudioAttributes(audioAttributes, true)
+                .setSeekBackIncrementMs(REWIND_INTERVAL_MILLIS)
+                .setSeekForwardIncrementMs(FAST_FORWARD_INTERVAL_MILLIS)
                 .build()
                 .apply {
                     playWhenReady = false
@@ -189,8 +191,9 @@ class PlaybackService : MediaSessionService() {
 
     companion object {
         private const val NOTIFICATION_ID = 1001
+        private const val REWIND_INTERVAL_MILLIS = 10_000L
+        private const val FAST_FORWARD_INTERVAL_MILLIS = 10_000L
         private const val SESSION_ID = "hearit_session"
-
         private const val EXTRA_AUDIO_URL = "AUDIO_URL"
         private const val EXTRA_TITLE = "TITLE"
         private const val EXTRA_HEARIT_ID = "HEARIT_ID"
@@ -198,7 +201,6 @@ class PlaybackService : MediaSessionService() {
         private const val EXTRA_SOURCE = "SOURCE"
         private const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
         private const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
-
         const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
         const val ACTION_PLAY_SINGLE = "hearit.ACTION_PLAY_SINGLE"
 
