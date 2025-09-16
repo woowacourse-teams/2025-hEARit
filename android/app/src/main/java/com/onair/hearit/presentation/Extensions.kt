@@ -4,15 +4,18 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import androidx.core.view.isVisible
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.onair.hearit.R
-import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
-import com.onair.hearit.presentation.IntentKeys.EXPLORE_KEY
-import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
-import com.onair.hearit.presentation.search.SearchFragment
+import com.onair.hearit.presentation.search.category.SearchCategoryFragment
+import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -28,19 +31,12 @@ fun Int.pxToDp(context: Context): Int = (this / context.resources.displayMetrics
 fun Intent?.toDetailResult(): DetailResult? {
     if (this == null) return null
     return when (getStringExtra(TYPE_KEY)) {
-        EXPLORE_KEY -> {
-            val hearitId = getLongExtra(HEARIT_ID_KEY, -1)
-            if (hearitId == -1L) return null
-            val bookmarkId = getLongExtra(BOOKMARK_ID_KEY, -1L).takeIf { it != -1L }
-            DetailResult.Explore(hearitId, bookmarkId)
-        }
-
         CATEGORY_KEY -> {
-            extras?.let { DetailResult.Category(it) }
+            extras?.let { DetailResult.Category.fromBundle(it) }
         }
 
         KEYWORD_KEY -> {
-            extras?.let { DetailResult.Keyword(it) }
+            extras?.let { DetailResult.Keyword.fromBundle(it) }
         }
 
         else -> null
@@ -50,27 +46,35 @@ fun Intent?.toDetailResult(): DetailResult? {
 fun DetailResult.navigate(mainActivity: MainActivity) {
     when (this) {
         is DetailResult.Category -> {
-            mainActivity.selectTab(R.id.nav_search)
-            val searchFragment = SearchFragment().apply { arguments = this@navigate.bundle }
-            mainActivity.supportFragmentManager
+            val fragmentManager = mainActivity.supportFragmentManager
+            val backStackTag = SearchCategoryFragment::class.java.simpleName
+
+            // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
+            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            fragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container_view, searchFragment)
-                .addToBackStack(null)
+                .replace(
+                    R.id.fragment_container_view,
+                    SearchCategoryFragment.newInstance(SearchInput.Category(id, name, colorCode)),
+                    backStackTag,
+                ).addToBackStack(backStackTag)
                 .commit()
         }
 
         is DetailResult.Keyword -> {
             mainActivity.selectTab(R.id.nav_search)
-            val searchFragment = SearchFragment().apply { arguments = this@navigate.bundle }
-            mainActivity.supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container_view, searchFragment)
-                .addToBackStack(null)
-                .commit()
-        }
+            val fragmentManager = mainActivity.supportFragmentManager
+            val backStackTag = SearchCategoryFragment::class.java.simpleName
 
-        is DetailResult.Explore -> {
-            Unit
+            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            fragmentManager
+                .beginTransaction()
+                .replace(
+                    R.id.fragment_container_view,
+                    SearchRecentFragment.newInstance(term),
+                    backStackTag,
+                ).addToBackStack(backStackTag)
+                .commit()
         }
     }
 }
@@ -121,3 +125,18 @@ fun View.flash(
 }
 
 fun View.hideFlashImmediately() = hideAndReset()
+
+fun <T> LiveData<T>.observeOnce(
+    lifecycleOwner: LifecycleOwner,
+    observer: Observer<T>,
+) {
+    observe(
+        lifecycleOwner,
+        object : Observer<T> {
+            override fun onChanged(value: T) {
+                observer.onChanged(value)
+                removeObserver(this)
+            }
+        },
+    )
+}

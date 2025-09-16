@@ -8,6 +8,7 @@ data class Hearit(
     val audioUrl: String,
     val script: List<ScriptLine>,
     val playTime: Int,
+    val lastPlayTime: Long? = null,
     val createdAt: String,
     val isBookmarked: Boolean,
     val bookmarkId: Long?,

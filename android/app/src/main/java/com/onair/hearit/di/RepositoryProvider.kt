@@ -6,9 +6,9 @@ import com.onair.hearit.data.repository.BookmarkRepositoryImpl
 import com.onair.hearit.data.repository.CategoryRepositoryImpl
 import com.onair.hearit.data.repository.ExploreDataStoreRepositoryImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
-import com.onair.hearit.data.repository.KeywordRepositoryImpl
 import com.onair.hearit.data.repository.MediaFileRepositoryImpl
 import com.onair.hearit.data.repository.MemberRepositoryImpl
+import com.onair.hearit.data.repository.PlayingHistoryRepositoryImpl
 import com.onair.hearit.data.repository.RecentHearitRepositoryImpl
 import com.onair.hearit.data.repository.RecentKeywordRepositoryImpl
 import com.onair.hearit.domain.repository.AuthRepository
@@ -16,9 +16,9 @@ import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
-import com.onair.hearit.domain.repository.KeywordRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
 import com.onair.hearit.domain.repository.MemberRepository
+import com.onair.hearit.domain.repository.PlayingHistoryRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 
@@ -55,10 +55,6 @@ object RepositoryProvider {
         HearitRepositoryImpl(hearitRemoteDataSource = DataSourceProvider.hearitRemoteDataSource)
     }
 
-    val keywordRepository: KeywordRepository by lazy {
-        KeywordRepositoryImpl(keywordRemoteDataSource = DataSourceProvider.keywordRemoteDataSource)
-    }
-
     val mediaFileRepository: MediaFileRepository by lazy {
         MediaFileRepositoryImpl(mediaFileRemoteDataSource = DataSourceProvider.mediaFileRemoteDataSource)
     }
@@ -76,5 +72,9 @@ object RepositoryProvider {
 
     val recentKeywordRepository: RecentKeywordRepository by lazy {
         RecentKeywordRepositoryImpl(hearitLocalDataSource = DataSourceProvider.hearitLocalDataSource)
+    }
+
+    val playingHistoryRepository: PlayingHistoryRepository by lazy {
+        PlayingHistoryRepositoryImpl(playingHistoryDataSource = DataSourceProvider.playingHistoryDataSource)
     }
 }

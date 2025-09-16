@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -145,6 +146,22 @@ fun setBackgroundColor(
     }
 }
 
+@BindingAdapter("roundedBackgroundColor")
+fun setRoundedBackgroundColor(
+    view: View,
+    colorCode: String?,
+) {
+    if (colorCode.isNullOrBlank()) return
+
+    val radiusPx = 8f * view.resources.displayMetrics.density
+    val drawable =
+        GradientDrawable().apply {
+            cornerRadius = radiusPx
+            setColor(colorCode.toColorInt())
+        }
+    view.background = drawable
+}
+
 @BindingAdapter("visibleIfNoHearits")
 fun setVisibleIfNoHearits(
     view: View,
@@ -175,4 +192,16 @@ fun setShimmerVisibility(
     isLoading: Boolean,
 ) {
     view.isVisible = isLoading
+}
+
+@BindingAdapter(value = ["lastPlayTime", "totalPlayTime"])
+fun setProgressBarRatio(
+    progressBar: ProgressBar,
+    lastPlayTime: Long?,
+    totalPlayTime: Long,
+) {
+    val lastPlayTimeSec = (lastPlayTime ?: 0L) / 1000f
+    val ratio = lastPlayTimeSec / totalPlayTime.toFloat()
+    val percent = (ratio.coerceIn(0f, 1f) * 100).toInt()
+    progressBar.progress = percent
 }

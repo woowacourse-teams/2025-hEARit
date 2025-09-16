@@ -9,4 +9,5 @@ data class ShortsHearit(
     val bookmarkId: Long?,
     val keywords: List<Keyword>,
     val categoryColorCode: String,
+    val cursorId: Long,
 )

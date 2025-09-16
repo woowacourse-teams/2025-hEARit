@@ -7,4 +7,5 @@ data class RandomHearit(
     val isBookmarked: Boolean,
     val bookmarkId: Long?,
     val keywords: List<Keyword>,
+    val cursorId: Long,
 )

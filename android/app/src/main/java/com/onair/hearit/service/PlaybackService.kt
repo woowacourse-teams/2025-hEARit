@@ -29,11 +29,14 @@ class PlaybackService : MediaSessionService() {
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
     private lateinit var stateSaver: PlaybackStateSaver
+    private lateinit var historyListener: PlaybackHistoryListener
+//    private lateinit var playerNotificationManager: PlayerNotificationManager
     private lateinit var mediaItemManager: PlaybackMediaItemManager
 
     private lateinit var notificationManager: PlayerNotificationManager
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var isServiceStarted = false
 
     override fun onCreate() {
         super.onCreate()
@@ -104,6 +107,7 @@ class PlaybackService : MediaSessionService() {
         // 4) 상태 저장/에러 최소 핸들링
         mediaItemManager = PlaybackMediaItemManager()
         stateSaver = PlaybackStateSaver(player, serviceScope, this)
+        historyListener = PlaybackHistoryListener(player, serviceScope).also { it.attach() }
         player.addListener(stateSaver.listener)
         player.addListener(
             object : Player.Listener {
@@ -140,10 +144,10 @@ class PlaybackService : MediaSessionService() {
 
     private fun handlePlay(intent: Intent) {
         val audioUrl = intent.getStringExtra(EXTRA_AUDIO_URL)
-        val title = intent.getStringExtra(EXTRA_TITLE) ?: getString(R.string.app_name)
+        val title = intent.getStringExtra(EXTRA_TITLE) ?: "hEARit"
         val hearitId = intent.getLongExtra(EXTRA_HEARIT_ID, -1L)
         val startPosition = intent.getLongExtra(EXTRA_START_POSITION, 0L)
-        val source = intent.getStringExtra(EXTRA_SOURCE) ?: getString(R.string.app_name)
+        val source = intent.getStringExtra(EXTRA_SOURCE) ?: "hEARit"
         val playbackMode = intent.getStringExtra(EXTRA_PLAYBACK_MODE) ?: UNKNOWN_SCREEN_ID
         val bookmarkId = intent.getLongExtra(EXTRA_BOOKMARK_ID, -1L).takeIf { it > 0 }
 
@@ -151,6 +155,8 @@ class PlaybackService : MediaSessionService() {
             stopSelf()
             return
         }
+
+        historyListener.recordIfSwitchingTo(hearitId)
 
         val info =
             PlaybackInfo(
@@ -160,7 +166,6 @@ class PlaybackService : MediaSessionService() {
                 audioUrl = audioUrl,
                 lastPosition = startPosition,
             )
-
         val item =
             mediaItemManager.buildMediaItem(
                 info = info,
@@ -246,6 +251,7 @@ class PlaybackService : MediaSessionService() {
         super.onDestroy()
         serviceScope.cancel()
         notificationManager.setPlayer(null)
+        historyListener.detach()
         stateSaver.release()
         mediaSession.release()
         player.removeListener(stateSaver.listener)
@@ -254,6 +260,8 @@ class PlaybackService : MediaSessionService() {
 
     companion object {
         private const val NOTIFICATION_ID = 1001
+        private const val REWIND_INTERVAL_MILLIS = 10_000L
+        private const val FAST_FORWARD_INTERVAL_MILLIS = 10_000L
         private const val SESSION_ID = "hearit_session"
         private const val CHANNEL_ID = "hearit_channel"
 
@@ -264,7 +272,6 @@ class PlaybackService : MediaSessionService() {
         private const val EXTRA_SOURCE = "SOURCE"
         private const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
         private const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
-
         const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
         const val ACTION_PLAY_SINGLE = "hearit.ACTION_PLAY_SINGLE"
 

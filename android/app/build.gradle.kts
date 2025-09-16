@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -6,6 +7,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
     id("com.google.gms.google-services")
     id("org.jlleitschuh.gradle.ktlint")
@@ -21,8 +23,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 10103
-        versionName = "1.1.3"
+        versionCode = 10200
+        versionName = "1.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders += mapOf()
@@ -78,40 +80,51 @@ android {
 
         debug {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
             applicationIdSuffix = ".debug"
-            versionNameSuffix = "-DEBUG"
+            versionNameSuffix = "-Dev"
             resValue("string", "app_name", "hEARit (Dev)")
 
             val devBaseUrl =
                 gradleLocalProperties(rootDir, providers).getProperty("DEV_BASE_URL") ?: ""
             buildConfigField("String", "BASE_URL", "\"$devBaseUrl\"")
+
+            configure<CrashlyticsExtension> {
+                mappingFileUploadEnabled = false
+            }
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
+
     kotlinOptions {
         jvmTarget = "21"
     }
+
     buildFeatures {
         buildConfig = true
         dataBinding = true
+        compose = true
     }
+
     ktlint {
         debug = true
     }
+
     testOptions {
         animationsDisabled = true
+    }
+
+    tasks.register("printVersionCode") {
+        doLast {
+            println(android.defaultConfig.versionCode)
+        }
     }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -122,6 +135,17 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Compose
+    val composeBom = platform("androidx.compose:compose-bom:2025.08.01")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.activity.compose)
+
+    // Preview
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
 
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

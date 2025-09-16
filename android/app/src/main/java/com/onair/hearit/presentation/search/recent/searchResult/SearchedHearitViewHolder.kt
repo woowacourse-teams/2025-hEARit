@@ -11,10 +11,13 @@ class SearchedHearitViewHolder(
     private val binding: ItemSearchedHearitBinding,
     private val hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
+    init {
+        binding.clickListener = hearitClickListener
+    }
+
     fun bind(searchedHearit: SearchedHearit) {
         binding.apply {
-            item = searchedHearit
-            clickListener = hearitClickListener
+            this.searchedHearit = searchedHearit
             tvKeywords.text = searchedHearit.keywords.joinToString("  ") { "#${it.name}" }
         }
     }

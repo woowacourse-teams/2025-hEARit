@@ -33,7 +33,6 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.presentation.DrawerClickListener
 import com.onair.hearit.presentation.PlaybackStarter
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity

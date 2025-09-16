@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -22,16 +21,14 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
-import com.onair.hearit.presentation.DrawerClickListener
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
+import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.SearchFragment
+import com.onair.hearit.presentation.search.category.SearchCategoryFragment
 
 class HomeFragment :
     Fragment(),
@@ -51,7 +48,13 @@ class HomeFragment :
     private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy {
         GroupedCategoryAdapter(
             this,
-            navigateClickListener = { id, name -> navigateToSearch(id, name) },
+            navigateClickListener = { id, name, colorCode ->
+                navigateToSearch(
+                    id,
+                    name,
+                    colorCode,
+                )
+            },
         )
     }
     private val snapHelper = PagerSnapHelper()
@@ -144,9 +147,13 @@ class HomeFragment :
                 addAll(contentItems)
                 add(RecommendHearits.NavigateItem(Direction.RIGHT))
             }
+
         recommendAdapter.submitList(items) {
-            scrollToMiddlePosition()
-            setupIndicator(contentItems.size)
+            // view가 살아있을 때만 실행
+            if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                scrollToMiddlePosition()
+                setupIndicator(contentItems.size)
+            }
         }
     }
 
@@ -227,23 +234,17 @@ class HomeFragment :
     private fun navigateToSearch(
         id: Long,
         name: String,
+        colorCode: String,
     ) {
         parentFragmentManager
             .beginTransaction()
-            .replace(R.id.fragment_container_view, SearchFragment())
-            .addToBackStack(null)
+            .replace(
+                R.id.fragment_container_view,
+                SearchCategoryFragment.newInstance(
+                    SearchInput.Category(id, name, colorCode),
+                ),
+            ).addToBackStack(null)
             .commit()
-
-        (requireActivity() as MainActivity).selectTab(R.id.nav_search)
-        parentFragmentManager.executePendingTransactions()
-
-        parentFragmentManager.setFragmentResult(
-            CATEGORY_KEY,
-            bundleOf(
-                CATEGORY_ID_KEY to id,
-                CATEGORY_NAME_KEY to name,
-            ),
-        )
     }
 
     private fun navigateToPlayerDetail(hearitId: Long) {

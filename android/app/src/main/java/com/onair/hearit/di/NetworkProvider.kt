@@ -6,9 +6,9 @@ import com.onair.hearit.data.api.AuthService
 import com.onair.hearit.data.api.BookmarkService
 import com.onair.hearit.data.api.CategoryService
 import com.onair.hearit.data.api.HearitService
-import com.onair.hearit.data.api.KeywordService
 import com.onair.hearit.data.api.MediaFileService
 import com.onair.hearit.data.api.MemberService
+import com.onair.hearit.data.api.PlayingHistoryService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -43,8 +43,6 @@ object NetworkProvider {
 
     val categoryService: CategoryService by lazy { retrofit.create() }
 
-    val keywordService: KeywordService by lazy { retrofit.create() }
-
     val hearitService: HearitService by lazy { retrofit.create() }
 
     val mediaFileService: MediaFileService by lazy { retrofit.create() }
@@ -52,4 +50,6 @@ object NetworkProvider {
     val bookmarkService: BookmarkService by lazy { retrofit.create() }
 
     val memberService: MemberService by lazy { retrofit.create() }
+
+    val playingHistoryService: PlayingHistoryService by lazy { retrofit.create() }
 }

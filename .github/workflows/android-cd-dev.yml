@@ -9,6 +9,7 @@ on:
 env:
   BASE_URL: ${{ secrets.BASE_URL }}
   GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+  KAKAO_NATIVE_KEY: ${{ secrets.KAKAO_NATIVE_KEY }}
 
 jobs:
   build:
@@ -20,6 +21,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -31,21 +33,35 @@ jobs:
         run: chmod +x gradlew
 
       - name: Add Local Properties
-        run:
-          echo "BASE_URL=$BASE_URL" > ./local.properties
+        run: echo "BASE_URL=$BASE_URL" > ./local.properties
 
       - name: Get Google Services JSON
-        run:
-          echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
+        run: echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
+
+      - name: Add Kakao Native Key
+        run: echo "KAKAO_NATIVE_KEY=$KAKAO_NATIVE_KEY" > ./local.properties
 
       - name: Build Debug apk
         run: ./gradlew assembleDebug
 
+      # 버전코드 구하기 (Gradle에서 직접 읽기)
+      - name: Extract versionCode from Gradle
+        id: version
+        run: |
+          VERSION_CODE=$(./gradlew -q :app:printVersionCode)
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
+      # APK 이름 바꾸기
+      - name: Rename APK with version code
+        run: |
+          mv ./app/build/outputs/apk/debug/hEARit-debug.apk \
+             ./app/build/outputs/apk/debug/hEARit-dev-${VERSION_CODE}.apk
+
       - name: Upload a Build APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hEARit-debug.apk
-          path: ./android/app/build/outputs/apk/debug/hEARit-debug.apk
+          name: hEARit-dev-${{ env.VERSION_CODE }}.apk
+          path: ./android/app/build/outputs/apk/debug/hEARit-dev-${{ env.VERSION_CODE }}.apk
           overwrite: 'true'
 
       - name: Upload APK to Firebase App Distribution
@@ -55,4 +71,4 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: hearit-test
           releaseNotesFile: ./android/app/whatsnew/whatsnew-ko-KR
-          file: ./android/app/build/outputs/apk/debug/hEARit-debug.apk
+          file: ./android/app/build/outputs/apk/debug/hEARit-dev-${{ env.VERSION_CODE }}.apk
