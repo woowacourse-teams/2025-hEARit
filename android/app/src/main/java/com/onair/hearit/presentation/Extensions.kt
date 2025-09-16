@@ -5,6 +5,9 @@ import android.content.Intent
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
@@ -122,3 +125,18 @@ fun View.flash(
 }
 
 fun View.hideFlashImmediately() = hideAndReset()
+
+fun <T> LiveData<T>.observeOnce(
+    lifecycleOwner: LifecycleOwner,
+    observer: Observer<T>,
+) {
+    observe(
+        lifecycleOwner,
+        object : Observer<T> {
+            override fun onChanged(value: T) {
+                observer.onChanged(value)
+                removeObserver(this)
+            }
+        },
+    )
+}

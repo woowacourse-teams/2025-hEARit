@@ -15,7 +15,7 @@ class BookmarkViewHolder(
     }
 
     fun bind(bookmark: Bookmark) {
-        binding.item = bookmark
+        binding.bookmarkItem = bookmark
     }
 
     companion object {

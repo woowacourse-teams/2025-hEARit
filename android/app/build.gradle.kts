@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -22,8 +23,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 10103
-        versionName = "1.1.3"
+        versionCode = 10200
+        versionName = "1.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders += mapOf()
@@ -79,36 +80,47 @@ android {
 
         debug {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
             applicationIdSuffix = ".debug"
-            versionNameSuffix = "-DEBUG"
+            versionNameSuffix = "-Dev"
             resValue("string", "app_name", "hEARit (Dev)")
 
             val devBaseUrl =
                 gradleLocalProperties(rootDir, providers).getProperty("DEV_BASE_URL") ?: ""
             buildConfigField("String", "BASE_URL", "\"$devBaseUrl\"")
+
+            configure<CrashlyticsExtension> {
+                mappingFileUploadEnabled = false
+            }
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
+
     kotlinOptions {
         jvmTarget = "21"
     }
+
     buildFeatures {
         buildConfig = true
         dataBinding = true
         compose = true
     }
+
     ktlint {
         debug = true
     }
+
     testOptions {
         animationsDisabled = true
+    }
+
+    tasks.register("printVersionCode") {
+        doLast {
+            println(android.defaultConfig.versionCode)
+        }
     }
 }
 

@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="32dp"
-            android:text="@string/playlist_bottom_sheet_playlist_guide"
+            android:text="@string/playlist_bottom_sheet_playlist_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/playlist_handler" />
 
@@ -39,18 +39,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="내가 북마크한 히어릿"
+            android:text="@string/playlist_bottom_sheet_playlist_body"
             android:textColor="@color/hearit_gray3"
             app:layout_constraintStart_toStartOf="@id/tv_playlist_guide"
-            app:layout_constraintTop_toBottomOf="@id/tv_playlist_guide"
-            tools:text="내가 북마크한 히어릿" />
+            app:layout_constraintTop_toBottomOf="@id/tv_playlist_guide" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_playlist"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="20dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_playlist_type"
             tools:itemCount="8"
             tools:listitem="@layout/item_playlist" />
