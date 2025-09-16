@@ -291,7 +291,7 @@ class PlayerDetailActivity :
         val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
         val isDifferentHearit = currentlyPlayingId != hearit.id
         val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
-        val startPosition = if (shouldResume) lastPosition else 0L
+        val startPosition = if (shouldResume) lastPosition else hearit.lastPlayTime ?: 0L
         val source = hearit.sources.firstOrNull()?.name ?: "hEARit"
 
         if (isDifferentHearit) {
