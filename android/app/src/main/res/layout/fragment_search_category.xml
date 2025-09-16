@@ -57,6 +57,7 @@
             android:id="@+id/rv_searched_hearit"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginBottom="72dp"
             android:orientation="vertical"
             android:paddingHorizontal="20dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
