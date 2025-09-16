@@ -24,6 +24,8 @@ import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSource
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.MemberRemoteDataSource
 import com.onair.hearit.data.datasource.remote.MemberRemoteDataSourceImpl
+import com.onair.hearit.data.datasource.remote.PlayingHistoryDataSource
+import com.onair.hearit.data.datasource.remote.PlayingHistoryDataSourceImpl
 
 object DataSourceProvider {
     private lateinit var dataStore: DataStore<Preferences>
@@ -91,5 +93,12 @@ object DataSourceProvider {
     val preferencesLocalDataSource: PreferencesLocalDataSource by lazy {
         check(::dataStore.isInitialized) { "DataSourceProvider.init() 먼저 호출 필요" }
         PreferencesLocalDataSourceImpl(dataStore)
+    }
+
+    val playingHistoryDataSource: PlayingHistoryDataSource by lazy {
+        PlayingHistoryDataSourceImpl(
+            playingHistoryService = NetworkProvider.playingHistoryService,
+            errorResponseHandler = errorHandler,
+        )
     }
 }
