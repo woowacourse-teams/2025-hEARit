@@ -9,6 +9,7 @@ on:
 env:
   BASE_URL: ${{ secrets.BASE_URL }}
   GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+  KAKAO_NATIVE_KEY: ${{ secrets.KAKAO_NATIVE_KEY }}
 
 jobs:
   build:
@@ -36,6 +37,9 @@ jobs:
 
       - name: Get Google Services JSON
         run: echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
+
+      - name: Add Kakao Native Key
+        run: echo "KAKAO_NATIVE_KEY=$KAKAO_NATIVE_KEY" > ./local.properties
 
       - name: Build Debug apk
         run: ./gradlew assembleDebug
