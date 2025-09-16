@@ -11,7 +11,8 @@ class GetHearitUseCase(
 ) {
     suspend operator fun invoke(hearitId: Long): Result<Hearit> =
         runCatching {
-            val hearitInfo = hearitRepository.getHearit(hearitId).getOrThrow()
+            val hearitInfo =
+                hearitRepository.getHearit(hearitId).getOrThrow()
             val audioUrl = mediaFileRepository.getOriginalAudioUrl(hearitId).getOrThrow().url
             val script = mediaFileRepository.getScriptLines(hearitId).getOrThrow()
 

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>오늘의 추천 히어릿</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        /* 달력 스타일 */
+        .calendar-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #dee2e6;
+            border: 1px solid #dee2e6;
+        }
+
+        .calendar-day {
+            background-color: white;
+            min-height: 80px;
+            padding: 8px;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.2s;
+        }
+
+        .calendar-day:hover {
+            background-color: #f8f9fa;
+        }
+
+        .calendar-day.today {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+
+        .calendar-day.other-month {
+            color: #6c757d;
+            background-color: #f8f9fa;
+        }
+
+        .calendar-day.past {
+            background-color: #f8f9fa;
+        }
+
+        .recommendation-dot {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+
+        .day-number {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        /* 모달 스타일 */
+        .hearit-item {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hearit-item:hover {
+            border-color: #0d6efd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .hearit-item.selected {
+            border-color: #0d6efd;
+            background-color: #e3f2fd;
+        }
+
+        .hearit-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .hearit-summary {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .hearit-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: black;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #e9ecef;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .needs-recommendation {
+            background-color: #fff0f1 !important; /* 은은한 빨간색 배경 */
+        }
+
+        .has-recommendation-soon {
+            background-color: #f0fff4 !important; /* 은은한 초록색 배경 */
+        }
+
+        .recommendation-done {
+            font-size: 14px;
+            font-weight: bold;
+            color: darkgreen;
+            margin-top: 4px;
+            line-height: 1.2;
+            word-break: keep-all;
+            text-align: center;
+        }
+
+        .recommendation-alert {
+            font-size: 14px;
+            font-weight: bold;
+            color: #d32f2f; /* 빨간색 글씨 */
+            margin-top: 4px;
+            line-height: 1.2;
+            word-break: keep-all;
+            text-align: center;
+        }
+    </style>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+<div th:insert="~{admin/navbar :: navbar}"></div>
+
+<div class="container-fluid mt-4">
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <div>
+                <button class="btn btn-outline-primary" id="prevMonth"><i class="bi bi-chevron-left"></i></button>
+                <span class="mx-3 fs-4" id="currentMonth"></span>
+                <button class="btn btn-outline-primary" id="nextMonth"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            <div>
+                <button class="btn btn-primary" id="todayBtn">오늘</button>
+            </div>
+        </div>
+
+        <div class="calendar-grid mb-2">
+            <div class="text-center py-2 fw-bold bg-light">일</div>
+            <div class="text-center py-2 fw-bold bg-light">월</div>
+            <div class="text-center py-2 fw-bold bg-light">화</div>
+            <div class="text-center py-2 fw-bold bg-light">수</div>
+            <div class="text-center py-2 fw-bold bg-light">목</div>
+            <div class="text-center py-2 fw-bold bg-light">금</div>
+            <div class="text-center py-2 fw-bold bg-light">토</div>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="createRecommendationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">추천 히어릿 생성</h5>
+                <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>선택한 날짜: </strong><span id="selectedDate"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">히어릿 선택 (5개까지)</label>
+                    <div class="selected-count mb-2">
+                        <small class="text-muted">선택된 히어릿: <span id="selectedCount">0</span>/5</small>
+                    </div>
+                    <div id="hearitList" style="min-height: 400px;"></div>
+                    <div class="pagination-controls" id="createPaginationControls"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">취소</button>
+                <button class="btn btn-primary" id="createRecommendationBtn" type="button">생성</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewRecommendationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalTitle">추천 히어릿 관리</h5>
+                <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>날짜: </strong><span id="viewSelectedDate"></span>
+                </div>
+
+                <div id="viewModalBodyContent"></div>
+            </div>
+            <div class="modal-footer" id="viewModalFooter">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 전역 변수
+    let currentDate = new Date();
+    let selectedHearits = [];
+    let recommendationData = {};
+
+    // 페이징 관련 변수
+    let currentPage = 0;
+    let totalPages = 1;
+    const PAGE_SIZE = 5;
+    let currentModalType = ''; // 'create' or 'edit'
+
+    // CSRF 토큰 설정
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeCalendar();
+        setupEventListeners();
+    });
+
+    function initializeCalendar() {
+        loadRecommendationDataForCurrentMonth();
+    }
+
+    function updateCalendarHeader() {
+        const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+        document.getElementById('currentMonth').textContent = `${currentDate.getFullYear()}년 ${monthNames[currentDate.getMonth()]}`;
+    }
+
+    function renderCalendar() {
+        const calendarGrid = document.getElementById('calendarGrid');
+        calendarGrid.innerHTML = '';
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // 일주일 후 날짜 계산
+        const oneWeekFromNow = new Date(today);
+        oneWeekFromNow.setDate(today.getDate() + 7);
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+        for (let i = 0; i < 42; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+            const dateString = formatDate(date);
+            const isCurrentMonth = date.getMonth() === month;
+            const isPast = date < today;
+
+            // 기본 클래스 설정
+            if (date.toDateString() === today.toDateString()) dayElement.classList.add('today');
+            if (!isCurrentMonth) dayElement.classList.add('other-month');
+            if (isPast) dayElement.classList.add('past');
+
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = date.getDate();
+            dayElement.appendChild(dayNumber);
+
+            // 추천 히어릿 존재 여부 확인 및 기본 표시 (점)
+            const hasRecommendation = recommendationData[dateString];
+            if (hasRecommendation) {
+                dayElement.classList.add('has-recommendation');
+                const dot = document.createElement('div');
+                dot.className = 'recommendation-dot';
+                dayElement.appendChild(dot);
+            }
+
+            // 오늘부터 일주일 이내 날짜에 대한 특별 스타일링 적용
+            const isWithinOneWeek = date >= today && date < oneWeekFromNow;
+            if (isWithinOneWeek) {
+                if (hasRecommendation) {
+                    dayElement.classList.add('has-recommendation-soon'); // 은은한 초록색 배경
+                    const alertText = document.createElement('div');
+                    alertText.className = 'recommendation-done';
+                    alertText.innerHTML = '🍀등록 완료!🍀'; // 경고 문구 추가
+                    dayElement.appendChild(alertText);
+                } else {
+                    dayElement.classList.add('needs-recommendation'); // 은은한 빨간색 배경
+                    const alertText = document.createElement('div');
+                    alertText.className = 'recommendation-alert';
+                    alertText.innerHTML = '🚨등록 필요!🚨'; // 경고 문구 추가
+                    dayElement.appendChild(alertText);
+                }
+            }
+
+            dayElement.addEventListener('click', () => handleDayClick(date, isPast));
+            calendarGrid.appendChild(dayElement);
+        }
+    }
+
+    function handleDayClick(date, isPast) {
+        const dateString = formatDate(date);
+        const hasRecommendation = recommendationData[dateString] && recommendationData[dateString].length > 0;
+
+        if (isPast) {
+            // 과거 날짜는 조회만 가능
+            showViewRecommendationModal(date, true);
+        } else if (hasRecommendation) {
+            // 추천이 있으면 조회/수정 모달 열기
+            showViewRecommendationModal(date, false);
+        } else {
+            // 추천이 없으면 생성 모달 열기
+            showCreateRecommendationModal(date);
+        }
+    }
+
+    function showCreateRecommendationModal(date) {
+        currentModalType = 'create';
+        document.getElementById('selectedDate').textContent = formatDisplayDate(date);
+        selectedHearits = [];
+        updateSelectedCount();
+
+        currentPage = 0;
+        loadHearitsPage(currentPage);
+
+        const modal = new bootstrap.Modal(document.getElementById('createRecommendationModal'));
+        modal.show();
+    }
+
+    // [수정됨] 추천 히어릿 조회/수정 모달 로직
+    function showViewRecommendationModal(date, isReadOnly) {
+        currentModalType = 'edit';
+        const dateString = formatDate(date);
+        document.getElementById('viewSelectedDate').textContent = formatDisplayDate(date);
+        const recommendations = recommendationData[dateString] || [];
+
+        const modalTitle = document.getElementById('viewModalTitle');
+        const modalBody = document.getElementById('viewModalBodyContent');
+        const modalFooter = document.getElementById('viewModalFooter');
+
+        // 1. 현재 추천된 히어릿을 보여주는 "조회 모드" 렌더링 함수
+        function renderViewMode() {
+            modalTitle.textContent = '추천 히어릿 조회';
+            if (recommendations.length > 0) {
+                modalBody.innerHTML = `
+                    <h6>추천된 히어릿 (${recommendations.length}개)</h6>
+                    ${recommendations.map(hearit => `
+                        <div class="alert alert-primary">
+                            <strong>${hearit.title}</strong>
+                            <div class="mt-1 text-muted small">${hearit.summary || '요약 정보 없음'}</div>
+                        </div>
+                    `).join('')}`;
+            } else {
+                // 이 경우는 hasRecommendation이 false일 때이므로 발생하지 않지만, 예외 처리
+                modalBody.innerHTML = '<p class="text-muted">해당 날짜에 추천된 히어릿이 없습니다.</p>';
+            }
+
+            modalFooter.innerHTML = ''; // 푸터 초기화
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'btn btn-secondary';
+            closeBtn.textContent = '닫기';
+            closeBtn.dataset.bsDismiss = 'modal';
+            modalFooter.appendChild(closeBtn);
+
+            // 2. 과거 날짜가 아닐 경우에만 "수정" 버튼을 추가
+            if (!isReadOnly) {
+                const editBtn = document.createElement('button');
+                editBtn.type = 'button';
+                editBtn.className = 'btn btn-primary';
+                editBtn.textContent = '수정';
+                editBtn.onclick = renderEditMode; // 클릭 시 수정 모드로 전환
+                modalFooter.appendChild(editBtn);
+            }
+        }
+
+        // 3. 히어릿을 새로 선택하는 "수정 모드" 렌더링 함수
+        function renderEditMode() {
+            modalTitle.textContent = '추천 히어릿 수정';
+            selectedHearits = []; // 수정 시작 시 선택 목록 초기화
+
+            modalBody.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label">히어릿 새로 선택 (5개)</label>
+                    <div class="selected-count mb-2">
+                        <small class="text-muted">선택된 히어릿: <span id="selectedCountEdit">0</span>/5</small>
+                    </div>
+                    <div id="hearitListEdit" style="min-height: 400px;"></div>
+                    <div id="editPaginationControls" class="pagination-controls"></div>
+                </div>
+            `;
+
+            modalFooter.innerHTML = ''; // 푸터 초기화
+            const cancelEditBtn = document.createElement('button');
+            cancelEditBtn.type = 'button';
+            cancelEditBtn.className = 'btn btn-secondary';
+            cancelEditBtn.textContent = '수정 취소';
+            cancelEditBtn.onclick = renderViewMode; // "수정 취소" 시 다시 조회 모드로 복귀
+            modalFooter.appendChild(cancelEditBtn);
+
+            const updateBtn = document.createElement('button');
+            updateBtn.type = 'button';
+            updateBtn.className = 'btn btn-primary';
+            updateBtn.textContent = '수정 완료';
+            updateBtn.onclick = updateRecommendation; // "수정 완료" 시 서버에 요청
+            modalFooter.appendChild(updateBtn);
+
+            updateSelectedCount(); // 선택 카운트 업데이트 (0으로)
+            currentPage = 0;
+            loadHearitsPage(currentPage); // 히어릿 목록 로드
+        }
+
+        // 초기 모달 표시: 항상 조회 모드로 시작
+        renderViewMode();
+
+        const modal = new bootstrap.Modal(document.getElementById('viewRecommendationModal'));
+        modal.show();
+    }
+
+
+    function setupEventListeners() {
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            loadRecommendationDataForCurrentMonth();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            loadRecommendationDataForCurrentMonth();
+        });
+
+        document.getElementById('todayBtn').addEventListener('click', () => {
+            currentDate = new Date();
+            loadRecommendationDataForCurrentMonth();
+        });
+
+        document.getElementById('createRecommendationBtn').addEventListener('click', createRecommendation);
+
+        const modals = ['createRecommendationModal', 'viewRecommendationModal'];
+        modals.forEach(modalId => {
+            document.getElementById(modalId).addEventListener('hidden.bs.modal', () => {
+                selectedHearits = [];
+                currentModalType = '';
+            });
+        });
+    }
+
+    // 히어릿 목록 페이지 로드 (페이징 적용)
+    function loadHearitsPage(page) {
+        fetch(`/api/v1/admin/recommend/hearits?page=${page}&size=${PAGE_SIZE}`, {
+            method: 'GET',
+            headers: {[csrfHeader]: csrfToken}
+        })
+            .then(response => response.json())
+            .then(data => {
+                displayHearitList(data.content);
+                currentPage = data.page;
+                totalPages = data.totalPages;
+                updatePaginationControls();
+            })
+            .catch(error => {
+                console.error('히어릿 로드 실패:', error);
+                alert('히어릿 목록을 불러오는데 실패했습니다.');
+            });
+    }
+
+    function displayHearitList(hearits) {
+        const containerId = currentModalType === 'create' ? 'hearitList' : 'hearitListEdit';
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+
+        hearits.forEach(hearit => {
+            const isSelected = selectedHearits.some(selected => selected.id === hearit.id);
+            const element = document.createElement('div');
+            element.className = 'hearit-item';
+            element.dataset.hearitId = hearit.id;
+            if (isSelected) {
+                element.classList.add('selected');
+            }
+
+            element.innerHTML = `
+                <div class="hearit-title">${hearit.title}</div>
+                <div class="hearit-summary">${hearit.summary || '요약 정보 없음'}</div>
+                <div class="hearit-info">
+                    <span class="category-badge">${hearit.categoryName}</span>
+                    <span class="lastRecommendedDate">최근 추천일: ${hearit.lastRecommendedDate || '없음'}</span>
+                    <span>길이: ${formatDuration(hearit.playTime)}</span>
+                </div>
+            `;
+            element.addEventListener('click', () => toggleHearitSelection(hearit, element));
+            container.appendChild(element);
+        });
+    }
+
+    function toggleHearitSelection(hearit, element) {
+        const isSelected = selectedHearits.some(selected => selected.id === hearit.id);
+
+        if (isSelected) {
+            selectedHearits = selectedHearits.filter(selected => selected.id !== hearit.id);
+            element.classList.remove('selected');
+        } else {
+            if (selectedHearits.length >= 5) {
+                alert('최대 5개까지만 선택할 수 있습니다.');
+                return;
+            }
+            selectedHearits.push(hearit);
+            element.classList.add('selected');
+        }
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        const countElementId = currentModalType === 'create' ? 'selectedCount' : 'selectedCountEdit';
+        const countElement = document.getElementById(countElementId);
+        if (countElement) {
+            countElement.textContent = selectedHearits.length;
+        }
+    }
+
+    // 추천 생성
+    function createRecommendation() {
+        if (selectedHearits.length !== 5) {
+            alert('정확히 5개의 히어릿을 선택해주세요.');
+            return;
+        }
+
+        const selectedDate = document.getElementById('selectedDate').textContent;
+        const recommendDate = convertDisplayDateToString(selectedDate);
+        const requestData = {
+            recommendDate: recommendDate,
+            hearitIds: selectedHearits.map(hearit => hearit.id)
+        };
+
+        fetch('/api/v1/admin/recommend', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', [csrfHeader]: csrfToken},
+            body: JSON.stringify(requestData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('추천 히어릿이 성공적으로 생성되었습니다.');
+                    bootstrap.Modal.getInstance(document.getElementById('createRecommendationModal')).hide();
+                    loadRecommendationDataForCurrentMonth();
+                } else {
+                    response.json().then(err => alert(`생성 실패: ${err.message || '서버 오류'}`));
+                }
+            })
+            .catch(error => alert(`생성 실패: ${error}`));
+    }
+
+    // 추천 수정
+    function updateRecommendation() {
+        if (selectedHearits.length !== 5) {
+            alert('정확히 5개의 히어릿을 선택해주세요.');
+            return;
+        }
+
+        const selectedDate = document.getElementById('viewSelectedDate').textContent;
+        const recommendDate = convertDisplayDateToString(selectedDate);
+        const requestData = {
+            recommendDate: recommendDate,
+            hearitIds: selectedHearits.map(hearit => hearit.id)
+        };
+
+        fetch('/api/v1/admin/recommend', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json', [csrfHeader]: csrfToken},
+            body: JSON.stringify(requestData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('추천 히어릿이 성공적으로 수정되었습니다.');
+                    bootstrap.Modal.getInstance(document.getElementById('viewRecommendationModal')).hide();
+                    loadRecommendationDataForCurrentMonth();
+                } else {
+                    response.json().then(err => alert(`수정 실패: ${err.message || '서버 오류'}`));
+                }
+            })
+            .catch(error => alert(`수정 실패: ${error}`));
+    }
+
+    function loadRecommendationDataForCurrentMonth() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1; // API는 1월=1
+
+        fetch(`/api/v1/admin/recommend?year=${year}&month=${month}`, {
+            method: 'GET',
+            headers: {[csrfHeader]: csrfToken}
+        })
+            .then(response => response.json())
+            .then(data => {
+                recommendationData = {};
+                data.forEach(item => {
+                    if (item.recommendHearits && item.recommendHearits.length > 0) {
+                        recommendationData[item.recommendDate] = item.recommendHearits;
+                    }
+                });
+                updateCalendarHeader();
+                renderCalendar();
+            })
+            .catch(error => {
+                console.error('추천 데이터 로드 실패:', error);
+                updateCalendarHeader();
+                renderCalendar();
+            });
+    }
+
+    // 페이징 컨트롤 업데이트
+    function updatePaginationControls() {
+        const controlsId = currentModalType === 'create' ? 'createPaginationControls' : 'editPaginationControls';
+        const paginationContainer = document.getElementById(controlsId);
+        if (!paginationContainer) return;
+
+        paginationContainer.innerHTML = `
+            <button class="btn btn-sm btn-outline-secondary me-2" id="prevPageBtn" ${currentPage === 0 ? 'disabled' : ''}>
+                <i class="bi bi-chevron-left"></i> 이전
+            </button>
+            <span class="px-2"> ${currentPage + 1} / ${totalPages} </span>
+            <button class="btn btn-sm btn-outline-secondary ms-2" id="nextPageBtn" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>
+                다음 <i class="bi bi-chevron-right"></i>
+            </button>
+        `;
+
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+
+        if (prevBtn) prevBtn.addEventListener('click', () => loadHearitsPage(currentPage - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => loadHearitsPage(currentPage + 1));
+    }
+
+    // 유틸리티 함수들
+    function formatDate(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    function formatDisplayDate(date) {
+        return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+    }
+
+    function convertDisplayDateToString(displayDate) {
+        const matches = displayDate.match(/(\d+)년 (\d+)월 (\d+)일/);
+        return `${matches[1]}-${String(matches[2]).padStart(2, '0')}-${String(matches[3]).padStart(2, '0')}`;
+    }
+
+    function formatDuration(seconds) {
+        if (isNaN(seconds) || seconds < 0) return '0:00';
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+    }
+</script>
+</body>
+</html>
