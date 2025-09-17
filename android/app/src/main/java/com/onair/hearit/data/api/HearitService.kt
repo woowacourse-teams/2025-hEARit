@@ -11,26 +11,26 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface HearitService {
-    @GET("hearits/recommend-category")
+    @GET("api/v1/hearits/recommend-category")
     suspend fun getCategoryHearits(): Response<List<GroupedCategoryHearitResponse>>
 
-    @GET("hearits/explore")
+    @GET("api/v2/hearits/explore")
     suspend fun getRandomHearits(
         @Query("cursorId") cursorId: Long?,
         @Query("size") size: Int?,
     ): Response<RandomHearitResponse>
 
-    @GET("hearits/recommend")
+    @GET("api/v1/hearits/recommend")
     suspend fun getRecommendHearits(): Response<List<RecommendHearitResponse>>
 
-    @GET("hearits/search")
+    @GET("api/v1/hearits/search")
     suspend fun getSearchHearits(
         @Query("searchTerm") searchTerm: String,
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<SearchHearitResponse>
 
-    @GET("hearits/{hearitId}")
+    @GET("api/v1/hearits/{hearitId}")
     suspend fun getHearit(
         @Path("hearitId") hearitId: Long,
     ): Response<HearitResponse>

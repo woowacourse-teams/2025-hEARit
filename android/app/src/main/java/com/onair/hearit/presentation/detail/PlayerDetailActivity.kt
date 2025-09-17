@@ -109,6 +109,7 @@ class PlayerDetailActivity :
         binding.clickListener = this
         binding.viewModel = viewModel
 
+        setupBaseControllerBookmark()
         setupBackPressHandler()
         setupWindowInsets()
         setupRecyclerView()
@@ -267,6 +268,11 @@ class PlayerDetailActivity :
         )
     }
 
+    private fun setupBaseControllerBookmark() {
+        binding.baseController.setOnBookmarkClickListener {
+            viewModel.toggleBookmark()
+        }
+    }
     // 단일 재생 전용: 커맨드 전송 없이 setMediaItem만 수행
     private fun playSingleWithController(
         hearit: Hearit,

@@ -5,6 +5,6 @@ import retrofit2.Response
 import retrofit2.http.GET
 
 interface MemberService {
-    @GET("members/me")
+    @GET("api/v1/members/me")
     suspend fun getUserInfo(): Response<UserInfoResponse>
 }

@@ -11,19 +11,19 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface AuthService {
-    @GET("auth/check")
+    @GET("api/v1/auth/check")
     suspend fun getAuthCheck(): Response<Unit>
 
-    @POST("auth/kakao-login")
+    @POST("api/v1/auth/kakao-login")
     suspend fun postLogin(
         @Body kakaoLoginRequest: KakaoLoginRequest,
     ): Response<KakaoLoginResponse>
 
-    @POST("auth/token/refresh")
+    @POST("api/v1/auth/token/refresh")
     suspend fun postRefreshToken(
         @Body tokenReissueRequest: TokenReissueRequest,
     ): Response<TokenReissueResponse>
 
-    @DELETE("auth/withdraw")
+    @DELETE("api/v1/auth/withdraw")
     suspend fun deleteAccount(): Response<Unit>
 }
