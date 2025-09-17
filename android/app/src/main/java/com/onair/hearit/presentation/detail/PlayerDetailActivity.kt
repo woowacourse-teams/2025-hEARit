@@ -142,8 +142,6 @@ class PlayerDetailActivity :
                 binding.playerView.player = controller
                 binding.baseController.setPlayer(controller)
                 controller.addListener(playerListener)
-
-//                viewModel.hearit.value?.let { maybeStartPlayback(controller, it) }
             }
         }
     }
@@ -218,33 +216,6 @@ class PlayerDetailActivity :
         }
     }
 
-//    private fun maybeStartPlayback(
-//        controller: Player,
-//        hearit: Hearit,
-//    ) {
-//        val currentId = controller.currentMediaItem?.mediaId?.toLongOrNull()
-//        val isDifferent = currentId != hearit.id
-//        val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
-//        val startPosition = if (shouldResume) lastPosition else hearit.lastPlayTime ?: 0L
-//        val source = hearit.sources.firstOrNull()?.name ?: "hEARit"
-//
-//        if (isDifferent) {
-//            startPlaybackService(
-//                audioUrl = hearit.audioUrl,
-//                title = hearit.title,
-//                hearitId = hearit.id,
-//                startPosition = startPosition,
-//                source = source,
-//                bookmarkId = hearit.bookmarkId,
-//            )
-//        } else {
-//            if (!controller.isPlaying) controller.play()
-//            if (shouldResume && abs(controller.currentPosition - startPosition) > 1_000) {
-//                controller.seekTo(startPosition)
-//            }
-//        }
-//    }
-
     private fun handlePlayback(hearit: Hearit) {
         val controller = mediaController ?: return
         val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
@@ -291,7 +262,7 @@ class PlayerDetailActivity :
             }
 
         controller.sendCustomCommand(
-            PlaybackSessionCallback.START_LIBRARY_PLAY,
+            PlaybackSessionCallback.START_LIBRARY_PLAY_COMMAND,
             args,
         )
     }
@@ -480,7 +451,6 @@ class PlayerDetailActivity :
         private const val KEY_BOOKMARK_ID = "BOOKMARK_ID"
         private const val KEY_PLAYBACK_MODE = "PLAYBACK_MODE"
         private const val KEY_START_POSITION = "START_POSITION"
-        private const val EXTRA_LIMIT = "LIMIT"
 
         fun newIntent(
             context: Context,
