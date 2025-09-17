@@ -10,18 +10,18 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface BookmarkService {
-    @GET("bookmarks/hearits")
+    @GET("api/v1/bookmarks/hearits")
     suspend fun getBookmarks(
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<BookmarkResponse>
 
-    @POST("bookmarks/hearits/{hearitId}")
+    @POST("api/v1/bookmarks/hearits/{hearitId}")
     suspend fun postBookmark(
         @Path("hearitId") hearitId: Long,
     ): Response<BookmarkIdResponse>
 
-    @DELETE("bookmarks/{bookmarkId}")
+    @DELETE("api/v1/bookmarks/{bookmarkId}")
     suspend fun deleteBookmark(
         @Path("bookmarkId") bookmarkId: Long,
     ): Response<Unit>
