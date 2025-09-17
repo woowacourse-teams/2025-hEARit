@@ -2,12 +2,13 @@ name: Hearit Android dev CD
 
 on:
   pull_request:
-    branches: [ "develop", "develop-an" ]
+    branches: [ "develop" ]
     paths:
       - 'android/**'
 
 env:
   BASE_URL: ${{ secrets.BASE_URL }}
+  DEV_BASE_URL: ${{ secrets.DEV_BASE_URL }}
   GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
   KAKAO_NATIVE_KEY: ${{ secrets.KAKAO_NATIVE_KEY }}
 
@@ -33,7 +34,9 @@ jobs:
         run: chmod +x gradlew
 
       - name: Add Local Properties
-        run: echo "BASE_URL=\"$BASE_URL\"" > ./local.properties
+        run: |
+          echo "BASE_URL=\"$BASE_URL\"" > ./local.properties
+          echo "DEV_BASE_URL=\"$DEV_BASE_URL\"" > ./local.properties
 
       - name: Get Google Services JSON
         run: echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
