@@ -36,7 +36,7 @@ class BookmarkControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 페이지에 따른 북마크 목록을 반환한다.")
-    void readBookmarkHearitsTest() {
+    void readBookmarkHearitsTest_v1() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -52,10 +52,62 @@ class BookmarkControllerTest extends IntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .param("page", 0)
                 .param("size", 5)
-                .filter(document("bookmark-read-list",
+                .filter(document("bookmark-read-list-v1",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
-                                .summary("북마크 목록 조회")
+                                .summary("북마크 목록 조회 V1")
+                                .description("사용자가 북마크한 히어릿 목록을 페이지별로 조회합니다.")
+                                .queryParameters(
+                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
+                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
+                                )
+                                .responseSchema(Schema.schema("PagedBookmarkHearitResponse"))
+                                .responseFields(
+                                        Stream.concat(
+                                                Arrays.stream(new FieldDescriptor[]{
+                                                        fieldWithPath("content[].hearitId").description("히어릿 ID"),
+                                                        fieldWithPath("content[].bookmarkId").description("북마크 ID"),
+                                                        fieldWithPath("content[].title").description("히어릿 제목"),
+                                                        fieldWithPath("content[].summary").description("히어릿 요약"),
+                                                        fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].categoryColor").description("카테고리 색상 코드")
+                                                }),
+                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
+                                        ).toArray(FieldDescriptor[]::new)
+                                )
+                                .build())
+                ))
+                .when()
+                .get("/api/v1/bookmarks/hearits")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("content.size()", equalTo(5));
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 페이지에 따른 북마크 목록을 반환한다.")
+    void readBookmarkHearitsTest_v2() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        String token = generateToken(member);
+        int bookmarkCount = 30;
+        for (int i = 0; i < bookmarkCount; i++) {
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+            dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+        }
+
+        // when & then
+        RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .param("page", 0)
+                .param("size", 5)
+                .filter(document("bookmark-read-list-v2",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Bookmark API")
+                                .summary("북마크 목록 조회 V2")
                                 .description("사용자가 북마크한 히어릿 목록을 페이지별로 조회합니다.")
                                 .queryParameters(
                                         parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
@@ -82,7 +134,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
-                .get("/api/v1/bookmarks/hearits")
+                .get("/api/v2/bookmarks/hearits")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("content.size()", equalTo(5));
