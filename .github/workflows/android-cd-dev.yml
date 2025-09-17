@@ -2,7 +2,7 @@ name: Hearit Android dev CD
 
 on:
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "develop", "develop-an" ]
     paths:
       - 'android/**'
 
