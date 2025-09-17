@@ -6,6 +6,7 @@ import com.onair.hearit.app.application.explore.HearitExploreService;
 import com.onair.hearit.app.dto.request.CursorRequest;
 import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.CursorResponse;
+import com.onair.hearit.app.dto.response.CursorResponseV1;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.app.dto.response.HearitDetailResponse;
 import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
@@ -26,14 +27,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/hearits")
+@RequestMapping("/api")
 public class HearitController {
 
     private final HearitService hearitService;
     private final HearitExploreService hearitExploreService;
     private final HearitSearchService hearitSearchService;
 
-    @GetMapping("/{hearitId}")
+    @GetMapping("/v1/hearits/{hearitId}")
     public ResponseEntity<HearitDetailResponse> readHearit(
             @PathVariable Long hearitId,
             @AuthenticationPrincipal RequestUser requestUser) {
@@ -41,8 +42,8 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/explore")
-    public ResponseEntity<CursorResponse<ExploredHearitResponse>> readExploredHearits(
+    @GetMapping("/v2/hearits/explore")
+    public ResponseEntity<CursorResponse<ExploredHearitResponse>> readExploredHearitsV2(
             @AuthenticationPrincipal RequestUser requestUser,
             @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
             @RequestParam(name = "size", defaultValue = "10") int size) {
@@ -52,13 +53,25 @@ public class HearitController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/recommend")
+    @GetMapping("/v1/hearits/explore")
+    public ResponseEntity<CursorResponseV1<ExploredHearitResponse>> readExploredHearitsV1(
+            @AuthenticationPrincipal RequestUser requestUser,
+            @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        CursorRequest cursorRequest = new CursorRequest(cursorId, size);
+        CursorResponse<ExploredHearitResponse> responses =
+                hearitExploreService.getExploredHearits(requestUser.getUserInfo(), cursorRequest);
+        CursorResponseV1<ExploredHearitResponse> responsesV1 = CursorResponseV1.from(responses);
+        return ResponseEntity.ok(responsesV1);
+    }
+
+    @GetMapping("/v1/hearits/recommend")
     public ResponseEntity<List<RecommendHearitResponse>> readRecommendedHearits() {
         List<RecommendHearitResponse> responses = hearitService.getRecommendedHearits();
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/search")
+    @GetMapping("/v1/hearits/search")
     public ResponseEntity<PagedResponse<HearitSearchResponse>> readSearchedHearits(
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -70,7 +83,7 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/recommend-category")
+    @GetMapping("/v1/hearits/recommend-category")
     public ResponseEntity<List<HearitsWithRecommendCategoryResponse>> readHearitsWithRecommendCategory(
             @AuthenticationPrincipal RequestUser requestUser) {
         List<HearitsWithRecommendCategoryResponse> responses =
@@ -78,7 +91,7 @@ public class HearitController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping
+    @GetMapping("/v1/hearits")
     public ResponseEntity<PagedResponse<HearitOfCategoryResponse>> readHearitsByCategory(
             @RequestParam(name = "categoryId") Long categoryId,
             @RequestParam(name = "page", defaultValue = "0") int page,
