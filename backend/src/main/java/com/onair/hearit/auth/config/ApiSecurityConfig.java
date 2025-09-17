@@ -27,17 +27,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class ApiSecurityConfig {
 
     private static final String[] PUBLIC_AUTH_ENDPOINTS = {
-            "/api/v1/auth/login",
-            "/api/v1/auth/kakao-login",
-            "/api/v1/auth/signup",
-            "/api/v1/auth/token/refresh",
+            "/api/*/auth/login",
+            "/api/*/auth/kakao-login",
+            "/api/*/auth/signup",
+            "/api/*/auth/token/refresh",
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
-            "/api/v1/hearits/**",
-            "/api/v1/categories/**",
-            "/api/v1/keywords/**",
-            "/api/v1/playing-histories"
+            "/api/*/hearits/**",
+            "/api/*/categories/**",
+            "/api/*/keywords/**",
+            "/api/*/playing-histories"
     };
 
     private final ObjectMapper objectMapper;

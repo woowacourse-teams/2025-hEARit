@@ -10,6 +10,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.app.dto.response.CursorResponse;
+import com.onair.hearit.app.dto.response.CursorResponseV1;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.app.dto.response.HearitDetailResponse;
 import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
@@ -36,7 +37,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -140,7 +140,7 @@ class HearitControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("탐색 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
-    void readExploredHearits_byMember() {
+    void readExploredHearits_byMember_v2() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Keyword keyword = dbHelper.insertKeyword(new Keyword("Keyword"));
@@ -163,7 +163,7 @@ class HearitControllerTest extends IntegrationTest {
                 .filter(document("hearit-read-explore-member",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
-                                .summary("탐색 히어릿 목록 조회")
+                                .summary("탐색 히어릿 목록 조회 V2")
                                 .description("사용자 별 최대 10개의 히어릿 목록을 조회합니다.")
                                 .queryParameters(
                                         parameterWithName("cursorId").description("시작 Cursor ID").defaultValue("0"),
@@ -193,6 +193,77 @@ class HearitControllerTest extends IntegrationTest {
                                 .build())
                 ))
                 .when()
+                .get("/api/v2/hearits/explore")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(new TypeRef<>() {
+                });
+
+        // then
+        assertAll(() -> {
+            assertThat(responses.content()).hasSize(3);
+            assertThat(responses.content()).extracting(ExploredHearitResponse::cursorId)
+                            .containsExactly(1L, 2L, 3L);
+            assertThat(responses.isEmpty()).isFalse();
+        });
+    }
+
+    @Test
+    @DisplayName("탐색 히어릿을 조회 시, 200 OK 및 최대 10개 히어릿 정보 목록을 제공한다.")
+    void readExploredHearits_byMember_v1() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Keyword keyword = dbHelper.insertKeyword(new Keyword("Keyword"));
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
+
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
+
+        // when
+        CursorResponseV1<ExploredHearitResponse> responses = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .queryParam("cursorId", 0)
+                .queryParam("size", 10)
+                .filter(document("hearit-read-explore-member",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("탐색 히어릿 목록 조회 V1")
+                                .description("사용자 별 최대 10개의 히어릿 목록을 조회합니다.")
+                                .queryParameters(
+                                        parameterWithName("cursorId").description("시작 Cursor ID").defaultValue("0"),
+                                        parameterWithName("size").description("필요한 히어릿 항목 수").defaultValue("10")
+                                )
+                                .responseSchema(Schema.schema("CursorExploredHearitResponse"))
+                                .responseFields(
+                                        Stream.concat(
+                                                Arrays.stream(new FieldDescriptor[]{
+                                                        fieldWithPath("content[].id").description("히어릿 ID"),
+                                                        fieldWithPath("content[].title").description("히어릿 제목"),
+                                                        fieldWithPath("content[].categoryColorCode").description(
+                                                                "카테고리 색상"),
+                                                        fieldWithPath("content[].isBookmarked").description("북마크 여부"),
+                                                        fieldWithPath("content[].bookmarkId").description(
+                                                                "북마크 ID (북마크된 경우)").optional(),
+                                                        fieldWithPath("content[].keywords").description(
+                                                                "히어릿에 포함된 키워드 목록"),
+                                                        fieldWithPath("content[].keywords[].id").description("키워드 ID"),
+                                                        fieldWithPath("content[].keywords[].name").description(
+                                                                "키워드 이름"),
+                                                        fieldWithPath("content[].cursorId").description("커서 ID"),
+                                                }),
+                                                Arrays.stream(ApiDocSnippets.getCustomCursorResponseV1Fields())
+                                        ).toArray(FieldDescriptor[]::new)
+                                )
+                                .build())
+                ))
+                .when()
                 .get("/api/v1/hearits/explore")
                 .then()
                 .statusCode(HttpStatus.OK.value())
@@ -203,6 +274,7 @@ class HearitControllerTest extends IntegrationTest {
         // then
         assertAll(() -> {
             assertThat(responses.content()).hasSize(3);
+            assertThat(responses.cursorId()).isEqualTo(3L);
             assertThat(responses.isEmpty()).isFalse();
         });
     }
