@@ -54,7 +54,6 @@ import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -99,24 +98,6 @@ class PlayerDetailActivity :
             }
         }
 
-    // (옵션) 남은 곡이 적으면 서비스에 프리패치 명령을 보내고 싶다면 사용
-    private val prefetchListener =
-        object : Player.Listener {
-            override fun onMediaItemTransition(
-                item: MediaItem?,
-                reason: Int,
-            ) {
-                val controller = mediaController ?: return
-                val remaining = controller.mediaItemCount - (controller.currentMediaItemIndex + 1)
-                if (remaining <= 2) {
-                    controller.sendCustomCommand(
-                        PlaybackSessionCallback.PREFETCH_NEXT,
-                        Bundle.EMPTY,
-                    )
-                }
-            }
-        }
-
     private var isPlaybackInitiated = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,6 +113,7 @@ class PlayerDetailActivity :
         setupWindowInsets()
         setupRecyclerView()
         observeViewModel()
+        startScriptSyncLoop()
 
         supportFragmentManager.addOnBackStackChangedListener {
             val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view)
@@ -145,47 +127,31 @@ class PlayerDetailActivity :
         connectController()
     }
 
-    private fun setupMediaController() {
+    private fun connectController() {
+        if (mediaController != null) return
         val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
 
         lifecycleScope.launch {
-            val controller =
+            runCatching {
                 MediaController
                     .Builder(this@PlayerDetailActivity, sessionToken)
                     .buildAsync()
                     .await()
+            }.onSuccess { controller ->
+                mediaController = controller
+                binding.playerView.player = controller
+                binding.baseController.setPlayer(controller)
+                controller.addListener(playerListener)
 
-            mediaController = controller
-            binding.playerView.player = controller
-            binding.baseController.setPlayer(controller)
-
-            controller.addListener(playerListener)
-
-            // 라이브러리 모드일 땐 프리패치 리스너 등록
-            if (previousScreen == LIBRARY_SCREEN_ID) {
-                controller.addListener(prefetchListener)
+//                viewModel.hearit.value?.let { maybeStartPlayback(controller, it) }
             }
-
-            val playingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
-            val isDifferentHearit = playingId != hearitId
-
-            if (isDifferentHearit) {
-                controller.addListener(
-                    object : Player.Listener {
-                        override fun onTimelineChanged(
-                            timeline: Timeline,
-                            reason: Int,
-                        ) {
-                            if (timeline.windowCount > 0) {
-                                controller.removeListener(this)
-                                controller.play()
-                            }
-                        }
-                    },
-                )
-            }
-            startScriptSync(controller)
         }
+    }
+
+    private fun disconnectController() {
+        mediaController?.removeListener(playerListener)
+        mediaController?.release()
+        mediaController = null
     }
 
     private fun setupRecyclerView() {
@@ -204,8 +170,8 @@ class PlayerDetailActivity :
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun setupGestureListener() {
-        val gestureDetector =
+    private fun setupScriptTapGesture() {
+        val detector =
             GestureDetector(
                 this,
                 object : GestureDetector.SimpleOnGestureListener() {
@@ -252,30 +218,40 @@ class PlayerDetailActivity :
         }
     }
 
-    private fun maybeStartPlayback(
-        controller: Player,
-        hearit: Hearit,
-    ) {
-        val currentId = controller.currentMediaItem?.mediaId?.toLongOrNull()
-        val isDifferent = currentId != hearit.id
+//    private fun maybeStartPlayback(
+//        controller: Player,
+//        hearit: Hearit,
+//    ) {
+//        val currentId = controller.currentMediaItem?.mediaId?.toLongOrNull()
+//        val isDifferent = currentId != hearit.id
+//        val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
+//        val startPosition = if (shouldResume) lastPosition else hearit.lastPlayTime ?: 0L
+//        val source = hearit.sources.firstOrNull()?.name ?: "hEARit"
+//
+//        if (isDifferent) {
+//            startPlaybackService(
+//                audioUrl = hearit.audioUrl,
+//                title = hearit.title,
+//                hearitId = hearit.id,
+//                startPosition = startPosition,
+//                source = source,
+//                bookmarkId = hearit.bookmarkId,
+//            )
+//        } else {
+//            if (!controller.isPlaying) controller.play()
+//            if (shouldResume && abs(controller.currentPosition - startPosition) > 1_000) {
+//                controller.seekTo(startPosition)
+//            }
+//        }
+//    }
+
+    private fun handlePlayback(hearit: Hearit) {
+        val controller = mediaController ?: return
+        val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
+        val isDifferentHearit = currentlyPlayingId != hearit.id
         val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
-        val startPosition = if (shouldResume) lastPosition else hearit.lastPlayTime ?: 0L
-        val source = hearit.sources.firstOrNull()?.name ?: "hEARit"
         val startPosition = if (shouldResume) lastPosition else 0L
 
-        if (isDifferent) {
-            startPlaybackService(
-                audioUrl = hearit.audioUrl,
-                title = hearit.title,
-                hearitId = hearit.id,
-                startPosition = startPosition,
-                source = source,
-                bookmarkId = hearit.bookmarkId,
-            )
-        } else {
-            if (!controller.isPlaying) controller.play()
-            if (shouldResume && abs(controller.currentPosition - startPosition) > 1_000) {
-                controller.seekTo(startPosition)
         if (previousScreen == LIBRARY_SCREEN_ID) {
             // 재생목록 모드: 서비스가 큐 세팅을 담당
             if (isDifferentHearit || controller.mediaItemCount == 0) {
@@ -298,11 +274,6 @@ class PlayerDetailActivity :
                 }
             }
         }
-    }
-
-    private fun handlePlayback(hearit: Hearit) {
-        val controller = mediaController ?: return
-        maybeStartPlayback(controller, hearit)
     }
 
     @OptIn(UnstableApi::class)
@@ -359,6 +330,69 @@ class PlayerDetailActivity :
         controller.play()
     }
 
+    private fun startScriptSyncLoop() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    val controller = mediaController
+                    if (controller != null) {
+                        val position = controller.currentPosition
+                        val current =
+                            scriptAdapter.currentList.firstOrNull { position in it.start until it.end }
+                        if (current != null) {
+                            scriptAdapter.highlightScriptLine(current.id)
+                            val index = scriptAdapter.currentList.indexOf(current)
+                            val center = binding.rvScript.height / 2 - itemHeightPx / 2
+                            (binding.rvScript.layoutManager as LinearLayoutManager)
+                                .scrollToPositionWithOffset(index, center)
+                        }
+                    }
+                    delay(updateIntervalMs)
+                }
+            }
+        }
+    }
+
+    private fun setupBackPressHandler() {
+        val backAction = {
+            if (previousScreen == EXPLORE_VALUE) {
+                val resultIntent =
+                    Intent().apply {
+                        putExtra(TYPE_KEY, EXPLORE_VALUE)
+                        putExtra(HEARIT_ID_KEY, hearitId)
+                        viewModel.bookmarkId.value?.let { putExtra(BOOKMARK_ID_KEY, it) }
+                    }
+                setResult(RESULT_OK, resultIntent)
+            } else {
+                setResult(RESULT_CANCELED)
+            }
+            finish()
+        }
+
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() = backAction()
+            },
+        )
+
+        binding.ibPlayerDetailBack.setOnClickListener { backAction() }
+    }
+
+    private fun setupWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, systemBars.top, 0, systemBars.bottom)
+            insets
+        }
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
+    }
+
+    private fun showLoginRequiredDialog() {
+        LoginRequiredDialogFragment { navigateToLogin() }
+            .show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
+    }
+
     private fun navigateToLogin() {
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.LOGIN_EVENT,
@@ -407,7 +441,6 @@ class PlayerDetailActivity :
                 AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
                 mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
             )
-
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
         } catch (e: Exception) {
@@ -424,7 +457,6 @@ class PlayerDetailActivity :
         val input = SearchInput.Keyword(term)
         val resultIntent =
             Intent().apply {
-                putExtra(TYPE_KEY, KEYWORD_VALUE)
                 putExtras(input.toBundle())
             }
         setResult(RESULT_OK, resultIntent)
@@ -434,13 +466,6 @@ class PlayerDetailActivity :
     override fun onDestroy() {
         super.onDestroy()
         disconnectController()
-        mediaController?.removeListener(playerListener)
-        if (previousScreen == LIBRARY_SCREEN_ID) {
-            mediaController?.removeListener(prefetchListener)
-        }
-        scriptSyncJob?.cancel()
-        mediaController?.release()
-        mediaController = null
     }
 
     companion object {

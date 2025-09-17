@@ -16,7 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 @UnstableApi
 class PlaybackSessionCallback(
@@ -66,7 +65,7 @@ class PlaybackSessionCallback(
                         // 개별 실패시 원본 유지
                         val resolved =
                             mediaItems.map { mi -> runCatching { resolve(mi) }.getOrElse { mi } }
-                        val finalItems = if (resolved.isNotEmpty()) resolved else mediaItems
+                        val finalItems = resolved.ifEmpty { mediaItems }
 
                         val safeStartIndex =
                             if (finalItems.isNotEmpty()) {
@@ -120,16 +119,10 @@ class PlaybackSessionCallback(
                     runCatching {
                         when (command.customAction) {
                             CMD_START_LIBRARY_PLAY -> {
-                                // 인자
-                                pageSize = 10
                                 val seedBookmarkId = args.getLong(EXTRA_SEED_BOOKMARK_ID, -1L)
                                 val seedHearitId = args.getLong(EXTRA_SEED_HEARIT_ID, -1L)
                                 val seedStartPosMs =
                                     args.getLong(EXTRA_START_POSITION, 0L).coerceAtLeast(0L)
-
-                                Timber.d(
-                                    "START_LIBRARY_PLAY seedBookmarkId=$seedBookmarkId seedHearitId=$seedHearitId startPos=$seedStartPosMs",
-                                )
 
                                 // 여러 페이지 누적 로드하며 시드의 전역 인덱스 찾기
                                 val allItems = mutableListOf<MediaItem>()
