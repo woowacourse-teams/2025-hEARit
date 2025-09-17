@@ -14,7 +14,7 @@ import androidx.fragment.app.viewModels
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.presentation.search.category.SearchCategoryFragment
+import com.onair.hearit.presentation.search.category.CategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
 class SearchFragment :
@@ -102,7 +102,7 @@ class SearchFragment :
             .beginTransaction()
             .replace(
                 R.id.fragment_container_view,
-                SearchCategoryFragment.newInstance(
+                CategoryFragment.newInstance(
                     SearchInput.Category(
                         id,
                         name,

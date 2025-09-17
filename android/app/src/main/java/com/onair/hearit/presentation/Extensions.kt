@@ -14,7 +14,7 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
-import com.onair.hearit.presentation.search.category.SearchCategoryFragment
+import com.onair.hearit.presentation.search.category.CategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,7 +47,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
     when (this) {
         is DetailResult.Category -> {
             val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = SearchCategoryFragment::class.java.simpleName
+            val backStackTag = CategoryFragment::class.java.simpleName
 
             // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
             fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
@@ -55,7 +55,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                 .beginTransaction()
                 .replace(
                     R.id.fragment_container_view,
-                    SearchCategoryFragment.newInstance(SearchInput.Category(id, name, colorCode)),
+                    CategoryFragment.newInstance(SearchInput.Category(id, name, colorCode)),
                     backStackTag,
                 ).addToBackStack(backStackTag)
                 .commit()
@@ -64,7 +64,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
         is DetailResult.Keyword -> {
             mainActivity.selectTab(R.id.nav_search)
             val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = SearchCategoryFragment::class.java.simpleName
+            val backStackTag = CategoryFragment::class.java.simpleName
 
             fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             fragmentManager

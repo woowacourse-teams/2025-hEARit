@@ -7,13 +7,13 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface CategoryService {
-    @GET("categories")
+    @GET("api/v1/categories")
     suspend fun getCategories(
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<CategoryResponse>
 
-    @GET("hearits")
+    @GET("api/v1/hearits")
     suspend fun getHearitsByCategoryId(
         @Query("categoryId") categoryId: Long,
         @Query("page") page: Int?,

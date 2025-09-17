@@ -16,7 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.R
-import com.onair.hearit.databinding.FragmentSearchCategoryBinding
+import com.onair.hearit.databinding.FragmentCategoryBinding
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
@@ -27,11 +27,11 @@ import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.recent.searchResult.SearchedHearitAdapter
 
-class SearchCategoryFragment :
+class CategoryFragment :
     Fragment(),
     HearitClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
-    private var _binding: FragmentSearchCategoryBinding? = null
+    private var _binding: FragmentCategoryBinding? = null
     private val binding get() = _binding!!
 
     private val categoryName: String by lazy {
@@ -52,7 +52,7 @@ class SearchCategoryFragment :
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentSearchCategoryBinding.inflate(inflater, container, false)
+        _binding = FragmentCategoryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
@@ -157,8 +157,8 @@ class SearchCategoryFragment :
     companion object {
         private const val REFRESH_THRESHOLD = 3
 
-        fun newInstance(input: SearchInput): SearchCategoryFragment =
-            SearchCategoryFragment().apply {
+        fun newInstance(input: SearchInput): CategoryFragment =
+            CategoryFragment().apply {
                 arguments = input.toBundle()
             }
     }

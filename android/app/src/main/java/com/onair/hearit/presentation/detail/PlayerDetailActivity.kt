@@ -107,6 +107,7 @@ class PlayerDetailActivity :
         binding.clickListener = this
         binding.viewModel = viewModel
 
+        setupBaseControllerBookmark()
         setupBackPressHandler()
         setupWindowInsets()
         setupRecyclerView()
@@ -240,6 +241,12 @@ class PlayerDetailActivity :
             if (shouldResume && abs(controller.currentPosition - startPosition) > 1_000) {
                 controller.seekTo(startPosition)
             }
+        }
+    }
+
+    private fun setupBaseControllerBookmark() {
+        binding.baseController.setOnBookmarkClickListener {
+            viewModel.toggleBookmark()
         }
     }
 
