@@ -1,11 +1,11 @@
 package com.onair.hearit.app.presentation;
 
 import com.onair.hearit.app.application.BookmarkService;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
 import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
+import com.onair.hearit.auth.domain.RequestUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +29,9 @@ public class BookmarkController {
     public ResponseEntity<PagedResponse<BookmarkHearitResponse>> readBookmarkHearits(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
-            @AuthenticationPrincipal UserContext userContext) {
+            @AuthenticationPrincipal RequestUser requestUser) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(userContext,
+        PagedResponse<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(requestUser.getUserInfo(),
                 pagingRequest);
         return ResponseEntity.ok(responses);
     }
@@ -39,16 +39,16 @@ public class BookmarkController {
     @PostMapping("/hearits/{hearitId}")
     public ResponseEntity<BookmarkInfoResponse> createBookmark(
             @PathVariable Long hearitId,
-            @AuthenticationPrincipal UserContext userContext) {
-        BookmarkInfoResponse response = bookmarkService.addBookmark(userContext, hearitId);
+            @AuthenticationPrincipal RequestUser requestUser) {
+        BookmarkInfoResponse response = bookmarkService.addBookmark(requestUser.getUserInfo(), hearitId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{bookmarkId}")
     public ResponseEntity<Void> deleteBookmark(
             @PathVariable Long bookmarkId,
-            @AuthenticationPrincipal UserContext userContext) {
-        bookmarkService.deleteBookmark(bookmarkId, userContext);
+            @AuthenticationPrincipal RequestUser requestUser) {
+        bookmarkService.deleteBookmark(bookmarkId, requestUser.getUserInfo());
         return ResponseEntity.noContent().build();
     }
 }

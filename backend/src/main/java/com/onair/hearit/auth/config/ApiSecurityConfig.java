@@ -1,7 +1,6 @@
 package com.onair.hearit.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.auth.domain.UserContext;
 import com.onair.hearit.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.log.exception.FilterExceptionLogger;
@@ -28,16 +27,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class ApiSecurityConfig {
 
     private static final String[] PUBLIC_AUTH_ENDPOINTS = {
-            "/api/v1/auth/login",
-            "/api/v1/auth/kakao-login",
-            "/api/v1/auth/signup",
-            "/api/v1/auth/token/refresh",
+            "/api/*/auth/login",
+            "/api/*/auth/kakao-login",
+            "/api/*/auth/signup",
+            "/api/*/auth/token/refresh",
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
-            "/api/v1/hearits/**",
-            "/api/v1/categories/**",
-            "/api/v1/keywords/**"
+            "/api/*/hearits/**",
+            "/api/*/categories/**",
+            "/api/*/keywords/**",
+            "/api/*/playing-histories"
     };
 
     private final ObjectMapper objectMapper;
@@ -52,7 +52,6 @@ public class ApiSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .anonymous(a -> a.principal(UserContext.guest()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .securityMatcher("/api/**")
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

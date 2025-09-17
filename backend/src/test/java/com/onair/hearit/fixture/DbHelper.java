@@ -8,6 +8,7 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.RecommendHearit;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -73,5 +74,11 @@ public class DbHelper {
         em.persist(exploreScore);
         em.flush();
         return exploreScore;
+    }
+
+    public PlayingHistory insertPlayingHistory(PlayingHistory playingHistory) {
+        em.persist(playingHistory);
+        em.flush();
+        return playingHistory;
     }
 }

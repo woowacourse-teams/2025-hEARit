@@ -46,7 +46,7 @@ public class Hearit {
     @Embedded
     private FileUrls fileUrls;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
             name = "hearit_source",
             joinColumns = @JoinColumn(name = "hearit_id")

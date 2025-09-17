@@ -4,23 +4,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.auth.domain.UserContext;
-import com.onair.hearit.common.exception.custom.AlreadyExistException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
-import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
+import com.onair.hearit.app.dto.request.PagingRequest;
+import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
+import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
-import com.onair.hearit.app.dto.request.PagingRequest;
-import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
-import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
-import com.onair.hearit.fixture.DbHelper;
-import com.onair.hearit.fixture.TestFixture;
+import com.onair.hearit.common.domain.PlayingHistory;
+import com.onair.hearit.common.domain.UserInfo;
+import com.onair.hearit.common.exception.custom.AlreadyExistException;
+import com.onair.hearit.common.exception.custom.UnauthorizedException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
+import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,6 +50,9 @@ class BookmarkServiceTest {
     @Autowired
     private BookmarkRepository bookmarkRepository;
 
+    @Autowired
+    private PlayingHistoryRepository playingHistoryRepository;
+
     private BookmarkService bookmarkService;
 
     @BeforeEach
@@ -60,15 +67,20 @@ class BookmarkServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 1));
 
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
         List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(
-                UserContext.member(member.getId()), new PagingRequest(0, 20)).content();
+                RequestUser.member(member.getId()).getUserInfo(), new PagingRequest(0, 20)).content();
 
         // then
-        assertThat(responses).hasSize(1);
+        assertAll(() -> {
+            assertThat(responses).hasSize(1);
+            assertThat(responses.getFirst().bookmarkId()).isEqualTo(bookmark.getId());
+            assertThat(responses.getFirst().lastPlayTime()).isEqualTo(playingHistory.getLastPlayTime());
+        });
     }
 
     @Test
@@ -76,7 +88,7 @@ class BookmarkServiceTest {
     void getBookmarkHearitsTest_() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserContext guestContext = UserContext.guest();
+        UserInfo guestInfo = RequestUser.guest(UUID.randomUUID().toString()).getUserInfo();
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
@@ -84,7 +96,7 @@ class BookmarkServiceTest {
         PagingRequest pagingRequest = new PagingRequest(0, 20);
 
         // when
-        assertThatThrownBy(() -> bookmarkService.getBookmarkHearits(guestContext, pagingRequest))
+        assertThatThrownBy(() -> bookmarkService.getBookmarkHearits(guestInfo, pagingRequest))
                 .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -98,7 +110,8 @@ class BookmarkServiceTest {
         int previousBookmarkCount = bookmarkRepository.findAll().size();
 
         // when
-        BookmarkInfoResponse response = bookmarkService.addBookmark(UserContext.member(member.getId()), hearit.getId());
+        BookmarkInfoResponse response = bookmarkService.addBookmark(RequestUser.member(member.getId()).getUserInfo(),
+                hearit.getId());
 
         // then
         int currentBookmarkCount = bookmarkRepository.findAll().size();
@@ -113,7 +126,7 @@ class BookmarkServiceTest {
     void addBookmarkTest_AlreadyExistTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserContext memberContext = UserContext.member(member.getId());
+        UserInfo memberInfo = RequestUser.member(member.getId()).getUserInfo();
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Long hearitId = hearit.getId();
@@ -121,7 +134,7 @@ class BookmarkServiceTest {
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
-        assertThatThrownBy(() -> bookmarkService.addBookmark(memberContext, hearitId))
+        assertThatThrownBy(() -> bookmarkService.addBookmark(memberInfo, hearitId))
                 .isInstanceOf(AlreadyExistException.class)
                 .hasMessageContaining("이미 북마크된 히어릿입니다.");
     }
@@ -137,7 +150,7 @@ class BookmarkServiceTest {
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
-        bookmarkService.deleteBookmark(bookmark.getId(), UserContext.member(member.getId()));
+        bookmarkService.deleteBookmark(bookmark.getId(), RequestUser.member(member.getId()).getUserInfo());
 
         // then
         assertThat(bookmarkRepository.findById(bookmark.getId())).isNotPresent();
@@ -149,7 +162,7 @@ class BookmarkServiceTest {
         // given
         Member bookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
         Member notBookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserContext nonBookmarkMemberContext = UserContext.member(notBookmarkMember.getId());
+        UserInfo notBookmarkMemberInfo = RequestUser.member(notBookmarkMember.getId()).getUserInfo();
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
@@ -158,7 +171,7 @@ class BookmarkServiceTest {
 
         // when & then
         assertThatThrownBy(
-                () -> bookmarkService.deleteBookmark(bookmarkId, nonBookmarkMemberContext))
+                () -> bookmarkService.deleteBookmark(bookmarkId, notBookmarkMemberInfo))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("북마크를 삭제할 권한이 없습니다.");
     }

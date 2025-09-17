@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "explore_score",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "hearit_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_uuid", "hearit_id"})
 )
 public class ExploreScore {
 
@@ -25,8 +25,8 @@ public class ExploreScore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "member_id")
-    private Long memberId;
+    @Column(name = "user_uuid", nullable = false, length = 36)
+    private String userUuid;
 
     @Column(name = "hearit_id", nullable = false)
     private Long hearitId;
@@ -37,17 +37,27 @@ public class ExploreScore {
     @Column(name = "cursor_id")
     private Long cursorId;
 
-    public ExploreScore(Long memberId, Long hearitId, Double score, Long cursorId) {
-        validate(hearitId, score);
-        this.memberId = memberId;
+    public ExploreScore(String userUuid, Long hearitId, Double score, Long cursorId) {
+        validate(userUuid, hearitId, score);
+        this.userUuid = userUuid.toString();
         this.hearitId = hearitId;
         this.score = score;
         this.cursorId = cursorId;
     }
 
-    private void validate(Long hearitId, Double score) {
+    private void validate(String userUuid, Long hearitId, Double score) {
+        validateUserUuid(userUuid);
         validateHearit(hearitId);
         validateScore(score);
+    }
+
+    private void validateUserUuid(String userUuid) {
+        if (userUuid == null) {
+            throw new IllegalArgumentException("userUuid는 null일 수 없습니다.");
+        }
+        if (userUuid.length() != 36) {
+            throw new IllegalArgumentException("userUuid 형식이 올바르지 않습니다.");
+        }
     }
 
     private void validateHearit(Long hearitId) {

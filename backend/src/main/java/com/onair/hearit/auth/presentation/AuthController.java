@@ -2,13 +2,14 @@ package com.onair.hearit.auth.presentation;
 
 import com.onair.hearit.auth.application.AuthService;
 import com.onair.hearit.auth.domain.OAuthProvider;
-import com.onair.hearit.auth.domain.UserContext;
+import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.request.TokenReissueRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
+import com.onair.hearit.common.domain.UserInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -58,8 +59,9 @@ public class AuthController {
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<Void> withdraw(@AuthenticationPrincipal UserContext userContext) {
-        authService.withdraw(userContext.memberId());
+    public ResponseEntity<Void> withdraw(@AuthenticationPrincipal RequestUser requestUser) {
+        UserInfo userInfo = requestUser.getUserInfo();
+        authService.withdraw(userInfo.getMemberId());
         return ResponseEntity.noContent().build();
     }
 }

@@ -8,14 +8,16 @@ public record HearitOfCategoryResponse(
         Long id,
         String title,
         Integer playTime,
+        Long lastPlayTime,
         List<KeywordResponse> keywords
 ) {
-    public static HearitOfCategoryResponse from(Hearit hearit, List<Keyword> keywords) {
+    public static HearitOfCategoryResponse from(Hearit hearit, List<Keyword> keywords, Long lastPlayTime) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         return new HearitOfCategoryResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getPlayTime(),
+                lastPlayTime,
                 keywordResponses
         );
     }

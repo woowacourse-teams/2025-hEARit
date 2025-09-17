@@ -7,6 +7,7 @@ import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlaytimeProjection;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
@@ -45,14 +46,15 @@ class BookmarkRepositoryTest {
         Bookmark newestBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit3));
 
         // when
-        Page<Bookmark> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(member,
+        Page<BookmarkWithPlaytimeProjection> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(
+                member.getId(),
                 PageRequest.of(0, 5));
 
         // then
         assertAll(() -> {
-            assertThat(bookmarks.getContent().get(0)).isEqualTo(newestBookmark);
-            assertThat(bookmarks.getContent().get(1)).isEqualTo(mideumBookmark);
-            assertThat(bookmarks.getContent().get(2)).isEqualTo(oldestBookmark);
+            assertThat(bookmarks.getContent().get(0).getBookmark().getId()).isEqualTo(newestBookmark.getId());
+            assertThat(bookmarks.getContent().get(1).getBookmark().getId()).isEqualTo(mideumBookmark.getId());
+            assertThat(bookmarks.getContent().get(2).getBookmark().getId()).isEqualTo(oldestBookmark.getId());
         });
     }
 

@@ -3,31 +3,40 @@ package com.onair.hearit.app.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
+import com.onair.hearit.app.dto.request.PagingRequest;
+import com.onair.hearit.app.dto.response.HearitSearchResponse;
+import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.Source;
-import com.onair.hearit.app.dto.request.PagingRequest;
-import com.onair.hearit.app.dto.response.HearitSearchResponse;
-import com.onair.hearit.app.dto.response.PagedResponse;
-import com.onair.hearit.fixture.DbHelper;
-import com.onair.hearit.fixture.TestFixture;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
+import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
+import com.onair.hearit.common.infrastructure.jpa.TestJpaAuditingConfig;
+import com.onair.hearit.fixture.DbHelper;
+import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.transaction.TestTransaction;
 
 @DataJpaTest
+@Sql("/dbclean.sql")
+@ActiveProfiles("integration-test")
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import({DbHelper.class, TestJpaAuditingConfig.class})
-@ActiveProfiles("fake-test")
 class HearitSearchServiceTest {
 
     @Autowired
@@ -39,11 +48,18 @@ class HearitSearchServiceTest {
     @Autowired
     private HearitKeywordRepository hearitKeywordRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private PlayingHistoryRepository playingHistoryRepository;
+
     private HearitSearchService hearitSearchService;
 
     @BeforeEach
     void setup() {
-        hearitSearchService = new HearitSearchService(hearitRepository, hearitKeywordRepository);
+        hearitSearchService = new HearitSearchService(hearitRepository, hearitKeywordRepository, memberRepository,
+                playingHistoryRepository);
     }
 
     @Test
@@ -51,6 +67,7 @@ class HearitSearchServiceTest {
     void searchHearitsByTitle_Success() {
         // given
         PagingRequest request = new PagingRequest(0, 10);
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Hearit hearit = saveHearitWithTitleAndKeyword("exampleSpring1", saveKeyword("keyword"));     // 제목에 검색어 포함됨
         Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1example", saveKeyword("1spring1"));   // 제목에 검색어 포함됨
         Hearit hearit2 = saveHearitWithTitleAndKeyword("wwSpring1ww", saveKeyword("keyword2"));      // 제목에 검색어 포함됨
@@ -59,7 +76,12 @@ class HearitSearchServiceTest {
         saveHearitWithTitleAndKeyword("notitle", saveKeyword("noKeyword"));         // 검색에서 제외됨
 
         // when
-        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -75,6 +97,7 @@ class HearitSearchServiceTest {
     void searchHearitsByKeyword_Succces() {
         // given
         PagingRequest request = new PagingRequest(0, 10);
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Hearit hearit = saveHearitWithTitleAndKeyword("example1", saveKeyword("Spring1"));     // 키워드에 검색어 포함됨
         Hearit hearit1 = saveHearitWithTitleAndKeyword("noTitle", saveKeyword("1springA"));    // 키워드에 검색어 포함됨
         Hearit hearit2 = saveHearitWithTitleAndKeyword("SpringS", saveKeyword("2sprINg1"));    // 키워드에 검색어 포함됨
@@ -82,7 +105,12 @@ class HearitSearchServiceTest {
         Hearit hearit4 = saveHearitWithTitleAndKeyword("noTitle", saveKeyword("noKeyword"));   // 검색에서 제외됨
 
         // when
-        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -99,14 +127,19 @@ class HearitSearchServiceTest {
     void searchHearitsByTitleOrKeyword_Success() {
         // given
         PagingRequest request = new PagingRequest(0, 10);
-
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Hearit titleOnly = saveHearitWithTitleAndKeyword("spring-title", saveKeyword("nomatch")); // 제목만 매칭
         Hearit keywordOnly = saveHearitWithTitleAndKeyword("nomatch-title", saveKeyword("spring-keyword")); // 키워드만 매칭
         Hearit bothMatch = saveHearitWithTitleAndKeyword("spring-title", saveKeyword("spring-keyword")); // 둘 다 매칭
         Hearit neither = saveHearitWithTitleAndKeyword("notitle", saveKeyword("nokeyword")); // 둘 다 매칭 안 됨
 
         // when
-        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request,
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -123,12 +156,18 @@ class HearitSearchServiceTest {
     void searchHearitsWithKeywords_includedInResponse() {
         // given
         PagingRequest request = new PagingRequest(0, 10);
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
         Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
         Hearit hearit = saveHearitWithTitleAndKeyword("Spring in Action", keyword1);
 
         // when
-        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -142,12 +181,18 @@ class HearitSearchServiceTest {
     void searchHearitsByTitle_sortedByCreatedAtDesc() {
         // given
         PagingRequest request = new PagingRequest(0, 10);
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));         // oldest
         Hearit hearit2 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("springKeyword"));   // middle
         Hearit hearit3 = saveHearitWithTitleAndKeyword("notitle", saveKeyword("springKeyword"));   // latest
 
         // when
-        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("Spring", request,
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
@@ -163,12 +208,18 @@ class HearitSearchServiceTest {
     void searchHearits_pagination() {
         // given
         PagingRequest request = new PagingRequest(1, 2);
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));
         Hearit hearit2 = saveHearitWithTitleAndKeyword("spring2", saveKeyword("springKeyword"));
         Hearit hearit3 = saveHearitWithTitleAndKeyword("otherTitle", saveKeyword("Spring"));
 
         // when
-        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request);
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request,
+                TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(

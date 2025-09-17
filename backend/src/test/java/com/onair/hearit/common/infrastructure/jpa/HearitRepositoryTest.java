@@ -7,7 +7,10 @@ import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.Source;
+import com.onair.hearit.common.infrastructure.dto.HearitWithPlayTimeProjection;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
@@ -46,51 +49,6 @@ class HearitRepositoryTest {
         assertAll(
                 () -> assertThat(hearit.getId()).isEqualTo(savedHearit.getId()),
                 () -> assertThat(hearit.getCategory().getId()).isEqualTo(savedHearit.getCategory().getId())
-        );
-    }
-
-    @Test
-    @DisplayName("제목 또는 키워드에 검색어가 포함된 히어릿을 반환한다.")
-    void searchByTerm_filterByTitleOrKeyword() {
-        // given
-        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Springboot"));
-        Keyword keyword2 = dbHelper.insertKeyword(new Keyword("NotMatched"));
-
-        Hearit titleMatched = saveHearitWithTitleAndKeyword("SpringBoot is great", keyword2); // 제목만 매칭
-        Hearit keywordMatched = saveHearitWithTitleAndKeyword("No match in title", keyword1); // 키워드만 매칭
-        Hearit notMatched = saveHearitWithTitleAndKeyword("No match at all", keyword2);       // 둘 다 매칭 안 됨
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<Hearit> result = hearitRepository.searchByTerm("spring", pageable);
-
-        // then
-        assertAll(
-                () -> assertThat(result.getContent()).hasSize(2),
-                () -> assertThat(result.getContent()).extracting(Hearit::getTitle)
-                        .containsExactlyInAnyOrder(
-                                titleMatched.getTitle(),
-                                keywordMatched.getTitle())
-        );
-    }
-
-    @Test
-    @DisplayName("제목과 키워드 둘 다 검색어가 포함돼도 중복 없이 하나만 반환된다.")
-    void searchByTerm_avoidDuplicateWhenTitleAndKeywordMatch() {
-        // given
-        Keyword keyword = dbHelper.insertKeyword(new Keyword("springboot"));
-        Hearit hearit = saveHearitWithTitleAndKeyword("SpringBoot", keyword);
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<Hearit> result = hearitRepository.searchByTerm("spring", pageable);
-
-        // then
-        assertAll(
-                () -> assertThat(result.getContent()).hasSize(1),
-                () -> assertThat(result.getContent().get(0).getId()).isEqualTo(hearit.getId())
         );
     }
 
@@ -140,6 +98,43 @@ class HearitRepositoryTest {
             assertThat(hearits.get(0).getId()).isEqualTo(hearit1.getId());
             assertThat(hearits.get(1).getId()).isEqualTo(hearit2.getId());
             assertThat(hearits.get(2).getId()).isEqualTo(hearit3.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("멤버별 카테고리 내 히어릿 조회 시 마지막 재생 시간도 포함된다.")
+    void findWithPlayTimeByCategoryIdTest() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        PlayingHistory playingHistory1 = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit1, 14));
+        PlayingHistory playingHistory2 = dbHelper.insertPlayingHistory(
+                new PlayingHistory(member.getId(), hearit3, 300));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<HearitWithPlayTimeProjection> result =
+                hearitRepository.findWithPlayTimeByCategoryId(category.getId(), member.getId(), pageable);
+
+        HearitWithPlayTimeProjection projection3 = result.getContent().get(0);
+        HearitWithPlayTimeProjection projection2 = result.getContent().get(1);
+        HearitWithPlayTimeProjection projection1 = result.getContent().get(2);
+
+        // then
+        assertAll(() -> {
+            assertThat(result.getContent()).hasSize(3);
+            assertThat(projection1.getHearit().getId()).isEqualTo(hearit1.getId());
+            assertThat(projection1.getLastPlayTime()).isEqualTo(playingHistory1.getLastPlayTime());
+            assertThat(projection2.getHearit().getId()).isEqualTo(hearit2.getId());
+            assertThat(projection2.getLastPlayTime()).isNull();
+            assertThat(projection3.getHearit().getId()).isEqualTo(hearit3.getId());
+            assertThat(projection3.getLastPlayTime()).isEqualTo(playingHistory2.getLastPlayTime());
         });
     }
 
