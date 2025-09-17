@@ -11,17 +11,17 @@ import retrofit2.http.Path
 import retrofit2.http.Url
 
 interface MediaFileService {
-    @GET("hearits/{hearitId}/short-audio-url")
+    @GET("api/v1/hearits/{hearitId}/short-audio-url")
     suspend fun getShortAudioUrl(
         @Path("hearitId") hearitId: Long,
     ): Response<ShortAudioUrlResponse>
 
-    @GET("hearits/{hearitId}/script-url")
+    @GET("api/v1/hearits/{hearitId}/script-url")
     suspend fun getScriptUrl(
         @Path("hearitId") hearitId: Long,
     ): Response<ScriptUrlResponse>
 
-    @GET("hearits/{hearitId}/original-audio-url")
+    @GET("api/v1/hearits/{hearitId}/original-audio-url")
     suspend fun getOriginalAudioUrl(
         @Path("hearitId") hearitId: Long,
     ): Response<OriginalAudioUrlResponse>
