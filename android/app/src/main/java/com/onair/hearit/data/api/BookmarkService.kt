@@ -10,7 +10,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface BookmarkService {
-    @GET("api/v1/bookmarks/hearits")
+    @GET("api/v2/bookmarks/hearits")
     suspend fun getBookmarks(
         @Query("page") page: Int?,
         @Query("size") size: Int?,
