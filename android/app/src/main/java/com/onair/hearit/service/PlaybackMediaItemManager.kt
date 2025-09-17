@@ -10,11 +10,6 @@ import com.onair.hearit.domain.model.PlaybackInfo
 
 @UnstableApi
 class PlaybackMediaItemManager {
-    /**
-     * PlaybackInfo -> MediaItem
-     * - bookmarkId / playbackMode 를 extras에 포함
-     * - startPositionMs가 주어지면 그 값을, 없으면 info.lastPosition을 START_POSITION 으로 포함
-     */
     fun buildMediaItem(
         info: PlaybackInfo,
         playbackMode: String? = null,
@@ -22,35 +17,55 @@ class PlaybackMediaItemManager {
         startPositionMs: Long? = null,
     ): MediaItem {
         val extras =
-            Bundle().apply {
-                bookmarkId?.let { putLong(EXTRA_BOOKMARK_ID, it) }
-                playbackMode?.let { putString(EXTRA_PLAYBACK_MODE, it) }
-                val start = (startPositionMs ?: info.lastPosition)
-                if (start > 0L) putLong(EXTRA_START_POSITION, start)
-            }
+            createExtras(
+                bookmarkId = bookmarkId,
+                playbackMode = playbackMode,
+                startPosition = startPositionMs ?: info.lastPosition,
+            )
 
         return MediaItem
             .Builder()
             .setUri(info.audioUrl.toUri())
             .setMediaId(info.hearitId.toString())
-            .setMediaMetadata(
-                MediaMetadata
-                    .Builder()
-                    .setTitle(info.title)
-                    .setArtist(info.source)
-                    .setExtras(extras)
-                    .build(),
-            ).setTag(playbackMode)
+            .setMediaMetadata(createMediaMetadata(info, extras))
+            .setTag(playbackMode)
             .build()
     }
 
-    /** 이어듣기(재시작) 용: MediaItemsWithStartPosition 생성 */
-    fun toItemsWithStart(info: PlaybackInfo): MediaSession.MediaItemsWithStartPosition =
-        MediaSession.MediaItemsWithStartPosition(
-            listOf(buildMediaItem(info, startPositionMs = info.lastPosition)),
+    fun toItemsWithStart(info: PlaybackInfo): MediaSession.MediaItemsWithStartPosition {
+        val item = buildMediaItem(info, startPositionMs = info.lastPosition)
+        val startPosition = info.lastPosition.coerceAtLeast(0L)
+
+        return MediaSession.MediaItemsWithStartPosition(
+            listOf(item),
             0,
-            info.lastPosition.coerceAtLeast(0L),
+            startPosition,
         )
+    }
+
+    private fun createExtras(
+        bookmarkId: Long?,
+        playbackMode: String?,
+        startPosition: Long,
+    ): Bundle =
+        Bundle().apply {
+            bookmarkId?.let { putLong(EXTRA_BOOKMARK_ID, it) }
+            playbackMode?.let { putString(EXTRA_PLAYBACK_MODE, it) }
+            if (startPosition > 0L) {
+                putLong(EXTRA_START_POSITION, startPosition)
+            }
+        }
+
+    private fun createMediaMetadata(
+        info: PlaybackInfo,
+        extras: Bundle,
+    ): MediaMetadata =
+        MediaMetadata
+            .Builder()
+            .setTitle(info.title)
+            .setArtist(info.source)
+            .setExtras(extras)
+            .build()
 
     companion object {
         const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
