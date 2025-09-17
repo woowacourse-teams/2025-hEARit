@@ -160,7 +160,7 @@ class HearitControllerTest extends IntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .queryParam("cursorId", 0)
                 .queryParam("size", 10)
-                .filter(document("hearit-read-explore-member",
+                .filter(document("hearit-read-explore-member-v2",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("탐색 히어릿 목록 조회 V2")
@@ -231,7 +231,7 @@ class HearitControllerTest extends IntegrationTest {
                 .header("Authorization", "Bearer " + token)
                 .queryParam("cursorId", 0)
                 .queryParam("size", 10)
-                .filter(document("hearit-read-explore-member",
+                .filter(document("hearit-read-explore-member-v1",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("탐색 히어릿 목록 조회 V1")
