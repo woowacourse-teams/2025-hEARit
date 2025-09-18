@@ -64,7 +64,7 @@ CREATE TABLE `explore_score` (
                                  `hearit_id` bigint NOT NULL,
                                  `score` double NOT NULL,
                                  `cursor_id` bigint DEFAULT NULL,
-                                 PRIMARY KEY (`id`),
+                                 PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `hearit_keyword` (
