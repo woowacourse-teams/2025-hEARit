@@ -22,11 +22,18 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.Locale
 import kotlin.coroutines.resume
 
 fun Int.dpToPx(context: Context): Int = (this * context.resources.displayMetrics.density).toInt()
 
 fun Int.pxToDp(context: Context): Int = (this / context.resources.displayMetrics.density).toInt()
+
+fun Int.toTimeString(): String {
+    val minutes = this / 60
+    val seconds = this % 60
+    return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+}
 
 fun Intent?.toDetailResult(): DetailResult? {
     if (this == null) return null
