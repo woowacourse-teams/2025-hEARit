@@ -31,7 +31,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             "/api/v1/admin/**",
             "/favicon.ico",
             "/.well-known/**",
-            "/actuator/health"
+            "/actuator/**"
     );
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
