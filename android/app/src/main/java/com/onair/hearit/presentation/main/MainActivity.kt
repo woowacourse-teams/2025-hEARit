@@ -379,7 +379,7 @@ class MainActivity :
 
     override fun hidePlayerControlView() {
         binding.layoutBottomPlayerController.post {
-            val target = binding.layoutBottomPlayerController.height.toFloat()
+            val target = binding.layoutBottomPlayerController.height.toFloat() + PLAYER_HIDE_OFFSET
             if (binding.layoutBottomPlayerController.translationY != target) {
                 binding.layoutBottomPlayerController
                     .animate()
@@ -427,6 +427,8 @@ class MainActivity :
 
     companion object {
         private const val HEARIT_OPEN_LICENSE_TITLE = "hEARit Open Source Licenses"
+        private const val PLAYER_HIDE_OFFSET = 100f
+
         private const val PRIVACY_POLICY_URL =
             "https://glistening-eclipse-58b.notion.site/231d39b9c3c3809b9f92ec3e812ea24b?source=copy_link"
         private const val TERMS_OF_USE_URL =

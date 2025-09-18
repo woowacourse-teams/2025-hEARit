@@ -163,6 +163,7 @@ class ExploreFragment :
                         val index = currentIndex()
                         if (index != RecyclerView.NO_POSITION && index != lastPlayingIndex) {
                             switchTo(index)
+                            player.play()
                         }
 
                         viewModel.maybeLoadMore(index, adapter.itemCount)

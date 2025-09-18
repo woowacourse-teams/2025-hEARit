@@ -1,13 +1,11 @@
 package com.onair.hearit.presentation.library
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -24,8 +22,6 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.navigate
-import com.onair.hearit.presentation.toDetailResult
 
 class LibraryFragment :
     Fragment(),
@@ -37,14 +33,6 @@ class LibraryFragment :
     private val mainViewModel: MainViewModel by activityViewModels()
     private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
     private val bookmarkAdapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
-
-    private val playerDetailLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            viewModel.refreshBookmarks()
-            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
-            val detailResult = result.data.toDetailResult() ?: return@registerForActivityResult
-            (requireActivity() as MainActivity).apply { detailResult.navigate(this) }
-        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -143,7 +131,7 @@ class LibraryFragment :
                 putExtra(AnalyticsParamKeys.SOURCE_NAME, PlayerDetailActivity.LIBRARY_SCREEN_ID)
                 putExtra(PREVIOUS_SCREEN_KEY, PlayerDetailActivity.LIBRARY_SCREEN_ID)
             }
-        playerDetailLauncher.launch(intent)
+        (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
     override fun onDestroyView() {
