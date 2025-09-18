@@ -65,7 +65,6 @@ CREATE TABLE `explore_score` (
                                  `score` double NOT NULL,
                                  `cursor_id` bigint DEFAULT NULL,
                                  PRIMARY KEY (`id`),
-                                 CONSTRAINT `uq_explore_score_member_hearit` UNIQUE (`member_id`, `hearit_id`)
 );
 
 CREATE TABLE `hearit_keyword` (
