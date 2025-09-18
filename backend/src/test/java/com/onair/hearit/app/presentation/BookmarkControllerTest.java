@@ -211,7 +211,7 @@ class BookmarkControllerTest extends IntegrationTest {
                                 .tag("Bookmark API")
                                 .summary("북마크 목록 조회")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
                                 .build())
                 ))
                 .when()
@@ -312,7 +312,7 @@ class BookmarkControllerTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("자신의 북마크가 아닌 북마크 삭제 시, 401 UNAUTHORIZED를 반환한다.")
+    @DisplayName("자신의 북마크가 아닌 북마크 삭제 시, 403 FORBIDDEN을 반환한다.")
     void notFoundHearitId() {
         // given
         Member bookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -336,7 +336,7 @@ class BookmarkControllerTest extends IntegrationTest {
                 .when()
                 .delete("/api/v1/bookmarks/{bookmarkId}", bookmark.getId())
                 .then()
-                .statusCode(HttpStatus.UNAUTHORIZED.value());
+                .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
     private String generateToken(Member member) {

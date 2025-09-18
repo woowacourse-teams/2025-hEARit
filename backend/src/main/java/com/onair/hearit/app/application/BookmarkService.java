@@ -9,8 +9,9 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
+import com.onair.hearit.common.exception.custom.ForbiddenException;
 import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.exception.custom.UnauthenticatedException;
 import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlaytimeProjection;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
@@ -67,14 +68,14 @@ public class BookmarkService {
         Bookmark bookmark = getBookmarkById(bookmarkId);
         Member member = getMemberByUserInfo(userInfo);
         if (!bookmark.isCreatedBy(member)) {
-            throw new UnauthorizedException("북마크를 삭제할 권한이 없습니다.");
+            throw new ForbiddenException("북마크를 삭제할 권한이 없습니다.");
         }
         bookmarkRepository.delete(bookmark);
     }
 
     private Member getMemberByUserInfo(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
-            throw new UnauthorizedException("로그인한 회원이 아닙니다.");
+            throw new UnauthenticatedException();
         }
         return getMemberById(userInfo.getMemberId());
     }

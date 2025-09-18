@@ -36,39 +36,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
-        String token = extractTokenFromHeader(header);
+        String token = extractTokenFromHeader(request.getHeader("Authorization"));
 
         // 화이트리스트면 그냥 통과
-        if ((token == null || token.isBlank()) && isWhitelisted(request)) {
-            String deviceUuid = request.getHeader(DEVICE_UUID_HEADER);
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(RequestUser.guest(deviceUuid), null, null);
-            SecurityContextHolder.getContext().setAuthentication(auth);
+        if (isWhitelisted(request) && (token == null || token.isBlank())) {
+            authenticateAsGuest(request);
             chain.doFilter(request, response);
             return;
         }
 
+        if (token == null) {
+            handleUnauthenticatedError(response, request);
+            return;
+        }
         if (!jwtTokenProvider.validateToken(token)) {
-            ProblemDetail problemDetail = buildProblemDetail(ErrorCode.UNAUTHORIZED, "유효하지 않은 토큰입니다.", request);
-            writeProblemDetailResponse(response, problemDetail);
-            filterExceptionLogger.warn(problemDetail);
+            handleInvalidTokenError(response, request);
             return;
         }
 
-        Long memberId = jwtTokenProvider.getMemberId(token);
-        RequestUser requestUser = RequestUser.member(memberId);
-
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(requestUser, null, Collections.emptyList());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
+        authenticateAsMember(token);
         chain.doFilter(request, response);
-    }
-
-    private boolean isWhitelisted(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return whitelist.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     private String extractTokenFromHeader(String header) {
@@ -78,10 +65,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return header.substring("Bearer ".length());
     }
 
+    private boolean isWhitelisted(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return whitelist.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+    }
+
+    private void authenticateAsGuest(HttpServletRequest request) {
+        String deviceUuid = request.getHeader(DEVICE_UUID_HEADER);
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(RequestUser.guest(deviceUuid), null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    private void handleUnauthenticatedError(HttpServletResponse response, HttpServletRequest request)
+            throws IOException {
+        ProblemDetail problemDetail = buildProblemDetail(ErrorCode.UNAUTHENTICATED, "토큰이 존재하지 않습니다.", request);
+        writeProblemDetailResponse(response, problemDetail);
+        filterExceptionLogger.warn(problemDetail);
+    }
+
+    private void handleInvalidTokenError(HttpServletResponse response, HttpServletRequest request) throws IOException {
+        ProblemDetail problemDetail = buildProblemDetail(ErrorCode.INVALID_ACCESS_TOKEN, "유효하지 않은 토큰입니다.", request);
+        writeProblemDetailResponse(response, problemDetail);
+        filterExceptionLogger.warn(problemDetail);
+    }
+
+    private void authenticateAsMember(String token) {
+        Long memberId = jwtTokenProvider.getMemberId(token);
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(RequestUser.member(memberId), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
     private ProblemDetail buildProblemDetail(ErrorCode errorCode, String detail, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(errorCode.getHttpStatus(), detail);
         problemDetail.setTitle(errorCode.getTitle());
         problemDetail.setType(URI.create(request.getRequestURI()));
+        problemDetail.setProperty("code", errorCode.name());
+        problemDetail.setProperty("reissuable", errorCode == ErrorCode.INVALID_ACCESS_TOKEN);
         return problemDetail;
     }
 
