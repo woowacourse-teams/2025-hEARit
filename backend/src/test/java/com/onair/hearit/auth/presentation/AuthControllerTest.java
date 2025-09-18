@@ -294,7 +294,7 @@ class AuthControllerTest extends IntegrationTest {
                                 .summary("엑세스토큰 유효성 검증")
                                 .description("엑세스토큰의 유효성을 검증합니다.")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
                                 .build())
                 ))
                 .when()

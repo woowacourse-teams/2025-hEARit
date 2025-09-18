@@ -16,7 +16,7 @@ import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.exception.custom.UnauthenticatedException;
 import com.onair.hearit.common.infrastructure.dto.HearitWithPlayTimeProjection;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.CategoryRepository;
@@ -107,7 +107,7 @@ public class HearitService {
 
     private Member getMemberByUserInfo(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
-            throw new UnauthorizedException("로그인한 회원이 아닙니다.");
+            throw new UnauthenticatedException();
         }
         return getMemberById(userInfo.getMemberId());
     }
