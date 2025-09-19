@@ -29,6 +29,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class PlayingHistory {
 
     private static final int FINISHED_TIME_RANGE = 10;
+    private static final int LAST_PLAY_TIME_PADDING = 1;
     private static final int MILLISECONDS_PER_SECOND = 1_000;
 
     @Id
@@ -60,7 +61,8 @@ public class PlayingHistory {
     }
 
     private boolean checkIsFinished(Hearit hearit, long lastPlayTime) {
-        return lastPlayTime >= (long) (hearit.getPlayTime() - FINISHED_TIME_RANGE) * MILLISECONDS_PER_SECOND;
+        return lastPlayTime >= (long) (hearit.getPlayTime()
+                + LAST_PLAY_TIME_PADDING - FINISHED_TIME_RANGE) * MILLISECONDS_PER_SECOND;
     }
 
     private void validateHearitPlayTime(Hearit hearit, long lastPlayTime) {
