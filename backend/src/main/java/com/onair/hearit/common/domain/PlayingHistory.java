@@ -61,12 +61,12 @@ public class PlayingHistory {
     }
 
     private boolean checkIsFinished(Hearit hearit, long lastPlayTime) {
-        return lastPlayTime >= (long) (hearit.getPlayTime()
-                + LAST_PLAY_TIME_PADDING - FINISHED_TIME_RANGE) * MILLISECONDS_PER_SECOND;
+        return lastPlayTime >= (long) (hearit.getPlayTime() - FINISHED_TIME_RANGE) * MILLISECONDS_PER_SECOND;
     }
 
     private void validateHearitPlayTime(Hearit hearit, long lastPlayTime) {
-        if (lastPlayTime < 0 || lastPlayTime > hearit.getPlayTime() * MILLISECONDS_PER_SECOND) {
+        if (lastPlayTime < 0 ||
+                lastPlayTime > (long) (hearit.getPlayTime() + LAST_PLAY_TIME_PADDING) * MILLISECONDS_PER_SECOND) {
             throw new InvalidInputException("마지막 재생 시간은 히어릿의 총 재생 시간보다 작아야 합니다");
         }
     }
