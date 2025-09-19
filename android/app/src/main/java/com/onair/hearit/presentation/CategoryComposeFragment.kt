@@ -1,9 +1,9 @@
 package com.onair.hearit.presentation
 
 import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,9 +25,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
@@ -58,26 +61,59 @@ import com.onair.hearit.presentation.theme.Gray3
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.Pretendard
+import timber.log.Timber
 
-class EmptyActivity : AppCompatActivity() {
-    private val viewModel: SearchViewModel by viewModels {
-        SearchViewModelFactory(SearchInput.Category(2, "Android", "#73A01A"))
+class CategoryComposeFragment : Fragment() {
+    private val category by lazy {
+        SearchInput.Category(
+            arguments?.getLong("CATEGORY_ID") ?: -1L,
+            arguments?.getString("CATEGORY_NAME") ?: "카테고리",
+            arguments?.getString("CATEGORY_COLOR") ?: "#000000",
+        )
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MaterialTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    SearchResultScreen(
-                        viewModel = viewModel,
-                        modifier = Modifier.padding(innerPadding),
-                    ) { finish() }
-                }
+    private val viewModel: SearchViewModel by viewModels {
+        SearchViewModelFactory(category)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View =
+        ComposeView(requireContext()).apply {
+            setContent {
+                SearchResultScreen(viewModel = viewModel) { parentFragmentManager.popBackStack() }
             }
         }
-    }
 }
+// class EmptyActivity : AppCompatActivity() {
+//    private lateinit var category: SearchInput.Category
+//    private val viewModel: SearchViewModel by viewModels {
+//        SearchViewModelFactory(category)
+//    }
+//
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        category =
+//            SearchInput.Category(
+//                intent.getLongExtra("CATEGORY_ID", -1L),
+//                intent.getStringExtra("CATEGORY_NAME") ?: "hEARit",
+//                intent.getStringExtra("CATEGORY_COLOR") ?: "#000000",
+//            )
+//
+//        setContent {
+//            MaterialTheme {
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    SearchResultScreen(
+//                        viewModel = viewModel,
+//                        modifier = Modifier.padding(innerPadding),
+//                    ) { finish() }
+//                }
+//            }
+//        }
+//    }
+// }
 
 @Composable
 fun SearchResultScreen(
@@ -86,9 +122,18 @@ fun SearchResultScreen(
     onBack: () -> Unit,
 ) {
     val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
+    val category by viewModel.currentCategory.collectAsStateWithLifecycle()
+
+    LaunchedEffect(hearits) {
+        Timber.d("hearits size=${hearits.size}")
+    }
+    LaunchedEffect(category) {
+        viewModel.fetchResultData(isInitial = true)
+    }
 
     GradientBackgroundScreen(
-        colorCode = "#73A01A",
+        colorCode = category?.colorCode ?: "#000000",
+        categoryName = category?.name ?: "카테고리",
         hearits = hearits,
         modifier = modifier,
         onBack = onBack,
@@ -98,6 +143,7 @@ fun SearchResultScreen(
 @Composable
 fun GradientBackgroundScreen(
     colorCode: String,
+    categoryName: String,
     hearits: List<SearchedHearit>,
     modifier: Modifier,
     onBack: () -> Unit,
@@ -140,7 +186,7 @@ fun GradientBackgroundScreen(
                     .padding(top = 18.dp, start = 24.dp),
         ) {
             Text(
-                text = "Android",
+                text = categoryName,
                 style =
                     TextStyle(
                         color = Gray4,
@@ -172,7 +218,12 @@ fun GradientBackgroundScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(hearits) { item ->
-                SearchedHearitItem(item = item, color = Color(colorCode.toColorInt()), {}, modifier)
+                SearchedHearitItem(
+                    item = item,
+                    color = Color(colorCode.toColorInt()),
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -219,11 +270,13 @@ fun SearchedHearitItem(
                     ),
             )
 
+            Spacer(modifier = Modifier.height(4.dp))
+
             Row(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp, bottom = 4.dp, start = 20.dp, end = 8.dp),
+                        .padding(top = 4.dp, bottom = 8.dp, start = 20.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 item.keywords.forEach { keyword ->
@@ -299,7 +352,7 @@ fun CustomLinearProgressBar(
             modifier =
                 Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(clamped) // 진행률 비율
+                    .fillMaxWidth(clamped)
                     .background(progressColor),
         )
     }
@@ -357,6 +410,7 @@ fun GradientBackgroundScreenPreview() {
     MaterialTheme {
         GradientBackgroundScreen(
             colorCode = "#73A01A",
+            categoryName = "Android",
             hearits = dummyHearits,
             modifier = Modifier.padding(4.dp),
             onBack = {},

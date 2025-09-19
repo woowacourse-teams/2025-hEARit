@@ -48,7 +48,7 @@
             android:name=".presentation.main.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
-
+    
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
