@@ -28,7 +28,7 @@ public class PlayingHistoryBuffer {
     }
 
     @Transactional
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 2000)
     public void flush() {
         if (!queue.isEmpty()) {
             List<PlayingHistory> batchRecords = new ArrayList<>();
