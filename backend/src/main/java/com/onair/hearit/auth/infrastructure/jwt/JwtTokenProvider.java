@@ -79,7 +79,7 @@ public class JwtTokenProvider {
 
     public TokenStatus getTokenStatus(String token) {
         if (token == null || token.isBlank()) {
-            return TokenStatus.INVALID;
+            return TokenStatus.NOT_EXIST;
         }
 
         try {
