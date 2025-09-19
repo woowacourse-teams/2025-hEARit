@@ -10,13 +10,16 @@ import org.junit.jupiter.api.Test;
 class PlayingHistoryTest {
 
     @Test
-    @DisplayName("재생 기록의 마지막 시간은 히어릿의 총 재생 시간보다 작아야 한다")
+    @DisplayName("재생 기록의 마지막 시간은 히어릿의 '총 재생 시간+1초' 보다 작아야 한다")
     void validateHearitPlayTime() {
         // given
-        Hearit hearit = createHearitWith(100);
+        int MILLISECONDS_PER_SECOND = 1_000;
+        int playTime = 100;
+        long lastPlayTime = (playTime + 2) * MILLISECONDS_PER_SECOND;
+        Hearit hearit = createHearitWith(playTime);
 
         // when & then
-        assertThatThrownBy(() -> new PlayingHistory(1L, hearit, 101_000));
+        assertThatThrownBy(() -> new PlayingHistory(1L, hearit, lastPlayTime));
     }
 
     @Test

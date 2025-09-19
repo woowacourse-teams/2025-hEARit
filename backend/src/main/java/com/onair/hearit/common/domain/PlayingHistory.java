@@ -29,6 +29,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class PlayingHistory {
 
     private static final int FINISHED_TIME_RANGE = 10;
+    private static final int LAST_PLAY_TIME_PADDING = 1;
     private static final int MILLISECONDS_PER_SECOND = 1_000;
 
     @Id
@@ -64,7 +65,8 @@ public class PlayingHistory {
     }
 
     private void validateHearitPlayTime(Hearit hearit, long lastPlayTime) {
-        if (lastPlayTime < 0 || lastPlayTime > hearit.getPlayTime() * MILLISECONDS_PER_SECOND) {
+        if (lastPlayTime < 0 ||
+                lastPlayTime > (long) (hearit.getPlayTime() + LAST_PLAY_TIME_PADDING) * MILLISECONDS_PER_SECOND) {
             throw new InvalidInputException("마지막 재생 시간은 히어릿의 총 재생 시간보다 작아야 합니다");
         }
     }
