@@ -222,7 +222,7 @@ class PlayerDetailActivity :
         val currentlyPlayingId = controller.currentMediaItem?.mediaId?.toLongOrNull()
         val isDifferentHearit = currentlyPlayingId != hearit.id
         val shouldResume = intent.hasExtra(LAST_POSITION_KEY) && lastPosition > 0L
-        val startPosition = if (shouldResume) lastPosition else 0L
+        val startPosition = if (shouldResume) lastPosition else hearit.lastPlayTime ?: 0L
 
         if (previousScreen == LIBRARY_SCREEN_ID) {
             // 재생목록 모드: 서비스가 큐 세팅을 담당
@@ -273,6 +273,7 @@ class PlayerDetailActivity :
             viewModel.toggleBookmark()
         }
     }
+
     // 단일 재생 전용: 커맨드 전송 없이 setMediaItem만 수행
     private fun playSingleWithController(
         hearit: Hearit,

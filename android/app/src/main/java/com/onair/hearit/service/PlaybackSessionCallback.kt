@@ -54,6 +54,7 @@ class PlaybackSessionCallback(
         startPositionMs: Long,
     ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> =
         executeAsync("onSetMediaItems") {
+            preRecordCurrent(mediaSession)
             processMediaItems(mediaItems, startIndex, startPositionMs)
         }
 
@@ -148,6 +149,7 @@ class PlaybackSessionCallback(
         if (loadResult.items.isEmpty()) {
             return SessionResult(SessionError.ERROR_BAD_VALUE)
         }
+        preRecordCurrent(session)
 
         withContext(Dispatchers.Main) {
             session.player.setMediaItems(
@@ -345,6 +347,21 @@ class PlaybackSessionCallback(
         val items: List<MediaItem>,
         val seedIndex: Int,
     )
+
+    private suspend fun preRecordCurrent(
+        session: MediaSession,
+        minMs: Long = 1_000L,
+    ) {
+        val player = session.player
+        val id = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return
+        val pos = player.currentPosition.coerceAtLeast(0L)
+        if (pos >= minMs) {
+            withContext(Dispatchers.IO) {
+                // 핵심: 여기서 PlayingHistoryRepository 호출
+                RepositoryProvider.playingHistoryRepository.addPlayingHistory(id, pos)
+            }
+        }
+    }
 
     companion object {
         private const val DEFAULT_PAGE_SIZE = 10
