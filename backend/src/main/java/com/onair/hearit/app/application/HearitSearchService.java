@@ -9,7 +9,7 @@ import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.exception.custom.UnauthenticatedException;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
@@ -75,7 +75,7 @@ public class HearitSearchService {
 
     private Member getMemberByUserInfo(UserInfo useruserInfo) {
         if (useruserInfo == null || useruserInfo.isGuest()) {
-            throw new UnauthorizedException("로그인한 회원이 아닙니다.");
+            throw new UnauthenticatedException();
         }
         return getMemberById(useruserInfo.getMemberId());
     }

@@ -1,6 +1,7 @@
 package com.onair.hearit.auth.infrastructure.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -9,9 +10,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -69,7 +72,27 @@ public class JwtTokenProvider {
             parseClaims(token);
             return true;
         } catch (JwtException e) {
+            log.warn("validateToken() failed: {}", e.getMessage());
             return false;
+        }
+    }
+
+    public TokenStatus getTokenStatus(String token) {
+        if (token == null || token.isBlank()) {
+            return TokenStatus.INVALID;
+        }
+
+        try {
+            Claims claims = parseClaims(token);
+            Date expiration = claims.getExpiration();
+            if (expiration.before(new Date())) {
+                return TokenStatus.EXPIRED;
+            }
+            return TokenStatus.VALID;
+        } catch (ExpiredJwtException e) {
+            return TokenStatus.EXPIRED;
+        } catch (JwtException e) {
+            return TokenStatus.INVALID;
         }
     }
 

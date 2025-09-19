@@ -75,7 +75,9 @@ public class AuthService {
         OAuthUserInfoResponse userInfo = oAuthService.fetchUser(request.accessToken());
         Member member = memberRepository.findBySocialIdAndOAuthProvider(userInfo.id(), provider)
                 .orElseGet(() -> signupWithUserInfo(userInfo, provider));
-        return createTokenResponseFrom(member);
+        LoginTokenResponse loginTokenResponse = createTokenResponseFrom(member);
+        log.warn("memberId:{}가 {} 로그인 성공", member.getId(), provider.name());
+        return loginTokenResponse;
     }
 
     private Member signupWithUserInfo(OAuthUserInfoResponse userInfo, OAuthProvider provider) {
@@ -103,10 +105,11 @@ public class AuthService {
     public String reissue(String refreshToken) {
         validateRefreshTokenExpired(refreshToken);
         Long memberId = jwtTokenProvider.getMemberId(refreshToken);
-        RefreshToken stored = refreshTokenRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new UnauthorizedException("저장된 토큰이 없습니다."));
-        validateRefreshTokenValue(refreshToken, stored);
-        return jwtTokenProvider.createAccessToken(memberId);
+        log.info("memberId:{}가 reissue 요청 수신", memberId);
+        validateRefreshToken(refreshToken, memberId);
+        String newAccessToken = jwtTokenProvider.createAccessToken(memberId);
+        log.info("memberId:{}의 token reissue 성공", memberId);
+        return newAccessToken;
     }
 
     private void validateRefreshTokenExpired(String refreshToken) {
@@ -115,8 +118,15 @@ public class AuthService {
         }
     }
 
-    private void validateRefreshTokenValue(String refreshToken, RefreshToken stored) {
+    private void validateRefreshToken(String refreshToken, Long memberId) {
+        RefreshToken stored = refreshTokenRepository.findByMemberId(memberId)
+                .orElseThrow(() -> {
+                    log.warn("memberId={} 저장된 리프레시토큰 없음", memberId);
+                    return new UnauthorizedException("저장된 토큰이 없습니다.");
+                });
+
         if (!stored.getToken().equals(refreshToken)) {
+            log.warn("memberId={} 저장된 토큰과 요청 토큰 불일치", memberId);
             throw new UnauthorizedException("리프레시 토큰이 불일치합니다.");
         }
     }
