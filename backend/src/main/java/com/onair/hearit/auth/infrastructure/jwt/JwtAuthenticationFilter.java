@@ -93,7 +93,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void handleUnauthenticatedError(HttpServletResponse response, HttpServletRequest request)
             throws IOException {
-        ProblemDetail problemDetail = buildProblemDetail(ErrorCode.UNAUTHENTICATED, "토큰이 존재하지 않습니다.", request);
+        ProblemDetail problemDetail = buildProblemDetail(ErrorCode.AUTHENTICATION_REQUIRED, "인증이 필요한 요청입니다.", request);
         writeProblemDetailResponse(response, problemDetail);
         filterExceptionLogger.warn(problemDetail);
     }

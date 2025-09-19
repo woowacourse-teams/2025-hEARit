@@ -42,7 +42,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
                 .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED)
-                .body("detail", equalTo("토큰이 존재하지 않습니다."));
+                .body("detail", equalTo("인증이 필요한 요청입니다."));
     }
 
     @Test
@@ -65,7 +65,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
                 .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED)
-                .body("detail", equalTo("토큰이 존재하지 않습니다."));
+                .body("detail", equalTo("인증이 필요한 요청입니다."));
     }
 
     @Test

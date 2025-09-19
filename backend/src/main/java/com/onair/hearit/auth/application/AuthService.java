@@ -75,7 +75,9 @@ public class AuthService {
         OAuthUserInfoResponse userInfo = oAuthService.fetchUser(request.accessToken());
         Member member = memberRepository.findBySocialIdAndOAuthProvider(userInfo.id(), provider)
                 .orElseGet(() -> signupWithUserInfo(userInfo, provider));
-        return createTokenResponseFrom(member);
+        LoginTokenResponse loginTokenResponse = createTokenResponseFrom(member);
+        log.warn("memberId:{}가 {} 로그인 성공", member.getId(), provider.name());
+        return loginTokenResponse;
     }
 
     private Member signupWithUserInfo(OAuthUserInfoResponse userInfo, OAuthProvider provider) {
