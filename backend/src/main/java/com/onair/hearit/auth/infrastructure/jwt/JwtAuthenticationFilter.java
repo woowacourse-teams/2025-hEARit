@@ -39,12 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractTokenFromHeader(request.getHeader("Authorization"));
 
         // 화이트리스트면 그냥 통과
-        if (isWhitelisted(request) && (token == null || token.isBlank())) {
-            authenticateAsGuest(request);
+        if (isWhitelisted(request)) {
+            handleWhitelistedRequest(request, token);
             chain.doFilter(request, response);
             return;
         }
 
+        //인증이 필요한 엔드포인트 처리
         if (token == null) {
             handleUnauthenticatedError(response, request);
             return;
@@ -52,19 +53,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         TokenStatus tokenStatus = jwtTokenProvider.getTokenStatus(token);
         switch (tokenStatus) {
-            case EXPIRED -> {
-                handleTokenExpiredError(response, request);
-                return;
+            case EXPIRED -> handleTokenExpiredError(response, request);
+            case INVALID -> handleInvalidTokenError(response, request);
+            case VALID -> {
+                authenticateAsMember(token);
+                chain.doFilter(request, response);
             }
-            case INVALID -> {
-                handleInvalidTokenError(response, request);
-                return;
-            }
-            case VALID -> { /* pass-through */ }
         }
+    }
 
+    private void handleWhitelistedRequest(HttpServletRequest request, String token) {
+        if (token == null || token.isBlank() || !jwtTokenProvider.validateToken(token)) {
+            // 토큰이 없거나 잘못된 토큰 → 게스트로 인증
+            authenticateAsGuest(request);
+            return;
+        }
+        // 유효한 토큰 → 회원으로 인증
         authenticateAsMember(token);
-        chain.doFilter(request, response);
     }
 
     private String extractTokenFromHeader(String header) {
