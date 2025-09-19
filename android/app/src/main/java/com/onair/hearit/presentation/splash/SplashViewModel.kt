@@ -42,9 +42,10 @@ class SplashViewModel(
         refreshToken: String,
     ) {
         authRepository
-            .checkAccessToken()
+            .checkAccessToken(accessToken)
             .onSuccess {
                 _checkToken.value = true
+                authRepository.saveToken(accessToken)
                 TokenInterceptorProvider.setAccessToken(accessToken)
             }.onFailure { throwable ->
                 handleAccessTokenError(throwable, refreshToken)

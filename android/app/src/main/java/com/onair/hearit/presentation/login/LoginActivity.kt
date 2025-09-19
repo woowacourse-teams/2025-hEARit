@@ -74,6 +74,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         binding.btnLoginKakao.setOnClickListener {
+            TokenInterceptorProvider.setDeviceUuid(null)
             kakaoLoginHelper.startLogin()
         }
 
