@@ -16,7 +16,8 @@ public enum ErrorCode {
     //CLIENT UNAUTHORIZED ERROR
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 요청입니다."),
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "엑세스 토큰이 존재하지 않습니다."),
-    INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "엑세스 토큰이 만료되거나 유효하지 않습니다."),
+    INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "엑세스 토큰이 유효하지 않습니다."),
+    ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "엑세스 토큰이 만료되었습니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     //SERVER ERROR

@@ -49,9 +49,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             handleUnauthenticatedError(response, request);
             return;
         }
-        if (!jwtTokenProvider.validateToken(token)) {
-            handleInvalidTokenError(response, request);
-            return;
+
+        TokenStatus tokenStatus = jwtTokenProvider.getTokenStatus(token);
+        switch (tokenStatus) {
+            case EXPIRED -> {
+                handleTokenExpiredError(response, request);
+                return;
+            }
+            case INVALID -> {
+                handleInvalidTokenError(response, request);
+                return;
+            }
+            case VALID -> { /* pass-through */ }
         }
 
         authenticateAsMember(token);
@@ -84,6 +93,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterExceptionLogger.warn(problemDetail);
     }
 
+    private void handleTokenExpiredError(HttpServletResponse response, HttpServletRequest request) throws IOException {
+        ProblemDetail problemDetail = buildProblemDetail(ErrorCode.ACCESS_TOKEN_EXPIRED, "만료된 토큰입니다.", request);
+        writeProblemDetailResponse(response, problemDetail);
+        filterExceptionLogger.warn(problemDetail);
+    }
+
     private void handleInvalidTokenError(HttpServletResponse response, HttpServletRequest request) throws IOException {
         ProblemDetail problemDetail = buildProblemDetail(ErrorCode.INVALID_ACCESS_TOKEN, "유효하지 않은 토큰입니다.", request);
         writeProblemDetailResponse(response, problemDetail);
@@ -102,7 +117,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         problemDetail.setTitle(errorCode.getTitle());
         problemDetail.setType(URI.create(request.getRequestURI()));
         problemDetail.setProperty("code", errorCode.name());
-        problemDetail.setProperty("reissuable", errorCode == ErrorCode.INVALID_ACCESS_TOKEN);
+        problemDetail.setProperty("reissuable", errorCode == ErrorCode.ACCESS_TOKEN_EXPIRED);
         return problemDetail;
     }
 

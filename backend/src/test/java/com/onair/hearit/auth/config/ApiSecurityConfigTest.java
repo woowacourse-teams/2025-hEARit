@@ -96,7 +96,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
                 .as(ProblemDetail.class);
 
         assertAll(
-                () -> assertThat(problemDetail.getTitle()).isEqualTo("엑세스 토큰이 만료되거나 유효하지 않습니다."),
+                () -> assertThat(problemDetail.getTitle()).isEqualTo("엑세스 토큰이 유효하지 않습니다."),
                 () -> assertThat(problemDetail.getDetail()).isEqualTo("유효하지 않은 토큰입니다."),
                 () -> assertThat(problemDetail.getProperties().get("code")).isNotNull(),
                 () -> assertThat(problemDetail.getProperties().get("reissuable")).isNotNull()
