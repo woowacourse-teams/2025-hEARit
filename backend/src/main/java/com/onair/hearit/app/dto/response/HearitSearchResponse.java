@@ -11,6 +11,8 @@ public record HearitSearchResponse(
         Long lastPlayTime,
         List<KeywordResponse> keywords
 ) {
+    private static final int KEYWORD_PER_HEARIT = 3;
+
     public static HearitSearchResponse of(Hearit hearit, List<Keyword> keywords, Long lastPlayTime) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         return new HearitSearchResponse(
@@ -23,7 +25,7 @@ public record HearitSearchResponse(
     }
 
     private static List<KeywordResponse> getKeywordNames(List<Keyword> keywords) {
-        return keywords.stream().map(KeywordResponse::from).toList();
+        return keywords.stream().limit(KEYWORD_PER_HEARIT).map(KeywordResponse::from).toList();
     }
 
     public record KeywordResponse(
