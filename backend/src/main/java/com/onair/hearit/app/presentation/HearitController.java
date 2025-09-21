@@ -5,8 +5,8 @@ import com.onair.hearit.app.application.HearitService;
 import com.onair.hearit.app.application.explore.HearitExploreService;
 import com.onair.hearit.app.dto.request.CursorRequest;
 import com.onair.hearit.app.dto.request.PagingRequest;
-import com.onair.hearit.app.dto.response.CursorResponse;
 import com.onair.hearit.app.dto.response.CursorResponseV1;
+import com.onair.hearit.app.dto.response.CursorResponseV2;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.app.dto.response.HearitDetailResponse;
 import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
@@ -42,27 +42,27 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/v2/hearits/explore")
-    public ResponseEntity<CursorResponse<ExploredHearitResponse>> readExploredHearitsV2(
-            @AuthenticationPrincipal RequestUser requestUser,
-            @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
-        CursorRequest cursorRequest = new CursorRequest(cursorId, size);
-        CursorResponse<ExploredHearitResponse> responses =
-                hearitExploreService.getExploredHearits(requestUser.getUserInfo(), cursorRequest);
-        return ResponseEntity.ok(responses);
-    }
-
     @GetMapping("/v1/hearits/explore")
     public ResponseEntity<CursorResponseV1<ExploredHearitResponse>> readExploredHearitsV1(
             @AuthenticationPrincipal RequestUser requestUser,
             @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         CursorRequest cursorRequest = new CursorRequest(cursorId, size);
-        CursorResponse<ExploredHearitResponse> responses =
+        CursorResponseV2<ExploredHearitResponse> responses =
                 hearitExploreService.getExploredHearits(requestUser.getUserInfo(), cursorRequest);
         CursorResponseV1<ExploredHearitResponse> responsesV1 = CursorResponseV1.from(responses);
         return ResponseEntity.ok(responsesV1);
+    }
+
+    @GetMapping("/v2/hearits/explore")
+    public ResponseEntity<CursorResponseV2<ExploredHearitResponse>> readExploredHearitsV2(
+            @AuthenticationPrincipal RequestUser requestUser,
+            @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        CursorRequest cursorRequest = new CursorRequest(cursorId, size);
+        CursorResponseV2<ExploredHearitResponse> responses =
+                hearitExploreService.getExploredHearits(requestUser.getUserInfo(), cursorRequest);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/v1/hearits/recommend")
