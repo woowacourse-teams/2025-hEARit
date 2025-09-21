@@ -63,6 +63,7 @@ class TokenAuthenticator(
         if (isRefreshing) return null
         return try {
             val newToken = runBlocking { refreshToken() }
+            Timber.d("$newToken")
             if (newToken != null) {
                 TokenInterceptorProvider.setAccessToken(newToken)
                 originalRequest
@@ -73,7 +74,7 @@ class TokenAuthenticator(
                 handleRefreshFailed()
                 null
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             handleRefreshFailed()
             null
         } finally {
@@ -84,7 +85,7 @@ class TokenAuthenticator(
     private fun handleRefreshFailed() {
         // 리프레시 실패시 로그아웃 처리
         TokenInterceptorProvider.setAccessToken(null)
-        // 로그아웃 이벤트 발송 등...
+        AuthEventManager.sendLogoutEvent()
     }
 
     private suspend fun refreshToken(): String? {
@@ -92,13 +93,12 @@ class TokenAuthenticator(
         val authService = authServiceProvider()
         val refreshToken =
             preferencesLocalDataSource.getRefreshToken().getOrNull() ?: return null
-        Timber.d(refreshToken)
         return try {
             val response = authService.postRefreshToken(TokenReissueRequest(refreshToken))
             val tokenResponse = response.body() ?: return null
             preferencesLocalDataSource.saveAccessToken(tokenResponse.accessToken)
             tokenResponse.accessToken
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             preferencesLocalDataSource.clearData()
             null
         }
@@ -107,7 +107,7 @@ class TokenAuthenticator(
     private fun parseErrorResponse(errorBody: String?): ErrorResponse? =
         try {
             errorBody?.let { json.decodeFromString<ErrorResponse>(it) }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.repository.AuthRepository
@@ -52,6 +53,7 @@ class LoginViewModel(
 
             result
                 .onSuccess {
+                    AuthEventManager.onLoginSuccess()
                     _loginState.value = true
                 }.onFailure { throwable ->
                     Timber.w(throwable)
