@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.dto.request.PagingRequest;
-import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.app.dto.response.BookmarkHearitResponseV2;
 import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.common.domain.Bookmark;
@@ -73,8 +73,8 @@ class BookmarkServiceTest {
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
-        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(
-                RequestUser.member(member.getId()).getUserInfo(), new PagingRequest(0, 20)).content();
+        List<BookmarkHearitResponseV2> responses = bookmarkService.getBookmarkHearits(
+                RequestUser.member(member.getId()).getUserInfo(), new PagingRequest(0, 20)).stream().toList();
 
         // then
         assertAll(() -> {
