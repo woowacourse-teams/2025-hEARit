@@ -26,7 +26,7 @@
             android:id="@+id/iv_bookmark_category_color"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="@drawable/bg_purple3_radius_left_8dp"
+            android:background="@drawable/bg_purple3_radius_8dp"
             app:backgroundColor="@{bookmarkItem.category.colorCode}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
