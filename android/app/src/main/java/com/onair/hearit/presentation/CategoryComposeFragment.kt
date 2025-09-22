@@ -12,13 +12,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -83,7 +87,11 @@ class CategoryComposeFragment : Fragment() {
     ): View =
         ComposeView(requireContext()).apply {
             setContent {
-                SearchResultScreen(viewModel = viewModel) { parentFragmentManager.popBackStack() }
+                SearchResultScreen(
+                    viewModel = viewModel,
+                    onBack = { parentFragmentManager.popBackStack() },
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
 }
@@ -118,8 +126,8 @@ class CategoryComposeFragment : Fragment() {
 @Composable
 fun SearchResultScreen(
     viewModel: SearchViewModel,
-    modifier: Modifier = Modifier,
     onBack: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
     val category by viewModel.currentCategory.collectAsStateWithLifecycle()
@@ -145,8 +153,8 @@ fun GradientBackgroundScreen(
     colorCode: String,
     categoryName: String,
     hearits: List<SearchedHearit>,
-    modifier: Modifier,
     onBack: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier =
@@ -167,6 +175,7 @@ fun GradientBackgroundScreen(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .windowInsetsPadding(WindowInsets.statusBars)
                     .padding(horizontal = 4.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -183,6 +192,7 @@ fun GradientBackgroundScreen(
             modifier =
                 Modifier
                     .align(Alignment.TopCenter)
+                    .windowInsetsPadding(WindowInsets.statusBars)
                     .padding(top = 18.dp, start = 24.dp),
         ) {
             Text(
