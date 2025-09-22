@@ -23,10 +23,10 @@ import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
 import com.onair.hearit.presentation.CategoryComposeFragment
-import com.onair.hearit.presentation.CategoryComposeFragment.Companion.CATEGORY_COLOR_BUNDLE_KEY
-import com.onair.hearit.presentation.CategoryComposeFragment.Companion.CATEGORY_ID_BUNDLE_KEY
-import com.onair.hearit.presentation.CategoryComposeFragment.Companion.CATEGORY_NAME_BUNDLE_KEY
 import com.onair.hearit.presentation.HearitClickListener
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.main.DrawerClickListener
@@ -246,9 +246,9 @@ class HomeFragment :
                 CategoryComposeFragment().apply {
                     arguments =
                         bundleOf(
-                            CATEGORY_ID_BUNDLE_KEY to id,
-                            CATEGORY_NAME_BUNDLE_KEY to name,
-                            CATEGORY_COLOR_BUNDLE_KEY to colorCode,
+                            CATEGORY_ID_KEY to id,
+                            CATEGORY_NAME_KEY to name,
+                            CATEGORY_COLOR_KEY to colorCode,
                         )
                 },
             ).addToBackStack(null)

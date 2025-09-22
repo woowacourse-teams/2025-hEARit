@@ -3,14 +3,17 @@ package com.onair.hearit.presentation
 import android.content.Context
 import android.content.Intent
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.onair.hearit.R
-import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
@@ -54,7 +57,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
     when (this) {
         is DetailResult.Category -> {
             val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = CategoryFragment::class.java.simpleName
+            val backStackTag = CategoryComposeFragment::class.java.simpleName
 
             // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
             fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
@@ -62,7 +65,14 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                 .beginTransaction()
                 .replace(
                     R.id.fragment_container_view,
-                    CategoryFragment.newInstance(SearchInput.Category(id, name, colorCode)),
+                    CategoryComposeFragment().apply {
+                        arguments =
+                            bundleOf(
+                                CATEGORY_ID_KEY to categoryId,
+                                CATEGORY_NAME_KEY to name,
+                                CATEGORY_COLOR_KEY to colorCode,
+                            )
+                    },
                     backStackTag,
                 ).addToBackStack(backStackTag)
                 .commit()

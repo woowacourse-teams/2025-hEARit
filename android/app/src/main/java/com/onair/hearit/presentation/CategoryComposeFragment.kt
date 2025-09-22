@@ -56,6 +56,9 @@ import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
@@ -72,9 +75,9 @@ import com.onair.hearit.presentation.theme.Pretendard
 class CategoryComposeFragment : Fragment() {
     private val category by lazy {
         SearchInput.Category(
-            arguments?.getLong(CATEGORY_ID_BUNDLE_KEY) ?: -1L,
-            arguments?.getString(CATEGORY_NAME_BUNDLE_KEY) ?: "카테고리",
-            arguments?.getString(CATEGORY_COLOR_BUNDLE_KEY) ?: "#000000",
+            arguments?.getLong(CATEGORY_ID_KEY) ?: -1L,
+            arguments?.getString(CATEGORY_NAME_KEY) ?: "카테고리",
+            arguments?.getString(CATEGORY_COLOR_KEY) ?: "#000000",
         )
     }
 
@@ -104,12 +107,6 @@ class CategoryComposeFragment : Fragment() {
     private fun onHearitClick(hearitId: Long) {
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         (activity as? MainActivity)?.launchDetailActivity(intent)
-    }
-
-    companion object {
-        const val CATEGORY_ID_BUNDLE_KEY = "CATEGORY_ID"
-        const val CATEGORY_NAME_BUNDLE_KEY = "CATEGORY_NAME"
-        const val CATEGORY_COLOR_BUNDLE_KEY = "CATEGORY_COLOR"
     }
 }
 
@@ -251,8 +248,7 @@ fun SearchedHearitItem(
                 .background(
                     Gray1,
                     shape = RoundedCornerShape(8.dp),
-                )
-                .clickable { onClick(item.id) }
+                ).clickable { onClick(item.id) }
                 .padding(vertical = 16.dp),
     ) {
         Column(
