@@ -92,14 +92,15 @@ class SearchRecentFragment :
         globalLayoutListener =
             ViewTreeObserver.OnGlobalLayoutListener {
                 binding.etSearch.requestFocus()
-                val imm =
+                val inputMethodManager =
                     requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
+                inputMethodManager.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
                 binding.etSearch.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
                 globalLayoutListener = null
             }
         binding.etSearch.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 
+        // 검색창을 터치하면 최근 검색으로 이동
         binding.etSearch.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 navigateToRecent()
@@ -107,12 +108,14 @@ class SearchRecentFragment :
             false
         }
 
+        // 키보드 검색 또는 돋보기 버튼 클릭 시
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 performSearchFromInput()
             }
             false
         }
+
         binding.btnSearch.setOnClickListener {
             performSearchFromInput()
         }
@@ -133,16 +136,10 @@ class SearchRecentFragment :
         hideKeyboard()
     }
 
-    private fun observeViewModel() {
-        viewModel.recentKeywords.observe(viewLifecycleOwner) { keywords ->
-            recentSearchAdapter.submitList(keywords)
-        }
-        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
-        }
-    }
-
     fun showSearchResultPage(input: SearchInput) {
+        binding.etSearch.setText(input.term())
+        binding.etSearch.setSelection(input.term().length)
+
         childFragmentManager
             .beginTransaction()
             .replace(
@@ -151,6 +148,15 @@ class SearchRecentFragment :
             ).commit()
         viewModel.saveRecentKeyword(input.term())
         hideKeyboard()
+    }
+
+    private fun observeViewModel() {
+        viewModel.recentKeywords.observe(viewLifecycleOwner) { keywords ->
+            recentSearchAdapter.submitList(keywords)
+        }
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+            showToast(getString(resId))
+        }
     }
 
     private fun navigateToRecent() {

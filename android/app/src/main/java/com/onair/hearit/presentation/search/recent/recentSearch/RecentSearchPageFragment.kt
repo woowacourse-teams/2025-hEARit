@@ -76,16 +76,12 @@ class RecentSearchPageFragment :
         }
     }
 
-    private fun navigateToSearchResult(input: SearchInput) {
-        (parentFragment as? SearchRecentFragment)?.showSearchResultPage(input)
-    }
-
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onRecentSearchClick(term: String) {
-        navigateToSearchResult(SearchInput.Keyword(term))
+        (parentFragment as? SearchRecentFragment)?.showSearchResultPage(SearchInput.Keyword(term))
     }
 
     override fun onDestroyView() {
