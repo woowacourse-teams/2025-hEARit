@@ -36,11 +36,11 @@
             style="@style/pretendard_nickname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
-            android:layout_marginEnd="20dp"
+            android:layout_marginStart="12dp"
+            app:layout_constraintBottom_toBottomOf="@id/ib_back"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@id/ib_back"
             tools:text="Android" />
 
         <ImageView
@@ -49,6 +49,7 @@
             android:layout_marginStart="4dp"
             android:contentDescription="@null"
             android:src="@drawable/ic_down"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tv_search_category_name"
             app:layout_constraintStart_toEndOf="@id/tv_search_category_name"
             app:layout_constraintTop_toTopOf="@id/tv_search_category_name" />
