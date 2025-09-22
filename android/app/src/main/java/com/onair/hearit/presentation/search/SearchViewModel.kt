@@ -50,6 +50,12 @@ class SearchViewModel(
 
     private var currentInput: SearchInput? = initialInput
 
+    fun refreshSearchResults() {
+        resetPaging()
+        _searchedHearits.value = emptyList()
+        fetchResultData(isInitial = true)
+    }
+
     fun getCategories() {
         viewModelScope.launch {
             categoryRepository
@@ -151,5 +157,11 @@ class SearchViewModel(
             } else {
                 SearchUiState.HearitsExist(hearits)
             }
+    }
+
+    private fun resetPaging() {
+        paging = null
+        currentPage = 0
+        isLastPage = false
     }
 }
