@@ -22,7 +22,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -79,9 +81,11 @@ class MainActivity :
         binding.lifecycleOwner = this
 
         lifecycleScope.launch {
-            AuthEventManager.logoutEvent.collect {
-                if (!AuthEventManager.isValidSession()) {
-                    handleForceLogout()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AuthEventManager.logoutEvent.collect {
+                    if (!AuthEventManager.isValidSession()) {
+                        handleForceLogout()
+                    }
                 }
             }
         }
