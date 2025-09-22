@@ -2,7 +2,7 @@ package com.onair.hearit.app.application.explore;
 
 import com.onair.hearit.app.application.explore.scoreprocessor.ExploreScoreProcessor;
 import com.onair.hearit.app.dto.request.CursorRequest;
-import com.onair.hearit.app.dto.response.CursorResponse;
+import com.onair.hearit.app.dto.response.CursorResponseV2;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.common.domain.UserInfo;
 import java.util.List;
@@ -15,15 +15,15 @@ public class HearitExploreService {
 
     private final List<ExploreScoreProcessor> exploreScoreProcessors;
 
-    public CursorResponse<ExploredHearitResponse> getExploredHearits(UserInfo userInfo,
-                                                                     CursorRequest cursorRequest) {
+    public CursorResponseV2<ExploredHearitResponse> getExploredHearits(UserInfo userInfo,
+                                                                       CursorRequest cursorRequest) {
         ExploreScoreProcessor exploreScoreProcessor = getExploreScoreProcessor(userInfo);
         List<ExploredHearitResponse> exploreHearitsResponses =
                 exploreScoreProcessor.getExploreHearitsResponse(
                         userInfo,
                         cursorRequest.cursorId(),
                         cursorRequest.size());
-        return CursorResponse.from(exploreHearitsResponses);
+        return CursorResponseV2.from(exploreHearitsResponses);
     }
 
     private ExploreScoreProcessor getExploreScoreProcessor(UserInfo userInfo) {
