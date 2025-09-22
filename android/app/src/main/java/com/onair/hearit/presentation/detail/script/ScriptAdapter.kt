@@ -9,18 +9,35 @@ class ScriptAdapter(
     private val onItemClick: (ScriptLine) -> Unit,
 ) : ListAdapter<ScriptLine, ScriptViewHolder>(DiffCallback) {
     private var highlightedId: Long? = null
+    private var highlightedIndex: Int = -1
+
+    val currentHighlightedId: Long?
+        get() = highlightedId
 
     fun highlightScriptLine(id: Long?) {
         if (highlightedId == id) return
 
-        val previousId = highlightedId
+        val prevIndex = highlightedIndex
+        val newIndex = currentList.indexOfFirst { it.id == id }.takeIf { it >= 0 } ?: -1
+
         highlightedId = id
+        highlightedIndex = newIndex
 
-        val prevIndex = currentList.indexOfFirst { it.id == previousId }
-        val newIndex = currentList.indexOfFirst { it.id == id }
+        when {
+            prevIndex >= 0 && newIndex >= 0 -> {
+                val from = minOf(prevIndex, newIndex)
+                val count = kotlin.math.abs(newIndex - prevIndex) + 1
+                notifyItemRangeChanged(from, count)
+            }
 
-        if (prevIndex != -1) notifyItemChanged(prevIndex)
-        if (newIndex != -1) notifyItemChanged(newIndex)
+            prevIndex >= 0 -> {
+                notifyItemRangeChanged(0, prevIndex + 1)
+            }
+
+            prevIndex == -1 && newIndex >= 0 -> {
+                notifyItemRangeChanged(0, newIndex + 1)
+            }
+        }
     }
 
     override fun onCreateViewHolder(
@@ -33,11 +50,10 @@ class ScriptAdapter(
         position: Int,
     ) {
         val item = getItem(position)
-        holder.bind(item, item.id == highlightedId)
+        val isHighlighted = (item.id == highlightedId)
+        val isPast = highlightedIndex >= 0 && position <= highlightedIndex
 
-        holder.itemView.setOnClickListener {
-            onItemClick.invoke(item)
-        }
+        holder.bind(item, isHighlighted, isPast, onItemClick)
     }
 
     companion object {
