@@ -7,12 +7,12 @@ public record CursorResponseV1<T>(
         boolean isEmpty,
         long cursorId
 ) {
-    public static <T> CursorResponseV1<T> from(CursorResponse<T> cursorResponse) {
-        List<T> contents = cursorResponse.content();
+    public static <T> CursorResponseV1<T> from(CursorResponseV2<T> cursorResponseV2) {
+        List<T> contents = cursorResponseV2.content();
         long cursorId = 0L;
-        if(!contents.isEmpty()) {
+        if (!contents.isEmpty()) {
             ExploredHearitResponse last = (ExploredHearitResponse) contents.getLast();
-            cursorId = last.cursorId();;
+            cursorId = last.cursorId();
         }
         return new CursorResponseV1<>(
                 contents,

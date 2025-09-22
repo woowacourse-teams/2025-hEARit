@@ -9,8 +9,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.app.dto.response.CursorResponse;
 import com.onair.hearit.app.dto.response.CursorResponseV1;
+import com.onair.hearit.app.dto.response.CursorResponseV2;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.app.dto.response.HearitDetailResponse;
 import com.onair.hearit.app.dto.response.HearitOfCategoryResponse;
@@ -156,7 +156,7 @@ class HearitControllerTest extends IntegrationTest {
         String token = generateToken(member);
 
         // when
-        CursorResponse<ExploredHearitResponse> responses = RestAssured.given(this.spec)
+        CursorResponseV2<ExploredHearitResponse> responses = RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .queryParam("cursorId", 0)
                 .queryParam("size", 10)
@@ -204,7 +204,7 @@ class HearitControllerTest extends IntegrationTest {
         assertAll(() -> {
             assertThat(responses.content()).hasSize(3);
             assertThat(responses.content()).extracting(ExploredHearitResponse::cursorId)
-                            .containsExactly(1L, 2L, 3L);
+                    .containsExactly(1L, 2L, 3L);
             assertThat(responses.isEmpty()).isFalse();
         });
     }

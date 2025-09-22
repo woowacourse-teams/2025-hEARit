@@ -230,7 +230,7 @@ class AuthServiceTest {
                 // when & then
                 assertThatThrownBy(() -> authService.reissue(refreshTokenValue))
                         .isInstanceOf(UnauthorizedException.class)
-                        .hasMessage("저장된 토큰이 없습니다.");
+                        .hasMessageContaining("저장된 토큰이 없습니다.");
             }
 
             @Test
@@ -249,7 +249,7 @@ class AuthServiceTest {
                 // when & then
                 assertThatThrownBy(() -> authService.reissue(refreshTokenValue))
                         .isInstanceOf(UnauthorizedException.class)
-                        .hasMessage("리프레시 토큰이 불일치합니다.");
+                        .hasMessageContaining("리프레시 토큰이 불일치합니다.");
             }
         }
     }

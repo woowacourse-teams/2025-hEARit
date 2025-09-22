@@ -1,7 +1,9 @@
 package com.onair.hearit.auth.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.domain.Member;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.spec.internal.HttpStatus;
+import org.springframework.http.ProblemDetail;
 
 class ApiSecurityConfigTest extends IntegrationTest {
 
@@ -39,7 +42,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
                 .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED)
-                .body("detail", equalTo("유효하지 않은 토큰입니다."));
+                .body("detail", equalTo("인증이 필요한 요청입니다."));
     }
 
     @Test
@@ -62,7 +65,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
                 .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED)
-                .body("detail", equalTo("유효하지 않은 토큰입니다."));
+                .body("detail", equalTo("인증이 필요한 요청입니다."));
     }
 
     @Test
@@ -80,17 +83,24 @@ class ApiSecurityConfigTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("인증 실패 시 application/problem+json 형식으로 응답한다")
+    @DisplayName("인증 실패 시 application/problem+json 형식으로 응답하며 토큰재발급 여부를 위한 properties를 포함한다.")
     void returnProblemDetailOnAuthFailure() {
-        RestAssured.given().log().all()
+        ProblemDetail problemDetail = RestAssured.given().log().all()
                 .header("Authorization", "Bearer invalid-token")
                 .when()
                 .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
                 .then().log().all()
                 .statusCode(401)
                 .header("Content-Type", containsString("application/problem+json"))
-                .body("title", equalTo("인증되지 않은 요청입니다."))
-                .body("detail", equalTo("유효하지 않은 토큰입니다."));
+                .extract()
+                .as(ProblemDetail.class);
+
+        assertAll(
+                () -> assertThat(problemDetail.getTitle()).isEqualTo("엑세스 토큰이 유효하지 않습니다."),
+                () -> assertThat(problemDetail.getDetail()).isEqualTo("유효하지 않은 토큰입니다."),
+                () -> assertThat(problemDetail.getProperties().get("code")).isNotNull(),
+                () -> assertThat(problemDetail.getProperties().get("reissuable")).isNotNull()
+        );
     }
 
     private String generateToken(Member member) {

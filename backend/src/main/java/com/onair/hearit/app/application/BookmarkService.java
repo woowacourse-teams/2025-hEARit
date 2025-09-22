@@ -1,16 +1,16 @@
 package com.onair.hearit.app.application;
 
 import com.onair.hearit.app.dto.request.PagingRequest;
-import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.app.dto.response.BookmarkHearitResponseV2;
 import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
-import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
+import com.onair.hearit.common.exception.custom.ForbiddenException;
 import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.exception.custom.UnauthenticatedException;
 import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlaytimeProjection;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
@@ -30,7 +30,7 @@ public class BookmarkService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public PagedResponse<BookmarkHearitResponse> getBookmarkHearits(
+    public Page<BookmarkHearitResponseV2> getBookmarkHearits(
             UserInfo userInfo,
             PagingRequest pagingRequest) {
         Member member = getMemberByUserInfo(userInfo);
@@ -38,12 +38,11 @@ public class BookmarkService {
         Page<BookmarkWithPlaytimeProjection> projections = bookmarkRepository.findAllByMemberOrderByRecent(
                 member.getId(),
                 pageable);
-        Page<BookmarkHearitResponse> response = toBookmarkHearitResponse(projections);
-        return PagedResponse.from(response);
+        return toBookmarkHearitResponse(projections);
     }
 
-    private Page<BookmarkHearitResponse> toBookmarkHearitResponse(Page<BookmarkWithPlaytimeProjection> projections) {
-        return projections.map(p -> BookmarkHearitResponse.of(
+    private Page<BookmarkHearitResponseV2> toBookmarkHearitResponse(Page<BookmarkWithPlaytimeProjection> projections) {
+        return projections.map(p -> BookmarkHearitResponseV2.of(
                 p.getBookmark(),
                 p.getBookmark().getHearit(),
                 p.getLastPlayTime()
@@ -67,14 +66,14 @@ public class BookmarkService {
         Bookmark bookmark = getBookmarkById(bookmarkId);
         Member member = getMemberByUserInfo(userInfo);
         if (!bookmark.isCreatedBy(member)) {
-            throw new UnauthorizedException("북마크를 삭제할 권한이 없습니다.");
+            throw new ForbiddenException("북마크를 삭제할 권한이 없습니다.");
         }
         bookmarkRepository.delete(bookmark);
     }
 
     private Member getMemberByUserInfo(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
-            throw new UnauthorizedException("로그인한 회원이 아닙니다.");
+            throw new UnauthenticatedException();
         }
         return getMemberById(userInfo.getMemberId());
     }

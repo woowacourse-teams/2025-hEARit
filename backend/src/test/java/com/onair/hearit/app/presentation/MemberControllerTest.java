@@ -78,7 +78,7 @@ class MemberControllerTest extends IntegrationTest {
                                 .summary("내 정보 조회")
                                 .description("현재 로그인한 사용자의 정보를 조회합니다.")
                                 .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
                                 .build()))
                 )
                 .when()

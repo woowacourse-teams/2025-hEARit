@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.dto.request.PagingRequest;
-import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.app.dto.response.BookmarkHearitResponseV2;
 import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
 import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.common.domain.Bookmark;
@@ -15,7 +15,8 @@ import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.AlreadyExistException;
-import com.onair.hearit.common.exception.custom.UnauthorizedException;
+import com.onair.hearit.common.exception.custom.ForbiddenException;
+import com.onair.hearit.common.exception.custom.UnauthenticatedException;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
@@ -72,8 +73,8 @@ class BookmarkServiceTest {
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
-        List<BookmarkHearitResponse> responses = bookmarkService.getBookmarkHearits(
-                RequestUser.member(member.getId()).getUserInfo(), new PagingRequest(0, 20)).content();
+        List<BookmarkHearitResponseV2> responses = bookmarkService.getBookmarkHearits(
+                RequestUser.member(member.getId()).getUserInfo(), new PagingRequest(0, 20)).stream().toList();
 
         // then
         assertAll(() -> {
@@ -97,7 +98,7 @@ class BookmarkServiceTest {
 
         // when
         assertThatThrownBy(() -> bookmarkService.getBookmarkHearits(guestInfo, pagingRequest))
-                .isInstanceOf(UnauthorizedException.class);
+                .isInstanceOf(UnauthenticatedException.class);
     }
 
     @Test
@@ -157,7 +158,7 @@ class BookmarkServiceTest {
     }
 
     @Test
-    @DisplayName("북마크 삭제 시, 북마크를 한 멤버가 아니라면 UnauthorizedException을 던진다.")
+    @DisplayName("북마크 삭제 시, 북마크를 한 멤버가 아니라면 Forbidden을 던진다.")
     void deleteBookmark_UnauthorizedTest() {
         // given
         Member bookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -172,7 +173,7 @@ class BookmarkServiceTest {
         // when & then
         assertThatThrownBy(
                 () -> bookmarkService.deleteBookmark(bookmarkId, notBookmarkMemberInfo))
-                .isInstanceOf(UnauthorizedException.class)
+                .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("북마크를 삭제할 권한이 없습니다.");
     }
 }

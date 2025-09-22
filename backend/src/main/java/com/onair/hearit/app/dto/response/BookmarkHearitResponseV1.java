@@ -9,15 +9,15 @@ public record BookmarkHearitResponseV1(
         Long lastPlayTime,
         String categoryColor
 ) {
-    public static BookmarkHearitResponseV1 from(BookmarkHearitResponse bookmarkHearitResponse) {
-        BookmarkHearitResponse.CategoryResponse category = bookmarkHearitResponse.category();
+    public static BookmarkHearitResponseV1 from(BookmarkHearitResponseV2 bookmarkHearitResponseV2) {
+        BookmarkHearitResponseV2.CategoryResponse category = bookmarkHearitResponseV2.category();
         return new BookmarkHearitResponseV1(
-                bookmarkHearitResponse.hearitId(),
-                bookmarkHearitResponse.bookmarkId(),
-                bookmarkHearitResponse.title(),
-                bookmarkHearitResponse.summary(),
-                bookmarkHearitResponse.playTime(),
-                bookmarkHearitResponse.lastPlayTime(),
+                bookmarkHearitResponseV2.hearitId(),
+                bookmarkHearitResponseV2.bookmarkId(),
+                bookmarkHearitResponseV2.title(),
+                bookmarkHearitResponseV2.summary(),
+                bookmarkHearitResponseV2.playTime(),
+                bookmarkHearitResponseV2.lastPlayTime(),
                 category.colorCode()
         );
     }
