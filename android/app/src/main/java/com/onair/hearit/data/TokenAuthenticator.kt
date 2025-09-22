@@ -10,7 +10,6 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
-import timber.log.Timber
 
 class TokenAuthenticator(
     private val preferenceProvider: () -> PreferencesLocalDataSource,
@@ -49,7 +48,7 @@ class TokenAuthenticator(
 
             return when {
                 // 토큰 만료 - 갱신 가능
-                errorResponse?.properties?.code == "ACCESS_TOKEN_EXPIRED" && errorResponse.properties.reissuable -> {
+                errorResponse?.properties?.let { it.code == "ACCESS_TOKEN_EXPIRED" && it.reissuable } == true -> {
                     refreshTokenAndRetry(response.request)
                 }
 
@@ -61,9 +60,9 @@ class TokenAuthenticator(
 
     private fun refreshTokenAndRetry(originalRequest: Request): Request? {
         if (isRefreshing) return null
+        isRefreshing = true
         return try {
             val newToken = runBlocking { refreshToken() }
-            Timber.d("$newToken")
             if (newToken != null) {
                 TokenInterceptorProvider.setAccessToken(newToken)
                 originalRequest
