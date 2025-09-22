@@ -5,12 +5,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
+import com.onair.hearit.app.dto.response.PlayingHistoryResponse;
 import com.onair.hearit.app.infrastructure.scheduler.PlayingHistoryBuffer;
+import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.Source;
+import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
@@ -55,7 +58,48 @@ class PlayingHistoryServiceTest {
 
     @BeforeEach
     void setup() {
-        playingHistoryService = new PlayingHistoryService(playingHistoryBuffer, hearitRepository);
+        playingHistoryService = new PlayingHistoryService(
+                hearitRepository,
+                playingHistoryRepository,
+                playingHistoryBuffer);
+    }
+
+    @Test
+    @DisplayName("회원은 최근 재생 기록을 조회할 수 있다.")
+    void getRecentPlayingHistoryOfMember_whenMember() throws InterruptedException {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        UserInfo memberInfo = RequestUser.member(member.getId()).getUserInfo();
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        dbHelper.insertPlayingHistory(new PlayingHistory(memberInfo.getMemberId(), hearit1, 10));
+        Thread.sleep(1000);
+        dbHelper.insertPlayingHistory(new PlayingHistory(memberInfo.getMemberId(), hearit2, 20));
+
+        // when
+        List<PlayingHistoryResponse> result = playingHistoryService.getRecentPlayingHistoryOfMember(memberInfo);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result.get(0).id()).isEqualTo(hearit2.getId()),
+                () -> assertThat(result.get(1).id()).isEqualTo(hearit1.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("회원이 아닌 유저는 빈 재생 기록을 반환한다.")
+    void getRecentPlayingHistoryOfMember_whenGuestOrNull_thenReturnEmpty() {
+        // given
+        UserInfo guestInfo = RequestUser.guest(UUID.randomUUID().toString()).getUserInfo();
+
+        // when
+        List<PlayingHistoryResponse> guestResult = playingHistoryService.getRecentPlayingHistoryOfMember(guestInfo);
+
+        // then
+        assertThat(guestResult).isEmpty();
     }
 
     @Test
