@@ -12,6 +12,7 @@ import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +24,7 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.main.MainActivity
+import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.recent.searchResult.SearchedHearitAdapter
@@ -40,6 +42,8 @@ class CategoryFragment :
     private val categoryColor: String by lazy {
         requireArguments().getString(CATEGORY_COLOR_KEY) ?: "#000000"
     }
+
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     private val viewModel: SearchViewModel by viewModels {
         val input = requireArguments().let { SearchInput.from(it) }
@@ -132,6 +136,10 @@ class CategoryFragment :
     }
 
     private fun observeViewModel() {
+        mainViewModel.bookmarkUpdated.observe(viewLifecycleOwner) {
+            viewModel.refreshSearchResults()
+        }
+
         viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
             searchedAdapter.submitList(searchedHearits)
         }
