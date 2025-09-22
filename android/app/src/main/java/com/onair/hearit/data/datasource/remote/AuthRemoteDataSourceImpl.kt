@@ -14,9 +14,9 @@ class AuthRemoteDataSourceImpl(
     private val authService: AuthService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : AuthRemoteDataSource {
-    override suspend fun checkAccessToken(): Result<NetworkResult<Unit>> =
+    override suspend fun checkAccessToken(accessToken: String): Result<NetworkResult<Unit>> =
         handleApiCall(
-            apiCall = { authService.getAuthCheck() },
+            apiCall = { authService.getAuthCheck("Bearer $accessToken") },
             transform = { },
             errorHandler = errorResponseHandler,
         )

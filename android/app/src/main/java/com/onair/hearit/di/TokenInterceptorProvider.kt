@@ -44,7 +44,7 @@ object TokenInterceptorProvider {
         accessToken = token
     }
 
-    fun setDeviceUuid(uuid: String) {
+    fun setDeviceUuid(uuid: String?) {
         deviceUuid = uuid
     }
 }
