@@ -34,13 +34,6 @@ object UseCaseProvider {
         GetShortsHearitUseCase(mediaFileRepository = RepositoryProvider.mediaFileRepository)
     }
 
-    val getNextBookmarkUseCase: GetNextBookmarkUseCase by lazy {
-        GetNextBookmarkUseCase(
-            bookmarkRepository = RepositoryProvider.bookmarkRepository,
-            mediaFileRepository = RepositoryProvider.mediaFileRepository,
-        )
-    }
-
     val getBookmarksUseCase: GetBookmarksUseCase by lazy {
         GetBookmarksUseCase(
             bookmarkRepository = RepositoryProvider.bookmarkRepository,
