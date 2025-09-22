@@ -98,6 +98,7 @@ class MainActivity :
         setupNavigation()
         setupDrawer()
         observeViewModel()
+        attachController()
         showFragment(HomeFragment())
         setupBottomControllerClick()
     }
