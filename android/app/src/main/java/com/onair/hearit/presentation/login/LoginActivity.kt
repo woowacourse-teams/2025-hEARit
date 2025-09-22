@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
+import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.databinding.ActivityLoginBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
@@ -74,11 +75,14 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         binding.btnLoginKakao.setOnClickListener {
+            TokenInterceptorProvider.setDeviceUuid(null)
             kakaoLoginHelper.startLogin()
         }
 
         binding.tvNoLoginHearit.setOnClickListener {
+            AuthEventManager.onLoginSuccess()
             lifecycleScope.launch {
+                viewModel.clearData()
                 setUserId(null)
                 navigateToMain()
             }

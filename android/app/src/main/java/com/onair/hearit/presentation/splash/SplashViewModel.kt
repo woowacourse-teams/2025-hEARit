@@ -42,10 +42,14 @@ class SplashViewModel(
         refreshToken: String,
     ) {
         authRepository
-            .checkAccessToken()
+            .checkAccessToken(accessToken)
             .onSuccess {
-                _checkToken.value = true
+                val saved = authRepository.saveToken(accessToken).isSuccess
+                if (!saved) {
+                    Timber.w("accessToken 저장에 실패했습니다.")
+                }
                 TokenInterceptorProvider.setAccessToken(accessToken)
+                _checkToken.value = true
             }.onFailure { throwable ->
                 handleAccessTokenError(throwable, refreshToken)
             }

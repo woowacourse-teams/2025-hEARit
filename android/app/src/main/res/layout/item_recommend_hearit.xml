@@ -37,12 +37,15 @@
 
         <ImageView
             android:id="@+id/iv_recommend_hearit_disk"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="44dp"
+            android:layout_marginTop="20dp"
             android:contentDescription="@null"
             android:scaleType="fitCenter"
             android:src="@drawable/img_home_record"
+            app:layout_constraintBottom_toTopOf="@id/tv_recommend_hearit_title"
+            app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_recommend_hearit_category" />
