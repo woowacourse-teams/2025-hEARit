@@ -19,4 +19,6 @@ public interface PlayingHistoryRepository extends JpaRepository<PlayingHistory, 
             LIMIT :size
             """)
     List<PlayingHistory> findByMemberIdOrderByUpdatedAtDesc(@Param("memberId") Long memberId, @Param("size") int size);
+
+    List<PlayingHistory> findByMemberIdAndHearitIdIn(Long memberId, List<Long> hearitIds);
 }
