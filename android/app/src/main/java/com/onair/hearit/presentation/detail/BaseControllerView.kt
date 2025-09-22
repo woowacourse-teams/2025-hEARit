@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import androidx.core.view.get
+import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
@@ -45,6 +46,9 @@ class BaseControllerView
 
         private fun initView() {
             binding = LayoutControllerBinding.inflate(LayoutInflater.from(context), this, true)
+
+            binding.exoPosition.text = DEFAULT_POSITION_TEXT
+            binding.exoDuration.text = DEFAULT_DURATION_TEXT
         }
 
         fun setPlayer(player: Player) =
@@ -151,7 +155,9 @@ class BaseControllerView
             if (timeline.isEmpty || index >= timeline.windowCount) return
 
             timeline.getWindow(index, window)
-            binding.exoProgress.setDuration(window.durationMs)
+            val winDuration = if (window.durationMs == C.TIME_UNSET) 0L else window.durationMs
+            binding.exoProgress.setDuration(winDuration)
+
             updateProgress()
         }
 
@@ -165,11 +171,12 @@ class BaseControllerView
             if (!isAttachedToWindow) return
 
             val pos = player.currentPosition
+            val rawDuration = player.duration
+            val duration = if (rawDuration == C.TIME_UNSET) 0L else rawDuration
             val buf = player.bufferedPosition
-            val duration = player.duration
 
             binding.exoPosition.text = Util.getStringForTime(formatBuilder, formatter, pos)
-            val remaining = maxOf(duration - pos, 0L)
+            val remaining = (duration - pos).coerceAtLeast(0L)
             binding.exoDuration.text = "-${Util.getStringForTime(formatBuilder, formatter, remaining)}"
 
             binding.exoProgress.setPosition(pos)
@@ -252,6 +259,9 @@ class BaseControllerView
         }
 
         companion object {
+            private const val DEFAULT_POSITION_TEXT = "00:00"
+            private const val DEFAULT_DURATION_TEXT = "-00:00"
+
             private const val DEFAULT_SPEED_INDEX = 1
             private const val PROGRESS_UPDATE_BASE_MS = 1000f
             private const val PROGRESS_UPDATE_MIN_MS = 100f
