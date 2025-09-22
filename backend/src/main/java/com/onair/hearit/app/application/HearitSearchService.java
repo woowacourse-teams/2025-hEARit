@@ -4,6 +4,7 @@ import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.HearitSearchResponse;
 import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.common.domain.PlayingHistory;
@@ -16,6 +17,7 @@ import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,8 +29,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HearitSearchService {
 
-    private static final int KEYWORD_PER_HEARIT = 3;
-
     private final HearitRepository hearitRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final MemberRepository memberRepository;
@@ -39,11 +39,10 @@ public class HearitSearchService {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.searchByTerm(toBooleanModeQuery(searchTerm), pageable);
         if (userInfo == null || userInfo.isGuest()) {
-            return PagedResponse.from(hearits.map(this::toHearitSearchResponseForGuest));
+            return PagedResponse.from(toHearitSearchResponseForGuest(hearits));
         }
-
         Member member = getMemberByUserInfo(userInfo);
-        return PagedResponse.from(hearits.map(hearit -> toHearitSearchResponseForMember(hearit, member)));
+        return PagedResponse.from(toHearitSearchResponseForMember(hearits, member));
     }
 
     private String toBooleanModeQuery(String searchTerm) {
@@ -58,19 +57,32 @@ public class HearitSearchService {
         return token.replaceAll("[+\\-~<>()\"*@]", "");
     }
 
-    private HearitSearchResponse toHearitSearchResponseForGuest(Hearit hearit) {
-        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-                KEYWORD_PER_HEARIT);
-        return HearitSearchResponse.of(hearit, keywords, null);
+    private Page<HearitSearchResponse> toHearitSearchResponseForGuest(Page<Hearit> hearits) {
+        List<Long> hearitIds = hearits.getContent().stream().map(Hearit::getId).toList();
+        Map<Long, List<Keyword>> hearitKeywords = getHearitKeywords(hearitIds);
+        return hearits.map(hearit -> HearitSearchResponse.of(hearit, hearitKeywords.get(hearit.getId()), null));
     }
 
-    private HearitSearchResponse toHearitSearchResponseForMember(Hearit hearit, Member member) {
-        Long lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
-                .map(PlayingHistory::getLastPlayTime)
-                .orElse(null);
-        List<Keyword> keywords = hearitKeywordRepository.findRecentKeywordsByHearitId(hearit.getId(),
-                KEYWORD_PER_HEARIT);
-        return HearitSearchResponse.of(hearit, keywords, lastPlayTime);
+    private Page<HearitSearchResponse> toHearitSearchResponseForMember(Page<Hearit> hearits, Member member) {
+        List<Long> hearitIds = hearits.getContent().stream().map(Hearit::getId).toList();
+        Map<Long, List<Keyword>> hearitKeywords = getHearitKeywords(hearitIds);
+        Map<Long, Long> playingHistories =
+                playingHistoryRepository.findByMemberIdAndHearitIdIn(member.getId(), hearitIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                PlayingHistory::getHearitId,
+                                PlayingHistory::getLastPlayTime));
+        return hearits.map(hearit -> HearitSearchResponse.of(
+                hearit,
+                hearitKeywords.get(hearit.getId()),
+                playingHistories.get(hearit.getId())));
+    }
+
+    private Map<Long, List<Keyword>> getHearitKeywords(List<Long> hearitIds) {
+        return hearitKeywordRepository.findByHearitIdIn(hearitIds)
+                .stream()
+                .collect(Collectors.groupingBy(hk -> hk.getHearit().getId(),
+                        Collectors.mapping(HearitKeyword::getKeyword, Collectors.toList())));
     }
 
     private Member getMemberByUserInfo(UserInfo useruserInfo) {
