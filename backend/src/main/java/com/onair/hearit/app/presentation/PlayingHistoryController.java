@@ -2,7 +2,7 @@ package com.onair.hearit.app.presentation;
 
 import com.onair.hearit.app.application.PlayingHistoryService;
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
-import com.onair.hearit.app.dto.response.PlayingHistoryResponse;
+import com.onair.hearit.app.dto.response.RecentlyPlayedHearitResponse;
 import com.onair.hearit.auth.domain.RequestUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +23,9 @@ public class PlayingHistoryController {
     private final PlayingHistoryService playingHistoryService;
 
     @GetMapping
-    public ResponseEntity<List<PlayingHistoryResponse>> readPlayingHistoriesOfMember(
+    public ResponseEntity<List<RecentlyPlayedHearitResponse>> readPlayingHistoriesOfMember(
             @AuthenticationPrincipal RequestUser requestUser) {
-        List<PlayingHistoryResponse> responses =
+        List<RecentlyPlayedHearitResponse> responses =
                 playingHistoryService.getRecentPlayingHistoryOfMember(requestUser.getUserInfo());
         return ResponseEntity.ok(responses);
     }

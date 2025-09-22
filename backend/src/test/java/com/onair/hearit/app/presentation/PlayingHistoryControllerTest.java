@@ -7,7 +7,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
-import com.onair.hearit.app.dto.response.PlayingHistoryResponse;
+import com.onair.hearit.app.dto.response.RecentlyPlayedHearitResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
@@ -43,7 +43,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
         }
 
         // when & then
-        List<PlayingHistoryResponse> response = RestAssured.given(this.spec)
+        List<RecentlyPlayedHearitResponse> response = RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .contentType("application/json")
                 .filter(document("playing-history-read-member",
@@ -85,7 +85,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
         }
 
         // when & then
-        List<PlayingHistoryResponse> response = RestAssured.given(this.spec)
+        List<RecentlyPlayedHearitResponse> response = RestAssured.given(this.spec)
                 .contentType("application/json")
                 .filter(document("playing-history-read-guest",
                         resource(ResourceSnippetParameters.builder()

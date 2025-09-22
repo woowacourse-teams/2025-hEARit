@@ -1,7 +1,7 @@
 package com.onair.hearit.app.application;
 
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
-import com.onair.hearit.app.dto.response.PlayingHistoryResponse;
+import com.onair.hearit.app.dto.response.RecentlyPlayedHearitResponse;
 import com.onair.hearit.app.infrastructure.scheduler.PlayingHistoryBuffer;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.PlayingHistory;
@@ -27,14 +27,14 @@ public class PlayingHistoryService {
     private final PlayingHistoryRepository playingHistoryRepository;
     private final PlayingHistoryBuffer playingHistoryBuffer;
 
-    public List<PlayingHistoryResponse> getRecentPlayingHistoryOfMember(UserInfo userInfo) {
+    public List<RecentlyPlayedHearitResponse> getRecentPlayingHistoryOfMember(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
             return new ArrayList<>();
         }
         return toPlayingHistoryResponseForMember(userInfo.getMemberId());
     }
 
-    private List<PlayingHistoryResponse> toPlayingHistoryResponseForMember(Long memberId) {
+    private List<RecentlyPlayedHearitResponse> toPlayingHistoryResponseForMember(Long memberId) {
         List<PlayingHistory> histories = playingHistoryRepository.findByMemberIdOrderByUpdatedAtDesc(
                 memberId, PLAYING_HISTORY_MAX_COUNT);
         Map<Long, Long> lastPlayTimeByHearitId = histories.stream()
@@ -43,7 +43,7 @@ public class PlayingHistoryService {
         Map<Long, Hearit> hearitMap = hearitRepository.findAllByIdIn(lastPlayTimeByHearitId.keySet().stream().toList())
                 .stream().collect(Collectors.toMap(Hearit::getId, h -> h));
         return lastPlayTimeByHearitId.entrySet().stream()
-                .map(e -> PlayingHistoryResponse.from(hearitMap.get(e.getKey()), e.getValue()))
+                .map(e -> RecentlyPlayedHearitResponse.from(hearitMap.get(e.getKey()), e.getValue()))
                 .toList();
     }
 

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
-import com.onair.hearit.app.dto.response.PlayingHistoryResponse;
+import com.onair.hearit.app.dto.response.RecentlyPlayedHearitResponse;
 import com.onair.hearit.app.infrastructure.scheduler.PlayingHistoryBuffer;
 import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.common.domain.Category;
@@ -79,7 +79,7 @@ class PlayingHistoryServiceTest {
         dbHelper.insertPlayingHistory(new PlayingHistory(memberInfo.getMemberId(), hearit2, 20));
 
         // when
-        List<PlayingHistoryResponse> result = playingHistoryService.getRecentPlayingHistoryOfMember(memberInfo);
+        List<RecentlyPlayedHearitResponse> result = playingHistoryService.getRecentPlayingHistoryOfMember(memberInfo);
 
         // then
         assertAll(
@@ -96,7 +96,7 @@ class PlayingHistoryServiceTest {
         UserInfo guestInfo = RequestUser.guest(UUID.randomUUID().toString()).getUserInfo();
 
         // when
-        List<PlayingHistoryResponse> guestResult = playingHistoryService.getRecentPlayingHistoryOfMember(guestInfo);
+        List<RecentlyPlayedHearitResponse> guestResult = playingHistoryService.getRecentPlayingHistoryOfMember(guestInfo);
 
         // then
         assertThat(guestResult).isEmpty();

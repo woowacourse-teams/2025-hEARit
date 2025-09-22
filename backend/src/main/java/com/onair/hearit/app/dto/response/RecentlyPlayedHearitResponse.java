@@ -4,7 +4,7 @@ import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import java.time.LocalDateTime;
 
-public record PlayingHistoryResponse(
+public record RecentlyPlayedHearitResponse(
         Long id,
         String title,
         Integer playTime,
@@ -12,8 +12,8 @@ public record PlayingHistoryResponse(
         LocalDateTime createdAt,
         CategoryResponse category
 ) {
-    public static PlayingHistoryResponse from(Hearit hearit, Long lastPlayTime) {
-        return new PlayingHistoryResponse(
+    public static RecentlyPlayedHearitResponse from(Hearit hearit, Long lastPlayTime) {
+        return new RecentlyPlayedHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getPlayTime(),
