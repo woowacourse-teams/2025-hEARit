@@ -1,6 +1,5 @@
 package com.onair.hearit.app.presentation;
 
-
 import com.onair.hearit.app.application.BookmarkService;
 import com.onair.hearit.app.dto.request.PagingRequest;
 import com.onair.hearit.app.dto.response.BookmarkHearitResponseV1;
@@ -17,18 +16,16 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
 public class BookmarkController {
 
     private final BookmarkService bookmarkService;
 
-    @GetMapping("/v1/bookmarks/hearits")
+    @GetMapping("/api/v1/bookmarks/hearits")
     public ResponseEntity<PagedResponse<BookmarkHearitResponseV1>> readBookmarkHearitsV1(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
@@ -40,7 +37,7 @@ public class BookmarkController {
         return ResponseEntity.ok(PagedResponse.from(v1Responses));
     }
 
-    @GetMapping("/v2/bookmarks/hearits")
+    @GetMapping("/api/v2/bookmarks/hearits")
     public ResponseEntity<PagedResponse<BookmarkHearitResponseV2>> readBookmarkHearitsV2(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
@@ -52,7 +49,7 @@ public class BookmarkController {
         return ResponseEntity.ok(PagedResponse.from(bookmarkHearits));
     }
 
-    @PostMapping("/v1/bookmarks/hearits/{hearitId}")
+    @PostMapping("/api/v1/bookmarks/hearits/{hearitId}")
     public ResponseEntity<BookmarkInfoResponse> createBookmark(
             @PathVariable Long hearitId,
             @AuthenticationPrincipal RequestUser requestUser) {
@@ -60,7 +57,7 @@ public class BookmarkController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @DeleteMapping("/v1/bookmarks/{bookmarkId}")
+    @DeleteMapping("/api/v1/bookmarks/{bookmarkId}")
     public ResponseEntity<Void> deleteBookmark(
             @PathVariable Long bookmarkId,
             @AuthenticationPrincipal RequestUser requestUser) {

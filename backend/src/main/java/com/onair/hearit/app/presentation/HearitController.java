@@ -21,20 +21,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
 public class HearitController {
 
     private final HearitService hearitService;
     private final HearitExploreService hearitExploreService;
     private final HearitSearchService hearitSearchService;
 
-    @GetMapping("/v1/hearits/{hearitId}")
+    @GetMapping("/api/v1/hearits/{hearitId}")
     public ResponseEntity<HearitDetailResponse> readHearit(
             @PathVariable Long hearitId,
             @AuthenticationPrincipal RequestUser requestUser) {
@@ -42,7 +40,7 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/v1/hearits/explore")
+    @GetMapping("/api/v1/hearits/explore")
     public ResponseEntity<CursorResponseV1<ExploredHearitResponse>> readExploredHearitsV1(
             @AuthenticationPrincipal RequestUser requestUser,
             @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
@@ -54,7 +52,7 @@ public class HearitController {
         return ResponseEntity.ok(responsesV1);
     }
 
-    @GetMapping("/v2/hearits/explore")
+    @GetMapping("/api/v2/hearits/explore")
     public ResponseEntity<CursorResponseV2<ExploredHearitResponse>> readExploredHearitsV2(
             @AuthenticationPrincipal RequestUser requestUser,
             @RequestParam(name = "cursorId", defaultValue = "0") long cursorId,
@@ -65,7 +63,7 @@ public class HearitController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/v1/hearits/recommend")
+    @GetMapping("/api/v1/hearits/recommend")
     public ResponseEntity<List<RecommendHearitResponse>> readRecommendedHearits() {
         List<RecommendHearitResponse> responses = hearitService.getRecommendedHearits();
         return ResponseEntity.ok(responses);
