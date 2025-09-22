@@ -15,6 +15,7 @@ import androidx.media3.common.util.Util
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutControllerBinding
+import java.math.BigDecimal
 import java.util.Formatter
 import java.util.Locale
 import kotlin.math.abs
@@ -201,9 +202,14 @@ class BaseControllerView
 
         private fun updateSpeedLabel() {
             val speed = player.playbackParameters.speed
-            val speedStr = String.format(Locale.getDefault(), "%.2f", speed).trimEnd('0').trimEnd('.')
+            val speedString =
+                BigDecimal(speed.toDouble())
+                    .stripTrailingZeros()
+                    .toPlainString()
+                    .let { if (speed % 1f == 0f) "$it.0" else it }
+
             binding.playSpeed.text =
-                context.getString(R.string.player_detail_player_speed_label, speedStr)
+                context.getString(R.string.player_detail_player_speed_label, speedString)
         }
 
         private fun defaultSpeedIndex(): Int = speedOptions.indexOfFirst { floatsAreEqualWithinTolerance(it, 1f) }.takeIf { it >= 0 } ?: 0
