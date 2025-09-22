@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import androidx.core.view.get
+import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
@@ -14,6 +15,7 @@ import androidx.media3.common.util.Util
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutControllerBinding
+import java.math.BigDecimal
 import java.util.Formatter
 import java.util.Locale
 import kotlin.math.abs
@@ -33,9 +35,8 @@ class BaseControllerView
         private val formatter = Formatter(formatBuilder, Locale.getDefault())
 
         private val window = Timeline.Window()
-        private var playSpeedIndex = DEFAULT_SPEED_INDEX
-
-        private val speedOptions = floatArrayOf(0.5f, 1f, 1.25f, 1.5f, 2f)
+        private val speedOptions = floatArrayOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
+        private var playSpeedIndex = defaultSpeedIndex()
 
         private val progressRunnable = Runnable { updateProgress() }
 
@@ -45,6 +46,9 @@ class BaseControllerView
 
         private fun initView() {
             binding = LayoutControllerBinding.inflate(LayoutInflater.from(context), this, true)
+
+            binding.exoPosition.text = DEFAULT_POSITION_TEXT
+            binding.exoDuration.text = DEFAULT_DURATION_TEXT
         }
 
         fun setPlayer(player: Player) =
@@ -95,7 +99,7 @@ class BaseControllerView
                 speedOptions
                     .indexOfFirst { floatsAreEqualWithinTolerance(it, currentSpeed) }
                     .takeIf { it >= 0 }
-                    ?: DEFAULT_SPEED_INDEX
+                    ?: defaultSpeedIndex()
             updateSpeedLabel()
         }
 
@@ -104,7 +108,7 @@ class BaseControllerView
             playSpeedIndex = speedOptions
                 .indexOfFirst { floatsAreEqualWithinTolerance(it, speed) }
                 .takeIf { it >= 0 }
-                ?: DEFAULT_SPEED_INDEX
+                ?: defaultSpeedIndex()
             updateSpeedLabel()
         }
 
@@ -121,7 +125,7 @@ class BaseControllerView
             val checkedIndex =
                 speedOptions
                     .indexOfFirst { floatsAreEqualWithinTolerance(it, currentSpeed) }
-                    .takeIf { it >= 0 } ?: DEFAULT_SPEED_INDEX
+                    .takeIf { it >= 0 } ?: defaultSpeedIndex()
 
             popup.menu[checkedIndex].isChecked = true
             popup.menu.setGroupCheckable(0, true, true)
@@ -151,7 +155,9 @@ class BaseControllerView
             if (timeline.isEmpty || index >= timeline.windowCount) return
 
             timeline.getWindow(index, window)
-            binding.exoProgress.setDuration(window.durationMs)
+            val winDuration = if (window.durationMs == C.TIME_UNSET) 0L else window.durationMs
+            binding.exoProgress.setDuration(winDuration)
+
             updateProgress()
         }
 
@@ -165,12 +171,15 @@ class BaseControllerView
             if (!isAttachedToWindow) return
 
             val pos = player.currentPosition
+            val rawDuration = player.duration
+            val duration = if (rawDuration == C.TIME_UNSET) 0L else rawDuration
             val buf = player.bufferedPosition
-            val duration = player.duration
 
             binding.exoPosition.text = Util.getStringForTime(formatBuilder, formatter, pos)
-            val remaining = maxOf(duration - pos, 0L)
-            binding.exoDuration.text = "-${Util.getStringForTime(formatBuilder, formatter, remaining)}"
+            val remaining = (duration - pos).coerceAtLeast(0L)
+            val remainingStr = Util.getStringForTime(formatBuilder, formatter, remaining)
+            binding.exoDuration.text =
+                context.getString(R.string.player_detail_player_duration_remaining, remainingStr)
 
             binding.exoProgress.setPosition(pos)
             binding.exoProgress.setBufferedPosition(buf)
@@ -193,8 +202,17 @@ class BaseControllerView
 
         private fun updateSpeedLabel() {
             val speed = player.playbackParameters.speed
-            binding.playSpeed.text = "${speed}x"
+            val speedString =
+                BigDecimal(speed.toDouble())
+                    .stripTrailingZeros()
+                    .toPlainString()
+                    .let { if (speed % 1f == 0f) "$it.0" else it }
+
+            binding.playSpeed.text =
+                context.getString(R.string.player_detail_player_speed_label, speedString)
         }
+
+        private fun defaultSpeedIndex(): Int = speedOptions.indexOfFirst { floatsAreEqualWithinTolerance(it, 1f) }.takeIf { it >= 0 } ?: 0
 
         private inner class ComponentListener :
             Player.Listener,
@@ -252,7 +270,8 @@ class BaseControllerView
         }
 
         companion object {
-            private const val DEFAULT_SPEED_INDEX = 1
+            private const val DEFAULT_POSITION_TEXT = "00:00"
+            private const val DEFAULT_DURATION_TEXT = "-00:00"
             private const val PROGRESS_UPDATE_BASE_MS = 1000f
             private const val PROGRESS_UPDATE_MIN_MS = 100f
             private const val PROGRESS_UPDATE_MAX_MS = 2000f

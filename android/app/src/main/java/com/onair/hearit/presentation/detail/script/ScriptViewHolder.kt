@@ -12,9 +12,14 @@ class ScriptViewHolder(
     fun bind(
         item: ScriptLine,
         isHighlighted: Boolean,
+        isPast: Boolean,
+        onClick: (ScriptLine) -> Unit,
     ) {
         binding.scriptLine = item
         binding.isHighlighted = isHighlighted
+        binding.isPast = isPast
+
+        binding.root.setOnClickListener { onClick(item) }
     }
 
     companion object {
