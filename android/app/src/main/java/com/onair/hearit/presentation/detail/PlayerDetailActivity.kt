@@ -54,6 +54,8 @@ import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -230,7 +232,6 @@ class PlayerDetailActivity :
                 startLibraryPlayback(
                     seedHearitId = hearit.id,
                     seedBookmarkId = viewModel.bookmarkId.value,
-                    startPosMs = startPosition,
                 )
             } else {
                 if (!controller.isPlaying) controller.play()
@@ -238,7 +239,7 @@ class PlayerDetailActivity :
         } else {
             // 단일 재생 모드
             if (isDifferentHearit) {
-                playSingleWithController(hearit, startPosition, previousScreen)
+                playSingleWithController(hearit, previousScreen)
             } else {
                 if (!controller.isPlaying) controller.play()
                 if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
@@ -252,14 +253,12 @@ class PlayerDetailActivity :
     private fun startLibraryPlayback(
         seedHearitId: Long,
         seedBookmarkId: Long?,
-        startPosMs: Long,
     ) {
         val controller = mediaController ?: return
         val args =
             Bundle().apply {
-                putLong("SEED_HEARIT_ID", seedHearitId)
-                putLong("SEED_BOOKMARK_ID", seedBookmarkId ?: -1)
-                putLong("START_POSITION", startPosMs.coerceAtLeast(0L))
+                putLong(EXTRA_SEED_HEARIT_ID, seedHearitId)
+                putLong(EXTRA_SEED_BOOKMARK_ID, seedBookmarkId ?: -1)
             }
 
         controller.sendCustomCommand(
@@ -277,7 +276,6 @@ class PlayerDetailActivity :
     // 단일 재생 전용: 커맨드 전송 없이 setMediaItem만 수행
     private fun playSingleWithController(
         hearit: Hearit,
-        startPosition: Long = 0L,
         previousScreen: String,
     ) {
         val controller = mediaController ?: return
@@ -286,7 +284,6 @@ class PlayerDetailActivity :
             Bundle().apply {
                 putLong(KEY_BOOKMARK_ID, hearit.bookmarkId ?: -1L)
                 putString(KEY_PLAYBACK_MODE, previousScreen)
-                putLong(KEY_START_POSITION, startPosition)
             }
 
         val item =
@@ -303,7 +300,7 @@ class PlayerDetailActivity :
                         .build(),
                 ).build()
 
-        controller.setMediaItem(item, startPosition)
+        controller.setMediaItem(item, hearit.lastPlayTime ?: 0L)
         controller.prepare()
         controller.play()
     }
@@ -457,7 +454,6 @@ class PlayerDetailActivity :
 
         private const val KEY_BOOKMARK_ID = "BOOKMARK_ID"
         private const val KEY_PLAYBACK_MODE = "PLAYBACK_MODE"
-        private const val KEY_START_POSITION = "START_POSITION"
 
         fun newIntent(
             context: Context,
