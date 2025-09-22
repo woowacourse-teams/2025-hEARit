@@ -77,9 +77,9 @@ fun setScriptTextColor(
     isHighlighted: Boolean = false,
     isPast: Boolean = false,
 ) {
-    val ctx = textView.context
-    val gray4 = ContextCompat.getColor(ctx, R.color.hearit_gray4)
-    val gray2 = ContextCompat.getColor(ctx, R.color.hearit_gray2)
+    val context = textView.context
+    val gray4 = ContextCompat.getColor(context, R.color.hearit_gray4)
+    val gray2 = ContextCompat.getColor(context, R.color.hearit_gray2)
 
     textView.setTextColor(if (isHighlighted || isPast) gray4 else gray2)
 }
