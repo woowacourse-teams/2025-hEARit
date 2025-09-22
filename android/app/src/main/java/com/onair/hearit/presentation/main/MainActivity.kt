@@ -101,6 +101,13 @@ class MainActivity :
         setupBottomControllerClick()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!AuthEventManager.isValidSession()) {
+            handleForceLogout()
+        }
+    }
+
     fun launchDetailActivity(intent: Intent) {
         detailResultLauncher.launch(intent)
     }

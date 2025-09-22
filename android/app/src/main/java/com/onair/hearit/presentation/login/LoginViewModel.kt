@@ -62,4 +62,15 @@ class LoginViewModel(
                 }
         }
     }
+
+    fun clearData() {
+        viewModelScope.launch {
+            preferencesLocalDataSource
+                .clearData()
+                .onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.main_toast_clear_token_fail
+                }
+        }
+    }
 }

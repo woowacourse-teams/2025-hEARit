@@ -15,10 +15,6 @@ class TokenAuthenticator(
     private val preferenceProvider: () -> PreferencesLocalDataSource,
     private val authServiceProvider: () -> AuthService,
 ) : Authenticator {
-    // 동시 갱신 방지
-    @Volatile
-    private var isRefreshing = false
-
     private val json =
         Json {
             prettyPrint = true
@@ -29,26 +25,16 @@ class TokenAuthenticator(
         route: Route?,
         response: Response,
     ): Request? {
-        if (response.code == 401) {
-            if (isRefreshing) {
-                Thread.sleep(1000)
-                val currentToken = TokenInterceptorProvider.getAccessToken()
-                return if (currentToken != null) {
-                    response.request
-                        .newBuilder()
-                        .header("Authorization", "Bearer $currentToken")
-                        .build()
-                } else {
-                    null
-                }
-            }
+        if (response.request.header("X-Retry-Attempt") == "1") return null
+        if (response.request.header("No-Auth") == "true") return null
 
+        if (response.code == 401) {
             val errorBody = response.peekBody(Long.MAX_VALUE).string()
             val errorResponse = parseErrorResponse(errorBody)
 
             return when {
                 // 토큰 만료 - 갱신 가능
-                errorResponse?.properties?.let { it.code == "ACCESS_TOKEN_EXPIRED" && it.reissuable } == true -> {
+                errorResponse?.properties?.reissuable == true -> {
                     refreshTokenAndRetry(response.request)
                 }
 
@@ -58,16 +44,15 @@ class TokenAuthenticator(
         return null
     }
 
-    private fun refreshTokenAndRetry(originalRequest: Request): Request? {
-        if (isRefreshing) return null
-        isRefreshing = true
-        return try {
+    private fun refreshTokenAndRetry(originalRequest: Request): Request? =
+        try {
             val newToken = runBlocking { refreshToken() }
             if (newToken != null) {
                 TokenInterceptorProvider.setAccessToken(newToken)
                 originalRequest
                     .newBuilder()
                     .header("Authorization", "Bearer $newToken")
+                    .header("X-Retry-Attempt", "1")
                     .build()
             } else {
                 handleRefreshFailed()
@@ -76,10 +61,7 @@ class TokenAuthenticator(
         } catch (_: Exception) {
             handleRefreshFailed()
             null
-        } finally {
-            isRefreshing = false
         }
-    }
 
     private fun handleRefreshFailed() {
         // 리프레시 실패시 로그아웃 처리

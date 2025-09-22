@@ -40,8 +40,6 @@ object TokenInterceptorProvider {
             chain.proceed(builder.build())
         }
 
-    fun getAccessToken() = accessToken
-
     fun setAccessToken(token: String?) {
         accessToken = token
     }
