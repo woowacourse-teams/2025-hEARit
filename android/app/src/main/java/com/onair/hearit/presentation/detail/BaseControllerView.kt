@@ -34,9 +34,8 @@ class BaseControllerView
         private val formatter = Formatter(formatBuilder, Locale.getDefault())
 
         private val window = Timeline.Window()
-        private var playSpeedIndex = DEFAULT_SPEED_INDEX
-
         private val speedOptions = floatArrayOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
+        private var playSpeedIndex = defaultSpeedIndex()
 
         private val progressRunnable = Runnable { updateProgress() }
 
@@ -99,7 +98,7 @@ class BaseControllerView
                 speedOptions
                     .indexOfFirst { floatsAreEqualWithinTolerance(it, currentSpeed) }
                     .takeIf { it >= 0 }
-                    ?: DEFAULT_SPEED_INDEX
+                    ?: defaultSpeedIndex()
             updateSpeedLabel()
         }
 
@@ -108,7 +107,7 @@ class BaseControllerView
             playSpeedIndex = speedOptions
                 .indexOfFirst { floatsAreEqualWithinTolerance(it, speed) }
                 .takeIf { it >= 0 }
-                ?: DEFAULT_SPEED_INDEX
+                ?: defaultSpeedIndex()
             updateSpeedLabel()
         }
 
@@ -125,7 +124,7 @@ class BaseControllerView
             val checkedIndex =
                 speedOptions
                     .indexOfFirst { floatsAreEqualWithinTolerance(it, currentSpeed) }
-                    .takeIf { it >= 0 } ?: DEFAULT_SPEED_INDEX
+                    .takeIf { it >= 0 } ?: defaultSpeedIndex()
 
             popup.menu[checkedIndex].isChecked = true
             popup.menu.setGroupCheckable(0, true, true)
@@ -207,6 +206,8 @@ class BaseControllerView
                 context.getString(R.string.player_detail_player_speed_label, speedStr)
         }
 
+        private fun defaultSpeedIndex(): Int = speedOptions.indexOfFirst { floatsAreEqualWithinTolerance(it, 1f) }.takeIf { it >= 0 } ?: 0
+
         private inner class ComponentListener :
             Player.Listener,
             TimeBar.OnScrubListener {
@@ -265,8 +266,6 @@ class BaseControllerView
         companion object {
             private const val DEFAULT_POSITION_TEXT = "00:00"
             private const val DEFAULT_DURATION_TEXT = "-00:00"
-
-            private const val DEFAULT_SPEED_INDEX = 1
             private const val PROGRESS_UPDATE_BASE_MS = 1000f
             private const val PROGRESS_UPDATE_MIN_MS = 100f
             private const val PROGRESS_UPDATE_MAX_MS = 2000f
