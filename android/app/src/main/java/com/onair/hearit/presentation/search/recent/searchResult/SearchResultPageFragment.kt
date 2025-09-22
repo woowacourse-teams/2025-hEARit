@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,8 +18,10 @@ import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.main.MainActivity
+import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
+import kotlin.getValue
 
 class SearchResultPageFragment :
     Fragment(),
@@ -26,6 +29,8 @@ class SearchResultPageFragment :
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchResultPageBinding? = null
     private val binding get() = _binding!!
+
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     private val viewModel: SearchViewModel by viewModels {
         val input = requireArguments().let { SearchInput.from(it) }
@@ -90,6 +95,10 @@ class SearchResultPageFragment :
     }
 
     private fun observeViewModel() {
+        mainViewModel.bookmarkUpdated.observe(viewLifecycleOwner) {
+            viewModel.refreshSearchResults()
+        }
+
         viewModel.searchUiState.observe(viewLifecycleOwner) { state ->
             binding.uiState = state
         }
