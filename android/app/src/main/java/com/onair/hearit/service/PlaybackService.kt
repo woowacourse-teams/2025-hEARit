@@ -12,6 +12,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.onair.hearit.di.RepositoryProvider.recentHearitRepository
+import com.onair.hearit.di.UseCaseProvider.getBookmarksUseCase
+import com.onair.hearit.di.UseCaseProvider.getPlaybackInfoUseCase
 import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.UNKNOWN_SCREEN_ID
 import com.onair.hearit.presentation.main.MainActivity
@@ -29,6 +32,8 @@ class PlaybackService : MediaSessionService() {
     private lateinit var mediaItemManager: PlaybackMediaItemManager
 
     private var notificationController: PlayerNotificationController? = null
+    private lateinit var libraryPlaybackHandler: LibraryPlaybackHandler
+    private lateinit var recentPlaybackHandler: RecentPlaybackHandler
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -36,6 +41,22 @@ class PlaybackService : MediaSessionService() {
         super.onCreate()
 
         initializePlayer()
+        mediaItemManager =
+            PlaybackMediaItemManager(
+                getPlaybackInfoUseCase = getPlaybackInfoUseCase,
+            )
+        libraryPlaybackHandler =
+            LibraryPlaybackHandler(
+                getBookmarksUseCase = getBookmarksUseCase,
+                mediaItemManager = mediaItemManager,
+            )
+
+        recentPlaybackHandler =
+            RecentPlaybackHandler(
+                recentHearitRepository = recentHearitRepository,
+                getPlaybackInfoUseCase = getPlaybackInfoUseCase,
+                mediaItemManager = mediaItemManager,
+            )
         initializeMediaSession()
 
         // 2) 알림 + 포그라운드 제어는 컨트롤러에 위임
@@ -47,8 +68,6 @@ class PlaybackService : MediaSessionService() {
                 notificationId = NOTIFICATION_ID,
             ).also { it.attach(player) }
 
-        // 3) 상태 저장/에러 최소 핸들링
-        mediaItemManager = PlaybackMediaItemManager()
         stateSaver = PlaybackStateSaver(player, serviceScope, this)
         historyListener = PlaybackHistoryListener(player, serviceScope).also { it.attach() }
         player.addListener(stateSaver.listener)
@@ -157,8 +176,14 @@ class PlaybackService : MediaSessionService() {
                 .Builder(this, player)
                 .setId(SESSION_ID)
                 .setSessionActivity(pendingIntent)
-                .setCallback(PlaybackSessionCallback(serviceScope))
-                .build()
+                .setCallback(
+                    PlaybackSessionCallback(
+                        serviceScope,
+                        mediaItemManager,
+                        libraryPlaybackHandler,
+                        recentPlaybackHandler,
+                    ),
+                ).build()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession = mediaSession
