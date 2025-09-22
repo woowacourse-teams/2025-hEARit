@@ -381,7 +381,12 @@ class MainActivity :
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
             startActivity(intent)
-            showToast("세션이 만료되어 다시 로그인해주세요")
+            Toast
+                .makeText(
+                    applicationContext,
+                    "세션이 만료되어 다시 로그인해주세요",
+                    Toast.LENGTH_LONG,
+                ).show()
         }
     }
 
