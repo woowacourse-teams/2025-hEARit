@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -21,14 +22,16 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
-import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.CategoryComposeFragment
+import com.onair.hearit.presentation.CategoryComposeFragment.Companion.CATEGORY_COLOR_BUNDLE_KEY
+import com.onair.hearit.presentation.CategoryComposeFragment.Companion.CATEGORY_ID_BUNDLE_KEY
+import com.onair.hearit.presentation.CategoryComposeFragment.Companion.CATEGORY_NAME_BUNDLE_KEY
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.category.CategoryFragment
 
 class HomeFragment :
     Fragment(),
@@ -240,9 +243,14 @@ class HomeFragment :
             .beginTransaction()
             .replace(
                 R.id.fragment_container_view,
-                CategoryFragment.newInstance(
-                    SearchInput.Category(id, name, colorCode),
-                ),
+                CategoryComposeFragment().apply {
+                    arguments =
+                        bundleOf(
+                            CATEGORY_ID_BUNDLE_KEY to id,
+                            CATEGORY_NAME_BUNDLE_KEY to name,
+                            CATEGORY_COLOR_BUNDLE_KEY to colorCode,
+                        )
+                },
             ).addToBackStack(null)
             .commit()
     }

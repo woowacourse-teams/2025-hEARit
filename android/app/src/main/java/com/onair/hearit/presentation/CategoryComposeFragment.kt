@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -50,12 +49,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.main.MainActivity
+import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.theme.DarkGray
@@ -65,16 +68,17 @@ import com.onair.hearit.presentation.theme.Gray3
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.Pretendard
-import timber.log.Timber
 
 class CategoryComposeFragment : Fragment() {
     private val category by lazy {
         SearchInput.Category(
-            arguments?.getLong("CATEGORY_ID") ?: -1L,
-            arguments?.getString("CATEGORY_NAME") ?: "카테고리",
-            arguments?.getString("CATEGORY_COLOR") ?: "#000000",
+            arguments?.getLong(CATEGORY_ID_BUNDLE_KEY) ?: -1L,
+            arguments?.getString(CATEGORY_NAME_BUNDLE_KEY) ?: "카테고리",
+            arguments?.getString(CATEGORY_COLOR_BUNDLE_KEY) ?: "#000000",
         )
     }
+
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     private val viewModel: SearchViewModel by viewModels {
         SearchViewModelFactory(category)
@@ -89,62 +93,55 @@ class CategoryComposeFragment : Fragment() {
             setContent {
                 SearchResultScreen(
                     viewModel = viewModel,
+                    mainViewModel = mainViewModel,
                     onBack = { parentFragmentManager.popBackStack() },
+                    onHearitClick = { heartId -> onHearitClick(heartId) },
                     modifier = Modifier.fillMaxSize(),
                 )
             }
         }
+
+    private fun onHearitClick(hearitId: Long) {
+        val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
+        (activity as? MainActivity)?.launchDetailActivity(intent)
+    }
+
+    companion object {
+        const val CATEGORY_ID_BUNDLE_KEY = "CATEGORY_ID"
+        const val CATEGORY_NAME_BUNDLE_KEY = "CATEGORY_NAME"
+        const val CATEGORY_COLOR_BUNDLE_KEY = "CATEGORY_COLOR"
+    }
 }
-// class EmptyActivity : AppCompatActivity() {
-//    private lateinit var category: SearchInput.Category
-//    private val viewModel: SearchViewModel by viewModels {
-//        SearchViewModelFactory(category)
-//    }
-//
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        category =
-//            SearchInput.Category(
-//                intent.getLongExtra("CATEGORY_ID", -1L),
-//                intent.getStringExtra("CATEGORY_NAME") ?: "hEARit",
-//                intent.getStringExtra("CATEGORY_COLOR") ?: "#000000",
-//            )
-//
-//        setContent {
-//            MaterialTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    SearchResultScreen(
-//                        viewModel = viewModel,
-//                        modifier = Modifier.padding(innerPadding),
-//                    ) { finish() }
-//                }
-//            }
-//        }
-//    }
-// }
 
 @Composable
 fun SearchResultScreen(
     viewModel: SearchViewModel,
+    mainViewModel: MainViewModel,
     onBack: () -> Unit,
+    onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
     val category by viewModel.currentCategory.collectAsStateWithLifecycle()
+//    val hearitUpdated by mainViewModel.bookmarkUpdated.collectAsStateWithLifecycle()
 
-    LaunchedEffect(hearits) {
-        Timber.d("hearits size=${hearits.size}")
-    }
     LaunchedEffect(category) {
         viewModel.fetchResultData(isInitial = true)
     }
+
+//    LaunchedEffect(hearitUpdated) {
+//        hearitUpdated?.let {
+//            viewModel.refreshSearchResults()
+//        }
+//    }
 
     GradientBackgroundScreen(
         colorCode = category?.colorCode ?: "#000000",
         categoryName = category?.name ?: "카테고리",
         hearits = hearits,
-        modifier = modifier,
         onBack = onBack,
+        onHearitClick = onHearitClick,
+        modifier = modifier,
     )
 }
 
@@ -154,6 +151,7 @@ fun GradientBackgroundScreen(
     categoryName: String,
     hearits: List<SearchedHearit>,
     onBack: () -> Unit,
+    onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -231,7 +229,7 @@ fun GradientBackgroundScreen(
                 SearchedHearitItem(
                     item = item,
                     color = Color(colorCode.toColorInt()),
-                    onClick = {},
+                    onClick = onHearitClick,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -422,8 +420,9 @@ fun GradientBackgroundScreenPreview() {
             colorCode = "#73A01A",
             categoryName = "Android",
             hearits = dummyHearits,
-            modifier = Modifier.padding(4.dp),
             onBack = {},
+            onHearitClick = {},
+            modifier = Modifier.padding(4.dp),
         )
     }
 }
