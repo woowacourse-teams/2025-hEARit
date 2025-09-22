@@ -30,7 +30,7 @@
     <string name="home_recent_hearit_text">최근에 들은 히어릿</string>
     <string name="home_navigate_to_explore_text">더 많은 히어릿을\n듣고 싶다면?</string>
     <string name="home_recommend_hearit_text">오늘 추천하는 팟캐스트</string>
-    <string name="home_grouped_category_text">%s 카테고리의 팟캐스트</string>
+    <string name="home_grouped_category_text">%s 카테고리</string>
     <string name="home_toast_recommend_load_fail">추천 히어릿 목록 조회에 실패했습니다.</string>
     <string name="home_toast_recent_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
     <string name="home_toast_grouped_category_load_fail">카테고리별 히어릿 조회에 실패했습니다.</string>
@@ -100,6 +100,9 @@
     <string name="search_toast_recent_keyword_delete_success">최근 검색어를 삭제했습니다</string>
     <string name="search_toast_recent_keyword_delete_fail">최근 검색어 삭제에 실패했습니다</string>
     <string name="search_guide_when_no_hearits">검색된 <font color="#B677F3">히어릿</font>이 없어요!</string>
+
+    <!-- SearchRecentFragment -->
+    <string name="search_toast_min_length">검색어는 2글자 이상 입력해주세요</string>
 
     <!-- SearchResultFragment-->
     <string name="search_result_searched_hearit">검색된 히어릿 목록</string>

@@ -124,7 +124,7 @@ class MainActivity :
                         result.data.toDetailResult() ?: return@registerForActivityResult
                     detailResult.navigate(this)
                 }
-                mainViewModel.bookmarkUpdated.value = Unit
+                mainViewModel.hearitUpdated.value = Unit
                 setPlayerControlViewVisibility()
             }
     }
