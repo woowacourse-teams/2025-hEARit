@@ -21,7 +21,6 @@ import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
-import kotlin.getValue
 
 class SearchResultPageFragment :
     Fragment(),
@@ -95,7 +94,7 @@ class SearchResultPageFragment :
     }
 
     private fun observeViewModel() {
-        mainViewModel.bookmarkUpdated.observe(viewLifecycleOwner) {
+        mainViewModel.hearitUpdated.observe(viewLifecycleOwner) {
             viewModel.refreshSearchResults()
         }
 

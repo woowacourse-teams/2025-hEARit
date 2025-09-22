@@ -136,7 +136,7 @@ class CategoryFragment :
     }
 
     private fun observeViewModel() {
-        mainViewModel.bookmarkUpdated.observe(viewLifecycleOwner) {
+        mainViewModel.hearitUpdated.observe(viewLifecycleOwner) {
             viewModel.refreshSearchResults()
         }
 
