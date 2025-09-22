@@ -7,6 +7,7 @@ import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.domain.usecase.GetBookmarksUseCase
 import com.onair.hearit.service.model.LibraryLoadResult
 import com.onair.hearit.service.model.LibraryPlayParams
+import com.onair.hearit.service.model.PrefetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -26,57 +27,61 @@ class LibraryPlaybackHandler(
             loadUntilSeedFoundWithIndex(params)
         }
 
-    suspend fun prefetchNextPage(): Pair<List<MediaItem>, Int?> =
+    suspend fun prefetchNextPage(): PrefetchResult =
         withContext(Dispatchers.IO) {
-            val pageToLoad = nextPage ?: return@withContext Pair(emptyList(), null)
+            val pageToLoad = nextPage ?: return@withContext PrefetchResult(emptyList(), null)
 
             val pageResult =
                 getBookmarksUseCase(page = pageToLoad, size = DEFAULT_PAGE_SIZE)
-                    .getOrNull() ?: return@withContext Pair(emptyList(), null)
+                    .getOrNull()
+
+            if (pageResult == null) {
+                nextPage = null
+                return@withContext PrefetchResult(emptyList(), null)
+            }
 
             val newItems = createMediaItems(pageResult.items)
             nextPage = if (!pageResult.paging.isLast) pageResult.paging.page + 1 else null
-            Pair(newItems, nextPage)
+
+            PrefetchResult(newItems, nextPage)
         }
 
-    private suspend fun loadSinglePage(page: Int): List<MediaItem> =
-        withContext(Dispatchers.IO) {
+    private suspend fun loadSinglePage(page: Int): List<MediaItem> {
+        val pageResult =
+            getBookmarksUseCase(page = page, size = DEFAULT_PAGE_SIZE)
+                .getOrNull() ?: return emptyList()
+
+        nextPage = if (!pageResult.paging.isLast) page + 1 else null
+        return createMediaItems(pageResult.items)
+    }
+
+    private suspend fun loadUntilSeedFoundWithIndex(params: LibraryPlayParams): LibraryLoadResult {
+        val allItems = mutableListOf<MediaItem>()
+        var currentPage = 0
+
+        do {
             val pageResult =
-                getBookmarksUseCase(page = page, size = DEFAULT_PAGE_SIZE)
-                    .getOrNull() ?: return@withContext emptyList()
+                getBookmarksUseCase(page = currentPage, size = DEFAULT_PAGE_SIZE)
+                    .getOrNull()
 
-            nextPage = if (!pageResult.paging.isLast) page + 1 else null
-            createMediaItems(pageResult.items)
-        }
+            if (pageResult == null) {
+                return LibraryLoadResult(allItems, -1)
+            }
 
-    private suspend fun loadUntilSeedFoundWithIndex(params: LibraryPlayParams): LibraryLoadResult =
-        withContext(Dispatchers.IO) {
-            val allItems = mutableListOf<MediaItem>()
-            var currentPage = 0
+            val seedIndexInPage = findSeedInBookmarks(pageResult.items, params)
+            if (seedIndexInPage >= 0) {
+                val pageItems = createMediaItems(pageResult.items)
+                allItems.addAll(pageItems)
+                val globalSeedIndex = allItems.size - pageItems.size + seedIndexInPage
+                return LibraryLoadResult(allItems, globalSeedIndex)
+            }
 
-            do {
-                val pageResult =
-                    getBookmarksUseCase(page = currentPage, size = DEFAULT_PAGE_SIZE)
-                        .getOrNull()
+            allItems.addAll(createMediaItems(pageResult.items))
+            currentPage++
+        } while (!pageResult.paging.isLast)
 
-                if (pageResult == null) {
-                    return@withContext LibraryLoadResult(allItems, -1)
-                }
-
-                val seedIndexInPage = findSeedInBookmarks(pageResult.items, params)
-                if (seedIndexInPage >= 0) {
-                    val pageItems = createMediaItems(pageResult.items)
-                    allItems.addAll(pageItems)
-                    val globalSeedIndex = allItems.size - pageItems.size + seedIndexInPage
-                    return@withContext LibraryLoadResult(allItems, globalSeedIndex)
-                }
-
-                allItems.addAll(createMediaItems(pageResult.items))
-                currentPage++
-            } while (!pageResult.paging.isLast)
-
-            LibraryLoadResult(allItems, -1)
-        }
+        return LibraryLoadResult(allItems, -1)
+    }
 
     private fun findSeedInBookmarks(
         bookmarks: List<Bookmark>,
