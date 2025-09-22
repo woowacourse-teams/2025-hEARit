@@ -10,7 +10,7 @@ import com.onair.hearit.app.application.explore.scorefactor.RecencyScoreFactor;
 import com.onair.hearit.app.application.explore.scoreprocessor.GuestExploreScoreProcessor;
 import com.onair.hearit.app.application.explore.scoreprocessor.MemberExploreScoreProcessor;
 import com.onair.hearit.app.dto.request.CursorRequest;
-import com.onair.hearit.app.dto.response.CursorResponse;
+import com.onair.hearit.app.dto.response.CursorResponseV2;
 import com.onair.hearit.app.dto.response.ExploredHearitResponse;
 import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.common.domain.Bookmark;
@@ -120,7 +120,7 @@ class HearitExploreServiceTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit));
 
         // when
-        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(
+        CursorResponseV2<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(
                 RequestUser.member(member.getId()).getUserInfo(), new CursorRequest(0L, 10));
 
         // then
@@ -149,7 +149,7 @@ class HearitExploreServiceTest {
         dbHelper.insertHearit(createHearitByNameAndCategory("hearit10", category3));
 
         // when
-        CursorResponse<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(
+        CursorResponseV2<ExploredHearitResponse> exploredHearits = hearitExploreService.getExploredHearits(
                 RequestUser.guest(UUID.randomUUID().toString()).getUserInfo(), new CursorRequest(0L, 10));
 
         // then

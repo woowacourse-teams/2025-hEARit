@@ -1,9 +1,8 @@
 package com.onair.hearit.app.application;
 
 import com.onair.hearit.app.dto.request.PagingRequest;
-import com.onair.hearit.app.dto.response.BookmarkHearitResponse;
+import com.onair.hearit.app.dto.response.BookmarkHearitResponseV2;
 import com.onair.hearit.app.dto.response.BookmarkInfoResponse;
-import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
@@ -31,7 +30,7 @@ public class BookmarkService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public PagedResponse<BookmarkHearitResponse> getBookmarkHearits(
+    public Page<BookmarkHearitResponseV2> getBookmarkHearits(
             UserInfo userInfo,
             PagingRequest pagingRequest) {
         Member member = getMemberByUserInfo(userInfo);
@@ -39,12 +38,11 @@ public class BookmarkService {
         Page<BookmarkWithPlaytimeProjection> projections = bookmarkRepository.findAllByMemberOrderByRecent(
                 member.getId(),
                 pageable);
-        Page<BookmarkHearitResponse> response = toBookmarkHearitResponse(projections);
-        return PagedResponse.from(response);
+        return toBookmarkHearitResponse(projections);
     }
 
-    private Page<BookmarkHearitResponse> toBookmarkHearitResponse(Page<BookmarkWithPlaytimeProjection> projections) {
-        return projections.map(p -> BookmarkHearitResponse.of(
+    private Page<BookmarkHearitResponseV2> toBookmarkHearitResponse(Page<BookmarkWithPlaytimeProjection> projections) {
+        return projections.map(p -> BookmarkHearitResponseV2.of(
                 p.getBookmark(),
                 p.getBookmark().getHearit(),
                 p.getLastPlayTime()

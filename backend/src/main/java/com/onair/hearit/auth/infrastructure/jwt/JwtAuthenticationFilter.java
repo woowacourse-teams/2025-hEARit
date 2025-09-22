@@ -39,20 +39,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractTokenFromHeader(request.getHeader("Authorization"));
 
         // 화이트리스트면 그냥 통과
-        if (isWhitelisted(request)) {
-            handleWhitelistedRequest(request, token);
+        if ((token == null || token.isBlank()) && isWhitelisted(request)) {
+            authenticateAsGuest(request);
             chain.doFilter(request, response);
             return;
         }
 
-        //인증이 필요한 엔드포인트 처리
-        if (token == null) {
-            handleUnauthenticatedError(response, request);
-            return;
-        }
-
+        // 토큰이 헤더에 존재하거나 인증이 필요한 엔드포인트 처리
         TokenStatus tokenStatus = jwtTokenProvider.getTokenStatus(token);
         switch (tokenStatus) {
+            case NOT_EXIST -> handleAuthenticatedRequiredError(response, request);
             case EXPIRED -> handleTokenExpiredError(response, request);
             case INVALID -> handleInvalidTokenError(response, request);
             case VALID -> {
@@ -60,16 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 chain.doFilter(request, response);
             }
         }
-    }
-
-    private void handleWhitelistedRequest(HttpServletRequest request, String token) {
-        if (token == null || token.isBlank() || !jwtTokenProvider.validateToken(token)) {
-            // 토큰이 없거나 잘못된 토큰 → 게스트로 인증
-            authenticateAsGuest(request);
-            return;
-        }
-        // 유효한 토큰 → 회원으로 인증
-        authenticateAsMember(token);
     }
 
     private String extractTokenFromHeader(String header) {
@@ -100,7 +86,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("회원으로 인증 완료, memberId={}", memberId);
     }
 
-    private void handleUnauthenticatedError(HttpServletResponse response, HttpServletRequest request)
+    private void handleAuthenticatedRequiredError(HttpServletResponse response, HttpServletRequest request)
             throws IOException {
         ProblemDetail problemDetail = buildProblemDetail(ErrorCode.AUTHENTICATION_REQUIRED, "인증이 필요한 요청입니다.", request);
         writeProblemDetailResponse(response, problemDetail);
