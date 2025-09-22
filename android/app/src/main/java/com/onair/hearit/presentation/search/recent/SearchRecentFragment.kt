@@ -75,6 +75,13 @@ class SearchRecentFragment :
         }
     }
 
+    fun showSearchResultPage(input: SearchInput) {
+        updateSearchInput(input.term())
+        showSearchResultFragment(input)
+        viewModel.saveRecentKeyword(input.term())
+        hideKeyboard()
+    }
+
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -89,18 +96,24 @@ class SearchRecentFragment :
             parentFragmentManager.popBackStack()
         }
 
+        setupKeyboardAutoFocus()
+        setupSearchInputListeners()
+    }
+
+    private fun setupKeyboardAutoFocus() {
         globalLayoutListener =
             ViewTreeObserver.OnGlobalLayoutListener {
                 binding.etSearch.requestFocus()
-                val inputMethodManager =
-                    requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
+                showKeyboard()
                 binding.etSearch.viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
                 globalLayoutListener = null
             }
         binding.etSearch.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+    }
 
-        // 검색창을 터치하면 최근 검색으로 이동
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupSearchInputListeners() {
+        // 검색창 터치시 최근 검색으로 이동
         binding.etSearch.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 navigateToRecent()
@@ -108,7 +121,7 @@ class SearchRecentFragment :
             false
         }
 
-        // 키보드 검색 또는 돋보기 버튼 클릭 시
+        // 키보드 검색 버튼 클릭시
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 performSearchFromInput()
@@ -127,27 +140,18 @@ class SearchRecentFragment :
                 ?.toString()
                 ?.trim()
         if (searchTerm.isNullOrEmpty()) return
-
         if (searchTerm == lastSearchTerm) return
-        lastSearchTerm = searchTerm
 
+        lastSearchTerm = searchTerm
         viewModel.saveRecentKeyword(searchTerm)
         navigateToSearchResult(SearchInput.Keyword(searchTerm))
         hideKeyboard()
     }
 
-    fun showSearchResultPage(input: SearchInput) {
-        binding.etSearch.setText(input.term())
-        binding.etSearch.setSelection(input.term().length)
-
-        childFragmentManager
-            .beginTransaction()
-            .replace(
-                R.id.fragment_search_container_view,
-                SearchResultPageFragment.newInstance(input),
-            ).commit()
-        viewModel.saveRecentKeyword(input.term())
-        hideKeyboard()
+    private fun updateSearchInput(term: String) {
+        binding.etSearch.setText(term)
+        binding.etSearch.setSelection(term.length)
+        lastSearchTerm = term
     }
 
     private fun observeViewModel() {
@@ -157,6 +161,15 @@ class SearchRecentFragment :
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
+    }
+
+    private fun showSearchResultFragment(input: SearchInput) {
+        childFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.fragment_search_container_view,
+                SearchResultPageFragment.newInstance(input),
+            ).commit()
     }
 
     private fun navigateToRecent() {
@@ -179,6 +192,12 @@ class SearchRecentFragment :
 
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showKeyboard() {
+        val inputMethodManager =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
     }
 
     private fun hideKeyboard() {
