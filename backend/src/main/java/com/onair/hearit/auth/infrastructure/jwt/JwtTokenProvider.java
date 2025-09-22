@@ -72,7 +72,7 @@ public class JwtTokenProvider {
             parseClaims(token);
             return true;
         } catch (JwtException e) {
-            log.warn("validateToken() failed: {}", e.getMessage());
+            log.info("validateToken() failed: {}", e.getMessage());
             return false;
         }
     }

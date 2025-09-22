@@ -75,6 +75,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(RequestUser.guest(deviceUuid), null, null);
         SecurityContextHolder.getContext().setAuthentication(auth);
+        log.info("비회원으로 접속 완료, deviceUuid={}", deviceUuid);
+    }
+
+    private void authenticateAsMember(String token) {
+        Long memberId = jwtTokenProvider.getMemberId(token);
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(RequestUser.member(memberId), null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        log.info("회원으로 인증 완료, memberId={}", memberId);
     }
 
     private void handleAuthenticatedRequiredError(HttpServletResponse response, HttpServletRequest request)
@@ -94,13 +103,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         ProblemDetail problemDetail = buildProblemDetail(ErrorCode.INVALID_ACCESS_TOKEN, "유효하지 않은 토큰입니다.", request);
         writeProblemDetailResponse(response, problemDetail);
         filterExceptionLogger.warn(problemDetail);
-    }
-
-    private void authenticateAsMember(String token) {
-        Long memberId = jwtTokenProvider.getMemberId(token);
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(RequestUser.member(memberId), null, Collections.emptyList());
-        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     private ProblemDetail buildProblemDetail(ErrorCode errorCode, String detail, HttpServletRequest request) {
