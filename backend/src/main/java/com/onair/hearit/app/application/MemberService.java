@@ -1,8 +1,8 @@
 package com.onair.hearit.app.application;
 
-import com.onair.hearit.common.exception.custom.NotFoundException;
-import com.onair.hearit.common.domain.Member;
 import com.onair.hearit.app.dto.response.MemberInfoResponse;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
