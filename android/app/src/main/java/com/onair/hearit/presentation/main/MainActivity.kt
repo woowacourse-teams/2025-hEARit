@@ -22,6 +22,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -31,6 +34,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.PlaybackStarter
@@ -50,6 +54,7 @@ import com.onair.hearit.presentation.splash.SplashViewModelFactory
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
+import kotlinx.coroutines.launch
 
 @OptIn(UnstableApi::class)
 class MainActivity :
@@ -77,7 +82,16 @@ class MainActivity :
         binding.layoutDrawer.viewModel = mainViewModel
         binding.lifecycleOwner = this
 
-        attachController()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AuthEventManager.logoutEvent.collect {
+                    if (!AuthEventManager.isValidSession()) {
+                        handleForceLogout()
+                    }
+                }
+            }
+        }
+
         setupResultLauncher()
         setupBackPressHandler()
         setupWindowInsets()
@@ -86,6 +100,13 @@ class MainActivity :
         observeViewModel()
         showFragment(HomeFragment())
         setupBottomControllerClick()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!AuthEventManager.isValidSession()) {
+            handleForceLogout()
+        }
     }
 
     fun launchDetailActivity(intent: Intent) {
@@ -104,7 +125,7 @@ class MainActivity :
                         result.data.toDetailResult() ?: return@registerForActivityResult
                     detailResult.navigate(this)
                 }
-                mainViewModel.bookmarkUpdated.value = Unit
+                mainViewModel.hearitUpdated.value = Unit
                 setPlayerControlViewVisibility()
             }
     }
@@ -362,6 +383,22 @@ class MainActivity :
         OssLicensesMenuActivity.setActivityTitle(HEARIT_OPEN_LICENSE_TITLE)
         val intent = Intent(this, OssLicensesMenuActivity::class.java)
         startActivity(intent)
+    }
+
+    private fun handleForceLogout() {
+        lifecycleScope.launch {
+            val intent =
+                Intent(this@MainActivity, LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+            startActivity(intent)
+            Toast
+                .makeText(
+                    applicationContext,
+                    "세션이 만료되어 다시 로그인해주세요",
+                    Toast.LENGTH_LONG,
+                ).show()
+        }
     }
 
     override fun openDrawer() {

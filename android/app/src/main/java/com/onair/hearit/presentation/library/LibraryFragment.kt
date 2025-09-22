@@ -76,7 +76,7 @@ class LibraryFragment :
     }
 
     private fun observeViewModel() {
-        mainViewModel.bookmarkUpdated.observe(viewLifecycleOwner) {
+        mainViewModel.hearitUpdated.observe(viewLifecycleOwner) {
             viewModel.refreshBookmarks()
         }
 

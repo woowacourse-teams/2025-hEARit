@@ -8,11 +8,14 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface AuthService {
     @GET("api/v1/auth/check")
-    suspend fun getAuthCheck(): Response<Unit>
+    suspend fun getAuthCheck(
+        @Header("Authorization") accessToken: String,
+    ): Response<Unit>
 
     @POST("api/v1/auth/kakao-login")
     suspend fun postLogin(
@@ -22,6 +25,7 @@ interface AuthService {
     @POST("api/v1/auth/token/refresh")
     suspend fun postRefreshToken(
         @Body tokenReissueRequest: TokenReissueRequest,
+        @Header("No-Auth") noAuth: Boolean = true,
     ): Response<TokenReissueResponse>
 
     @DELETE("api/v1/auth/withdraw")
