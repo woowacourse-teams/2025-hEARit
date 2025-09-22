@@ -35,7 +35,7 @@ class BaseControllerView
         private val window = Timeline.Window()
         private var playSpeedIndex = DEFAULT_SPEED_INDEX
 
-        private val speedOptions = floatArrayOf(0.5f, 1f, 1.25f, 1.5f, 2f)
+        private val speedOptions = floatArrayOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
 
         private val progressRunnable = Runnable { updateProgress() }
 
