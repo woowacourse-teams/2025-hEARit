@@ -140,6 +140,10 @@ class SearchRecentFragment :
                 ?.toString()
                 ?.trim()
         if (searchTerm.isNullOrEmpty()) return
+        if (searchTerm.length < MIN_SEARCH_LENGTH) {
+            showToast(getString(R.string.search_toast_min_length))
+            return
+        }
         if (searchTerm == lastSearchTerm) return
 
         lastSearchTerm = searchTerm
@@ -220,6 +224,8 @@ class SearchRecentFragment :
     }
 
     companion object {
+        private const val MIN_SEARCH_LENGTH = 2
+
         fun newInstance(term: String): SearchRecentFragment =
             SearchRecentFragment().apply {
                 arguments =
