@@ -2,7 +2,6 @@ package com.onair.hearit.di
 
 import com.onair.hearit.domain.usecase.GetBookmarksUseCase
 import com.onair.hearit.domain.usecase.GetHearitUseCase
-import com.onair.hearit.domain.usecase.GetNextBookmarkUseCase
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
