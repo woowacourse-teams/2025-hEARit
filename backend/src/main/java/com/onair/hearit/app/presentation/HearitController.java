@@ -69,7 +69,7 @@ public class HearitController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/v1/hearits/search")
+    @GetMapping("/api/v1/hearits/search")
     public ResponseEntity<PagedResponse<HearitSearchResponse>> readSearchedHearits(
             @RequestParam(name = "searchTerm") String searchTerm,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -81,7 +81,7 @@ public class HearitController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/v1/hearits/recommend-category")
+    @GetMapping("/api/v1/hearits/recommend-category")
     public ResponseEntity<List<HearitsWithRecommendCategoryResponse>> readHearitsWithRecommendCategory(
             @AuthenticationPrincipal RequestUser requestUser) {
         List<HearitsWithRecommendCategoryResponse> responses =
@@ -89,7 +89,7 @@ public class HearitController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/v1/hearits")
+    @GetMapping("/api/v1/hearits")
     public ResponseEntity<PagedResponse<HearitOfCategoryResponse>> readHearitsByCategory(
             @RequestParam(name = "categoryId") Long categoryId,
             @RequestParam(name = "page", defaultValue = "0") int page,
