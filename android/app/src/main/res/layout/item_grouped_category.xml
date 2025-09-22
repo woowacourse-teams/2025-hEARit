@@ -26,10 +26,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
+            android:onClick="@{() -> navigateClickListener.invoke(groupedCategory.categoryId, groupedCategory.categoryName, groupedCategory.colorCode)}"
             android:text="@{@string/home_grouped_category_text(groupedCategory.categoryName)}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Spring 카테고리의 팟캐스트" />
+            tools:text="Spring 카테고리" />
 
         <ImageButton
             android:id="@+id/ib_navigate_to_search"
