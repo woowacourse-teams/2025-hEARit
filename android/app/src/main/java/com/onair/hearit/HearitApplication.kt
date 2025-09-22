@@ -8,6 +8,7 @@ import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.di.DataSourceProvider
 import com.onair.hearit.di.DatabaseProvider
 import com.onair.hearit.di.RepositoryProvider
+import com.onair.hearit.di.TokenAuthenticatorProvider
 import timber.log.Timber
 
 class HearitApplication : Application() {
@@ -19,6 +20,7 @@ class HearitApplication : Application() {
         DataSourceProvider.init(this)
         RepositoryProvider.init(this)
         AnalyticsProvider.init(this)
+        TokenAuthenticatorProvider.init()
         initialTimber()
     }
 

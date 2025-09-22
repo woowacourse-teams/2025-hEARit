@@ -23,12 +23,19 @@ object NetworkProvider {
             ignoreUnknownKeys = true
         }
 
-    private val okhttpClient =
-        OkHttpClient
-            .Builder()
-            .addInterceptor(TokenInterceptorProvider.provide())
-            .addInterceptor(LoggingInterceptorProvider.provide())
-            .build()
+    private val okhttpClient: OkHttpClient by lazy {
+        val builder =
+            OkHttpClient
+                .Builder()
+                .addInterceptor(TokenInterceptorProvider.provide())
+                .addInterceptor(LoggingInterceptorProvider.provide())
+
+        TokenAuthenticatorProvider.provide()?.let { authenticator ->
+            builder.authenticator(authenticator)
+        }
+
+        builder.build()
+    }
 
     private val retrofit: Retrofit by lazy {
         Retrofit

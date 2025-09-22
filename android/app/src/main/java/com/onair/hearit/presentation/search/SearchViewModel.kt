@@ -42,6 +42,7 @@ class SearchViewModel(
 
     private val _currentInput = MutableStateFlow(initialInput)
     var currentInput: SearchInput? = _currentInput.value
+
     val currentCategory: StateFlow<Category?> =
         _currentInput
             .map { input ->
@@ -64,6 +65,13 @@ class SearchViewModel(
     private var currentPage = 0
     private var isLastPage = false
     private var isLoading = false
+
+
+    fun refreshSearchResults() {
+        resetPaging()
+        _searchedHearits.value = emptyList()
+        fetchResultData(isInitial = true)
+    }
 
     fun getCategories() {
         viewModelScope.launch {
@@ -167,5 +175,11 @@ class SearchViewModel(
             } else {
                 SearchUiState.HearitsExist(hearits)
             }
+    }
+
+    private fun resetPaging() {
+        paging = null
+        currentPage = 0
+        isLastPage = false
     }
 }

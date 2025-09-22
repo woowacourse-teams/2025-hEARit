@@ -12,13 +12,19 @@ class AuthRepositoryImpl(
     private val authRemoteDataSource: AuthRemoteDataSource,
     private val preferencesLocalDataSource: PreferencesLocalDataSource,
 ) : AuthRepository {
-    override suspend fun checkAccessToken(): Result<Unit> = authRemoteDataSource.checkAccessToken().mapOrThrowDomain { }
+    override suspend fun checkAccessToken(accessToken: String): Result<Unit> =
+        authRemoteDataSource.checkAccessToken(accessToken).mapOrThrowDomain { }
 
     override suspend fun getTokens(): Result<Pair<String, String>> =
         runCatching {
             val accessToken = preferencesLocalDataSource.getAccessToken().getOrThrow()
             val refreshToken = preferencesLocalDataSource.getRefreshToken().getOrThrow()
             accessToken to refreshToken
+        }
+
+    override suspend fun saveToken(accessToken: String): Result<Unit> =
+        runCatching {
+            preferencesLocalDataSource.saveAccessToken(accessToken).getOrThrow()
         }
 
     override suspend fun kakaoLogin(accessToken: String): Result<LoginToken> =

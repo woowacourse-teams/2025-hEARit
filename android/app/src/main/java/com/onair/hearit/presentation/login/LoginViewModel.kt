@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.repository.AuthRepository
@@ -28,7 +29,6 @@ class LoginViewModel(
                 .kakaoLogin(accessToken)
                 .onSuccess { appToken ->
                     saveToken(appToken.accessToken, appToken.refreshToken)
-                    TokenInterceptorProvider.setAccessToken(appToken.accessToken)
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.login_toast_kakao_login_fail
@@ -52,11 +52,24 @@ class LoginViewModel(
 
             result
                 .onSuccess {
+                    TokenInterceptorProvider.setAccessToken(accessToken)
+                    AuthEventManager.onLoginSuccess()
                     _loginState.value = true
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.login_toast_save_token_fail
                     _loginState.value = false
+                }
+        }
+    }
+
+    fun clearData() {
+        viewModelScope.launch {
+            preferencesLocalDataSource
+                .clearData()
+                .onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.main_toast_clear_token_fail
                 }
         }
     }
