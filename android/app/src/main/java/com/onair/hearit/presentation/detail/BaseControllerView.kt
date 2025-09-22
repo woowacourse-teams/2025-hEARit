@@ -177,7 +177,9 @@ class BaseControllerView
 
             binding.exoPosition.text = Util.getStringForTime(formatBuilder, formatter, pos)
             val remaining = (duration - pos).coerceAtLeast(0L)
-            binding.exoDuration.text = "-${Util.getStringForTime(formatBuilder, formatter, remaining)}"
+            val remainingStr = Util.getStringForTime(formatBuilder, formatter, remaining)
+            binding.exoDuration.text =
+                context.getString(R.string.player_detail_player_duration_remaining, remainingStr)
 
             binding.exoProgress.setPosition(pos)
             binding.exoProgress.setBufferedPosition(buf)
@@ -200,7 +202,9 @@ class BaseControllerView
 
         private fun updateSpeedLabel() {
             val speed = player.playbackParameters.speed
-            binding.playSpeed.text = "${speed}x"
+            val speedStr = String.format(Locale.getDefault(), "%.2f", speed).trimEnd('0').trimEnd('.')
+            binding.playSpeed.text =
+                context.getString(R.string.player_detail_player_speed_label, speedStr)
         }
 
         private inner class ComponentListener :
