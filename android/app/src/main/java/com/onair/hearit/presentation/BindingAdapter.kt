@@ -164,13 +164,17 @@ fun setRoundedBackgroundColor(
     view: View,
     colorCode: String?,
 ) {
-    if (colorCode.isNullOrBlank()) return
-
     val radiusPx = 8f * view.resources.displayMetrics.density
     val drawable =
         GradientDrawable().apply {
             cornerRadius = radiusPx
-            setColor(colorCode.toColorInt())
+            val colorInt =
+                if (colorCode.isNullOrBlank()) {
+                    ContextCompat.getColor(view.context, R.color.hearit_gray1)
+                } else {
+                    colorCode.toColorInt()
+                }
+            setColor(colorInt)
         }
     view.background = drawable
 }
