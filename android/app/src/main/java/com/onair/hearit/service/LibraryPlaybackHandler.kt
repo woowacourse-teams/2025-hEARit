@@ -88,12 +88,16 @@ class LibraryPlaybackHandler(
         }
 
     fun createMediaItems(bookmarks: List<Bookmark>): List<MediaItem> =
-        bookmarks.map { bookmark ->
+        bookmarks.mapNotNull { bookmark ->
+            val audioUrl = bookmark.audioUrl
+            if (audioUrl.isNullOrBlank()) {
+                return@mapNotNull null
+            }
             mediaItemManager.buildMediaItem(
                 info =
                     PlaybackInfo(
                         hearitId = bookmark.hearitId,
-                        audioUrl = checkNotNull(bookmark.audioUrl),
+                        audioUrl = audioUrl,
                         title = bookmark.title,
                         source = "hEARit",
                     ),
