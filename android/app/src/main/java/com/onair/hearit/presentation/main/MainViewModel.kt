@@ -12,6 +12,8 @@ import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.presentation.SingleLiveData
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -34,11 +36,18 @@ class MainViewModel(
 
     val hearitUpdated = MutableLiveData<Unit>()
 
+    private val _categoryUpdated = MutableSharedFlow<Unit>(replay = 0, extraBufferCapacity = 1)
+    val categoryUpdated: SharedFlow<Unit> = _categoryUpdated
+
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
         fetchRecentHearit()
+    }
+
+    fun notifyCategoryUpdated() {
+        _categoryUpdated.tryEmit(Unit)
     }
 
     fun updateLoginState(isLoggedIn: Boolean) {

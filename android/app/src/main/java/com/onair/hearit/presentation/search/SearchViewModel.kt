@@ -37,6 +37,17 @@ class SearchViewModel(
     private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
     val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
 
+    private val currentInput = initialInput
+
+    val currentCategory: Category? =
+        (currentInput as? SearchInput.Category)?.let {
+            Category(
+                id = it.id,
+                name = it.name,
+                colorCode = it.colorCode,
+            )
+        }
+
     private val _categoryHearits = MutableStateFlow<List<SearchedHearit>>(emptyList())
     val categoryHearits: StateFlow<List<SearchedHearit>> = _categoryHearits
 
@@ -47,8 +58,6 @@ class SearchViewModel(
     private var currentPage = 0
     private var isLastPage = false
     private var isLoading = false
-
-    private var currentInput: SearchInput? = initialInput
 
     fun refreshSearchResults() {
         resetPaging()
@@ -127,6 +136,7 @@ class SearchViewModel(
                                 _searchedHearits.value.orEmpty() + pageResult.items
                             }
 
+                        _categoryHearits.value = updatedList
                         _searchedHearits.value = updatedList
                         updateUiState(updatedList)
                     }.onFailure { throwable ->
