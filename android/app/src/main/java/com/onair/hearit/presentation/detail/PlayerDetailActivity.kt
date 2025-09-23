@@ -241,7 +241,7 @@ class PlayerDetailActivity :
         } else {
             // 단일 재생 모드
             if (isDifferentHearit) {
-                playSingleWithController(hearit, previousScreen)
+                playSingleWithController(hearit, previousScreen, startPosition)
             } else {
                 if (!controller.isPlaying) controller.play()
                 if (shouldResume && abs(controller.currentPosition - startPosition) > 1000) {
@@ -262,7 +262,7 @@ class PlayerDetailActivity :
             Bundle().apply {
                 putLong(EXTRA_SEED_HEARIT_ID, seedHearitId)
                 putLong(EXTRA_SEED_BOOKMARK_ID, seedBookmarkId ?: -1)
-                putLong(EXTRA_START_POSITION_MS, startPositionMs ?: 0L)
+                putLong(EXTRA_START_POSITION_MS, startPositionMs)
             }
 
         controller.sendCustomCommand(
@@ -281,6 +281,7 @@ class PlayerDetailActivity :
     private fun playSingleWithController(
         hearit: Hearit,
         previousScreen: String,
+        startPositionMs: Long,
     ) {
         val controller = mediaController ?: return
 
@@ -304,7 +305,7 @@ class PlayerDetailActivity :
                         .build(),
                 ).build()
 
-        controller.setMediaItem(item, hearit.lastPlayTime ?: 0L)
+        controller.setMediaItem(item, startPositionMs)
         controller.prepare()
         controller.play()
     }
