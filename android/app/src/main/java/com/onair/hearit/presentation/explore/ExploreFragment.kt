@@ -123,7 +123,6 @@ class ExploreFragment :
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         animator?.removeAllListeners()
         animator?.cancel()
         animator?.setTarget(null)
@@ -133,6 +132,8 @@ class ExploreFragment :
         playerManager.stop()
         _binding = null
         lastPlayingIndex = RecyclerView.NO_POSITION
+
+        super.onDestroyView()
     }
 
     override fun onDestroy() {
@@ -149,13 +150,10 @@ class ExploreFragment :
     }
 
     private fun setupRecyclerView() {
-        _binding?.rvExplore?.adapter = adapter
-        _binding?.rvExplore?.let {
-            snapHelper.attachToRecyclerView(it)
-        }
-        snapHelper.attachToRecyclerView(binding.rvExplore)
-
         val bindingSafe = _binding ?: return
+        bindingSafe.rvExplore.adapter = adapter
+        bindingSafe.rvExplore.let { snapHelper.attachToRecyclerView(it) }
+
         bindingSafe.rvExplore.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(
@@ -249,14 +247,15 @@ class ExploreFragment :
         val currentPosition = currentIndex()
         val nextPosition = currentPosition + 1
         if (nextPosition < adapter.itemCount) {
-            binding.rvExplore.smoothScrollToPosition(nextPosition)
+            _binding?.rvExplore?.smoothScrollToPosition(nextPosition)
         }
     }
 
     private fun startSwipeAnimation() {
-        binding.lavExploreSwipeUp.visibility = View.VISIBLE
+        val bindingSafe = _binding ?: return
+        bindingSafe.lavExploreSwipeUp.visibility = View.VISIBLE
         animator =
-            ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
+            ObjectAnimator.ofFloat(bindingSafe.rvExplore, "translationY", 0f, -100f, 0f).apply {
                 duration = 1300
                 repeatCount = 1
                 repeatMode = ObjectAnimator.RESTART
