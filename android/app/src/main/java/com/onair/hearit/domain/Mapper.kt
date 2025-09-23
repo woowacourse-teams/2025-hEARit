@@ -47,7 +47,7 @@ fun SingleHearit.toHearit(
 fun SingleHearit.toPlaybackInfo(
     audioUrl: String,
     title: String,
-    startPosition: Long = 0L,
+    startPosition: Long? = null,
     source: String,
 ): PlaybackInfo =
     PlaybackInfo(
