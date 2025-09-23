@@ -45,7 +45,14 @@ class ExploreFragment :
 
     private val viewModel: ExploreViewModel by activityViewModels { ExploreViewModelFactory() }
 
-    private lateinit var playerManager: ExplorePlayerManager
+    private val playerManager by lazy {
+        ExplorePlayerManager(
+            context = requireContext().applicationContext,
+            lifecycleScope = viewLifecycleOwner.lifecycleScope,
+            onPlaybackEnded = { scrollToNextItem() },
+            onPositionUpdated = { position -> highlightScript(position) },
+        )
+    }
     private val player get() = playerManager.player
 
     private val adapter by lazy { ShortsAdapter(player, this) }
@@ -88,14 +95,6 @@ class ExploreFragment :
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
         setupWindowInsets()
-
-        playerManager =
-            ExplorePlayerManager(
-                context = requireContext().applicationContext,
-                lifecycleScope = viewLifecycleOwner.lifecycleScope,
-                onPlaybackEnded = { scrollToNextItem() },
-                onPositionUpdated = { position -> highlightScript(position) },
-            )
 
         setupRecyclerView()
         observeViewModel()
@@ -150,10 +149,14 @@ class ExploreFragment :
     }
 
     private fun setupRecyclerView() {
-        binding.rvExplore.adapter = adapter
+        _binding?.rvExplore?.adapter = adapter
+        _binding?.rvExplore?.let {
+            snapHelper.attachToRecyclerView(it)
+        }
         snapHelper.attachToRecyclerView(binding.rvExplore)
 
-        binding.rvExplore.addOnScrollListener(
+        val bindingSafe = _binding ?: return
+        bindingSafe.rvExplore.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(
                     recyclerView: RecyclerView,
@@ -212,7 +215,7 @@ class ExploreFragment :
 
     private fun currentIndex(): Int {
         val layoutManager =
-            binding.rvExplore.layoutManager as? LinearLayoutManager
+            _binding?.rvExplore?.layoutManager as? LinearLayoutManager
                 ?: return RecyclerView.NO_POSITION
         val snapView = snapHelper.findSnapView(layoutManager) ?: return RecyclerView.NO_POSITION
         return layoutManager.getPosition(snapView)
