@@ -2,10 +2,10 @@ package com.onair.hearit.service
 
 import android.os.Bundle
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionCommand
-import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.di.RepositoryProvider.playingHistoryRepository
@@ -22,8 +22,10 @@ class PlaybackSessionCallback(
     private val libraryPlaybackHandler: LibraryPlaybackHandler,
     private val recentPlaybackHandler: RecentPlaybackHandler,
 ) : MediaSession.Callback {
+    private val resumedOnceById = mutableSetOf<String>()
+    private var resumeListenerAdded = false
+
     // 컨트롤러가 세션에 연결될 때 호출됨
-    // 기본 세션 명령어 + 커스텀 명령어(PRELOAD, START_LIBRARY_PLAY, PREFETCH_NEXT)를 등록
     override fun onConnect(
         session: MediaSession,
         controller: MediaSession.ControllerInfo,
@@ -46,7 +48,6 @@ class PlaybackSessionCallback(
     }
 
     // 컨트롤러가 미디어 아이템을 지정했을 때 호출됨
-    // 현재 재생중인 상태 기록 → 아이템 resolve → 시작 인덱스/포지션 계산
     override fun onSetMediaItems(
         mediaSession: MediaSession,
         controller: MediaSession.ControllerInfo,
@@ -100,6 +101,45 @@ class PlaybackSessionCallback(
                 }.ifEmpty { mediaItems }
         }
 
+    private fun ensureResumeOnTransition(session: MediaSession) {
+        if (resumeListenerAdded) return
+        resumeListenerAdded = true
+
+        session.player.addListener(
+            object : Player.Listener {
+                override fun onMediaItemTransition(
+                    item: MediaItem?,
+                    reason: Int,
+                ) {
+                    val player = session.player
+                    val id = item?.mediaId ?: return
+
+                    if (resumedOnceById.contains(id)) return
+
+                    // extras에 저장된 마지막 위치 꺼내기
+                    val lastPosition =
+                        item.mediaMetadata.extras
+                            ?.getLong(PlaybackMediaItemManager.EXTRA_LAST_POSITION_MS, 0L) ?: 0L
+                    if (lastPosition <= 0L) {
+                        resumedOnceById.add(id)
+                        return
+                    }
+
+                    // 첫 진입에서 이미 위치가 잡혀 있다면(초기 seed) 두 번 보정하지 않기
+                    if (player.currentPosition > 500L) {
+                        resumedOnceById.add(id)
+                        return
+                    }
+
+                    // 현재 아이템 인덱스 기준으로 보정
+                    val index = player.currentMediaItemIndex
+                    player.seekTo(index, lastPosition)
+                    resumedOnceById.add(id)
+                }
+            },
+        )
+    }
+
     private suspend fun processMediaItems(
         mediaItems: List<MediaItem>,
         startIndex: Int,
@@ -132,24 +172,23 @@ class PlaybackSessionCallback(
         args: Bundle,
     ): SessionResult {
         val playParams = LibraryPlayParams.fromBundle(args)
-        val loadResult = libraryPlaybackHandler.loadLibraryItemsWithIndex(playParams)
-
-        if (loadResult.items.isEmpty()) {
-            return SessionResult(SessionError.ERROR_BAD_VALUE)
-        }
-
         preRecordCurrent(session)
 
+        val itemsWithStart = libraryPlaybackHandler.loadLibraryItemsWithStartPosition(playParams)
+
         withContext(Dispatchers.Main) {
+            // 1) 큐 세팅(초기 아이템만 startPosition 적용됨)
             session.player.setMediaItems(
-                loadResult.items,
-                loadResult.seedIndex,
-                playParams.startPositionMs,
+                itemsWithStart.mediaItems,
+                itemsWithStart.startIndex,
+                itemsWithStart.startPositionMs,
             )
             session.player.prepare()
             session.player.play()
-        }
 
+            // 2) 이후 아이템 전환마다 extras 기반으로 재개 보정
+            ensureResumeOnTransition(session)
+        }
         return SessionResult(SessionResult.RESULT_SUCCESS)
     }
 
