@@ -3,7 +3,7 @@ package com.onair.hearit.common.infrastructure.jpa;
 import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
-import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlaytimeProjection;
+import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlayingHistoryProjection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -17,7 +17,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     @Query("""
                 SELECT
                     b AS bookmark,
-                    ph.lastPlayTime AS lastPlayTime
+                    ph AS playingHistory
                 FROM Bookmark b
                 JOIN FETCH b.hearit h
                 JOIN FETCH h.category c
@@ -26,8 +26,8 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
                 WHERE b.member.id = :memberId
                 ORDER BY b.createdAt DESC
             """)
-    Page<BookmarkWithPlaytimeProjection> findAllByMemberOrderByRecent(@Param("memberId") Long memberId,
-                                                                      Pageable pageable);
+    Page<BookmarkWithPlayingHistoryProjection> findAllByMemberOrderByRecent(@Param("memberId") Long memberId,
+                                                                            Pageable pageable);
 
     Optional<Bookmark> findByHearitAndMember(Hearit hearit, Member member);
 
