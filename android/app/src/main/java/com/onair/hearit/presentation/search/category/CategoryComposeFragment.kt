@@ -31,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -124,16 +123,16 @@ fun SearchResultScreen(
 ) {
     val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
     val category by viewModel.currentCategory.collectAsStateWithLifecycle()
-    val categoryUpdated by mainViewModel.categoryUpdated.collectAsState()
 
     LaunchedEffect(category) {
         viewModel.fetchResultData(isInitial = true)
     }
 
-    LaunchedEffect(categoryUpdated) {
-        if (categoryUpdated) {
+    LaunchedEffect(Unit) {
+        // SharedFlow의 이벤트를 수집(collect)합니다.
+        // collect는 코루틴이 취소될 때까지 계속 실행됩니다.
+        mainViewModel.categoryUpdated.collect {
             viewModel.fetchResultData(isInitial = true)
-            mainViewModel.categoryUpdated.value = false
         }
     }
 
