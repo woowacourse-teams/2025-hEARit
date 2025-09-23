@@ -22,7 +22,7 @@ public class PlayingHistoryController {
 
     private final PlayingHistoryService playingHistoryService;
 
-    @GetMapping
+    @GetMapping("/hearits")
     public ResponseEntity<List<RecentlyPlayedHearitResponse>> readPlayingHistoriesOfMember(
             @AuthenticationPrincipal RequestUser requestUser) {
         List<RecentlyPlayedHearitResponse> responses =
