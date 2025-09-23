@@ -45,7 +45,14 @@ class ExploreFragment :
 
     private val viewModel: ExploreViewModel by activityViewModels { ExploreViewModelFactory() }
 
-    private lateinit var playerManager: ExplorePlayerManager
+    private val playerManager by lazy {
+        ExplorePlayerManager(
+            context = requireContext().applicationContext,
+            lifecycleScope = viewLifecycleOwner.lifecycleScope,
+            onPlaybackEnded = { scrollToNextItem() },
+            onPositionUpdated = { position -> highlightScript(position) },
+        )
+    }
     private val player get() = playerManager.player
 
     private val adapter by lazy { ShortsAdapter(player, this) }
@@ -88,14 +95,6 @@ class ExploreFragment :
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
         setupWindowInsets()
-
-        playerManager =
-            ExplorePlayerManager(
-                context = requireContext().applicationContext,
-                lifecycleScope = viewLifecycleOwner.lifecycleScope,
-                onPlaybackEnded = { scrollToNextItem() },
-                onPositionUpdated = { position -> highlightScript(position) },
-            )
 
         setupRecyclerView()
         observeViewModel()
