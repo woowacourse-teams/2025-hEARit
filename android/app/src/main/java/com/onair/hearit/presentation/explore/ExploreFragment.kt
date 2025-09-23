@@ -123,6 +123,7 @@ class ExploreFragment :
     }
 
     override fun onDestroyView() {
+        super.onDestroyView()
         animator?.removeAllListeners()
         animator?.cancel()
         animator?.setTarget(null)
@@ -132,8 +133,6 @@ class ExploreFragment :
         playerManager.stop()
         _binding = null
         lastPlayingIndex = RecyclerView.NO_POSITION
-
-        super.onDestroyView()
     }
 
     override fun onDestroy() {
@@ -150,11 +149,10 @@ class ExploreFragment :
     }
 
     private fun setupRecyclerView() {
-        val bindingSafe = _binding ?: return
-        bindingSafe.rvExplore.adapter = adapter
-        bindingSafe.rvExplore.let { snapHelper.attachToRecyclerView(it) }
+        binding.rvExplore.adapter = adapter
+        snapHelper.attachToRecyclerView(binding.rvExplore)
 
-        bindingSafe.rvExplore.addOnScrollListener(
+        binding.rvExplore.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(
                     recyclerView: RecyclerView,
@@ -213,7 +211,7 @@ class ExploreFragment :
 
     private fun currentIndex(): Int {
         val layoutManager =
-            _binding?.rvExplore?.layoutManager as? LinearLayoutManager
+            binding.rvExplore.layoutManager as? LinearLayoutManager
                 ?: return RecyclerView.NO_POSITION
         val snapView = snapHelper.findSnapView(layoutManager) ?: return RecyclerView.NO_POSITION
         return layoutManager.getPosition(snapView)
@@ -247,15 +245,14 @@ class ExploreFragment :
         val currentPosition = currentIndex()
         val nextPosition = currentPosition + 1
         if (nextPosition < adapter.itemCount) {
-            _binding?.rvExplore?.smoothScrollToPosition(nextPosition)
+            binding.rvExplore.smoothScrollToPosition(nextPosition)
         }
     }
 
     private fun startSwipeAnimation() {
-        val bindingSafe = _binding ?: return
-        bindingSafe.lavExploreSwipeUp.visibility = View.VISIBLE
+        binding.lavExploreSwipeUp.visibility = View.VISIBLE
         animator =
-            ObjectAnimator.ofFloat(bindingSafe.rvExplore, "translationY", 0f, -100f, 0f).apply {
+            ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
                 duration = 1300
                 repeatCount = 1
                 repeatMode = ObjectAnimator.RESTART
