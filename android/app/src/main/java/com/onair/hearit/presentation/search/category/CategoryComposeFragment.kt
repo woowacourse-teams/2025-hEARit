@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation
+package com.onair.hearit.presentation.search.category
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,6 +72,7 @@ import com.onair.hearit.presentation.theme.Gray3
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.Pretendard
+import com.onair.hearit.presentation.toTimeString
 
 class CategoryComposeFragment : Fragment() {
     private val category by lazy {
@@ -120,17 +122,18 @@ fun SearchResultScreen(
 ) {
     val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
     val category by viewModel.currentCategory.collectAsStateWithLifecycle()
-//    val hearitUpdated by mainViewModel.bookmarkUpdated.collectAsStateWithLifecycle()
+    val categoryUpdated by mainViewModel.categoryUpdated.collectAsState()
 
     LaunchedEffect(category) {
         viewModel.fetchResultData(isInitial = true)
     }
 
-//    LaunchedEffect(hearitUpdated) {
-//        hearitUpdated?.let {
-//            viewModel.refreshSearchResults()
-//        }
-//    }
+    LaunchedEffect(categoryUpdated) {
+        if (categoryUpdated) {
+            viewModel.fetchResultData(isInitial = true)
+            mainViewModel.categoryUpdated.value = false
+        }
+    }
 
     GradientBackgroundScreen(
         colorCode = category?.colorCode ?: "#000000",

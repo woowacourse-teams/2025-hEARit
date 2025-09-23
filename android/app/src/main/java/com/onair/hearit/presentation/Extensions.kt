@@ -17,6 +17,7 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
+import com.onair.hearit.presentation.search.category.CategoryComposeFragment
 import com.onair.hearit.presentation.search.category.CategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import kotlinx.coroutines.CoroutineScope

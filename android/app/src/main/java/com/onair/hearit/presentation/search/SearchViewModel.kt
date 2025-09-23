@@ -66,7 +66,6 @@ class SearchViewModel(
     private var isLastPage = false
     private var isLoading = false
 
-
     fun refreshSearchResults() {
         resetPaging()
         _searchedHearits.value = emptyList()

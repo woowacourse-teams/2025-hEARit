@@ -6,7 +6,6 @@ import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.PlayingHistoryRequest
-import java.lang.IllegalStateException
 
 class PlayingHistoryDataSourceImpl(
     private val playingHistoryService: PlayingHistoryService,

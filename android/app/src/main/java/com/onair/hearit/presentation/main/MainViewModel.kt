@@ -12,6 +12,7 @@ import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.presentation.SingleLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -33,6 +34,8 @@ class MainViewModel(
     val withdrawState: LiveData<Boolean> = _withdrawState
 
     val hearitUpdated = MutableLiveData<Unit>()
+
+    val categoryUpdated = MutableStateFlow(false)
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
