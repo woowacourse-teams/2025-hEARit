@@ -72,6 +72,7 @@ import com.onair.hearit.presentation.theme.Gray3
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.Pretendard
+import com.onair.hearit.presentation.toHashtagName
 import com.onair.hearit.presentation.toTimeString
 
 class CategoryComposeFragment : Fragment() {
@@ -175,7 +176,7 @@ fun GradientBackgroundScreen(
                 Modifier
                     .fillMaxWidth()
                     .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                    .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
@@ -226,7 +227,7 @@ fun GradientBackgroundScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(hearits, key = { it.id }) { item ->
+            items(items = hearits, key = { it.id }) { item ->
                 SearchedHearitItem(
                     item = item,
                     color = safeColor,
@@ -289,7 +290,7 @@ fun SearchedHearitItem(
             ) {
                 item.keywords.forEach { keyword ->
                     Text(
-                        text = "#${keyword.name}",
+                        text = keyword.toHashtagName(),
                         style =
                             TextStyle(
                                 color = Gray2,
@@ -379,35 +380,35 @@ fun GradientBackgroundScreenPreview() {
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
             ),
             SearchedHearit(
-                0,
+                1,
                 "이제 두 번째 레슨, 슬픔도 너만 갖기",
                 playTime = 1234,
                 lastPlayTime = 192013,
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
             ),
             SearchedHearit(
-                0,
+                2,
                 "드디어 세 번째 레슨, 일희일비 않기",
                 playTime = 1234,
                 lastPlayTime = 99999,
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
             ),
             SearchedHearit(
-                0,
+                3,
                 "드디어 세 번째 레슨, 일희일비 않기",
                 playTime = 1234,
                 lastPlayTime = 99999,
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
             ),
             SearchedHearit(
-                0,
+                4,
                 "드디어 세 번째 레슨, 일희일비 않기",
                 playTime = 1234,
                 lastPlayTime = 99999,
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
             ),
             SearchedHearit(
-                0,
+                5,
                 "드디어 세 번째 레슨, 일희일비 않기",
                 playTime = 1234,
                 lastPlayTime = 99999,
@@ -422,7 +423,6 @@ fun GradientBackgroundScreenPreview() {
             hearits = dummyHearits,
             onBack = {},
             onHearitClick = {},
-            modifier = Modifier.padding(4.dp),
         )
     }
 }

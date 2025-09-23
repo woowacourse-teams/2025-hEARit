@@ -10,6 +10,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.onair.hearit.R
+import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
@@ -18,7 +19,6 @@ import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
-import com.onair.hearit.presentation.search.category.CategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,6 +38,8 @@ fun Int.toTimeString(): String {
     val seconds = this % 60
     return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
 }
+
+fun Keyword.toHashtagName(): String = "#${this.name}"
 
 fun Intent?.toDetailResult(): DetailResult? {
     if (this == null) return null
@@ -82,7 +84,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
         is DetailResult.Keyword -> {
             mainActivity.selectTab(R.id.nav_search)
             val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = CategoryFragment::class.java.simpleName
+            val backStackTag = SearchRecentFragment::class.java.simpleName
 
             fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             fragmentManager
