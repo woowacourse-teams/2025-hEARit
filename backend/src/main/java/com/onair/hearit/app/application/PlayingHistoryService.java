@@ -9,10 +9,11 @@ import com.onair.hearit.common.domain.UserInfo;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.PlayingHistoryRepository;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,22 +30,37 @@ public class PlayingHistoryService {
 
     public List<RecentlyPlayedHearitResponse> getRecentPlayingHistoryOfMember(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
-        return toPlayingHistoryResponseForMember(userInfo.getMemberId());
+        return toPlayingHistoryResponse(userInfo.getMemberId());
     }
 
-    private List<RecentlyPlayedHearitResponse> toPlayingHistoryResponseForMember(Long memberId) {
+    private List<RecentlyPlayedHearitResponse> toPlayingHistoryResponse(Long memberId) {
         List<PlayingHistory> histories = playingHistoryRepository.findByMemberIdOrderByUpdatedAtDesc(
                 memberId, PLAYING_HISTORY_MAX_COUNT);
-        Map<Long, Long> lastPlayTimeByHearitId = histories.stream()
-                .collect(Collectors.toMap(PlayingHistory::getHearitId, PlayingHistory::getLastPlayTime,
-                        (existing, ignored) -> existing, LinkedHashMap::new));
-        Map<Long, Hearit> hearitMap = hearitRepository.findAllByIdIn(lastPlayTimeByHearitId.keySet().stream().toList())
-                .stream().collect(Collectors.toMap(Hearit::getId, h -> h));
+        Map<Long, Long> lastPlayTimeByHearitId = mapHearitIdToLastPlayTime(histories);
+        Map<Long, Hearit> hearitMap = mapHearitIdToHearit(lastPlayTimeByHearitId.keySet());
         return lastPlayTimeByHearitId.entrySet().stream()
-                .map(e -> RecentlyPlayedHearitResponse.from(hearitMap.get(e.getKey()), e.getValue()))
+                .map(entry -> RecentlyPlayedHearitResponse.from(hearitMap.get(entry.getKey()), entry.getValue()))
                 .toList();
+    }
+
+    private Map<Long, Long> mapHearitIdToLastPlayTime(List<PlayingHistory> histories) {
+        return histories.stream()
+                .collect(Collectors.toMap(
+                        PlayingHistory::getHearitId,      // Key: hearitId
+                        PlayingHistory::getLastPlayTime,  // Value: lastPlayTime
+                        (existing, ignored) -> existing,  // 중복 key 처리
+                        LinkedHashMap::new // DB에서 가져온 순서(최신순) 유지
+                ));
+    }
+
+    private Map<Long, Hearit> mapHearitIdToHearit(Set<Long> hearitIds) {
+        return hearitRepository.findAllByIdIn(hearitIds.stream().toList()).stream()
+                .collect(Collectors.toMap(
+                        Hearit::getId, // Key: hearitId
+                        hearit -> hearit // Value: Hearit 객체
+                ));
     }
 
     public void addPlayingHistory(UserInfo userInfo, PlayingHistoryRequest request) {
