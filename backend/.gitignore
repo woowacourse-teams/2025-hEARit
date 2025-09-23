@@ -41,3 +41,5 @@ out/
 
 .DS_store
 .env
+
+afterMigrate.sql
