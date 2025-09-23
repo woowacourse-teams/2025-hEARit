@@ -3,12 +3,14 @@ package com.onair.hearit.presentation
 import android.content.Context
 import android.content.Intent
 import android.view.View
+import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
@@ -160,3 +162,19 @@ fun <T> LiveData<T>.observeOnce(
         },
     )
 }
+
+fun <T> executeAsync(
+    serviceScope: CoroutineScope,
+    operationName: String,
+    operation: suspend () -> T,
+): ListenableFuture<T> =
+    CallbackToFutureAdapter.getFuture { completer ->
+        val job =
+            serviceScope.launch {
+                runCatching { operation() }
+                    .onSuccess { completer.set(it) }
+                    .onFailure { completer.setException(it) }
+            }
+        completer.addCancellationListener({ job.cancel() }, Runnable::run)
+        operationName
+    }

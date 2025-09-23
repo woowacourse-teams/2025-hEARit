@@ -12,6 +12,10 @@
         <variable
             name="isHighlighted"
             type="Boolean" />
+
+        <variable
+            name="isPast"
+            type="Boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -28,10 +32,11 @@
             android:lineSpacingMultiplier="1.3"
             android:singleLine="false"
             android:text="@{scriptLine.text}"
-            app:detailHighlightedStyle="@{isHighlighted}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:scriptIsHighlighted="@{isHighlighted}"
+            app:scriptIsPast="@{isPast}"
             tools:text="안녕하세요. 오늘은 HTTP와 HTTPS에 대해서 알아볼까요? 저는 잘 모르겠네요~ 스크립트가 길어지면 어떻게 될까요? 두근두근" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

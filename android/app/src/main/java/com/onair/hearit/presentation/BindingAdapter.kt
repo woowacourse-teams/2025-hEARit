@@ -71,6 +71,19 @@ fun setHighlightedStyle(
     textView.typeface = ResourcesCompat.getFont(context, fontRes)
 }
 
+@BindingAdapter(value = ["scriptIsHighlighted", "scriptIsPast"], requireAll = false)
+fun setScriptTextColor(
+    textView: TextView,
+    isHighlighted: Boolean = false,
+    isPast: Boolean = false,
+) {
+    val context = textView.context
+    val gray4 = ContextCompat.getColor(context, R.color.hearit_gray4)
+    val gray2 = ContextCompat.getColor(context, R.color.hearit_gray2)
+
+    textView.setTextColor(if (isHighlighted || isPast) gray4 else gray2)
+}
+
 @BindingAdapter("formattedDate")
 fun setFormattedDate(
     textView: TextView,
@@ -151,13 +164,17 @@ fun setRoundedBackgroundColor(
     view: View,
     colorCode: String?,
 ) {
-    if (colorCode.isNullOrBlank()) return
-
     val radiusPx = 8f * view.resources.displayMetrics.density
     val drawable =
         GradientDrawable().apply {
             cornerRadius = radiusPx
-            setColor(colorCode.toColorInt())
+            val colorInt =
+                if (colorCode.isNullOrBlank()) {
+                    ContextCompat.getColor(view.context, R.color.hearit_gray1)
+                } else {
+                    colorCode.toColorInt()
+                }
+            setColor(colorInt)
         }
     view.background = drawable
 }

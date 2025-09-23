@@ -1,7 +1,7 @@
 package com.onair.hearit.di
 
+import com.onair.hearit.domain.usecase.GetBookmarksUseCase
 import com.onair.hearit.domain.usecase.GetHearitUseCase
-import com.onair.hearit.domain.usecase.GetNextBookmarkUseCase
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
@@ -33,8 +33,8 @@ object UseCaseProvider {
         GetShortsHearitUseCase(mediaFileRepository = RepositoryProvider.mediaFileRepository)
     }
 
-    val getNextBookmarkUseCase: GetNextBookmarkUseCase by lazy {
-        GetNextBookmarkUseCase(
+    val getBookmarksUseCase: GetBookmarksUseCase by lazy {
+        GetBookmarksUseCase(
             bookmarkRepository = RepositoryProvider.bookmarkRepository,
             mediaFileRepository = RepositoryProvider.mediaFileRepository,
         )
