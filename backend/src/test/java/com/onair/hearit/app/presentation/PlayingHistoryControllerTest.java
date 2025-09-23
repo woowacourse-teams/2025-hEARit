@@ -64,7 +64,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 ).build())
                 ))
                 .when()
-                .get("/api/v1/playing-histories")
+                .get("/api/v1/playing-histories/hearits")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(new TypeRef<>() {
@@ -98,7 +98,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 ).build())
                 ))
                 .when()
-                .get("/api/v1/playing-histories")
+                .get("/api/v1/playing-histories/hearits")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(new TypeRef<>() {
