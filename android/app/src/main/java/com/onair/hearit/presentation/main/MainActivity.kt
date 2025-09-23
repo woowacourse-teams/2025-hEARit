@@ -97,8 +97,8 @@ class MainActivity :
         setupWindowInsets()
         setupNavigation()
         setupDrawer()
-        observeViewModel()
         attachController()
+        observeViewModel()
         showFragment(HomeFragment())
         setupBottomControllerClick()
     }

@@ -144,7 +144,7 @@ class PlaybackSessionCallback(
             session.player.setMediaItems(
                 loadResult.items,
                 loadResult.seedIndex,
-                session.player.currentPosition,
+                playParams.startPositionMs,
             )
             session.player.prepare()
             session.player.play()

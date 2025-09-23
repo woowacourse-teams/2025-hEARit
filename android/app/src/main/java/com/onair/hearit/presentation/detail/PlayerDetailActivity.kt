@@ -56,6 +56,7 @@ import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -232,6 +233,7 @@ class PlayerDetailActivity :
                 startLibraryPlayback(
                     seedHearitId = hearit.id,
                     seedBookmarkId = viewModel.bookmarkId.value,
+                    startPositionMs = startPosition,
                 )
             } else {
                 if (!controller.isPlaying) controller.play()
@@ -253,12 +255,14 @@ class PlayerDetailActivity :
     private fun startLibraryPlayback(
         seedHearitId: Long,
         seedBookmarkId: Long?,
+        startPositionMs: Long,
     ) {
         val controller = mediaController ?: return
         val args =
             Bundle().apply {
                 putLong(EXTRA_SEED_HEARIT_ID, seedHearitId)
                 putLong(EXTRA_SEED_BOOKMARK_ID, seedBookmarkId ?: -1)
+                putLong(EXTRA_START_POSITION_MS, startPositionMs ?: 0L)
             }
 
         controller.sendCustomCommand(
