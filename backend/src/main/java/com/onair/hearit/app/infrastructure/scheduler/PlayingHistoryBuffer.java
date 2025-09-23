@@ -28,11 +28,11 @@ public class PlayingHistoryBuffer {
     }
 
     @Transactional
-    @Scheduled(fixedDelay = 2000)
+    @Scheduled(fixedDelay = 1_000)
     public void flush() {
         if (!queue.isEmpty()) {
             List<PlayingHistory> batchRecords = new ArrayList<>();
-            queue.drainTo(batchRecords, 500);
+            queue.drainTo(batchRecords, 5_000);
             if (!batchRecords.isEmpty()) {
                 playingHistoryCommandRepository.bulkInsert(batchRecords);
             }
