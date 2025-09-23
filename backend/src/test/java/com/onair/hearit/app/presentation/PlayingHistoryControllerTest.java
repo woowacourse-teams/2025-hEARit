@@ -3,12 +3,16 @@ package com.onair.hearit.app.presentation;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.onair.hearit.app.dto.request.PlayingHistoryRequest;
+import com.onair.hearit.app.dto.response.BookmarkHearitResponseV2;
+import com.onair.hearit.app.dto.response.PagedResponse;
 import com.onair.hearit.app.dto.response.RecentlyPlayedHearitResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
@@ -203,6 +207,54 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                 .post("/api/v1/playing-histories")
                 .then()
                 .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    @DisplayName("isFinished가 true인 상태에서 lastPlayTime이 줄어들면 isFinished는 유지되고 lastPlayTime만 업데이트된다.")
+    void updatePlayingHistory_keepFinishedTrueWhenTimeDec2reases() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
+        Category category = dbHelper.insertCategory(new Category("name", "#000000"));
+        Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+        Bookmark bookmark = dbHelper.insertBookmark(new Bookmark(member, hearit));
+
+        // 처음에 거의 끝까지 들은 상태 저장 → isFinished = true
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
+                new PlayingHistory(member.getId(), hearit, 99_500L) // 100초 기준, 끝까지 다 들음
+        );
+        assertThat(playingHistory.isFinished()).isTrue();
+
+        // lastPlayTime을 줄여서 다시 요청
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 20_000L);
+
+        // when
+        RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .contentType("application/json")
+                .body(request)
+                .when()
+                .post("/api/v1/playing-histories")
+                .then()
+                .statusCode(HttpStatus.OK.value());
+
+        PagedResponse<BookmarkHearitResponseV2> response = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .param("page", 0)
+                .param("size", 5)
+                .when()
+                .get("/api/v2/bookmarks/hearits")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(new TypeRef<>() {
+                });
+
+        // then
+        assertAll(
+                () -> assertThat(response.content().getFirst().lastPlayTime()).isEqualTo(20_000L),
+                () -> assertThat(response.content().getFirst().isFinished()).isTrue()
+        );
     }
 
     private Hearit createHearitWith(int playTime, Category category) {
