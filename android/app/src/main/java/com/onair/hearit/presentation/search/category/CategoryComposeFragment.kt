@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -95,6 +96,7 @@ class CategoryComposeFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View =
         ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 SearchResultScreen(
                     viewModel = viewModel,
@@ -251,7 +253,8 @@ fun SearchedHearitItem(
                 .background(
                     Gray1,
                     shape = RoundedCornerShape(8.dp),
-                ).clickable { onClick(item.id) }
+                )
+                .clickable { onClick(item.id) }
                 .padding(vertical = 16.dp),
     ) {
         Column(
