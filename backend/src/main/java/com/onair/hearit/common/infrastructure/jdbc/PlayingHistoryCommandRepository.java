@@ -22,7 +22,7 @@ public class PlayingHistoryCommandRepository {
                 VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
                     last_play_time = VALUES(last_play_time),
-                    is_finished = VALUES(is_finished),
+                    is_finished = playing_history.is_finished OR VALUES(is_finished),
                     updated_at = VALUES(updated_at)
                 """;
 
