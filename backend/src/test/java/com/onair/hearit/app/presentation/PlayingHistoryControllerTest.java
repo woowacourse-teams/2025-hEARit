@@ -211,7 +211,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
 
     @Test
     @DisplayName("isFinished가 true인 상태에서 lastPlayTime이 줄어들면 isFinished는 유지되고 lastPlayTime만 업데이트된다.")
-    void updatePlayingHistory_keepFinishedTrueWhenTimeDec2reases() {
+    void updatePlayingHistory_keepFinishedTrueWhenTimeDecreases() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
