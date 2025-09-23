@@ -52,18 +52,26 @@ class PlaybackMediaItemManager(
             )
         }
 
-    /** 여러 PlaybackInfo → MediaItemsWithStart (첫 아이템만 startPosition 적용됨) */
     fun toItemsWithStart(
         items: List<PlaybackInfo>,
         startIndex: Int,
         startPositionMs: Long,
+        playbackMode: String? = null,
     ): MediaSession.MediaItemsWithStartPosition {
-        val mediaItems = items.map { buildMediaItem(it) }
-        // safeIndex 설명 (쉽게):
-        // - 목록이 있으면: startIndex를 0~마지막 인덱스 범위로 맞춘다 → 범위 밖 접근 방지
-        // - 목록이 비었으면: lastIndex가 -1이므로 보정할 수 없어 0으로 처리
+        val mediaItems =
+            items.map { info ->
+                // bookmarkId와 playbackMode를 extras/tag에 함께 담는다.
+                buildMediaItem(
+                    info = info,
+                    playbackMode = playbackMode,
+                    bookmarkId = info.bookmarkId,
+                )
+            }
+
+        // 안전한 시작 인덱스 계산: 목록이 있으면 0~lastIndex로 보정, 없으면 0으로 처리
         val safeIndex =
-            if (mediaItems.isNotEmpty()) startIndex.coerceIn(0, mediaItems.lastIndex) else 0
+            if (mediaItems.isEmpty()) 0 else startIndex.coerceIn(0, mediaItems.lastIndex)
+
         return MediaSession.MediaItemsWithStartPosition(
             mediaItems,
             safeIndex,

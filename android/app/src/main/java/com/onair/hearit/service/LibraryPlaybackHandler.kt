@@ -39,6 +39,7 @@ class LibraryPlaybackHandler(
                 items = loadResult.items,
                 startIndex = seedIndex,
                 startPositionMs = startPositionMs,
+                playbackMode = "LIBRARY",
             )
         }
 
@@ -66,7 +67,13 @@ class LibraryPlaybackHandler(
 
             nextPage = if (!pageResult.paging.isLast) pageResult.paging.page + 1 else null
             val newItems =
-                createPlaybackInfos(pageResult.items).map { mediaItemManager.buildMediaItem(it) }
+                createPlaybackInfos(pageResult.items).map { playbackInfo ->
+                    mediaItemManager.buildMediaItem(
+                        info = playbackInfo,
+                        playbackMode = "LIBRARY",
+                        bookmarkId = playbackInfo.bookmarkId,
+                    )
+                }
             PrefetchResult(newItems, nextPage)
         }
 
