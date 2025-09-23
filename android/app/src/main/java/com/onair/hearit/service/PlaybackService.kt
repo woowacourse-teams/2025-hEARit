@@ -28,7 +28,6 @@ class PlaybackService : MediaSessionService() {
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
     private lateinit var stateSaver: PlaybackStateSaver
-    private lateinit var historyListener: PlaybackHistoryListener
     private lateinit var mediaItemManager: PlaybackMediaItemManager
 
     private var notificationController: PlayerNotificationController? = null
@@ -57,6 +56,10 @@ class PlaybackService : MediaSessionService() {
                 getPlaybackInfoUseCase = getPlaybackInfoUseCase,
                 mediaItemManager = mediaItemManager,
             )
+
+        stateSaver = PlaybackStateSaver(player, serviceScope, this)
+        player.addListener(stateSaver.listener)
+
         initializeMediaSession()
 
         // 2) 알림 + 포그라운드 제어는 컨트롤러에 위임
@@ -67,10 +70,6 @@ class PlaybackService : MediaSessionService() {
                 channelId = CHANNEL_ID,
                 notificationId = NOTIFICATION_ID,
             ).also { it.attach(player) }
-
-        stateSaver = PlaybackStateSaver(player, serviceScope, this)
-        historyListener = PlaybackHistoryListener(player, serviceScope).also { it.attach() }
-        player.addListener(stateSaver.listener)
         player.addListener(
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
@@ -115,8 +114,6 @@ class PlaybackService : MediaSessionService() {
             stopSelf()
             return
         }
-
-        historyListener.recordIfSwitchingTo(hearitId)
 
         val info =
             PlaybackInfo(
@@ -182,6 +179,7 @@ class PlaybackService : MediaSessionService() {
                         mediaItemManager,
                         libraryPlaybackHandler,
                         recentPlaybackHandler,
+                        stateSaver,
                     ),
                 ).build()
     }
@@ -200,7 +198,6 @@ class PlaybackService : MediaSessionService() {
         super.onDestroy()
         serviceScope.cancel()
         notificationController?.detach()
-        historyListener.detach()
         stateSaver.release()
         mediaSession.release()
         player.removeListener(stateSaver.listener)

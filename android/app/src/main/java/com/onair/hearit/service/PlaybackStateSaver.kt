@@ -1,8 +1,9 @@
 package com.onair.hearit.service
 
-import android.util.Log
 import androidx.annotation.OptIn
+import androidx.media3.common.C
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import com.onair.hearit.di.RepositoryProvider
 import kotlinx.coroutines.CoroutineScope
@@ -20,59 +21,96 @@ class PlaybackStateSaver(
 ) {
     private var saveJob: Job? = null
 
-    // 30초에 한번씩 마지막 재생 위치를 저장하기 위해서 runnable과 handler를 돌림
+    /** 지금 재생 중인 아이템을 ‘minRecordMs 이상’ 들었으면 히스토리 기록 */
+    fun recordCurrent(minRecordMs: Long = 1_000L) {
+        val currentId = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return
+        val playedMs = player.currentPosition.coerceAtLeast(0L)
+        if (playedMs >= minRecordMs) recordHistory(currentId, playedMs)
+    }
+
+    /** 다음 아이템으로 바꾸기 ‘직전’에 호출 → 현재 곡 기록 (중복 방지 포함) */
+    fun recordBeforeSwitchingTo(
+        nextId: Long,
+        minRecordMs: Long = 1_000L,
+    ) {
+        val currentId = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return
+        if (currentId == nextId) return
+        val playedMs = player.currentPosition.coerceAtLeast(0L)
+        if (playedMs >= minRecordMs) recordHistory(currentId, playedMs)
+    }
+
+    fun flushNow(finished: Boolean = false) {
+        savePlaybackPosition(finished)
+        recordCurrent(minRecordMs = 1_000L)
+    }
+
+    // 30초 주기 최근 위치 저장 + 종료/중단 처리
     val listener =
         @UnstableApi
         object : Player.Listener {
-            // 현재 플레이어가 실행중인 경우, 30초에 한번씩 저장할 수 있도록 도와줌
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) {
-                    // 재생 시작: 30초마다 위치를 저장하는 주기적인 작업 시작
                     startSavingPosition()
                 } else {
-                    // 재생 중단: 주기적인 저장 작업을 멈추고 마지막 위치를 한 번 저장
-                    // 현재 플레이어가 실행중이지 않은 경우 runnable을 멈추고, playbackPosition을 저장
+                    // 일시정지 시점에 최근 위치 저장 + 히스토리도 한 번 남겨줌
                     stopSavingPosition()
+                    recordCurrent(minRecordMs = 1_000L)
                 }
             }
 
-            /**
-             * 플레이어의 재생 상태(준비, 버퍼링, 종료 등)가 변경될 때 호출됨
-             * 재생이 종료(STATE_ENDED)되면, 주기적인 저장 작업을 멈추고 재생 위치를 0으로 초기화하여 저장
-             */
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) {
+                    // 마지막 곡 끝난 시점: 히스토리 + 최근 위치 0으로 초기화 저장
+                    val id = player.currentMediaItem?.mediaId?.toLongOrNull()
+                    if (id != null) recordHistory(id, 0L)
+
                     stopSavingPosition(finished = true)
                     service?.stopSelf()
                 }
             }
 
-            /**
-             * 재생 위치가 불연속적으로 변경될 때(예: 디폴트 타임 바- 재생바가 변경되는 경우) 호출됩니다.
-             * 이 경우 즉시 현재 위치를 저장하여 정확한 상태를 유지함
-             */
-            override fun onPositionDiscontinuity(reason: Int) {
+            // ✅ Media3 최신 시그니처: old/new 받으면 직전 트랙을 정확히 기록 가능
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                @Player.DiscontinuityReason reason: Int,
+            ) {
+                val oldId = oldPosition.mediaItem?.mediaId?.toLongOrNull()
+                val newId = newPosition.mediaItem?.mediaId?.toLongOrNull()
+                if (oldId == null || newId == null || oldId == newId) return
+
+                val isAuto = reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION
+                val isSeek =
+                    reason == Player.DISCONTINUITY_REASON_SEEK ||
+                        reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
+                if (isAuto || isSeek) {
+                    // 자동전환인 경우, 끝까지 들은 상태면 0으로 기록
+                    val playedMs = oldPosition.positionMs.coerceAtLeast(0L)
+                    val toRecord =
+                        if (isAuto && isOldItemFinished(oldPosition)) 0L else playedMs
+
+                    if (toRecord >= 1_000L || toRecord == 0L) {
+                        // 0(완주) 또는 1초 이상 재생했을 때만 기록
+                        recordHistory(oldId, toRecord)
+                    }
+                }
+
+                // 최근 위치 즉시 갱신
                 savePlaybackPosition()
             }
         }
 
-    // 재생 시작 시 호출: 주기적인 저장 코루틴을 시작
     private fun startSavingPosition() {
-        // 기존 작업이 있다면 취소
         saveJob?.cancel()
-
-        // 30초마다 위치를 저장하는 코루틴을 시작
         saveJob =
             serviceScope.launch(Dispatchers.IO) {
-                // 코루틴이 시작되면 Active상태, 코루틴이 멈추면 Completed 상태
                 while (isActive) {
-                    delay(30_000L) // 30초 대기
+                    delay(30_000L)
                     savePlaybackPosition()
                 }
             }
     }
 
-    // 재생 중단 또는 종료 시 호출: 주기적인 저장 작업을 멈추고 마지막 위치를 한 번 저장
     private fun stopSavingPosition(finished: Boolean = false) {
         saveJob?.cancel()
         savePlaybackPosition(finished)
@@ -81,7 +119,9 @@ class PlaybackStateSaver(
     fun release() {
         saveJob?.cancel()
         service?.let { player.removeListener(listener) }
+        // 앱/서비스 종료 시점: 최근 위치 + 히스토리 한 번 더
         savePlaybackPosition()
+        recordCurrent(minRecordMs = 1_000L)
         service = null
     }
 
@@ -90,27 +130,49 @@ class PlaybackStateSaver(
         serviceScope.launch(Dispatchers.IO) {
             var mediaId: Long? = null
             var lastPosition = 0L
+            var completed = finished
 
-            // player 접근은 Main 스레드에서 수행
             withContext(Dispatchers.Main) {
                 mediaId = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return@withContext
                 val duration = player.duration
                 val position = player.currentPosition
-                lastPosition =
-                    if (finished || (duration > 0 && position >= duration - 1_000)) 0L else position
+                completed = completed || (duration > 0 && position >= duration - 1_000)
+                lastPosition = if (completed) 0L else position
             }
-
-            mediaId?.let {
+            mediaId?.let { id ->
                 runCatching {
-                    RepositoryProvider.recentHearitRepository
-                        .updateRecentHearitPosition(
-                            hearitId = it,
-                            position = lastPosition,
-                        )
-                }.onFailure {
-                    Log.w("PlaybackSaver", "위치 저장 실패: ${it.message}")
+                    RepositoryProvider.recentHearitRepository.updateRecentHearitPosition(
+                        id,
+                        lastPosition,
+                    )
                 }
             }
         }
+    }
+
+    private fun recordHistory(
+        hearitId: Long,
+        lastPlayTime: Long,
+    ) {
+        serviceScope.launch(Dispatchers.IO) {
+            runCatching {
+                RepositoryProvider.playingHistoryRepository.addPlayingHistory(
+                    hearitId,
+                    lastPlayTime,
+                )
+            }
+        }
+    }
+
+    private fun isOldItemFinished(oldPosition: Player.PositionInfo): Boolean {
+        val timeline = player.currentTimeline
+        val oldIndex = oldPosition.mediaItemIndex
+        if (timeline.isEmpty || oldIndex < 0 || oldIndex >= timeline.windowCount) return false
+
+        val durationMs = timeline.getWindow(oldIndex, Timeline.Window()).durationMs
+        if (durationMs == C.TIME_UNSET) return false
+
+        // 마지막 1초 이내면 완주로 간주
+        return oldPosition.positionMs >= (durationMs - 1_000L)
     }
 }
