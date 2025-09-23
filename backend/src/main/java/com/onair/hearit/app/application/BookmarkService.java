@@ -11,7 +11,7 @@ import com.onair.hearit.common.exception.custom.AlreadyExistException;
 import com.onair.hearit.common.exception.custom.ForbiddenException;
 import com.onair.hearit.common.exception.custom.NotFoundException;
 import com.onair.hearit.common.exception.custom.UnauthenticatedException;
-import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlaytimeProjection;
+import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlayingHistoryProjection;
 import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
@@ -35,17 +35,17 @@ public class BookmarkService {
             PagingRequest pagingRequest) {
         Member member = getMemberByUserInfo(userInfo);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<BookmarkWithPlaytimeProjection> projections = bookmarkRepository.findAllByMemberOrderByRecent(
+        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findAllByMemberOrderByRecent(
                 member.getId(),
                 pageable);
         return toBookmarkHearitResponse(projections);
     }
 
-    private Page<BookmarkHearitResponseV2> toBookmarkHearitResponse(Page<BookmarkWithPlaytimeProjection> projections) {
+    private Page<BookmarkHearitResponseV2> toBookmarkHearitResponse(Page<BookmarkWithPlayingHistoryProjection> projections) {
         return projections.map(p -> BookmarkHearitResponseV2.of(
                 p.getBookmark(),
                 p.getBookmark().getHearit(),
-                p.getLastPlayTime()
+                p.getPlayingHistory()
         ));
     }
 

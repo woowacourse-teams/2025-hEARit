@@ -7,7 +7,8 @@ import com.onair.hearit.common.domain.Bookmark;
 import com.onair.hearit.common.domain.Category;
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Member;
-import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlaytimeProjection;
+import com.onair.hearit.common.domain.PlayingHistory;
+import com.onair.hearit.common.infrastructure.dto.BookmarkWithPlayingHistoryProjection;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.fixture.TestFixture;
 import java.util.List;
@@ -46,7 +47,7 @@ class BookmarkRepositoryTest {
         Bookmark newestBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit3));
 
         // when
-        Page<BookmarkWithPlaytimeProjection> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(
+        Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(
                 member.getId(),
                 PageRequest.of(0, 5));
 
@@ -55,6 +56,36 @@ class BookmarkRepositoryTest {
             assertThat(bookmarks.getContent().get(0).getBookmark().getId()).isEqualTo(newestBookmark.getId());
             assertThat(bookmarks.getContent().get(1).getBookmark().getId()).isEqualTo(mideumBookmark.getId());
             assertThat(bookmarks.getContent().get(2).getBookmark().getId()).isEqualTo(oldestBookmark.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("멤버의 북마크와 함께 재생 시간을 가져온다.")
+    void findAllByMemberOrderByRecentWithPlayingTimeTest() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(
+                member.getId(),
+                hearit,
+                (hearit.getPlayTime() - 10) * 1000L));
+
+        // when
+        Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(
+                member.getId(),
+                PageRequest.of(0, 5)
+        );
+
+        // then
+        BookmarkWithPlayingHistoryProjection projection = bookmarks.getContent().get(0);
+
+        assertAll(() -> {
+            assertThat(bookmarks.getContent()).hasSize(1);
+            assertThat(projection.getBookmark().getId()).isEqualTo(bookmark.getId());
+            assertThat(projection.getPlayingHistory().getLastPlayTime()).isEqualTo(playingHistory.getLastPlayTime());
+            assertThat(projection.getPlayingHistory().isFinished()).isTrue();
         });
     }
 
