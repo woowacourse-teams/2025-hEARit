@@ -8,14 +8,14 @@ import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 
 sealed class DetailResult {
     data class Category(
-        val id: Long,
+        val categoryId: Long,
         val name: String,
         val colorCode: String,
     ) : DetailResult() {
         companion object {
             fun fromBundle(bundle: Bundle): Category =
                 Category(
-                    id = bundle.getLong(CATEGORY_ID_KEY),
+                    categoryId = bundle.getLong(CATEGORY_ID_KEY),
                     name = bundle.getString(CATEGORY_NAME_KEY) ?: DEFAULT_CATEGORY_NAME,
                     colorCode = bundle.getString(CATEGORY_COLOR_KEY) ?: DEFAULT_CATEGORY_COLOR,
                 )

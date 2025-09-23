@@ -4,7 +4,6 @@ object IntentKeys {
     const val TYPE_KEY = "type"
     const val HEARIT_ID_KEY = "hearit_id"
     const val BOOKMARK_ID_KEY = "bookmark_id"
-    const val EXPLORE_KEY = "explore"
     const val CATEGORY_KEY = "category"
     const val CATEGORY_ID_KEY = "category_id"
     const val CATEGORY_NAME_KEY = "category_name"

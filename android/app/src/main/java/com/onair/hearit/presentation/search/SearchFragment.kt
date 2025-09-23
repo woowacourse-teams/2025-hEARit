@@ -7,14 +7,17 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchBinding
-import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.presentation.search.category.CategoryFragment
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
+import com.onair.hearit.presentation.search.category.CategoryComposeFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
 class SearchFragment :
@@ -98,18 +101,20 @@ class SearchFragment :
         name: String,
         colorCode: String,
     ) {
+        val fragment =
+            CategoryComposeFragment().apply {
+                arguments =
+                    bundleOf(
+                        CATEGORY_ID_KEY to id,
+                        CATEGORY_NAME_KEY to name,
+                        CATEGORY_COLOR_KEY to colorCode,
+                    )
+            }
+
         parentFragmentManager
             .beginTransaction()
-            .replace(
-                R.id.fragment_container_view,
-                CategoryFragment.newInstance(
-                    SearchInput.Category(
-                        id,
-                        name,
-                        colorCode,
-                    ),
-                ),
-            ).addToBackStack(null)
+            .replace(R.id.fragment_container_view, fragment)
+            .addToBackStack(null)
             .commit()
     }
 

@@ -126,6 +126,7 @@ class MainActivity :
                         result.data.toDetailResult() ?: return@registerForActivityResult
                     detailResult.navigate(this)
                 }
+                mainViewModel.notifyCategoryUpdated()
                 mainViewModel.hearitUpdated.value = Unit
                 setPlayerControlViewVisibility()
             }
