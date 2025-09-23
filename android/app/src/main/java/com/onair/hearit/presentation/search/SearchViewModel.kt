@@ -15,10 +15,7 @@ import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -40,20 +37,16 @@ class SearchViewModel(
     private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
     val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
 
-    private val _currentInput = MutableStateFlow(initialInput)
-    var currentInput: SearchInput? = _currentInput.value
+    private val currentInput = initialInput
 
-    val currentCategory: StateFlow<Category?> =
-        _currentInput
-            .map { input ->
-                (input as? SearchInput.Category)?.let {
-                    Category(
-                        id = it.id,
-                        name = it.name,
-                        colorCode = it.colorCode,
-                    )
-                }
-            }.stateIn(viewModelScope, SharingStarted.Lazily, null)
+    val currentCategory: Category? =
+        (currentInput as? SearchInput.Category)?.let {
+            Category(
+                id = it.id,
+                name = it.name,
+                colorCode = it.colorCode,
+            )
+        }
 
     private val _categoryHearits = MutableStateFlow<List<SearchedHearit>>(emptyList())
     val categoryHearits: StateFlow<List<SearchedHearit>> = _categoryHearits

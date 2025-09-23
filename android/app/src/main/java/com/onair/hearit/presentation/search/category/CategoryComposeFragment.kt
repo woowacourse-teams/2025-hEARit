@@ -122,14 +122,12 @@ fun SearchResultScreen(
     modifier: Modifier = Modifier,
 ) {
     val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
-    val category by viewModel.currentCategory.collectAsStateWithLifecycle()
-
-    LaunchedEffect(category) {
-        viewModel.fetchResultData(isInitial = true)
-    }
+    val category = viewModel.currentCategory
 
     LaunchedEffect(Unit) {
-        // SharedFlow의 이벤트를 수집(collect)합니다.
+        viewModel.fetchResultData(isInitial = true)
+
+        // 외부에서 카테고리 업데이트 신호가 올 때마다 데이터를 다시 가져옵니다.
         // collect는 코루틴이 취소될 때까지 계속 실행됩니다.
         mainViewModel.categoryUpdated.collect {
             viewModel.fetchResultData(isInitial = true)
