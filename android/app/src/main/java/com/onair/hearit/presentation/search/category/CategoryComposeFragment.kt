@@ -155,6 +155,8 @@ fun GradientBackgroundScreen(
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val safeColor = runCatching { Color(colorCode.toColorInt()) }.getOrElse { HearitBlack }
+
     Box(
         modifier =
             modifier
@@ -164,7 +166,7 @@ fun GradientBackgroundScreen(
                         Brush.verticalGradient(
                             colorStops =
                                 arrayOf(
-                                    0.0f to Color(colorCode.toColorInt()),
+                                    0.0f to safeColor,
                                     0.2f to HearitBlack,
                                 ),
                         ),
@@ -226,10 +228,10 @@ fun GradientBackgroundScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(hearits) { item ->
+            items(hearits, key = { it.id }) { item ->
                 SearchedHearitItem(
                     item = item,
-                    color = Color(colorCode.toColorInt()),
+                    color = safeColor,
                     onClick = onHearitClick,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -252,8 +254,7 @@ fun SearchedHearitItem(
                 .background(
                     Gray1,
                     shape = RoundedCornerShape(8.dp),
-                )
-                .clickable { onClick(item.id) }
+                ).clickable { onClick(item.id) }
                 .padding(vertical = 16.dp),
     ) {
         Column(
