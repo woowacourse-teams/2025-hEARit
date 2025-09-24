@@ -7,7 +7,6 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.ListenableFuture
-import com.onair.hearit.di.RepositoryProvider.playingHistoryRepository
 import com.onair.hearit.presentation.executeAsync
 import com.onair.hearit.service.model.LibraryPlayParams
 import kotlinx.coroutines.CoroutineScope
@@ -21,12 +20,14 @@ class PlaybackSessionCallback(
     private val libraryPlaybackHandler: LibraryPlaybackHandler,
     private val recentPlaybackHandler: RecentPlaybackHandler,
     private val playbackPositionListener: PlaybackPositionListener,
+    private val stateSaver: PlaybackStateSaver,
 ) : MediaSession.Callback {
     // setMediaItems가 중복으로 실행되면서, Library에서의 플래그를 무시해서 처음에 라이브러리에서 눌렀을 때 단일 재생으로 이루어지는 경우가 있었음
     @Volatile
     private var ignoreNextSetFromController = false
 
     // 컨트롤러가 세션에 연결될 때 호출됨
+    // 기본 세션 명령어 + 커스텀 명령어(PRELOAD, START_LIBRARY_PLAY, PREFETCH_NEXT)를 등록
     override fun onConnect(
         session: MediaSession,
         controller: MediaSession.ControllerInfo,
@@ -39,6 +40,7 @@ class PlaybackSessionCallback(
                 .add(PRELOAD_RECENT_COMMAND) // 최근 항목 미리 불러오기
                 .add(START_LIBRARY_PLAY_COMMAND) // 라이브러리 재생 시작
                 .add(PREFETCH_NEXT_COMMAND) // 다음 페이지 미리 가져오기
+                .add(FLUSH_PLAYBACK_COMMAND)
                 .build()
 
         return MediaSession.ConnectionResult
@@ -49,6 +51,7 @@ class PlaybackSessionCallback(
     }
 
     // 컨트롤러가 미디어 아이템을 지정했을 때 호출됨
+    // 현재 재생중인 상태 기록 → 아이템 resolve → 시작 인덱스/포지션 계산
     override fun onSetMediaItems(
         mediaSession: MediaSession,
         controller: MediaSession.ControllerInfo,
@@ -68,7 +71,12 @@ class PlaybackSessionCallback(
                     player.currentPosition.coerceAtLeast(0L),
                 )
             }
-            preRecordCurrent(mediaSession)
+            // 다음으로 바꿀 타켓 아이템 id 파악
+            val targetIndex =
+                if (mediaItems.isNotEmpty()) startIndex.coerceIn(0, mediaItems.size - 1) else 0
+            val nextId = mediaItems.getOrNull(targetIndex)?.mediaId?.toLongOrNull()
+
+            nextId?.let { stateSaver.recordBeforeSwitchingTo(it, minRecordMs = 1_000) }
             processMediaItems(mediaItems, startIndex, startPositionMs)
         }
 
@@ -87,6 +95,8 @@ class PlaybackSessionCallback(
                 ACTION_START_LIBRARY_PLAY -> handleStartLibraryPlay(session, args)
                 ACTION_PREFETCH_NEXT -> handlePrefetchNext(session)
                 ACTION_PRELOAD_RECENT -> recentPlaybackHandler.preloadRecentItem(session)
+                ACTION_FLUSH_PLAYBACK -> handleFlushPlayback()
+
                 else -> super.onCustomCommand(session, controller, command, args).get()
             } as SessionResult
         }
@@ -145,7 +155,18 @@ class PlaybackSessionCallback(
         args: Bundle,
     ): SessionResult {
         val playParams = LibraryPlayParams.fromBundle(args)
-        preRecordCurrent(session)
+        val loadResult = libraryPlaybackHandler.loadLibraryItemsWithIndex(playParams)
+
+        if (loadResult.items.isEmpty()) {
+            return SessionResult(SessionError.ERROR_BAD_VALUE)
+        }
+
+        val nextId =
+            loadResult.items
+                .getOrNull(loadResult.seedIndex)
+                ?.mediaId
+                ?.toLongOrNull()
+        nextId?.let { stateSaver.recordBeforeSwitchingTo(it, minRecordMs = 1_000L) }
 
         val itemsWithStart = libraryPlaybackHandler.loadLibraryItemsWithStartPosition(playParams)
 
@@ -180,28 +201,21 @@ class PlaybackSessionCallback(
         return SessionResult(SessionResult.RESULT_SUCCESS)
     }
 
-    // 새로운 미디어 아이템으로 변경하기 전에 아이템의 재생 기록을 저장함
-    private suspend fun preRecordCurrent(
-        session: MediaSession,
-        minMs: Long = 1_000L, // 최소 기록 조건(1초 이상 재생 시만 기록)
-    ) {
-        val player = session.player
-        val id = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return
-        val position = player.currentPosition.coerceAtLeast(0L)
-        if (position >= minMs) {
-            withContext(Dispatchers.IO) {
-                playingHistoryRepository.addPlayingHistory(id, position)
-            }
-        }
+    private suspend fun handleFlushPlayback(): SessionResult {
+        // 저장 완료까지 기다림
+        stateSaver.flushNowBlocking()
+        return SessionResult(SessionResult.RESULT_SUCCESS)
     }
 
     companion object {
         private const val ACTION_PRELOAD_RECENT = "PRELOAD_RECENT"
         private const val ACTION_START_LIBRARY_PLAY = "START_LIBRARY_PLAY"
         private const val ACTION_PREFETCH_NEXT = "PREFETCH_NEXT"
+        private const val ACTION_FLUSH_PLAYBACK = "FLUSH_PLAYBACK"
 
         val PRELOAD_RECENT_COMMAND = SessionCommand(ACTION_PRELOAD_RECENT, Bundle.EMPTY)
         val START_LIBRARY_PLAY_COMMAND = SessionCommand(ACTION_START_LIBRARY_PLAY, Bundle.EMPTY)
         val PREFETCH_NEXT_COMMAND = SessionCommand(ACTION_PREFETCH_NEXT, Bundle.EMPTY)
+        val FLUSH_PLAYBACK_COMMAND = SessionCommand(ACTION_FLUSH_PLAYBACK, Bundle.EMPTY)
     }
 }

@@ -76,7 +76,7 @@
             android:paddingHorizontal="24dp"
             android:text="@string/all_login_button_text"
             app:layout_constraintTop_toBottomOf="@id/divider2"
-            app:visibleIfLogin="@{!viewModel.isLoggedIn}" />
+            app:visibleIfCondition="@{!viewModel.isLoggedIn}" />
 
         <TextView
             android:id="@+id/tv_drawer_logout"
@@ -88,7 +88,7 @@
             android:paddingHorizontal="24dp"
             android:text="@string/all_logout"
             app:layout_constraintTop_toBottomOf="@id/divider2"
-            app:visibleIfLogin="@{viewModel.isLoggedIn}" />
+            app:visibleIfCondition="@{viewModel.isLoggedIn}" />
 
         <TextView
             android:id="@+id/tv_drawer_withdrawal"
@@ -100,6 +100,6 @@
             android:text="@string/all_withdrawal"
             android:textColor="@color/hearit_red1"
             app:layout_constraintTop_toBottomOf="@id/tv_drawer_logout"
-            app:visibleIfLogin="@{viewModel.isLoggedIn}" />
+            app:visibleIfCondition="@{viewModel.isLoggedIn}" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -115,7 +115,7 @@ fun setImageUrl(
         }
 }
 
-@BindingAdapter("visibleIfLogin")
+@BindingAdapter("visibleIfCondition")
 fun setVisibleIfLogin(
     view: View,
     condition: Boolean,
@@ -201,14 +201,6 @@ fun setExploreKeywords(
     keywords: List<Keyword>,
 ) {
     textView.text = keywords.joinToString(" ") { "#${it.name}" }
-}
-
-@BindingAdapter("setSkeleton")
-fun setShimmerVisibility(
-    view: View,
-    isLoading: Boolean,
-) {
-    view.isVisible = isLoading
 }
 
 @BindingAdapter(value = ["lastPlayTime", "totalPlayTime"])
