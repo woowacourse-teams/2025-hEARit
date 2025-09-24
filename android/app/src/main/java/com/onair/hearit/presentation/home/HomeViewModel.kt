@@ -103,4 +103,17 @@ class HomeViewModel(
                 }
         }
     }
+
+    fun loadRecentHearits() {
+        viewModelScope.launch {
+            playingHistoryRepository
+                .getPlayingHistories()
+                .onSuccess { recentHearits ->
+                    _recentHearits.value = recentHearits
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.home_toast_recent_load_fail
+                }
+        }
+    }
 }

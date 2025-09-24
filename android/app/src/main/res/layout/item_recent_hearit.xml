@@ -18,7 +18,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:focusable="true">
+        android:focusable="true"
+        android:onClick="@{() -> clickListener.onClick(recentHearit.id)}">
 
         <TextView
             android:id="@+id/recent_hearit_category"
