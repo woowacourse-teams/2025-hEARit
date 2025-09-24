@@ -51,7 +51,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 .tag("Playing History API")
                                 .summary("최근 재생 기록 조회")
                                 .description("로그인한 사용자는 최근 재생 기록을 최대 10개까지 조회할 수 있습니다.\n\n"
-                                        + "로그인하지 않은 사용자는 빈 리스트를 반환합니다.")
+                                             + "로그인하지 않은 사용자는 빈 리스트를 반환합니다.")
                                 .responseFields(
                                         fieldWithPath("[].id").description("히어릿 ID"),
                                         fieldWithPath("[].title").description("히어릿 제목"),
@@ -92,7 +92,7 @@ class PlayingHistoryControllerTest extends IntegrationTest {
                                 .tag("Playing History API")
                                 .summary("최근 재생 기록 조회")
                                 .description("로그인한 사용자는 최근 재생 기록을 최대 10개까지 조회할 수 있습니다.\n\n"
-                                        + "로그인하지 않은 사용자는 빈 리스트를 반환합니다.")
+                                             + "로그인하지 않은 사용자는 빈 리스트를 반환합니다.")
                                 .responseFields(
                                         fieldWithPath("[]").description("빈 리스트")
                                 ).build())

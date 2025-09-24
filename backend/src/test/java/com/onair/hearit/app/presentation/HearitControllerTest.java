@@ -70,8 +70,8 @@ class HearitControllerTest extends IntegrationTest {
                                 .tag("Hearit API")
                                 .summary("히어릿 상세 조회")
                                 .description("히어릿의 상세 정보를 조회합니다. \n\n"
-                                        + "로그인한 사용자의 경우, `isBookmarked`와 `bookmarkId` 필드가 사용자의 북마크 상태를 반영하여 반환됩니다. \n\n"
-                                        + "비로그인 사용자의 경우, `isBookmarked`는 항상 `false`이며 `bookmarkId`는 `null` 입니다.")
+                                             + "로그인한 사용자의 경우, `isBookmarked`와 `bookmarkId` 필드가 사용자의 북마크 상태를 반영하여 반환됩니다. \n\n"
+                                             + "비로그인 사용자의 경우, `isBookmarked`는 항상 `false`이며 `bookmarkId`는 `null` 입니다.")
                                 .pathParameters(
                                         parameterWithName("hearitId").description("조회할 히어릿의 ID")
                                 )
