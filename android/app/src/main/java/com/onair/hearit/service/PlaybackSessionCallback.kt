@@ -150,6 +150,7 @@ class PlaybackSessionCallback(
         val itemsWithStart = libraryPlaybackHandler.loadLibraryItemsWithStartPosition(playParams)
 
         withContext(Dispatchers.Main) {
+            ignoreNextSetFromController = true
             session.player.setMediaItems(
                 itemsWithStart.mediaItems,
                 itemsWithStart.startIndex,
