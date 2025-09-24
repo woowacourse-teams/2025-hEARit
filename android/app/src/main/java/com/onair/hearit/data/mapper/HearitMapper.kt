@@ -5,6 +5,7 @@ import com.onair.hearit.data.dto.CategoryHearitResponse
 import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.KeywordResponse
+import com.onair.hearit.data.dto.PlayingHistoryResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
@@ -16,6 +17,7 @@ import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
+import com.onair.hearit.domain.model.PlayingHistoryHearit
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
@@ -134,4 +136,14 @@ fun CategoryHearitResponse.toDomain(): CategoryHearit =
         hearitId = this.hearitId,
         title = this.title,
         createdAt = this.createdAt,
+    )
+
+fun PlayingHistoryResponse.toDomain(): PlayingHistoryHearit =
+    PlayingHistoryHearit(
+        id = this.id,
+        title = this.title,
+        playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
+        createdAt = this.createdAt,
+        category = this.category.toDomain(),
     )
