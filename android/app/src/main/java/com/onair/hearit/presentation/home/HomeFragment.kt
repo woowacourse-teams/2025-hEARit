@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -146,6 +147,7 @@ class HomeFragment :
         }
 
         viewModel.recentHearits.observe(viewLifecycleOwner) { recentHearits ->
+            binding.tvHomeRecentHearitTitle.isVisible = recentHearits.isNotEmpty()
             recentAdapter.submitList(recentHearits)
         }
 
