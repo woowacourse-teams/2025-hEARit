@@ -28,7 +28,7 @@ public class PlayingHistoryService {
     private final PlayingHistoryRepository playingHistoryRepository;
     private final PlayingHistoryBuffer playingHistoryBuffer;
 
-    public List<RecentlyPlayedHearitResponse> getRecentPlayingHistoryOfMember(UserInfo userInfo) {
+    public List<RecentlyPlayedHearitResponse> getRecentPlayingHistory(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
             return Collections.emptyList();
         }

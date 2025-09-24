@@ -66,12 +66,12 @@ public class HearitSearchService {
     private Page<HearitSearchResponse> toHearitSearchResponseForMember(Page<Hearit> hearits, Member member) {
         List<Long> hearitIds = hearits.getContent().stream().map(Hearit::getId).toList();
         Map<Long, List<Keyword>> hearitKeywords = getHearitKeywords(hearitIds);
-        Map<Long, Long> playingHistories =
+        Map<Long, PlayingHistory> playingHistories =
                 playingHistoryRepository.findByMemberIdAndHearitIdIn(member.getId(), hearitIds)
                         .stream()
                         .collect(Collectors.toMap(
                                 PlayingHistory::getHearitId,
-                                PlayingHistory::getLastPlayTime));
+                                playingHistory -> playingHistory));
         return hearits.map(hearit -> HearitSearchResponse.of(
                 hearit,
                 hearitKeywords.get(hearit.getId()),

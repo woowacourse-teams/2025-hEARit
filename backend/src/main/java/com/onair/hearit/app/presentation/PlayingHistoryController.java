@@ -23,10 +23,10 @@ public class PlayingHistoryController {
     private final PlayingHistoryService playingHistoryService;
 
     @GetMapping("/hearits")
-    public ResponseEntity<List<RecentlyPlayedHearitResponse>> readPlayingHistoriesOfMember(
+    public ResponseEntity<List<RecentlyPlayedHearitResponse>> readPlayingHistories(
             @AuthenticationPrincipal RequestUser requestUser) {
         List<RecentlyPlayedHearitResponse> responses =
-                playingHistoryService.getRecentPlayingHistoryOfMember(requestUser.getUserInfo());
+                playingHistoryService.getRecentPlayingHistory(requestUser.getUserInfo());
         return ResponseEntity.ok(responses);
     }
 

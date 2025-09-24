@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -65,15 +66,28 @@ public class HearitService {
         Long bookmarkId = bookmarkRepository.findByHearitAndMember(hearit, member)
                 .map(Bookmark::getId)
                 .orElse(null);
-        Long lastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
-                .map(PlayingHistory::getLastPlayTime)
-                .orElse(null);
+        Long lastPlayTime = calculateLastPlayTime(hearit, member);
         return HearitDetailResponse.of(hearit, keywords, lastPlayTime, bookmarkId);
     }
 
     private Hearit getHearitById(Long hearitId) {
         return hearitRepository.findWithCategoryById(hearitId)
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
+    }
+
+    private Long calculateLastPlayTime(Hearit hearit, Member member) {
+        Optional<Long> optionalLastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(),
+                        member.getId())
+                .map(PlayingHistory::getLastPlayTime);
+        if (optionalLastPlayTime.isEmpty()) {
+            return null;
+        }
+        Long lastPlayTime = optionalLastPlayTime.get();
+        Long remainingMillis = hearit.getPlayTime() * 1000 - lastPlayTime; // playTime(s), lastPlayTime(ms)
+        if (remainingMillis <= 5000) {
+            return 0L;
+        }
+        return lastPlayTime;
     }
 
     public List<RecommendHearitResponse> getRecommendedHearits() {
