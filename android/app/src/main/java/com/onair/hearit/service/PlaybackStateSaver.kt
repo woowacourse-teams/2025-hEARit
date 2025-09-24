@@ -84,7 +84,7 @@ class PlaybackStateSaver(
                 }
             }
 
-            // ✅ Media3 최신 시그니처: old/new 받으면 직전 트랙을 정확히 기록 가능
+            // old/new 받으면 직전 트랙을 정확히 기록 가능
             override fun onPositionDiscontinuity(
                 oldPosition: Player.PositionInfo,
                 newPosition: Player.PositionInfo,
