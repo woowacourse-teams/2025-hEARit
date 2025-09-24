@@ -42,4 +42,9 @@ public class AdminViewController {
     public String recommendHearitPage() {
         return "admin/recommend-hearit";
     }
+
+    @GetMapping("/trace")
+    public String tracePage() {
+        return "admin/trace";
+    }
 }
