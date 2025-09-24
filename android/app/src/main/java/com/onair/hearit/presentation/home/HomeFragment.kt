@@ -42,6 +42,10 @@ class HomeFragment :
     private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private val mainViewModel: MainViewModel by activityViewModels()
 
+    private val recentAdapter: RecentHearitAdapter by lazy {
+        RecentHearitAdapter(this)
+    }
+
     private val recommendAdapter: RecommendHearitAdapter by lazy {
         RecommendHearitAdapter(
             this,
@@ -105,6 +109,8 @@ class HomeFragment :
                 updateIndicator(position)
             }
 
+        binding.rvHomeRecentHearit.adapter = recentAdapter
+
         binding.rvHomeRecommend.apply {
             adapter = recommendAdapter
             snapHelper.attachToRecyclerView(this)
@@ -127,6 +133,10 @@ class HomeFragment :
 
         viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
             binding.userInfo = userInfo
+        }
+
+        viewModel.recentHearits.observe(viewLifecycleOwner) { recentHearits ->
+            recentAdapter.submitList(recentHearits)
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
