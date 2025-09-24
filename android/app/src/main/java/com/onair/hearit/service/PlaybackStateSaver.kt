@@ -3,7 +3,6 @@ package com.onair.hearit.service
 import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.Player
-import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import com.onair.hearit.di.RepositoryProvider
 import kotlinx.coroutines.CoroutineScope
@@ -39,9 +38,27 @@ class PlaybackStateSaver(
         if (playedMs >= minRecordMs) recordHistory(currentId, playedMs)
     }
 
-    fun flushNow(finished: Boolean = false) {
-        savePlaybackPosition(finished)
-        recordCurrent(minRecordMs = 1_000L)
+    suspend fun flushNowBlocking(finished: Boolean = false) {
+        val (id, lastPos) =
+            withContext(Dispatchers.Main) {
+                val currentId =
+                    player.currentMediaItem?.mediaId?.toLongOrNull() ?: return@withContext null
+                val duration = player.duration
+                val pos = player.currentPosition.coerceAtLeast(0L)
+                val completed =
+                    finished || (duration != C.TIME_UNSET && duration > 0 && pos >= duration - 1_000)
+                currentId to if (completed) 0L else pos
+            } ?: return
+
+        // IO에서 저장 (완료까지 대기)
+        withContext(Dispatchers.IO) {
+            runCatching {
+                RepositoryProvider.recentHearitRepository.updateRecentHearitPosition(id, lastPos)
+                if (lastPos >= 1_000L) {
+                    RepositoryProvider.playingHistoryRepository.addPlayingHistory(id, lastPos)
+                }
+            }
+        }
     }
 
     // 30초 주기 최근 위치 저장 + 종료/중단 처리

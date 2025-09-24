@@ -80,7 +80,7 @@ class PlaybackSessionCallback(
                 ACTION_START_LIBRARY_PLAY -> handleStartLibraryPlay(session, args)
                 ACTION_PREFETCH_NEXT -> handlePrefetchNext(session)
                 ACTION_PRELOAD_RECENT -> recentPlaybackHandler.preloadRecentItem(session)
-                ACTION_FLUSH_PLAYBACK -> handleFlushPlayback(session)
+                ACTION_FLUSH_PLAYBACK -> handleFlushPlayback()
 
                 else -> super.onCustomCommand(session, controller, command, args).get()
             } as SessionResult
@@ -181,8 +181,9 @@ class PlaybackSessionCallback(
         return SessionResult(SessionResult.RESULT_SUCCESS)
     }
 
-    private fun handleFlushPlayback(session: MediaSession): SessionResult {
-        stateSaver.flushNow(false)
+    private suspend fun handleFlushPlayback(): SessionResult {
+        // 저장 완료까지 기다림
+        stateSaver.flushNowBlocking(finished = false)
         return SessionResult(SessionResult.RESULT_SUCCESS)
     }
 
