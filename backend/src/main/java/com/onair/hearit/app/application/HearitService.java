@@ -76,14 +76,15 @@ public class HearitService {
     }
 
     private Long calculateLastPlayTime(Hearit hearit, Member member) {
-        Optional<Long> optionalLastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(), member.getId())
+        Optional<Long> optionalLastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(),
+                        member.getId())
                 .map(PlayingHistory::getLastPlayTime);
-        if(optionalLastPlayTime.isEmpty()) {
+        if (optionalLastPlayTime.isEmpty()) {
             return null;
         }
         Long lastPlayTime = optionalLastPlayTime.get();
-        Long remainingTime = hearit.getPlayTime() - lastPlayTime;
-        if(remainingTime <= 5) {
+        Long remainingMillis = hearit.getPlayTime() * 1000 - lastPlayTime; // playTime(s), lastPlayTime(ms)
+        if (remainingMillis <= 5000) {
             return 0L;
         }
         return lastPlayTime;

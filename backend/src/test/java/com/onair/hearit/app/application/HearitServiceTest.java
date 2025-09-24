@@ -125,15 +125,15 @@ class HearitServiceTest {
     class LastPlayTimeResetTest {
 
         @ParameterizedTest
-        @ValueSource(longs = {5L, 1L, 0L})
-        @DisplayName("lastPlayTime이 5초 이내로 저장된 경우 lastPlayTime은 0으로 초기화된다.")
+        @ValueSource(longs = {5000L, 1000L, 0L})
+        @DisplayName("lastPlayTime이 5000ms 이내로 저장된 경우 lastPlayTime은 0ms으로 초기화된다.")
         void resetLastPlayTimeToZero_whenWithin5Seconds(long remainingSeconds) {
             // given
             Member member = dbHelper.insertMember(TestFixture.createFixedMember());
             Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-            long lastPlayTime = hearit.getPlayTime() - remainingSeconds;
+            long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
             playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
 
             // when
@@ -150,15 +150,15 @@ class HearitServiceTest {
         }
 
         @Test
-        @DisplayName("lastPlayTime이 5초 초과로 저장된 경우 lastPlayTime은 그대로 유지된다.")
+        @DisplayName("lastPlayTime이 5000ms 초과로 저장된 경우 lastPlayTime은 그대로 유지된다.")
         void keepLastPlayTime_whenExceeds5Seconds() {
             // given
             Member member = dbHelper.insertMember(TestFixture.createFixedMember());
             Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category)); //히어릿 playTime 500초
 
-            long remainingSeconds = 6L;
-            Long lastPlayTime = hearit.getPlayTime() - remainingSeconds;
+            long remainingSeconds = 5001L;
+            Long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
             playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
 
             // when
