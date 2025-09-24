@@ -55,10 +55,23 @@
             android:maxLines="1"
             android:text="@{bookmarkItem.title}"
             android:textColor="@color/hearit_gray4"
-            app:layout_constraintEnd_toStartOf="@id/tv_bookmark_time"
+            app:layout_constraintEnd_toStartOf="@id/iv_hearit_finished"
             app:layout_constraintStart_toEndOf="@id/iv_bookmark_category_color"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="HTTP와 HTTPS의 차이에는 어떤것들이 있을까요?" />
+
+        <ImageView
+            android:id="@+id/iv_hearit_finished"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_hearit_finished"
+            app:layout_constraintBottom_toBottomOf="@id/tv_bookmark_title"
+            app:layout_constraintEnd_toStartOf="@id/tv_bookmark_time"
+            app:layout_constraintStart_toEndOf="@id/tv_bookmark_title"
+            app:layout_constraintTop_toTopOf="@id/tv_bookmark_title"
+            app:visibleIfCondition="@{bookmarkItem.isFinished}" />
 
         <TextView
             android:id="@+id/tv_bookmark_time"

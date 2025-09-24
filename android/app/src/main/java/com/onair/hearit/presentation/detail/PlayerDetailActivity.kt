@@ -334,29 +334,46 @@ class PlayerDetailActivity :
     }
 
     private fun setupBackPressHandler() {
-        val backAction = {
-            if (previousScreen == EXPLORE_VALUE) {
-                val resultIntent =
-                    Intent().apply {
-                        putExtra(TYPE_KEY, EXPLORE_VALUE)
-                        putExtra(HEARIT_ID_KEY, hearitId)
-                        viewModel.bookmarkId.value?.let { putExtra(BOOKMARK_ID_KEY, it) }
-                    }
-                setResult(RESULT_OK, resultIntent)
-            } else {
-                setResult(RESULT_CANCELED)
-            }
-            finish()
-        }
-
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() = backAction()
+                override fun handleOnBackPressed() {
+                    handleBackAction()
+                }
             },
         )
 
-        binding.ibPlayerDetailBack.setOnClickListener { backAction() }
+        binding.ibPlayerDetailBack.setOnClickListener { handleBackAction() }
+    }
+
+    /** 뒤로가기 액션 처리 */
+    private fun handleBackAction() {
+        lifecycleScope.launch {
+            runCatching {
+                mediaController
+                    ?.sendCustomCommand(
+                        PlaybackSessionCallback.FLUSH_PLAYBACK_COMMAND,
+                        Bundle.EMPTY,
+                    )?.await()
+            }
+            finishWithResult()
+        }
+    }
+
+    /** 결과 Intent 세팅 후 finish */
+    private fun finishWithResult() {
+        if (previousScreen == EXPLORE_VALUE) {
+            val resultIntent =
+                Intent().apply {
+                    putExtra(TYPE_KEY, EXPLORE_VALUE)
+                    putExtra(HEARIT_ID_KEY, hearitId)
+                    viewModel.bookmarkId.value?.let { putExtra(BOOKMARK_ID_KEY, it) }
+                }
+            setResult(RESULT_OK, resultIntent)
+        } else {
+            setResult(RESULT_CANCELED)
+        }
+        finish()
     }
 
     private fun setupWindowInsets() {

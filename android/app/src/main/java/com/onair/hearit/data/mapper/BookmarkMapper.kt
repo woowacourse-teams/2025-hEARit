@@ -13,6 +13,7 @@ fun BookmarkResponse.Content.toDomain(): Bookmark =
         summary = summary,
         playTime = playTime,
         lastPlayTime = lastPlayTime,
+        isFinished = isFinished,
         category = category.toDomain(),
         audioUrl = null,
     )
