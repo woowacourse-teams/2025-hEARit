@@ -26,17 +26,6 @@ class PlaybackStateSaver(
         if (playedMs >= minRecordMs) recordHistory(currentId, playedMs)
     }
 
-    /** 다음 아이템으로 바꾸기 ‘직전’에 호출 → 현재 곡 기록 (중복 방지 포함) */
-    fun recordBeforeSwitchingTo(
-        nextId: Long,
-        minRecordMs: Long = 1_000L,
-    ) {
-        val currentId = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return
-        if (currentId == nextId) return
-        val playedMs = player.currentPosition.coerceAtLeast(0L)
-        if (playedMs >= minRecordMs) recordHistory(currentId, playedMs)
-    }
-
     suspend fun flushNowBlocking() {
         val (id, lastPos) =
             withContext(Dispatchers.Main) {

@@ -5,6 +5,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.presentation.executeAsync
@@ -76,7 +77,7 @@ class PlaybackSessionCallback(
                 if (mediaItems.isNotEmpty()) startIndex.coerceIn(0, mediaItems.size - 1) else 0
             val nextId = mediaItems.getOrNull(targetIndex)?.mediaId?.toLongOrNull()
 
-            nextId?.let { stateSaver.recordBeforeSwitchingTo(it, minRecordMs = 1_000) }
+            nextId?.let { stateSaver.recordCurrent(minRecordMs = 1_000) }
             processMediaItems(mediaItems, startIndex, startPositionMs)
         }
 
@@ -155,18 +156,13 @@ class PlaybackSessionCallback(
         args: Bundle,
     ): SessionResult {
         val playParams = LibraryPlayParams.fromBundle(args)
-        val loadResult = libraryPlaybackHandler.loadLibraryItemsWithIndex(playParams)
+        val loadIndexOnly = libraryPlaybackHandler.loadLibraryItemsWithIndex(playParams)
 
-        if (loadResult.items.isEmpty()) {
+        if (loadIndexOnly.items.isEmpty()) {
             return SessionResult(SessionError.ERROR_BAD_VALUE)
         }
-
-        val nextId =
-            loadResult.items
-                .getOrNull(loadResult.seedIndex)
-                ?.mediaId
-                ?.toLongOrNull()
-        nextId?.let { stateSaver.recordBeforeSwitchingTo(it, minRecordMs = 1_000L) }
+        val nextId = loadIndexOnly.items.getOrNull(loadIndexOnly.seedIndex)?.hearitId
+        nextId?.let { stateSaver.recordCurrent(minRecordMs = 1_000L) }
 
         val itemsWithStart = libraryPlaybackHandler.loadLibraryItemsWithStartPosition(playParams)
 

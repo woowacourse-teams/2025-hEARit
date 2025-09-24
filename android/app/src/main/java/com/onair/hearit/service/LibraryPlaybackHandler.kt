@@ -148,12 +148,18 @@ class LibraryPlaybackHandler(
     fun createPlaybackInfos(bookmarks: List<Bookmark>): List<PlaybackInfo> =
         bookmarks.mapNotNull { bookmark ->
             val audioUrl = bookmark.audioUrl ?: return@mapNotNull null
+
             PlaybackInfo(
                 hearitId = bookmark.hearitId,
                 audioUrl = audioUrl,
                 title = bookmark.title,
                 source = bookmark.sources.first().name,
-                lastPosition = bookmark.lastPlayTime,
+                lastPosition =
+                    if (bookmark.playTime * 1000 - bookmark.lastPlayTime!! < 5_000) {
+                        0L
+                    } else {
+                        bookmark.lastPlayTime
+                    },
                 bookmarkId = bookmark.bookmarkId,
             )
         }
