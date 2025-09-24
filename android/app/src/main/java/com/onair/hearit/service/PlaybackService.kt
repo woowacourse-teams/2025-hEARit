@@ -28,6 +28,7 @@ class PlaybackService : MediaSessionService() {
     private lateinit var stateSaver: PlaybackStateSaver
     private lateinit var historyListener: PlaybackHistoryListener
     private lateinit var mediaItemManager: PlaybackMediaItemManager
+    private lateinit var playbackPositionListener: PlaybackPositionListener
 
     private var notificationController: PlayerNotificationController? = null
     private lateinit var libraryPlaybackHandler: LibraryPlaybackHandler
@@ -55,6 +56,7 @@ class PlaybackService : MediaSessionService() {
                 getPlaybackInfoUseCase = getPlaybackInfoUseCase,
                 mediaItemManager = mediaItemManager,
             )
+        playbackPositionListener = PlaybackPositionListener(player)
         initializeMediaSession()
 
         // 2) 알림 + 포그라운드 제어는 컨트롤러에 위임
@@ -141,6 +143,7 @@ class PlaybackService : MediaSessionService() {
                         mediaItemManager,
                         libraryPlaybackHandler,
                         recentPlaybackHandler,
+                        playbackPositionListener,
                     ),
                 ).build()
     }
@@ -163,6 +166,7 @@ class PlaybackService : MediaSessionService() {
         stateSaver.release()
         mediaSession.release()
         player.removeListener(stateSaver.listener)
+        playbackPositionListener.detach()
         player.release()
     }
 

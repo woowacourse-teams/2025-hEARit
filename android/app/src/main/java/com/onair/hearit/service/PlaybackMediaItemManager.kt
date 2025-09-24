@@ -70,7 +70,7 @@ class PlaybackMediaItemManager(
 
         // 안전한 시작 인덱스 계산: 목록이 있으면 0~lastIndex로 보정, 없으면 0으로 처리
         val safeIndex =
-            if (mediaItems.isEmpty()) 0 else startIndex.coerceIn(0, mediaItems.lastIndex)
+            if (mediaItems.isNotEmpty()) startIndex.coerceIn(0, mediaItems.lastIndex) else 0
 
         return MediaSession.MediaItemsWithStartPosition(
             mediaItems,

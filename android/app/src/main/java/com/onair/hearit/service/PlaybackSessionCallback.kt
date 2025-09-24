@@ -2,7 +2,6 @@ package com.onair.hearit.service
 
 import android.os.Bundle
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionCommand
@@ -21,9 +20,11 @@ class PlaybackSessionCallback(
     private val mediaItemManager: PlaybackMediaItemManager,
     private val libraryPlaybackHandler: LibraryPlaybackHandler,
     private val recentPlaybackHandler: RecentPlaybackHandler,
+    private val playbackPositionListener: PlaybackPositionListener,
 ) : MediaSession.Callback {
-    private val resumedOnceById = mutableSetOf<String>()
-    private var resumeListenerAdded = false
+    // setMediaItems가 중복으로 실행되면서, Library에서의 플래그를 무시해서 처음에 라이브러리에서 눌렀을 때 단일 재생으로 이루어지는 경우가 있었음
+    @Volatile
+    private var ignoreNextSetFromController = false
 
     // 컨트롤러가 세션에 연결될 때 호출됨
     override fun onConnect(
@@ -56,6 +57,17 @@ class PlaybackSessionCallback(
         startPositionMs: Long,
     ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> =
         executeAsync(serviceScope, "onSetMediaItems") {
+            // 만약에 이미 라이브러리 트리거로 진행이 된 상태이면 현재의 큐를 그대로 돌려주도록 하는 코드
+            if (ignoreNextSetFromController) {
+                ignoreNextSetFromController = false
+                val player = mediaSession.player
+                val current = List(player.mediaItemCount) { i -> player.getMediaItemAt(i) }
+                return@executeAsync MediaSession.MediaItemsWithStartPosition(
+                    current,
+                    player.currentMediaItemIndex.coerceAtLeast(0),
+                    player.currentPosition.coerceAtLeast(0L),
+                )
+            }
             preRecordCurrent(mediaSession)
             processMediaItems(mediaItems, startIndex, startPositionMs)
         }
@@ -101,45 +113,6 @@ class PlaybackSessionCallback(
                 }.ifEmpty { mediaItems }
         }
 
-    private fun ensureResumeOnTransition(session: MediaSession) {
-        if (resumeListenerAdded) return
-        resumeListenerAdded = true
-
-        session.player.addListener(
-            object : Player.Listener {
-                override fun onMediaItemTransition(
-                    item: MediaItem?,
-                    reason: Int,
-                ) {
-                    val player = session.player
-                    val id = item?.mediaId ?: return
-
-                    if (resumedOnceById.contains(id)) return
-
-                    // extras에 저장된 마지막 위치 꺼내기
-                    val lastPosition =
-                        item.mediaMetadata.extras
-                            ?.getLong(PlaybackMediaItemManager.EXTRA_LAST_POSITION_MS, 0L) ?: 0L
-                    if (lastPosition <= 0L) {
-                        resumedOnceById.add(id)
-                        return
-                    }
-
-                    // 첫 진입에서 이미 위치가 잡혀 있다면(초기 seed) 두 번 보정하지 않기
-                    if (player.currentPosition > 500L) {
-                        resumedOnceById.add(id)
-                        return
-                    }
-
-                    // 현재 아이템 인덱스 기준으로 보정
-                    val index = player.currentMediaItemIndex
-                    player.seekTo(index, lastPosition)
-                    resumedOnceById.add(id)
-                }
-            },
-        )
-    }
-
     private suspend fun processMediaItems(
         mediaItems: List<MediaItem>,
         startIndex: Int,
@@ -177,7 +150,6 @@ class PlaybackSessionCallback(
         val itemsWithStart = libraryPlaybackHandler.loadLibraryItemsWithStartPosition(playParams)
 
         withContext(Dispatchers.Main) {
-            // 1) 큐 세팅(초기 아이템만 startPosition 적용됨)
             session.player.setMediaItems(
                 itemsWithStart.mediaItems,
                 itemsWithStart.startIndex,
@@ -186,8 +158,8 @@ class PlaybackSessionCallback(
             session.player.prepare()
             session.player.play()
 
-            // 2) 이후 아이템 전환마다 extras 기반으로 재개 보정
-            ensureResumeOnTransition(session)
+            playbackPositionListener.attach()
+            playbackPositionListener.reset()
         }
         return SessionResult(SessionResult.RESULT_SUCCESS)
     }
@@ -214,10 +186,10 @@ class PlaybackSessionCallback(
     ) {
         val player = session.player
         val id = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return
-        val pos = player.currentPosition.coerceAtLeast(0L)
-        if (pos >= minMs) {
+        val position = player.currentPosition.coerceAtLeast(0L)
+        if (position >= minMs) {
             withContext(Dispatchers.IO) {
-                playingHistoryRepository.addPlayingHistory(id, pos)
+                playingHistoryRepository.addPlayingHistory(id, position)
             }
         }
     }

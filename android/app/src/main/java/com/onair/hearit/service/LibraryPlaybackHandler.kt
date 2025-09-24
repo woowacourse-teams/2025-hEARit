@@ -11,6 +11,14 @@ import com.onair.hearit.service.model.PrefetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * 라이브러리(북마크 목록) 기반 재생을 위한 핸들러.
+ *
+ * - 페이징된 북마크를 로드하여 [PlaybackInfo] 리스트로 만든다.
+ * - 특정 "시드(seed)" 아이템(북마크 ID 또는 hearit ID) 기준으로 시작 인덱스/재생 위치를 계산한다.
+ * - Media3 재생용 [MediaSession.MediaItemsWithStartPosition]으로 변환한다.
+ * - 다음 페이지를 미리 불러(prefetch) 재생 중 끊김을 줄인다.
+ */
 @UnstableApi
 class LibraryPlaybackHandler(
     private val getBookmarksUseCase: GetBookmarksUseCase,
@@ -53,7 +61,12 @@ class LibraryPlaybackHandler(
             }
         }
 
-    /** 다음 페이지 미리 가져오기 */
+    /**
+     * 다음 페이지를 미리 가져온다 (prefetch).
+     * - 현재 [nextPage]가 null이면 더 이상 가져올 페이지 없음 → 빈 결과 반환
+     * - 성공 시: MediaItem 리스트와 다음 nextPage를 함께 반환
+     * - 실패/마지막 페이지: nextPage를 null로 세팅
+     */
     suspend fun prefetchNextPage(): PrefetchResult =
         withContext(Dispatchers.IO) {
             val pageToLoad = nextPage ?: return@withContext PrefetchResult(emptyList(), null)
@@ -77,6 +90,11 @@ class LibraryPlaybackHandler(
             PrefetchResult(newItems, nextPage)
         }
 
+    /**
+     * 단일 페이지를 로드하여 [PlaybackInfo] 리스트로 변환한다.
+     * - 성공 시: 리스트 반환 및 [nextPage] 갱신
+     * - 실패 시: 빈 리스트 반환 및 [nextPage]를 null로 설정
+     */
     private suspend fun loadPage(page: Int): List<PlaybackInfo> {
         val pageResult =
             getBookmarksUseCase(page = page, size = DEFAULT_PAGE_SIZE)
@@ -85,6 +103,12 @@ class LibraryPlaybackHandler(
         return createPlaybackInfos(pageResult.items)
     }
 
+    /**
+     * "시드"가 현재 페이지에 없을 수 있으므로, 페이지를 순회하며 시드를 찾는다.
+     * - 각 페이지에서 [PlaybackInfo]로 매핑 후, [findSeedInBookmarks]로 시드 인덱스를 검사
+     * - 찾으면 지금까지 누적된 아이템 수를 기반으로 전역 인덱스 계산
+     * - 끝까지 못 찾으면 seedIndex=-1로 반환
+     */
     private suspend fun findSeedAcrossPages(params: LibraryPlayParams): LibraryLoadResult {
         val allItems = mutableListOf<PlaybackInfo>()
         var currentPage = 0
@@ -107,6 +131,10 @@ class LibraryPlaybackHandler(
         }
     }
 
+    /**
+     * 현재 페이지(혹은 주어진 리스트)에서 시드(북마크 ID 또는 hearit ID)와 매칭되는 인덱스를 찾는다.
+     * - 없으면 -1
+     */
     private fun findSeedInBookmarks(
         playbackInfos: List<PlaybackInfo>,
         params: LibraryPlayParams,
@@ -124,7 +152,7 @@ class LibraryPlaybackHandler(
                 hearitId = bookmark.hearitId,
                 audioUrl = audioUrl,
                 title = bookmark.title,
-                source = "hEARit",
+                source = bookmark.sources.first().name,
                 lastPosition = bookmark.lastPlayTime,
                 bookmarkId = bookmark.bookmarkId,
             )
