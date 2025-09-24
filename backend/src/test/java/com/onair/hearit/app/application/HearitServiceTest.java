@@ -37,7 +37,10 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -115,6 +118,61 @@ class HearitServiceTest {
             assertThat(response.category().name()).isEqualTo(hearit.getCategory().getName());
             assertThat(response.keywords()).hasSize(1);
         });
+    }
+
+    @Nested
+    @DisplayName("히어릿 단일조회 시 lastPlayTime 초기화 규칙")
+    class LastPlayTimeResetTest {
+
+        @ParameterizedTest
+        @ValueSource(longs = {5000L, 1000L, 0L})
+        @DisplayName("lastPlayTime이 5000ms 이내로 저장된 경우 lastPlayTime은 0ms으로 초기화된다.")
+        void resetLastPlayTimeToZero_whenWithin5Seconds(long remainingSeconds) {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+            long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
+            playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
+
+            // when
+            HearitDetailResponse response = hearitService.getHearitDetail(
+                    hearit.getId(),
+                    TestFixture.createFixedMemberUserInfo(member)
+            );
+
+            // then
+            assertAll(
+                    () -> assertThat(response.id()).isEqualTo(hearit.getId()),
+                    () -> assertThat(response.lastPlayTime()).isEqualTo(0L)
+            );
+        }
+
+        @Test
+        @DisplayName("lastPlayTime이 5000ms 초과로 저장된 경우 lastPlayTime은 그대로 유지된다.")
+        void keepLastPlayTime_whenExceeds5Seconds() {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category)); //히어릿 playTime 500초
+
+            long remainingSeconds = 5001L;
+            Long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
+            playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
+
+            // when
+            HearitDetailResponse response = hearitService.getHearitDetail(
+                    hearit.getId(),
+                    TestFixture.createFixedMemberUserInfo(member)
+            );
+
+            // then
+            assertAll(
+                    () -> assertThat(response.id()).isEqualTo(hearit.getId()),
+                    () -> assertThat(response.lastPlayTime()).isEqualTo(lastPlayTime)
+            );
+        }
     }
 
     @Test

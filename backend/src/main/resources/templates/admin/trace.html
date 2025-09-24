@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 페이지</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        /* 약간의 커스텀 스타일 추가 */
+        .list-group-item h5 {
+            margin-bottom: 0.25rem;
+        }
+
+        .list-group-item p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .icon-text-gap {
+            gap: 0.75rem; /* 아이콘과 텍스트 사이 간격 */
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div th:insert="~{admin/navbar :: navbar}"></div>
+
+<div class="container mt-5">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+            <h1 class="mb-0 text-center">hEARit Trace Menu</h1>
+        </div>
+        <div class="card-body p-4">
+
+            <ul class="nav nav-tabs nav-fill mb-4" id="traceTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button aria-controls="prod-tab-pane" aria-selected="true" class="nav-link active"
+                            data-bs-target="#prod-tab-pane"
+                            data-bs-toggle="tab" id="prod-tab" role="tab" type="button">
+                        <i class="bi bi-server"></i> PROD
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button aria-controls="dev-tab-pane" aria-selected="false" class="nav-link"
+                            data-bs-target="#dev-tab-pane"
+                            data-bs-toggle="tab" id="dev-tab" role="tab" type="button">
+                        <i class="bi bi-tools"></i> DEV
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="traceTabContent">
+                <div aria-labelledby="prod-tab" class="tab-pane fade show active" id="prod-tab-pane" role="tabpanel"
+                     tabindex="0">
+                    <div class="list-group">
+                        <a class="list-group-item list-group-item-action d-flex align-items-center icon-text-gap"
+                           href="http://hearit-pp.o-r.kr/main/realtime/prod-hearit@SPRING_BOOT"
+                           target="_blank">
+                            <i class="bi bi-speedometer2 fs-4 text-primary"></i>
+                            <div>
+                                <h5>Main Page</h5>
+                                <p>요청 수, 실시간 트레이스 확인</p>
+                            </div>
+                        </a>
+                        <a class="list-group-item list-group-item-action d-flex align-items-center icon-text-gap"
+                           href="http://hearit-pp.o-r.kr/inspector/realtime/prod-hearit@SPRING_BOOT/prod-hearit-01"
+                           target="_blank">
+                            <i class="bi bi-activity fs-4 text-success"></i>
+                            <div>
+                                <h5>Inspector</h5>
+                                <p>Java heap, 응답 시간, CPU, 메모리 등 상세 지표</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div aria-labelledby="dev-tab" class="tab-pane fade" id="dev-tab-pane" role="tabpanel" tabindex="0">
+                    <div class="list-group">
+                        <a class="list-group-item list-group-item-action d-flex align-items-center icon-text-gap"
+                           href="http://hearit-pp.o-r.kr/main/realtime/dev-hearit@SPRING_BOOT"
+                           target="_blank">
+                            <i class="bi bi-speedometer2 fs-4 text-primary"></i>
+                            <div>
+                                <h5>Main Page</h5>
+                                <p>요청 수, 실시간 트레이스 확인</p>
+                            </div>
+                        </a>
+                        <a class="list-group-item list-group-item-action d-flex align-items-center icon-text-gap"
+                           href="http://hearit-pp.o-r.kr/inspector/realtime/dev-hearit@SPRING_BOOT/dev-hearit-01"
+                           target="_blank">
+                            <i class="bi bi-activity fs-4 text-success"></i>
+                            <div>
+                                <h5>Inspector</h5>
+                                <p>Java heap, 응답 시간, CPU, 메모리 등 상세 지표</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

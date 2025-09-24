@@ -2,6 +2,7 @@ package com.onair.hearit.app.dto.response;
 
 import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.PlayingHistory;
 import java.util.List;
 
 public record HearitSearchResponse(
@@ -9,17 +10,19 @@ public record HearitSearchResponse(
         String title,
         Integer playTime,
         Long lastPlayTime,
+        Boolean isFinished,
         List<KeywordResponse> keywords
 ) {
     private static final int KEYWORD_PER_HEARIT = 3;
 
-    public static HearitSearchResponse of(Hearit hearit, List<Keyword> keywords, Long lastPlayTime) {
+    public static HearitSearchResponse of(Hearit hearit, List<Keyword> keywords, PlayingHistory playingHistory) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         return new HearitSearchResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getPlayTime(),
-                lastPlayTime,
+                playingHistory != null ? playingHistory.getLastPlayTime() : null,
+                playingHistory != null ? playingHistory.isFinished() : null,
                 keywordResponses
         );
     }

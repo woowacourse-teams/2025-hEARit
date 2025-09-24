@@ -37,7 +37,7 @@ public class ApiSecurityConfig {
             "/api/*/hearits/**",
             "/api/*/categories/**",
             "/api/*/keywords/**",
-            "/api/*/playing-histories"
+            "/api/*/playing-histories/**"
     };
 
     private final ObjectMapper objectMapper;

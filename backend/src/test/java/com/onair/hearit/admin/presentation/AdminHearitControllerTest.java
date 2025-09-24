@@ -238,7 +238,7 @@ class AdminHearitControllerTest extends IntegrationTest {
 
         Hearit updatedHearit = hearitRepository.findById(hearit.getId()).orElseThrow();
 
-            assertThat(updatedHearit.getShortAudioUrl()).isEqualTo(shortPath);
+        assertThat(updatedHearit.getShortAudioUrl()).isEqualTo(shortPath);
 
     }
 

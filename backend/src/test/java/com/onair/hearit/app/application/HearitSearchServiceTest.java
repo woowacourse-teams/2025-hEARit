@@ -11,6 +11,7 @@ import com.onair.hearit.common.domain.Hearit;
 import com.onair.hearit.common.domain.HearitKeyword;
 import com.onair.hearit.common.domain.Keyword;
 import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.PlayingHistory;
 import com.onair.hearit.common.domain.Source;
 import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.common.infrastructure.jpa.HearitRepository;
@@ -212,19 +213,47 @@ class HearitSearchServiceTest {
         Hearit hearit1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));
         Hearit hearit2 = saveHearitWithTitleAndKeyword("spring2", saveKeyword("springKeyword"));
         Hearit hearit3 = saveHearitWithTitleAndKeyword("otherTitle", saveKeyword("Spring"));
-
-        // when
         TestTransaction.flagForCommit();
         TestTransaction.end();
+
+        // when
         TestTransaction.start();
 
-        PagedResponse<HearitSearchResponse> result = hearitSearchService.search("spring", request,
-                TestFixture.createFixedMemberUserInfo(member));
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search(
+                "spring", request, TestFixture.createFixedMemberUserInfo(member));
 
         // then
         assertAll(
                 () -> assertThat(result.content()).hasSize(1),
                 () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
+        );
+    }
+
+    @DisplayName("검색 시 시청기록 정보(마지막 재생시간, 끝까지 시청했는지 여부)도 함께 제공한다.")
+    @Test
+    void searchHearit_withPlayingHistory() {
+        // given
+        PagingRequest pagingRequest = new PagingRequest(0, 10);
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Hearit hearit = saveHearitWithTitleAndKeyword("spring test title", saveKeyword("keyword"));
+
+        PlayingHistory playingHistory = playingHistoryRepository.save(
+                new PlayingHistory(member.getId(), hearit, 10L));
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
+        // when
+        TestTransaction.start();
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.search(
+                "spring", pagingRequest, TestFixture.createFixedMemberUserInfo(member));
+
+        // then
+        HearitSearchResponse hearitSearchResponse = result.content().get(0);
+        assertAll(
+                () -> assertThat(hearitSearchResponse.id()).isEqualTo(hearit.getId()),
+                () -> assertThat(hearitSearchResponse.lastPlayTime()).isEqualTo(playingHistory.getLastPlayTime()),
+                () -> assertThat(hearitSearchResponse.isFinished()).isEqualTo(playingHistory.isFinished())
         );
     }
 

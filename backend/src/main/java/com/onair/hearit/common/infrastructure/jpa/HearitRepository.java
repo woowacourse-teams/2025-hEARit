@@ -61,9 +61,6 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             """)
     List<Hearit> findByCategory(@Param("categoryId") Long categoryId, @Param("size") int size);
 
-    @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id IN :hearitIds")
-    List<Hearit> findAllByIdInWithCategory(@Param("hearitIds") List<Long> hearitIds);
-
     @Query("""
             SELECT h
             FROM Hearit h
@@ -72,6 +69,7 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             """)
     Page<Hearit> findAll(Pageable pageable);
 
+    @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id IN :hearitIds")
     List<Hearit> findAllByIdIn(List<Long> hearitIds);
 
     @Query("""
