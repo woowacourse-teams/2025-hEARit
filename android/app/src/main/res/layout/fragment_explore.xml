@@ -46,8 +46,8 @@
             android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:setSkeleton="@{viewModel.isLoading}"
-            app:shimmer_auto_start="true">
+            app:shimmer_auto_start="true"
+            app:visibleIfCondition="@{viewModel.isLoading}">
 
             <include layout="@layout/item_explore_skeleton" />
 
