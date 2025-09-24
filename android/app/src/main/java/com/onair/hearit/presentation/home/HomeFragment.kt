@@ -27,6 +27,7 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
@@ -109,7 +110,10 @@ class HomeFragment :
                 updateIndicator(position)
             }
 
-        binding.rvHomeRecentHearit.adapter = recentAdapter
+        binding.rvHomeRecentHearit.apply {
+            adapter = recentAdapter
+            addItemDecoration(HorizontalMarginItemDecoration(12.dpToPx(requireContext())))
+        }
 
         binding.rvHomeRecommend.apply {
             adapter = recommendAdapter

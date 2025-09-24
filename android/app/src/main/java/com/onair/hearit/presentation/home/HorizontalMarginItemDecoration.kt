@@ -16,8 +16,8 @@ class HorizontalMarginItemDecoration(
         val position = parent.getChildAdapterPosition(view)
         if (position == RecyclerView.NO_POSITION) return
 
-        when (position) {
-            0 -> outRect.left = sideMargin
+        if (position > 0) {
+            outRect.left = sideMargin
         }
     }
 }

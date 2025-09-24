@@ -46,6 +46,6 @@ class GroupedCategoryViewHolder(
         }
 
         private const val DEFAULT_COLOR = "#000000"
-        private const val SIDE_MARGIN = 20
+        private const val SIDE_MARGIN = 12
     }
 }

@@ -17,7 +17,6 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
         android:clickable="true"
         android:focusable="true">
 
@@ -26,19 +25,19 @@
             style="@style/prompt_logo"
             android:layout_width="162dp"
             android:layout_height="96dp"
-            android:background="@drawable/bg_gray1_radius_8dp"
             android:gravity="center"
             android:text="@{recentHearit.category.name}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:roundedBackgroundColor="@{recentHearit.category.colorCode}"
             tools:text="ANDROID" />
 
         <TextView
             android:id="@+id/tv_recent_hearit_title"
             style="@style/pretendard_bottom_title"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:layout_marginTop="12dp"
             android:ellipsize="end"
             android:maxLines="2"
