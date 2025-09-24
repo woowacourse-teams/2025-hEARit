@@ -112,7 +112,7 @@ class HomeFragment :
 
         binding.rvHomeRecentHearit.apply {
             adapter = recentAdapter
-            addItemDecoration(HorizontalMarginItemDecoration(12.dpToPx(requireContext())))
+            addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
         }
 
         binding.rvHomeRecommend.apply {
@@ -295,5 +295,6 @@ class HomeFragment :
         private const val INDICATOR_SIZE_DP = 8
         private const val INDICATOR_MARGIN_DP = 4
         private const val INITIAL_INDICATOR_POSITION = 2
+        private const val SIDE_MARGIN = 16
     }
 }
