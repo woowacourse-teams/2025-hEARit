@@ -37,7 +37,6 @@ class PlaybackPositionListener(
         item: MediaItem?,
         reason: Int,
     ) {
-        // 자동 전환/반복/셔플 상황만 보정 (명시적 seek/재설정은 스킵)
         val shouldConsider =
             when (reason) {
                 Player.MEDIA_ITEM_TRANSITION_REASON_AUTO,
