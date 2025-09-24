@@ -28,11 +28,12 @@
             android:layout_height="96dp"
             android:gravity="center"
             android:text="@{recentHearit.category.name}"
+            android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:roundedBackgroundColor="@{recentHearit.category.colorCode}"
-            tools:text="ANDROID" />
+            tools:text="우아한테크코스" />
 
         <TextView
             android:id="@+id/tv_recent_hearit_title"

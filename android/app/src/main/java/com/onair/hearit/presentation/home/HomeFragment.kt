@@ -91,11 +91,6 @@ class HomeFragment :
         observeViewModel()
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.loadRecentHearits()
-    }
-
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -118,7 +113,6 @@ class HomeFragment :
 
         binding.rvHomeRecentHearit.apply {
             adapter = recentAdapter
-            itemAnimator = null
             addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
         }
 
