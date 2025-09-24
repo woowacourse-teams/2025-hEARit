@@ -359,6 +359,8 @@ class HearitControllerTest extends IntegrationTest {
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
                                                         fieldWithPath("content[].lastPlayTime").description(
                                                                 "히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].isFinished").description(
+                                                                "히어릿을 끝까지 시청했는지 여부").optional(),
                                                         fieldWithPath("content[].keywords").description(
                                                                 "히어릿에 포함된 키워드 목록"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
