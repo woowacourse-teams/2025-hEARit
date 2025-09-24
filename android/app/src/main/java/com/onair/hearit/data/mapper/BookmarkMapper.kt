@@ -13,6 +13,8 @@ fun BookmarkResponse.Content.toDomain(): Bookmark =
         summary = summary,
         playTime = playTime,
         lastPlayTime = lastPlayTime,
+        isFinished = isFinished,
+        sources = sources.map { it.toDomain() },
         category = category.toDomain(),
         audioUrl = null,
     )
