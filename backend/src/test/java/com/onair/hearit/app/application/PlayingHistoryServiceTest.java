@@ -79,7 +79,7 @@ class PlayingHistoryServiceTest {
         dbHelper.insertPlayingHistory(new PlayingHistory(memberInfo.getMemberId(), hearit2, 20));
 
         // when
-        List<RecentlyPlayedHearitResponse> result = playingHistoryService.getRecentPlayingHistoryOfMember(memberInfo);
+        List<RecentlyPlayedHearitResponse> result = playingHistoryService.getRecentPlayingHistory(memberInfo);
 
         // then
         assertAll(
@@ -96,7 +96,7 @@ class PlayingHistoryServiceTest {
         UserInfo guestInfo = RequestUser.guest(UUID.randomUUID().toString()).getUserInfo();
 
         // when
-        List<RecentlyPlayedHearitResponse> guestResult = playingHistoryService.getRecentPlayingHistoryOfMember(guestInfo);
+        List<RecentlyPlayedHearitResponse> guestResult = playingHistoryService.getRecentPlayingHistory(guestInfo);
 
         // then
         assertThat(guestResult).isEmpty();
