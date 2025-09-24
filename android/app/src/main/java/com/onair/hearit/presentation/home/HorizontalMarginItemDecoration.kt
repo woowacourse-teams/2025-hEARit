@@ -5,7 +5,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 
 class HorizontalMarginItemDecoration(
-    private val sideMargin: Int,
+    private val sideMargin: Int = 16,
 ) : RecyclerView.ItemDecoration() {
     override fun getItemOffsets(
         outRect: Rect,
@@ -16,8 +16,8 @@ class HorizontalMarginItemDecoration(
         val position = parent.getChildAdapterPosition(view)
         if (position == RecyclerView.NO_POSITION) return
 
-        when (position) {
-            0 -> outRect.left = sideMargin
+        if (position > 0) {
+            outRect.left = sideMargin
         }
     }
 }

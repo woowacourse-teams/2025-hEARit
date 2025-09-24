@@ -6,8 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -21,14 +23,17 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
-import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.category.CategoryFragment
+import com.onair.hearit.presentation.search.category.CategoryComposeFragment
 
 class HomeFragment :
     Fragment(),
@@ -38,6 +43,10 @@ class HomeFragment :
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private val mainViewModel: MainViewModel by activityViewModels()
+
+    private val recentAdapter: RecentHearitAdapter by lazy {
+        RecentHearitAdapter(this)
+    }
 
     private val recommendAdapter: RecommendHearitAdapter by lazy {
         RecommendHearitAdapter(
@@ -102,6 +111,11 @@ class HomeFragment :
                 updateIndicator(position)
             }
 
+        binding.rvHomeRecentHearit.apply {
+            adapter = recentAdapter
+            addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
+        }
+
         binding.rvHomeRecommend.apply {
             adapter = recommendAdapter
             snapHelper.attachToRecyclerView(this)
@@ -124,6 +138,11 @@ class HomeFragment :
 
         viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
             binding.userInfo = userInfo
+        }
+
+        viewModel.recentHearits.observe(viewLifecycleOwner) { recentHearits ->
+            binding.tvHomeRecentHearitTitle.isVisible = recentHearits.isNotEmpty()
+            recentAdapter.submitList(recentHearits)
         }
 
         viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
@@ -240,9 +259,14 @@ class HomeFragment :
             .beginTransaction()
             .replace(
                 R.id.fragment_container_view,
-                CategoryFragment.newInstance(
-                    SearchInput.Category(id, name, colorCode),
-                ),
+                CategoryComposeFragment().apply {
+                    arguments =
+                        bundleOf(
+                            CATEGORY_ID_KEY to id,
+                            CATEGORY_NAME_KEY to name,
+                            CATEGORY_COLOR_KEY to colorCode,
+                        )
+                },
             ).addToBackStack(null)
             .commit()
     }
@@ -273,5 +297,6 @@ class HomeFragment :
         private const val INDICATOR_SIZE_DP = 8
         private const val INDICATOR_MARGIN_DP = 4
         private const val INITIAL_INDICATOR_POSITION = 2
+        private const val SIDE_MARGIN = 16
     }
 }

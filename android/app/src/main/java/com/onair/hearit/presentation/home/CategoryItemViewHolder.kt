@@ -11,13 +11,16 @@ class CategoryItemViewHolder private constructor(
     private val binding: ItemCategoryHearitBinding,
     private val hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
+    init {
+        binding.hearitClickListener = hearitClickListener
+    }
+
     fun bind(
         item: CategoryHearit,
         color: String,
     ) {
         binding.categoryHearit = item
         binding.categoryColor = color
-        binding.hearitClickListener = hearitClickListener
     }
 
     companion object {

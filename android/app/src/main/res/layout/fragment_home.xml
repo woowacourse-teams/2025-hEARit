@@ -109,16 +109,42 @@
                 app:layout_constraintTop_toBottomOf="@id/rv_home_recommend"
                 tools:background="@color/black" />
 
+            <TextView
+                android:id="@+id/tv_home_recent_hearit_title"
+                style="@style/pretendard_main_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@{@string/home_recent_hearit_title(userInfo.nickname)}"
+                app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
+                app:layout_constraintTop_toBottomOf="@id/indicator_container"
+                tools:text="hEARit님이 듣고 있는 팟캐스트" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_home_recent_hearit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:paddingHorizontal="20dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_recent_hearit_title"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_recent_hearit" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_grouped_category"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="72dp"
+                android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/indicator_container"
+                app:layout_constraintTop_toBottomOf="@id/rv_home_recent_hearit"
                 tools:itemCount="3"
                 tools:listitem="@layout/item_grouped_category" />
 

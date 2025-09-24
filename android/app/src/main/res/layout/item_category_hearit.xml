@@ -21,7 +21,6 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="200dp"
         android:layout_height="148dp"
-        android:layout_marginEnd="16dp"
         android:background="@drawable/bg_gray1_radius_8dp"
         android:onClick="@{() -> hearitClickListener.onClick(categoryHearit.hearitId)}">
 

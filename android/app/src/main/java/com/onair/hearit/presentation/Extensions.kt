@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import androidx.concurrent.futures.CallbackToFutureAdapter
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
@@ -11,12 +12,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
-import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.domain.model.Keyword
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
-import com.onair.hearit.presentation.search.category.CategoryFragment
+import com.onair.hearit.presentation.search.category.CategoryComposeFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,11 +28,20 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.Locale
 import kotlin.coroutines.resume
 
 fun Int.dpToPx(context: Context): Int = (this * context.resources.displayMetrics.density).toInt()
 
 fun Int.pxToDp(context: Context): Int = (this / context.resources.displayMetrics.density).toInt()
+
+fun Int.toTimeString(): String {
+    val minutes = this / 60
+    val seconds = this % 60
+    return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+}
+
+fun Keyword.toHashtagName(): String = "#${this.name}"
 
 fun Intent?.toDetailResult(): DetailResult? {
     if (this == null) return null
@@ -49,7 +62,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
     when (this) {
         is DetailResult.Category -> {
             val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = CategoryFragment::class.java.simpleName
+            val backStackTag = CategoryComposeFragment::class.java.simpleName
 
             // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
             fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
@@ -57,7 +70,14 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                 .beginTransaction()
                 .replace(
                     R.id.fragment_container_view,
-                    CategoryFragment.newInstance(SearchInput.Category(id, name, colorCode)),
+                    CategoryComposeFragment().apply {
+                        arguments =
+                            bundleOf(
+                                CATEGORY_ID_KEY to categoryId,
+                                CATEGORY_NAME_KEY to name,
+                                CATEGORY_COLOR_KEY to colorCode,
+                            )
+                    },
                     backStackTag,
                 ).addToBackStack(backStackTag)
                 .commit()
@@ -66,7 +86,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
         is DetailResult.Keyword -> {
             mainActivity.selectTab(R.id.nav_search)
             val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = CategoryFragment::class.java.simpleName
+            val backStackTag = SearchRecentFragment::class.java.simpleName
 
             fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             fragmentManager
