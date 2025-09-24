@@ -61,9 +61,7 @@ class PlaybackStateSaver(
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) {
                     // 마지막 곡 끝난 시점: 히스토리 + 최근 위치 0으로 초기화 저장
-                    val id = player.currentMediaItem?.mediaId?.toLongOrNull()
-                    if (id != null) recordHistory(id, 0L)
-
+                    recordCurrent(minRecordMs = 1_000L)
                     stopSavingPosition(finished = true)
                     service?.stopSelf()
                 }
@@ -79,20 +77,19 @@ class PlaybackStateSaver(
                 val newId = newPosition.mediaItem?.mediaId?.toLongOrNull()
                 if (oldId == null || newId == null || oldId == newId) return
 
-                val isAuto = reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION
-                val isSeek =
-                    reason == Player.DISCONTINUITY_REASON_SEEK ||
-                        reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
-                if (isAuto || isSeek) {
-                    // 자동전환인 경우, 끝까지 들은 상태면 0으로 기록
+                if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION) {
                     val playedMs = oldPosition.positionMs.coerceAtLeast(0L)
-                    val toRecord =
-                        if (isAuto && isOldItemFinished(oldPosition)) 0L else playedMs
+                    recordHistory(oldId, playedMs)
+                    savePlaybackPosition()
+                    return
+                }
 
-                    if (toRecord >= 1_000L || toRecord == 0L) {
-                        // 0(완주) 또는 1초 이상 재생했을 때만 기록
-                        recordHistory(oldId, toRecord)
-                    }
+                if (reason == Player.DISCONTINUITY_REASON_SEEK ||
+                    reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
+                ) {
+                    val playedMs = oldPosition.positionMs.coerceAtLeast(0L)
+                    if (playedMs >= 1_000L) recordHistory(oldId, playedMs)
+                    savePlaybackPosition()
                 }
 
                 // 최근 위치 즉시 갱신
@@ -162,17 +159,5 @@ class PlaybackStateSaver(
                 )
             }
         }
-    }
-
-    private fun isOldItemFinished(oldPosition: Player.PositionInfo): Boolean {
-        val timeline = player.currentTimeline
-        val oldIndex = oldPosition.mediaItemIndex
-        if (timeline.isEmpty || oldIndex < 0 || oldIndex >= timeline.windowCount) return false
-
-        val durationMs = timeline.getWindow(oldIndex, Timeline.Window()).durationMs
-        if (durationMs == C.TIME_UNSET) return false
-
-        // 마지막 1초 이내면 완주로 간주
-        return oldPosition.positionMs >= (durationMs - 1_000L)
     }
 }
