@@ -42,6 +42,8 @@ class PlaybackPositionListener(
             when (reason) {
                 Player.MEDIA_ITEM_TRANSITION_REASON_AUTO,
                 Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT,
+                Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED,
+                Player.MEDIA_ITEM_TRANSITION_REASON_SEEK,
                 -> true
 
                 else -> false
