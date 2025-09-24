@@ -1,8 +1,8 @@
 package com.onair.hearit.service.model
 
-import androidx.media3.common.MediaItem
+import com.onair.hearit.domain.model.PlaybackInfo
 
 data class LibraryLoadResult(
-    val items: List<MediaItem>,
+    val items: List<PlaybackInfo>,
     val seedIndex: Int,
 )

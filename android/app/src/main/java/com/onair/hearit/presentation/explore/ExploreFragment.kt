@@ -269,7 +269,7 @@ class ExploreFragment :
 
     private fun navigateToDetail(
         hearitId: Long,
-        lastPosition: Long = 0L,
+        lastPosition: Long? = null,
     ) {
         val intent =
             PlayerDetailActivity.newIntent(requireActivity(), hearitId, lastPosition).apply {

@@ -18,7 +18,13 @@ class RecentPlaybackHandler(
     // MediaSession.Callback의 onPlaybackResumption에서 호출될 함수
     suspend fun getRecentMediaItemsWithStart(): MediaSession.MediaItemsWithStartPosition {
         val recentInfo = loadRecentPlaybackInfo()
-        return recentInfo?.let { mediaItemManager.toItemsWithStart(it) }
+        return recentInfo?.let {
+            mediaItemManager.toItemsWithStart(
+                listOf(it),
+                0,
+                recentInfo.lastPosition ?: 0L,
+            )
+        }
             ?: EMPTY_MEDIA_ITEMS_WITH_START
     }
 
@@ -28,7 +34,7 @@ class RecentPlaybackHandler(
         recentInfo?.let {
             val player = session.player
             val recentItem = mediaItemManager.buildMediaItem(it)
-            val resumePosition = it.lastPosition.coerceAtLeast(0L)
+            val resumePosition = it.lastPosition?.coerceAtLeast(0L) ?: 0L
             // 플레이어에 미디어 아이템을 세팅하고 준비시킴 (직접 플레이어 제어)
             player.playWhenReady = false
             player.setMediaItems(listOf(recentItem), 0, resumePosition)

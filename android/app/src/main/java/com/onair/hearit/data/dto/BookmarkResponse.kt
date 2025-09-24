@@ -36,6 +36,8 @@ data class BookmarkResponse(
         val lastPlayTime: Long? = null,
         @SerialName("isFinished")
         val isFinished: Boolean? = null,
+        @SerialName("sources")
+        val sources: List<SourceResponse> = emptyList(),
         @SerialName("category")
         val category: CategoryResponse.Content,
     )
