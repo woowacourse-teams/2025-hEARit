@@ -1,7 +1,6 @@
 package com.onair.hearit.service
 
 import androidx.annotation.OptIn
-import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import com.onair.hearit.di.RepositoryProvider
@@ -38,16 +37,13 @@ class PlaybackStateSaver(
         if (playedMs >= minRecordMs) recordHistory(currentId, playedMs)
     }
 
-    suspend fun flushNowBlocking(finished: Boolean = false) {
+    suspend fun flushNowBlocking() {
         val (id, lastPos) =
             withContext(Dispatchers.Main) {
                 val currentId =
                     player.currentMediaItem?.mediaId?.toLongOrNull() ?: return@withContext null
-                val duration = player.duration
                 val pos = player.currentPosition.coerceAtLeast(0L)
-                val completed =
-                    finished || (duration != C.TIME_UNSET && duration > 0 && pos >= duration - 1_000)
-                currentId to if (completed) 0L else pos
+                currentId to pos
             } ?: return
 
         // IO에서 저장 (완료까지 대기)

@@ -183,7 +183,7 @@ class PlaybackSessionCallback(
 
     private suspend fun handleFlushPlayback(): SessionResult {
         // 저장 완료까지 기다림
-        stateSaver.flushNowBlocking(finished = false)
+        stateSaver.flushNowBlocking()
         return SessionResult(SessionResult.RESULT_SUCCESS)
     }
 
