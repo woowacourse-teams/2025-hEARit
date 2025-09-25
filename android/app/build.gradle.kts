@@ -23,8 +23,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 10203
-        versionName = "1.2.3"
+        versionCode = 10204
+        versionName = "1.2.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders += mapOf()
