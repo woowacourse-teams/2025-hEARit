@@ -20,8 +20,6 @@ import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.databinding.ActivityLoginBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.di.TokenInterceptorProvider
-import com.onair.hearit.presentation.UserIdManager
 import com.onair.hearit.presentation.main.MainActivity
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -82,7 +80,6 @@ class LoginActivity : AppCompatActivity() {
             AuthEventManager.onLoginSuccess()
             lifecycleScope.launch {
                 viewModel.clearData()
-                setUserId(null)
                 navigateToMain()
             }
         }
@@ -116,10 +113,8 @@ class LoginActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    private suspend fun setUserId(kakaoId: Long?) {
-        val uuid = UserIdManager.getOrCreateUserId(this)
-        val userId = kakaoId?.toString() ?: uuid
-        TokenInterceptorProvider.setDeviceUuid(uuid)
+    private fun setUserId(kakaoId: Long?) {
+        val userId = kakaoId?.toString() ?: return
         AnalyticsProvider.get().setUserId(userId)
         CrashlyticsProvider.get().setUserId(userId)
     }

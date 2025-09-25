@@ -9,6 +9,12 @@ import com.onair.hearit.di.DataSourceProvider
 import com.onair.hearit.di.DatabaseProvider
 import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.TokenAuthenticatorProvider
+import com.onair.hearit.di.TokenInterceptorProvider
+import com.onair.hearit.presentation.UserIdManager
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class HearitApplication : Application() {
@@ -16,12 +22,21 @@ class HearitApplication : Application() {
         super.onCreate()
 
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_KEY)
+        initUuid()
         DatabaseProvider.init(this)
         DataSourceProvider.init(this)
         RepositoryProvider.init(this)
         AnalyticsProvider.init(this)
         TokenAuthenticatorProvider.init()
         initialTimber()
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun initUuid() {
+        GlobalScope.launch(Dispatchers.IO) {
+            val uuid = UserIdManager.getOrCreateUserId(this@HearitApplication)
+            TokenInterceptorProvider.setDeviceUuid(uuid)
+        }
     }
 
     private fun initialTimber() {
