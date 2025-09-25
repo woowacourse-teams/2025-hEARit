@@ -50,7 +50,7 @@ fun setHighlightedStyle(
 ) {
     val context = textView.context
     val highlightTextColor = ContextCompat.getColor(context, R.color.hearit_gray4)
-    val normalTextColor = ContextCompat.getColor(context, R.color.hearit_gray2)
+    val normalTextColor = ContextCompat.getColor(context, R.color.hearit_dark_gray)
     val transparent = ContextCompat.getColor(context, android.R.color.transparent)
 
     textView.setTextColor(if (isHighlighted) highlightTextColor else normalTextColor)
@@ -78,10 +78,10 @@ fun setScriptTextColor(
     isPast: Boolean = false,
 ) {
     val context = textView.context
-    val gray4 = ContextCompat.getColor(context, R.color.hearit_gray4)
-    val gray2 = ContextCompat.getColor(context, R.color.hearit_gray2)
+    val highlightTextColor = ContextCompat.getColor(context, R.color.hearit_gray4)
+    val normalTextColor = ContextCompat.getColor(context, R.color.hearit_dark_gray)
 
-    textView.setTextColor(if (isHighlighted || isPast) gray4 else gray2)
+    textView.setTextColor(if (isHighlighted || isPast) highlightTextColor else normalTextColor)
 }
 
 @BindingAdapter("formattedDate")

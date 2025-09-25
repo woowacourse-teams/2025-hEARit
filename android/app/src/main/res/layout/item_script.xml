@@ -25,7 +25,7 @@
 
         <TextView
             android:id="@+id/tv_script_body"
-            style="@style/pretendard_body"
+            style="@style/pretendard_sub_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
