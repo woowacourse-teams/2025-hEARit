@@ -95,7 +95,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/hearit_black1"
-            android:clipToPadding="false"
             android:paddingBottom="72dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
@@ -110,8 +109,7 @@
                     android:layout_marginHorizontal="12dp"
                     android:layout_marginTop="12dp"
                     android:background="@color/hearit_black1"
-                    android:nestedScrollingEnabled="false"
-                    android:orientation="vertical"
+                    android:clipToPadding="false"
                     app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent"

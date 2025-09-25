@@ -168,8 +168,8 @@ fun GradientBackgroundScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(top = 168.dp, bottom = 72.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(top = 152.dp, bottom = 60.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(items = hearits, key = { it.id }) { item ->
