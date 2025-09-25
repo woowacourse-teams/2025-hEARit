@@ -23,10 +23,6 @@ class PlaybackSessionCallback(
     private val playbackPositionListener: PlaybackPositionListener,
     private val stateSaver: PlaybackStateSaver,
 ) : MediaSession.Callback {
-    // setMediaItems가 중복으로 실행되면서, Library에서의 플래그를 무시해서 처음에 라이브러리에서 눌렀을 때 단일 재생으로 이루어지는 경우가 있었음
-    @Volatile
-    private var ignoreNextSetFromController = false
-
     // 컨트롤러가 세션에 연결될 때 호출됨
     // 기본 세션 명령어 + 커스텀 명령어(PRELOAD, START_LIBRARY_PLAY, PREFETCH_NEXT)를 등록
     override fun onConnect(
@@ -61,17 +57,6 @@ class PlaybackSessionCallback(
         startPositionMs: Long,
     ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> =
         executeAsync(serviceScope, "onSetMediaItems") {
-            // 만약에 이미 라이브러리 트리거로 진행이 된 상태이면 현재의 큐를 그대로 돌려주도록 하는 코드
-            if (ignoreNextSetFromController) {
-                ignoreNextSetFromController = false
-                val player = mediaSession.player
-                val current = List(player.mediaItemCount) { i -> player.getMediaItemAt(i) }
-                return@executeAsync MediaSession.MediaItemsWithStartPosition(
-                    current,
-                    player.currentMediaItemIndex.coerceAtLeast(0),
-                    player.currentPosition.coerceAtLeast(0L),
-                )
-            }
             // 다음으로 바꿀 타켓 아이템 id 파악
             val targetIndex =
                 if (mediaItems.isNotEmpty()) startIndex.coerceIn(0, mediaItems.size - 1) else 0
@@ -167,7 +152,6 @@ class PlaybackSessionCallback(
         val itemsWithStart = libraryPlaybackHandler.loadLibraryItemsWithStartPosition(playParams)
 
         withContext(Dispatchers.Main) {
-            ignoreNextSetFromController = true
             session.player.setMediaItems(
                 itemsWithStart.mediaItems,
                 itemsWithStart.startIndex,

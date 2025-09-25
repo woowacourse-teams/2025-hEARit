@@ -229,18 +229,17 @@ class PlayerDetailActivity :
 
         if (previousScreen == LIBRARY_SCREEN_ID) {
             // 재생목록 모드: 서비스가 큐 세팅을 담당
-            if (isDifferentHearit || controller.mediaItemCount == 0) {
+            if (isDifferentHearit || controller.mediaItemCount == 1) {
                 startLibraryPlayback(
                     seedHearitId = hearit.id,
                     seedBookmarkId = viewModel.bookmarkId.value,
                     startPositionMs = startPosition,
                 )
-            } else {
-                if (!controller.isPlaying) controller.play()
+                return
             }
         } else {
             // 단일 재생 모드
-            if (isDifferentHearit) {
+            if (isDifferentHearit || controller.mediaItemCount != 1) {
                 playSingleWithController(hearit, previousScreen, startPosition)
             } else {
                 if (!controller.isPlaying) controller.play()
