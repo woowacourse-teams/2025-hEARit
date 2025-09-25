@@ -20,7 +20,7 @@
         android:layout_marginBottom="16dp"
         android:background="@drawable/bg_gray1_radius_8dp"
         android:onClick="@{() -> clickListener.onClick(searchedHearit.id)}"
-        android:paddingVertical="20dp">
+        android:paddingVertical="16dp">
 
         <TextView
             android:id="@+id/tv_searched_hearit_title"
@@ -77,10 +77,11 @@
             android:id="@+id/pb_hearit_progress"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dp"
-            android:layout_height="8dp"
+            android:layout_height="4dp"
             android:layout_marginTop="8dp"
             android:max="100"
             android:progress="20"
+            android:progressDrawable="@drawable/recent_progress_bar"
             android:progressTint="@color/hearit_purple2"
             app:lastPlayTime="@{searchedHearit.lastPlayTime}"
             app:layout_constraintEnd_toEndOf="@id/tv_searched_hearit_time"
