@@ -55,15 +55,14 @@
             android:layout_width="0dp"
             android:layout_height="4dp"
             android:layout_marginTop="8dp"
-            android:max="100"
-            android:progress="20"
             android:progressDrawable="@drawable/recent_progress_bar"
-            android:progressTint="@color/hearit_purple2"
             app:lastPlayTime="@{recentHearit.lastPlayTime}"
             app:layout_constraintEnd_toEndOf="@id/tv_recent_hearit_title"
             app:layout_constraintStart_toStartOf="@id/tv_recent_hearit_title"
             app:layout_constraintTop_toBottomOf="@id/tv_recent_hearit_title"
-            app:totalPlayTime="@{recentHearit.playTime}" />
+            app:totalPlayTime="@{recentHearit.playTime}"
+            tools:max="100"
+            tools:progress="20" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
