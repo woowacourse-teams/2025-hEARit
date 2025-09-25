@@ -3,10 +3,10 @@ package com.onair.hearit.app.application;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import com.onair.hearit.application.FileSourceService;
-import com.onair.hearit.dto.response.OriginalAudioResponse;
-import com.onair.hearit.dto.response.ScriptResponse;
-import com.onair.hearit.dto.response.ShortAudioResponse;
+import com.onair.hearit.hearit.application.FileSourceService;
+import com.onair.hearit.hearit.dto.OriginalAudioResponse;
+import com.onair.hearit.hearit.dto.ScriptResponse;
+import com.onair.hearit.hearit.dto.ShortAudioResponse;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.exception.custom.NotFoundException;

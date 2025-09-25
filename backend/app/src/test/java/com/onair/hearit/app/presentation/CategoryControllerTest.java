@@ -9,8 +9,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.dto.response.CategoryResponse;
-import com.onair.hearit.dto.response.PagedResponse;
+import com.onair.hearit.category.dto.CategoryResponse;
+import com.onair.hearit.common.dto.response.PagedResponse;
 import com.onair.hearit.core.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.fixture.IntegrationTest;

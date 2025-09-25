@@ -9,15 +9,15 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.dto.response.CursorResponseV1;
-import com.onair.hearit.dto.response.CursorResponseV2;
-import com.onair.hearit.dto.response.ExploredHearitResponse;
-import com.onair.hearit.dto.response.HearitDetailResponse;
-import com.onair.hearit.dto.response.HearitOfCategoryResponse;
-import com.onair.hearit.dto.response.HearitSearchResponse;
-import com.onair.hearit.dto.response.HearitsWithRecommendCategoryResponse;
-import com.onair.hearit.dto.response.PagedResponse;
-import com.onair.hearit.dto.response.RecommendHearitResponse;
+import com.onair.hearit.common.dto.response.CursorResponseV1;
+import com.onair.hearit.common.dto.response.CursorResponseV2;
+import com.onair.hearit.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.hearit.dto.HearitDetailResponse;
+import com.onair.hearit.hearit.dto.HearitOfCategoryResponse;
+import com.onair.hearit.hearit.dto.HearitSearchResponse;
+import com.onair.hearit.hearit.dto.HearitsWithRecommendCategoryResponse;
+import com.onair.hearit.common.dto.response.PagedResponse;
+import com.onair.hearit.recommendhearit.dto.RecommendHearitResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.core.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Category;

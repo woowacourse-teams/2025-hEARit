@@ -8,9 +8,9 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.dto.response.OriginalAudioResponse;
-import com.onair.hearit.dto.response.ScriptResponse;
-import com.onair.hearit.dto.response.ShortAudioResponse;
+import com.onair.hearit.hearit.dto.OriginalAudioResponse;
+import com.onair.hearit.hearit.dto.ScriptResponse;
+import com.onair.hearit.hearit.dto.ShortAudioResponse;
 import com.onair.hearit.core.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;

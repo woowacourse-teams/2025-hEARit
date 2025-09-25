@@ -6,8 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.onair.hearit.dto.request.PlayingHistoryRequest;
-import com.onair.hearit.dto.response.RecentlyPlayedHearitResponse;
+import com.onair.hearit.playinghistory.dto.PlayingHistoryRequest;
+import com.onair.hearit.playinghistory.dto.RecentlyPlayedHearitResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;

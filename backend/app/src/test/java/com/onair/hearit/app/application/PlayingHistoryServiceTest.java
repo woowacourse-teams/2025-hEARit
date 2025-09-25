@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.application.PlayingHistoryService;
-import com.onair.hearit.dto.request.PlayingHistoryRequest;
-import com.onair.hearit.dto.response.RecentlyPlayedHearitResponse;
-import com.onair.hearit.infrastructure.scheduler.PlayingHistoryBuffer;
+import com.onair.hearit.playinghistory.application.PlayingHistoryService;
+import com.onair.hearit.playinghistory.dto.PlayingHistoryRequest;
+import com.onair.hearit.playinghistory.dto.RecentlyPlayedHearitResponse;
+import com.onair.hearit.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
 import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;

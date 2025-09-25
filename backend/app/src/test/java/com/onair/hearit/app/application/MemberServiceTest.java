@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.application.MemberService;
-import com.onair.hearit.dto.response.MemberInfoResponse;
+import com.onair.hearit.member.application.MemberService;
+import com.onair.hearit.member.dto.MemberInfoResponse;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.exception.custom.NotFoundException;
 import com.onair.hearit.core.fixture.TestFixture;

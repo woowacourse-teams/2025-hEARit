@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.application.BookmarkService;
-import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.BookmarkHearitResponseV2;
-import com.onair.hearit.dto.response.BookmarkInfoResponse;
+import com.onair.hearit.bookmark.application.BookmarkService;
+import com.onair.hearit.common.dto.request.PagingRequest;
+import com.onair.hearit.bookmark.dto.BookmarkHearitResponseV2;
+import com.onair.hearit.bookmark.dto.BookmarkInfoResponse;
 import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;

@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.application.KeywordService;
-import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.KeywordResponse;
+import com.onair.hearit.keyword.application.KeywordService;
+import com.onair.hearit.common.dto.request.PagingRequest;
+import com.onair.hearit.keyword.dto.KeywordResponse;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.exception.custom.NotFoundException;
 import com.onair.hearit.infrastructure.jpa.KeywordRepository;

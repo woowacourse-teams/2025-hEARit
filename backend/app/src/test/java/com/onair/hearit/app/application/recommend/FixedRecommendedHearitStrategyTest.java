@@ -3,7 +3,7 @@ package com.onair.hearit.app.application.recommend;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.onair.hearit.application.recommend.FixedRecommendedHearitStrategy;
+import com.onair.hearit.recommendhearit.application.strategy.FixedRecommendedHearitStrategy;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.RecommendHearit;

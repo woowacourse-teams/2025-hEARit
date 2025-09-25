@@ -9,7 +9,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.dto.response.KeywordResponse;
+import com.onair.hearit.keyword.dto.KeywordResponse;
 import com.onair.hearit.core.docs.ApiDocSnippets;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.core.fixture.TestFixture;

@@ -2,16 +2,16 @@ package com.onair.hearit.app.application;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-import com.onair.hearit.application.explore.ExploreScoreCalculator;
-import com.onair.hearit.application.explore.HearitExploreService;
-import com.onair.hearit.application.explore.scorefactor.BookmarkScoreFactor;
-import com.onair.hearit.application.explore.scorefactor.RandomScoreFactor;
-import com.onair.hearit.application.explore.scorefactor.RecencyScoreFactor;
-import com.onair.hearit.application.explore.scoreprocessor.GuestExploreScoreProcessor;
-import com.onair.hearit.application.explore.scoreprocessor.MemberExploreScoreProcessor;
-import com.onair.hearit.dto.request.CursorRequest;
-import com.onair.hearit.dto.response.CursorResponseV2;
-import com.onair.hearit.dto.response.ExploredHearitResponse;
+import com.onair.hearit.explore.application.ExploreScoreCalculator;
+import com.onair.hearit.explore.application.HearitExploreService;
+import com.onair.hearit.explore.application.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.explore.application.scorefactor.RandomScoreFactor;
+import com.onair.hearit.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.explore.application.scoreprocessor.GuestExploreScoreProcessor;
+import com.onair.hearit.explore.application.scoreprocessor.MemberExploreScoreProcessor;
+import com.onair.hearit.common.dto.request.CursorRequest;
+import com.onair.hearit.common.dto.response.CursorResponseV2;
+import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;

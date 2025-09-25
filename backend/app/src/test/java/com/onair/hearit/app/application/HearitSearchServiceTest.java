@@ -3,10 +3,10 @@ package com.onair.hearit.app.application;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.application.HearitSearchService;
-import com.onair.hearit.dto.request.PagingRequest;
-import com.onair.hearit.dto.response.HearitSearchResponse;
-import com.onair.hearit.dto.response.PagedResponse;
+import com.onair.hearit.hearit.application.HearitSearchService;
+import com.onair.hearit.common.dto.request.PagingRequest;
+import com.onair.hearit.hearit.dto.HearitSearchResponse;
+import com.onair.hearit.common.dto.response.PagedResponse;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
