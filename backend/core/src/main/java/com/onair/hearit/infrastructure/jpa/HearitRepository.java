@@ -1,0 +1,87 @@
+package com.onair.hearit.infrastructure.jpa;
+
+import com.onair.hearit.domain.Hearit;
+import com.onair.hearit.infrastructure.projection.HearitWithPlayTimeProjection;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface HearitRepository extends JpaRepository<Hearit, Long> {
+
+    @Query("""
+                SELECT DISTINCT h
+                FROM Hearit h
+                LEFT JOIN FETCH h.category c
+                LEFT JOIN FETCH h.sources s
+                WHERE h.id = :id
+            """)
+    Optional<Hearit> findByIdWithCategoryAndSources(@Param("id") Long id);
+
+    @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id = :id")
+    Optional<Hearit> findWithCategoryById(Long id);
+
+    @Query(
+            value = """
+                    SELECT h.* FROM (
+                        SELECT * FROM hearit
+                        WHERE MATCH(title) AGAINST(:searchTerm IN BOOLEAN MODE)
+                        UNION
+                        SELECT h.* FROM hearit h
+                        JOIN hearit_keyword hk ON h.id = hk.hearit_id
+                        JOIN keyword k ON hk.keyword_id = k.id
+                        WHERE MATCH(k.name) AGAINST(:searchTerm IN BOOLEAN MODE)
+                    ) h
+                    ORDER BY h.created_at DESC
+                    """,
+            countQuery = """
+                    SELECT COUNT(*) FROM (
+                        SELECT h.id FROM hearit h
+                        WHERE MATCH(h.title) AGAINST(:searchTerm IN BOOLEAN MODE)
+                        UNION
+                        SELECT h.id FROM hearit h
+                        JOIN hearit_keyword hk ON h.id = hk.hearit_id
+                        JOIN keyword k ON hk.keyword_id = k.id
+                        WHERE MATCH(k.name) AGAINST(:searchTerm IN BOOLEAN MODE)
+                    ) AS total_count
+                    """,
+            nativeQuery = true
+    )
+    Page<Hearit> searchByTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
+
+    @Query("""
+            SELECT h
+            FROM Hearit h
+            WHERE h.category.id = :categoryId
+            ORDER BY h.createdAt DESC
+            LIMIT :size
+            """)
+    List<Hearit> findByCategory(@Param("categoryId") Long categoryId, @Param("size") int size);
+
+    @Query("""
+            SELECT h
+            FROM Hearit h
+            JOIN FETCH h.category
+            ORDER BY h.createdAt DESC
+            """)
+    Page<Hearit> findAll(Pageable pageable);
+
+    @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id IN :hearitIds")
+    List<Hearit> findAllByIdIn(List<Long> hearitIds);
+
+    @Query("""
+            SELECT h AS hearit, ph.lastPlayTime AS lastPlayTime
+            FROM Hearit h
+            LEFT JOIN PlayingHistory ph ON h.id = ph.hearitId AND ph.memberId = :memberId
+            WHERE h.category.id = :categoryId
+            ORDER BY h.createdAt DESC
+            """)
+    Page<HearitWithPlayTimeProjection> findWithPlayTimeByCategoryId(
+            @Param("categoryId") Long categoryId,
+            @Param("memberId") Long memberId,
+            Pageable pageable
+    );
+}

@@ -1,1 +1,2 @@
-rootProject.name = 'hEARit'
+rootProject.name = 'hearit-backend'
+include ('core', 'admin', 'app')
