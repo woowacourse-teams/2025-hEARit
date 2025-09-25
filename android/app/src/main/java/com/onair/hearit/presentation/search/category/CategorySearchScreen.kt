@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.search.category
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,6 +70,8 @@ fun CategorySearchScreen(
 ) {
     val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
     val category = viewModel.currentCategory
+
+    BackHandler(enabled = true) { onBack() }
 
     LaunchedEffect(Unit) {
         viewModel.fetchResultData(isInitial = true)
