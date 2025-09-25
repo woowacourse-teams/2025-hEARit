@@ -1,12 +1,7 @@
 package com.onair.hearit.hearit.application;
 
-import com.onair.hearit.recommendhearit.application.strategy.RecommendHearitStrategy;
 import com.onair.hearit.common.dto.request.PagingRequest;
-import com.onair.hearit.hearit.dto.HearitDetailResponse;
-import com.onair.hearit.hearit.dto.HearitOfCategoryResponse;
-import com.onair.hearit.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.common.dto.response.PagedResponse;
-import com.onair.hearit.recommendhearit.dto.RecommendHearitResponse;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -17,13 +12,16 @@ import com.onair.hearit.domain.PlayingHistory;
 import com.onair.hearit.domain.UserInfo;
 import com.onair.hearit.exception.custom.NotFoundException;
 import com.onair.hearit.exception.custom.UnauthenticatedException;
-import com.onair.hearit.infrastructure.projection.HearitWithPlayTimeProjection;
+import com.onair.hearit.hearit.dto.HearitDetailResponse;
+import com.onair.hearit.hearit.dto.HearitOfCategoryResponse;
+import com.onair.hearit.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.infrastructure.jpa.PlayingHistoryRepository;
+import com.onair.hearit.infrastructure.projection.HearitWithPlayTimeProjection;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +40,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HearitService {
 
-    private static final int RECOMMEND_HEARIT_COUNT = 5;
     private static final int RECOMMEND_CATEGORY_COUNT = 3;
     private static final int HEARITS_PER_RECOMMENDED_CATEGORY = 5;
     private static final int KEYWORDS_PER_CATEGORIZED_HEARIT = 3;
@@ -53,7 +50,6 @@ public class HearitService {
     private final HearitKeywordRepository hearitKeywordRepository;
     private final CategoryRepository categoryRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
-    private final RecommendHearitStrategy recommendHearitStrategy;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
         Hearit hearit = getHearitById(hearitId);
@@ -88,13 +84,6 @@ public class HearitService {
             return 0L;
         }
         return lastPlayTime;
-    }
-
-    public List<RecommendHearitResponse> getRecommendedHearits() {
-        List<Hearit> recommendHearits = recommendHearitStrategy.getRecommendHearit(RECOMMEND_HEARIT_COUNT);
-        return recommendHearits.stream()
-                .map(RecommendHearitResponse::from)
-                .toList();
     }
 
     public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(UserInfo userInfo) {
