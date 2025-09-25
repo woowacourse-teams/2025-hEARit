@@ -34,7 +34,7 @@ class HearitApplication : Application() {
     @OptIn(DelicateCoroutinesApi::class)
     private fun initUuid() {
         GlobalScope.launch(Dispatchers.IO) {
-            val uuid = UserIdManager.getOrCreateUserId(this@HearitApplication)
+            val uuid = UserIdManager.getOrCreateUserId(applicationContext)
             TokenInterceptorProvider.setDeviceUuid(uuid)
         }
     }

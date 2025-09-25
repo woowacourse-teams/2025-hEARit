@@ -1,6 +1,5 @@
 package com.onair.hearit.presentation.login
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,12 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
-import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.UserIdManager
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -75,19 +71,6 @@ class LoginViewModel(
                     Timber.w(throwable)
                     _toastMessage.value = R.string.main_toast_clear_token_fail
                 }
-        }
-    }
-
-    fun setUserId(
-        context: Context,
-        kakaoId: Long?,
-    ) {
-        viewModelScope.launch {
-            val uuid = UserIdManager.getOrCreateUserId(context)
-            val userId = kakaoId?.toString() ?: uuid
-            TokenInterceptorProvider.setDeviceUuid(uuid)
-            AnalyticsProvider.get().setUserId(userId)
-            CrashlyticsProvider.get().setUserId(userId)
         }
     }
 }
