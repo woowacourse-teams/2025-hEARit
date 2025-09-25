@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.fixture;
+package com.onair.hearit.fixture;
 
 import com.onair.hearit.domain.Admin;
 import com.onair.hearit.domain.Bookmark;

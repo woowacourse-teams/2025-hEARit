@@ -1,9 +1,9 @@
-package com.onair.hearit.admin.config;
+package com.onair.hearit.config;
 
 import static org.hamcrest.Matchers.containsString;
 
 import com.onair.hearit.domain.Admin;
-import com.onair.hearit.admin.fixture.IntegrationTest;
+import com.onair.hearit.fixture.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.jsoup.Jsoup;

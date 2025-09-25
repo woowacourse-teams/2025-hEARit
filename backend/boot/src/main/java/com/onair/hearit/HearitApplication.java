@@ -4,9 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AdminApplication {
-
+public class HearitApplication {
     public static void main(String[] args) {
-        SpringApplication.run(AdminApplication.class, args);
+        SpringApplication.run(HearitApplication.class, args);
     }
 }

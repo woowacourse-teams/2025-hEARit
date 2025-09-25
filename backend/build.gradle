@@ -2,8 +2,9 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.3' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
+    id 'com.epages.restdocs-api-spec' version '0.18.2' apply false
+    id 'org.hidetake.swagger.generator' version '2.18.2' apply false
 }
-
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -16,6 +17,10 @@ subprojects {
         toolchain {
             languageVersion = JavaLanguageVersion.of(21)
         }
+    }
+
+    repositories {
+        mavenCentral()
     }
 
     configurations {

@@ -1,20 +1,8 @@
+// admin/build.gradle
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.3'
-    id 'io.spring.dependency-management' version '1.1.7'
-}
-
-repositories {
-    mavenCentral()
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-    configureEach {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-    }
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
 }
 
 dependencies {
@@ -42,10 +30,10 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('jar') {
+tasks.named('bootJar') {
     enabled = false
 }
 
-tasks.named('bootJar') {
+tasks.named('jar') {
     enabled = true
 }

@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.presentation;
+package com.onair.hearit.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -7,8 +7,8 @@ import com.onair.hearit.dto.request.CategoryCreateRequest;
 import com.onair.hearit.dto.request.CategoryUpdateRequest;
 import com.onair.hearit.dto.response.AdminCategoryResponse;
 import com.onair.hearit.dto.response.AdminPagedResponse;
-import com.onair.hearit.admin.fixture.IntegrationTest;
-import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
+import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.infrastructure.jpa.CategoryRepository;
 import io.restassured.RestAssured;
