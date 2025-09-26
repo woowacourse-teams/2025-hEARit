@@ -49,16 +49,16 @@ jobs:
         run: ./gradlew clean build
 
       - name: Rename jar to app.jar
-        working-directory: backend/build/libs
+        working-directory: backend/boot/build/libs
         run: |
-          JAR_NAME=$(ls *.jar | head -n 1)
+          JAR_NAME=$(find . -name "*.jar" ! -name "*-plain.jar")
           mv "$JAR_NAME" app.jar
 
       - name: Upload jar artifact
         uses: actions/upload-artifact@v4
         with:
           name: backend-jar
-          path: backend/build/libs/app.jar
+          path: backend/boot/build/libs/app.jar
 
   deploy:
     name: Deploy on EC2 for dev

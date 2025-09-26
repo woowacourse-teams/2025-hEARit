@@ -1,0 +1,111 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+    id 'com.epages.restdocs-api-spec'
+    id 'org.hidetake.swagger.generator'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    // 공통 핵심 모듈인 core에 의존합니다.
+    implementation project(':core')
+
+    // App 모듈에 필요한 의존성들
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test
+    testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner:4.2.1'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.jsoup:jsoup:1.17.2'
+
+    // REST Docs & restdocs-api-spec
+    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
+    testImplementation "com.epages:restdocs-api-spec-restassured:0.18.2"
+    testImplementation "com.epages:restdocs-api-spec:0.18.2"
+    testImplementation testFixtures(project(':core'))
+
+    // Swagger UI
+    swaggerUI 'org.webjars:swagger-ui:5.17.14'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    enabled = false
+}
+
+tasks.named('jar') {
+    enabled = true
+}
+
+// --- Swagger/OpenAPI 관련 설정 시작 ---
+swaggerSources {
+    sample {
+        setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
+    }
+}
+
+openapi3 {
+    servers = [
+            { url = "http://localhost:8080"; description = "로컬 서버" },
+            { url = "https://hearit.o-r.kr"; description = "운영 서버" },
+            { url = "https://hearit-dev.o-r.kr"; description = "개발 서버" }
+    ]
+    title = "Hearit API 문서"
+    description = "Spring REST Docs와 Swagger UI를 이용한 API 명세서"
+    version = project.version
+    format = "yaml"
+}
+
+tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI).configureEach {
+    dependsOn 'openapi3'
+}
+
+
+tasks.named('generateSwaggerUISample') {
+    doLast {
+        def indexFile = file("${outputDir}/index.html")
+        if (!indexFile.exists()) return
+        def content = indexFile.getText('UTF-8')
+        def swaggerOptions = [
+                'docExpansion: "list"',
+                'displayRequestDuration: true',
+                'operationsSorter: (a, b) => {\n' +
+                        '    const order = ["get", "post", "put", "delete"];\n' +
+                        '    return order.indexOf(a.get("method")) - order.indexOf(b.get("method"));\n' +
+                        '}',
+                'tagsSorter: "alpha"'
+        ].join(',\n    ')
+        content = content
+                .replaceAll(/docExpansion\s*:\s*["'](full|list|none)["']\s*,?/, '')
+                .replaceAll(/displayRequestDuration\s*:\s*(true|false)\s*,?/, '')
+                .replaceAll(/operationsSorter\s*:\s*["'](alpha|method|none)["']\s*,?/, '')
+                .replaceAll(/tagsSorter\s*:\s*["'](alpha|method|none)["']\s*,?/, '')
+        content = content.replaceFirst(
+                /(?s)(SwaggerUIBundle\s*\(\s*\{)/,
+                "\$1\n    ${swaggerOptions},"
+        )
+        indexFile.write(content, 'UTF-8')
+    }
+}

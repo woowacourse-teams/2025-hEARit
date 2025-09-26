@@ -1,0 +1,74 @@
+// core build.gradle
+plugins {
+    id 'java-library'
+    id 'java-test-fixtures'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    configureEach {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+}
+
+dependencies {
+    // Spring
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    api 'org.springframework.boot:spring-boot-starter-security'
+    api 'jakarta.validation:jakarta.validation-api'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    compileOnly 'org.springframework:spring-webmvc'
+
+    // DB
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'com.h2database:h2'
+
+    // Lombok
+    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
+
+    // Jwt
+    api 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Flyway
+    api 'org.flywaydb:flyway-core'
+    api 'org.flywaydb:flyway-mysql'
+
+    // S3 (공통 파일 인프라)
+    api platform('software.amazon.awssdk:bom:2.25.30')
+    api 'software.amazon.awssdk:s3'
+    api 'software.amazon.awssdk:auth'
+    api 'software.amazon.awssdk:regions'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
+    testImplementation 'io.rest-assured:rest-assured:5.4.0'
+
+    testFixturesImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
+    testFixturesImplementation 'io.rest-assured:rest-assured:5.4.0'
+    testFixturesImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.named("bootJar") {
+    enabled = false
+}
+
+tasks.named('jar') {
+    enabled = true
+}
