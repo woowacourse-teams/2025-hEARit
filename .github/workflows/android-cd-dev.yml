@@ -2,15 +2,13 @@ name: Hearit Android dev CD
 
 on:
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "develop", "develop-an" ]
     paths:
       - 'android/**'
 
 env:
-  BASE_URL: ${{ secrets.BASE_URL }}
-  DEV_BASE_URL: ${{ secrets.DEV_BASE_URL }}
+  LOCAL_PROPERTIES_CONTENTS: ${{ secrets.LOCAL_PROPERTIES_CONTENTS }}
   GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-  KAKAO_NATIVE_KEY: ${{ secrets.KAKAO_NATIVE_KEY }}
 
 jobs:
   build:
@@ -33,16 +31,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Add Local Properties
-        run: |
-          echo "BASE_URL=\"$BASE_URL\"" > ./local.properties
-          echo "DEV_BASE_URL=\"$DEV_BASE_URL\"" > ./local.properties
+      - name: Create local.properties
+        run: echo "$LOCAL_PROPERTIES_CONTENTS" > ./local.properties
 
       - name: Get Google Services JSON
         run: echo "$GOOGLE_SERVICES_JSON" > ./app/google-services.json
-
-      - name: Add Kakao Native Key
-        run: echo "KAKAO_NATIVE_KEY=$KAKAO_NATIVE_KEY" > ./local.properties
 
       - name: Build Debug apk
         run: ./gradlew assembleDebug
