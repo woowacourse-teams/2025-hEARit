@@ -16,7 +16,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.infrastructure.oauth.kakao.KakaoOAuthService;
-import com.onair.hearit.core.docs.ApiDocSnippets;
+import com.onair.hearit.fixture.ApiDocSnippets;
 import com.onair.hearit.fixture.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

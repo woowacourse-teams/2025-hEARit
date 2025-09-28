@@ -12,7 +12,7 @@ import com.epages.restdocs.apispec.Schema;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.common.dto.response.CursorResponseV1;
 import com.onair.hearit.common.dto.response.CursorResponseV2;
-import com.onair.hearit.core.docs.ApiDocSnippets;
+import com.onair.hearit.fixture.ApiDocSnippets;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;

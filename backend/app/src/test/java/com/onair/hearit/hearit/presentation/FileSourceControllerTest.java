@@ -8,7 +8,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.core.docs.ApiDocSnippets;
+import com.onair.hearit.fixture.ApiDocSnippets;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;

@@ -17,7 +17,7 @@ import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
 import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
-import com.onair.hearit.core.docs.ApiDocSnippets;
+import com.onair.hearit.fixture.ApiDocSnippets;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.infrastructure.jpa.MemberRepository;
