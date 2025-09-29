@@ -33,7 +33,8 @@ rules = "1.6.1"
 junitKtx = "1.2.1"
 shimmer = "0.5.0"
 timber = "5.0.1"
-v2User = "2.21.4"
+v2Share = "2.21.7"
+v2User = "2.21.7"
 room-runtime = "2.7.2"
 activityCompose = "1.10.1"
 
@@ -81,6 +82,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+v2-share = { module = "com.kakao.sdk:v2-share", version.ref = "v2Share" }
 v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }

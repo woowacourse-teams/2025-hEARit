@@ -190,6 +190,7 @@ dependencies {
 
     // kakao SDK
     implementation(libs.v2.user)
+    implementation(libs.v2.share)
 
     // dataStore
     implementation(libs.androidx.datastore.preferences)
