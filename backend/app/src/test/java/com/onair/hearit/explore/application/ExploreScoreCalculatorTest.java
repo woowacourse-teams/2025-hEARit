@@ -33,7 +33,6 @@ import org.springframework.test.context.jdbc.Sql;
 @Import({DbHelper.class, TestConfig.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-
 class ExploreScoreCalculatorTest {
 
     private static final double FIXED_RANDOM_SCORE = 1.0;
@@ -54,7 +53,7 @@ class ExploreScoreCalculatorTest {
     @Test
     void calculateTotalScoresForMemberWithRealFactors() {
         // given
-        LocalDateTime baseTime = LocalDateTime.of(2024, 1, 1, 12, 0);
+        LocalDateTime baseTime = LocalDateTime.now();
         LocalDateTime fourDaysAgo = baseTime.minusDays(4);
         LocalDateTime sixtyDaysAgo = baseTime.minusDays(60);
 
