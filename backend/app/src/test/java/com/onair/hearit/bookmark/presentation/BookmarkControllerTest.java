@@ -86,8 +86,7 @@ class BookmarkControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].lastPlayTime").description(
-                                                                "히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].lastPlayTime").description("히어릿 마지막 재생 시간(ms)").optional(),
                                                         fieldWithPath("content[].categoryColor").description("카테고리 색상 코드")
                                                 }), Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields()))
                                         .toArray(FieldDescriptor[]::new)
@@ -139,10 +138,8 @@ class BookmarkControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].lastPlayTime").description(
-                                                                "히어릿 마지막 재생 시간(ms)").optional(),
-                                                        fieldWithPath("content[].isFinished").description(
-                                                                "히어릿 재생 완료 여부").optional(),
+                                                        fieldWithPath("content[].lastPlayTime").description("히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].isFinished").description("히어릿 재생 완료 여부").optional(),
                                                         fieldWithPath("content[].sources").description("출처 정보"),
                                                         fieldWithPath("content[].sources[].sourceName").description("출처 이름"),
                                                         fieldWithPath("content[].sources[].sourceUrl").description("출처 URL"),

@@ -1,343 +1,294 @@
 package com.onair.hearit.auth.presentation;
 
-
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.auth.domain.RefreshToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onair.hearit.auth.application.AuthService;
 import com.onair.hearit.auth.dto.request.LoginRequest;
+import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.request.TokenReissueRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
-import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.auth.infrastructure.repository.RefreshTokenRepository;
+import com.onair.hearit.auth.infrastructure.jwt.TokenStatus;
+import com.onair.hearit.exception.custom.InvalidInputException;
+import com.onair.hearit.exception.custom.UnauthorizedException;
 import com.onair.hearit.fixture.ApiDocSnippets;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.infrastructure.jpa.MemberRepository;
-import com.onair.hearit.fixture.DbHelper;
-import com.onair.hearit.fixture.IntegrationTest;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import com.onair.hearit.fixture.ControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class AuthControllerTest extends IntegrationTest {
-
-    @Autowired
-    DbHelper dbHelper;
+@WebMvcTest(controllers = AuthController.class)
+class AuthControllerTest extends ControllerTest {
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private ObjectMapper objectMapper;
 
-    @Autowired
-    JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    RefreshTokenRepository refreshTokenRepository;
-
-    @Autowired
-    MemberRepository memberRepository;
+    @MockitoBean
+    private AuthService authService;
 
     @Test
-    @DisplayName("로그인 성공 시 200 OK 및 엑세스토큰 + 리프레시토큰을 반환한다.")
-    void login_success() {
+    @DisplayName("로컬 로그인 V1 - 200 OK")
+    void loginV1_OK() throws Exception {
         // given
-        Member member = Member.createLocalUser(
-                UUID.randomUUID().toString(),
-                "test123",
-                "testName",
-                passwordEncoder.encode("pass1234"),
-                "profile.jpg"
+        var request = new LoginRequest("test123", "password1234");
+        var response = new LoginTokenResponse(
+                "access12341234.token12341234.fake-signature",
+                "refresh12341234.token12341234.fake-signature"
         );
-        dbHelper.insertMember(member);
 
-        LoginRequest request = new LoginRequest("test123", "pass1234");
-
-        // when
-        LoginTokenResponse loginTokenResponse = RestAssured.given(this.spec).log().all()
-                .contentType(ContentType.JSON)
-                .body(request)
-                .filter(document("auth-login",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Auth API")
-                                .summary("일반 로그인")
-                                .description("아이디/비밀번호로 로그인하여 토큰을 발급받습니다.")
-                                .requestSchema(Schema.schema("LoginRequest"))
-                                .requestFields(
-                                        fieldWithPath("localId").description("사용자 아이디"),
-                                        fieldWithPath("password").description("비밀번호")
-                                )
-                                .responseSchema(Schema.schema("LoginTokenResponse"))
-                                .responseFields(
-                                        fieldWithPath("accessToken").description("발급된 액세스 토큰"),
-                                        fieldWithPath("refreshToken").description("발급된 리프레시 토큰")
-                                )
-                                .build())
-                ))
-                .when()
-                .post("/api/v1/auth/login")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .extract().as(LoginTokenResponse.class);
-
-        // then
-        assertAll(() -> {
-            assertThat(loginTokenResponse.accessToken()).isNotNull();
-            assertThat(loginTokenResponse.refreshToken()).isNotNull();
-        });
-    }
-
-    @DisplayName("유효한 리프레시토큰으로 엑세스토큰 재발급 요청 시 새 엑세스토큰을 반환한다.")
-    @Test
-    void reissueToken_requestWithValidRefreshToken() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        RefreshToken validRefreshToken = createAndSaveRefreshTokenFrom(member);
-
-        TokenReissueRequest tokenReissueRequest = new TokenReissueRequest(validRefreshToken.getToken());
-
-        // when
-        TokenReissueResponse response = RestAssured.given(this.spec).log().all()
-                .contentType(ContentType.JSON)
-                .body(tokenReissueRequest)
-                .filter(document("auth-refresh",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Auth API")
-                                .summary("엑세스토큰 재발급 요청")
-                                .description("리프레시토큰으로 엑세스토큰 재발급 요청해 새 엑세스토큰을 반환받습니다.")
-                                .requestSchema(Schema.schema("TokenReissueResponse"))
-                                .requestFields(
-                                        fieldWithPath("refreshToken").description("리프레시 토큰")
-                                )
-                                .responseSchema(Schema.schema("LoginTokenResponse"))
-                                .responseFields(
-                                        fieldWithPath("accessToken").description("발급된 액세스 토큰")
-                                )
-                                .build())
-                ))
-                .when()
-                .post("/api/v1/auth/token/refresh")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .extract().as(TokenReissueResponse.class);
-
-        // then
-        assertThat(response.accessToken()).isNotNull();
-    }
-
-    @Test
-    @DisplayName("비밀번호 틀리면 401 Unauthorized 반환한다.")
-    void login_invalidPassword() {
-        Member member = Member.createLocalUser(
-                UUID.randomUUID().toString(),
-                "test123",
-                "testName",
-                passwordEncoder.encode("pass1234"),
-                "profile.jpg"
-        );
-        dbHelper.insertMember(member);
-
-        LoginRequest request = new LoginRequest("test123", "wrong-pass");
-
-        // when
-        // then
-        RestAssured.given(this.spec)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .filter(document("auth-login-unauthorized-wrong-password",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Auth API")
-                                .summary("일반 로그인")
-                                .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
-                                .build())
-                ))
-                .when()
-                .post("/api/v1/auth/login")
-                .then()
-                .statusCode(HttpStatus.UNAUTHORIZED.value());
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 회원이면 401 Unauthorized 반환한다.")
-    void login_nonexistentMember() {
-        // given
-        LoginRequest request = new LoginRequest("ghost123", "pass1234");
-
-        RestAssured.given(this.spec).log().all()
-                .contentType(ContentType.JSON)
-                .body(request)
-                .filter(document("auth-login-unauthorized-nonexistent-member",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Auth API")
-                                .summary("일반 로그인")
-                                .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
-                                .build())
-                ))
-                .when()
-                .post("/api/v1/auth/login")
-                .then().log().all()
-                .statusCode(HttpStatus.UNAUTHORIZED.value());
-    }
-
-    @Test
-    @DisplayName("회원가입 성공 시 201 CREATED를 반환한다.")
-    void signup_success() {
-        // given
-        SignupRequest request = new SignupRequest("newUser123", "newNickname", "password1234");
+        given(authService.login(any())).willReturn(response);
 
         // when & then
-        RestAssured.given(this.spec)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .filter(document("auth-signup",
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(document("v1-post-auth-login-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
-                                .summary("회원가입")
-                                .description("새로운 계정을 생성합니다.")
-                                .requestSchema(Schema.schema("SignupRequest"))
+                                .summary("로컬 로그인 V1")
+                                .description("아이디/비밀번호로 로그인하여 `accessToken`과 `refreshToken`을 발급받습니다.")
                                 .requestFields(
-                                        fieldWithPath("localId").description("사용자 아이디"),
+                                        fieldWithPath("localId").description("로컬 아이디"),
+                                        fieldWithPath("password").description("로컬 비밀번호")
+                                )
+                                .responseFields(
+                                        fieldWithPath("accessToken").description("발급된 access token"),
+                                        fieldWithPath("refreshToken").description("발급된 refresh token")
+                                )
+                                .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("로컬 로그인 V1 - 401 Unauthorized")
+    void loginV1_Unauthorized() throws Exception {
+        // given
+        var request = new LoginRequest("test123", "wrong-pass");
+
+        given(authService.login(any()))
+                .willThrow(new UnauthorizedException("아이디나 비밀번호가 일치하지 않습니다."));
+
+        // when & then
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andDo(document("v1-post-auth-login-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("로컬 로그인 V1")
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("카카오 로그인 V1 - 200 OK")
+    void kakaoLoginV1_OK() throws Exception {
+        // given
+        var request = new OAuthLoginRequest("kakao-access-token-12345");
+        var response = new LoginTokenResponse(
+                "access12341234.token12341234.fake-signature",
+                "refresh12341234.token12341234.fake-signature"
+        );
+
+        given(authService.loginOrSignUp(any(), any())).willReturn(response);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/auth/kakao-login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(document("v1-post-auth-kakao-login-ok",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("카카오 로그인 V1")
+                                .description(
+                                        "카카오 `accessToken`으로 로그인 또는 회원가입을 진행하여 `accessToken`과 `refreshToken`을 발급받습니다.")
+                                .requestFields(
+                                        fieldWithPath("accessToken").description("카카오 access token")
+                                )
+                                .responseFields(
+                                        fieldWithPath("accessToken").description("발급된 access token"),
+                                        fieldWithPath("refreshToken").description("발급된 refresh token")
+                                )
+                                .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("카카오 로그인 V1 - 401 Unauthorized")
+    void kakaoLoginV1_Unauthorized() throws Exception {
+        // given
+        var request = new OAuthLoginRequest("invalid-kakao-access-token");
+
+        given(authService.loginOrSignUp(any(), any()))
+                .willThrow(new UnauthorizedException("this access token is already expired"));
+
+        // when & then
+        mockMvc.perform(post("/api/v1/auth/kakao-login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andDo(document("v1-post-auth-kakao-login-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("카카오 로그인 V1")
+                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("로컬 회원가입 V1 - 201 Created")
+    void signupV1_Created() throws Exception {
+        // given
+        var request = new SignupRequest("newUser123", "newNickname", "password1234");
+
+        willDoNothing().given(authService).signup(any());
+
+        // when & then
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andDo(document("v1-post-auth-signup-created",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("로컬 회원가입 V1")
+                                .description("아이디/비밀번호를 통해 새로운 계정을 생성합니다.")
+                                .requestFields(
+                                        fieldWithPath("localId").description("회원 아이디"),
                                         fieldWithPath("nickname").description("닉네임"),
                                         fieldWithPath("password").description("비밀번호")
                                 )
                                 .build())
-                ))
-                .when()
-                .post("/api/v1/auth/signup")
-                .then()
-                .statusCode(HttpStatus.CREATED.value());
+                ));
     }
 
     @Test
-    @DisplayName("이미 존재하는 아이디로 회원가입 시 400 BAD REQUEST를 반환한다.")
-    void signup_fail_with_duplicate_id() {
+    @DisplayName("로컬 회원가입 V1 - 400 Bad Request")
+    void signupV1_BadRequest() throws Exception {
         // given
-        Member existingMember = Member.createLocalUser(
-                UUID.randomUUID().toString(),
-                "existingUser",
-                "existingNickname",
-                passwordEncoder.encode("password1234"),
-                "profile.jpg"
-        );
-        dbHelper.insertMember(existingMember);
+        var request = new SignupRequest("existingUser", "newNickname", "password1234");
 
-        SignupRequest request = new SignupRequest("existingUser", "newNickname", "password1234");
+        willThrow(new InvalidInputException("이미 존재하는 아이디입니다."))
+                .given(authService).signup(any());
 
         // when & then
-        RestAssured.given(this.spec)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .filter(document("auth-signup-bad-request",
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andDo(document("v1-post-auth-signup-bad-request",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
-                                .summary("회원가입")
-                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .summary("로컬 회원가입 V1")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
-                ))
-                .when()
-                .post("/api/v1/auth/signup")
-                .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
+                ));
     }
 
+    @DisplayName("access token 재발급 V1 - 200 OK")
     @Test
-    @DisplayName("엑세스토큰 유효성 검증 성공 시 200 OK를 반환한다.")
-    void check_success() {
+    void refresh_tokenV1_OK() throws Exception {
         // given
-        Member member = dbHelper.insertMember(
-                Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname", "password", "profile.jpg"));
-        String validAccessToken = jwtTokenProvider.createAccessToken(member.getId());
+        var request = new TokenReissueRequest("refresh12341234.token12341234.fake-signature");
+        var response = new TokenReissueResponse("new-access12341234.token12341234.fake-signature");
+
+        given(authService.reissue(any())).willReturn(response.accessToken());
 
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + validAccessToken)
-                .filter(document("auth-check",
+        mockMvc.perform(post("/api/v1/auth/token/refresh")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(document("v1-post-auth-token-refresh-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
-                                .summary("엑세스토큰 유효성 검증")
-                                .description("엑세스토큰의 유효성을 검증합니다.")
+                                .summary("access token 재발급 V1")
+                                .description("`refreshToken`으로 `accessToken`을 재발급 받습니다.")
+                                .requestFields(
+                                        fieldWithPath("refreshToken").description("refresh token")
+                                )
+                                .responseFields(
+                                        fieldWithPath("accessToken").description("발급된 access token")
+                                )
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/auth/check")
-                .then()
-                .statusCode(HttpStatus.OK.value());
+                ));
     }
 
     @Test
-    @DisplayName("엑세스토큰 유효성 검증 실패 시 401 Unauthorized를 반환한다.")
-    void check_unauthorized() {
+    @DisplayName("access token 검증 V1 - 200 OK")
+    void checkV1_OK() throws Exception {
         // given
-        String invalidAccessToken = "invalid-access-token";
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
 
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + invalidAccessToken)
-                .filter(document("auth-check-unauthorized",
+        mockMvc.perform(get("/api/v1/auth/check")
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isOk())
+                .andDo(document("v1-get-auth-check-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
-                                .summary("엑세스토큰 유효성 검증")
-                                .description("엑세스토큰의 유효성을 검증합니다.")
-                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .summary("access token 검증 V1")
+                                .description("`accessToken`의 유효성을 검증합니다.")
+                                .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("access token 검증 V1 - 401 Unauthorized")
+    void checkV1_Unauthorized() throws Exception {
+        // given
+        given(jwtTokenProvider.getTokenStatus("invalid-token")).willReturn(TokenStatus.INVALID);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/auth/check")
+                        .header("Authorization", "Bearer invalid-token"))
+                .andExpect(status().isUnauthorized())
+                .andDo(document("v1-get-auth-check-unauthorized",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Auth API")
+                                .summary("access token 검증 V1")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/auth/check")
-                .then()
-                .statusCode(HttpStatus.UNAUTHORIZED.value());
+                ));
     }
 
     @Test
-    @DisplayName("회원탈퇴 시 해당 회원의 리프레시토큰을 삭제하고 회원탈퇴 시간이 기록된다.")
-    void withdraw() {
+    @DisplayName("회원 탈퇴 V1 - 204 No Content")
+    void withdrawV1_NoContent() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        createAndSaveRefreshTokenFrom(member);
-        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        willDoNothing().given(authService).withdraw(any());
 
-        String accessToken = jwtTokenProvider.createAccessToken(member.getId());
-
-        // when
-        RestAssured.given(this.spec).log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .filter(document("auth-withdraw",
+        // when & then
+        mockMvc.perform(delete("/api/v1/auth/withdraw")
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isNoContent())
+                .andDo(document("v1-delete-auth-withdraw-no-content",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Auth API")
-                                .summary("회원탈퇴")
-                                .description("회원탈퇴 시 서버에서 회원을 탈퇴처리합니다.")
+                                .summary("회원 탈퇴 V1")
+                                .description("서버에서 회원을 탈퇴 처리합니다.")
                                 .build())
-                ))
-                .when()
-                .delete("/api/v1/auth/withdraw")
-                .then().log().all()
-                .statusCode(HttpStatus.NO_CONTENT.value());
-
-        // then
-        assertAll(() -> {
-            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
-            assertThat(memberRepository.findById(member.getId()).orElseThrow().getDeletedAt()).isNotNull();
-        });
-    }
-
-    private RefreshToken createAndSaveRefreshTokenFrom(Member member) {
-        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
-        LocalDateTime expiryDate = jwtTokenProvider.extractExpiry(refreshToken);
-        return refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, expiryDate));
+                ));
     }
 }
