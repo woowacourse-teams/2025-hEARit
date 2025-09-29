@@ -9,7 +9,7 @@ import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Source;
-import com.onair.hearit.explore.application.TestConfig;
+import com.onair.hearit.explore.application.ExploreScoreTestConfig;
 import com.onair.hearit.fixture.DbHelper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,7 +27,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, TestConfig.class, TestJpaAuditingConfig.class})
+@Import({DbHelper.class, ExploreScoreTestConfig.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class RecencyScoreFactorTest {

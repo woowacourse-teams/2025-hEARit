@@ -28,7 +28,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, TestJpaAuditingConfig.class, ExploreScoreCommandRepository.class, TestConfig.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, ExploreScoreCommandRepository.class,
+        ExploreScoreTestConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ExploreScoreRefresherTest {

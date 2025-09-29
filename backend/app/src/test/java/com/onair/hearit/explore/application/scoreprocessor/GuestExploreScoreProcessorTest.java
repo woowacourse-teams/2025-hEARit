@@ -12,7 +12,7 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.UserInfo;
 import com.onair.hearit.domain.UserType;
 import com.onair.hearit.explore.application.ExploreScoreRefresher;
-import com.onair.hearit.explore.application.TestConfig;
+import com.onair.hearit.explore.application.ExploreScoreTestConfig;
 import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
@@ -33,7 +33,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, TestJpaAuditingConfig.class, TestConfig.class, ExploreScoreCommandRepository.class,
+@Import({DbHelper.class, TestJpaAuditingConfig.class, ExploreScoreTestConfig.class, ExploreScoreCommandRepository.class,
         ExploreScoreRefresher.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
