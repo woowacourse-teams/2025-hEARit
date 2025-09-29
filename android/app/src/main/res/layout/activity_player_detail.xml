@@ -53,6 +53,17 @@
                 app:layout_constraintTop_toTopOf="@id/ib_player_detail_back"
                 tools:text="Network" />
 
+            <ImageButton
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:background="@color/hearit_black1"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_share"
+                app:layout_constraintBottom_toBottomOf="@id/tv_player_detail_category"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_player_detail_category" />
+
             <include
                 android:id="@+id/layout_thumbnail"
                 layout="@layout/layout_player_detail_thumbnail"
