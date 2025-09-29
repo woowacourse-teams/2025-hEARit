@@ -53,17 +53,13 @@ class ExploreScoreCalculatorTest {
     @Test
     void calculateTotalScoresForMemberWithRealFactors() {
         // given
-        LocalDateTime baseTime = LocalDateTime.now();
-        LocalDateTime fourDaysAgo = baseTime.minusDays(4);
-        LocalDateTime sixtyDaysAgo = baseTime.minusDays(60);
-
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // -- 북마크 이력용 Hearit들 --
-        TestClock.freezeAt(baseTime);
+        TestClock.freezeAt(LocalDateTime.now());
         Hearit hearit1 = dbHelper.insertHearit(createHearit(category1));
         Hearit hearit2 = dbHelper.insertHearit(createHearit(category1));
         Hearit hearit3 = dbHelper.insertHearit(createHearit(category1));
@@ -77,13 +73,13 @@ class ExploreScoreCalculatorTest {
 
         // -- 점수 계산 대상 Hearit들 --
         // 최신성 20, 카테고리 22.5
-        TestClock.freezeAt(baseTime);
+        TestClock.freezeAt(LocalDateTime.now());
         Hearit hearit5 = dbHelper.insertHearit(createHearit(category1));
         // 최신성 18, 카테고리 7.5
-        TestClock.freezeAt(fourDaysAgo);
+        TestClock.freezeAt(LocalDateTime.now().minusDays(4));
         Hearit hearit6 = dbHelper.insertHearit(createHearit(category2));
         // 최신성 0, 카테고리 0
-        TestClock.freezeAt(sixtyDaysAgo);
+        TestClock.freezeAt(LocalDateTime.now().minusDays(60));
         Hearit hearit7 = dbHelper.insertHearit(createHearit(category3));
 
         // when
@@ -102,26 +98,22 @@ class ExploreScoreCalculatorTest {
     @Test
     void calculateTotalScoresForGuestWithRealFactors() {
         // given
-        LocalDateTime baseTime = LocalDateTime.now();
-        LocalDateTime fourDaysAgo = baseTime.minusDays(4);
-        LocalDateTime sixtyDaysAgo = baseTime.minusDays(60);
-
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // 북마크 이력 Hearit (게스트 점수엔 반영 안 됨)
-        TestClock.freezeAt(baseTime);
+        TestClock.freezeAt(LocalDateTime.now());
         Hearit hearit1 = dbHelper.insertHearit(createHearit(category1));
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
 
         // -- 점수 계산 대상 Hearit들 --
-        TestClock.freezeAt(baseTime);
+        TestClock.freezeAt(LocalDateTime.now());
         Hearit hearit2 = dbHelper.insertHearit(createHearit(category1));              // ֽż 20
-        TestClock.freezeAt(fourDaysAgo);
+        TestClock.freezeAt(LocalDateTime.now().minusDays(4));
         Hearit hearit3 = dbHelper.insertHearit(createHearit(category2)); // ֽż 18
-        TestClock.freezeAt(sixtyDaysAgo);
+        TestClock.freezeAt(LocalDateTime.now().minusDays(60));
         Hearit hearit4 = dbHelper.insertHearit(createHearit(category3));// ֽż 0
 
         String guestUuid = UUID.randomUUID().toString();

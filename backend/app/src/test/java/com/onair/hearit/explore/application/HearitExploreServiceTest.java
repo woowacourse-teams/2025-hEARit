@@ -48,8 +48,6 @@ import org.springframework.test.context.jdbc.Sql;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
 
-    private static final LocalDateTime BASE_TIME = LocalDateTime.now();
-
     @Autowired
     private DbHelper dbHelper;
 
@@ -90,8 +88,8 @@ class HearitExploreServiceTest {
     @Test
     void getExploredHearitsForMember_firstRequest() {
         // given
-        LocalDateTime fourDaysAgo = BASE_TIME.minusDays(4);
-        LocalDateTime sixtyDaysAgo = BASE_TIME.minusDays(60);
+        LocalDateTime fourDaysAgo = LocalDateTime.now().minusDays(4);
+        LocalDateTime sixtyDaysAgo = LocalDateTime.now().minusDays(60);
 
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
@@ -100,7 +98,7 @@ class HearitExploreServiceTest {
         UserInfo memberInfo = TestFixture.createFixedMemberUserInfo(member);
 
         // -- 북마크 이력용 Hearit들 --
-        TestClock.freezeAt(BASE_TIME);
+        TestClock.freezeAt(LocalDateTime.now());
         // 최신성 20, 카테고리 22.5
         Hearit hearit1 = dbHelper.insertHearit(createHearit(category1));
         // 최신성 20, 카테고리 22.5
@@ -117,7 +115,7 @@ class HearitExploreServiceTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit4));
 
         // 북마크 제외 히어릿들
-        TestClock.freezeAt(BASE_TIME);
+        TestClock.freezeAt(LocalDateTime.now());
         // 최신성 20, 카테고리 22.5
         Hearit hearit5 = dbHelper.insertHearit(createHearit(category1));
         // 최신성 18, 카테고리 7.5
@@ -158,7 +156,7 @@ class HearitExploreServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = TestFixture.createFixedMemberUserInfo(member);
 
-        TestClock.freezeAt(BASE_TIME);
+        TestClock.freezeAt(LocalDateTime.now());
         dbHelper.insertHearit(createHearit(category1));
 
         CursorResponseV2<ExploredHearitResponse> firstResponse = hearitExploreService.getExploredHearits(
@@ -168,7 +166,7 @@ class HearitExploreServiceTest {
         long nextCursorId = firstContent.get(firstContent.size() - 1).cursorId();
 
         // when
-        TestClock.freezeAt(BASE_TIME.plusMinutes(1));
+        TestClock.freezeAt(LocalDateTime.now().plusMinutes(1));
         Hearit newHearit = dbHelper.insertHearit(createHearit(category1));
         CursorResponseV2<ExploredHearitResponse> secondResponse = hearitExploreService.getExploredHearits(
                 memberInfo, new CursorRequest(nextCursorId, 2));
@@ -185,11 +183,11 @@ class HearitExploreServiceTest {
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         UserInfo guestInfo = TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString());
 
-        TestClock.freezeAt(BASE_TIME);
+        TestClock.freezeAt(LocalDateTime.now());
         Hearit hearit1 = dbHelper.insertHearit(createHearit(category1));
-        TestClock.freezeAt(BASE_TIME.minusDays(2));
+        TestClock.freezeAt(LocalDateTime.now().minusDays(2));
         Hearit hearit2 = dbHelper.insertHearit(createHearit(category1));
-        TestClock.freezeAt(BASE_TIME.minusDays(4));
+        TestClock.freezeAt(LocalDateTime.now().minusDays(4));
         Hearit hearit3 = dbHelper.insertHearit(createHearit(category1));
 
         // when

@@ -32,7 +32,6 @@ import org.springframework.test.context.jdbc.Sql;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class RecencyScoreFactorTest {
 
-    private static final LocalDateTime BASE_TIME = LocalDateTime.now();
 
     @Autowired
     private DbHelper dbHelper;
@@ -48,12 +47,11 @@ class RecencyScoreFactorTest {
     @Test
     void calculateRecencyScores() {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-
-        TestClock.freezeAt(BASE_TIME);
+        TestClock.freezeAt(LocalDateTime.now());
         Hearit latest = dbHelper.insertHearit(createHearit(category));
-        TestClock.freezeAt(BASE_TIME.minusDays(4));
+        TestClock.freezeAt(LocalDateTime.now().minusDays(4));
         Hearit medium = dbHelper.insertHearit(createHearit(category));
-        TestClock.freezeAt(BASE_TIME.minusDays(60));
+        TestClock.freezeAt(LocalDateTime.now().minusDays(60));
         Hearit old = dbHelper.insertHearit(createHearit(category));
 
         List<Hearit> hearits = List.of(latest, medium, old);
