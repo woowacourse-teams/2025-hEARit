@@ -43,12 +43,23 @@
         </activity>
         <activity
             android:name=".presentation.detail.PlayerDetailActivity"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="kakaolink"
+                    android:scheme="kakao${kakaoNativeKey}" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".presentation.main.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
-    
+
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
