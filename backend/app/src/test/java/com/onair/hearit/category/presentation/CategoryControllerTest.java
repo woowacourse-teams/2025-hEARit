@@ -2,55 +2,65 @@ package com.onair.hearit.category.presentation;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
+import com.onair.hearit.category.application.CategoryService;
 import com.onair.hearit.category.dto.CategoryResponse;
 import com.onair.hearit.common.dto.response.PagedResponse;
 import com.onair.hearit.fixture.ApiDocSnippets;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.fixture.IntegrationTest;
-import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
+import com.onair.hearit.fixture.ControllerTest;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.restdocs.payload.FieldDescriptor;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class CategoryControllerTest extends IntegrationTest {
+@WebMvcTest(controllers = CategoryController.class)
+class CategoryControllerTest extends ControllerTest {
+
+    @MockitoBean
+    private CategoryService categoryService;
 
     @Test
-    @DisplayName("전체 카테고리를 조회 시 200 OK 및 페이징이 적용된 카테고리 목록을 반환한다.")
-    void readAllCategories() {
+    @DisplayName("카테고리 목록 조회 V1 - 200 OK")
+    void readCategoriesV1_OK() throws Exception {
         // given
-        Category category1 = dbHelper.insertCategory(new Category("category1", "#111111"));
-        Category category2 = dbHelper.insertCategory(new Category("category2", "#222222"));
-        Category category3 = dbHelper.insertCategory(new Category("category3", "#333333"));
-        Category category4 = dbHelper.insertCategory(new Category("category4", "#444444"));
-        Category category5 = dbHelper.insertCategory(new Category("category5", "#555555"));
+        var responses = IntStream.range(1, 25).mapToObj(i -> new CategoryResponse(
+                        (long) i,
+                        "category" + i,
+                        "#" + i * 111111
+                ))
+                .toList();
+        var pagedResponses = PagedResponse.from(new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
-        // when
-        PagedResponse<CategoryResponse> result = RestAssured.given(this.spec)
-                .param("page", 1)
-                .param("size", 2)
-                .filter(document("category-read-list",
+        given(categoryService.getCategories(any())).willReturn(pagedResponses);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/categories")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-categories-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Category API")
-                                .summary("전체 카테고리 목록 조회")
-                                .description("전체 카테고리 목록을 페이지별로 조회합니다.")
+                                .summary("카테고리 목록 조회 V1")
+                                .description("전체 카테고리 목록을 `Page` 단위로 조회합니다.")
                                 .queryParameters(
-                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
-                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
+                                        parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
+                                        parameterWithName("size").description("페이지 당 항목 수").defaultValue("20")
                                 )
-                                .responseSchema(Schema.schema("PagedResponse"))
-                                .responseFields(
-                                        Stream.concat(
+                                .responseFields(Stream.concat(
                                                 Arrays.stream(new FieldDescriptor[]{
                                                         fieldWithPath("content[].id").description("카테고리 ID"),
                                                         fieldWithPath("content[].name").description("카테고리 이름"),
@@ -60,42 +70,23 @@ class CategoryControllerTest extends IntegrationTest {
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/categories")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .as(new TypeRef<>() {
-                });
-
-        // then
-        assertAll(
-                () -> assertThat(result.content()).hasSize(2),
-                () -> assertThat(result.content()).extracting(CategoryResponse::id)
-                        .containsExactly(category3.getId(), category4.getId()),
-                () -> assertThat(result.content()).extracting(CategoryResponse::colorCode)
-                        .containsExactly("#333333", "#444444")
-        );
+                ));
     }
 
     @Test
-    @DisplayName("전체 카테고리 조회 시 유효하지 않은 페이지 번호를 보내면 400 BAD_REQUEST를 반환한다.")
-    void readAllCategoriesWithInvalidPage() {
-        RestAssured.given(this.spec)
-                .param("page", -1)
-                .param("size", 10)
-                .filter(document("category-read-list-bad-request",
+    @DisplayName("카테고리 목록 조회 V1 - 400 Bad Request")
+    void readCategoriesV1_BadRequest() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/v1/categories")
+                        .param("page", "-1")
+                        .param("size", "20"))
+                .andExpect(status().isBadRequest())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-categories-bad-request",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Category API")
-                                .summary("전체 카테고리 목록 조회")
-                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .summary("카테고리 목록 조회 V1")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/categories")
-                .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
+                ));
     }
 }
