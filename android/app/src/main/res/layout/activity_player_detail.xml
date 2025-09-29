@@ -54,6 +54,7 @@
                 tools:text="Network" />
 
             <ImageButton
+                android:id="@+id/btn_detail_share"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="8dp"

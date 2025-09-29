@@ -1,6 +1,7 @@
 package com.onair.hearit.presentation.detail
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -33,6 +34,9 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.kakao.sdk.common.util.KakaoCustomTabsClient
+import com.kakao.sdk.share.ShareClient
+import com.kakao.sdk.share.WebSharerClient
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
@@ -117,6 +121,8 @@ class PlayerDetailActivity :
         setupRecyclerView()
         observeViewModel()
         startScriptSyncLoop()
+
+        binding.btnDetailShare.setOnClickListener { startKakaoInvite(this@PlayerDetailActivity) }
     }
 
     override fun onStart() {
@@ -396,6 +402,42 @@ class PlayerDetailActivity :
         Toast.makeText(this, message ?: "", Toast.LENGTH_SHORT).show()
     }
 
+    private fun startKakaoInvite(context: Context) {
+        val title = viewModel.hearit.value?.title ?: return
+
+        if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
+            ShareClient.instance.shareCustom(
+                context,
+                TEMPLATE_ID,
+                hashMapOf(TEMPLATE_TITLE_KEY to title),
+            ) { sharingResult, error ->
+                if (error != null) {
+                    Timber.e(error, getString(R.string.player_detail_invite_error_kakao))
+                } else if (sharingResult != null) {
+                    startActivity(sharingResult.intent)
+                }
+            }
+        } else {
+            val sharerUrl =
+                WebSharerClient.instance.makeCustomUrl(
+                    TEMPLATE_ID,
+                    hashMapOf(TEMPLATE_TITLE_KEY to title),
+                )
+            try {
+                KakaoCustomTabsClient.openWithDefault(context, sharerUrl)
+                return
+            } catch (error: UnsupportedOperationException) {
+                Timber.e(error, getString(R.string.player_detail_invite_error_browser))
+            }
+            try {
+                KakaoCustomTabsClient.open(context, sharerUrl)
+                return
+            } catch (error: ActivityNotFoundException) {
+                Timber.e(error, getString(R.string.player_detail_invite_error_browser))
+            }
+        }
+    }
+
     override fun onClickCategory(
         id: Long,
         name: String,
@@ -465,7 +507,8 @@ class PlayerDetailActivity :
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
         private const val SCRIPT_ITEM_HEIGHT_DP = 16
-
+        private const val TEMPLATE_ID = 124720L
+        private const val TEMPLATE_TITLE_KEY = "title"
         private const val KEY_BOOKMARK_ID = "BOOKMARK_ID"
         private const val KEY_PLAYBACK_MODE = "PLAYBACK_MODE"
 
