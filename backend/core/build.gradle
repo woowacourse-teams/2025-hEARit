@@ -20,10 +20,8 @@ configurations {
 
 dependencies {
     // Spring
-    api 'org.springframework.boot:spring-boot-starter-data-jpa'
-    api 'org.springframework.boot:spring-boot-starter-validation'
-    api 'org.springframework.boot:spring-boot-starter-security'
-    api 'jakarta.validation:jakarta.validation-api'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-webmvc'
@@ -36,29 +34,17 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     compileOnly 'org.projectlombok:lombok'
 
-    // Jwt
-    api 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
     // Flyway
-    api 'org.flywaydb:flyway-core'
-    api 'org.flywaydb:flyway-mysql'
-
-    // S3 (공통 파일 인프라)
-    api platform('software.amazon.awssdk:bom:2.25.30')
-    api 'software.amazon.awssdk:s3'
-    api 'software.amazon.awssdk:auth'
-    api 'software.amazon.awssdk:regions'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
-    testImplementation 'io.rest-assured:rest-assured:5.4.0'
 
     testFixturesImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
     testFixturesImplementation 'io.rest-assured:rest-assured:5.4.0'
     testFixturesImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testFixturesImplementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 }
 
 tasks.named('test') {
