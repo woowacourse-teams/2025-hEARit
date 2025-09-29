@@ -9,7 +9,12 @@ import com.onair.hearit.domain.model.Bookmark
 
 class PlaylistViewHolder(
     private val binding: ItemPlaylistBinding,
+    private val playlistClickListener: PlaylistClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
+    init {
+        binding.playlistClickListener = playlistClickListener
+    }
+
     fun bind(
         bookmark: Bookmark,
         isPlaying: Boolean,
@@ -28,10 +33,13 @@ class PlaylistViewHolder(
     }
 
     companion object {
-        fun create(parent: ViewGroup): PlaylistViewHolder {
+        fun create(
+            parent: ViewGroup,
+            playlistClickListener: PlaylistClickListener,
+        ): PlaylistViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemPlaylistBinding.inflate(inflater, parent, false)
-            return PlaylistViewHolder(binding)
+            return PlaylistViewHolder(binding, playlistClickListener)
         }
     }
 }

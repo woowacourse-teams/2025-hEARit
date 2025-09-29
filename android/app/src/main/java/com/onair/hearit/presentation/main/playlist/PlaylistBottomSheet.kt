@@ -16,15 +16,20 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.onair.hearit.databinding.BottomSheetPlaylistBinding
+import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
+import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.service.PlaybackService
 
-class PlaylistBottomSheet : BottomSheetDialogFragment() {
+class PlaylistBottomSheet :
+    BottomSheetDialogFragment(),
+    PlaylistClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: BottomSheetPlaylistBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: PlaylistViewModel by viewModels { PlaylistViewModelFactory() }
-    private val playlistAdapter: PlaylistAdapter by lazy { PlaylistAdapter() }
+    private val playlistAdapter: PlaylistAdapter by lazy { PlaylistAdapter(this) }
 
     private var mediaController: MediaController? = null
 
@@ -132,6 +137,14 @@ class PlaylistBottomSheet : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onClickHearit(hearitId: Long) {
+        val intent =
+            PlayerDetailActivity.newIntent(requireActivity(), hearitId).apply {
+                putExtra(PREVIOUS_SCREEN_KEY, PlayerDetailActivity.LIBRARY_SCREEN_ID)
+            }
+        (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
     companion object {

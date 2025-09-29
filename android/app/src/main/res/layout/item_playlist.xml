@@ -8,12 +8,17 @@
         <variable
             name="item"
             type="com.onair.hearit.domain.model.Bookmark" />
+
+        <variable
+            name="playlistClickListener"
+            type="com.onair.hearit.presentation.main.playlist.PlaylistClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="84dp"
-        android:background="@drawable/playlist_background_selector">
+        android:background="@drawable/playlist_background_selector"
+        android:onClick="@{() -> playlistClickListener.onClickHearit(item.hearitId)}">
 
         <ImageView
             android:id="@+id/iv_playlist_thumbnail"

@@ -6,7 +6,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.Bookmark
 
-class PlaylistAdapter : ListAdapter<Bookmark, PlaylistViewHolder>(DiffCallback) {
+class PlaylistAdapter(
+    private val playlistClickListener: PlaylistClickListener,
+) : ListAdapter<Bookmark, PlaylistViewHolder>(DiffCallback) {
     init {
         setHasStableIds(true)
     }
@@ -42,7 +44,7 @@ class PlaylistAdapter : ListAdapter<Bookmark, PlaylistViewHolder>(DiffCallback) 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): PlaylistViewHolder = PlaylistViewHolder.create(parent)
+    ): PlaylistViewHolder = PlaylistViewHolder.create(parent, playlistClickListener)
 
     override fun onBindViewHolder(
         holder: PlaylistViewHolder,
