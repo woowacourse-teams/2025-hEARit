@@ -2,7 +2,9 @@ package com.onair.hearit.app.exception;
 
 import com.onair.hearit.core.domain.exception.DomainErrorCode;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DomainExceptionMapper {
 
     public HttpStatus toHttpStatus(DomainErrorCode code) {
