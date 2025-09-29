@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
-import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -118,12 +117,6 @@ class PlayerDetailActivity :
         setupRecyclerView()
         observeViewModel()
         startScriptSyncLoop()
-
-        supportFragmentManager.addOnBackStackChangedListener {
-            val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view)
-            binding.fragmentContainerView.visibility =
-                if (fragment?.isVisible == true) View.VISIBLE else View.GONE
-        }
     }
 
     override fun onStart() {
