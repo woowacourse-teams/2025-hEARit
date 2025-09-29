@@ -3,11 +3,10 @@ package com.onair.hearit.core.infrastructure.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.OAuthProvider;
+import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.OAuthProvider;
 import com.onair.hearit.core.fixture.DbHelper;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.infrastructure.jpa.MemberRepository;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;

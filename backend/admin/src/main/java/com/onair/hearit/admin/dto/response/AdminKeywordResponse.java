@@ -1,0 +1,15 @@
+package com.onair.hearit.admin.dto.request;
+
+import com.onair.hearit.core.domain.Keyword;
+
+public record AdminKeywordResponse(
+        Long id,
+        String name
+) {
+    public static AdminKeywordResponse from(Keyword keyword) {
+        return new AdminKeywordResponse(
+                keyword.getId(),
+                keyword.getName()
+        );
+    }
+}
