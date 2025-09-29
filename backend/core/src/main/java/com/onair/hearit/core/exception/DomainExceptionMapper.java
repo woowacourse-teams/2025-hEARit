@@ -1,4 +1,4 @@
-package com.onair.hearit.app.exception;
+package com.onair.hearit.core.exception;
 
 import com.onair.hearit.core.domain.exception.DomainErrorCode;
 import org.springframework.http.HttpStatus;

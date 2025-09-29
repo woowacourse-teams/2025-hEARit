@@ -2,6 +2,7 @@ package com.onair.hearit.app.exception;
 
 import com.onair.hearit.app.exception.custom.HearitException;
 import com.onair.hearit.core.domain.exception.DomainException;
+import com.onair.hearit.core.exception.DomainExceptionMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.stream.Collectors;

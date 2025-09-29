@@ -1,4 +1,4 @@
-package com.onair.hearit.app.exception;
+package com.onair.hearit.core.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
