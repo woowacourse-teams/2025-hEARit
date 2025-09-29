@@ -1,47 +1,51 @@
 package com.onair.hearit.recommendhearit.presentation;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.RecommendHearit;
-import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.fixture.ControllerTest;
+import com.onair.hearit.recommendhearit.application.RecommendHearitService;
 import com.onair.hearit.recommendhearit.dto.RecommendHearitResponse;
-import io.restassured.RestAssured;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class RecommendHearitControllerTest extends IntegrationTest {
+@WebMvcTest(controllers = RecommendHearitController.class)
+class RecommendHearitControllerTest extends ControllerTest {
+
+    @MockitoBean
+    private RecommendHearitService recommendHearitService;
 
     @Test
-    @DisplayName("오늘의 추천 히어릿을 조회 시, 200 OK 및 5개 히어릿 정보 목록을 제공한다.")
-    void readRecommendedHearits() {
+    @DisplayName("오늘의 추천 히어릿 목록 조회 V1 - 200 OK")
+    void readRecommendedHearitsV1_OK() throws Exception {
         // given
-        LocalDate today = LocalDate.now();
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        for (int i = 0; i < 5; i++) {
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertRecommendHearit(new RecommendHearit(hearit, today));
-        }
+        var responses = List.of(
+                new RecommendHearitResponse(1L, "히어릿1", 120, LocalDateTime.now(), "카테고리1", "#000001"),
+                new RecommendHearitResponse(2L, "히어릿2", 150, LocalDateTime.now(), "카테고리2", "#000002"),
+                new RecommendHearitResponse(3L, "히어릿3", 200, LocalDateTime.now(), "카테고리3", "#000003"),
+                new RecommendHearitResponse(4L, "히어릿4", 180, LocalDateTime.now(), "카테고리4", "#000004"),
+                new RecommendHearitResponse(5L, "히어릿5", 210, LocalDateTime.now(), "카테고리5", "#000005")
+        );
 
-        // when
-        List<RecommendHearitResponse> responses = RestAssured.given(this.spec)
-                .filter(document("hearit-read-recommend",
+        given(recommendHearitService.getRecommendedHearits()).willReturn(responses);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/hearits/recommend"))
+                .andExpect(status().isOk())
+                .andDo(document("v1-get-hearits-recommend-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
-                                .summary("추천 히어릿 목록 조회")
+                                .summary("오늘의 추천 히어릿 목록 조회 V1")
                                 .description("추천 히어릿 목록을 최대 5개까지 조회합니다.")
-                                .responseSchema(Schema.schema("RecommendHearitResponseList"))
                                 .responseFields(
                                         fieldWithPath("[].id").description("히어릿 ID"),
                                         fieldWithPath("[].title").description("히어릿 제목"),
@@ -51,16 +55,6 @@ class RecommendHearitControllerTest extends IntegrationTest {
                                         fieldWithPath("[].categoryColor").description("카테고리 색상 코드")
                                 )
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/hearits/recommend")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .jsonPath()
-                .getList(".", RecommendHearitResponse.class);
-
-        // then
-        assertThat(responses).hasSize(5);
+                ));
     }
 }
