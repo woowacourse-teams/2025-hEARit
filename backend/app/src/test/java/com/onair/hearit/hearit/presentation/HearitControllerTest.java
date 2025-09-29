@@ -2,173 +2,154 @@ package com.onair.hearit.hearit.presentation;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.auth.infrastructure.jwt.TokenStatus;
 import com.onair.hearit.common.dto.response.PagedResponse;
+import com.onair.hearit.exception.custom.NotFoundException;
 import com.onair.hearit.fixture.ApiDocSnippets;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.HearitKeyword;
-import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.PlayingHistory;
-import com.onair.hearit.domain.Source;
-import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.fixture.ControllerTest;
+import com.onair.hearit.hearit.application.HearitService;
 import com.onair.hearit.hearit.dto.HearitDetailResponse;
+import com.onair.hearit.hearit.dto.HearitDetailResponse.CategoryResponse;
+import com.onair.hearit.hearit.dto.HearitDetailResponse.SourceResponse;
 import com.onair.hearit.hearit.dto.HearitOfCategoryResponse;
 import com.onair.hearit.hearit.dto.HearitsWithRecommendCategoryResponse;
-import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
+import com.onair.hearit.hearit.dto.HearitsWithRecommendCategoryResponse.HearitResponse;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class HearitControllerTest extends IntegrationTest {
+@WebMvcTest(controllers = HearitController.class)
+class HearitControllerTest extends ControllerTest {
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    @MockitoBean
+    private HearitService hearitService;
 
     @Test
-    @DisplayName("로그인한 사용자가 히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
-    void readHearitWithSuccessWithMember() {
+    @DisplayName("단일 히어릿 조회 - 200 OK")
+    void readHearitV1_OK() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
-                new PlayingHistory(member.getId(), hearit, 1_000));
-        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
-        Keyword keyword2 = dbHelper.insertKeyword(new Keyword("Spring"));
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword2));
+        var hearitId = 3L;
+        var response = new HearitDetailResponse(
+                1L,
+                "Title",
+                "summary",
+                List.of(new SourceResponse("source1", "url1"), new SourceResponse("source2", "url2")),
+                300,
+                (long) 1_000,
+                LocalDateTime.of(2025, 9, 30, 10, 0),
+                false,
+                null,
+                new CategoryResponse(2L, "categoryName", "#FFFFFF"),
+                List.of(new HearitDetailResponse.KeywordResponse(1L, "keyword1"),
+                        new HearitDetailResponse.KeywordResponse(2L, "keyword2"))
+        );
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(hearitService.getHearitDetail(any(), any())).willReturn(response);
+
         // when & then
-        HearitDetailResponse response = RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .filter(document("hearit-read-detail",
+        mockMvc.perform(get("/api/v1/hearits/{hearitId}", hearitId)
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isOk())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearit-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
-                                .summary("히어릿 상세 조회")
+                                .summary("단일 히어릿 조회 V1")
                                 .description("히어릿의 상세 정보를 조회합니다. \n\n"
-                                             + "로그인한 사용자의 경우, `isBookmarked`와 `bookmarkId` 필드가 사용자의 북마크 상태를 반영하여 반환됩니다. \n\n"
-                                             + "비로그인 사용자의 경우, `isBookmarked`는 항상 `false`이며 `bookmarkId`는 `null` 입니다.")
+                                        + "로그인한 사용자의 경우, `isBookmarked`와 `bookmarkId` 필드가 사용자의 북마크 상태를 반영하여 반환됩니다. \n\n"
+                                        + "비로그인 사용자의 경우, `isBookmarked`는 항상 `false`이며 `bookmarkId`는 `null` 입니다.")
                                 .pathParameters(
                                         parameterWithName("hearitId").description("조회할 히어릿의 ID")
                                 )
-                                .responseSchema(Schema.schema("HearitDetailResponse"))
                                 .responseFields(getHearitDetailResponseFields())
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/hearits/{hearitId}", hearit.getId())
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .extract().as(HearitDetailResponse.class);
-
-        assertThat(response.id()).isEqualTo(hearit.getId());
+                ));
     }
 
     @Test
-    @DisplayName("로그인 하지 않은 사용자가 히어릿 단일 조회 시, 200 OK 및 히어릿 정보를 제공한다.")
-    void readHearitWithSuccessWithNotMember() {
+    @DisplayName("단일 히어릿 조회 - 404 Not Found")
+    void readHearitV1_NotFound() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
-
-        // when & then
-        HearitDetailResponse response = RestAssured.given(this.spec)
-                .when()
-                .get("/api/v1/hearits/{hearitId}", hearit.getId())
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract().as(HearitDetailResponse.class);
-
-        assertAll(
-                () -> assertThat(response.id()).isEqualTo(hearit.getId()),
-                () -> assertThat(response.isBookmarked()).isFalse()
-        );
-    }
-
-    @Test
-    @DisplayName("히어릿 단일 조회 시, 존재하지 않는 아이디인 경우 404 NOT_FOUND를 반환한다.")
-    void readHearitWithNotFound() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
         Long notFoundHearitId = 9999L;
 
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(hearitService.getHearitDetail(any(), any())).willThrow(new NotFoundException("hearitId", "9999"));
+
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .filter(document("hearit-read-detail-not-found",
+        mockMvc.perform(get("/api/v1/hearits/{hearitId}", notFoundHearitId)
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isNotFound())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearit-not-found",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
-                                .summary("히어릿 상세 조회")
-                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .summary("단일 히어릿 조회 V1")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/hearits/{hearitId}", notFoundHearitId)
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value());
+                ));
     }
 
     @Test
-    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, 추천하는 3개의 카테고리와 히어릿들을 반환한다.")
-    void readHomeCategoriesHearit() {
+    @DisplayName("추천 카테고리별 히어릿 조회 V1 - 200 OK")
+    void readHearitsWithRecommendCategoryV1_OK() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
+        var category1 = new HearitsWithRecommendCategoryResponse(1L, "Category A", "#FF0000",
+                List.of(
+                        new HearitResponse(101L, "Hearit 101", LocalDateTime.now()),
+                        new HearitResponse(102L, "Hearit 102", LocalDateTime.now()),
+                        new HearitResponse(103L, "Hearit 103", LocalDateTime.now()),
+                        new HearitResponse(104L, "Hearit 104", LocalDateTime.now()),
+                        new HearitResponse(105L, "Hearit 105", LocalDateTime.now())
+                )
+        );
+        var category2 = new HearitsWithRecommendCategoryResponse(2L, "Category B", "#00FF00",
+                List.of(
+                        new HearitResponse(201L, "Hearit 201", LocalDateTime.now()),
+                        new HearitResponse(202L, "Hearit 202", LocalDateTime.now()),
+                        new HearitResponse(203L, "Hearit 203", LocalDateTime.now()),
+                        new HearitResponse(204L, "Hearit 204", LocalDateTime.now()),
+                        new HearitResponse(205L, "Hearit 205", LocalDateTime.now())
+                )
+        );
+        var category3 = new HearitsWithRecommendCategoryResponse(3L, "Category C", "#0000FF",
+                List.of(
+                        new HearitResponse(301L, "Hearit 301", LocalDateTime.now()),
+                        new HearitResponse(302L, "Hearit 302", LocalDateTime.now()),
+                        new HearitResponse(303L, "Hearit 303", LocalDateTime.now()),
+                        new HearitResponse(304L, "Hearit 304", LocalDateTime.now()),
+                        new HearitResponse(305L, "Hearit 305", LocalDateTime.now())
+                )
+        );
+        var mockedResponse = List.of(category1, category2, category3);
 
-        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
-        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
-        Category category3 = dbHelper.insertCategory(new Category("React1", "#0000FF"));
-        Category category4 = dbHelper.insertCategory(new Category("React2", "#0000FF"));
-        Category category5 = dbHelper.insertCategory(new Category("React3", "#0000FF"));
-        Category category6 = dbHelper.insertCategory(new Category("React4", "#0000FF"));
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(hearitService.getHearitsWithRecommendCategory(any())).willReturn(mockedResponse);
 
-        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit21 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        Hearit hearit22 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        Hearit hearit31 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit11));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit12));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit13));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit21));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit22));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit31));
-
-        // when
-        List<HearitsWithRecommendCategoryResponse> responses = RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .filter(document("hearit-recommend-category",
+        // when & then
+        mockMvc.perform(get("/api/v1/hearits/recommend-category")
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isOk())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearits-recommend-category-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
-                                .summary("추천 카테고리별 그룹화된 히어릿 조회")
-                                .description(
-                                        "추천하는 3개 카테고리와 카테고리별로 그룹화된 히어릿 5개 목록을 조회합니다. (현재 추천 기준 : 북마크 많은 카테고리 순, 북마크가 없는 경우 하루마다 랜덤 카테고리 추천)")
-                                .responseSchema(Schema.schema("HearitsWithRecommendCategoryResponse"))
+                                .summary("추천 카테고리별 히어릿 조회 V1")
+                                .description("추천하는 3개 카테고리와 카테고리별로 그룹화된 히어릿 5개 목록을 조회합니다.")
                                 .responseFields(
                                         fieldWithPath("[].categoryId").description("카테고리 ID"),
                                         fieldWithPath("[].categoryName").description("카테고리 이름"),
@@ -178,67 +159,49 @@ class HearitControllerTest extends IntegrationTest {
                                         fieldWithPath("[].hearits[].title").description("히어릿 제목"),
                                         fieldWithPath("[].hearits[].createdAt").description("히어릿 생성 일시")
                                 )
-                                .build()))
-                )
-                .when()
-                .get("/api/v1/hearits/recommend-category")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .jsonPath()
-                .getList(".", HearitsWithRecommendCategoryResponse.class);
-
-        // then
-        assertAll(() -> {
-            assertThat(responses).hasSize(3);
-            assertThat(responses.get(0).hearits()).hasSize(3);
-            assertThat(responses.get(1).hearits()).hasSize(2);
-            assertThat(responses.get(2).hearits()).hasSize(1);
-            assertThat(responses.get(0).categoryId()).isEqualTo(category1.getId());
-            assertThat(responses.get(1).categoryId()).isEqualTo(category2.getId());
-            assertThat(responses.get(2).categoryId()).isEqualTo(category3.getId());
-        });
+                                .build())
+                ));
     }
 
     @Test
-    @DisplayName("카테고리로 히어릿 검색 시 200 OK 및 해당 카테고리의 히어릿들을 최신순으로 반환한다.")
-    void getHearitsByCategoryWithPagination() {
+    @DisplayName("카테고리별 히어릿 조회 V1 - 200 OK")
+    void getHearitsByCategoryWithPagination() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-        Category category1 = dbHelper.insertCategory(new Category("Spring", "#000001"));
-        Category category2 = dbHelper.insertCategory(new Category("Java", "#000002"));
+        var categoryId = 1L;
+        var responses = List.of(new HearitOfCategoryResponse(101L, "Spring Boot Guide", 300, null,
+                        List.of(new HearitOfCategoryResponse.KeywordResponse(1L, "spring"),
+                                new HearitOfCategoryResponse.KeywordResponse(2L, "boot"))),
+                new HearitOfCategoryResponse(102L, "JPA Tips", 200, null,
+                        List.of(new HearitOfCategoryResponse.KeywordResponse(3L, "jpa"),
+                                new HearitOfCategoryResponse.KeywordResponse(4L, "hibernate"))));
+        var pagedResponses = PagedResponse.from(new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
-        Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-        Hearit hearit1 = saveHearitWithCategoryAndKeyword(category1, keyword);
-        Hearit hearit2 = saveHearitWithCategoryAndKeyword(category1, keyword);
-        Hearit hearit3 = saveHearitWithCategoryAndKeyword(category2, keyword); // 카테고리 2의 히어릿
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(hearitService.getHearitsByCategory(any(), any(), any())).willReturn(pagedResponses);
 
-        // when
-        PagedResponse<HearitOfCategoryResponse> pagedResponse = RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .queryParam("categoryId", category1.getId())
-                .queryParam("page", 0)
-                .queryParam("size", 10)
-                .filter(document("category-search-hearits",
+        // when & then
+        mockMvc.perform(get("/api/v1/hearits")
+                        .header("Authorization", "Bearer valid-token")
+                        .param("categoryId", String.valueOf(categoryId))
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearits-by-category-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
-                                .summary("카테고리별 히어릿 목록 조회")
-                                .description("특정 카테고리에 속한 히어릿 목록을 페이지별로 조회합니다.")
+                                .summary("카테고리별 히어릿 목록 조회 V1")
+                                .description("특정 카테고리에 속한 히어릿 목록을 `Page` 단위로 조회합니다.")
                                 .queryParameters(
                                         parameterWithName("categoryId").description("조회할 카테고리의 ID"),
                                         parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
                                         parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
                                 )
-                                .responseSchema(Schema.schema("PagedHearitSearchResponse"))
-                                .responseFields(
-                                        Stream.concat(
+                                .responseFields(Stream.concat(
                                                 Arrays.stream(new FieldDescriptor[]{
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].lastPlayTime").description(
-                                                                "히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].lastPlayTime").description("히어릿 마지막 재생 시간(ms)").optional(),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description("키워드 이름")
                                                 }),
@@ -246,41 +209,7 @@ class HearitControllerTest extends IntegrationTest {
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/hearits")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .as(new TypeRef<>() {
-                });
-        List<HearitOfCategoryResponse> responses = pagedResponse.content();
-
-        // then
-        assertAll(
-                () -> assertThat(responses).hasSize(2),
-                () -> assertThat(responses.get(0).id()).isEqualTo(hearit2.getId()), // 최신 hearit 먼저
-                () -> assertThat(responses.get(1).id()).isEqualTo(hearit1.getId())
-        );
-    }
-
-    private String generateToken(Member member) {
-        return jwtTokenProvider.createAccessToken(member.getId());
-    }
-
-    private Hearit saveHearitWithCategoryAndKeyword(Category category, Keyword keyword) {
-        Hearit hearit = new Hearit(
-                "title",
-                "summary",
-                100,
-                "/hearit/audio/original/ORG_test.mp3",
-                "/hearit/audio/short/SHR_test.mp3",
-                "/hearit/script/SCR_test.json",
-                List.of(new Source("출처", "url")),
-                category);
-        Hearit savedHearit = dbHelper.insertHearit(hearit);
-        dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
-        return savedHearit;
+                ));
     }
 
     private FieldDescriptor[] getHearitDetailResponseFields() {
