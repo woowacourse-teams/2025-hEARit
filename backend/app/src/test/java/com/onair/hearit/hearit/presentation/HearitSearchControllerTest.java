@@ -88,7 +88,7 @@ public class HearitSearchControllerTest extends ControllerTest {
 
     @Test
     @DisplayName("히어릿 검색 V1 - 400 Bad Request")
-    void readHearitsByCategoryWithInvalidParams() throws Exception {
+    void readSearchedHearitsV1_BadRequest() throws Exception {
         // given
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
 
