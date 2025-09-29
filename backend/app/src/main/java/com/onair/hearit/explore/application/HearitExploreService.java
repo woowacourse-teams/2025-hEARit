@@ -1,10 +1,10 @@
 package com.onair.hearit.explore.application;
 
-import com.onair.hearit.explore.application.scoreprocessor.ExploreScoreProcessor;
 import com.onair.hearit.common.dto.request.CursorRequest;
 import com.onair.hearit.common.dto.response.CursorResponseV2;
-import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.domain.UserInfo;
+import com.onair.hearit.explore.application.scoreprocessor.ExploreScoreProcessor;
+import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,13 +14,17 @@ import org.springframework.stereotype.Service;
 public class HearitExploreService {
 
     private final List<ExploreScoreProcessor> exploreScoreProcessors;
+    private final ExploreScoreRefresher exploreScoreRefresher;
 
     public CursorResponseV2<ExploredHearitResponse> getExploredHearits(UserInfo userInfo,
                                                                        CursorRequest cursorRequest) {
         ExploreScoreProcessor exploreScoreProcessor = getExploreScoreProcessor(userInfo);
+        String userUuid = exploreScoreProcessor.resolveUserUuid(userInfo);
+        exploreScoreRefresher.refreshIfNeeded(cursorRequest.cursorId(), userUuid, userInfo.getUserType());
         List<ExploredHearitResponse> exploreHearitsResponses =
                 exploreScoreProcessor.getExploreHearitsResponse(
                         userInfo,
+                        userUuid,
                         cursorRequest.cursorId(),
                         cursorRequest.size());
         return CursorResponseV2.from(exploreHearitsResponses);
@@ -32,7 +36,7 @@ public class HearitExploreService {
                 return exploreScoreProcessor;
             }
         }
-        //TODO: 커스텀예외
-        throw new IllegalStateException("지원하지 않는 유저입니다.");
+        //TODO: 커스텀 예외
+        throw new IllegalStateException("지원하지 않는 요청입니다.");
     }
 }

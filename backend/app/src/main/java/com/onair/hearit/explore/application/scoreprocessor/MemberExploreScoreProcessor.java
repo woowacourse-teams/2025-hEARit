@@ -1,19 +1,17 @@
 package com.onair.hearit.explore.application.scoreprocessor;
 
-import com.onair.hearit.explore.application.ExploreScoreCalculator;
-import com.onair.hearit.explore.dto.ExploredHearitResponse;
-import com.onair.hearit.domain.Bookmark;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.UserInfo;
-import com.onair.hearit.exception.custom.NotFoundException;
-import com.onair.hearit.infrastructure.projection.ExploredHearitProjection;
-import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
-import com.onair.hearit.infrastructure.jpa.BookmarkRepository;
-import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
-import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
-import com.onair.hearit.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.app.dto.response.ExploredHearitResponse;
+import com.onair.hearit.common.domain.Bookmark;
+import com.onair.hearit.common.domain.Hearit;
+import com.onair.hearit.common.domain.Keyword;
+import com.onair.hearit.common.domain.Member;
+import com.onair.hearit.common.domain.UserInfo;
+import com.onair.hearit.common.exception.custom.NotFoundException;
+import com.onair.hearit.common.infrastructure.dto.ExploredHearitProjection;
+import com.onair.hearit.common.infrastructure.jpa.BookmarkRepository;
+import com.onair.hearit.common.infrastructure.jpa.ExploredHearitQueryRepository;
+import com.onair.hearit.common.infrastructure.jpa.HearitKeywordRepository;
+import com.onair.hearit.common.infrastructure.jpa.MemberRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,14 +23,11 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public MemberExploreScoreProcessor(ExploreScoreCalculator exploreScoreCalculator,
-                                       ExploreScoreCommandRepository exploreScoreCommandRepository,
-                                       ExploredHearitQueryRepository exploredHearitQueryRepository,
+    public MemberExploreScoreProcessor(ExploredHearitQueryRepository exploredHearitQueryRepository,
                                        HearitKeywordRepository hearitKeywordRepository,
                                        MemberRepository memberRepository,
                                        BookmarkRepository bookmarkRepository) {
-        super(exploreScoreCalculator, exploreScoreCommandRepository,
-                exploredHearitQueryRepository, hearitKeywordRepository);
+        super(exploredHearitQueryRepository, hearitKeywordRepository);
         this.memberRepository = memberRepository;
         this.bookmarkRepository = bookmarkRepository;
     }
@@ -46,7 +41,7 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    protected String getUserUuId(UserInfo userInfo) {
+    protected String getUserUuid(UserInfo userInfo) {
         return getMemberById(userInfo.getMemberId()).getUuid();
     }
 

@@ -1,14 +1,12 @@
 package com.onair.hearit.explore.application.scoreprocessor;
 
-import com.onair.hearit.explore.application.ExploreScoreCalculator;
-import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.UserInfo;
-import com.onair.hearit.infrastructure.projection.ExploredHearitProjection;
-import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
+import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
+import com.onair.hearit.infrastructure.projection.ExploredHearitProjection;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
@@ -16,12 +14,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
 
-    public GuestExploreScoreProcessor(ExploreScoreCalculator exploreScoreCalculator,
-                                      ExploreScoreCommandRepository exploreScoreCommandRepository,
-                                      ExploredHearitQueryRepository exploredHearitQueryRepository,
+    public GuestExploreScoreProcessor(ExploredHearitQueryRepository exploredHearitQueryRepository,
                                       HearitKeywordRepository hearitKeywordRepository) {
-        super(exploreScoreCalculator, exploreScoreCommandRepository,
-                exploredHearitQueryRepository, hearitKeywordRepository);
+        super(exploredHearitQueryRepository, hearitKeywordRepository);
     }
 
     @Override
@@ -30,7 +25,7 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    protected String getUserUuId(UserInfo userInfo) {
+    protected String getUserUuid(UserInfo userInfo) {
         return userInfo.getGuestId();
     }
 

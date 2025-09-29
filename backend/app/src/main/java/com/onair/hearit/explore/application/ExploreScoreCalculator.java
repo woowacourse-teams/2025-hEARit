@@ -1,8 +1,8 @@
 package com.onair.hearit.explore.application;
 
-import com.onair.hearit.explore.application.scorefactor.ScoreFactor;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.UserType;
+import com.onair.hearit.explore.application.scorefactor.ScoreFactor;
 import com.onair.hearit.infrastructure.jpa.HearitRepository;
 import java.util.ArrayList;
 import java.util.List;
