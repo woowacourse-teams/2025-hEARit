@@ -3,7 +3,9 @@ package com.onair.hearit.explore.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.common.TestClock;
 import com.onair.hearit.core.fixture.TestFixture;
+import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
@@ -15,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +30,10 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, TestConfig.class})
+@Import({DbHelper.class, TestConfig.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+
 class ExploreScoreCalculatorTest {
 
     private static final double FIXED_RANDOM_SCORE = 1.0;
@@ -40,20 +44,31 @@ class ExploreScoreCalculatorTest {
     @Autowired
     private ExploreScoreCalculator exploreScoreCalculator;
 
+    @AfterEach
+    void tearDown() {
+        TestClock.unfreeze();
+    }
+
+
     @DisplayName("회원은 북마크·최신성·랜덤 점수를 모두 합산한다")
     @Test
     void calculateTotalScoresForMemberWithRealFactors() {
         // given
+        LocalDateTime baseTime = LocalDateTime.of(2024, 1, 1, 12, 0);
+        LocalDateTime fourDaysAgo = baseTime.minusDays(4);
+        LocalDateTime sixtyDaysAgo = baseTime.minusDays(60);
+
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // -- 북마크 이력용 Hearit들 --
-        Hearit hearit1 = dbHelper.insertHearit(createHearitWithTime(LocalDateTime.now(), category1));
-        Hearit hearit2 = dbHelper.insertHearit(createHearitWithTime(LocalDateTime.now(), category1));
-        Hearit hearit3 = dbHelper.insertHearit(createHearitWithTime(LocalDateTime.now(), category1));
-        Hearit hearit4 = dbHelper.insertHearit(createHearitWithTime(LocalDateTime.now(), category2));
+        TestClock.freezeAt(baseTime);
+        Hearit hearit1 = dbHelper.insertHearit(createHearit(category1));
+        Hearit hearit2 = dbHelper.insertHearit(createHearit(category1));
+        Hearit hearit3 = dbHelper.insertHearit(createHearit(category1));
+        Hearit hearit4 = dbHelper.insertHearit(createHearit(category2));
 
         //  카테고리별 북마크 - category1 : 3개, category2: 1개
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
@@ -63,11 +78,14 @@ class ExploreScoreCalculatorTest {
 
         // -- 점수 계산 대상 Hearit들 --
         // 최신성 20, 카테고리 22.5
-        Hearit hearit5 = dbHelper.insertHearit(createHearitWithTime(LocalDateTime.now(), category1));
+        TestClock.freezeAt(baseTime);
+        Hearit hearit5 = dbHelper.insertHearit(createHearit(category1));
         // 최신성 18, 카테고리 7.5
-        Hearit hearit6 = dbHelper.insertHearit(createHearitWithTime(LocalDateTime.now().minusDays(4), category2));
+        TestClock.freezeAt(fourDaysAgo);
+        Hearit hearit6 = dbHelper.insertHearit(createHearit(category2));
         // 최신성 0, 카테고리 0
-        Hearit hearit7 = dbHelper.insertHearit(createHearitWithTime(LocalDateTime.now().minusDays(60), category3));
+        TestClock.freezeAt(sixtyDaysAgo);
+        Hearit hearit7 = dbHelper.insertHearit(createHearit(category3));
 
         // when
         Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(member.getUuid(), UserType.MEMBER);
@@ -85,22 +103,27 @@ class ExploreScoreCalculatorTest {
     @Test
     void calculateTotalScoresForGuestWithRealFactors() {
         // given
+        LocalDateTime baseTime = LocalDateTime.now();
+        LocalDateTime fourDaysAgo = baseTime.minusDays(4);
+        LocalDateTime sixtyDaysAgo = baseTime.minusDays(60);
+
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // 북마크 이력 Hearit (게스트 점수엔 반영 안 됨)
-        Hearit hearit1 = dbHelper.insertHearit(createHearitWithTime(LocalDateTime.now(), category1));
+        TestClock.freezeAt(baseTime);
+        Hearit hearit1 = dbHelper.insertHearit(createHearit(category1));
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
 
         // -- 점수 계산 대상 Hearit들 --
-        Hearit hearit2 = dbHelper.insertHearit(
-                createHearitWithTime(LocalDateTime.now(), category1));              // 최신성 20
-        Hearit hearit3 = dbHelper.insertHearit(
-                createHearitWithTime(LocalDateTime.now().minusDays(4), category2)); // 최신성 18
-        Hearit hearit4 = dbHelper.insertHearit(
-                createHearitWithTime(LocalDateTime.now().minusDays(60), category3));// 최신성 0
+        TestClock.freezeAt(baseTime);
+        Hearit hearit2 = dbHelper.insertHearit(createHearit(category1));              // ֽż 20
+        TestClock.freezeAt(fourDaysAgo);
+        Hearit hearit3 = dbHelper.insertHearit(createHearit(category2)); // ֽż 18
+        TestClock.freezeAt(sixtyDaysAgo);
+        Hearit hearit4 = dbHelper.insertHearit(createHearit(category3));// ֽż 0
 
         String guestUuid = UUID.randomUUID().toString();
 
@@ -116,7 +139,7 @@ class ExploreScoreCalculatorTest {
         );
     }
 
-    private Hearit createHearitWithTime(LocalDateTime createdAt, Category category) {
+    private Hearit createHearit(Category category) {
         return new Hearit(
                 "title",
                 "summary",
@@ -126,8 +149,7 @@ class ExploreScoreCalculatorTest {
                 "/hearit/script/SCR_bf7c513e-579e-4224-8505-3824bb22ed01.json",
                 List.of(new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
                         "https://example.com/1")),
-                category,
-                createdAt
+                category
         );
     }
 }
