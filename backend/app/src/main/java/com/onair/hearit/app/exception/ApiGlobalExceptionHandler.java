@@ -25,9 +25,9 @@ public class ApiGlobalExceptionHandler {
 
     @ExceptionHandler(DomainException.class)
     public ProblemDetail handle(DomainException ex, HttpServletRequest request) {
-        HttpStatus status = domainExceptionMapper.toHttpStatus(ex);
+        HttpStatus status = domainExceptionMapper.toHttpStatus(ex.getErrorCode());
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
-        problemDetail.setTitle(ex.getCode());
+        problemDetail.setTitle(ex.getErrorCode().name());
         problemDetail.setType(URI.create(request.getRequestURI()));
         return problemDetail;
     }

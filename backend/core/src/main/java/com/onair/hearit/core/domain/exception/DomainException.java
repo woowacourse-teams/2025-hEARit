@@ -4,10 +4,11 @@ import lombok.Getter;
 
 @Getter
 public abstract class DomainException extends RuntimeException {
-    private final String code;
 
-    protected DomainException(String code, String message) {
+    private final DomainErrorCode errorCode;
+
+    protected DomainException(DomainErrorCode errorCode, String message) {
         super(message);
-        this.code = code;
+        this.errorCode = errorCode;
     }
 }
