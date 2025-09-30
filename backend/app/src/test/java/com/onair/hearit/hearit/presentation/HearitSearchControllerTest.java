@@ -101,7 +101,7 @@ public class HearitSearchControllerTest extends ControllerTest {
                 .andExpect(status().isBadRequest())
                 .andDo(document("v1-get-hearits-search-bad-request",
                         resource(ResourceSnippetParameters.builder()
-                                .tag("Hearit API")
+                                .tag("Search API")
                                 .summary("히어릿 검색 V1")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())

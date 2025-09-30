@@ -84,7 +84,7 @@ public class HearitSearchIntegrationTest extends IntegrationTest {
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
 
-        RestAssured.given()
+        RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .queryParam("searchTerm", "spring")
                 .queryParam("page", 0)

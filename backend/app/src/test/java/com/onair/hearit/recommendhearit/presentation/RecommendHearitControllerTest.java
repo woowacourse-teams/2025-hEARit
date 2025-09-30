@@ -28,12 +28,13 @@ class RecommendHearitControllerTest extends ControllerTest {
     @DisplayName("오늘의 추천 히어릿 목록 조회 V1 - 200 OK")
     void readRecommendedHearitsV1_OK() throws Exception {
         // given
+        var now = LocalDateTime.of(2025, 9, 30, 10, 0);
         var responses = List.of(
-                new RecommendHearitResponse(1L, "히어릿1", 120, LocalDateTime.now(), "카테고리1", "#000001"),
-                new RecommendHearitResponse(2L, "히어릿2", 150, LocalDateTime.now(), "카테고리2", "#000002"),
-                new RecommendHearitResponse(3L, "히어릿3", 200, LocalDateTime.now(), "카테고리3", "#000003"),
-                new RecommendHearitResponse(4L, "히어릿4", 180, LocalDateTime.now(), "카테고리4", "#000004"),
-                new RecommendHearitResponse(5L, "히어릿5", 210, LocalDateTime.now(), "카테고리5", "#000005")
+                new RecommendHearitResponse(1L, "히어릿1", 120, now, "카테고리1", "#000001"),
+                new RecommendHearitResponse(2L, "히어릿2", 150, now, "카테고리2", "#000002"),
+                new RecommendHearitResponse(3L, "히어릿3", 200, now, "카테고리3", "#000003"),
+                new RecommendHearitResponse(4L, "히어릿4", 180, now, "카테고리4", "#000004"),
+                new RecommendHearitResponse(5L, "히어릿5", 210, now, "카테고리5", "#000005")
         );
 
         given(recommendHearitService.getRecommendedHearits()).willReturn(responses);

@@ -21,7 +21,7 @@ class MemberIntegrationTest extends IntegrationTest {
     JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("로그인한 사용자가 사용자 정보 조회 시, 200 OK 및 사용지 정보를 제공한다.")
+    @DisplayName("로그인한 사용자가 사용자 정보 조회 시, 200 OK 및 사용자 정보를 제공한다.")
     void getMemberInfo_success() {
         // given
         String socialId = "12345678";

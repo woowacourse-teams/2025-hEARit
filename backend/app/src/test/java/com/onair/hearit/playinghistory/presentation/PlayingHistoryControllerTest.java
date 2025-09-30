@@ -75,6 +75,7 @@ class PlayingHistoryControllerTest extends ControllerTest {
     @DisplayName("최근 재생 기록 조회 V1 - 게스트 사용자 200 OK 빈 리스트")
     void getRecentPlayingHistoriesWhenGuestV1_OK() throws Exception {
         // given
+        given(jwtTokenProvider.getTokenStatus(isNull())).willReturn(TokenStatus.NOT_EXIST);
         given(playingHistoryService.getRecentPlayingHistory(any())).willReturn(List.of());
 
         // when & then
