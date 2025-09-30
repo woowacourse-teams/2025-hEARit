@@ -38,9 +38,7 @@ dependencies {
     testImplementation 'org.jsoup:jsoup:1.17.2'
 
     // REST Docs & restdocs-api-spec
-    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-    testImplementation "com.epages:restdocs-api-spec-restassured:0.18.2"
     testImplementation "com.epages:restdocs-api-spec-mockmvc:0.18.2"
     testImplementation testFixtures(project(':core'))
 
