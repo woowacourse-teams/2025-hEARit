@@ -11,13 +11,16 @@ import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.TokenAuthenticatorProvider
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.presentation.UserIdManager
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class HearitApplication : Application() {
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun onCreate() {
         super.onCreate()
 
@@ -31,9 +34,13 @@ class HearitApplication : Application() {
         initialTimber()
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    override fun onTerminate() {
+        super.onTerminate()
+        appScope.cancel()
+    }
+
     private fun initUuid() {
-        GlobalScope.launch(Dispatchers.IO) {
+        appScope.launch {
             val uuid = UserIdManager.getOrCreateUserId(applicationContext)
             TokenInterceptorProvider.setDeviceUuid(uuid)
         }
