@@ -5,21 +5,29 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.onair.hearit.databinding.BottomSheetPlaylistBinding
+import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
+import com.onair.hearit.presentation.PlaybackStarter
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.service.PlaybackService
+import com.onair.hearit.service.PlaybackSessionCallback
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
 
 class PlaylistBottomSheet :
     BottomSheetDialogFragment(),
@@ -105,7 +113,7 @@ class PlaylistBottomSheet :
 
     private fun publishFromMetadata(metadata: MediaMetadata?) {
         val id = metadata?.extras?.getLong(EXTRA_BOOKMARK_ID, -1L)?.takeIf { it > 0 }
-        val mode = metadata?.extras?.getString("PLAYBACK_MODE")
+        val mode = metadata?.extras?.getString(MODE_KEY)
         playlistAdapter.updatePlaying(id, mode)
     }
 
@@ -154,9 +162,50 @@ class PlaylistBottomSheet :
         (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
+    @OptIn(UnstableApi::class)
+    override fun onClickPlayToggle(item: Bookmark) {
+        val controller = mediaController
+        if (controller == null) {
+            (activity as? PlaybackStarter)?.startPlayback()
+            return
+        }
+
+        val current = controller.currentMediaItem
+        val currentMeta: MediaMetadata? = current?.mediaMetadata
+        val currentBookmarkId =
+            currentMeta?.extras?.getLong(EXTRA_BOOKMARK_ID, -1L)?.takeIf { it > 0 }
+        val currentMode = currentMeta?.extras?.getString(MODE_KEY)
+
+        val isSameLibraryItem =
+            (currentBookmarkId == item.bookmarkId) && (
+                currentMode.equals(
+                    "LIBRARY",
+                    ignoreCase = true,
+                )
+            )
+
+        if (isSameLibraryItem) {
+            if (controller.isPlaying) controller.pause() else controller.play()
+            return
+        }
+
+        // 다른 아이템이면: 서비스에 라이브러리 재생 시작 커맨드 전송
+        val args =
+            Bundle().apply {
+                putLong(EXTRA_SEED_HEARIT_ID, item.hearitId)
+                putLong(EXTRA_SEED_BOOKMARK_ID, item.bookmarkId)
+                putLong(EXTRA_START_POSITION_MS, item.lastPlayTime ?: 0L)
+            }
+        controller.sendCustomCommand(
+            PlaybackSessionCallback.START_LIBRARY_PLAY_COMMAND,
+            args,
+        )
+    }
+
     companion object {
         private const val INITIAL_PEEK_RATIO = 0.5
         private const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
+        private const val MODE_KEY = "PLAYBACK_MODE"
 
         fun newInstance(): PlaylistBottomSheet = PlaylistBottomSheet()
     }
