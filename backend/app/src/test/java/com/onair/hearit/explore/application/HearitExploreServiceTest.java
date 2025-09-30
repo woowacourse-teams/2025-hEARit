@@ -2,6 +2,7 @@ package com.onair.hearit.explore.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.BDDMockito.given;
 
 import com.onair.hearit.common.TestClock;
 import com.onair.hearit.common.dto.request.CursorRequest;
@@ -14,6 +15,10 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.domain.Source;
 import com.onair.hearit.domain.UserInfo;
+import com.onair.hearit.explore.application.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.explore.application.scorefactor.RandomNumberGenerator;
+import com.onair.hearit.explore.application.scorefactor.RandomScoreFactor;
+import com.onair.hearit.explore.application.scorefactor.RecencyScoreFactor;
 import com.onair.hearit.explore.application.scoreprocessor.GuestExploreScoreProcessor;
 import com.onair.hearit.explore.application.scoreprocessor.MemberExploreScoreProcessor;
 import com.onair.hearit.explore.dto.ExploredHearitResponse;
@@ -35,18 +40,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, ExploreScoreTestConfig.class, ExploreScoreCommandRepository.class, ExploreScoreRefresher.class,
-        TestJpaAuditingConfig.class
+@Import({DbHelper.class, RandomScoreFactor.class, RecencyScoreFactor.class, BookmarkScoreFactor.class,
+        ExploreScoreCalculator.class,
+        ExploreScoreCommandRepository.class, ExploreScoreRefresher.class, TestJpaAuditingConfig.class
 })
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
+
+    @MockBean
+    private RandomNumberGenerator randomNumberGenerator;
 
     @Autowired
     private DbHelper dbHelper;
@@ -93,6 +103,7 @@ class HearitExploreServiceTest {
     @Test
     void getExploredHearitsForMember_firstRequest() {
         // given
+        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         LocalDateTime fourDaysAgo = LocalDateTime.now().minusDays(4);
         LocalDateTime sixtyDaysAgo = LocalDateTime.now().minusDays(60);
 
@@ -157,6 +168,7 @@ class HearitExploreServiceTest {
     @Test
     void reusePersonalScoreOnSecondRequest() {
         // given
+        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = TestFixture.createFixedMemberUserInfo(member);
@@ -185,6 +197,7 @@ class HearitExploreServiceTest {
     @Test
     void getExploredHearitsForGuest() {
         // given
+        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         UserInfo guestInfo = TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString());
 

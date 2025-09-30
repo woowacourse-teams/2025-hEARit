@@ -2,6 +2,7 @@ package com.onair.hearit.explore.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.BDDMockito.given;
 
 import com.onair.hearit.common.TestClock;
 import com.onair.hearit.core.fixture.TestFixture;
@@ -12,6 +13,10 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.domain.Source;
 import com.onair.hearit.domain.UserType;
+import com.onair.hearit.explore.application.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.explore.application.scorefactor.RandomNumberGenerator;
+import com.onair.hearit.explore.application.scorefactor.RandomScoreFactor;
+import com.onair.hearit.explore.application.scorefactor.RecencyScoreFactor;
 import com.onair.hearit.fixture.DbHelper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,18 +29,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, ExploreScoreTestConfig.class, TestJpaAuditingConfig.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, RandomScoreFactor.class, RecencyScoreFactor.class,
+        BookmarkScoreFactor.class, ExploreScoreCalculator.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ExploreScoreCalculatorTest {
 
     private static final double FIXED_RANDOM_SCORE = 1.0;
+
+    @MockBean
+    private RandomNumberGenerator randomNumberGenerator;
 
     @Autowired
     private DbHelper dbHelper;
@@ -48,11 +58,11 @@ class ExploreScoreCalculatorTest {
         TestClock.unfreeze();
     }
 
-
     @DisplayName("회원은 북마크·최신성·랜덤 점수를 모두 합산한다")
     @Test
     void calculateTotalScoresForMemberWithRealFactors() {
         // given
+        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
@@ -97,6 +107,7 @@ class ExploreScoreCalculatorTest {
     @DisplayName("게스트는 북마크 점수를 제외하고 합산한다")
     @Test
     void calculateTotalScoresForGuestWithRealFactors() {
+        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         // given
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
