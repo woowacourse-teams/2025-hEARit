@@ -2,148 +2,133 @@ package com.onair.hearit.app.hearit.presentation;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.core.docs.ApiDocSnippets;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.domain.Category;
-import com.onair.hearit.core.domain.Hearit;
-import com.onair.hearit.app.fixture.IntegrationTest;
+import com.onair.hearit.app.exception.custom.NotFoundException;
+import com.onair.hearit.app.fixture.ControllerTest;
+import com.onair.hearit.app.hearit.application.FileSourceService;
 import com.onair.hearit.app.hearit.dto.OriginalAudioResponse;
 import com.onair.hearit.app.hearit.dto.ScriptResponse;
 import com.onair.hearit.app.hearit.dto.ShortAudioResponse;
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class FileSourceControllerTest extends IntegrationTest {
+@WebMvcTest(controllers = FileSourceController.class)
+class FileSourceControllerTest extends ControllerTest {
+
+    @MockitoBean
+    private FileSourceService fileSourceService;
 
     @Test
-    @DisplayName("원본 오디오 url 요청 시, 200 OK 및 id와 url을 반환한다.")
-    void readOriginalAudioUrlWithSuccess() {
+    @DisplayName("원본 오디오 조회 - 200 OK")
+    void readOriginalAudioUrlV1_OK() throws Exception {
         // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        var hearitId = 3L;
+        var response = new OriginalAudioResponse(1L, "http://hearit.com/original-audio-url");
 
-        // when
-        OriginalAudioResponse response = RestAssured.given(this.spec)
-                .filter(document("filesource-read-original-audio",
+        given(fileSourceService.getOriginalAudio(any())).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/hearits/{hearitId}/original-audio-url", hearitId))
+                .andExpect(status().isOk())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearits-original-audio-url-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("FileSource API")
-                                .summary("원본 오디오 URL 조회")
-                                .description("히어릿 ID를 통해 원본 오디오 파일의 URL을 조회합니다.")
+                                .summary("원본 오디오 조회 V1")
+                                .description("히어릿에 대한 원본 오디오 파일 URL을 조회합니다.")
                                 .pathParameters(
-                                        parameterWithName("hearitId").description("히어릿 ID")
+                                        parameterWithName("hearitId").description("대상 히어릿 ID")
                                 )
-                                .responseSchema(Schema.schema("OriginalAudioResponse"))
                                 .responseFields(
                                         fieldWithPath("id").description("히어릿 ID"),
                                         fieldWithPath("url").description("원본 오디오 파일 URL")
                                 )
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/hearits/{hearitId}/original-audio-url", hearit.getId())
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract().as(OriginalAudioResponse.class);
-
-        // then
-        assertThat(response.url()).contains(hearit.getOriginalAudioUrl());
+                ));
     }
 
     @Test
-    @DisplayName("1분 오디오 url 요청 시, 200 OK 및 id와 url을 반환한다.")
-    void readShortAudioUrlWithSuccess() {
+    @DisplayName("1분 오디오 조회 - 200 OK")
+    void readShortAudioUrlV1_OK() throws Exception {
         // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        var hearitId = 3L;
+        var response = new ShortAudioResponse(1L, "http://hearit.com/short-audio-url");
 
-        // when
-        ShortAudioResponse response = RestAssured.given(this.spec)
-                .filter(document("filesource-read-short-audio",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("FileSource API")
-                                .summary("1분 미리듣기 오디오 URL 조회")
-                                .description("히어릿 ID를 통해 1분 미리듣기 오디오 파일의 URL을 조회합니다.")
-                                .pathParameters(
-                                        parameterWithName("hearitId").description("히어릿 ID")
-                                )
-                                .responseSchema(Schema.schema("ShortAudioResponse"))
-                                .responseFields(
-                                        fieldWithPath("id").description("히어릿 ID"),
-                                        fieldWithPath("url").description("1분 미리듣기 오디오 파일 URL")
-                                )
-                                .build())
-                ))
-                .when()
-                .get("/api/v1/hearits/{hearitId}/short-audio-url", hearit.getId())
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract().as(ShortAudioResponse.class);
-
-        // then
-        assertThat(response.url()).contains(hearit.getShortAudioUrl());
-    }
-
-    @Test
-    @DisplayName("대본 url 요청 시 200 OK 및 id와 url을 반환한다.")
-    void readScriptUrlWithSuccess() {
-        // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        // when
-        ScriptResponse response = RestAssured.given(this.spec)
-                .filter(document("filesource-read-script",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("FileSource API")
-                                .summary("스크립트 URL 조회")
-                                .description("히어릿 ID를 통해 스크립트 파일의 URL을 조회합니다.")
-                                .pathParameters(
-                                        parameterWithName("hearitId").description("히어릿 ID")
-                                )
-                                .responseSchema(Schema.schema("ScriptResponse"))
-                                .responseFields(
-                                        fieldWithPath("id").description("히어릿 ID"),
-                                        fieldWithPath("url").description("스크립트 파일 URL")
-                                )
-                                .build())
-                ))
-                .when()
-                .get("/api/v1/hearits/{hearitId}/script-url", hearit.getId())
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract().as(ScriptResponse.class);
-
-        // then
-        assertThat(response.url()).contains(hearit.getScriptUrl());
-    }
-
-    @Test
-    @DisplayName("존재하지 않은 hearit id로 url 요청 시, 404 NOT_FOUND를 반환한다.")
-    void notFoundHearitId() {
-        // given
-        Long notSavedHearitId = 9999L;
+        given(fileSourceService.getShortAudio(any())).willReturn(response);
 
         // when & then
-        RestAssured.given(this.spec)
-                .filter(document("filesource-read-not-found",
+        mockMvc.perform(get("/api/v1/hearits/{hearitId}/short-audio-url", hearitId))
+                .andExpect(status().isOk())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearits-short-audio-url-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("FileSource API")
-                                .summary("원본/미리듣기/스크립트 URL 조회")
-                                .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
+                                .summary("1분 오디오 조회 V1")
+                                .description("히어릿에 대한 1분 오디오 파일 URL을 조회합니다.")
+                                .pathParameters(
+                                        parameterWithName("hearitId").description("대상 히어릿 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("id").description("히어릿 ID"),
+                                        fieldWithPath("url").description("1분 오디오 파일 URL")
+                                )
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/hearits/{hearitId}/script-url", notSavedHearitId)
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value());
+                ));
+    }
+
+    @Test
+    @DisplayName("대본 조회 - 200 OK")
+    void readScriptUrlV1_OK() throws Exception {
+        // given
+        var hearitId = 3L;
+        var response = new ScriptResponse(1L, "http://hearit.com/script-url");
+
+        given(fileSourceService.getScript(any())).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/hearits/{hearitId}/script-url", hearitId))
+                .andExpect(status().isOk())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearits-script-url-ok",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("FileSource API")
+                                .summary("대본 조회 V1")
+                                .description("히어릿에 대한 대본 파일 URL을 조회합니다.")
+                                .pathParameters(
+                                        parameterWithName("hearitId").description("대상 히어릿 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("id").description("히어릿 ID"),
+                                        fieldWithPath("url").description("대본 파일 URL")
+                                )
+                                .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("대본 조회 - 404 Not Found")
+    void readScriptUrlV1_NotFound() throws Exception {
+        // given
+        var notSavedHearitId = 9999L;
+
+        given(fileSourceService.getScript(any()))
+                .willThrow(new NotFoundException("hearitId", "9999"));
+
+        // when & then
+        mockMvc.perform(get("/api/v1/hearits/{hearitId}/script-url", notSavedHearitId))
+                .andExpect(status().isNotFound())
+                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearits-script-url-not-found",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("FileSource API")
+                                .summary("대본 조회 V1")
+                                .responseFields(com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ));
     }
 }

@@ -1,22 +1,16 @@
 package com.onair.hearit.app.auth.presentation;
 
-import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
-import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.onair.hearit.app.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.app.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.app.auth.infrastructure.oauth.kakao.KakaoOAuthService;
-import com.onair.hearit.core.docs.ApiDocSnippets;
 import com.onair.hearit.app.fixture.IntegrationTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -30,7 +24,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = "kakao.user-info.base-url=http://localhost:8089")
-class AuthKakaoLoginControllerTest extends IntegrationTest {
+class AuthKakaoLoginIntegrationTest extends IntegrationTest {
 
     private static WireMockServer wireMockServer;
 
@@ -68,22 +62,6 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
         LoginTokenResponse loginTokenResponse = RestAssured.given(this.spec).log().all()
                 .contentType(ContentType.JSON)
                 .body(kakaoLoginRequest)
-                .filter(document("auth-kakao-login",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Auth API")
-                                .summary("카카오 로그인")
-                                .description("카카오 액세스토큰으로 로그인하여 서비스 토큰을 발급받습니다.")
-                                .requestSchema(Schema.schema("OAuthLoginRequest"))
-                                .requestFields(
-                                        fieldWithPath("accessToken").description("카카오에서 발급받은 Access Token")
-                                )
-                                .responseSchema(Schema.schema("TokenResponse"))
-                                .responseFields(
-                                        fieldWithPath("accessToken").description("발급된 서비스 액세스 토큰"),
-                                        fieldWithPath("refreshToken").description("발급된 리프레시 토큰")
-                                )
-                                .build())
-                ))
                 .when()
                 .post("/api/v1/auth/kakao-login")
                 .then().log().all()
@@ -116,18 +94,6 @@ class AuthKakaoLoginControllerTest extends IntegrationTest {
         ProblemDetail problemDetail = given(this.spec)
                 .contentType(ContentType.JSON)
                 .body(kakaoLoginRequest)
-                .filter(document("auth-kakao-login",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Auth API")
-                                .summary("카카오 로그인")
-                                .requestSchema(Schema.schema("OAuthLoginRequest"))
-                                .requestFields(
-                                        fieldWithPath("accessToken").description("카카오에서 발급받은 Access Token")
-                                )
-                                .responseSchema(Schema.schema("ProblemDetail"))
-                                .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
-                                .build())
-                ))
                 .when()
                 .post("/api/v1/auth/kakao-login")
                 .then()
