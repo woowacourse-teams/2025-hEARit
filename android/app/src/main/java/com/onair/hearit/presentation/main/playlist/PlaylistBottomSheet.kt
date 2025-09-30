@@ -177,12 +177,8 @@ class PlaylistBottomSheet :
         val currentMode = currentMeta?.extras?.getString(MODE_KEY)
 
         val isSameLibraryItem =
-            (currentBookmarkId == item.bookmarkId) && (
-                currentMode.equals(
-                    "LIBRARY",
-                    ignoreCase = true,
-                )
-            )
+            (currentBookmarkId == item.bookmarkId) &&
+                (currentMode.equals("LIBRARY", ignoreCase = true))
 
         if (isSameLibraryItem) {
             if (controller.isPlaying) controller.pause() else controller.play()
