@@ -3,6 +3,7 @@ package com.onair.hearit.explore.application.scoreprocessor;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.UserInfo;
+import com.onair.hearit.explore.application.ExploreScoreRefresher;
 import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
@@ -14,9 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
 
-    public GuestExploreScoreProcessor(ExploredHearitQueryRepository exploredHearitQueryRepository,
+    public GuestExploreScoreProcessor(ExploreScoreRefresher exploreScoreRefresher,
+                                      ExploredHearitQueryRepository exploredHearitQueryRepository,
                                       HearitKeywordRepository hearitKeywordRepository) {
-        super(exploredHearitQueryRepository, hearitKeywordRepository);
+        super(exploreScoreRefresher, exploredHearitQueryRepository, hearitKeywordRepository);
     }
 
     @Override

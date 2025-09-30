@@ -74,9 +74,14 @@ class HearitExploreServiceTest {
     @BeforeEach
     void setup() {
         hearitExploreService = new HearitExploreService(
-                List.of(new GuestExploreScoreProcessor(exploredHearitQueryRepository, hearitKeywordRepository),
-                        new MemberExploreScoreProcessor(exploredHearitQueryRepository, hearitKeywordRepository,
-                                memberRepository, bookmarkRepository)), exploreScoreRefresher);
+                List.of(
+                        new GuestExploreScoreProcessor(exploreScoreRefresher, exploredHearitQueryRepository,
+                                hearitKeywordRepository),
+                        new MemberExploreScoreProcessor(exploreScoreRefresher, exploredHearitQueryRepository,
+                                hearitKeywordRepository,
+                                memberRepository, bookmarkRepository)
+                )
+        );
     }
 
     @AfterEach
@@ -213,9 +218,12 @@ class HearitExploreServiceTest {
                 "/hearit/audio/original/ORG_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
                 "/hearit/audio/short/SHR_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
                 "/hearit/script/SCR_bf7c513e-579e-4224-8505-3824bb22ed01.json",
-                List.of(new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
+                List.of(new Source("??컨텐츠는 쿠버?�티??공식 문서 (?�?�자: The Kubernetes Authors)�?참고?�여 만들?�졌?�니??",
                         "https://example.com/1")),
                 category
         );
     }
 }
+
+
+

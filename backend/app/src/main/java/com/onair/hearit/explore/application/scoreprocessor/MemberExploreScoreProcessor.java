@@ -6,6 +6,7 @@ import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.domain.UserInfo;
 import com.onair.hearit.exception.custom.NotFoundException;
+import com.onair.hearit.explore.application.ExploreScoreRefresher;
 import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
@@ -23,11 +24,12 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public MemberExploreScoreProcessor(ExploredHearitQueryRepository exploredHearitQueryRepository,
+    public MemberExploreScoreProcessor(ExploreScoreRefresher exploreScoreRefresher,
+                                       ExploredHearitQueryRepository exploredHearitQueryRepository,
                                        HearitKeywordRepository hearitKeywordRepository,
                                        MemberRepository memberRepository,
                                        BookmarkRepository bookmarkRepository) {
-        super(exploredHearitQueryRepository, hearitKeywordRepository);
+        super(exploreScoreRefresher, exploredHearitQueryRepository, hearitKeywordRepository);
         this.memberRepository = memberRepository;
         this.bookmarkRepository = bookmarkRepository;
     }

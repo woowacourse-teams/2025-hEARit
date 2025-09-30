@@ -14,17 +14,13 @@ import org.springframework.stereotype.Service;
 public class HearitExploreService {
 
     private final List<ExploreScoreProcessor> exploreScoreProcessors;
-    private final ExploreScoreRefresher exploreScoreRefresher;
 
     public CursorResponseV2<ExploredHearitResponse> getExploredHearits(UserInfo userInfo,
                                                                        CursorRequest cursorRequest) {
         ExploreScoreProcessor exploreScoreProcessor = getExploreScoreProcessor(userInfo);
-        String userUuid = exploreScoreProcessor.resolveUserUuid(userInfo);
-        exploreScoreRefresher.refreshIfNeeded(cursorRequest.cursorId(), userUuid, userInfo.getUserType());
         List<ExploredHearitResponse> exploreHearitsResponses =
                 exploreScoreProcessor.getExploreHearitsResponse(
                         userInfo,
-                        userUuid,
                         cursorRequest.cursorId(),
                         cursorRequest.size());
         return CursorResponseV2.from(exploreHearitsResponses);

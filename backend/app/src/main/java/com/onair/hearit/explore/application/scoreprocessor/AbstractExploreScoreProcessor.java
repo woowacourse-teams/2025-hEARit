@@ -4,6 +4,7 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.UserInfo;
+import com.onair.hearit.explore.application.ExploreScoreRefresher;
 import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
@@ -20,17 +21,16 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
 
     protected static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
 
+    private final ExploreScoreRefresher exploreScoreRefresher;
     private final ExploredHearitQueryRepository exploredHearitQueryRepository;
     protected final HearitKeywordRepository hearitKeywordRepository;
 
     @Override
-    public String resolveUserUuid(UserInfo userInfo) {
-        return getUserUuid(userInfo);
-    }
+    public final List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId,
+                                                                        int size) {
+        String userUuid = getUserUuid(userInfo);
+        exploreScoreRefresher.refreshIfNeeded(cursorId, userUuid, userInfo.getUserType());
 
-    @Override
-    public List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, String userUuid,
-                                                                  long cursorId, int size) {
         List<ExploredHearitProjection> exploredHearitProjections =
                 exploredHearitQueryRepository.findExploredHearits(userUuid, cursorId, Pageable.ofSize(size));
         if (exploredHearitProjections.isEmpty()) {

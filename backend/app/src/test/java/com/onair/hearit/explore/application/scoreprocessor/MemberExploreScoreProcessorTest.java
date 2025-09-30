@@ -11,7 +11,6 @@ import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.domain.UserInfo;
-import com.onair.hearit.domain.UserType;
 import com.onair.hearit.explore.application.ExploreScoreRefresher;
 import com.onair.hearit.explore.application.ExploreScoreTestConfig;
 import com.onair.hearit.explore.dto.ExploredHearitResponse;
@@ -63,36 +62,11 @@ class MemberExploreScoreProcessorTest {
 
     @BeforeEach
     void setup() {
-        memberExploreScoreProcessor = new MemberExploreScoreProcessor(exploredHearitQueryRepository,
-                hearitKeywordRepository, memberRepository, bookmarkRepository);
-    }
-
-    @DisplayName("회원 UUID를 조회하여 반환한다")
-    @Test
-    void resolveUserUuidLoadsMember() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserInfo memberInfo = new UserInfo(member.getId(), null);
-
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword));
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
-
-        exploreScoreRefresher.refreshIfNeeded(0L, member.getUuid(), UserType.MEMBER);
-
-        // when
-        String uuid = memberExploreScoreProcessor.resolveUserUuid(memberInfo);
-
-        // then
-        assertThat(uuid).isEqualTo(member.getUuid());
+        memberExploreScoreProcessor = new MemberExploreScoreProcessor(exploreScoreRefresher,
+                exploredHearitQueryRepository,
+                hearitKeywordRepository,
+                memberRepository,
+                bookmarkRepository);
     }
 
     @DisplayName("회원 탐색 응답에 북마크 정보와 키워드가 포함된다")
@@ -114,11 +88,9 @@ class MemberExploreScoreProcessorTest {
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
 
-        exploreScoreRefresher.refreshIfNeeded(0L, member.getUuid(), UserType.MEMBER);
-
         // when
         List<ExploredHearitResponse> responses = memberExploreScoreProcessor.getExploreHearitsResponse(memberInfo,
-                member.getUuid(), 0L, 3);
+                0L, 3);
 
         // then
         assertAll(

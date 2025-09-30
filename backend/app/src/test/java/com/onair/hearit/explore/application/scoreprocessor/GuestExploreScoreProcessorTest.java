@@ -10,7 +10,6 @@ import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
 import com.onair.hearit.domain.UserInfo;
-import com.onair.hearit.domain.UserType;
 import com.onair.hearit.explore.application.ExploreScoreRefresher;
 import com.onair.hearit.explore.application.ExploreScoreTestConfig;
 import com.onair.hearit.explore.dto.ExploredHearitResponse;
@@ -57,37 +56,12 @@ class GuestExploreScoreProcessorTest {
 
     @BeforeEach
     void setup() {
-        guestExploreScoreProcessor = new GuestExploreScoreProcessor(exploredHearitQueryRepository,
+        guestExploreScoreProcessor = new GuestExploreScoreProcessor(exploreScoreRefresher,
+                exploredHearitQueryRepository,
                 hearitKeywordRepository);
     }
 
     @DisplayName("게스트 UUID를 그대로 반환한다")
-    @Test
-    void resolveUserUuidReturnsGuestId() {
-        // given
-        UserInfo guestInfo = new UserInfo(null, GUEST_ID);
-
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword));
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
-
-        exploreScoreRefresher.refreshIfNeeded(0L, GUEST_ID, UserType.GUEST);
-
-        // when
-        String uuid = guestExploreScoreProcessor.resolveUserUuid(guestInfo);
-
-        // then
-        assertThat(uuid).isEqualTo(GUEST_ID);
-    }
-
-    @DisplayName("게스트 탐색 응답에 키워드와 커서가 포함된다")
     @Test
     void fetchExploreResponsesForGuest() {
         // given
@@ -104,11 +78,9 @@ class GuestExploreScoreProcessorTest {
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
 
-        exploreScoreRefresher.refreshIfNeeded(0L, GUEST_ID, UserType.GUEST);
-
         // when
         List<ExploredHearitResponse> responses = guestExploreScoreProcessor.getExploreHearitsResponse(guestInfo,
-                GUEST_ID, 0L, 3);
+                0L, 3);
 
         // then
         assertAll(

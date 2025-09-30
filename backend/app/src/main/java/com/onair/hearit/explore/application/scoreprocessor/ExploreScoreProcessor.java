@@ -8,8 +8,5 @@ public interface ExploreScoreProcessor {
 
     boolean isSupported(UserInfo userInfo);
 
-    String resolveUserUuid(UserInfo userInfo);
-
-    List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, String userUuid,
-                                                           long cursorId, int size);
+    List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId, int size);
 }
