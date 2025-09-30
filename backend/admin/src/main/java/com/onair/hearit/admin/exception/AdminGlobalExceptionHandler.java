@@ -2,7 +2,6 @@ package com.onair.hearit.admin.exception;
 
 import com.onair.hearit.admin.exception.custom.AdminException;
 import com.onair.hearit.core.domain.exception.DomainException;
-import com.onair.hearit.core.exception.DomainExceptionMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.stream.Collectors;
@@ -21,12 +20,9 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice(basePackages = "com.onair.hearit.admin")
 public class AdminGlobalExceptionHandler {
 
-    private final DomainExceptionMapper domainExceptionMapper;
-
     @ExceptionHandler(DomainException.class)
     public ProblemDetail handle(DomainException ex, HttpServletRequest request) {
-        HttpStatus status = domainExceptionMapper.toHttpStatus(ex.getErrorCode());
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         problemDetail.setTitle(ex.getErrorCode().name());
         problemDetail.setType(URI.create(request.getRequestURI()));
         return problemDetail;
@@ -72,7 +68,7 @@ public class AdminGlobalExceptionHandler {
 
     private ProblemDetail buildProblemDetail(AdminErrorCode errorCode, String detail, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(errorCode.getHttpStatus(), detail);
-        problemDetail.setTitle(errorCode.getTitle());
+        problemDetail.setTitle(errorCode.name());
         problemDetail.setType(URI.create(request.getRequestURI()));
         return problemDetail;
     }
