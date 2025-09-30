@@ -2,6 +2,7 @@ package com.onair.hearit.core.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.core.domain.exception.UserInfoDomainException;
 import org.junit.jupiter.api.DisplayName;
@@ -20,9 +21,11 @@ class UserInfoTest {
         void createWithMemberId() {
             UserInfo userInfo = new UserInfo(1L, null);
 
-            assertThat(userInfo.isMember()).isTrue();
-            assertThat(userInfo.isGuest()).isFalse();
-            assertThat(userInfo.getMemberId()).isEqualTo(1L);
+            assertAll(
+                    () -> assertThat(userInfo.isMember()).isTrue(),
+                    () -> assertThat(userInfo.isGuest()).isFalse(),
+                    () -> assertThat(userInfo.getMemberId()).isEqualTo(1L)
+            );
         }
 
         @Test
@@ -31,9 +34,12 @@ class UserInfoTest {
             String guestId = "123e4567-e89b-12d3-a456-426614174000"; // 36자
             UserInfo userInfo = new UserInfo(null, guestId);
 
-            assertThat(userInfo.isGuest()).isTrue();
-            assertThat(userInfo.isMember()).isFalse();
-            assertThat(userInfo.getGuestId()).isEqualTo(guestId);
+            assertAll(
+                    () -> assertThat(userInfo.isGuest()).isTrue(),
+                    () -> assertThat(userInfo.isMember()).isFalse(),
+                    () -> assertThat(userInfo.getGuestId()).isEqualTo(guestId)
+            );
+
         }
 
         @Test
