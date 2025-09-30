@@ -51,6 +51,12 @@ class PlaylistBottomSheet :
                 ) {
                     publishFromMetadata(player.currentMediaItem?.mediaMetadata)
                 }
+
+                if (events.contains(Player.EVENT_IS_PLAYING_CHANGED) ||
+                    events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED)
+                ) {
+                    playlistAdapter.updateIsPlaying(player.isPlaying)
+                }
             }
         }
 
@@ -121,8 +127,9 @@ class PlaylistBottomSheet :
                 val controller = future.get()
                 mediaController = controller
                 controller.addListener(playerListener)
-                // 연결 직후에도 한 번 현재 상태 반영
+                // 연결 직후에도 현재 아이템 + 재생 여부 모두 반영
                 publishFromMetadata(controller.currentMediaItem?.mediaMetadata)
+                playlistAdapter.updateIsPlaying(controller.isPlaying)
             },
             ContextCompat.getMainExecutor(requireContext()),
         )

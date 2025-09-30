@@ -17,19 +17,25 @@ class PlaylistViewHolder(
 
     fun bind(
         bookmark: Bookmark,
+        isActive: Boolean,
         isPlaying: Boolean,
     ) {
         binding.item = bookmark
-        binding.root.isActivated = isPlaying
-        val resId = if (isPlaying) R.drawable.ic_bottom_pause else R.drawable.ic_bottom_play
-        binding.btnPlaylistPlayPause.setImageResource(resId)
+        binding.root.isActivated = isActive
+        binding.btnPlaylistPlayPause.setImageResource(
+            if (isPlaying) R.drawable.ic_bottom_pause else R.drawable.ic_bottom_play,
+        )
         binding.executePendingBindings()
     }
 
-    fun updatePlayState(isPlaying: Boolean) {
-        binding.root.isActivated = isPlaying
-        val resId = if (isPlaying) R.drawable.ic_bottom_pause else R.drawable.ic_bottom_play
-        binding.btnPlaylistPlayPause.setImageResource(resId)
+    fun updatePlayState(
+        isActive: Boolean,
+        isPlaying: Boolean,
+    ) {
+        binding.root.isActivated = isActive
+        binding.btnPlaylistPlayPause.setImageResource(
+            if (isPlaying) R.drawable.ic_bottom_pause else R.drawable.ic_bottom_play,
+        )
     }
 
     companion object {
