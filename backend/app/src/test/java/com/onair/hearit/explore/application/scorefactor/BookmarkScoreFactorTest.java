@@ -10,6 +10,7 @@ import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
+import com.onair.hearit.domain.UserType;
 import com.onair.hearit.exception.custom.NotFoundException;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.infrastructure.jpa.BookmarkRepository;
@@ -49,6 +50,32 @@ class BookmarkScoreFactorTest {
         bookmarkScoreFactor = new BookmarkScoreFactor(memberRepository, bookmarkRepository);
     }
 
+    @Test
+    @DisplayName("MEMBER 타입은 지원하므로 true를 반환한다.")
+    void isSupported_returnsTrueForMember() {
+        // given
+        UserType userType = UserType.MEMBER;
+
+        // when
+        boolean actual = bookmarkScoreFactor.isSupported(userType);
+
+        // then
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    @DisplayName("GUEST 타입은 지원하지 않으므로 false를 반환한다.")
+    void isSupported_returnsFalseForGuest() {
+        // given
+        UserType userType = UserType.GUEST;
+
+        // when
+        boolean actual = bookmarkScoreFactor.isSupported(userType);
+
+        // then
+        assertThat(actual).isFalse();
+    }
+    
     @Test
     @DisplayName("사용자의 카테고리별 북마크 비율에 비례하여 점수를 계산한다.")
     void basedOnBookmarkCounts() {
