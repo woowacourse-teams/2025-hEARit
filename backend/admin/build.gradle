@@ -26,9 +26,12 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     // Test
+    testImplementation testFixtures(project(':core'))
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation testFixtures(project(':core'))
+
+    testRuntimeOnly 'com.mysql:mysql-connector-j'
+    testRuntimeOnly 'com.h2database:h2'
 
     testImplementation 'io.rest-assured:rest-assured:5.4.0'
     testImplementation 'org.jsoup:jsoup:1.17.2'
