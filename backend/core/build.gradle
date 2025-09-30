@@ -34,13 +34,15 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     compileOnly 'org.projectlombok:lombok'
 
+    // Flyway
+    api "org.flywaydb:flyway-core"
+    api "org.flywaydb:flyway-mysql"
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     testRuntimeOnly 'com.mysql:mysql-connector-j'
     testRuntimeOnly 'com.h2database:h2'
-    testImplementation 'org.flywaydb:flyway-core'
-    testImplementation 'org.flywaydb:flyway-mysql'
 
     testFixturesImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
     testFixturesImplementation 'io.rest-assured:rest-assured:5.4.0'
