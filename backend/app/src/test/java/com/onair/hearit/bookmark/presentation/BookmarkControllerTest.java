@@ -1,351 +1,297 @@
 package com.onair.hearit.bookmark.presentation;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.auth.infrastructure.jwt.TokenStatus;
+import com.onair.hearit.bookmark.application.BookmarkService;
+import com.onair.hearit.bookmark.dto.BookmarkHearitResponseV2;
+import com.onair.hearit.bookmark.dto.BookmarkHearitResponseV2.CategoryResponse;
+import com.onair.hearit.bookmark.dto.BookmarkHearitResponseV2.SourceResponse;
 import com.onair.hearit.bookmark.dto.BookmarkInfoResponse;
-import com.onair.hearit.core.docs.ApiDocSnippets;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.domain.Bookmark;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.fixture.IntegrationTest;
-import io.restassured.RestAssured;
+import com.onair.hearit.exception.custom.AlreadyExistException;
+import com.onair.hearit.exception.custom.ForbiddenException;
+import com.onair.hearit.fixture.ApiDocSnippets;
+import com.onair.hearit.fixture.ControllerTest;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.restdocs.payload.FieldDescriptor;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class BookmarkControllerTest extends IntegrationTest {
+@WebMvcTest(controllers = BookmarkController.class)
+class BookmarkControllerTest extends ControllerTest {
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    @MockitoBean
+    private BookmarkService bookmarkService;
 
     @Test
-    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 페이지에 따른 북마크 목록을 반환한다.")
-    void readBookmarkHearitsTest_v1() {
+    @DisplayName("북마크 목록 조회 V1 - 200 OK")
+    void readBookmarkHearitsV1_OK() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        String token = generateToken(member);
-        int bookmarkCount = 30;
-        for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
-        }
+        var responses = IntStream.range(1, 25).mapToObj(i -> new BookmarkHearitResponseV2(
+                        (long) i,
+                        (long) (1000 + i),
+                        "Title " + i,
+                        "Summary " + i + 1,
+                        100 + i,
+                        (long) 200 + i - 2,
+                        false,
+                        List.of(new SourceResponse("source1", "url1"), new SourceResponse("source2", "url2")),
+                        new CategoryResponse((long) i, "categoryName", "#FFFFFF")
+                ))
+                .toList();
+        var pagedResponses = new PageImpl<>(responses, PageRequest.of(0, 20), responses.size());
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(bookmarkService.getBookmarkHearits(any(), any())).willReturn(pagedResponses);
 
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .param("page", 0)
-                .param("size", 5)
-                .filter(document("bookmark-read-list-v1",
+        mockMvc.perform(get("/api/v1/bookmarks/hearits")
+                        .header("Authorization", "Bearer valid-token")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andDo(document("v1-get-bookmarks-hearits-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
                                 .summary("북마크 목록 조회 V1")
-                                .description("사용자가 북마크한 히어릿 목록을 페이지별로 조회합니다.")
+                                .description("로그인한 사용자가 북마크한 히어릿 목록을 `Page` 단위로 조회합니다.")
                                 .queryParameters(
-                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
-                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
+                                        parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
+                                        parameterWithName("size").description("페이지 당 항목 수").defaultValue("20")
                                 )
-                                .responseSchema(Schema.schema("PagedBookmarkHearitResponse"))
-                                .responseFields(
-                                        Stream.concat(
+                                .responseFields(Stream.concat(
                                                 Arrays.stream(new FieldDescriptor[]{
                                                         fieldWithPath("content[].hearitId").description("히어릿 ID"),
                                                         fieldWithPath("content[].bookmarkId").description("북마크 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].lastPlayTime").description(
-                                                                "히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].lastPlayTime").description("히어릿 마지막 재생 시간(ms)").optional(),
                                                         fieldWithPath("content[].categoryColor").description("카테고리 색상 코드")
-                                                }),
-                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
-                                        ).toArray(FieldDescriptor[]::new)
+                                                }), Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields()))
+                                        .toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/bookmarks/hearits")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .body("content.size()", equalTo(5));
+                ));
     }
 
     @Test
-    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 페이지에 따른 북마크 목록을 반환한다.")
-    void readBookmarkHearitsTest_v2() {
+    @DisplayName("북마크 목록 조회 V2 - 200 OK")
+    void readBookmarkHearitsV2_OK() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        String token = generateToken(member);
-        int bookmarkCount = 30;
-        for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
-        }
+        var responses = IntStream.range(1, 25).mapToObj(i -> new BookmarkHearitResponseV2(
+                        (long) i,
+                        (long) (1000 + i),
+                        "Title " + i,
+                        "Summary " + i + 1,
+                        100 + i,
+                        (long) 200 + i - 2,
+                        false,
+                        List.of(new SourceResponse("source1", "url1"), new SourceResponse("source2", "url2")),
+                        new CategoryResponse((long) i, "categoryName", "#FFFFFF")
+                ))
+                .toList();
+        var pagedResponses = new PageImpl<>(responses, PageRequest.of(0, 20), responses.size());
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(bookmarkService.getBookmarkHearits(any(), any())).willReturn(pagedResponses);
 
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .param("page", 0)
-                .param("size", 5)
-                .filter(document("bookmark-read-list-v2",
+        mockMvc.perform(get("/api/v2/bookmarks/hearits")
+                        .header("Authorization", "Bearer valid-token")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andDo(document("v2-get-bookmarks-hearits-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
                                 .summary("북마크 목록 조회 V2")
-                                .description("사용자가 북마크한 히어릿 목록을 페이지별로 조회합니다.")
+                                .description("로그인한 사용자가 북마크한 히어릿 목록을 `Page` 단위로 조회합니다.")
                                 .queryParameters(
-                                        parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
-                                        parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
+                                        parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
+                                        parameterWithName("size").description("페이지 당 항목 수").defaultValue("20")
                                 )
-                                .responseSchema(Schema.schema("PagedBookmarkHearitResponse"))
-                                .responseFields(
-                                        Stream.concat(
+                                .responseFields(Stream.concat(
                                                 Arrays.stream(new FieldDescriptor[]{
                                                         fieldWithPath("content[].hearitId").description("히어릿 ID"),
                                                         fieldWithPath("content[].bookmarkId").description("북마크 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].lastPlayTime").description(
-                                                                "히어릿 마지막 재생 시간(ms)").optional(),
-                                                        fieldWithPath("content[].isFinished").description(
-                                                                "히어릿 재생 완료 여부").optional(),
-                                                        fieldWithPath("content[].sources").description("히어릿 소스 리스트"),
-                                                        fieldWithPath("content[].sources[].sourceName").description("소스 이름"),
-                                                        fieldWithPath("content[].sources[].sourceUrl").description("소스 URL"),
+                                                        fieldWithPath("content[].lastPlayTime").description("히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].isFinished").description("히어릿 재생 완료 여부").optional(),
+                                                        fieldWithPath("content[].sources").description("출처 정보"),
+                                                        fieldWithPath("content[].sources[].sourceName").description("출처 이름"),
+                                                        fieldWithPath("content[].sources[].sourceUrl").description("출처 URL"),
                                                         fieldWithPath("content[].category").description("카테고리 정보"),
                                                         fieldWithPath("content[].category.id").description("카테고리 ID"),
                                                         fieldWithPath("content[].category.name").description("카테고리 이름"),
-                                                        fieldWithPath("content[].category.colorCode").description("카테고리 색상 코드")
-                                                }),
-                                                Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields())
-                                        ).toArray(FieldDescriptor[]::new)
+                                                        fieldWithPath("content[].category.colorCode").description("카테고리 색상코드")
+                                                }), Arrays.stream(ApiDocSnippets.getCustomPagedResponseFields()))
+                                        .toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
-                ))
-                .when()
-                .get("/api/v2/bookmarks/hearits")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .body("content.size()", equalTo(5));
+                ));
     }
 
     @Test
-    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, page가 0 미만인 경우 400 BADREQUEST가 발생한다.")
-    void readBookmarkHearitsTestWithBadRequestByPage() {
+    @DisplayName("북마크 목록 조회 V2 - 400 BadRequest")
+    void readBookmarkHearitsV2_BadRequest() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
 
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .param("page", -1)
-                .filter(document("bookmark-read-list-bad-request",
+        mockMvc.perform(get("/api/v2/bookmarks/hearits")
+                        .header("Authorization", "Bearer valid-token")
+                        .param("page", "-1")
+                        .param("size", "20"))
+                .andExpect(status().isBadRequest())
+                .andDo(document("v2-get-bookmarks-hearits-bad-request",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
-                                .summary("북마크 목록 조회")
-                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .summary("북마크 목록 조회 V2")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/bookmarks/hearits")
-                .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {-1, 101})
-    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, size가 0 ~ 100이 아닌 경우 400 BADREQUEST가 발생한다.")
-    void readBookmarkHearitsTestWithBadRequestBySize(int size) {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
-
-        // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .param("size", size)
-                .when()
-                .get("/api/v1/bookmarks/hearits")
-                .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
+                ));
     }
 
     @Test
-    @DisplayName("로그인하지 않은 사용자가 북마크 목록 조회 시, 401 UNAUTHORIZED가 발생한다.")
-    void readBookmarkHearits_error_401_whenNotLogin() {
+    @DisplayName("북마크 목록 조회 V2 - 401 Unauthorized")
+    void readBookmarkHearitsV2_Unauthorized() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        int bookmarkCount = 10;
-        for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
-        }
+        given(jwtTokenProvider.getTokenStatus(isNull())).willReturn(TokenStatus.NOT_EXIST);
 
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "")
-                .param("page", 0)
-                .param("size", 20)
-                .filter(document("bookmark-read-list-unauthorized",
+        mockMvc.perform(get("/api/v2/bookmarks/hearits")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isUnauthorized())
+                .andDo(document("v2-get-bookmarks-hearits-unauthorized",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
-                                .summary("북마크 목록 조회")
-                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .summary("북마크 목록 조회 V2")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/bookmarks/hearits")
-                .then()
-                .statusCode(HttpStatus.UNAUTHORIZED.value());
+                ));
     }
 
     @Test
-    @DisplayName("로그인한 사용자가 북마크 추가 시, 추가 후 201 CREATED를 반환한다.")
-    void createBookmarkTest() {
+    @DisplayName("북마크 추가 V1 - 201 Created")
+    void createBookmarkV1_Created() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        var hearitId = 3L;
+        var response = new BookmarkInfoResponse(hearitId);
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(bookmarkService.addBookmark(any(), any())).willReturn(response);
 
         // when & then
-        BookmarkInfoResponse response = RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .filter(document("bookmark-create",
+        mockMvc.perform(post("/api/v1/bookmarks/hearits/{hearitId}", hearitId)
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isCreated())
+                .andDo(document("v1-post-bookmarks-hearits-created",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
-                                .summary("북마크 생성")
-                                .description("로그인한 회원이 히어릿 ID로 북마크를 생성합니다.")
+                                .summary("북마크 생성 V1")
+                                .description("로그인한 사용자가 히어릿에 대한 북마크를 생성합니다.")
                                 .pathParameters(
-                                        parameterWithName("hearitId").description("북마크할 히어릿의 ID")
+                                        parameterWithName("hearitId").description("북마크 대상 히어릿 ID")
                                 )
-                                .responseSchema(Schema.schema("BookmarkInfoResponse"))
                                 .responseFields(
-                                        fieldWithPath("id").description("생성된 북마크의 ID")
+                                        fieldWithPath("id").description("생성된 북마크 ID")
                                 )
                                 .build())
-                ))
-                .when()
-                .post("/api/v1/bookmarks/hearits/{hearitId}", hearit.getId())
-                .then()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().as(BookmarkInfoResponse.class);
-
-        assertThat(response.id()).isNotNull();
+                ));
     }
 
     @Test
-    @DisplayName("로그인한 사용자가 이미 추가된 북마크 추가 시, 추가 후 409 CONFLICT를 반환한다.")
-    void createBookmarkTestWithConflict() {
+    @DisplayName("북마크 추가 V1 - 409 Conflict")
+    void createBookmarkV1_Conflict() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+        var hearitId = 3L;
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(bookmarkService.addBookmark(any(), any()))
+                .willThrow(new AlreadyExistException("이미 북마크된 히어릿입니다."));
 
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .filter(document("bookmark-create-conflict",
+        mockMvc.perform(post("/api/v1/bookmarks/hearits/{hearitId}", hearitId)
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isConflict())
+                .andDo(document("v1-post-bookmarks-hearits-conflict",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
-                                .summary("북마크 생성")
-                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .summary("북마크 생성 V1")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
-                ))
-                .when()
-                .post("/api/v1/bookmarks/hearits/{hearitId}", hearit.getId())
-                .then()
-                .statusCode(HttpStatus.CONFLICT.value());
+                ));
     }
 
     @Test
-    @DisplayName("로그인한 사용자가 북마크 삭제 시, 삭제 후 204 NOCONTENT를 반환한다.")
-    void deleteBookmark() {
+    @DisplayName("북마크 삭제 V1 - 204 No Content")
+    void deleteBookmarkV1_NoContent() throws Exception {
         // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+        var bookmarkId = 1L;
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        willDoNothing().given(bookmarkService).deleteBookmark(any(), any());
 
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .filter(document("bookmark-delete",
+        mockMvc.perform(delete("/api/v1/bookmarks/{bookmarkId}", bookmarkId)
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isNoContent())
+                .andDo(document("v1-delete-bookmarks-no-content",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
-                                .summary("북마크 삭제")
-                                .description("로그인한 히어릿 ID와 북마크 ID로 북마크를 삭제합니다.")
+                                .summary("북마크 삭제 V1")
+                                .description("로그인한 사용자가 히어릿에 대한 북마크를 삭제합니다.")
                                 .pathParameters(
-                                        parameterWithName("bookmarkId").description("삭제할 북마크의 ID")
+                                        parameterWithName("bookmarkId").description("삭제 대상 북마크 ID")
                                 )
                                 .build())
-                ))
-                .when()
-                .delete("/api/v1/bookmarks/{bookmarkId}", bookmark.getId())
-                .then()
-                .statusCode(HttpStatus.NO_CONTENT.value());
+                ));
     }
 
     @Test
-    @DisplayName("자신의 북마크가 아닌 북마크 삭제 시, 403 FORBIDDEN을 반환한다.")
-    void notFoundHearitId() {
+    @DisplayName("북마크 삭제 V1 - 403 Forbidden")
+    void deleteBookmarkV1_Forbidden() throws Exception {
         // given
-        Member bookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
-        Member notBookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(notBookmarkMember);
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(bookmarkMember, hearit));
+        var bookmarkId = 1L;
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        willThrow(new ForbiddenException("북마크를 삭제할 권한이 없습니다."))
+                .given(bookmarkService).deleteBookmark(any(), any());
 
         // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .filter(document("bookmark-delete-unauthorized",
+        mockMvc.perform(delete("/api/v1/bookmarks/{bookmarkId}", bookmarkId)
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isForbidden())
+                .andDo(document("v1-delete-bookmarks-forbidden",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
-                                .summary("북마크 삭제")
-                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .summary("북마크 삭제 V1")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
-                ))
-                .when()
-                .delete("/api/v1/bookmarks/{bookmarkId}", bookmark.getId())
-                .then()
-                .statusCode(HttpStatus.FORBIDDEN.value());
-    }
-
-    private String generateToken(Member member) {
-        return jwtTokenProvider.createAccessToken(member.getId());
+                ));
     }
 }

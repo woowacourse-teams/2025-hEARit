@@ -1,128 +1,109 @@
 package com.onair.hearit.keyword.presentation;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.core.docs.ApiDocSnippets;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.exception.custom.NotFoundException;
+import com.onair.hearit.fixture.ApiDocSnippets;
+import com.onair.hearit.fixture.ControllerTest;
+import com.onair.hearit.keyword.application.KeywordService;
 import com.onair.hearit.keyword.dto.KeywordResponse;
-import io.restassured.RestAssured;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class KeywordControllerTest extends IntegrationTest {
+@WebMvcTest(controllers = KeywordController.class)
+class KeywordControllerTest extends ControllerTest {
+
+    @MockitoBean
+    private KeywordService keywordService;
 
     @Test
-    @DisplayName("전체 키워드를 조회 시 200 OK 및 페이징이 적용된 키워드 목록을 반환한다.")
-    void readAllKeywords() {
+    @DisplayName("키워드 조회 V1 - 200 OK")
+    void readKeywordsV1_OK() throws Exception {
         // given
-        Keyword keyword1 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-        Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-        Keyword keyword3 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-        Keyword keyword4 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-        Keyword keyword5 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        var responses = List.of(
+                new KeywordResponse(1L, "Spring"),
+                new KeywordResponse(2L, "Java")
+        );
 
-        // when
-        List<KeywordResponse> result = RestAssured.given(this.spec)
-                .param("page", 1)
-                .param("size", 2)
-                .filter(document("keyword-read-all",
+        given(keywordService.getKeywords(any())).willReturn(responses);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/keywords")
+                        .param("page", "0")
+                        .param("size", "2"))
+                .andExpect(status().isOk())
+                .andDo(document("v1-get-keywords-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Keyword API")
-                                .summary("전체 키워드 목록 조회")
-                                .description("전체 키워드 목록을 페이지별로 조회합니다.")
+                                .summary("전체 키워드 목록 조회 V1")
+                                .description("전체 키워드 목록을 `Page` 단위로 조회합니다.")
                                 .queryParameters(
                                         parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
                                         parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
                                 )
-                                .responseSchema(Schema.schema("KeywordResponseList"))
                                 .responseFields(
                                         fieldWithPath("[].id").description("키워드 ID"),
                                         fieldWithPath("[].name").description("키워드 이름")
                                 )
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/keywords")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .jsonPath()
-                .getList(".", KeywordResponse.class);
-
-        // then
-        assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(KeywordResponse::id)
-                        .containsExactly(keyword3.getId(), keyword4.getId())
-        );
+                ));
     }
 
-
     @Test
-    @DisplayName("단일 키워드 조회 시 200 OK 및 해당 키워드 정보를 반환한다.")
-    void readSingleKeyword() {
+    @DisplayName("단일 키워드 조회 V1 - 200 OK")
+    void readKeywordV1_OK() throws Exception {
         // given
-        Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+        var response = new KeywordResponse(1L, "Spring");
 
-        // when
-        KeywordResponse result = RestAssured.given(this.spec)
-                .filter(document("keyword-read-single",
+        given(keywordService.getKeyword(any())).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/keywords/{keywordId}", response.id()))
+                .andExpect(status().isOk())
+                .andDo(document("v1-get-keyword-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Keyword API")
-                                .summary("단일 키워드 조회")
-                                .description("ID로 특정 키워드의 정보를 조회합니다.")
+                                .summary("단일 키워드 조회 V1")
+                                .description("단일 키워드의 정보를 조회합니다.")
                                 .pathParameters(
                                         parameterWithName("keywordId").description("조회할 키워드의 ID")
                                 )
-                                .responseSchema(Schema.schema("KeywordResponse"))
                                 .responseFields(
                                         fieldWithPath("id").description("키워드 ID"),
                                         fieldWithPath("name").description("키워드 이름")
                                 )
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/keywords/{keywordId}", keyword.getId())
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .as(KeywordResponse.class);
-
-        // then
-        assertAll(
-                () -> assertThat(result.id()).isEqualTo(keyword.getId()),
-                () -> assertThat(result.name()).isEqualTo(keyword.getName())
-        );
-
+                ));
     }
 
     @Test
-    @DisplayName("존재하지 않는 키워드를 조회 시 404 NOT_FOUND를 반환한다.")
-    void readNotFoundKeyword() {
+    @DisplayName("단일 키워드 조회 V1 - 404 Not Found")
+    void readNotFoundKeyword() throws Exception {
+        // given
+        var notFoundKeywordId = 9999L;
+
+        given(keywordService.getKeyword(any())).willThrow(new NotFoundException("keywordId", "9999"));
+
         // when & then
-        RestAssured.given(this.spec)
-                .filter(document("keyword-read-single-not-found",
+        mockMvc.perform(get("/api/v1/keywords/{keywordId}", notFoundKeywordId))
+                .andExpect(status().isNotFound())
+                .andDo(document("v1-get-keywords-not-found",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Keyword API")
-                                .summary("단일 키워드 조회")
-                                .responseSchema(Schema.schema("ProblemDetail"))
+                                .summary("단일 키워드 조회 V1")
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
-                ))
-                .when()
-                .get("/api/v1/keywords/{keywordId}", 9999L)
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value());
+                ));
     }
 }

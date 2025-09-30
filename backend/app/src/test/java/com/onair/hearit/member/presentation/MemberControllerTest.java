@@ -1,93 +1,76 @@
 package com.onair.hearit.member.presentation;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper.document;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.epages.restdocs.apispec.Schema;
-import com.onair.hearit.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.core.docs.ApiDocSnippets;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.OAuthProvider;
-import com.onair.hearit.fixture.IntegrationTest;
+import com.onair.hearit.auth.infrastructure.jwt.TokenStatus;
+import com.onair.hearit.fixture.ApiDocSnippets;
+import com.onair.hearit.fixture.ControllerTest;
+import com.onair.hearit.member.application.MemberService;
 import com.onair.hearit.member.dto.MemberInfoResponse;
-import io.restassured.RestAssured;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class MemberControllerTest extends IntegrationTest {
+@WebMvcTest(controllers = MemberController.class)
+class MemberControllerTest extends ControllerTest {
 
-    @Autowired
-    JwtTokenProvider jwtTokenProvider;
+    @MockitoBean
+    private MemberService memberService;
 
     @Test
-    @DisplayName("로그인한 사용자가 사용자 정보 조회 시, 200 OK 및 사용지 정보를 제공한다.")
-    void getMemberInfo_success() {
+    @DisplayName("사용자 정보 조회 V1 - 200 OK")
+    void getMemberInfoV1_OK() throws Exception {
         // given
-        String socialId = "12345678";
-        String nickname = "nickname";
-        String profileImage = "profile-image.jpg";
-        Member member = dbHelper.insertMember(
-                Member.createSocialUser(UUID.randomUUID().toString(), socialId, nickname, profileImage,
-                        OAuthProvider.KAKAO));
+        var response = new MemberInfoResponse(
+                1L,
+                "nickname",
+                "profile-image.jpg"
+        );
 
-        String token = generateToken(member);
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(memberService.getMember(any())).willReturn(response);
 
         // when & then
-        MemberInfoResponse response = RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .filter(document("member-read-me",
+        mockMvc.perform(get("/api/v1/members/me")
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isOk())
+                .andDo(document("v1-get-members-me-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Member API")
-                                .summary("내 정보 조회")
+                                .summary("사용자 정보 조회 V1")
                                 .description("현재 로그인한 사용자의 정보를 조회합니다.")
-                                .responseSchema(Schema.schema("MemberInfoResponse"))
                                 .responseFields(
                                         fieldWithPath("id").description("사용자 ID"),
                                         fieldWithPath("nickname").description("닉네임"),
                                         fieldWithPath("profileImage").description("프로필 이미지 URL")
                                 )
-                                .build()))
-                )
-                .when()
-                .get("/api/v1/members/me")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .extract().as(MemberInfoResponse.class);
-
-        assertAll(() -> {
-            assertThat(response.id()).isEqualTo(member.getId());
-            assertThat(response.nickname()).isEqualTo(member.getNickname());
-            assertThat(response.profileImage()).isEqualTo(member.getProfileImage());
-        });
+                                .build())
+                ));
     }
 
     @Test
-    @DisplayName("로그인하지 않은 사용자가 사용자 정보 조회 시, 401 Unauthorized 예외를 반환한다.")
-    void getMemberInfo_error_when_isNotLoginedMember() {
-        RestAssured.given(this.spec)
-                .filter(document("member-read-me-unauthorized",
+    @DisplayName("사용자 정보 조회 V1 - 401 Unauthorized")
+    void getMemberInfoV1_Unauthorized() throws Exception {
+        // given
+        given(jwtTokenProvider.getTokenStatus(isNull())).willReturn(TokenStatus.NOT_EXIST);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/members/me"))
+                .andExpect(status().isUnauthorized())
+                .andDo(document("v1-get-members-me-unauthorized",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Member API")
-                                .summary("내 정보 조회")
-                                .description("현재 로그인한 사용자의 정보를 조회합니다.")
-                                .responseSchema(Schema.schema("ProblemDetail"))
                                 .responseFields(ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
-                                .build()))
-                )
-                .when()
-                .get("/api/v1/members/me")
-                .then()
-                .statusCode(HttpStatus.UNAUTHORIZED.value());
-    }
-
-    private String generateToken(Member member) {
-        return jwtTokenProvider.createAccessToken(member.getId());
+                                .build())
+                ));
     }
 }

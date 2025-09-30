@@ -1,7 +1,6 @@
 package com.onair.hearit.auth.presentation;
 
 import com.onair.hearit.auth.application.AuthService;
-import com.onair.hearit.domain.OAuthProvider;
 import com.onair.hearit.auth.domain.RequestUser;
 import com.onair.hearit.auth.dto.request.LoginRequest;
 import com.onair.hearit.auth.dto.request.OAuthLoginRequest;
@@ -9,6 +8,7 @@ import com.onair.hearit.auth.dto.request.SignupRequest;
 import com.onair.hearit.auth.dto.request.TokenReissueRequest;
 import com.onair.hearit.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.auth.dto.response.TokenReissueResponse;
+import com.onair.hearit.domain.OAuthProvider;
 import com.onair.hearit.domain.UserInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
