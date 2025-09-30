@@ -1,5 +1,6 @@
 package com.onair.hearit.fixture;
 
+import com.onair.hearit.common.TestClock;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
 import com.onair.hearit.domain.ExploreScore;
@@ -11,6 +12,7 @@ import com.onair.hearit.domain.PlayingHistory;
 import com.onair.hearit.domain.RecommendHearit;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,15 @@ public class DbHelper {
         em.persist(hearit);
         em.flush();
         return hearit;
+    }
+
+    public Hearit insertHearitAt(Hearit hearit, LocalDateTime creationTime) {
+        try {
+            TestClock.freezeAt(creationTime);
+            return insertHearit(hearit);
+        } finally {
+            TestClock.unfreeze();
+        }
     }
 
     public Category insertCategory(Category category) {

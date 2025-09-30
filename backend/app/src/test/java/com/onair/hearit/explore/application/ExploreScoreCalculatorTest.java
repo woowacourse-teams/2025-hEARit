@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
 
-import com.onair.hearit.common.TestClock;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
@@ -22,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,44 +51,32 @@ class ExploreScoreCalculatorTest {
     @Autowired
     private ExploreScoreCalculator exploreScoreCalculator;
 
-    @AfterEach
-    void tearDown() {
-        TestClock.unfreeze();
-    }
 
     @DisplayName("회원은 북마크·최신성·랜덤 점수를 모두 합산한다")
     @Test
     void calculateTotalScoresForMemberWithRealFactors() {
-        // given
         given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
+        // given
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
-        // -- 북마크 이력용 Hearit들 --
-        TestClock.freezeAt(LocalDateTime.now());
-        Hearit hearit1 = dbHelper.insertHearit(createHearit(category1));
-        Hearit hearit2 = dbHelper.insertHearit(createHearit(category1));
-        Hearit hearit3 = dbHelper.insertHearit(createHearit(category1));
-        Hearit hearit4 = dbHelper.insertHearit(createHearit(category2));
+        LocalDateTime now = LocalDateTime.now();
 
-        //  카테고리별 북마크 - category1 : 3개, category2: 1개
+        Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);
+        Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now);
+        Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category1), now);
+        Hearit hearit4 = dbHelper.insertHearitAt(createHearit(category2), now);
+
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
         dbHelper.insertBookmark(new Bookmark(member, hearit2));
         dbHelper.insertBookmark(new Bookmark(member, hearit3));
         dbHelper.insertBookmark(new Bookmark(member, hearit4));
 
-        // -- 점수 계산 대상 Hearit들 --
-        // 최신성 20, 카테고리 22.5
-        TestClock.freezeAt(LocalDateTime.now());
-        Hearit hearit5 = dbHelper.insertHearit(createHearit(category1));
-        // 최신성 18, 카테고리 7.5
-        TestClock.freezeAt(LocalDateTime.now().minusDays(4));
-        Hearit hearit6 = dbHelper.insertHearit(createHearit(category2));
-        // 최신성 0, 카테고리 0
-        TestClock.freezeAt(LocalDateTime.now().minusDays(60));
-        Hearit hearit7 = dbHelper.insertHearit(createHearit(category3));
+        Hearit hearit5 = dbHelper.insertHearitAt(createHearit(category1), now);
+        Hearit hearit6 = dbHelper.insertHearitAt(createHearit(category2), now.minusDays(4));
+        Hearit hearit7 = dbHelper.insertHearitAt(createHearit(category3), now.minusDays(60));
 
         // when
         Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(member.getUuid(), UserType.MEMBER);
@@ -102,6 +88,7 @@ class ExploreScoreCalculatorTest {
                 () -> assertThat(scores.get(hearit6.getId())).isEqualTo(7.5 + 18.0 + FIXED_RANDOM_SCORE),
                 () -> assertThat(scores.get(hearit7.getId())).isEqualTo(0.0 + 0.0 + FIXED_RANDOM_SCORE)
         );
+
     }
 
     @DisplayName("게스트는 북마크 점수를 제외하고 합산한다")
@@ -114,18 +101,14 @@ class ExploreScoreCalculatorTest {
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
-        // 북마크 이력 Hearit (게스트 점수엔 반영 안 됨)
-        TestClock.freezeAt(LocalDateTime.now());
-        Hearit hearit1 = dbHelper.insertHearit(createHearit(category1));
+        LocalDateTime now = LocalDateTime.now();
+        Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
 
         // -- 점수 계산 대상 Hearit들 --
-        TestClock.freezeAt(LocalDateTime.now());
-        Hearit hearit2 = dbHelper.insertHearit(createHearit(category1));              // ֽż 20
-        TestClock.freezeAt(LocalDateTime.now().minusDays(4));
-        Hearit hearit3 = dbHelper.insertHearit(createHearit(category2)); // ֽż 18
-        TestClock.freezeAt(LocalDateTime.now().minusDays(60));
-        Hearit hearit4 = dbHelper.insertHearit(createHearit(category3));// ֽż 0
+        Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now);              // ?? 20
+        Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category2), now.minusDays(4)); // ?? 18
+        Hearit hearit4 = dbHelper.insertHearitAt(createHearit(category3), now.minusDays(60));// ?? 0
 
         String guestUuid = UUID.randomUUID().toString();
 
@@ -139,6 +122,7 @@ class ExploreScoreCalculatorTest {
                 () -> assertThat(scores.get(hearit3.getId())).isEqualTo(18.0 + FIXED_RANDOM_SCORE),
                 () -> assertThat(scores.get(hearit4.getId())).isEqualTo(0.0 + FIXED_RANDOM_SCORE)
         );
+
     }
 
     private Hearit createHearit(Category category) {
