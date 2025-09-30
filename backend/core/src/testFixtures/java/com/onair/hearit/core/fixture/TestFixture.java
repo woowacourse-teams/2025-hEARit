@@ -1,12 +1,12 @@
 package com.onair.hearit.core.fixture;
 
-import com.onair.hearit.domain.Bookmark;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.Source;
-import com.onair.hearit.domain.UserInfo;
+import com.onair.hearit.core.domain.Bookmark;
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Keyword;
+import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.Source;
+import com.onair.hearit.core.domain.UserInfo;
 import java.util.List;
 import java.util.UUID;
 

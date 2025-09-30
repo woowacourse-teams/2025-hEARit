@@ -1,14 +1,14 @@
 package com.onair.hearit.core.fixture;
 
-import com.onair.hearit.domain.Bookmark;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.ExploreScore;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.HearitKeyword;
-import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.PlayingHistory;
-import com.onair.hearit.domain.RecommendHearit;
+import com.onair.hearit.core.domain.Bookmark;
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.ExploreScore;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.HearitKeyword;
+import com.onair.hearit.core.domain.Keyword;
+import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.PlayingHistory;
+import com.onair.hearit.core.domain.RecommendHearit;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Component;

@@ -3,13 +3,12 @@ package com.onair.hearit.core.infrastructure.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.RecommendHearit;
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.RecommendHearit;
 import com.onair.hearit.core.fixture.DbHelper;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.infrastructure.jpa.RecommendHearitRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.IntStream;

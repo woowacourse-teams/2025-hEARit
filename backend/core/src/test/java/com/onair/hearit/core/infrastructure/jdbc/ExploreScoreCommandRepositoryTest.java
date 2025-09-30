@@ -3,13 +3,12 @@ package com.onair.hearit.core.infrastructure.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Member;
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.fixture.DbHelper;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
