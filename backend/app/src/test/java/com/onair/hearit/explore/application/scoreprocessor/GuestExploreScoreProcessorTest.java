@@ -49,8 +49,6 @@ import org.springframework.test.context.jdbc.Sql;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class GuestExploreScoreProcessorTest {
 
-    private static final String GUEST_ID = UUID.randomUUID().toString();
-
     @MockitoBean
     private RandomNumberGenerator randomNumberGenerator;
 
@@ -82,7 +80,8 @@ class GuestExploreScoreProcessorTest {
     @Test
     void isSupportedForGuest() {
         // given
-        UserInfo guestInfo = new UserInfo(null, GUEST_ID);
+        String guestUuid = UUID.randomUUID().toString();
+        UserInfo guestInfo = new UserInfo(null, guestUuid);
 
         // when & then
         assertThat(guestExploreScoreProcessor.isSupported(guestInfo)).isTrue();
@@ -107,7 +106,8 @@ class GuestExploreScoreProcessorTest {
     void refreshScoresIfNeededStoresScores() {
         // given
         long cursorId = 0L;
-        UserInfo guestInfo = new UserInfo(null, GUEST_ID);
+        String guestUuid = UUID.randomUUID().toString();
+        UserInfo guestInfo = new UserInfo(null, guestUuid);
 
         // 랜덤 점수를 1.0점으로 고정
         double fixedRandomDouble = 0.1d;
@@ -124,7 +124,7 @@ class GuestExploreScoreProcessorTest {
         guestExploreScoreProcessor.refreshScoresIfNeeded(guestInfo, cursorId);
 
         // then
-        List<ExploreScoreRow> rows = findExploreScores(GUEST_ID);
+        List<ExploreScoreRow> rows = findExploreScores(guestUuid);
 
         // 예상 점수 계산 (게스트 점수 = 최신성 점수 + 랜덤 점수)
         double scoreForNewest = calculateRecencyScore(now, now) + fixedRandomScore;          // 20.0 + 1.0 = 21.0
@@ -145,7 +145,8 @@ class GuestExploreScoreProcessorTest {
     @Test
     void getExploreHearitsReturnsResponses() {
         // given
-        UserInfo guestInfo = new UserInfo(null, GUEST_ID);
+        String guestUuid = UUID.randomUUID().toString();
+        UserInfo guestInfo = new UserInfo(null, guestUuid);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
 
@@ -153,8 +154,8 @@ class GuestExploreScoreProcessorTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword)); // hearit1에만 키워드 설정
 
-        dbHelper.insertExploreScore(new ExploreScore(GUEST_ID, hearit1.getId(), 50.0, 1L));
-        dbHelper.insertExploreScore(new ExploreScore(GUEST_ID, hearit2.getId(), 40.0, 2L));
+        dbHelper.insertExploreScore(new ExploreScore(guestUuid, hearit1.getId(), 50.0, 1L));
+        dbHelper.insertExploreScore(new ExploreScore(guestUuid, hearit2.getId(), 40.0, 2L));
 
         // when
         List<ExploredHearitResponse> responses = guestExploreScoreProcessor.getExploreHearits(guestInfo, 0L, 3);
@@ -184,7 +185,8 @@ class GuestExploreScoreProcessorTest {
     @Test
     void getExploreHearitsReturnsEmptyWhenNoData() {
         // given
-        UserInfo guestInfo = new UserInfo(null, GUEST_ID);
+        String guestUuid = UUID.randomUUID().toString();
+        UserInfo guestInfo = new UserInfo(null, guestUuid);
 
         // when
         List<ExploredHearitResponse> responses = guestExploreScoreProcessor.getExploreHearits(guestInfo, 0L, 3);
