@@ -121,7 +121,7 @@
                 tools:text="hEARit님이 듣고 있는 팟캐스트" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_recent_hearit"
+                android:id="@+id/rv_home_playing_hearit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -132,6 +132,104 @@
                 app:layout_constraintTop_toBottomOf="@id/tv_home_recent_hearit_title"
                 tools:itemCount="3"
                 tools:listitem="@layout/item_recent_hearit" />
+
+            <TextView
+                android:id="@+id/tv_home_recently_hearit_title"
+                style="@style/pretendard_main_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="최근 추가된 팟캐스트"
+                app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
+                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_hearit"
+                tools:text="최근 추가된 팟캐스트" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_home_recently_hearit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:paddingHorizontal="20dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_recently_hearit_title"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_recent_hearit" />
+
+            <TextView
+                android:id="@+id/tv_home_bookmark_hearit_title"
+                style="@style/pretendard_main_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="북마크한 팟캐스트를 들어보세요"
+                app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
+                app:layout_constraintTop_toBottomOf="@id/rv_home_recently_hearit"
+                tools:text="북마크한 팟캐스트를 들어보세요" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_home_bookmark_hearit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:paddingHorizontal="20dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_bookmark_hearit_title"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_recent_hearit" />
+
+            <TextView
+                android:id="@+id/tv_home_shortcast"
+                style="@style/pretendard_category"
+                android:layout_width="0dp"
+                android:layout_height="92dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_gradient_home_shortcast"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:text="숏캐스트를 구경하고\n더 많은 팟캐스트를 북마크해보세요!"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/rv_home_bookmark_hearit" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_home_arrow"
+                app:layout_constraintBottom_toBottomOf="@id/tv_home_shortcast"
+                app:layout_constraintEnd_toEndOf="@id/tv_home_shortcast"
+                app:layout_constraintTop_toTopOf="@id/tv_home_shortcast" />
+
+            <TextView
+                android:id="@+id/tv_home_wootaeco"
+                style="@style/pretendard_category"
+                android:layout_width="0dp"
+                android:layout_height="92dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_gradient_home_wootaeco"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:text="숏캐스트를 구경하고\n더 많은 팟캐스트를 북마크해보세요!"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_home_arrow"
+                app:layout_constraintBottom_toBottomOf="@id/tv_home_wootaeco"
+                app:layout_constraintEnd_toEndOf="@id/tv_home_wootaeco"
+                app:layout_constraintTop_toTopOf="@id/tv_home_wootaeco" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_grouped_category"
@@ -144,8 +242,8 @@
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_recent_hearit"
-                tools:itemCount="3"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_wootaeco"
+                tools:itemCount="5"
                 tools:listitem="@layout/item_grouped_category" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

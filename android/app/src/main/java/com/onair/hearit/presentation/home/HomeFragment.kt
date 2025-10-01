@@ -111,15 +111,15 @@ class HomeFragment :
                 updateIndicator(position)
             }
 
-        binding.rvHomeRecentHearit.apply {
-            adapter = recentAdapter
-            addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
-        }
-
         binding.rvHomeRecommend.apply {
             adapter = recommendAdapter
             snapHelper.attachToRecyclerView(this)
             centerScrollListener?.let { addOnScrollListener(it) }
+        }
+
+        binding.rvHomePlayingHearit.apply {
+            adapter = recentAdapter
+            addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
         }
 
         binding.rvHomeGroupedCategory.adapter = groupedCategoryAdapter
