@@ -24,6 +24,7 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.domain.model.ShortsHearit
 import com.onair.hearit.presentation.DetailResult
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
@@ -195,34 +196,7 @@ class ExploreFragment :
 
     private fun observeViewModel() {
         viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
-            if (!isViewValid) return@observe
-
-            adapter.submitList(shortsHearits) {
-                if (!isViewValid) return@submitList
-
-                if (shortsHearits.isNotEmpty()) {
-                    binding.rvExplore.post {
-                        if (!isViewValid) return@post
-
-                        if (binding.rvExplore.isEmpty()) {
-                            binding.rvExplore.post {
-                                if (!isViewValid) return@post
-                                val index =
-                                    currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
-                                switchTo(index)
-                                viewModel.maybeLoadMore(index, adapter.itemCount)
-                                viewModel.loadAnimation()
-                            }
-                        } else {
-                            val index =
-                                currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
-                            switchTo(index)
-                            viewModel.maybeLoadMore(index, adapter.itemCount)
-                            viewModel.loadAnimation()
-                        }
-                    }
-                }
-            }
+            handleShortsHearitsUpdate(shortsHearits)
         }
 
         viewModel.shouldPlayAnimation.observe(viewLifecycleOwner) { isEnabled ->
@@ -247,6 +221,43 @@ class ExploreFragment :
                 if (isLoading) startShimmer() else stopShimmer()
             }
         }
+    }
+
+    // 피드 목록이 갱신 되었을 때
+    private fun handleShortsHearitsUpdate(shortsHearits: List<ShortsHearit>) {
+        if (!isViewValid) return
+        adapter.submitList(shortsHearits) {
+            if (!isViewValid) return@submitList
+            if (shortsHearits.isEmpty()) return@submitList
+
+            // 레이아웃이 아직 안붙은 경우에 한 번 더 post로 지연
+            binding.rvExplore.post {
+                if (!isViewValid) return@post
+
+                if (binding.rvExplore.isEmpty()) {
+                    waitForRecyclerViewLayout()
+                } else {
+                    startPlaybackAndAnimation()
+                }
+            }
+        }
+    }
+
+    // 만약에 뷰가 없으면 기다렸다가 post 재시도
+    private fun waitForRecyclerViewLayout() {
+        binding.rvExplore.post {
+            if (isViewValid) {
+                startPlaybackAndAnimation()
+            }
+        }
+    }
+
+    // 현재 인덱스의 아이템을 재생하고, 추가적으로 애니메이션 트리거
+    private fun startPlaybackAndAnimation() {
+        val index = currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
+        switchTo(index)
+        viewModel.maybeLoadMore(index, adapter.itemCount)
+        viewModel.loadAnimation()
     }
 
     private fun currentIndex(): Int {
@@ -304,22 +315,24 @@ class ExploreFragment :
         animator?.cancel()
         animator?.setTarget(null)
 
-        animator =
-            ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
-                duration = 1300
-                repeatCount = 1
-                repeatMode = ObjectAnimator.RESTART
-                addListener(
-                    object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator) {
-                            if (!isViewValid) return
-                            _binding?.lavExploreSwipeUp?.visibility = View.INVISIBLE
-                        }
-                    },
-                )
-                start()
-            }
+        animator = createSwipeAnimator()
     }
+
+    private fun createSwipeAnimator() =
+        ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
+            duration = 1300
+            repeatCount = 1
+            repeatMode = ObjectAnimator.RESTART
+            addListener(
+                object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        if (!isViewValid) return
+                        _binding?.lavExploreSwipeUp?.visibility = View.INVISIBLE
+                    }
+                },
+            )
+            start()
+        }
 
     private fun navigateToDetail(
         hearitId: Long,
