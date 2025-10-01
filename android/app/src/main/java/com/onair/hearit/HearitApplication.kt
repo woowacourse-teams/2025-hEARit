@@ -9,19 +9,41 @@ import com.onair.hearit.di.DataSourceProvider
 import com.onair.hearit.di.DatabaseProvider
 import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.TokenAuthenticatorProvider
+import com.onair.hearit.di.TokenInterceptorProvider
+import com.onair.hearit.presentation.UserIdManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class HearitApplication : Application() {
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun onCreate() {
         super.onCreate()
 
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_KEY)
+        initUuid()
         DatabaseProvider.init(this)
         DataSourceProvider.init(this)
         RepositoryProvider.init(this)
         AnalyticsProvider.init(this)
         TokenAuthenticatorProvider.init()
         initialTimber()
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        appScope.cancel()
+    }
+
+    private fun initUuid() {
+        appScope.launch {
+            val uuid = UserIdManager.getOrCreateUserId(applicationContext)
+            TokenInterceptorProvider.setDeviceUuid(uuid)
+        }
     }
 
     private fun initialTimber() {
