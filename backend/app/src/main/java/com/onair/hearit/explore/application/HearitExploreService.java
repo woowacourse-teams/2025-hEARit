@@ -30,7 +30,7 @@ public class HearitExploreService {
                 return exploreScoreProcessor;
             }
         }
-        //TODO: 예외 처리
-        throw new IllegalStateException("지원하지 않는 탐색 요청입니다.");
+        //TODO: 커스텀예외
+        throw new IllegalStateException("지원하지 않는 유저입니다.");
     }
 }
