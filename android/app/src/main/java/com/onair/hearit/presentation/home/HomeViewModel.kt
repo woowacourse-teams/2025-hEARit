@@ -7,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.domain.model.PlayingBookmarkHearit
 import com.onair.hearit.domain.model.PlayingHistoryHearit
+import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.HearitRepository
@@ -36,6 +38,13 @@ class HomeViewModel(
         MutableLiveData()
     val playingHistoryHearits: LiveData<List<PlayingHistoryHearit>> = _playingHistoryHearits
 
+    private val _recentUploadHearits: MutableLiveData<List<RecentUploadHearit>> = MutableLiveData()
+    val recentUploadHearits: LiveData<List<RecentUploadHearit>> = _recentUploadHearits
+
+    private val _playingBookmarkHearits: MutableLiveData<List<PlayingBookmarkHearit>> =
+        MutableLiveData()
+    val playingBookmarkHearits: LiveData<List<PlayingBookmarkHearit>> = _playingBookmarkHearits
+
     private val _groupedCategory: MutableLiveData<List<GroupedCategory>> = MutableLiveData()
     val groupedCategory: LiveData<List<GroupedCategory>> = _groupedCategory
 
@@ -62,23 +71,35 @@ class HomeViewModel(
 
             val recommendResult = recommendDeferred.await()
             val playingHistoryResult = playingHistoryDeferred.await()
+            val recentUploadResult = recentUploadDeferred.await()
+            val playingBookmarkResult = playingBookmarkDeferred.await()
             val groupedResult = groupedDeferred.await()
 
-            playingHistoryResult.onFailure { throwable ->
-                Timber.w(throwable)
-                _toastMessage.value = R.string.home_toast_recent_load_fail
-            }
             recommendResult.onFailure { throwable ->
                 Timber.w(throwable)
                 _toastMessage.value = R.string.home_toast_recommend_load_fail
+            }
+            playingHistoryResult.onFailure { throwable ->
+                Timber.w(throwable)
+                _toastMessage.value = R.string.home_toast_playing_history_load_fail
+            }
+            recentUploadResult.onFailure { throwable ->
+                Timber.w(throwable)
+                _toastMessage.value = R.string.home_toast_recent_upload_load_fail
+            }
+            playingBookmarkResult.onFailure { throwable ->
+                Timber.w(throwable)
+                _toastMessage.value = R.string.home_toast_playing_bookmark_load_fail
             }
             groupedResult.onFailure { throwable ->
                 Timber.w(throwable)
                 _toastMessage.value = R.string.home_toast_grouped_category_load_fail
             }
 
-            playingHistoryResult.onSuccess { _playingHistoryHearits.value = it }
             recommendResult.onSuccess { _recommendHearits.value = it }
+            playingHistoryResult.onSuccess { _playingHistoryHearits.value = it }
+            recentUploadResult.onSuccess { _recentUploadHearits.value = it }
+            playingBookmarkResult.onSuccess { _playingBookmarkHearits.value = it }
             groupedResult.onSuccess { _groupedCategory.value = it }
 
             _isLoading.value = false

@@ -54,6 +54,15 @@ class HomeFragment :
             navigateClickListener = { navigateToExplore() },
         )
     }
+
+    private val recentUploadAdapter: RecentUploadHearitAdapter by lazy {
+        RecentUploadHearitAdapter(this)
+    }
+
+    private val playingBookmarkAdapter: PlayingBookmarkHearitAdapter by lazy {
+        PlayingBookmarkHearitAdapter(this)
+    }
+
     private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy {
         GroupedCategoryAdapter(
             this,
@@ -117,6 +126,10 @@ class HomeFragment :
             centerScrollListener?.let { addOnScrollListener(it) }
         }
 
+        binding.rvHomeRecentUpload.adapter = recentUploadAdapter
+
+        binding.rvHomePlayingBookmark.adapter = playingBookmarkAdapter
+
         binding.rvHomePlayingHearit.apply {
             adapter = recentAdapter
             addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
@@ -140,13 +153,21 @@ class HomeFragment :
             binding.userInfo = userInfo
         }
 
-        viewModel.recentHearits.observe(viewLifecycleOwner) { recentHearits ->
+        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
+            submitRecommendItems(recommendItems)
+        }
+
+        viewModel.playingHistoryHearits.observe(viewLifecycleOwner) { recentHearits ->
             binding.tvHomeRecentHearitTitle.isVisible = recentHearits.isNotEmpty()
             recentAdapter.submitList(recentHearits)
         }
 
-        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
-            submitRecommendItems(recommendItems)
+        viewModel.recentUploadHearits.observe(viewLifecycleOwner) { recentUploadHearits ->
+            recentUploadAdapter.submitList(recentUploadHearits)
+        }
+
+        viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->
+            playingBookmarkAdapter.submitList(playingBookmarkHearits)
         }
 
         viewModel.groupedCategory.observe(viewLifecycleOwner) { groupedCategory ->

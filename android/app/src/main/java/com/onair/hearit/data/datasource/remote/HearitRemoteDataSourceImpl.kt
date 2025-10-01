@@ -8,6 +8,7 @@ import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
+import com.onair.hearit.data.dto.RecentUploadResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 
@@ -32,6 +33,16 @@ class HearitRemoteDataSourceImpl(
             },
             errorHandler = errorResponseHandler,
         )
+
+    override suspend fun getRecentUploadHearits(): Result<NetworkResult<List<RecentUploadResponse>>> =
+        handleApiCall(
+            apiCall = { hearitService.getRecentUploadHearits() },
+            transform = { response ->
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
+            },
+            errorHandler = errorResponseHandler,
+        )
+
 
     override suspend fun getRandomHearits(
         cursorId: Long?,
