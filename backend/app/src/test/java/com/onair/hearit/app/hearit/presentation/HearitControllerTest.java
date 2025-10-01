@@ -144,7 +144,7 @@ class HearitControllerTest extends ControllerTest {
                         new HearitResponse(405L, "Hearit 405", LocalDateTime.now())
                 )
         );
-        var category4 = new HearitsWithRecommendCategoryResponse(5L, "Category D", "#0000FF",
+        var randomCategory = new HearitsWithRecommendCategoryResponse(5L, "Random Category", "#0000FF",
                 List.of(
                         new HearitResponse(501L, "Hearit 501", LocalDateTime.now()),
                         new HearitResponse(502L, "Hearit 502", LocalDateTime.now()),
@@ -153,7 +153,7 @@ class HearitControllerTest extends ControllerTest {
                         new HearitResponse(505L, "Hearit 505", LocalDateTime.now())
                 )
         );
-        var mockedResponse = List.of(itTrendCategory, category1, category2, category3, category4);
+        var mockedResponse = List.of(itTrendCategory, category1, category2, category3, randomCategory);
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
         given(hearitService.getHearitsWithRecommendCategory(any())).willReturn(mockedResponse);
