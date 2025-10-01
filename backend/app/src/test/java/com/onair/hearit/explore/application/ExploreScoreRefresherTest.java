@@ -140,7 +140,7 @@ class ExploreScoreRefresherTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         LocalDateTime now = LocalDateTime.now();
 
-        // -- 북마크 분포를 만드는 Hearit (카테고리1:3개, 카테고리2:1개) --
+        // 북마크 만드는 Hearit (카테고리1:3개, 카테고리2:1개)
         Hearit bookmarked1 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now);
         Hearit bookmarked2 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now);
         Hearit bookmarked3 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now);
@@ -150,7 +150,7 @@ class ExploreScoreRefresherTest {
         dbHelper.insertBookmark(new Bookmark(member, bookmarked3));
         dbHelper.insertBookmark(new Bookmark(member, bookmarked4));
 
-        // -- 실제 검증 대상 Hearit (recency + bookmark + random 합산) --
+        // 검증 대상 Hearit (recency + bookmark + random 합산)
         Hearit withHighBookmark = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now);
         Hearit withLowBookmark = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2),
                 now.minusDays(4));

@@ -27,9 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
@@ -40,9 +40,7 @@ import org.springframework.test.context.jdbc.Sql;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ExploreScoreCalculatorTest {
 
-    private static final double FIXED_RANDOM_SCORE = 1.0;
-
-    @MockBean
+    @MockitoBean
     private RandomNumberGenerator randomNumberGenerator;
 
     @Autowired
@@ -55,8 +53,10 @@ class ExploreScoreCalculatorTest {
     @DisplayName("회원은 북마크·최신성·랜덤 점수를 모두 합산한다")
     @Test
     void calculateTotalScoresForMemberWithRealFactors() {
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         // given
+        double fixedRandomDouble = 0.1d;
+        double fixedRandomScore = 0.1d * 10;
+        given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
@@ -89,9 +89,9 @@ class ExploreScoreCalculatorTest {
         // then
         assertAll(
                 () -> assertThat(scores).hasSize(7),
-                () -> assertThat(scores.get(hearit5.getId())).isEqualTo(22.5 + 20.0 + FIXED_RANDOM_SCORE),
-                () -> assertThat(scores.get(hearit6.getId())).isEqualTo(7.5 + 18.0 + FIXED_RANDOM_SCORE),
-                () -> assertThat(scores.get(hearit7.getId())).isEqualTo(0.0 + 0.0 + FIXED_RANDOM_SCORE)
+                () -> assertThat(scores.get(hearit5.getId())).isEqualTo(22.5 + 20.0 + fixedRandomScore),
+                () -> assertThat(scores.get(hearit6.getId())).isEqualTo(7.5 + 18.0 + fixedRandomScore),
+                () -> assertThat(scores.get(hearit7.getId())).isEqualTo(0.0 + 0.0 + fixedRandomScore)
         );
 
     }
@@ -99,8 +99,10 @@ class ExploreScoreCalculatorTest {
     @DisplayName("게스트는 북마크 점수를 제외하고 합산한다")
     @Test
     void calculateTotalScoresForGuestWithRealFactors() {
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         // given
+        double fixedRandomDouble = 0.1d;
+        double fixedRandomScore = 0.1d * 10;
+        given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
@@ -124,9 +126,9 @@ class ExploreScoreCalculatorTest {
         // then
         assertAll(
                 () -> assertThat(scores).hasSize(4),
-                () -> assertThat(scores.get(hearit2.getId())).isEqualTo(20.0 + FIXED_RANDOM_SCORE),
-                () -> assertThat(scores.get(hearit3.getId())).isEqualTo(18.0 + FIXED_RANDOM_SCORE),
-                () -> assertThat(scores.get(hearit4.getId())).isEqualTo(0.0 + FIXED_RANDOM_SCORE)
+                () -> assertThat(scores.get(hearit2.getId())).isEqualTo(20.0 + fixedRandomScore),
+                () -> assertThat(scores.get(hearit3.getId())).isEqualTo(18.0 + fixedRandomScore),
+                () -> assertThat(scores.get(hearit4.getId())).isEqualTo(0.0 + fixedRandomScore)
         );
 
     }
