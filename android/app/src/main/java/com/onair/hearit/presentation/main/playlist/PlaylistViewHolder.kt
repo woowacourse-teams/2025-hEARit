@@ -21,10 +21,7 @@ class PlaylistViewHolder(
         isPlaying: Boolean,
     ) {
         binding.item = bookmark
-        binding.root.isActivated = isActive
-        binding.btnPlaylistPlayPause.setImageResource(
-            if (isPlaying) R.drawable.ic_bottom_pause else R.drawable.ic_bottom_play,
-        )
+        updatePlayState(isActive, isPlaying)
         binding.executePendingBindings()
     }
 
