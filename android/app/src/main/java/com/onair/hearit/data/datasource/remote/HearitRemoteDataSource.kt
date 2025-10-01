@@ -3,6 +3,7 @@ package com.onair.hearit.data.datasource.remote
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
+import com.onair.hearit.data.dto.PlayingBookmarkResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecentUploadResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
@@ -14,6 +15,8 @@ interface HearitRemoteDataSource {
     suspend fun getRecommendHearits(): Result<NetworkResult<List<RecommendHearitResponse>>>
 
     suspend fun getRecentUploadHearits(): Result<NetworkResult<List<RecentUploadResponse>>>
+
+    suspend fun getPlayingBookmarkHearits(): Result<NetworkResult<List<PlayingBookmarkResponse>>>
 
     suspend fun getRandomHearits(
         cursorId: Long?,

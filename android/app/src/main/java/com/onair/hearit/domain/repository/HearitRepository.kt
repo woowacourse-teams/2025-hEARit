@@ -3,6 +3,7 @@ package com.onair.hearit.domain.repository
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.PageResult
+import com.onair.hearit.domain.model.PlayingBookmarkHearit
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
@@ -15,6 +16,8 @@ interface HearitRepository {
     suspend fun getRecommendHearits(): Result<List<RecommendHearit>>
 
     suspend fun getRecentUploadHearits(): Result<List<RecentUploadHearit>>
+
+    suspend fun getPlayingBookmarkHearits(): Result<List<PlayingBookmarkHearit>>
 
     suspend fun getRandomHearits(
         cursorId: Long? = null,

@@ -7,6 +7,7 @@ import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
+import com.onair.hearit.data.dto.PlayingBookmarkResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecentUploadResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
@@ -43,6 +44,14 @@ class HearitRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
+    override suspend fun getPlayingBookmarkHearits(): Result<NetworkResult<List<PlayingBookmarkResponse>>> =
+        handleApiCall(
+            apiCall = { hearitService.getPlayingBookmarkHearits() },
+            transform = { response ->
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
+            },
+            errorHandler = errorResponseHandler,
+        )
 
     override suspend fun getRandomHearits(
         cursorId: Long?,

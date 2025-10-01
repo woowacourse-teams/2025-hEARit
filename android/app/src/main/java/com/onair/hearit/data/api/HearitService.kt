@@ -22,6 +22,9 @@ interface HearitService {
     @GET("api/v1/hearits/recent")
     suspend fun getRecentUploadHearits(): Response<List<RecentUploadResponse>>
 
+    //    @GET("api/v1/hearits/playing-bookmarks")
+    suspend fun getPlayingBookmarkHearits(): Response<List<PlayingBookmarkResponse>>
+
     @GET("api/v2/hearits/explore")
     suspend fun getRandomHearits(
         @Query("cursorId") cursorId: Long?,
