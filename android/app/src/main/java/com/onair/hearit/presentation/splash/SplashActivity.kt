@@ -46,7 +46,7 @@ class SplashActivity : AppCompatActivity() {
         checkForUpdate()
 
         val data: Uri? = intent?.data
-        if (data != null && data.host == "kakaolink") {
+        if (data != null && data.host == KAKAO_LINK_HOST) {
             AnalyticsProvider.get().logEvent(AnalyticsEventNames.SHARE_EVENT)
         }
     }
@@ -116,5 +116,9 @@ class SplashActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    companion object {
+        private const val KAKAO_LINK_HOST = "kakaolink"
     }
 }
