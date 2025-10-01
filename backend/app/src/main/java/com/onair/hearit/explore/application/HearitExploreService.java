@@ -18,11 +18,10 @@ public class HearitExploreService {
     public CursorResponseV2<ExploredHearitResponse> getExploredHearits(UserInfo userInfo,
                                                                        CursorRequest cursorRequest) {
         ExploreScoreProcessor exploreScoreProcessor = getExploreScoreProcessor(userInfo);
-        List<ExploredHearitResponse> exploreHearitsResponses =
-                exploreScoreProcessor.getExploreHearitsResponse(
-                        userInfo,
-                        cursorRequest.cursorId(),
-                        cursorRequest.size());
+        String userUuid = exploreScoreProcessor.resolveUserUuid(userInfo);
+        exploreScoreProcessor.refreshScoresIfNeeded(cursorRequest.cursorId(), userInfo, userUuid);
+        List<ExploredHearitResponse> exploreHearitsResponses = exploreScoreProcessor.fetchExploreHearits(
+                userUuid, cursorRequest.cursorId(), cursorRequest.size(), userInfo);
         return CursorResponseV2.from(exploreHearitsResponses);
     }
 
@@ -32,7 +31,7 @@ public class HearitExploreService {
                 return exploreScoreProcessor;
             }
         }
-        //TODO: 커스텀 예외
-        throw new IllegalStateException("지원하지 않는 요청입니다.");
+        //TODO: 예외 처리
+        throw new IllegalStateException("지원하지 않는 탐색 요청입니다.");
     }
 }

@@ -71,7 +71,7 @@ class GuestExploreScoreProcessorTest {
                 hearitKeywordRepository);
     }
 
-    @DisplayName("비회원 응답에 키워드 정보가 포함된다. ")
+    @DisplayName("게스트 UUID를 그대로 반환한다")
     @Test
     void fetchExploreResponsesForGuest() {
         // given
@@ -90,13 +90,17 @@ class GuestExploreScoreProcessorTest {
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
 
         // when
-        List<ExploredHearitResponse> responses = guestExploreScoreProcessor.getExploreHearitsResponse(guestInfo,
-                0L, 3);
+        String userUuid = guestExploreScoreProcessor.resolveUserUuid(guestInfo);
+        guestExploreScoreProcessor.refreshScoresIfNeeded(0L, guestInfo, userUuid);
+        List<ExploredHearitResponse> responses = guestExploreScoreProcessor.fetchExploreHearits(userUuid, 0L, 3,
+                guestInfo);
 
         // then
         assertAll(
                 () -> assertThat(responses).hasSize(3),
                 () -> assertThat(responses).allMatch(response -> !response.isBookmarked()),
+                () -> assertThat(responses).allMatch(
+                        response -> response.cursorId() != null && response.cursorId() > 0),
                 () -> assertThat(responses.getFirst().keywords()).isNotEmpty()
         );
     }

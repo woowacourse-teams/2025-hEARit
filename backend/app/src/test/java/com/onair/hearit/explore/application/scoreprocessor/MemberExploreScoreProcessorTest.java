@@ -100,8 +100,10 @@ class MemberExploreScoreProcessorTest {
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
 
         // when
-        List<ExploredHearitResponse> responses = memberExploreScoreProcessor.getExploreHearitsResponse(memberInfo,
-                0L, 3);
+        String userUuid = memberExploreScoreProcessor.resolveUserUuid(memberInfo);
+        memberExploreScoreProcessor.refreshScoresIfNeeded(0L, memberInfo, userUuid);
+        List<ExploredHearitResponse> responses = memberExploreScoreProcessor.fetchExploreHearits(userUuid, 0L, 3,
+                memberInfo);
 
         // then
         assertAll(
