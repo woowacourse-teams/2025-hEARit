@@ -1,12 +1,14 @@
 package com.onair.hearit.app.bookmark.presentation;
 
+import com.onair.hearit.app.auth.domain.RequestUser;
 import com.onair.hearit.app.bookmark.application.BookmarkService;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV1;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
+import com.onair.hearit.app.bookmark.dto.BookmarkUnfinishedHearitResponse;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
-import com.onair.hearit.app.auth.domain.RequestUser;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -47,6 +49,14 @@ public class BookmarkController {
                 requestUser.getUserInfo(),
                 pagingRequest);
         return ResponseEntity.ok(PagedResponse.from(bookmarkHearits));
+    }
+
+    @GetMapping("/api/v1/bookmarks/hearits/unfinished")
+    public ResponseEntity<List<BookmarkUnfinishedHearitResponse>> readBookmarkUnfinishedHearits(
+            @AuthenticationPrincipal RequestUser requestUser) {
+        List<BookmarkUnfinishedHearitResponse> response =
+                bookmarkService.getBookmarkUnfinishedHearit(requestUser.getUserInfo());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/api/v1/bookmarks/hearits/{hearitId}")
