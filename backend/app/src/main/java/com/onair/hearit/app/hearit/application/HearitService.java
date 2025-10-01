@@ -2,6 +2,7 @@ package com.onair.hearit.app.hearit.application;
 
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
+import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -84,6 +85,10 @@ public class HearitService {
             return 0L;
         }
         return lastPlayTime;
+    }
+
+    public List<RecentHearitResponse> getRecentHearits(UserInfo userInfo) {
+        return List.of();
     }
 
     public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(UserInfo userInfo) {
