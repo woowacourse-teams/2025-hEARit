@@ -26,32 +26,19 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
     protected final HearitKeywordRepository hearitKeywordRepository;
 
     @Override
-    public final String resolveUserUuid(UserInfo userInfo) {
-        return getUserUuid(userInfo);
+    public final void refreshScoresIfNeeded(UserInfo userInfo, long cursorId) {
+        exploreScoreRefresher.refreshIfNeeded(cursorId, getUserUuid(userInfo), userInfo.getUserType());
     }
 
     @Override
-    public final void refreshScoresIfNeeded(long cursorId, UserInfo userInfo, String userUuid) {
-        exploreScoreRefresher.refreshIfNeeded(cursorId, userUuid, userInfo.getUserType());
-    }
-
-    @Override
-    public final List<ExploredHearitResponse> fetchExploreHearits(String userUuid, long cursorId, int size,
-                                                                  UserInfo userInfo) {
+    public final List<ExploredHearitResponse> fetchExploreHearits(UserInfo userInfo, long cursorId, int size) {
+        String userUuid = getUserUuid(userInfo);
         List<ExploredHearitProjection> exploredHearitProjections =
                 exploredHearitQueryRepository.findExploredHearits(userUuid, cursorId, Pageable.ofSize(size));
         if (exploredHearitProjections.isEmpty()) {
             return List.of();
         }
         return convertToExploredHearitResponses(exploredHearitProjections, userInfo);
-    }
-
-    @Override
-    public final List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId,
-                                                                        int size) {
-        String userUuid = resolveUserUuid(userInfo);
-        refreshScoresIfNeeded(cursorId, userInfo, userUuid);
-        return fetchExploreHearits(userUuid, cursorId, size, userInfo);
     }
 
     protected Map<Hearit, List<Keyword>> prepareKeywordsMap(List<Hearit> hearits) {

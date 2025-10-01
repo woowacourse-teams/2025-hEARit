@@ -8,15 +8,12 @@ public interface ExploreScoreProcessor {
 
     boolean isSupported(UserInfo userInfo);
 
-    String resolveUserUuid(UserInfo userInfo);
+    void refreshScoresIfNeeded(UserInfo userInfo, long cursorId);
 
-    void refreshScoresIfNeeded(long cursorId, UserInfo userInfo, String userUuid);
-
-    List<ExploredHearitResponse> fetchExploreHearits(String userUuid, long cursorId, int size, UserInfo userInfo);
+    List<ExploredHearitResponse> fetchExploreHearits(UserInfo userInfo, long cursorId, int size);
 
     default List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId, int size) {
-        String userUuid = resolveUserUuid(userInfo);
-        refreshScoresIfNeeded(cursorId, userInfo, userUuid);
-        return fetchExploreHearits(userUuid, cursorId, size, userInfo);
+        refreshScoresIfNeeded(userInfo, cursorId);
+        return fetchExploreHearits(userInfo, cursorId, size);
     }
 }

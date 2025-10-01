@@ -90,10 +90,8 @@ class GuestExploreScoreProcessorTest {
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
 
         // when
-        String userUuid = guestExploreScoreProcessor.resolveUserUuid(guestInfo);
-        guestExploreScoreProcessor.refreshScoresIfNeeded(0L, guestInfo, userUuid);
-        List<ExploredHearitResponse> responses = guestExploreScoreProcessor.fetchExploreHearits(userUuid, 0L, 3,
-                guestInfo);
+        guestExploreScoreProcessor.refreshScoresIfNeeded(guestInfo, 0L);
+        List<ExploredHearitResponse> responses = guestExploreScoreProcessor.fetchExploreHearits(guestInfo, 0L, 3);
 
         // then
         assertAll(
