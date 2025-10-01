@@ -19,7 +19,7 @@ public class TestClock implements DateTimeProvider {
 
     @Override
     public Optional<TemporalAccessor> getNow() {
-        LocalDateTime now = (fixedTime != null) ? fixedTime : LocalDateTime.now();
+        LocalDateTime now = (fixedTime == null) ? LocalDateTime.now() : fixedTime;
         return Optional.of(now);
     }
 }
