@@ -108,7 +108,7 @@ class HearitControllerTest extends ControllerTest {
     @DisplayName("추천 카테고리별 히어릿 조회 V1 - 200 OK")
     void readHearitsWithRecommendCategoryV1_OK() throws Exception {
         // given
-        var category1 = new HearitsWithRecommendCategoryResponse(1L, "Category A", "#FF0000",
+        var itTrendCategory = new HearitsWithRecommendCategoryResponse(1L, "IT 트랜드", "#FF0000",
                 List.of(
                         new HearitResponse(101L, "Hearit 101", LocalDateTime.now()),
                         new HearitResponse(102L, "Hearit 102", LocalDateTime.now()),
@@ -117,7 +117,7 @@ class HearitControllerTest extends ControllerTest {
                         new HearitResponse(105L, "Hearit 105", LocalDateTime.now())
                 )
         );
-        var category2 = new HearitsWithRecommendCategoryResponse(2L, "Category B", "#00FF00",
+        var category1 = new HearitsWithRecommendCategoryResponse(2L, "Category A", "#FF0000",
                 List.of(
                         new HearitResponse(201L, "Hearit 201", LocalDateTime.now()),
                         new HearitResponse(202L, "Hearit 202", LocalDateTime.now()),
@@ -126,7 +126,7 @@ class HearitControllerTest extends ControllerTest {
                         new HearitResponse(205L, "Hearit 205", LocalDateTime.now())
                 )
         );
-        var category3 = new HearitsWithRecommendCategoryResponse(3L, "Category C", "#0000FF",
+        var category2 = new HearitsWithRecommendCategoryResponse(3L, "Category B", "#00FF00",
                 List.of(
                         new HearitResponse(301L, "Hearit 301", LocalDateTime.now()),
                         new HearitResponse(302L, "Hearit 302", LocalDateTime.now()),
@@ -135,7 +135,25 @@ class HearitControllerTest extends ControllerTest {
                         new HearitResponse(305L, "Hearit 305", LocalDateTime.now())
                 )
         );
-        var mockedResponse = List.of(category1, category2, category3);
+        var category3 = new HearitsWithRecommendCategoryResponse(4L, "Category C", "#0000FF",
+                List.of(
+                        new HearitResponse(401L, "Hearit 401", LocalDateTime.now()),
+                        new HearitResponse(402L, "Hearit 402", LocalDateTime.now()),
+                        new HearitResponse(403L, "Hearit 403", LocalDateTime.now()),
+                        new HearitResponse(404L, "Hearit 404", LocalDateTime.now()),
+                        new HearitResponse(405L, "Hearit 405", LocalDateTime.now())
+                )
+        );
+        var randomCategory = new HearitsWithRecommendCategoryResponse(5L, "Random Category", "#0000FF",
+                List.of(
+                        new HearitResponse(501L, "Hearit 501", LocalDateTime.now()),
+                        new HearitResponse(502L, "Hearit 502", LocalDateTime.now()),
+                        new HearitResponse(503L, "Hearit 503", LocalDateTime.now()),
+                        new HearitResponse(504L, "Hearit 504", LocalDateTime.now()),
+                        new HearitResponse(505L, "Hearit 505", LocalDateTime.now())
+                )
+        );
+        var mockedResponse = List.of(itTrendCategory, category1, category2, category3, randomCategory);
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
         given(hearitService.getHearitsWithRecommendCategory(any())).willReturn(mockedResponse);
