@@ -1,6 +1,7 @@
 package com.onair.hearit.presentation.detail
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -426,9 +427,24 @@ class PlayerDetailActivity :
                     hashMapOf(TEMPLATE_TITLE_KEY to title),
                 )
 
+            // 1. CustomTabsServiceConnection 지원 브라우저 열기
+            // ex) Chrome, 삼성 인터넷, FireFox, 웨일 등
             try {
                 KakaoCustomTabsClient.openWithDefault(context, sharerUrl)
-            } catch (e: Exception) {
+                return
+            } catch (e: UnsupportedOperationException) {
+                // CustomTabsServiceConnection 지원 브라우저가 없을 때 예외처리
+                Timber.w(e, getString(R.string.player_detail_invite_error_browser))
+                showToast(getString(R.string.player_detail_invite_error_browser))
+            }
+
+            // 2. CustomTabsServiceConnection 미지원 브라우저 열기
+            // ex) 다음, 네이버 등
+            try {
+                KakaoCustomTabsClient.open(context, sharerUrl)
+                return
+            } catch (e: ActivityNotFoundException) {
+                // 디바이스에 설치된 인터넷 브라우저가 없을 때 예외처리
                 Timber.e(e, getString(R.string.player_detail_invite_error_browser))
                 showToast(getString(R.string.player_detail_invite_error_browser))
             }
