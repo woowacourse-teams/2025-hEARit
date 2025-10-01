@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -21,18 +22,14 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Category
-import com.onair.hearit.domain.model.Direction
 import com.onair.hearit.domain.model.PlayingBookmarkHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
-import com.onair.hearit.domain.model.RecommendHearit
-import com.onair.hearit.domain.model.RecommendHearits
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.dpToPx
-import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
@@ -52,10 +49,7 @@ class HomeFragment :
     }
 
     private val recommendAdapter: RecommendHearitAdapter by lazy {
-        RecommendHearitAdapter(
-            this,
-            navigateClickListener = { navigateToExplore() },
-        )
+        RecommendHearitAdapter(this)
     }
 
     private val recentUploadAdapter: RecentUploadHearitAdapter by lazy {
@@ -117,6 +111,7 @@ class HomeFragment :
         }
 
         binding.tvHomeShortcast.setOnClickListener {
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_EXPLORE_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_explore)
         }
 
@@ -132,6 +127,7 @@ class HomeFragment :
             }
 
         binding.rvHomeRecommend.apply {
+            doOnPreDraw { scrollToMiddlePosition() }
             adapter = recommendAdapter
             snapHelper.attachToRecyclerView(this)
             centerScrollListener?.let { addOnScrollListener(it) }
@@ -164,8 +160,13 @@ class HomeFragment :
             binding.userInfo = userInfo
         }
 
-        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendItems ->
-            submitRecommendItems(recommendItems)
+        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendHearits ->
+            recommendAdapter.submitList(recommendHearits) {
+                if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                    scrollToMiddlePosition()
+                    setupIndicator()
+                }
+            }
         }
 
         viewModel.playingHistoryHearits.observe(viewLifecycleOwner) { recentHearits ->
@@ -209,25 +210,7 @@ class HomeFragment :
         }
     }
 
-    private fun submitRecommendItems(recommendItems: List<RecommendHearit>) {
-        val contentItems = recommendItems.map { RecommendHearits.Content(it) }
-        val items =
-            buildList {
-                add(RecommendHearits.NavigateItem(Direction.LEFT))
-                addAll(contentItems)
-                add(RecommendHearits.NavigateItem(Direction.RIGHT))
-            }
-
-        recommendAdapter.submitList(items) {
-            // view가 살아있을 때만 실행
-            if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                scrollToMiddlePosition()
-                setupIndicator(contentItems.size)
-            }
-        }
-    }
-
-    private fun setupIndicator(size: Int) {
+    private fun setupIndicator(size: Int = 5) {
         val container = binding.indicatorContainer
         container.removeAllViews()
         val density = resources.displayMetrics.density
@@ -253,7 +236,7 @@ class HomeFragment :
         val count = container.childCount
         if (count == 0) return
 
-        val indicatorIndex = position - 1
+        val indicatorIndex = position
         if (indicatorIndex in 0 until count) {
             setCurrentIndicator(indicatorIndex)
         }
@@ -287,18 +270,6 @@ class HomeFragment :
 
     private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun navigateToExplore() {
-        AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_EXPLORE_SELECTED)
-
-        parentFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment_container_view, ExploreFragment())
-            .addToBackStack(null)
-            .commit()
-
-        (requireActivity() as MainActivity).selectTab(R.id.nav_explore)
     }
 
     private fun navigateToSearch(

@@ -17,9 +17,7 @@ class RecentUploadHearitAdapter(
     override fun onBindViewHolder(
         holder: RecentUploadHearitViewHolder,
         position: Int,
-    ) {
-        holder.bind(getItem(position))
-    }
+    ) = holder.bind(getItem(position))
 
     companion object {
         private val DiffCallback =
