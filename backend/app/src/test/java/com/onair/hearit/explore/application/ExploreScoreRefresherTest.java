@@ -20,9 +20,7 @@ import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,8 +41,6 @@ import org.springframework.test.context.jdbc.Sql;
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ExploreScoreRefresherTest {
-
-    private static final String GUEST_UUID = UUID.randomUUID().toString();
 
     @MockitoBean
     private RandomNumberGenerator randomNumberGenerator;
@@ -72,6 +68,7 @@ class ExploreScoreRefresherTest {
     @Test
     void skipRefreshingWhenCursorIsNotZero() {
         // given
+        String guestUuid = UUID.randomUUID().toString();
         given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         long cursorId = 1L;
 
@@ -81,57 +78,53 @@ class ExploreScoreRefresherTest {
         }
 
         // when
-        exploreScoreRefresher.refreshIfNeeded(cursorId, GUEST_UUID, UserType.GUEST);
+        exploreScoreRefresher.refreshIfNeeded(cursorId, guestUuid, UserType.GUEST);
 
         // then
-        assertThat(findExploreScores(GUEST_UUID)).isEmpty();
+        assertThat(findExploreScores(guestUuid)).isEmpty();
     }
 
-    @DisplayName("cursorId가 0이고 비회원이면 게스트 점수를 갱신하고 커서를 부여한다")
+    @DisplayName("cursorId가 0이고 비회원이면 최신성 점수와 랜덤 점수를 반영해 점수를 갱신한다.")
     @Test
     void refreshScoresWhenCursorIsZeroForGuest() {
         // given
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
+        String guestUuid = UUID.randomUUID().toString();
+
+        double fixedRandomDouble = 0.1d;
+        double fixedRandomScore = fixedRandomDouble * 10;
+        given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
+
         long cursorId = 0L;
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         LocalDateTime now = LocalDateTime.now();
 
-        // 게스트용 Hearit
         Hearit newest = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), now);
         Hearit twoDaysAgo = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), now.minusDays(2));
         Hearit fiveDaysAgo = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), now.minusDays(5));
 
         // when
-        exploreScoreRefresher.refreshIfNeeded(cursorId, GUEST_UUID, UserType.GUEST);
+        exploreScoreRefresher.refreshIfNeeded(cursorId, guestUuid, UserType.GUEST);
 
         // then
-        List<ExploreScoreRow> rows = findExploreScores(GUEST_UUID);
-        Map<Long, ExploreScoreRow> rowByHearitId = rows.stream()
-                .collect(Collectors.toMap(ExploreScoreRow::hearitId, row -> row));
-
-        LocalDateTime verificationTime = LocalDateTime.now();
-        double randomContribution = 0.1d * 10;
-
+        List<ExploreScoreRow> rows = findExploreScores(guestUuid);
         assertAll(
                 () -> assertThat(rows).hasSize(3),
-                () -> assertThat(rowByHearitId.get(newest.getId()).score())
-                        .isEqualTo(randomContribution + calculateRecencyScore(newest.getCreatedAt(),
-                                verificationTime)),
-                () -> assertThat(rowByHearitId.get(twoDaysAgo.getId()).score())
-                        .isEqualTo(randomContribution + calculateRecencyScore(twoDaysAgo.getCreatedAt(),
-                                verificationTime)),
-                () -> assertThat(rowByHearitId.get(fiveDaysAgo.getId()).score())
-                        .isEqualTo(randomContribution + calculateRecencyScore(fiveDaysAgo.getCreatedAt(),
-                                verificationTime))
-
+                () -> assertThat(rows.get(0).score)
+                        .isEqualTo(fixedRandomScore + calculateRecencyScore(newest.getCreatedAt(), now)),
+                () -> assertThat(rows.get(1).score)
+                        .isEqualTo(fixedRandomScore + calculateRecencyScore(twoDaysAgo.getCreatedAt(), now)),
+                () -> assertThat(rows.get(2).score)
+                        .isEqualTo(fixedRandomScore + calculateRecencyScore(fiveDaysAgo.getCreatedAt(), now))
         );
     }
 
-    @DisplayName("cursorId가 0이면 회원 점수를 갱신하면서 모든 ScoreFactor를 합산한다")
+    @DisplayName("cursorId가 0이고 회원이면 최신성, 북마크, 랜덤 점수를 합산하여 점수를 갱신한다")
     @Test
     void refreshScoresWhenCursorIsZeroForMember() {
         // given
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
+        double fixedRandomDouble = 0.1d;
+        double fixedRandomScore = fixedRandomDouble * 10;
+        given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
         long cursorId = 0L;
 
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
@@ -140,47 +133,53 @@ class ExploreScoreRefresherTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         LocalDateTime now = LocalDateTime.now();
 
-        // 북마크 만드는 Hearit (카테고리1:3개, 카테고리2:1개)
-        Hearit bookmarked1 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now);
-        Hearit bookmarked2 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now);
-        Hearit bookmarked3 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now);
-        Hearit bookmarked4 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2), now);
-        dbHelper.insertBookmark(new Bookmark(member, bookmarked1));
-        dbHelper.insertBookmark(new Bookmark(member, bookmarked2));
-        dbHelper.insertBookmark(new Bookmark(member, bookmarked3));
-        dbHelper.insertBookmark(new Bookmark(member, bookmarked4));
+        // 북마크 이력용 Hearit (카테고리1: 3개, 카테고리2: 1개)
+        dbHelper.insertBookmark(
+                new Bookmark(member, dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now)));
+        dbHelper.insertBookmark(
+                new Bookmark(member, dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now)));
+        dbHelper.insertBookmark(
+                new Bookmark(member, dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now)));
+        dbHelper.insertBookmark(
+                new Bookmark(member, dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2), now)));
 
-        // 검증 대상 Hearit (recency + bookmark + random 합산)
-        Hearit withHighBookmark = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now);
-        Hearit withLowBookmark = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2),
-                now.minusDays(4));
-        Hearit withNoBookmark = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category3),
-                now.minusDays(60));
+        // 시간 이력용 Hearit
+        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now); // 점수 1위 그룹
+        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2), now.minusDays(4)); // 점수 6위
+        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category3), now.minusDays(60)); // 점수 7위
 
         // when
         exploreScoreRefresher.refreshIfNeeded(cursorId, member.getUuid(), UserType.MEMBER);
 
         // then
         List<ExploreScoreRow> rows = findExploreScores(member.getUuid());
-        Map<Long, ExploreScoreRow> rowByHearitId = rows.stream()
-                .collect(Collectors.toMap(ExploreScoreRow::hearitId, row -> row));
 
-        LocalDateTime verificationTime = LocalDateTime.now();
-        double randomContribution = 0.1d * 10;
-        double highBookmarkScore = (3.0 / 4.0) * 30.0;
-        double lowBookmarkScore = (1.0 / 4.0) * 30.0;
+        // 예상 점수 계산
+        double highBookmarkScore = (3.0 / 4.0) * 30.0; // 22.5
+        double lowBookmarkScore = (1.0 / 4.0) * 30.0;  // 7.5
+
+        double scoreGroup1 = highBookmarkScore + calculateRecencyScore(now, now)
+                + fixedRandomScore;                   // 22.5 + 20.0 + 1.0 = 43.5
+        double scoreGroup2 = lowBookmarkScore + calculateRecencyScore(now, now)
+                + fixedRandomScore;                    // 7.5 + 20.0 + 1.0 = 28.5
+        double scoreGroup3 = lowBookmarkScore + calculateRecencyScore(now.minusDays(4), now)
+                + fixedRandomScore;      // 7.5 + 18.0 + 1.0 = 26.5
+        double scoreGroup4 = 0.0 + calculateRecencyScore(now.minusDays(60), now)
+                + fixedRandomScore;                   // 0.0 + 0.0 + 1.0 = 1.0
 
         assertAll(
                 () -> assertThat(rows).hasSize(7),
-                () -> assertThat(rowByHearitId.get(withHighBookmark.getId()).score())
-                        .isEqualTo(highBookmarkScore + calculateRecencyScore(withHighBookmark.getCreatedAt(),
-                                verificationTime) + randomContribution),
-                () -> assertThat(rowByHearitId.get(withLowBookmark.getId()).score())
-                        .isEqualTo(lowBookmarkScore + calculateRecencyScore(withLowBookmark.getCreatedAt(),
-                                verificationTime) + randomContribution),
-                () -> assertThat(rowByHearitId.get(withNoBookmark.getId()).score())
-                        .isEqualTo(0.0 + calculateRecencyScore(withNoBookmark.getCreatedAt(), verificationTime)
-                                + randomContribution)
+                // 1~4위 (4개): 카테고리1, 생성일 now -> 43.5점
+                () -> assertThat(rows.get(0).score()).isEqualTo(scoreGroup1),
+                () -> assertThat(rows.get(1).score()).isEqualTo(scoreGroup1),
+                () -> assertThat(rows.get(2).score()).isEqualTo(scoreGroup1),
+                () -> assertThat(rows.get(3).score()).isEqualTo(scoreGroup1),
+                // 5위 (1개): 카테고리2, 생성일 now -> 28.5점
+                () -> assertThat(rows.get(4).score()).isEqualTo(scoreGroup2),
+                // 6위 (1개): 카테고리2, 생성일 4일 전 -> 26.5점
+                () -> assertThat(rows.get(5).score()).isEqualTo(scoreGroup3),
+                // 7위 (1개): 카테고리3, 생성일 60일 전 -> 1.0점
+                () -> assertThat(rows.get(6).score()).isEqualTo(scoreGroup4)
         );
     }
 
@@ -202,7 +201,8 @@ class ExploreScoreRefresherTest {
     }
 
     private double calculateRecencyScore(LocalDateTime createdAt, LocalDateTime now) {
-        long daysPassed = Duration.between(createdAt, now).toDays();
+        long daysPassed = Duration.between(createdAt.toLocalDate().atStartOfDay(), now.toLocalDate().atStartOfDay())
+                .toDays();
         double recencyScore = 20.0 - (daysPassed * 0.5);
         return Math.max(0.0, recencyScore);
     }
