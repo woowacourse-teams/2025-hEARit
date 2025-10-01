@@ -13,7 +13,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentSearchBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
@@ -101,6 +104,11 @@ class SearchFragment :
         name: String,
         colorCode: String,
     ) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
+            mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
+        )
+
         val fragment =
             CategoryComposeFragment().apply {
                 arguments =
