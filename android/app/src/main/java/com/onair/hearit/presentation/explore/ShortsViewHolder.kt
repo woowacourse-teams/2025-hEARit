@@ -15,7 +15,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemShortsBinding
-import com.onair.hearit.domain.model.ShortsHearit
+import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.presentation.flash
 import com.onair.hearit.presentation.hideFlashImmediately
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +32,7 @@ class ShortsViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
     private val scriptAdapter = ExploreScriptAdapter()
     private var rotateAnimator: ObjectAnimator? = null
-    private var item: ShortsHearit? = null
+    private var item: ExploreHearit? = null
 
     private val interactiveRect = android.graphics.Rect()
     private var isBoosting = false
@@ -98,7 +98,7 @@ class ShortsViewHolder(
         )
 
     @OptIn(UnstableApi::class)
-    fun bind(item: ShortsHearit) {
+    fun bind(item: ExploreHearit) {
         this.item = item
         binding.hearitItem = item
 
@@ -110,11 +110,19 @@ class ShortsViewHolder(
     }
 
     fun highlightScriptLine(positionMs: Long) {
-        val item = item ?: return
-        val index = item.script.indexOfLast { script -> script.start <= positionMs }
-        val id = item.script.getOrNull(index)?.id
+        val current = item ?: return
+        val script = current.script ?: return
+        if (script.isEmpty()) return
 
+        val index = script.indexOfLast { it.start <= positionMs }
+        if (index < 0) {
+            scriptAdapter.highlightSubtitle(null)
+            return
+        }
+
+        val id = script.getOrNull(index)?.id
         scriptAdapter.highlightSubtitle(id)
+
         (binding.rvExploreItemScript.layoutManager as? LinearLayoutManager)
             ?.scrollToPositionWithOffset(index, binding.rvExploreItemScript.height / 3)
     }

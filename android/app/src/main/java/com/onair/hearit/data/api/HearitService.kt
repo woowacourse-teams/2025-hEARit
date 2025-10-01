@@ -1,8 +1,8 @@
 package com.onair.hearit.data.api
 
+import com.onair.hearit.data.dto.ExploreHearitResponse
 import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
-import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 import retrofit2.Response
@@ -18,7 +18,7 @@ interface HearitService {
     suspend fun getRandomHearits(
         @Query("cursorId") cursorId: Long?,
         @Query("size") size: Int?,
-    ): Response<RandomHearitResponse>
+    ): Response<ExploreHearitResponse>
 
     @GET("api/v1/hearits/recommend")
     suspend fun getRecommendHearits(): Response<List<RecommendHearitResponse>>

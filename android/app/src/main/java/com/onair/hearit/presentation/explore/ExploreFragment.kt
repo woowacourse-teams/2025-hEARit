@@ -24,7 +24,7 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.domain.model.ShortsHearit
+import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.presentation.DetailResult
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
@@ -224,7 +224,7 @@ class ExploreFragment :
     }
 
     // 피드 목록이 갱신 되었을 때
-    private fun handleShortsHearitsUpdate(shortsHearits: List<ShortsHearit>) {
+    private fun handleShortsHearitsUpdate(shortsHearits: List<ExploreHearit>) {
         if (!isViewValid) return
         adapter.submitList(shortsHearits) {
             if (!isViewValid) return@submitList
@@ -284,8 +284,16 @@ class ExploreFragment :
         index: Int,
         startPosition: Long = 0L,
     ) {
-        val item = adapter.currentList.getOrNull(index) ?: return
-        playerManager.playAudio(item.audioUrl, startPosition)
+        val list = adapter.currentList
+        if (index !in list.indices) return
+
+        val item = list[index]
+        val url =
+            item.audioUrl?.takeIf { it.isNotBlank() } ?: run {
+                return
+            }
+
+        playerManager.playAudio(url, startPosition)
     }
 
     private fun switchTo(newPosition: Int) {

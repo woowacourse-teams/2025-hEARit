@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RandomHearitResponse(
+data class ExploreHearitResponse(
     @SerialName("content")
     val content: List<Content>,
     @SerialName("isEmpty")

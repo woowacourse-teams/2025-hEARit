@@ -10,7 +10,7 @@ class ExploreViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val hearitRepository = RepositoryProvider.hearitRepository
         val exploreDataStoreRepository = RepositoryProvider.exploreDataStoreRepository
-        val getShortsHearitUseCase = UseCaseProvider.getShortsHearitUseCase
+        val getShortsHearitUseCase = UseCaseProvider.getExploreHearitUseCase
 
         return ExploreViewModel(
             hearitRepository,
