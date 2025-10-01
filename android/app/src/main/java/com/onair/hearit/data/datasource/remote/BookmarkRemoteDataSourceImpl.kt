@@ -7,6 +7,7 @@ import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.BookmarkIdResponse
 import com.onair.hearit.data.dto.BookmarkResponse
+import com.onair.hearit.data.dto.PlayingBookmarkResponse
 
 class BookmarkRemoteDataSourceImpl(
     private val bookmarkService: BookmarkService,
@@ -18,6 +19,15 @@ class BookmarkRemoteDataSourceImpl(
     ): Result<NetworkResult<BookmarkResponse>> =
         handleApiCall(
             apiCall = { bookmarkService.getBookmarks(page, size) },
+            transform = { response ->
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
+            },
+            errorHandler = errorResponseHandler,
+        )
+
+    override suspend fun getPlayingBookmarkHearits(): Result<NetworkResult<List<PlayingBookmarkResponse>>> =
+        handleApiCall(
+            apiCall = { bookmarkService.getPlayingBookmarkHearits() },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },

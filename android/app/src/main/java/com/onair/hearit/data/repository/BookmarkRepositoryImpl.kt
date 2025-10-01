@@ -4,6 +4,7 @@ import com.onair.hearit.data.datasource.remote.BookmarkRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.PageResult
+import com.onair.hearit.domain.model.PlayingBookmarkHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
 
 class BookmarkRepositoryImpl(
@@ -13,6 +14,9 @@ class BookmarkRepositoryImpl(
         page: Int?,
         size: Int?,
     ): Result<PageResult<Bookmark>> = bookmarkDataSource.getBookmarks(page, size).mapOrThrowDomain { it.toDomain() }
+
+    override suspend fun getPlayingBookmarkHearits(): Result<List<PlayingBookmarkHearit>> =
+        bookmarkDataSource.getPlayingBookmarkHearits().mapListOrThrowDomain { it.toDomain() }
 
     override suspend fun addBookmark(hearitId: Long): Result<Long> = bookmarkDataSource.addBookmark(hearitId).mapOrThrowDomain { it.id }
 

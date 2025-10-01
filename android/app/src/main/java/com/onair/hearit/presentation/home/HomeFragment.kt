@@ -20,7 +20,10 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Direction
+import com.onair.hearit.domain.model.PlayingBookmarkHearit
+import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendHearits
 import com.onair.hearit.presentation.HearitClickListener
@@ -163,11 +166,30 @@ class HomeFragment :
         }
 
         viewModel.recentUploadHearits.observe(viewLifecycleOwner) { recentUploadHearits ->
-            recentUploadAdapter.submitList(recentUploadHearits)
+            val dummy =
+                listOf(
+                    RecentUploadHearit(
+                        id = 1,
+                        title = "dummy;lsakdasljdkasjldjlasdlkjkajskldja",
+                        category = Category(id = 1, colorCode = "#8C46D2", name = "IT 트렌드"),
+                    ),
+                )
+            recentUploadAdapter.submitList(dummy)
         }
 
         viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->
-            playingBookmarkAdapter.submitList(playingBookmarkHearits)
+            val dummy =
+                listOf(
+                    PlayingBookmarkHearit(
+                        id = 1,
+                        title = "더미데이터1 더미데이터2 터미네이터3",
+                        playTime = 600,
+                        lastPlayTime = 500000,
+                        createdAt = "aaaaa",
+                        category = Category(id = 1, colorCode = "#1883B5", name = "IT 트렌드"),
+                    ),
+                )
+            playingBookmarkAdapter.submitList(dummy)
         }
 
         viewModel.groupedCategory.observe(viewLifecycleOwner) { groupedCategory ->

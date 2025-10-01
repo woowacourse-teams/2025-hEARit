@@ -2,6 +2,7 @@ package com.onair.hearit.data.api
 
 import com.onair.hearit.data.dto.BookmarkIdResponse
 import com.onair.hearit.data.dto.BookmarkResponse
+import com.onair.hearit.data.dto.PlayingBookmarkResponse
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -15,6 +16,9 @@ interface BookmarkService {
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<BookmarkResponse>
+
+    @GET("api/v1/bookmarks/hearits/unfinished")
+    suspend fun getPlayingBookmarkHearits(): Response<List<PlayingBookmarkResponse>>
 
     @POST("api/v1/bookmarks/hearits/{hearitId}")
     suspend fun postBookmark(

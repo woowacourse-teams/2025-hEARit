@@ -12,6 +12,7 @@ import com.onair.hearit.domain.model.PlayingHistoryHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class HomeViewModel(
+    private val bookmarkRepository: BookmarkRepository,
     private val hearitRepository: HearitRepository,
     private val memberRepository: MemberRepository,
     private val playingHistoryRepository: PlayingHistoryRepository,
@@ -66,7 +68,7 @@ class HomeViewModel(
             val recommendDeferred = async { hearitRepository.getRecommendHearits() }
             val playingHistoryDeferred = async { playingHistoryRepository.getPlayingHistories() }
             val recentUploadDeferred = async { hearitRepository.getRecentUploadHearits() }
-            val playingBookmarkDeferred = async { hearitRepository.getPlayingBookmarkHearits() }
+            val playingBookmarkDeferred = async { bookmarkRepository.getPlayingBookmarkHearits() }
             val groupedDeferred = async { hearitRepository.getCategoryHearits() }
 
             val recommendResult = recommendDeferred.await()

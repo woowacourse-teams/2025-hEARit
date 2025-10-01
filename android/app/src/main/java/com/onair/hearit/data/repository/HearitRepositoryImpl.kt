@@ -5,7 +5,6 @@ import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.PageResult
-import com.onair.hearit.domain.model.PlayingBookmarkHearit
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
@@ -24,9 +23,6 @@ class HearitRepositoryImpl(
 
     override suspend fun getRecentUploadHearits(): Result<List<RecentUploadHearit>> =
         hearitRemoteDataSource.getRecentUploadHearits().mapListOrThrowDomain { it.toDomain() }
-
-    override suspend fun getPlayingBookmarkHearits(): Result<List<PlayingBookmarkHearit>> =
-        hearitRemoteDataSource.getPlayingBookmarkHearits().mapListOrThrowDomain { it.toDomain() }
 
     override suspend fun getRandomHearits(
         cursorId: Long?,

@@ -155,7 +155,7 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_recent_upload_title"
                 tools:itemCount="3"
-                tools:listitem="@layout/item_playing_history_hearit" />
+                tools:listitem="@layout/item_recent_upload_hearit" />
 
             <TextView
                 android:id="@+id/tv_home_playing_bookmark_title"
@@ -179,7 +179,7 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_playing_bookmark_title"
                 tools:itemCount="3"
-                tools:listitem="@layout/item_playing_history_hearit" />
+                tools:listitem="@layout/item_playing_bookmark_hearit" />
 
             <TextView
                 android:id="@+id/tv_home_shortcast"
