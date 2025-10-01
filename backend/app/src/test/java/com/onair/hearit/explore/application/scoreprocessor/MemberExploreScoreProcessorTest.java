@@ -179,7 +179,7 @@ class MemberExploreScoreProcessorTest {
 
     @DisplayName("fetchExploreHearits는 점수판 순서대로 응답과 북마크 정보를 함께 반환한다")
     @Test
-    void fetchExploreHearitsReturnsResponses() {
+    void getExploreHearitsReturnsResponses() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = new UserInfo(member.getId(), null);
@@ -203,7 +203,7 @@ class MemberExploreScoreProcessorTest {
                 """, member.getUuid(), hearit2.getId(), 50.0, 2L);
 
         // when
-        List<ExploredHearitResponse> responses = memberExploreScoreProcessor.fetchExploreHearits(memberInfo, 0L, 3);
+        List<ExploredHearitResponse> responses = memberExploreScoreProcessor.getExploreHearits(memberInfo, 0L, 3);
 
         // then
         assertThat(responses).hasSize(2);
@@ -227,13 +227,13 @@ class MemberExploreScoreProcessorTest {
 
     @DisplayName("점수 데이터가 없으면 비어 있는 리스트를 반환한다")
     @Test
-    void fetchExploreHearitsReturnsEmptyWhenNoData() {
+    void getExploreHearitsReturnsEmptyWhenNoData() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = new UserInfo(member.getId(), null);
 
         // when
-        List<ExploredHearitResponse> responses = memberExploreScoreProcessor.fetchExploreHearits(memberInfo, 0L, 3);
+        List<ExploredHearitResponse> responses = memberExploreScoreProcessor.getExploreHearits(memberInfo, 0L, 3);
 
         // then
         assertThat(responses).isEmpty();

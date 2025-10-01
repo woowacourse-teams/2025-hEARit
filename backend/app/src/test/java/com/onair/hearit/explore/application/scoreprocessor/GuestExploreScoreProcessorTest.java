@@ -142,7 +142,7 @@ class GuestExploreScoreProcessorTest {
 
     @DisplayName("fetchExploreHearits는 explore_score 테이블의 점수 순서대로 응답을 반환한다")
     @Test
-    void fetchExploreHearitsReturnsResponses() {
+    void getExploreHearitsReturnsResponses() {
         // given
         UserInfo guestInfo = new UserInfo(null, GUEST_ID);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -162,7 +162,7 @@ class GuestExploreScoreProcessorTest {
                 """, GUEST_ID, hearit2.getId(), 40.0, 2L);
 
         // when
-        List<ExploredHearitResponse> responses = guestExploreScoreProcessor.fetchExploreHearits(guestInfo, 0L, 3);
+        List<ExploredHearitResponse> responses = guestExploreScoreProcessor.getExploreHearits(guestInfo, 0L, 3);
 
         // then
         assertThat(responses).hasSize(2);
@@ -187,12 +187,12 @@ class GuestExploreScoreProcessorTest {
 
     @DisplayName("점수 데이터가 없으면 비어 있는 리스트를 반환한다")
     @Test
-    void fetchExploreHearitsReturnsEmptyWhenNoData() {
+    void getExploreHearitsReturnsEmptyWhenNoData() {
         // given
         UserInfo guestInfo = new UserInfo(null, GUEST_ID);
 
         // when
-        List<ExploredHearitResponse> responses = guestExploreScoreProcessor.fetchExploreHearits(guestInfo, 0L, 3);
+        List<ExploredHearitResponse> responses = guestExploreScoreProcessor.getExploreHearits(guestInfo, 0L, 3);
 
         // then
         assertThat(responses).isEmpty();

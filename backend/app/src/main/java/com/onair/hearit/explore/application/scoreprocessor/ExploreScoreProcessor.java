@@ -10,10 +10,5 @@ public interface ExploreScoreProcessor {
 
     void refreshScoresIfNeeded(UserInfo userInfo, long cursorId);
 
-    List<ExploredHearitResponse> fetchExploreHearits(UserInfo userInfo, long cursorId, int size);
-
-    default List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId, int size) {
-        refreshScoresIfNeeded(userInfo, cursorId);
-        return fetchExploreHearits(userInfo, cursorId, size);
-    }
+    List<ExploredHearitResponse> getExploreHearits(UserInfo userInfo, long cursorId, int size);
 }
