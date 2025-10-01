@@ -188,6 +188,8 @@ class HomeFragment :
                     RecentUploadHearit(
                         id = 1,
                         title = "더미데이터1 더미데이터2 터미네이터3",
+                        playTime = 508,
+                        lastPlayTime = 123456,
                         category = Category(id = 1, colorCode = "#8C46D2", name = "IT 트렌드"),
                     ),
                 )
@@ -202,10 +204,11 @@ class HomeFragment :
                         title = "더미데이터1 더미데이터2 터미네이터3",
                         playTime = 600,
                         lastPlayTime = 500000,
-                        createdAt = "aaaaa",
                         category = Category(id = 1, colorCode = "#1883B5", name = "IT 트렌드"),
                     ),
                 )
+            binding.tvHomePlayingBookmarkTitle.isVisible = playingBookmarkHearits.isNotEmpty()
+            binding.ibHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
             playingBookmarkAdapter.submitList(dummy)
         }
 

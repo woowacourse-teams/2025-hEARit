@@ -12,7 +12,7 @@ data class RecentUploadResponse(
     @SerialName("playTime")
     val playTime: Int,
     @SerialName("lastPlayTime")
-    val lastPlayTime: Int,
+    val lastPlayTime: Long,
     @SerialName("createdAt")
     val createdAt: String,
     @SerialName("category")

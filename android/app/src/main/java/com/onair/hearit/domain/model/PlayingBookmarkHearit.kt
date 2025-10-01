@@ -6,6 +6,5 @@ data class PlayingBookmarkHearit(
     val title: String,
     val playTime: Int,
     val lastPlayTime: Long = 0L,
-    val createdAt: String,
     val category: Category,
 )

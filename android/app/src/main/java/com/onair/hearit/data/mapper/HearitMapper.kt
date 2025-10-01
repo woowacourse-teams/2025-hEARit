@@ -156,6 +156,8 @@ fun RecentUploadResponse.toDomain(): RecentUploadHearit =
     RecentUploadHearit(
         id = this.id,
         title = this.title,
+        playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
         category = this.category.toDomain(),
     )
 
@@ -165,6 +167,5 @@ fun PlayingBookmarkResponse.toDomain(): PlayingBookmarkHearit =
         title = this.title,
         playTime = this.playTime,
         lastPlayTime = this.lastPlayTime,
-        createdAt = this.createdAt,
         category = this.category.toDomain(),
     )
