@@ -178,7 +178,7 @@ class HomeFragment :
         }
 
         viewModel.playingHistoryHearits.observe(viewLifecycleOwner) { recentHearits ->
-            binding.tvHomeRecentHearitTitle.isVisible = recentHearits.isNotEmpty()
+            binding.tvHomePlayingHistoryHearitTitle.isVisible = recentHearits.isNotEmpty()
             recentAdapter.submitList(recentHearits)
         }
 
@@ -187,7 +187,7 @@ class HomeFragment :
                 listOf(
                     RecentUploadHearit(
                         id = 1,
-                        title = "dummy;lsakdasljdkasjldjlasdlkjkajskldja",
+                        title = "더미데이터1 더미데이터2 터미네이터3",
                         category = Category(id = 1, colorCode = "#8C46D2", name = "IT 트렌드"),
                     ),
                 )

@@ -114,7 +114,7 @@
                 tools:background="@color/black" />
 
             <TextView
-                android:id="@+id/tv_home_recent_hearit_title"
+                android:id="@+id/tv_home_playing_history_hearit_title"
                 style="@style/pretendard_main_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -133,7 +133,7 @@
                 android:orientation="horizontal"
                 android:paddingHorizontal="20dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_recent_hearit_title"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_playing_history_hearit_title"
                 tools:itemCount="3"
                 tools:listitem="@layout/item_playing_history_hearit" />
 
