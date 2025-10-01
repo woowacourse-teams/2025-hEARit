@@ -1,7 +1,13 @@
 package com.onair.hearit.app.hearit.application;
 
+import com.onair.hearit.app.category.application.RecommendCategoryService;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
+import com.onair.hearit.app.exception.custom.NotFoundException;
+import com.onair.hearit.app.exception.custom.UnauthenticatedException;
+import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
+import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
+import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -10,25 +16,16 @@ import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.UserInfo;
-import com.onair.hearit.app.exception.custom.NotFoundException;
-import com.onair.hearit.app.exception.custom.UnauthenticatedException;
-import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
-import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
-import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
-import com.onair.hearit.core.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import com.onair.hearit.core.infrastructure.projection.HearitWithPlayTimeProjection;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,7 +37,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HearitService {
 
-    private static final int RECOMMEND_CATEGORY_COUNT = 3;
     private static final int HEARITS_PER_RECOMMENDED_CATEGORY = 5;
     private static final int KEYWORDS_PER_CATEGORIZED_HEARIT = 3;
 
@@ -48,8 +44,8 @@ public class HearitService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
-    private final CategoryRepository categoryRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
+    private final RecommendCategoryService recommendCategoryService;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
         Hearit hearit = getHearitById(hearitId);
@@ -87,25 +83,11 @@ public class HearitService {
     }
 
     public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(UserInfo userInfo) {
-        List<Category> recommendCategories = getRecommendCategories(userInfo);
-        if (recommendCategories.size() < RECOMMEND_CATEGORY_COUNT) {
-            int extraCount = RECOMMEND_CATEGORY_COUNT - recommendCategories.size();
-            List<Long> randomCategoryIds = pickTodayRandomCategoryIds(recommendCategories, extraCount);
-            List<Category> randomCategories = categoryRepository.findAllById(randomCategoryIds);
-            recommendCategories.addAll(randomCategories);
-        }
+        List<Category> recommendCategories = recommendCategoryService.getRecommendedCategoriesFor(userInfo);
+
         return recommendCategories.stream()
                 .map(this::toHearitsWithRecommendedWithCategory)
                 .toList();
-    }
-
-    private List<Category> getRecommendCategories(UserInfo userInfo) {
-        if (userInfo == null || userInfo.isGuest()) {
-            return new ArrayList<>();
-        }
-        Member member = getMemberByUserInfo(userInfo);
-        return categoryRepository.findTopCategoriesByMemberBookmarks(member.getId(), RECOMMEND_CATEGORY_COUNT);
-
     }
 
     private Member getMemberByUserInfo(UserInfo userInfo) {
@@ -118,22 +100,6 @@ public class HearitService {
     private Member getMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
-    }
-
-    private List<Long> pickTodayRandomCategoryIds(List<Category> recommendCategories, int count) {
-        long seed = LocalDate.now().toEpochDay();
-        List<Long> categoryIds = getAllCategoryIdsWithoutRecommend(recommendCategories);
-        List<Long> mutableCategoryIds = new ArrayList<>(categoryIds);
-        Collections.shuffle(mutableCategoryIds, new Random(seed));
-        return mutableCategoryIds.subList(0, count);
-    }
-
-    private List<Long> getAllCategoryIdsWithoutRecommend(List<Category> recommendCategories) {
-        List<Long> recommendCategoryIds = recommendCategories.stream().map(Category::getId).toList();
-        List<Long> categoryIds = categoryRepository.findAllIds();
-        return categoryIds.stream()
-                .filter(id -> !recommendCategoryIds.contains(id))
-                .toList();
     }
 
     private HearitsWithRecommendCategoryResponse toHearitsWithRecommendedWithCategory(Category category) {

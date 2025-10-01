@@ -37,6 +37,10 @@ public class TestFixture {
         return new Category("Spring", "#000000");
     }
 
+    public static Category createCategoryByName(String name) {
+        return new Category(name, "#000000");
+    }
+
     public static Hearit createFixedHearitWith(Category category) {
         return new Hearit(
                 "title",

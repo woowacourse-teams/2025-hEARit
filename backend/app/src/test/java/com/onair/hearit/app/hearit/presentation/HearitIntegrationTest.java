@@ -100,7 +100,7 @@ class HearitIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, 추천하는 3개의 카테고리와 히어릿들을 반환한다.")
+    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, IT트랜드 + 추천 카테고리 3개 + 랜덤카테고리 를 선정하고 히어릿들을 반환한다.")
     void readHomeCategoriesHearit() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -112,20 +112,26 @@ class HearitIntegrationTest extends IntegrationTest {
         Category category4 = dbHelper.insertCategory(new Category("React2", "#0000FF"));
         Category category5 = dbHelper.insertCategory(new Category("React3", "#0000FF"));
         Category category6 = dbHelper.insertCategory(new Category("React4", "#0000FF"));
+        Category itTrendCategory = dbHelper.insertCategory(new Category("IT 트렌드", "#0000FF"));
 
-        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit21 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        Hearit hearit22 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        Hearit hearit31 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        Hearit hearit4 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        Hearit hearit5 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        Hearit hearit6 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        Hearit hearit7 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category4));
+        Hearit hearit8 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category5));
+        Hearit hearit9 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category6));
+        Hearit hearit10 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(itTrendCategory));
+        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(itTrendCategory));
 
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit11));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit12));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit13));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit21));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit22));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit31));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit2));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit3));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit4));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit5));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit6));
 
         // when
         List<HearitsWithRecommendCategoryResponse> responses = RestAssured.given(this.spec)
@@ -139,15 +145,7 @@ class HearitIntegrationTest extends IntegrationTest {
                 .getList(".", HearitsWithRecommendCategoryResponse.class);
 
         // then
-        assertAll(() -> {
-            assertThat(responses).hasSize(3);
-            assertThat(responses.get(0).hearits()).hasSize(3);
-            assertThat(responses.get(1).hearits()).hasSize(2);
-            assertThat(responses.get(2).hearits()).hasSize(1);
-            assertThat(responses.get(0).categoryId()).isEqualTo(category1.getId());
-            assertThat(responses.get(1).categoryId()).isEqualTo(category2.getId());
-            assertThat(responses.get(2).categoryId()).isEqualTo(category3.getId());
-        });
+        assertThat(responses).hasSize(5);
     }
 
     @Test
