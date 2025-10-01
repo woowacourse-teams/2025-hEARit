@@ -11,9 +11,6 @@ class ScriptAdapter(
     private var highlightedId: Long? = null
     private var highlightedIndex: Int = -1
 
-    val currentHighlightedId: Long?
-        get() = highlightedId
-
     fun highlightScriptLine(id: Long?) {
         if (highlightedId == id) return
 

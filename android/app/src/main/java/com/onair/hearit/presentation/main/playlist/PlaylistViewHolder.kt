@@ -9,29 +9,40 @@ import com.onair.hearit.domain.model.Bookmark
 
 class PlaylistViewHolder(
     private val binding: ItemPlaylistBinding,
+    private val playlistClickListener: PlaylistClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
+    init {
+        binding.playlistClickListener = playlistClickListener
+    }
+
     fun bind(
         bookmark: Bookmark,
+        isActive: Boolean,
         isPlaying: Boolean,
     ) {
         binding.item = bookmark
-        binding.root.isActivated = isPlaying
-        val resId = if (isPlaying) R.drawable.ic_bottom_pause else R.drawable.ic_bottom_play
-        binding.btnPlaylistPlayPause.setImageResource(resId)
+        updatePlayState(isActive, isPlaying)
         binding.executePendingBindings()
     }
 
-    fun updatePlayState(isPlaying: Boolean) {
-        binding.root.isActivated = isPlaying
-        val resId = if (isPlaying) R.drawable.ic_bottom_pause else R.drawable.ic_bottom_play
-        binding.btnPlaylistPlayPause.setImageResource(resId)
+    fun updatePlayState(
+        isActive: Boolean,
+        isPlaying: Boolean,
+    ) {
+        binding.root.isActivated = isActive
+        binding.btnPlaylistPlayPause.setImageResource(
+            if (isPlaying) R.drawable.ic_bottom_pause else R.drawable.ic_bottom_play,
+        )
     }
 
     companion object {
-        fun create(parent: ViewGroup): PlaylistViewHolder {
+        fun create(
+            parent: ViewGroup,
+            playlistClickListener: PlaylistClickListener,
+        ): PlaylistViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemPlaylistBinding.inflate(inflater, parent, false)
-            return PlaylistViewHolder(binding)
+            return PlaylistViewHolder(binding, playlistClickListener)
         }
     }
 }
