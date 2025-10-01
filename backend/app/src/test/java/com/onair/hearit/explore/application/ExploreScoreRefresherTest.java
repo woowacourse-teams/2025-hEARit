@@ -8,7 +8,6 @@ import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Bookmark;
 import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.Member;
 import com.onair.hearit.domain.UserType;
 import com.onair.hearit.explore.application.scorefactor.BookmarkScoreFactor;
@@ -69,13 +68,10 @@ class ExploreScoreRefresherTest {
     void skipRefreshingWhenCursorIsNotZero() {
         // given
         String guestUuid = UUID.randomUUID().toString();
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         long cursorId = 1L;
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        for (int i = 0; i < 3; i++) {
-            dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        }
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
         exploreScoreRefresher.refreshIfNeeded(cursorId, guestUuid, UserType.GUEST);
@@ -84,37 +80,43 @@ class ExploreScoreRefresherTest {
         assertThat(findExploreScores(guestUuid)).isEmpty();
     }
 
-    @DisplayName("cursorId가 0이고 비회원이면 최신성 점수와 랜덤 점수를 반영해 점수를 갱신한다.")
+    @DisplayName("cursorId가 0이고 비회원이면 최신성, 랜덤 점수를 합산하여 점수를 갱신한다")
     @Test
     void refreshScoresWhenCursorIsZeroForGuest() {
         // given
         String guestUuid = UUID.randomUUID().toString();
+        long cursorId = 0L;
 
+        // 랜덤 점수를 1.0점으로 고정
         double fixedRandomDouble = 0.1d;
         double fixedRandomScore = fixedRandomDouble * 10;
         given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
 
-        long cursorId = 0L;
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         LocalDateTime now = LocalDateTime.now();
-
-        Hearit newest = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), now);
-        Hearit twoDaysAgo = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), now.minusDays(2));
-        Hearit fiveDaysAgo = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), now.minusDays(5));
+        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), now);
+        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), now.minusDays(2));
+        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), now.minusDays(5));
 
         // when
         exploreScoreRefresher.refreshIfNeeded(cursorId, guestUuid, UserType.GUEST);
 
         // then
         List<ExploreScoreRow> rows = findExploreScores(guestUuid);
+
+        // 예상 점수 계산 (게스트 점수 = 최신성 점수 + 랜덤 점수)
+        double scoreForNewest = calculateRecencyScore(now, now) + fixedRandomScore;          // 20.0 + 1.0 = 21.0
+        double scoreForTwoDaysAgo =
+                calculateRecencyScore(now.minusDays(2), now) + fixedRandomScore;  // 19.0 + 1.0 = 20.0
+        double scoreForFiveDaysAgo =
+                calculateRecencyScore(now.minusDays(5), now) + fixedRandomScore; // 17.5 + 1.0 = 18.5
+
         assertAll(
                 () -> assertThat(rows).hasSize(3),
-                () -> assertThat(rows.get(0).score)
-                        .isEqualTo(fixedRandomScore + calculateRecencyScore(newest.getCreatedAt(), now)),
-                () -> assertThat(rows.get(1).score)
-                        .isEqualTo(fixedRandomScore + calculateRecencyScore(twoDaysAgo.getCreatedAt(), now)),
-                () -> assertThat(rows.get(2).score)
-                        .isEqualTo(fixedRandomScore + calculateRecencyScore(fiveDaysAgo.getCreatedAt(), now))
+                // 점수가 높은 순으로 정렬(cursor_id 순서)되므로, 순서대로 점수를 검증
+                () -> assertThat(rows.get(0).score()).isEqualTo(scoreForNewest),      // 1위
+                () -> assertThat(rows.get(1).score()).isEqualTo(scoreForTwoDaysAgo),  // 2위
+                () -> assertThat(rows.get(2).score()).isEqualTo(scoreForFiveDaysAgo)   // 3위
         );
     }
 
@@ -122,10 +124,12 @@ class ExploreScoreRefresherTest {
     @Test
     void refreshScoresWhenCursorIsZeroForMember() {
         // given
+        long cursorId = 0L;
+
+        // 랜덤 점수를 1.0점으로 고정
         double fixedRandomDouble = 0.1d;
         double fixedRandomScore = fixedRandomDouble * 10;
         given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
-        long cursorId = 0L;
 
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
@@ -133,7 +137,7 @@ class ExploreScoreRefresherTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         LocalDateTime now = LocalDateTime.now();
 
-        // 북마크 이력용 Hearit (카테고리1: 3개, 카테고리2: 1개)
+        // 북마크 이력용 Hearit 생성 (카테고리1: 3개, 카테고리2: 1개)
         dbHelper.insertBookmark(
                 new Bookmark(member, dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now)));
         dbHelper.insertBookmark(
@@ -143,10 +147,10 @@ class ExploreScoreRefresherTest {
         dbHelper.insertBookmark(
                 new Bookmark(member, dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2), now)));
 
-        // 시간 이력용 Hearit
-        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now); // 점수 1위 그룹
-        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2), now.minusDays(4)); // 점수 6위
-        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category3), now.minusDays(60)); // 점수 7위
+        // 점수 검증 대상 Hearit 생성
+        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), now);
+        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2), now.minusDays(4));
+        dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category3), now.minusDays(60));
 
         // when
         exploreScoreRefresher.refreshIfNeeded(cursorId, member.getUuid(), UserType.MEMBER);
@@ -154,7 +158,7 @@ class ExploreScoreRefresherTest {
         // then
         List<ExploreScoreRow> rows = findExploreScores(member.getUuid());
 
-        // 예상 점수 계산
+        // 예상 점수 계산 (회원 점수 = 최신성 점수 + 북마크 점수 + 랜덤 점수)
         double highBookmarkScore = (3.0 / 4.0) * 30.0; // 22.5
         double lowBookmarkScore = (1.0 / 4.0) * 30.0;  // 7.5
 
