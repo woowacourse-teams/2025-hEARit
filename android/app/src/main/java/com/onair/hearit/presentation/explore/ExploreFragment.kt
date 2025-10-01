@@ -12,6 +12,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isEmpty
+import androidx.core.view.isNotEmpty
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -43,14 +45,21 @@ class ExploreFragment :
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
 
+    private val isViewValid: Boolean
+        get() = _binding != null
+
     private val viewModel: ExploreViewModel by activityViewModels { ExploreViewModelFactory() }
 
     private val playerManager by lazy {
         ExplorePlayerManager(
             context = requireContext().applicationContext,
             lifecycleScope = viewLifecycleOwner.lifecycleScope,
-            onPlaybackEnded = { scrollToNextItem() },
-            onPositionUpdated = { position -> highlightScript(position) },
+            onPlaybackEnded = {
+                if (isViewValid) scrollToNextItem()
+            },
+            onPositionUpdated = { position ->
+                if (isViewValid) highlightScript(position)
+            },
         )
     }
     private val player get() = playerManager.player
@@ -101,38 +110,47 @@ class ExploreFragment :
 
         (activity as? PlayerControllerView)?.pause()
 
-        // 복귀 예약이 있다면 재개
         viewModel.resumeIfScheduled()
     }
 
     override fun onResume() {
         super.onResume()
-        player.playWhenReady = true
+        if (lastPlayingIndex != RecyclerView.NO_POSITION) {
+            player.playWhenReady = true
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        player.playWhenReady = false
 
-        // 현재 카드/재생 위치 저장 → 다음 attach 때 재개
-        val index = currentIndex()
-        viewModel.scheduleResume(
-            resumeIndex = index,
-            playerPositionMs = playerManager.getCurrentPosition(),
-        )
+        if (lastPlayingIndex != RecyclerView.NO_POSITION) {
+            player.playWhenReady = false
+
+            if (isViewValid) {
+                val index = currentIndex()
+                viewModel.scheduleResume(
+                    resumeIndex = index,
+                    playerPositionMs = playerManager.getCurrentPosition(),
+                )
+            }
+        }
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         animator?.removeAllListeners()
         animator?.cancel()
         animator?.setTarget(null)
+        animator = null
+
         binding.rvExplore.clearOnScrollListeners()
         snapHelper.attachToRecyclerView(null)
         binding.rvExplore.adapter = null
+
         playerManager.stop()
-        _binding = null
         lastPlayingIndex = RecyclerView.NO_POSITION
+
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onDestroy() {
@@ -158,6 +176,8 @@ class ExploreFragment :
                     recyclerView: RecyclerView,
                     newState: Int,
                 ) {
+                    if (!isViewValid) return
+
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         val index = currentIndex()
                         if (index != RecyclerView.NO_POSITION && index != lastPlayingIndex) {
@@ -175,23 +195,42 @@ class ExploreFragment :
 
     private fun observeViewModel() {
         viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
-            adapter.submitList(shortsHearits) {
-                val bindingSafe = _binding ?: return@submitList
-                if (shortsHearits.isNotEmpty()) {
-                    viewModel.loadAnimation()
+            if (!isViewValid) return@observe
 
-                    // 초기/복귀 시: 스냅 정착 후 재생 + 프리패치
-                    bindingSafe.rvExplore.post {
-                        val index = currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
-                        switchTo(index)
-                        viewModel.maybeLoadMore(index, adapter.itemCount)
+            adapter.submitList(shortsHearits) {
+                if (!isViewValid) return@submitList
+
+                if (shortsHearits.isNotEmpty()) {
+                    binding.rvExplore.post {
+                        if (!isViewValid) return@post
+
+                        if (binding.rvExplore.isEmpty()) {
+                            binding.rvExplore.post {
+                                if (!isViewValid) return@post
+                                val index =
+                                    currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
+                                switchTo(index)
+                                viewModel.maybeLoadMore(index, adapter.itemCount)
+                                viewModel.loadAnimation()
+                            }
+                        } else {
+                            val index =
+                                currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
+                            switchTo(index)
+                            viewModel.maybeLoadMore(index, adapter.itemCount)
+                            viewModel.loadAnimation()
+                        }
                     }
                 }
             }
         }
 
         viewModel.shouldPlayAnimation.observe(viewLifecycleOwner) { isEnabled ->
-            if (isEnabled) startSwipeAnimation()
+            if (!isViewValid) return@observe
+
+            if (isEnabled && binding.rvExplore.isNotEmpty()) {
+                startSwipeAnimation()
+            }
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
@@ -203,6 +242,7 @@ class ExploreFragment :
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (!isViewValid) return@observe
             binding.frExploreSkeleton.apply {
                 if (isLoading) startShimmer() else stopShimmer()
             }
@@ -210,6 +250,8 @@ class ExploreFragment :
     }
 
     private fun currentIndex(): Int {
+        if (!isViewValid) return RecyclerView.NO_POSITION
+
         val layoutManager =
             binding.rvExplore.layoutManager as? LinearLayoutManager
                 ?: return RecyclerView.NO_POSITION
@@ -218,11 +260,12 @@ class ExploreFragment :
     }
 
     private fun highlightScript(positionMs: Long) {
-        val bindingSafe = _binding ?: return
+        if (!isViewValid) return
+
         val index = currentIndex()
         if (index == RecyclerView.NO_POSITION) return
         val holder =
-            bindingSafe.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
+            binding.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
         holder?.highlightScriptLine(positionMs)
     }
 
@@ -239,9 +282,12 @@ class ExploreFragment :
         val startPos = viewModel.consumeResumePositionMs()
         playAudioAtIndex(newPosition, startPos)
         lastPlayingIndex = newPosition
+        player.playWhenReady = true
     }
 
     private fun scrollToNextItem() {
+        if (!isViewValid) return
+
         val currentPosition = currentIndex()
         val nextPosition = currentPosition + 1
         if (nextPosition < adapter.itemCount) {
@@ -250,7 +296,14 @@ class ExploreFragment :
     }
 
     private fun startSwipeAnimation() {
+        if (!isViewValid) return
+
         binding.lavExploreSwipeUp.visibility = View.VISIBLE
+
+        animator?.removeAllListeners()
+        animator?.cancel()
+        animator?.setTarget(null)
+
         animator =
             ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
                 duration = 1300
@@ -259,6 +312,7 @@ class ExploreFragment :
                 addListener(
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator) {
+                            if (!isViewValid) return
                             _binding?.lavExploreSwipeUp?.visibility = View.INVISIBLE
                         }
                     },
