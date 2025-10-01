@@ -22,7 +22,7 @@ class PlaylistAdapter(
         newId: Long?,
         newMode: String?,
     ) {
-        if ((currentPlayingId == newId) && currentPlayMode.equals(newMode, true)) return
+        if ((currentPlayingId == newId) && currentPlayMode.equals(newMode)) return
 
         val oldPosition = currentPlayingId?.let { findPositionById(it) }
         val newPosition = newId?.let { findPositionById(it) }
@@ -59,7 +59,6 @@ class PlaylistAdapter(
         position: Int,
     ) {
         val item: Bookmark = getItem(position)
-        idToPosition.put(item.bookmarkId, position)
         val active = isActiveForBackground(item.bookmarkId)
         holder.bind(item, isActive = active, isPlaying = (active && isPlayerPlaying))
     }

@@ -14,6 +14,8 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -86,6 +88,7 @@ class PlaylistBottomSheet :
         super.onViewCreated(view, savedInstanceState)
 
         observeViewModel()
+        setupInfiniteScroll()
     }
 
     override fun onStart() {
@@ -120,6 +123,29 @@ class PlaylistBottomSheet :
     override fun onStop() {
         super.onStop()
         disconnectController()
+    }
+
+    private fun setupInfiniteScroll() {
+        val layoutManager = binding.rvPlaylist.layoutManager as? LinearLayoutManager ?: return
+        binding.rvPlaylist.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int,
+                ) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    if (dy <= 0) return
+
+                    val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+                    val totalItemCount = layoutManager.itemCount
+
+                    if (lastVisibleItem >= totalItemCount - LOAD_MORE_THRESHOLD && viewModel.isLoading.value != true) {
+                        viewModel.loadNextPage()
+                    }
+                }
+            },
+        )
     }
 
     private fun connectController() {
@@ -214,6 +240,7 @@ class PlaylistBottomSheet :
 
     companion object {
         private const val INITIAL_PEEK_RATIO = 0.5
+        private const val LOAD_MORE_THRESHOLD = 3
         private const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
         private const val MODE_KEY = "PLAYBACK_MODE"
 

@@ -20,20 +20,48 @@ class PlaylistViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private var nextPage: Int? = 0
+
     init {
-        fetchBookmarks()
+        refreshPlaylist()
     }
 
-    private fun fetchBookmarks() {
+    fun refreshPlaylist() {
+        nextPage = 0
+        _bookmarks.value = emptyList()
+        fetchBookmarks(page = 0)
+    }
+
+    fun loadNextPage() {
+        val page = nextPage ?: return
+        fetchBookmarks(page)
+    }
+
+    private fun fetchBookmarks(page: Int) {
+        if (_isLoading.value == true || nextPage == null) return
+
+        _isLoading.value = true
         viewModelScope.launch {
             bookmarkRepository
-                .getBookmarks(page = null, size = null)
+                .getBookmarks(page = page, size = null)
                 .onSuccess { pageResult ->
-                    _bookmarks.value = pageResult.items
+                    val currentList = _bookmarks.value.orEmpty()
+                    _bookmarks.value = currentList + pageResult.items
+
+                    nextPage =
+                        if (!pageResult.paging.isLast) {
+                            pageResult.paging.page + 1
+                        } else {
+                            null
+                        }
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.library_toast_bookmark_load_fail
                 }
+            _isLoading.value = false
         }
     }
 }
