@@ -3,6 +3,7 @@ package com.onair.hearit.presentation.splash
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -21,7 +22,9 @@ import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.databinding.ActivitySplashBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import kotlinx.coroutines.delay
