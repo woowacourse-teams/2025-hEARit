@@ -9,7 +9,7 @@ public class DefaultRandomNumberGenerator implements RandomNumberGenerator {
     private final Random random = new Random();
 
     @Override
-    public double nextDouble() {
+    public double getDouble() {
         return random.nextDouble();
     }
 }

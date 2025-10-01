@@ -111,7 +111,7 @@ class GuestExploreScoreProcessorTest {
         // 랜덤 점수를 1.0점으로 고정
         double fixedRandomDouble = 0.1d;
         double fixedRandomScore = fixedRandomDouble * 10;
-        given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
+        given(randomNumberGenerator.getDouble()).willReturn(fixedRandomDouble);
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         LocalDateTime now = LocalDateTime.now();

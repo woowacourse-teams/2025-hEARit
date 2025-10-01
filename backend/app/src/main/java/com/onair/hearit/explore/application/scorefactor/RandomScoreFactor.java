@@ -26,7 +26,7 @@ public class RandomScoreFactor implements ScoreFactor {
         return hearits.stream()
                 .collect(Collectors.toMap(
                         Hearit::getId,
-                        h -> randomNumberGenerator.nextDouble() * MAX_RANDOM_SCORE
+                        h -> randomNumberGenerator.getDouble() * MAX_RANDOM_SCORE
                 ));
     }
 }

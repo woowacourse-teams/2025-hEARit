@@ -90,7 +90,7 @@ class ExploreScoreRefresherTest {
         // 랜덤 점수를 1.0점으로 고정
         double fixedRandomDouble = 0.1d;
         double fixedRandomScore = fixedRandomDouble * 10;
-        given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
+        given(randomNumberGenerator.getDouble()).willReturn(fixedRandomDouble);
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         LocalDateTime now = LocalDateTime.now();
@@ -129,7 +129,7 @@ class ExploreScoreRefresherTest {
         // 랜덤 점수를 1.0점으로 고정
         double fixedRandomDouble = 0.1d;
         double fixedRandomScore = fixedRandomDouble * 10;
-        given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
+        given(randomNumberGenerator.getDouble()).willReturn(fixedRandomDouble);
 
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));

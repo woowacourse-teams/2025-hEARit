@@ -93,7 +93,7 @@ class HearitExploreServiceTest {
         // given
         // 랜덤 점수를 1.0점으로 고정
         double fixedRandomDouble = 0.1d;
-        given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
+        given(randomNumberGenerator.getDouble()).willReturn(fixedRandomDouble);
 
         LocalDateTime now = LocalDateTime.now();
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
@@ -146,7 +146,7 @@ class HearitExploreServiceTest {
     @Test
     void reusePersonalScoreOnSecondRequest() {
         // given
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
+        given(randomNumberGenerator.getDouble()).willReturn(0.1d);
 
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -176,7 +176,7 @@ class HearitExploreServiceTest {
     @Test
     void getExploredHearitsForGuest() {
         // given
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
+        given(randomNumberGenerator.getDouble()).willReturn(0.1d);
 
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         UserInfo guestInfo = TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString());
