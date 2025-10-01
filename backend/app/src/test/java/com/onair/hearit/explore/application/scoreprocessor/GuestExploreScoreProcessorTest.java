@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.given;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.domain.Category;
+import com.onair.hearit.domain.ExploreScore;
 import com.onair.hearit.domain.Hearit;
 import com.onair.hearit.domain.HearitKeyword;
 import com.onair.hearit.domain.Keyword;
@@ -152,14 +153,8 @@ class GuestExploreScoreProcessorTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword)); // hearit1에만 키워드 설정
 
-        jdbcTemplate.update("""
-                INSERT INTO explore_score (user_uuid, hearit_id, score, cursor_id)
-                VALUES (?, ?, ?, ?)
-                """, GUEST_ID, hearit1.getId(), 50.0, 1L);
-        jdbcTemplate.update("""
-                INSERT INTO explore_score (user_uuid, hearit_id, score, cursor_id)
-                VALUES (?, ?, ?, ?)
-                """, GUEST_ID, hearit2.getId(), 40.0, 2L);
+        dbHelper.insertExploreScore(new ExploreScore(GUEST_ID, hearit1.getId(), 50.0, 1L));
+        dbHelper.insertExploreScore(new ExploreScore(GUEST_ID, hearit2.getId(), 40.0, 2L));
 
         // when
         List<ExploredHearitResponse> responses = guestExploreScoreProcessor.getExploreHearits(guestInfo, 0L, 3);

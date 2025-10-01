@@ -74,7 +74,7 @@ public class DbHelper {
         return recommendHearit;
     }
 
-    public ExploreScore insertMemberExploreScore(ExploreScore exploreScore) {
+    public ExploreScore insertExploreScore(ExploreScore exploreScore) {
         em.persist(exploreScore);
         em.flush();
         return exploreScore;
