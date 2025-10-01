@@ -19,6 +19,7 @@ import com.onair.hearit.app.auth.infrastructure.jwt.TokenStatus;
 import com.onair.hearit.app.bookmark.application.BookmarkService;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
+import com.onair.hearit.app.bookmark.dto.BookmarkUnfinishedHearitResponse;
 import com.onair.hearit.app.exception.custom.AlreadyExistException;
 import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.fixture.ControllerTest;
@@ -52,7 +53,8 @@ class BookmarkControllerTest extends ControllerTest {
                         100 + i,
                         (long) 200 + i - 2,
                         false,
-                        List.of(new BookmarkHearitResponseV2.SourceResponse("source1", "url1"), new BookmarkHearitResponseV2.SourceResponse("source2", "url2")),
+                        List.of(new BookmarkHearitResponseV2.SourceResponse("source1", "url1"),
+                                new BookmarkHearitResponseV2.SourceResponse("source2", "url2")),
                         new BookmarkHearitResponseV2.CategoryResponse((long) i, "categoryName", "#FFFFFF")
                 ))
                 .toList();
@@ -83,9 +85,11 @@ class BookmarkControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].lastPlayTime").description("히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
                                                         fieldWithPath("content[].categoryColor").description("카테고리 색상 코드")
-                                                }), Arrays.stream(com.onair.hearit.fixture.ApiDocSnippets.getCustomPagedResponseFields()))
+                                                }), Arrays.stream(
+                                                        com.onair.hearit.fixture.ApiDocSnippets.getCustomPagedResponseFields()))
                                         .toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
@@ -104,7 +108,8 @@ class BookmarkControllerTest extends ControllerTest {
                         100 + i,
                         (long) 200 + i - 2,
                         false,
-                        List.of(new BookmarkHearitResponseV2.SourceResponse("source1", "url1"), new BookmarkHearitResponseV2.SourceResponse("source2", "url2")),
+                        List.of(new BookmarkHearitResponseV2.SourceResponse("source1", "url1"),
+                                new BookmarkHearitResponseV2.SourceResponse("source2", "url2")),
                         new BookmarkHearitResponseV2.CategoryResponse((long) i, "categoryName", "#FFFFFF")
                 ))
                 .toList();
@@ -135,8 +140,10 @@ class BookmarkControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].summary").description("히어릿 요약"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].lastPlayTime").description("히어릿 마지막 재생 시간(ms)").optional(),
-                                                        fieldWithPath("content[].isFinished").description("히어릿 재생 완료 여부").optional(),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].isFinished").description(
+                                                                "히어릿 재생 완료 여부").optional(),
                                                         fieldWithPath("content[].sources").description("출처 정보"),
                                                         fieldWithPath("content[].sources[].sourceName").description("출처 이름"),
                                                         fieldWithPath("content[].sources[].sourceUrl").description("출처 URL"),
@@ -144,7 +151,8 @@ class BookmarkControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].category.id").description("카테고리 ID"),
                                                         fieldWithPath("content[].category.name").description("카테고리 이름"),
                                                         fieldWithPath("content[].category.colorCode").description("카테고리 색상코드")
-                                                }), Arrays.stream(com.onair.hearit.fixture.ApiDocSnippets.getCustomPagedResponseFields()))
+                                                }), Arrays.stream(
+                                                        com.onair.hearit.fixture.ApiDocSnippets.getCustomPagedResponseFields()))
                                         .toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
@@ -167,7 +175,8 @@ class BookmarkControllerTest extends ControllerTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
                                 .summary("북마크 목록 조회 V2")
-                                .responseFields(com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ));
     }
@@ -187,7 +196,49 @@ class BookmarkControllerTest extends ControllerTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
                                 .summary("북마크 목록 조회 V2")
-                                .responseFields(com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
+                                .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("북마크 미 완료 목록 조회 V1 - 200 OK")
+    void readBookmarkUnFinishedHearit_Ok() throws Exception {
+        // given
+        var responses = List.of(
+                new BookmarkUnfinishedHearitResponse(1L, "title1", 120, 30L, null,
+                        new BookmarkUnfinishedHearitResponse.CategoryResponse(1L, "카테고리1", "#000000")),
+                new BookmarkUnfinishedHearitResponse(2L, "title2", 150, 60L, null,
+                        new BookmarkUnfinishedHearitResponse.CategoryResponse(2L, "카테고리2", "#111111")),
+                new BookmarkUnfinishedHearitResponse(3L, "title3", 150, 60L, null,
+                        new BookmarkUnfinishedHearitResponse.CategoryResponse(3L, "카테고리3", "#222222")),
+                new BookmarkUnfinishedHearitResponse(4L, "title4", 150, 60L, null,
+                        new BookmarkUnfinishedHearitResponse.CategoryResponse(4L, "카테고리1", "#333333")
+                ));
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(bookmarkService.getBookmarkUnfinishedHearit(any())).willReturn(responses);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/bookmarks/hearits/unfinished")
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isOk())
+                .andDo(document("v1-get-bookmark-unfinished-ok",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Bookmark API")
+                                .summary("미완료 북마크 API V1")
+                                .description("로그인한 사용자는 다 듣지 않은 북마크 목록을 최대 10개까지 조회합니다.")
+                                .responseFields(
+                                        fieldWithPath("[].id").description("히어릿 ID"),
+                                        fieldWithPath("[].title").description("히어릿 제목"),
+                                        fieldWithPath("[].playTime").description("히어릿 전체 재생 시간(s)"),
+                                        fieldWithPath("[].lastPlayTime").description("사용자가 마지막으로 재생한 시간(ms)"),
+                                        fieldWithPath("[].createdAt").description("히어릿 생성일").optional(),
+                                        fieldWithPath("[].category.id").description("카테고리 ID"),
+                                        fieldWithPath("[].category.name").description("카테고리 이름"),
+                                        fieldWithPath("[].category.colorCode").description("카테고리 색상 코드")
+                                )
                                 .build())
                 ));
     }
@@ -239,7 +290,8 @@ class BookmarkControllerTest extends ControllerTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
                                 .summary("북마크 생성 V1")
-                                .responseFields(com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ));
     }
@@ -287,7 +339,8 @@ class BookmarkControllerTest extends ControllerTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Bookmark API")
                                 .summary("북마크 삭제 V1")
-                                .responseFields(com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ));
     }

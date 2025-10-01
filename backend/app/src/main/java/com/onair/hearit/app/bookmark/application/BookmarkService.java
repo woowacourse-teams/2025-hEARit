@@ -1,20 +1,23 @@
 package com.onair.hearit.app.bookmark.application;
 
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
-import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
-import com.onair.hearit.core.domain.Bookmark;
-import com.onair.hearit.core.domain.Hearit;
-import com.onair.hearit.core.domain.Member;
-import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.app.bookmark.dto.BookmarkUnfinishedHearitResponse;
+import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.exception.custom.AlreadyExistException;
 import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.exception.custom.UnauthenticatedException;
-import com.onair.hearit.core.infrastructure.projection.BookmarkWithPlayingHistoryProjection;
+import com.onair.hearit.core.domain.Bookmark;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.core.infrastructure.projection.BookmarkWithPlayingHistoryProjection;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,12 +44,18 @@ public class BookmarkService {
         return toBookmarkHearitResponse(projections);
     }
 
-    private Page<BookmarkHearitResponseV2> toBookmarkHearitResponse(Page<BookmarkWithPlayingHistoryProjection> projections) {
+    private Page<BookmarkHearitResponseV2> toBookmarkHearitResponse(
+            Page<BookmarkWithPlayingHistoryProjection> projections) {
         return projections.map(p -> BookmarkHearitResponseV2.of(
                 p.getBookmark(),
                 p.getBookmark().getHearit(),
                 p.getPlayingHistory()
         ));
+    }
+
+    public List<BookmarkUnfinishedHearitResponse> getBookmarkUnfinishedHearit(UserInfo userInfo) {
+        //TODO: API Docs 우선 배포하여 비지니스 로직 구현 필요
+        return Collections.emptyList();
     }
 
     @Transactional

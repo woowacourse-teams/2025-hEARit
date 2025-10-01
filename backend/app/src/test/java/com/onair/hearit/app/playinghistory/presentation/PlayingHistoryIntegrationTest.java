@@ -58,10 +58,10 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
-        for (int i = 0; i < 2; i++) {
-            Hearit hearit = dbHelper.insertHearit(createHearitWith(100 + i, category));
-            dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 10L * i));
-        }
+        Hearit hearit = dbHelper.insertHearit(createHearitWith(101, category));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 10L));
+        Hearit hearit2 = dbHelper.insertHearit(createHearitWith(102, category));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit2, 20L));
 
         // when & then
         List<RecentlyPlayedHearitResponse> response = RestAssured.given(this.spec)
@@ -73,7 +73,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
                 .extract().as(new TypeRef<>() {
                 });
 
-        assertThat(response).hasSize(0);
+        assertThat(response).isEmpty();
     }
 
     @Test
