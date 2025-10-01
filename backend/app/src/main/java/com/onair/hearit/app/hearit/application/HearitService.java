@@ -2,6 +2,11 @@ package com.onair.hearit.app.hearit.application;
 
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
+import com.onair.hearit.app.exception.custom.NotFoundException;
+import com.onair.hearit.app.exception.custom.UnauthenticatedException;
+import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
+import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
+import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
@@ -11,11 +16,6 @@ import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.UserInfo;
-import com.onair.hearit.app.exception.custom.NotFoundException;
-import com.onair.hearit.app.exception.custom.UnauthenticatedException;
-import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
-import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
-import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
@@ -44,6 +44,7 @@ public class HearitService {
     private static final int RECOMMEND_CATEGORY_COUNT = 3;
     private static final int HEARITS_PER_RECOMMENDED_CATEGORY = 5;
     private static final int KEYWORDS_PER_CATEGORIZED_HEARIT = 3;
+    private static final int RECENT_HEARIT_COUNT = 10;
 
     private final HearitRepository hearitRepository;
     private final MemberRepository memberRepository;
@@ -88,7 +89,13 @@ public class HearitService {
     }
 
     public List<RecentHearitResponse> getRecentHearits(UserInfo userInfo) {
-        return List.of();
+        Long memberId = (userInfo == null || userInfo.isGuest()) ? null : userInfo.getMemberId();
+        List<HearitWithPlayTimeProjection> hearitsWithPlayTime = hearitRepository.findTopNHearitWithPlayTime(
+                memberId,
+                RECENT_HEARIT_COUNT);
+        return hearitsWithPlayTime.stream()
+                .map(projection -> RecentHearitResponse.from(projection.getHearit(), projection.getLastPlayTime()))
+                .toList();
     }
 
     public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(UserInfo userInfo) {

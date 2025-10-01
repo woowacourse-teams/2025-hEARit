@@ -9,6 +9,7 @@ import com.onair.hearit.app.fixture.IntegrationTest;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
+import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -100,8 +101,44 @@ class HearitIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    @DisplayName("최근 등록된 히어릿 10개를 반환한다.")
+    void readRecentHearit() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
+        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
+        Category category3 = dbHelper.insertCategory(new Category("React1", "#0000FF"));
+
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+
+        // when
+        List<RecentHearitResponse> responses = RestAssured.given(this.spec)
+                .when()
+                .get("/api/v1/hearits/recent")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .jsonPath()
+                .getList(".", RecentHearitResponse.class);
+
+        // then
+        assertThat(responses).hasSize(10);
+    }
+
+    @Test
     @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, 추천하는 3개의 카테고리와 히어릿들을 반환한다.")
-    void readHomeCategoriesHearit() {
+    void readCategoriesHearit() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);

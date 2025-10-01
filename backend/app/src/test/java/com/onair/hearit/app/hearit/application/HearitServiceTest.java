@@ -6,8 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
+import com.onair.hearit.app.exception.custom.NotFoundException;
+import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
+import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
+import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
+import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -16,11 +20,8 @@ import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
-import com.onair.hearit.app.exception.custom.NotFoundException;
-import com.onair.hearit.app.fixture.DbHelper;
-import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
-import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
-import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
+import com.onair.hearit.core.fixture.TestFixture;
+import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
@@ -41,8 +42,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("fake-test")
+@Import({DbHelper.class, TestJpaAuditingConfig.class})
 class HearitServiceTest {
 
     @Autowired
@@ -174,6 +175,36 @@ class HearitServiceTest {
                 TestFixture.createFixedMemberUserInfo(member)))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
+    }
+
+    @Test
+    @DisplayName("최근 업로드된 히어릿 10개를 조회할 수 있다.")
+    void getRecentHearits() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category c2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Category c3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
+
+        // when
+        List<RecentHearitResponse> responses = hearitService.getRecentHearits(
+                TestFixture.createFixedMemberUserInfo(member));
+
+        // then
+        assertThat(responses).hasSize(10);
     }
 
     @Test
