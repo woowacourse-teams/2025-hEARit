@@ -115,6 +115,14 @@ class HomeFragment :
         binding.ivProfile.setOnClickListener {
             (activity as? DrawerClickListener)?.openDrawer()
         }
+
+        binding.tvHomeShortcast.setOnClickListener {
+            (activity as MainActivity).selectTab(R.id.nav_explore)
+        }
+
+        binding.tvHomeWootaeco.setOnClickListener {
+            navigateToSearch(id = 13, name = "우아한테크코스", colorCode = "#12C6B0")
+        }
     }
 
     private fun setupRecyclerView() {

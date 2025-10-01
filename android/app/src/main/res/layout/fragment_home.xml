@@ -216,7 +216,7 @@
                 android:background="@drawable/bg_gradient_home_wootaeco"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
-                android:text="숏캐스트를 구경하고\n더 많은 팟캐스트를 북마크해보세요!"
+                android:text="우아한테크코스 8기가 궁금하다면?\n선배님들의 후기를 들어보세요!"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast" />
