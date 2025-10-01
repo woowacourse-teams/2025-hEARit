@@ -112,9 +112,9 @@ class ExploreScoreCalculatorTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
 
         // -- 점수 계산 대상 Hearit들 --
-        Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now);              // ?? 20
-        Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category2), now.minusDays(4)); // ?? 18
-        Hearit hearit4 = dbHelper.insertHearitAt(createHearit(category3), now.minusDays(60));// ?? 0
+        Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now);              // 20
+        Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category2), now.minusDays(4)); //  18
+        Hearit hearit4 = dbHelper.insertHearitAt(createHearit(category3), now.minusDays(60));//  0
 
         String guestUuid = UUID.randomUUID().toString();
 
