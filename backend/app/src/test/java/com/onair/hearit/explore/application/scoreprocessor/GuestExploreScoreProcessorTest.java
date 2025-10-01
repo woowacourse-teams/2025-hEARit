@@ -22,6 +22,7 @@ import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
+import com.onair.hearit.infrastructure.projection.ExploredHearitProjection;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -71,13 +73,35 @@ class GuestExploreScoreProcessorTest {
                 hearitKeywordRepository);
     }
 
-    @DisplayName("게스트 UUID를 그대로 반환한다")
+    @DisplayName("게스트 사용자만 지원한다")
     @Test
-    void fetchExploreResponsesForGuest() {
+    void isSupportedForGuest() {
+        // given
+        UserInfo guestInfo = new UserInfo(null, GUEST_ID);
+
+        // when & then
+        assertThat(guestExploreScoreProcessor.isSupported(guestInfo)).isTrue();
+    }
+
+    @DisplayName("게스트가 아니면 지원하지 않는다")
+    @Test
+    void isSupportedForNonGuest() {
+        // given
+        UserInfo memberInfo = new UserInfo(1L, null);
+
+        // when & then
+        assertAll(
+                () -> assertThat(guestExploreScoreProcessor.isSupported(null)).isFalse(),
+                () -> assertThat(guestExploreScoreProcessor.isSupported(memberInfo)).isFalse()
+        );
+    }
+
+    @DisplayName("refreshScoresIfNeeded는 게스트 점수를 계산해 저장한다")
+    @Test
+    void refreshScoresIfNeededStoresScores() {
         // given
         given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         UserInfo guestInfo = new UserInfo(null, GUEST_ID);
-
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
 
@@ -91,15 +115,60 @@ class GuestExploreScoreProcessorTest {
 
         // when
         guestExploreScoreProcessor.refreshScoresIfNeeded(guestInfo, 0L);
+
+        // then
+        List<ExploredHearitProjection> projections = exploredHearitQueryRepository
+                .findExploredHearits(GUEST_ID, 0L, Pageable.ofSize(10));
+        System.out.println("projections = " + projections);
+        assertThat(projections).isNotEmpty();
+    }
+
+    @DisplayName("fetchExploreHearits는 저장된 탐색 결과를 반환한다")
+    @Test
+    void fetchExploreHearitsReturnsResponses() {
+        // given
+        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
+        UserInfo guestInfo = new UserInfo(null, GUEST_ID);
+        createGuestScenario();
+        guestExploreScoreProcessor.refreshScoresIfNeeded(guestInfo, 0L);
+
+        // when
         List<ExploredHearitResponse> responses = guestExploreScoreProcessor.fetchExploreHearits(guestInfo, 0L, 3);
 
         // then
         assertAll(
                 () -> assertThat(responses).hasSize(3),
                 () -> assertThat(responses).allMatch(response -> !response.isBookmarked()),
-                () -> assertThat(responses).allMatch(
-                        response -> response.cursorId() != null && response.cursorId() > 0),
+                () -> assertThat(responses)
+                        .allMatch(response -> response.cursorId() != null && response.cursorId() > 0),
                 () -> assertThat(responses.getFirst().keywords()).isNotEmpty()
         );
+    }
+
+    @DisplayName("탐색 결과가 없으면 빈 리스트를 반환한다")
+    @Test
+    void fetchExploreHearitsReturnsEmptyWhenNoData() {
+        // given
+        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
+        UserInfo guestInfo = new UserInfo(null, GUEST_ID);
+
+        // when
+        List<ExploredHearitResponse> responses = guestExploreScoreProcessor.fetchExploreHearits(guestInfo, 0L, 3);
+
+        // then
+        assertThat(responses).isEmpty();
+    }
+
+    private void createGuestScenario() {
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
     }
 }
