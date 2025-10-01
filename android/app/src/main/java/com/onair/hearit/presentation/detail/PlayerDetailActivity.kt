@@ -1,7 +1,6 @@
 package com.onair.hearit.presentation.detail
 
 import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -405,6 +404,7 @@ class PlayerDetailActivity :
     private fun startKakaoInvite(context: Context) {
         val title = viewModel.hearit.value?.title ?: return
 
+        // 카카오톡 설치여부 확인
         if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
             ShareClient.instance.shareCustom(
                 context,
@@ -419,23 +419,17 @@ class PlayerDetailActivity :
                 }
             }
         } else {
+            // 카카오톡 미설치: 웹 공유 사용 권장
             val sharerUrl =
                 WebSharerClient.instance.makeCustomUrl(
                     TEMPLATE_ID,
                     hashMapOf(TEMPLATE_TITLE_KEY to title),
                 )
+
             try {
                 KakaoCustomTabsClient.openWithDefault(context, sharerUrl)
-                return
-            } catch (error: UnsupportedOperationException) {
-                Timber.e(error, getString(R.string.player_detail_invite_error_browser))
-                showToast(getString(R.string.player_detail_invite_error_browser))
-            }
-            try {
-                KakaoCustomTabsClient.open(context, sharerUrl)
-                return
-            } catch (error: ActivityNotFoundException) {
-                Timber.e(error, getString(R.string.player_detail_invite_error_browser))
+            } catch (e: Exception) {
+                Timber.e(e, getString(R.string.player_detail_invite_error_browser))
                 showToast(getString(R.string.player_detail_invite_error_browser))
             }
         }

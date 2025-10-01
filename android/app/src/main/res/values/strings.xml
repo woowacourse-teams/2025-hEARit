@@ -69,7 +69,7 @@
     <string name="player_detail_toast_hearit_load_fail">히어릿 조회에 실패했습니다.</string>
     <string name="player_detail_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다.</string>
     <string name="player_detail_invite_error_kakao">카카오톡으로 공유하는 중 오류가 발생했습니다.</string>
-    <string name="player_detail_invite_error_browser">브라우저를 열 수 없습니다. 잠시 후 다시 시도해 주세요.</string>
+    <string name="player_detail_invite_error_browser">웹 브라우저를 찾을 수 없어 공유할 수 없습니다</string>
 
     <!-- ExploreFragment-->
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 찾아보세요!</string>
