@@ -30,6 +30,7 @@ class PlaylistViewModel(
     }
 
     fun refreshPlaylist() {
+        if (_isLoading.value == true) return
         nextPage = 0
         _bookmarks.value = emptyList()
         fetchBookmarks(page = 0)
