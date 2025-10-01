@@ -178,10 +178,24 @@ class PlaylistBottomSheet :
 
         val isSameLibraryItem =
             (currentBookmarkId == item.bookmarkId) &&
-                (currentMode.equals("LIBRARY", ignoreCase = true))
+                (currentMode.equals("LIBRARY"))
 
         if (isSameLibraryItem) {
-            if (controller.isPlaying) controller.pause() else controller.play()
+            when (controller.playbackState) {
+                Player.STATE_ENDED -> {
+                    controller.seekToDefaultPosition()
+                    controller.play()
+                }
+
+                Player.STATE_IDLE -> {
+                    controller.prepare()
+                    controller.play()
+                }
+
+                Player.STATE_BUFFERING, Player.STATE_READY -> {
+                    if (controller.isPlaying) controller.pause() else controller.play()
+                }
+            }
             return
         }
 
