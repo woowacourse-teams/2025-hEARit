@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.search.category
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -70,6 +71,8 @@ fun CategorySearchScreen(
     val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
     val category = viewModel.currentCategory
 
+    BackHandler(enabled = true) { onBack() }
+
     LaunchedEffect(Unit) {
         viewModel.fetchResultData(isInitial = true)
 
@@ -121,7 +124,7 @@ fun GradientBackgroundScreen(
                 Modifier
                     .fillMaxWidth()
                     .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
@@ -138,14 +141,14 @@ fun GradientBackgroundScreen(
                 Modifier
                     .align(Alignment.TopCenter)
                     .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(top = 18.dp, start = 24.dp),
+                    .padding(top = 20.dp, start = 24.dp),
         ) {
             Text(
                 text = categoryName,
                 style =
                     TextStyle(
                         color = Gray4,
-                        fontSize = 24.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = Pretendard,
                     ),
@@ -168,8 +171,8 @@ fun GradientBackgroundScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(top = 168.dp, bottom = 72.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(top = 152.dp, bottom = 60.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(items = hearits, key = { it.id }) { item ->
