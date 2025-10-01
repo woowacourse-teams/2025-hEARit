@@ -21,22 +21,16 @@ class PlaylistAdapter(
     fun updatePlaying(
         newId: Long?,
         newMode: String?,
-        force: Boolean = false,
     ) {
-        val isSameHearit = (currentPlayingId == newId) && currentPlayMode.equals(newMode, true)
-        if (!force && isSameHearit) return
+        if ((currentPlayingId == newId) && currentPlayMode.equals(newMode, true)) return
 
-        val oldPos = currentPlayingId?.let { findPositionById(it) }
-        val newPos = newId?.let { findPositionById(it) }
+        val oldPosition = currentPlayingId?.let { findPositionById(it) }
+        val newPosition = newId?.let { findPositionById(it) }
         currentPlayingId = newId
         currentPlayMode = newMode
 
-        if (!isSameHearit) {
-            oldPos?.let { notifyItemChanged(it, PAYLOAD_PLAY_STATE) }
-            newPos?.let { notifyItemChanged(it, PAYLOAD_PLAY_STATE) }
-        } else {
-            newPos?.let { notifyItemChanged(it, PAYLOAD_PLAY_STATE) }
-        }
+        oldPosition?.let { notifyItemChanged(it, PAYLOAD_PLAY_STATE) }
+        newPosition?.let { notifyItemChanged(it, PAYLOAD_PLAY_STATE) }
     }
 
     fun updateIsPlaying(isPlaying: Boolean) {
@@ -48,7 +42,7 @@ class PlaylistAdapter(
 
     private fun findPositionById(id: Long): Int? = idToPosition.get(id)?.takeIf { it >= 0 }
 
-    private fun isActiveForBg(itemId: Long): Boolean {
+    private fun isActiveForBackground(itemId: Long): Boolean {
         val isLibrary = currentPlayMode?.equals("LIBRARY", ignoreCase = true) == true
         return isLibrary && (itemId == currentPlayingId)
     }
@@ -66,7 +60,7 @@ class PlaylistAdapter(
     ) {
         val item: Bookmark = getItem(position)
         idToPosition.put(item.bookmarkId, position)
-        val active = isActiveForBg(item.bookmarkId)
+        val active = isActiveForBackground(item.bookmarkId)
         holder.bind(item, isActive = active, isPlaying = (active && isPlayerPlaying))
     }
 
@@ -77,7 +71,7 @@ class PlaylistAdapter(
     ) {
         if (payloads.contains(PAYLOAD_PLAY_STATE)) {
             val item = getItem(position)
-            val active = isActiveForBg(item.bookmarkId)
+            val active = isActiveForBackground(item.bookmarkId)
             holder.updatePlayState(isActive = active, isPlaying = (active && isPlayerPlaying))
         } else {
             super.onBindViewHolder(holder, position, payloads)
