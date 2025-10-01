@@ -3,6 +3,7 @@ package com.onair.hearit.app.hearit.application;
 import com.onair.hearit.app.category.application.RecommendCategoryService;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
+import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.exception.custom.UnauthenticatedException;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
@@ -82,9 +83,12 @@ public class HearitService {
         return lastPlayTime;
     }
 
+    public List<RecentHearitResponse> getRecentHearits(UserInfo userInfo) {
+        return List.of();
+    }
+
     public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(UserInfo userInfo) {
         List<Category> recommendCategories = recommendCategoryService.getRecommendedCategories(userInfo);
-
         return recommendCategories.stream()
                 .map(this::toHearitsWithRecommendedWithCategory)
                 .toList();
