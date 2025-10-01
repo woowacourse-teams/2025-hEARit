@@ -1,5 +1,6 @@
 package com.onair.hearit.app.hearit.presentation;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,7 +9,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.onair.hearit.app.auth.infrastructure.jwt.TokenStatus;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
@@ -21,6 +21,7 @@ import com.onair.hearit.app.hearit.dto.HearitDetailResponse.SourceResponse;
 import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse.HearitResponse;
+import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -67,7 +68,7 @@ class HearitControllerTest extends ControllerTest {
         mockMvc.perform(get("/api/v1/hearits/{hearitId}", hearitId)
                         .header("Authorization", "Bearer valid-token"))
                 .andExpect(status().isOk())
-                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearit-ok",
+                .andDo(document("v1-get-hearit-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("단일 히어릿 조회 V1")
@@ -95,11 +96,58 @@ class HearitControllerTest extends ControllerTest {
         mockMvc.perform(get("/api/v1/hearits/{hearitId}", notFoundHearitId)
                         .header("Authorization", "Bearer valid-token"))
                 .andExpect(status().isNotFound())
-                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearit-not-found",
+                .andDo(document("v1-get-hearit-not-found",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("단일 히어릿 조회 V1")
                                 .responseFields(com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("최근 업로드된 히어릿 조회 - 200 OK")
+    void readRecentHearitsV1_OK() throws Exception {
+        // given
+        var responses = List.of(
+                new RecentHearitResponse(99L, "10월 15일 히어릿", 300, (long) 1_000,
+                        LocalDateTime.of(2024, 10, 15, 10, 0),
+                        new RecentHearitResponse.CategoryResponse(2L, "IT 트렌드", "#FFFFFF")),
+                new RecentHearitResponse(98L, "10월 14일 히어릿", 400, (long) 1_500,
+                        LocalDateTime.of(2024, 10, 14, 10, 0),
+                        new RecentHearitResponse.CategoryResponse(9L, "Spring", "#FFFFFF")),
+                new RecentHearitResponse(96L, "10월 13일 히어릿", 100, (long) 1_100,
+                        LocalDateTime.of(2024, 10, 13, 10, 0),
+                        new RecentHearitResponse.CategoryResponse(8L, "Android", "#FFFFFF")),
+                new RecentHearitResponse(94L, "10월 12일 히어릿", 250, (long) 1_080,
+                        LocalDateTime.of(2024, 10, 12, 10, 0),
+                        new RecentHearitResponse.CategoryResponse(7L, "React", "#FFFFFF")),
+                new RecentHearitResponse(92L, "10월 11일 히어릿", 330, (long) 1_900,
+                        LocalDateTime.of(2024, 10, 11, 10, 0),
+                        new RecentHearitResponse.CategoryResponse(2L, "IT 트렌드", "#FFFFFF")
+                ));
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(hearitService.getRecentHearits(any())).willReturn(responses);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/hearits/recent")
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isOk())
+                .andDo(document("v1-get-hearits-recent-ok",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("최근 업로드된 히어릿 조회 V1")
+                                .description("최근 업로드된 히어릿을 최신순으로 5개 조회합니다.")
+                                .responseFields(
+                                        fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("히어릿 ID"),
+                                        fieldWithPath("[].title").type(JsonFieldType.STRING).description("히어릿 제목"),
+                                        fieldWithPath("[].playTime").type(JsonFieldType.NUMBER).description("재생 시간(s)"),
+                                        fieldWithPath("[].lastPlayTime").type(JsonFieldType.NUMBER).description("마지막 재생 시간(ms)").optional(),
+                                        fieldWithPath("[].createdAt").type(JsonFieldType.STRING).description("생성 일시"),
+                                        fieldWithPath("[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                                        fieldWithPath("[].category.name").type(JsonFieldType.STRING).description("카테고리 이름"),
+                                        fieldWithPath("[].category.colorCode").type(JsonFieldType.STRING).description("카테고리 색상"))
                                 .build())
                 ));
     }
@@ -144,7 +192,7 @@ class HearitControllerTest extends ControllerTest {
         mockMvc.perform(get("/api/v1/hearits/recommend-category")
                         .header("Authorization", "Bearer valid-token"))
                 .andExpect(status().isOk())
-                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearits-recommend-category-ok",
+                .andDo(document("v1-get-hearits-recommend-category-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("추천 카테고리별 히어릿 조회 V1")
@@ -185,7 +233,7 @@ class HearitControllerTest extends ControllerTest {
                         .param("page", "0")
                         .param("size", "20"))
                 .andExpect(status().isOk())
-                .andDo(MockMvcRestDocumentationWrapper.document("v1-get-hearits-by-category-ok",
+                .andDo(document("v1-get-hearits-by-category-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("카테고리별 히어릿 목록 조회 V1")

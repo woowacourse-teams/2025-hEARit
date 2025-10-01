@@ -7,6 +7,7 @@ import com.onair.hearit.app.hearit.application.HearitService;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
+import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,12 @@ public class HearitController {
             @AuthenticationPrincipal RequestUser requestUser) {
         HearitDetailResponse response = hearitService.getHearitDetail(hearitId, requestUser.getUserInfo());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/v1/hearits/recent")
+    public ResponseEntity<List<RecentHearitResponse>> readRecentHearit(@AuthenticationPrincipal RequestUser requestUser) {
+        List<RecentHearitResponse> responses = hearitService.getRecentHearits(requestUser.getUserInfo());
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/api/v1/hearits/recommend-category")
