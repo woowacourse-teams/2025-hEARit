@@ -22,7 +22,6 @@ import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
-import com.onair.hearit.infrastructure.projection.ExploredHearitProjection;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,10 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
@@ -49,7 +47,7 @@ class GuestExploreScoreProcessorTest {
 
     private static final String GUEST_ID = UUID.randomUUID().toString();
 
-    @MockBean
+    @MockitoBean
     private RandomNumberGenerator randomNumberGenerator;
 
     @Autowired
@@ -96,9 +94,9 @@ class GuestExploreScoreProcessorTest {
         );
     }
 
-    @DisplayName("refreshScoresIfNeeded는 게스트 점수를 계산해 저장한다")
+    @DisplayName("탐색 히어릿을 조회할 때 저장된 탐색 결과를 반환한다")
     @Test
-    void refreshScoresIfNeededStoresScores() {
+    void fetchExploreHearitsReturnsResponses() {
         // given
         given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         UserInfo guestInfo = new UserInfo(null, GUEST_ID);
@@ -112,24 +110,6 @@ class GuestExploreScoreProcessorTest {
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
-
-        // when
-        guestExploreScoreProcessor.refreshScoresIfNeeded(guestInfo, 0L);
-
-        // then
-        List<ExploredHearitProjection> projections = exploredHearitQueryRepository
-                .findExploredHearits(GUEST_ID, 0L, Pageable.ofSize(10));
-        System.out.println("projections = " + projections);
-        assertThat(projections).isNotEmpty();
-    }
-
-    @DisplayName("fetchExploreHearits는 저장된 탐색 결과를 반환한다")
-    @Test
-    void fetchExploreHearitsReturnsResponses() {
-        // given
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
-        UserInfo guestInfo = new UserInfo(null, GUEST_ID);
-        createGuestScenario();
         guestExploreScoreProcessor.refreshScoresIfNeeded(guestInfo, 0L);
 
         // when
@@ -157,18 +137,5 @@ class GuestExploreScoreProcessorTest {
 
         // then
         assertThat(responses).isEmpty();
-    }
-
-    private void createGuestScenario() {
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword));
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
-        dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
     }
 }

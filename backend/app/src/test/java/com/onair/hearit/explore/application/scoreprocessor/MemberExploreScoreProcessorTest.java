@@ -26,7 +26,6 @@ import com.onair.hearit.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.infrastructure.jpa.MemberRepository;
-import com.onair.hearit.infrastructure.projection.ExploredHearitProjection;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,10 +35,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
@@ -51,7 +49,7 @@ import org.springframework.test.context.jdbc.Sql;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class MemberExploreScoreProcessorTest {
 
-    @MockBean
+    @MockitoBean
     private RandomNumberGenerator randomNumberGenerator;
 
     @Autowired
@@ -109,24 +107,7 @@ class MemberExploreScoreProcessorTest {
         );
     }
 
-    @DisplayName("refreshScoresIfNeeded는 점수 데이터를 저장한다")
-    @Test
-    void refreshScoresIfNeededStoresScores() {
-        // given
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
-        Member member = createMemberScenario();
-        UserInfo memberInfo = new UserInfo(member.getId(), null);
-
-        // when
-        memberExploreScoreProcessor.refreshScoresIfNeeded(memberInfo, 0L);
-
-        // then
-        List<ExploredHearitProjection> projections = exploredHearitQueryRepository
-                .findExploredHearits(member.getUuid(), 0L, Pageable.ofSize(10));
-        assertThat(projections).isNotEmpty();
-    }
-
-    @DisplayName("fetchExploreHearits는 북마크와 키워드를 포함해 반환한다")
+    @DisplayName("점수를 조회할 때 북마크와 키워드를 포함해 반환한다")
     @Test
     void fetchExploreHearitsReturnsResponses() {
         // given
