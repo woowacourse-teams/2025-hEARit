@@ -26,7 +26,6 @@ import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
-import com.onair.hearit.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.infrastructure.jpa.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,38 +37,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, RandomScoreFactor.class, RecencyScoreFactor.class, BookmarkScoreFactor.class,
-        ExploreScoreCalculator.class,
-        ExploreScoreCommandRepository.class, ExploreScoreRefresher.class, TestJpaAuditingConfig.class
-})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, RandomScoreFactor.class, RecencyScoreFactor.class,
+        BookmarkScoreFactor.class, ExploreScoreCalculator.class, ExploreScoreCommandRepository.class,
+        ExploreScoreRefresher.class, GuestExploreScoreProcessor.class, MemberExploreScoreProcessor.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
 
-    @MockBean
+    @MockitoBean
     private RandomNumberGenerator randomNumberGenerator;
 
     @Autowired
     private DbHelper dbHelper;
 
     @Autowired
-    private HearitRepository hearitRepository;
-
-    @Autowired
-    private ExploredHearitQueryRepository exploredHearitQueryRepository;
+    private BookmarkRepository bookmarkRepository;
 
     @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
-    private BookmarkRepository bookmarkRepository;
+    private ExploredHearitQueryRepository exploredHearitQueryRepository;
 
     @Autowired
     private HearitKeywordRepository hearitKeywordRepository;
@@ -77,121 +72,115 @@ class HearitExploreServiceTest {
     @Autowired
     private ExploreScoreRefresher exploreScoreRefresher;
 
+    @Autowired
+    private GuestExploreScoreProcessor guestExploreScoreProcessor;
+
+    @Autowired
+    private MemberExploreScoreProcessor memberExploreScoreProcessor;
+
     private HearitExploreService hearitExploreService;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         hearitExploreService = new HearitExploreService(
-                List.of(
-                        new GuestExploreScoreProcessor(exploreScoreRefresher, exploredHearitQueryRepository,
-                                hearitKeywordRepository),
-                        new MemberExploreScoreProcessor(exploreScoreRefresher, exploredHearitQueryRepository,
-                                hearitKeywordRepository,
-                                memberRepository, bookmarkRepository)
-                )
-        );
+                List.of(guestExploreScoreProcessor, memberExploreScoreProcessor));
     }
+
 
     @DisplayName("회원이 처음 탐색 요청 시(cursorId=0), 점수 순으로 정렬하여 반환한다")
     @Test
     void getExploredHearitsForMember_firstRequest() {
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         // given
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fourDaysAgo = now.minusDays(4);
-        LocalDateTime sixtyDaysAgo = now.minusDays(60);
+        // 랜덤 점수를 1.0점으로 고정
+        double fixedRandomDouble = 0.1d;
+        given(randomNumberGenerator.nextDouble()).willReturn(fixedRandomDouble);
 
+        LocalDateTime now = LocalDateTime.now();
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = TestFixture.createFixedMemberUserInfo(member);
 
-        // -- 북마크 이력용 Hearit들 --
-        // 최신성 20, 카테고리 22.5
+        // 북마크 이력용 데이터 생성 (카테고리1: 3개, 카테고리2: 1개)
         Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);
-        // 최신성 20, 카테고리 22.5
         Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now);
-        // 최신성 20, 카테고리 22.5
         Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category1), now);
-        // 최성 20, 카테고리 7.5
         Hearit hearit4 = dbHelper.insertHearitAt(createHearit(category2), now);
-
-        //  카테고리별 북마크 - category1 : 3개, category2: 1개
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
         dbHelper.insertBookmark(new Bookmark(member, hearit2));
         dbHelper.insertBookmark(new Bookmark(member, hearit3));
         dbHelper.insertBookmark(new Bookmark(member, hearit4));
 
-        // 북마크 제외 히어릿들
-        // 최신성 20, 카테고리 22.5
+        // 점수 검증 대상 데이터 생성
         Hearit hearit5 = dbHelper.insertHearitAt(createHearit(category1), now);
-        // 최신성 18, 카테고리 7.5
-        Hearit hearit6 = dbHelper.insertHearitAt(createHearit(category2), fourDaysAgo);
-        // 최신성 0, 카테고리 0
-        Hearit hearit7 = dbHelper.insertHearitAt(createHearit(category3), sixtyDaysAgo);
+        Hearit hearit6 = dbHelper.insertHearitAt(createHearit(category2), now.minusDays(4));
+        Hearit hearit7 = dbHelper.insertHearitAt(createHearit(category3), now.minusDays(60));
 
         // when
         CursorResponseV2<ExploredHearitResponse> response = hearitExploreService.getExploredHearits(
                 memberInfo, new CursorRequest(0L, 10));
 
         // then
-        // 점수가 높은 순서(내림차순)로 정렬
+        // 예상 점수 계산 (회원 점수 = 북마크 점수 + 최신성 점수 + 랜덤 점수)
+        // hearit 1,2,3,5 (cat1, now): 22.5 + 20.0 + 1.0 = 43.5점
+        // hearit 4 (cat2, now): 7.5 + 20.0 + 1.0 = 28.5점
+        // hearit 6 (cat2, 4일 전): 7.5 + 18.0 + 1.0 = 26.5점
+        // hearit 7 (cat3, 60일 전): 0.0 + 0.0 + 1.0 = 1.0점
         assertThat(response.content())
                 .hasSize(7)
                 .extracting("id", "isBookmarked")
+                .as("점수가 높은 순으로 정렬되어야 한다")
                 .containsExactly(
-                        tuple(hearit5.getId(), false),
-                        tuple(hearit3.getId(), true),
-                        tuple(hearit2.getId(), true),
-                        tuple(hearit1.getId(), true),
-                        // --- 28.5점 ---
-                        tuple(hearit4.getId(), true),
-                        // --- 26.5점 ---
-                        tuple(hearit6.getId(), false),
-                        // --- 1.0점 ---
-                        tuple(hearit7.getId(), false)
+                        tuple(hearit5.getId(), false), // 43.5점
+                        tuple(hearit3.getId(), true),  // 43.5점
+                        tuple(hearit2.getId(), true),  // 43.5점
+                        tuple(hearit1.getId(), true),  // 43.5점
+                        tuple(hearit4.getId(), true),  // 28.5점
+                        tuple(hearit6.getId(), false), // 26.5점
+                        tuple(hearit7.getId(), false)  // 1.0점
                 );
-
     }
 
     @DisplayName("회원이 두 번째 이후 탐색 요청 시(cursorId!=0), 점수판을 갱신하지 않는다")
     @Test
     void reusePersonalScoreOnSecondRequest() {
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         // given
+        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
+
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = TestFixture.createFixedMemberUserInfo(member);
-
         LocalDateTime now = LocalDateTime.now();
+
         dbHelper.insertHearitAt(createHearit(category1), now);
 
+        // 첫 번째 요청으로 점수판 생성
         CursorResponseV2<ExploredHearitResponse> firstResponse = hearitExploreService.getExploredHearits(
-                memberInfo, new CursorRequest(0L, 2));
-        List<ExploredHearitResponse> firstContent = firstResponse.content();
-        assertThat(firstContent).isNotEmpty();
-        long nextCursorId = firstContent.get(firstContent.size() - 1).cursorId();
+                memberInfo, new CursorRequest(0L, 1));
+        long nextCursorId = firstResponse.content().getFirst().cursorId();
 
         // when
+        // 새로운 Hearit이 추가되었지만, cursorId가 0이 아니므로 점수판은 갱신되지 않아야 함
         Hearit newHearit = dbHelper.insertHearitAt(createHearit(category1), now.plusMinutes(1));
         CursorResponseV2<ExploredHearitResponse> secondResponse = hearitExploreService.getExploredHearits(
-                memberInfo, new CursorRequest(nextCursorId, 2));
+                memberInfo, new CursorRequest(nextCursorId, 1));
 
+        // then
         assertThat(secondResponse.content())
                 .extracting("id")
                 .doesNotContain(newHearit.getId());
-
     }
 
     @DisplayName("게스트가 탐색 요청 시, 북마크를 제외한 점수 순으로 정렬하여 반환한다")
     @Test
     void getExploredHearitsForGuest() {
-        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
         // given
-        LocalDateTime now = LocalDateTime.now();
+        given(randomNumberGenerator.nextDouble()).willReturn(0.1d);
+
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
         UserInfo guestInfo = TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString());
+        LocalDateTime now = LocalDateTime.now();
 
         Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now.minusDays(2));
@@ -202,13 +191,18 @@ class HearitExploreServiceTest {
                 guestInfo, new CursorRequest(0L, 10));
 
         // then
+        // 예상 점수 계산 (게스트 점수 = 최신성 점수 + 랜덤 점수)
+        // hearit1 (now): 20.0 + 1.0 = 21.0점
+        // hearit2 (2일 전): 19.0 + 1.0 = 20.0점
+        // hearit3 (4일 전): 18.0 + 1.0 = 19.0점
         assertThat(response.content())
                 .hasSize(3)
                 .extracting("id", "isBookmarked")
+                .as("점수가 높은 순(최신순)으로 정렬되어야 한다")
                 .containsExactly(
-                        tuple(hearit1.getId(), false),
-                        tuple(hearit2.getId(), false),
-                        tuple(hearit3.getId(), false)
+                        tuple(hearit1.getId(), false), // 21.0점
+                        tuple(hearit2.getId(), false), // 20.0점
+                        tuple(hearit3.getId(), false)  // 19.0점
                 );
     }
 
@@ -220,12 +214,9 @@ class HearitExploreServiceTest {
                 "/hearit/audio/original/ORG_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
                 "/hearit/audio/short/SHR_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
                 "/hearit/script/SCR_bf7c513e-579e-4224-8505-3824bb22ed01.json",
-                List.of(new Source("??컨텐츠는 쿠버?�티??공식 문서 (?�?�자: The Kubernetes Authors)�?참고?�여 만들?�졌?�니??",
+                List.of(new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
                         "https://example.com/1")),
                 category
         );
     }
 }
-
-
-
