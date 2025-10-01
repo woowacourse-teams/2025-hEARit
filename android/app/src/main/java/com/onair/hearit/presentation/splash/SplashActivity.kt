@@ -44,6 +44,11 @@ class SplashActivity : AppCompatActivity() {
         setupUpdateLauncher()
         observeViewModel()
         checkForUpdate()
+
+        val data: Uri? = intent?.data
+        if (data != null && data.host == "kakaolink") {
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.SHARE_EVENT)
+        }
     }
 
     private fun setupWindowInsets() {

@@ -7,6 +7,7 @@ object AnalyticsEventNames {
     const val DETAIL_CATEGORY_SELECTED = "detail_category_selected"
     const val DETAIL_SOURCE_SELECTED = "detail_source_selected"
     const val LOGIN_EVENT = "login_event"
+    const val SHARE_EVENT = "share_event"
     const val EXPLORE_TO_DETAIL = "explore_to_detail"
     const val EXPLORE_SWIPE = "explore_swipe"
 }
