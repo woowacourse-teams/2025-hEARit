@@ -413,6 +413,7 @@ class PlayerDetailActivity :
             ) { sharingResult, error ->
                 if (error != null) {
                     Timber.e(error, getString(R.string.player_detail_invite_error_kakao))
+                    showToast(getString(R.string.player_detail_invite_error_kakao))
                 } else if (sharingResult != null) {
                     startActivity(sharingResult.intent)
                 }
@@ -428,12 +429,14 @@ class PlayerDetailActivity :
                 return
             } catch (error: UnsupportedOperationException) {
                 Timber.e(error, getString(R.string.player_detail_invite_error_browser))
+                showToast(getString(R.string.player_detail_invite_error_browser))
             }
             try {
                 KakaoCustomTabsClient.open(context, sharerUrl)
                 return
             } catch (error: ActivityNotFoundException) {
                 Timber.e(error, getString(R.string.player_detail_invite_error_browser))
+                showToast(getString(R.string.player_detail_invite_error_browser))
             }
         }
     }
