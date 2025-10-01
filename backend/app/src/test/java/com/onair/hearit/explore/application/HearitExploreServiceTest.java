@@ -112,7 +112,6 @@ class HearitExploreServiceTest {
         dbHelper.insertBookmark(new Bookmark(member, hearit3));
         dbHelper.insertBookmark(new Bookmark(member, hearit4));
 
-        // 점수 검증 대상 데이터 생성
         Hearit hearit5 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit6 = dbHelper.insertHearitAt(createHearit(category2), now.minusDays(4));
         Hearit hearit7 = dbHelper.insertHearitAt(createHearit(category3), now.minusDays(60));
@@ -198,7 +197,6 @@ class HearitExploreServiceTest {
         assertThat(response.content())
                 .hasSize(3)
                 .extracting("id", "isBookmarked")
-                .as("점수가 높은 순(최신순)으로 정렬되어야 한다")
                 .containsExactly(
                         tuple(hearit1.getId(), false), // 21.0점
                         tuple(hearit2.getId(), false), // 20.0점

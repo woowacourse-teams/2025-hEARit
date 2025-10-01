@@ -113,7 +113,6 @@ class ExploreScoreRefresherTest {
 
         assertAll(
                 () -> assertThat(rows).hasSize(3),
-                // 점수가 높은 순으로 정렬(cursor_id 순서)되므로, 순서대로 점수를 검증
                 () -> assertThat(rows.get(0).score()).isEqualTo(scoreForNewest),      // 1위
                 () -> assertThat(rows.get(1).score()).isEqualTo(scoreForTwoDaysAgo),  // 2위
                 () -> assertThat(rows.get(2).score()).isEqualTo(scoreForFiveDaysAgo)   // 3위

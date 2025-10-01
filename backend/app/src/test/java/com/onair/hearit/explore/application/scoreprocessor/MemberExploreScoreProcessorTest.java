@@ -206,12 +206,11 @@ class MemberExploreScoreProcessorTest {
         List<ExploredHearitResponse> responses = memberExploreScoreProcessor.getExploreHearits(memberInfo, 0L, 3);
 
         // then
-        assertThat(responses).hasSize(2);
 
-        // 1순위 응답(hearit1) 검증
         ExploredHearitResponse response1 = responses.get(0);
         ExploredHearitResponse response2 = responses.get(1);
-        assertAll("첫 번째 응답 검증 (북마크 O)",
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
                 () -> assertThat(response1.id()).isEqualTo(hearit1.getId()),
                 () -> assertThat(response1.cursorId()).isEqualTo(1L),
                 () -> assertThat(response1.isBookmarked()).isTrue(),

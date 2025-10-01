@@ -161,11 +161,11 @@ class GuestExploreScoreProcessorTest {
         List<ExploredHearitResponse> responses = guestExploreScoreProcessor.getExploreHearits(guestInfo, 0L, 3);
 
         // then
-        assertThat(responses).hasSize(2);
 
         ExploredHearitResponse response1 = responses.get(0);
         ExploredHearitResponse response2 = responses.get(1);
-        assertAll("첫 번째 응답 검증",
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
                 () -> assertThat(response1.id()).isEqualTo(hearit1.getId()),
                 () -> assertThat(response1.title()).isEqualTo(hearit1.getTitle()),
                 () -> assertThat(response1.cursorId()).isEqualTo(1L),
