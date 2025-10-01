@@ -24,29 +24,14 @@ public class RecommendCategoryService {
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
 
-    public List<Category> getRecommendedCategoriesFor(UserInfo userInfo) {
-        List<Category> composedCategories = new ArrayList<>();
-
-        Category itTrendCategory = getItTrendCategory();
-        composedCategories.add(itTrendCategory);
-
-        if (userInfo != null && !userInfo.isGuest()) {
-            Member member = memberRepository.findById(userInfo.getMemberId())
-                    .orElseThrow(() -> new NotFoundException("memberId", userInfo.getMemberId().toString()));
-
-            List<Category> userCategories = categoryRepository.findTopCategoriesByMemberBookmarks(
-                    member.getId(),
-                    USER_BASED_RECOMMEND_COUNT,
-                    itTrendCategory.getId()
-            );
-            composedCategories.addAll(userCategories);
+    public List<Category> getRecommendedCategories(UserInfo userInfo) {
+        List<Category> recommendations = new ArrayList<>();
+        recommendations.add(getItTrendCategory());
+        if (userInfo.isMember()) {
+            recommendations.addAll(getUserBasedRecommendations(userInfo, recommendations));
         }
-
-        int remainingCount = TOTAL_RECOMMEND_COUNT - composedCategories.size();
-        if (remainingCount > 0) {
-            composedCategories.addAll(pickRandomCategories(composedCategories, remainingCount));
-        }
-        return composedCategories;
+        recommendations.addAll(getRandomRecommendations(recommendations));
+        return recommendations;
     }
 
     private Category getItTrendCategory() {
@@ -54,20 +39,48 @@ public class RecommendCategoryService {
                 .orElseThrow(() -> new NotFoundException("category", IT_TREND_CATEGORY_NAME));
     }
 
+    private List<Category> getUserBasedRecommendations(UserInfo userInfo, List<Category> alreadyRecommended) {
+        Member member = getMemberById(userInfo.getMemberId());
+        List<Long> excludedIds = alreadyRecommended.stream()
+                .map(Category::getId)
+                .toList();
+        return categoryRepository.findTopCategoriesByMemberBookmarks(
+                member.getId(),
+                USER_BASED_RECOMMEND_COUNT,
+                excludedIds
+        );
+    }
+
+    private Member getMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
+    }
+
+    private List<Category> getRandomRecommendations(List<Category> alreadyRecommended) {
+        int remainingCount = TOTAL_RECOMMEND_COUNT - alreadyRecommended.size();
+        if (remainingCount <= 0) {
+            return Collections.emptyList();
+        }
+        return pickRandomCategories(alreadyRecommended, remainingCount);
+    }
+
     private List<Category> pickRandomCategories(List<Category> recommendCategories, int count) {
-        List<Long> categoryIds = getAllCategoryIdsWithoutRecommend(recommendCategories);
+        List<Long> categoryIds = findCandidateIdsForRandomPick(recommendCategories);
         List<Long> mutableCategoryIds = new ArrayList<>(categoryIds);
         Collections.shuffle(mutableCategoryIds, new Random());
+
         int pickCount = Math.min(count, mutableCategoryIds.size());
         List<Long> pickedIds = mutableCategoryIds.subList(0, pickCount);
         return categoryRepository.findAllById(pickedIds);
     }
 
-    private List<Long> getAllCategoryIdsWithoutRecommend(List<Category> recommendCategories) {
-        List<Long> recommendCategoryIds = recommendCategories.stream().map(Category::getId).toList();
-        List<Long> categoryIds = categoryRepository.findAllIds();
-        return categoryIds.stream()
-                .filter(id -> !recommendCategoryIds.contains(id))
+    private List<Long> findCandidateIdsForRandomPick(List<Category> excludedCategories) {
+        List<Long> excludedIds = excludedCategories.stream()
+                .map(Category::getId)
                 .toList();
+        if (excludedIds.isEmpty()) {
+            return categoryRepository.findAllIds();
+        }
+        return categoryRepository.findIdsWithoutExcludedIds(excludedIds);
     }
 }

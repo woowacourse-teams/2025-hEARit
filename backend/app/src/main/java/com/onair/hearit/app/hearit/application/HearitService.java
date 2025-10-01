@@ -83,7 +83,7 @@ public class HearitService {
     }
 
     public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(UserInfo userInfo) {
-        List<Category> recommendCategories = recommendCategoryService.getRecommendedCategoriesFor(userInfo);
+        List<Category> recommendCategories = recommendCategoryService.getRecommendedCategories(userInfo);
 
         return recommendCategories.stream()
                 .map(this::toHearitsWithRecommendedWithCategory)

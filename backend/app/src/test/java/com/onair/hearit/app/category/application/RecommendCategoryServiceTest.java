@@ -51,7 +51,7 @@ class RecommendCategoryServiceTest {
             Category itTrendCategory = dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
 
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategoriesFor(userInfo);
+            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo);
 
             // then
             assertAll(
@@ -96,7 +96,7 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(member.getId(), null);
 
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategoriesFor(userInfo);
+            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo);
 
             // then
             List<Long> recommendedIds = recommendedCategories.stream()
@@ -131,7 +131,7 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(member.getId(), null);
 
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategoriesFor(userInfo);
+            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo);
 
             // then
             List<Long> recommendedIds = recommendedCategories.stream()
@@ -163,7 +163,7 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(member.getId(), null);
 
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategoriesFor(userInfo);
+            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo);
 
             // then
             List<Long> recommendedIds = recommendedCategories.stream()
@@ -193,7 +193,7 @@ class RecommendCategoryServiceTest {
             UserInfo guest = new UserInfo(null, UUID.randomUUID().toString());
 
             // when & then
-            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategoriesFor(guest))
+            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategories(guest))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("IT 트렌드");
         }
@@ -207,7 +207,7 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(nonExistId, null);
 
             // when & then
-            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategoriesFor(userInfo))
+            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategories(userInfo))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("memberId");
         }
@@ -223,7 +223,7 @@ class RecommendCategoryServiceTest {
             UserInfo guest = new UserInfo(null, UUID.randomUUID().toString());
 
             // when
-            List<Category> recommended = recommendCategoryService.getRecommendedCategoriesFor(guest);
+            List<Category> recommended = recommendCategoryService.getRecommendedCategories(guest);
 
             // then
             List<Long> ids = recommended.stream().map(Category::getId).toList();

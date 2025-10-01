@@ -16,15 +16,19 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
         SELECT b.hearit.category AS category, COUNT(b) AS bookmarkCount
         FROM Bookmark b
         WHERE b.member.id = :memberId
-            AND b.hearit.category.id <> :excludeCategoryId
+            AND b.hearit.category.id NOT IN :excludedCategoryIds
         GROUP BY b.hearit.category
         ORDER BY bookmarkCount DESC
         LIMIT :size
         """)
-    List<Category> findTopCategoriesByMemberBookmarks(@Param("memberId") Long memberId, @Param("size") int size, Long excludeCategoryId);
+    List<Category> findTopCategoriesByMemberBookmarks(
+            @Param("memberId") Long memberId,
+            @Param("size") int size,
+            @Param("excludedCategoryIds") List<Long> excludedCategoryIds
+    );
 
     @Query("SELECT c.id FROM Category c WHERE c.id NOT IN :excludedIds")
-    List<Long> findIdsByExcludedIds(@Param("excludedIds") List<Long> excludedIds);
+    List<Long> findIdsWithoutExcludedIds(@Param("excludedIds") List<Long> excludedIds);
 
     Optional<Category> findByName(String name);
 }
