@@ -5,9 +5,7 @@ import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.OriginalAudioUrl
 import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.domain.model.ShortAudioUrl
-import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.repository.MediaFileRepository
-import com.onair.hearit.domain.toHearit
 import kotlinx.serialization.json.Json
 
 class MediaFileRepositoryImpl(
@@ -43,15 +41,15 @@ class MediaFileRepositoryImpl(
             .getOriginalAudioUrl(hearitId)
             .mapOrThrowDomain { response -> OriginalAudioUrl(id = response.id, url = response.url) }
 
-    override suspend fun getOriginalHearitItem(item: SingleHearit): Result<Hearit> = combineHearit(item)
+    override suspend fun getOriginalHearitItem(item: Hearit): Result<Hearit> = combineHearit(item)
 
-    private suspend fun combineHearit(item: SingleHearit): Result<Hearit> =
+    private suspend fun combineHearit(item: Hearit): Result<Hearit> =
         getOriginalAudioUrl(item.id)
             .mapCatching {
                 it.url
             }.flatMap { audioUrl ->
                 getScriptLines(item.id).mapCatching { scriptLines ->
-                    item.toHearit(audioUrl, scriptLines)
+                    item.copy(audioUrl = audioUrl, script = scriptLines)
                 }
             }
 

@@ -5,16 +5,16 @@ import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.repository.HearitRepository
 
 class HearitRepositoryImpl(
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
-    override suspend fun getHearit(hearitId: Long): Result<SingleHearit> =
+    override suspend fun getHearit(hearitId: Long): Result<Hearit> =
         hearitRemoteDataSource.getHearit(hearitId).mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =

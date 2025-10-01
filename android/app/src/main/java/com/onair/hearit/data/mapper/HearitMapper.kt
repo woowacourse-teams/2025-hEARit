@@ -15,6 +15,7 @@ import com.onair.hearit.domain.model.CategoryHearit
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
@@ -22,7 +23,6 @@ import com.onair.hearit.domain.model.PlayingHistoryHearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.model.Source
 import com.onair.hearit.domain.model.UserInfo
 
@@ -78,8 +78,8 @@ fun ExploreHearitResponse.toDomain(): CursorResult<ExploreHearit> =
         isEmpty = this.isEmpty,
     )
 
-fun HearitResponse.toDomain(): SingleHearit =
-    SingleHearit(
+fun HearitResponse.toDomain(): Hearit =
+    Hearit(
         id = this.id,
         title = this.title,
         summary = this.summary,
@@ -91,6 +91,8 @@ fun HearitResponse.toDomain(): SingleHearit =
         bookmarkId = this.bookmarkId,
         category = this.category.toDomain(),
         keywords = this.keywords.map { it.toDomain() },
+        audioUrl = null,
+        script = null,
     )
 
 fun UserInfoResponse.toDomain(): UserInfo =

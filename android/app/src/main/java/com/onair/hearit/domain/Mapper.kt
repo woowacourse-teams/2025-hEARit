@@ -2,31 +2,9 @@ package com.onair.hearit.domain
 
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.PlaybackInfo
-import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.domain.model.SingleHearit
 
-fun SingleHearit.toHearit(
-    audioUrl: String,
-    script: List<ScriptLine>,
-): Hearit =
-    Hearit(
-        id = this.id,
-        title = this.title,
-        summary = this.summary,
-        sources = this.sources,
-        audioUrl = audioUrl,
-        script = script,
-        playTime = this.playTime,
-        lastPlayTime = this.lastPlayTime,
-        createdAt = this.createdAt,
-        isBookmarked = this.isBookmarked,
-        bookmarkId = this.bookmarkId,
-        category = this.category,
-        keywords = this.keywords,
-    )
-
-fun SingleHearit.toPlaybackInfo(
+fun Hearit.toPlaybackInfo(
     audioUrl: String,
     title: String,
     startPosition: Long? = null,
