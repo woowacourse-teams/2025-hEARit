@@ -61,21 +61,26 @@ class ExploreScoreCalculatorTest {
         Category category2 = dbHelper.insertCategory(new Category("Android", "#445566"));
         Category category3 = dbHelper.insertCategory(new Category("Kotlin", "#778899"));
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-
         LocalDateTime now = LocalDateTime.now();
 
+        // -- 북마크 이력용 Hearit들 --
         Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit4 = dbHelper.insertHearitAt(createHearit(category2), now);
 
+        //  카테고리별 북마크 - category1 : 3개, category2: 1개
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
         dbHelper.insertBookmark(new Bookmark(member, hearit2));
         dbHelper.insertBookmark(new Bookmark(member, hearit3));
         dbHelper.insertBookmark(new Bookmark(member, hearit4));
 
+        // -- 점수 계산 대상 Hearit들 --
+        // 최신성 20, 카테고리 22.5
         Hearit hearit5 = dbHelper.insertHearitAt(createHearit(category1), now);
+        // 최신성 18, 카테고리 7.5
         Hearit hearit6 = dbHelper.insertHearitAt(createHearit(category2), now.minusDays(4));
+        // 최신성 0, 카테고리 0
         Hearit hearit7 = dbHelper.insertHearitAt(createHearit(category3), now.minusDays(60));
 
         // when
@@ -102,6 +107,7 @@ class ExploreScoreCalculatorTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         LocalDateTime now = LocalDateTime.now();
+        // 북마크 이력 Hearit (게스트 점수엔 반영 안 됨)
         Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
 

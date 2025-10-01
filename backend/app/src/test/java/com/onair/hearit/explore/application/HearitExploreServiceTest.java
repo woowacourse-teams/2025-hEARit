@@ -107,18 +107,28 @@ class HearitExploreServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = TestFixture.createFixedMemberUserInfo(member);
 
+        // -- 북마크 이력용 Hearit들 --
+        // 최신성 20, 카테고리 22.5
         Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);
+        // 최신성 20, 카테고리 22.5
         Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now);
+        // 최신성 20, 카테고리 22.5
         Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category1), now);
+        // 최성 20, 카테고리 7.5
         Hearit hearit4 = dbHelper.insertHearitAt(createHearit(category2), now);
 
+        //  카테고리별 북마크 - category1 : 3개, category2: 1개
         dbHelper.insertBookmark(new Bookmark(member, hearit1));
         dbHelper.insertBookmark(new Bookmark(member, hearit2));
         dbHelper.insertBookmark(new Bookmark(member, hearit3));
         dbHelper.insertBookmark(new Bookmark(member, hearit4));
 
+        // 북마크 제외 히어릿들
+        // 최신성 20, 카테고리 22.5
         Hearit hearit5 = dbHelper.insertHearitAt(createHearit(category1), now);
+        // 최신성 18, 카테고리 7.5
         Hearit hearit6 = dbHelper.insertHearitAt(createHearit(category2), fourDaysAgo);
+        // 최신성 0, 카테고리 0
         Hearit hearit7 = dbHelper.insertHearitAt(createHearit(category3), sixtyDaysAgo);
 
         // when
@@ -126,6 +136,7 @@ class HearitExploreServiceTest {
                 memberInfo, new CursorRequest(0L, 10));
 
         // then
+        // 점수가 높은 순서(내림차순)로 정렬
         assertThat(response.content())
                 .hasSize(7)
                 .extracting("id", "isBookmarked")
@@ -134,8 +145,11 @@ class HearitExploreServiceTest {
                         tuple(hearit3.getId(), true),
                         tuple(hearit2.getId(), true),
                         tuple(hearit1.getId(), true),
+                        // --- 28.5점 ---
                         tuple(hearit4.getId(), true),
+                        // --- 26.5점 ---
                         tuple(hearit6.getId(), false),
+                        // --- 1.0점 ---
                         tuple(hearit7.getId(), false)
                 );
 
@@ -196,7 +210,6 @@ class HearitExploreServiceTest {
                         tuple(hearit2.getId(), false),
                         tuple(hearit3.getId(), false)
                 );
-
     }
 
     private Hearit createHearit(Category category) {
