@@ -10,6 +10,7 @@ import com.onair.hearit.service.model.LibraryPlayParams
 import com.onair.hearit.service.model.PrefetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 /**
  * 라이브러리(북마크 목록) 기반 재생을 위한 핸들러.
@@ -70,10 +71,14 @@ class LibraryPlaybackHandler(
     suspend fun prefetchNextPage(): PrefetchResult =
         withContext(Dispatchers.IO) {
             val pageToLoad = nextPage ?: return@withContext PrefetchResult(emptyList(), null)
+            Timber.d("sessionCallback nextPage $nextPage")
+
             val pageResult =
                 getBookmarksUseCase(page = pageToLoad, size = DEFAULT_PAGE_SIZE).getOrNull()
+            Timber.d("sessionCallback pageResult $pageResult")
 
             if (pageResult == null) {
+                Timber.d("sessionCallback pageResult null $pageResult")
                 nextPage = null
                 return@withContext PrefetchResult(emptyList(), null)
             }
@@ -122,11 +127,15 @@ class LibraryPlaybackHandler(
 
             allItems.addAll(items)
             if (seedInPage >= 0) {
+                nextPage = if (!result.paging.isLast) (result.paging.page + 1) else null
                 val globalIndex = allItems.size - items.size + seedInPage
                 return LibraryLoadResult(allItems, globalIndex)
             }
 
-            if (result.paging.isLast) return LibraryLoadResult(allItems, -1)
+            if (result.paging.isLast) {
+                nextPage = null
+                return LibraryLoadResult(allItems, -1)
+            }
             currentPage++
         }
     }
