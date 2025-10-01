@@ -131,10 +131,10 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_recent_hearit_title"
                 tools:itemCount="3"
-                tools:listitem="@layout/item_recent_hearit" />
+                tools:listitem="@layout/item_playing_history_hearit" />
 
             <TextView
-                android:id="@+id/tv_home_recently_hearit_title"
+                android:id="@+id/tv_home_recent_upload_title"
                 style="@style/pretendard_main_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -145,7 +145,7 @@
                 tools:text="최근 추가된 팟캐스트" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_recently_hearit"
+                android:id="@+id/rv_home_recent_upload"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -153,23 +153,23 @@
                 android:orientation="horizontal"
                 android:paddingHorizontal="20dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_recently_hearit_title"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_recent_upload_title"
                 tools:itemCount="3"
-                tools:listitem="@layout/item_recent_hearit" />
+                tools:listitem="@layout/item_playing_history_hearit" />
 
             <TextView
-                android:id="@+id/tv_home_bookmark_hearit_title"
+                android:id="@+id/tv_home_playing_bookmark_title"
                 style="@style/pretendard_main_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:text="북마크한 팟캐스트를 들어보세요"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_recently_hearit"
+                app:layout_constraintTop_toBottomOf="@id/rv_home_recent_upload"
                 tools:text="북마크한 팟캐스트를 들어보세요" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_bookmark_hearit"
+                android:id="@+id/rv_home_playing_bookmark"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -177,9 +177,9 @@
                 android:orientation="horizontal"
                 android:paddingHorizontal="20dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_bookmark_hearit_title"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_playing_bookmark_title"
                 tools:itemCount="3"
-                tools:listitem="@layout/item_recent_hearit" />
+                tools:listitem="@layout/item_playing_history_hearit" />
 
             <TextView
                 android:id="@+id/tv_home_shortcast"
@@ -194,7 +194,7 @@
                 android:text="숏캐스트를 구경하고\n더 많은 팟캐스트를 북마크해보세요!"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_bookmark_hearit" />
+                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_bookmark" />
 
             <ImageView
                 android:layout_width="wrap_content"

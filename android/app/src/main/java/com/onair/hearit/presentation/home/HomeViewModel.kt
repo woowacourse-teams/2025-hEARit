@@ -32,8 +32,9 @@ class HomeViewModel(
     private val _recommendHearits: MutableLiveData<List<RecommendHearit>> = MutableLiveData()
     val recommendHearits: LiveData<List<RecommendHearit>> = _recommendHearits
 
-    private val _recentHearits: MutableLiveData<List<PlayingHistoryHearit>> = MutableLiveData()
-    val recentHearits: LiveData<List<PlayingHistoryHearit>> = _recentHearits
+    private val _playingHistoryHearits: MutableLiveData<List<PlayingHistoryHearit>> =
+        MutableLiveData()
+    val playingHistoryHearits: LiveData<List<PlayingHistoryHearit>> = _playingHistoryHearits
 
     private val _groupedCategory: MutableLiveData<List<GroupedCategory>> = MutableLiveData()
     val groupedCategory: LiveData<List<GroupedCategory>> = _groupedCategory
@@ -53,15 +54,17 @@ class HomeViewModel(
         _isLoading.value = true
 
         viewModelScope.launch {
-            val recentDeferred = async { playingHistoryRepository.getPlayingHistories() }
             val recommendDeferred = async { hearitRepository.getRecommendHearits() }
+            val playingHistoryDeferred = async { playingHistoryRepository.getPlayingHistories() }
+            val recentUploadDeferred = async { hearitRepository.getRecentUploadHearits() }
+            val playingBookmarkDeferred = async { hearitRepository.getPlayingBookmarkHearits() }
             val groupedDeferred = async { hearitRepository.getCategoryHearits() }
 
-            val recentResult = recentDeferred.await()
             val recommendResult = recommendDeferred.await()
+            val playingHistoryResult = playingHistoryDeferred.await()
             val groupedResult = groupedDeferred.await()
 
-            recentResult.onFailure { throwable ->
+            playingHistoryResult.onFailure { throwable ->
                 Timber.w(throwable)
                 _toastMessage.value = R.string.home_toast_recent_load_fail
             }
@@ -74,7 +77,7 @@ class HomeViewModel(
                 _toastMessage.value = R.string.home_toast_grouped_category_load_fail
             }
 
-            recentResult.onSuccess { _recentHearits.value = it }
+            playingHistoryResult.onSuccess { _playingHistoryHearits.value = it }
             recommendResult.onSuccess { _recommendHearits.value = it }
             groupedResult.onSuccess { _groupedCategory.value = it }
 
@@ -100,19 +103,6 @@ class HomeViewModel(
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }
-                }
-        }
-    }
-
-    fun loadRecentHearits() {
-        viewModelScope.launch {
-            playingHistoryRepository
-                .getPlayingHistories()
-                .onSuccess { recentHearits ->
-                    _recentHearits.value = recentHearits
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.home_toast_recent_load_fail
                 }
         }
     }

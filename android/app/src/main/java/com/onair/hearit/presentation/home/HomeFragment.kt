@@ -44,8 +44,8 @@ class HomeFragment :
     private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private val recentAdapter: RecentHearitAdapter by lazy {
-        RecentHearitAdapter(this)
+    private val recentAdapter: PlayingHistoryHearitAdapter by lazy {
+        PlayingHistoryHearitAdapter(this)
     }
 
     private val recommendAdapter: RecommendHearitAdapter by lazy {
