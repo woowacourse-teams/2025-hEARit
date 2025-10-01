@@ -12,6 +12,10 @@
         <variable
             name="viewModel"
             type="com.onair.hearit.presentation.home.HomeViewModel" />
+
+        <variable
+            name="onNavigateToBookmark"
+            type="kotlin.jvm.functions.Function0&lt;kotlin.Unit>" />
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -168,6 +172,18 @@
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_recent_upload"
                 tools:text="북마크한 팟캐스트를 들어보세요" />
+
+            <ImageButton
+                android:id="@+id/ib_home_playing_bookmark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:background="@null"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_right"
+                app:layout_constraintBottom_toBottomOf="@id/tv_home_playing_bookmark_title"
+                app:layout_constraintStart_toEndOf="@id/tv_home_playing_bookmark_title"
+                app:layout_constraintTop_toTopOf="@id/tv_home_playing_bookmark_title" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_playing_bookmark"

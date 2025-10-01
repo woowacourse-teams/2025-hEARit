@@ -110,6 +110,14 @@ class HomeFragment :
             (activity as? DrawerClickListener)?.openDrawer()
         }
 
+        binding.tvHomePlayingBookmarkTitle.setOnClickListener {
+            (activity as MainActivity).selectTab(R.id.nav_library)
+        }
+
+        binding.ibHomePlayingBookmark.setOnClickListener {
+            (activity as MainActivity).selectTab(R.id.nav_library)
+        }
+
         binding.tvHomeShortcast.setOnClickListener {
             AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_EXPLORE_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_explore)
