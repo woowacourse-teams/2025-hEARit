@@ -19,11 +19,11 @@ public class PlayingHistoryCommandRepository {
         LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         String sql = """
                 INSERT INTO playing_history (member_id, hearit_id, last_play_time, is_finished, updated_at)
-                VALUES (?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?) AS new_history
                 ON DUPLICATE KEY UPDATE
-                    last_play_time = VALUES(last_play_time),
-                    is_finished = playing_history.is_finished OR VALUES(is_finished),
-                    updated_at = VALUES(updated_at)
+                    last_play_time = new_history.last_play_time,
+                    is_finished = playing_history.is_finished OR new_history.is_finished,
+                    updated_at = new_history.updated_at
                 """;
 
         jdbcTemplate.batchUpdate(sql, histories, histories.size(), (ps, history) -> {
