@@ -16,12 +16,15 @@ public class ExploreScoreRefresher {
 
     @Transactional
     public void refreshIfNeeded(long cursorId, String userUuid, UserType userType) {
-        if (cursorId != 0L) {
+        if (!isInitialRequest(cursorId)) {
             return;
         }
         Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(userUuid, userType);
         exploreScoreCommandRepository.insertScores(userUuid, scores);
         exploreScoreCommandRepository.updateCursorIds(userUuid);
     }
-}
 
+    private boolean isInitialRequest(long cursorId) {
+        return cursorId == 0L;
+    }
+}
