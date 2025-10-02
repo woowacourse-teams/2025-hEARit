@@ -15,9 +15,9 @@ public class ExploreScoreCommandRepository {
     public void insertScores(String userUuid, Map<Long, Double> scores) {
         String insertSql = """
                 INSERT INTO explore_score (user_uuid, hearit_id, score, cursor_id)
-                VALUES (?, ?, ?, NULL)
+                VALUES (?, ?, ?, NULL) AS new_score
                 ON DUPLICATE KEY UPDATE
-                    score = VALUES(score),
+                    score = new_score.score,
                     cursor_id = NULL
                 """;
 
