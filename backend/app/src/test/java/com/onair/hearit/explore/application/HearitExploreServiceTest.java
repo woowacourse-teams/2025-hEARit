@@ -23,10 +23,6 @@ import com.onair.hearit.explore.application.scoreprocessor.MemberExploreScorePro
 import com.onair.hearit.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.fixture.DbHelper;
 import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
-import com.onair.hearit.infrastructure.jpa.BookmarkRepository;
-import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
-import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
-import com.onair.hearit.infrastructure.jpa.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -56,21 +52,6 @@ class HearitExploreServiceTest {
 
     @Autowired
     private DbHelper dbHelper;
-
-    @Autowired
-    private BookmarkRepository bookmarkRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private ExploredHearitQueryRepository exploredHearitQueryRepository;
-
-    @Autowired
-    private HearitKeywordRepository hearitKeywordRepository;
-
-    @Autowired
-    private ExploreScoreRefresher exploreScoreRefresher;
 
     @Autowired
     private GuestExploreScoreProcessor guestExploreScoreProcessor;

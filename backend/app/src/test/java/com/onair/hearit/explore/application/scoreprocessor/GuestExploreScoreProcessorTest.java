@@ -30,7 +30,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
@@ -58,9 +57,6 @@ class GuestExploreScoreProcessorTest {
 
     @Autowired
     private ExploreScoreRefresher exploreScoreRefresher;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     private GuestExploreScoreProcessor guestExploreScoreProcessor;
 

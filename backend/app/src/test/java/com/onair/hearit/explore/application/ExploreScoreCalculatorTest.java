@@ -19,9 +19,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -32,8 +30,6 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-// 1. Mockito 사용을 위해 @ExtendWith(MockitoExtension.class) 추가
-@ExtendWith(MockitoExtension.class)
 @Import({DbHelper.class, TestJpaAuditingConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -78,7 +74,7 @@ class ExploreScoreCalculatorTest {
                 Map.of(hearit1.getId(), 20.0, hearit2.getId(), 18.0));
 
         given(scoreFactor3.isSupported(any())).willReturn(false);
-        // scoreFactor3.calculate()는 호출되지 않으므로, given 설정이 불필요함 (에러 발생 X)
+        // scoreFactor3.calculate()는 호출되지 않으므로, given 설정이 불필요함 (에러 발생)
 
         Map<Long, Double> memberScores = exploreScoreCalculator.calculateTotalScores("any-uuid", UserType.MEMBER);
 
