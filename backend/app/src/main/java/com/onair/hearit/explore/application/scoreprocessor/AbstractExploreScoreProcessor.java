@@ -27,7 +27,7 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
 
     @Override
     public final void refreshScoresIfNeeded(UserInfo userInfo, long cursorId) {
-        exploreScoreRefresher.refreshIfNeeded(cursorId, getUserUuid(userInfo), userInfo.getUserType());
+        exploreScoreRefresher.refreshScores(cursorId, getUserUuid(userInfo), userInfo.getUserType());
     }
 
     @Override

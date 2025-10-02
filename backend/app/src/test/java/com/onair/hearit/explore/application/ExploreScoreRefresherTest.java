@@ -67,7 +67,7 @@ class ExploreScoreRefresherTest {
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
-        exploreScoreRefresher.refreshIfNeeded(cursorId, userUuid, UserType.GUEST);
+        exploreScoreRefresher.refreshScores(cursorId, userUuid, UserType.GUEST);
 
         // then
         assertThat(findExploreScores(userUuid)).isEmpty();
@@ -75,7 +75,7 @@ class ExploreScoreRefresherTest {
 
     @DisplayName("cursorId가 0이면 점수를 갱신하고 커서 ID를 부여한다")
     @Test
-    void refreshScoresWhenCursorIsZero() {
+    void refreshScoresScoresWhenCursorIsZero() {
         // given
         String userUuid = UUID.randomUUID().toString();
         long cursorId = 0L;
@@ -83,7 +83,7 @@ class ExploreScoreRefresherTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        exploreScoreRefresher.refreshIfNeeded(cursorId, userUuid, UserType.GUEST);
+        exploreScoreRefresher.refreshScores(cursorId, userUuid, UserType.GUEST);
 
         List<ExploreScoreRow> rows = findExploreScores(userUuid);
 

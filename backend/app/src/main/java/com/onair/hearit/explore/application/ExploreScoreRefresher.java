@@ -15,7 +15,7 @@ public class ExploreScoreRefresher {
     private final ExploreScoreCommandRepository exploreScoreCommandRepository;
 
     @Transactional
-    public void refreshIfNeeded(long cursorId, String userUuid, UserType userType) {
+    public void refreshScores(long cursorId, String userUuid, UserType userType) {
         if (!isInitialRequest(cursorId)) {
             return;
         }
