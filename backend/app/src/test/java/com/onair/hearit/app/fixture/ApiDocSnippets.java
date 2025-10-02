@@ -40,8 +40,10 @@ public class ApiDocSnippets {
                 fieldWithPath("title").type(JsonFieldType.STRING).description("문제 유형에 대한 요약 (에러 코드 제목)"),
                 fieldWithPath("status").type(JsonFieldType.NUMBER).description("HTTP 상태 코드"),
                 fieldWithPath("detail").type(JsonFieldType.STRING).description("문제 발생에 대한 상세 설명"),
-                fieldWithPath("instance").type(JsonFieldType.STRING).description("문제의 특정 발생을 식별하는 URI (현재는 사용되지 않아 null)").optional(),
-                fieldWithPath("properties").type(JsonFieldType.OBJECT).description("문제 유형에 대한 추가 세부 정보 (현재는 사용되지 않아 null)").optional()
+                fieldWithPath("instance").type(JsonFieldType.STRING)
+                        .description("문제의 특정 발생을 식별하는 URI (현재는 사용되지 않아 null)").optional(),
+                fieldWithPath("properties").type(JsonFieldType.OBJECT)
+                        .description("문제 유형에 대한 추가 세부 정보 (현재는 사용되지 않아 null)").optional()
         };
     }
 
@@ -51,9 +53,13 @@ public class ApiDocSnippets {
                 fieldWithPath("title").type(JsonFieldType.STRING).description("문제 유형에 대한 요약 (에러 코드 제목)"),
                 fieldWithPath("status").type(JsonFieldType.NUMBER).description("HTTP 상태 코드"),
                 fieldWithPath("detail").type(JsonFieldType.STRING).description("문제 발생에 대한 상세 설명"),
-                fieldWithPath("instance").type(JsonFieldType.STRING).description("문제의 특정 발생을 식별하는 URI (현재는 사용되지 않아 null)").optional(),
+                fieldWithPath("instance").type(JsonFieldType.STRING)
+                        .description("문제의 특정 발생을 식별하는 URI (현재는 사용되지 않아 null)").optional(),
                 fieldWithPath("code").type(JsonFieldType.STRING).description("에러 코드 (예: UNAUTHENTICATED)"),
-                fieldWithPath("reissuable").type(JsonFieldType.BOOLEAN).description("토큰 재발급 가능 여부")
+                fieldWithPath("reissuable").type(JsonFieldType.BOOLEAN).description("토큰 재발급 가능 여부"),
+                fieldWithPath("properties").description("속성 객체"),
+                fieldWithPath("properties.reissuable").description("토큰 재발급 가능 여부"),
+                fieldWithPath("properties.code").description("에러 코드 (예: UNAUTHENTICATED)")
         };
     }
 }

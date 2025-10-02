@@ -6,16 +6,16 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.app.fixture.IntegrationTest;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.app.fixture.IntegrationTest;
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.contract.spec.internal.HttpStatus;
-import org.springframework.http.ProblemDetail;
 
 class ApiSecurityConfigTest extends IntegrationTest {
 
@@ -85,7 +85,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
     @Test
     @DisplayName("인증 실패 시 application/problem+json 형식으로 응답하며 토큰재발급 여부를 위한 properties를 포함한다.")
     void returnProblemDetailOnAuthFailure() {
-        ProblemDetail problemDetail = RestAssured.given().log().all()
+        JsonPath jsonPath = RestAssured.given().log().all()
                 .header("Authorization", "Bearer invalid-token")
                 .when()
                 .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
@@ -93,13 +93,13 @@ class ApiSecurityConfigTest extends IntegrationTest {
                 .statusCode(401)
                 .header("Content-Type", containsString("application/problem+json"))
                 .extract()
-                .as(ProblemDetail.class);
+                .jsonPath();
 
         assertAll(
-                () -> assertThat(problemDetail.getTitle()).isEqualTo("엑세스 토큰이 유효하지 않습니다."),
-                () -> assertThat(problemDetail.getDetail()).isEqualTo("유효하지 않은 토큰입니다."),
-                () -> assertThat(problemDetail.getProperties().get("code")).isNotNull(),
-                () -> assertThat(problemDetail.getProperties().get("reissuable")).isNotNull()
+                () -> assertThat(jsonPath.getString("title")).isEqualTo("엑세스 토큰이 유효하지 않습니다."),
+                () -> assertThat(jsonPath.getString("detail")).isEqualTo("유효하지 않은 토큰입니다."),
+                () -> assertThat(jsonPath.getString("code")).isNotNull(),
+                () -> assertThat(jsonPath.getObject("reissuable", Boolean.class)).isNotNull()
         );
     }
 
