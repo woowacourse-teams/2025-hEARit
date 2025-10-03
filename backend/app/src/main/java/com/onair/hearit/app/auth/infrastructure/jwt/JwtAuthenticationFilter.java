@@ -108,7 +108,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private ProblemDetail buildProblemDetail(ErrorCode errorCode, String detail, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(errorCode.getHttpStatus(), detail);
-        problemDetail.setTitle(errorCode.getTitle());
+        problemDetail.setTitle(errorCode.getHttpStatus().getReasonPhrase());
         problemDetail.setType(URI.create(request.getRequestURI()));
         String code = errorCode.name();
         boolean reissuable = (errorCode == ErrorCode.ACCESS_TOKEN_EXPIRED);

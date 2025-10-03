@@ -96,7 +96,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
                 .jsonPath();
 
         assertAll(
-                () -> assertThat(jsonPath.getString("title")).isEqualTo("엑세스 토큰이 유효하지 않습니다."),
+                () -> assertThat(jsonPath.getString("title")).isEqualTo("Unauthorized"),
                 () -> assertThat(jsonPath.getString("detail")).isEqualTo("유효하지 않은 토큰입니다."),
                 () -> assertThat(jsonPath.getString("code")).isNotNull(),
                 () -> assertThat(jsonPath.getObject("reissuable", Boolean.class)).isNotNull()
