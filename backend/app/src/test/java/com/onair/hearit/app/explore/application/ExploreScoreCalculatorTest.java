@@ -84,5 +84,4 @@ class ExploreScoreCalculatorTest {
                 () -> assertThat(memberScores.get(hearit2.getId())).isEqualTo(1.0 + 18.0)  // 19
         );
     }
-
 }
