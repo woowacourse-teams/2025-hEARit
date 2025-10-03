@@ -3,10 +3,7 @@ package com.onair.hearit.core.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.onair.hearit.domain.FileType;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Source;
-import com.onair.hearit.exception.custom.InvalidInputException;
+import com.onair.hearit.core.domain.exception.HearitDomainException;
 import com.onair.hearit.core.fixture.TestFixture;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +29,7 @@ class HearitTest {
                             10, "ORG_123.mp3",
                             "SHR_123.mp3", "SCR_123.json",
                             List.of(new Source("출처", "url")), TestFixture.createFixedCategory()))
-                    .isInstanceOf(InvalidInputException.class);
+                    .isInstanceOf(HearitDomainException.class);
         }
 
         @Test
@@ -51,7 +48,7 @@ class HearitTest {
                             10, "ORG_123.mp3",
                             "SHR_123.mp3", "SCR_123.json",
                             List.of(new Source("출처", "url")), TestFixture.createFixedCategory()))
-                    .isInstanceOf(InvalidInputException.class);
+                    .isInstanceOf(HearitDomainException.class);
         }
 
         @ParameterizedTest
@@ -64,7 +61,7 @@ class HearitTest {
                             playTime, "ORG_123.mp3",
                             "SHR_123.mp3", "SCR_123.json",
                             List.of(new Source("출처", "url")), TestFixture.createFixedCategory()))
-                    .isInstanceOf(InvalidInputException.class);
+                    .isInstanceOf(HearitDomainException.class);
         }
 
         @Test
@@ -76,7 +73,7 @@ class HearitTest {
                             10, "ORG_123.mp3",
                             "SHR_123.mp3", "SCR_123.json",
                             List.of(new Source("출처", "url")), null))
-                    .isInstanceOf(InvalidInputException.class);
+                    .isInstanceOf(HearitDomainException.class);
         }
     }
 

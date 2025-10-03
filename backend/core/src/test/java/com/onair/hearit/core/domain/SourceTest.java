@@ -3,8 +3,7 @@ package com.onair.hearit.core.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.onair.hearit.domain.Source;
-import com.onair.hearit.exception.custom.InvalidInputException;
+import com.onair.hearit.core.domain.exception.HearitDomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +28,7 @@ class SourceTest {
     @DisplayName("sourceName이 null이면 예외가 발생한다")
     void createSourceWithNullName() {
         assertThatThrownBy(() -> new Source(null, "https://example.com"))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(HearitDomainException.class)
                 .hasMessageContaining("sourceName");
     }
 
@@ -38,7 +37,7 @@ class SourceTest {
     void createSourceWithTooLongName() {
         String longName = "a".repeat(251);
         assertThatThrownBy(() -> new Source(longName, "https://example.com"))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(HearitDomainException.class)
                 .hasMessageContaining("sourceName");
     }
 
@@ -47,7 +46,7 @@ class SourceTest {
     void createSourceWithTooLongUrl() {
         String longUrl = "a".repeat(501);
         assertThatThrownBy(() -> new Source("sourceName", longUrl))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(HearitDomainException.class)
                 .hasMessageContaining("sourceUrl");
     }
 }
