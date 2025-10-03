@@ -111,4 +111,34 @@ class BookmarkRepositoryTest {
         // then
         assertThat(categoryBookmarkCounts.getFirst().getCount()).isEqualTo(3);
     }
+
+    @Test
+    @DisplayName("멤버의 북마크한 히어릿 중 청취 미완료인 목록을 조회한다. ")
+    void findUnfinishedByMemberOrderByRecentTest() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit finished1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit finished2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit unfinished1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit unfinished2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit unfinished3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished1));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished2));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished1, 500_000L));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished2, 500_000L));
+
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished1));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), unfinished1, 100L));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished2));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished3));
+
+        // when
+        var unfinishedBookmarks = bookmarkRepository.findUnfinishedByMemberOrderByRecent(
+                member.getId(), PageRequest.of(0, 5));
+
+        // then
+        assertThat(unfinishedBookmarks.getContent()).hasSize(3);
+    }
 }

@@ -29,6 +29,23 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     Page<BookmarkWithPlayingHistoryProjection> findAllByMemberOrderByRecent(@Param("memberId") Long memberId,
                                                                             Pageable pageable);
 
+    @Query("""
+                SELECT
+                    b AS bookmark,
+                    ph AS playingHistory
+                FROM Bookmark b
+                JOIN FETCH b.hearit h
+                JOIN FETCH h.category c
+                LEFT JOIN PlayingHistory ph
+                    ON ph.hearitId = h.id
+                    AND ph.memberId = :memberId
+                WHERE b.member.id = :memberId
+                    AND (ph.isFinished = false OR ph IS NULL)
+                ORDER BY b.createdAt DESC
+            """)
+    Page<BookmarkWithPlayingHistoryProjection> findUnfinishedByMemberOrderByRecent(@Param("memberId") Long memberId,
+                                                                                   Pageable pageable);
+
     Optional<Bookmark> findByHearitAndMember(Hearit hearit, Member member);
 
     List<Bookmark> findAllByHearitInAndMember(List<Hearit> hearits, Member member);
