@@ -3,7 +3,6 @@ package com.onair.hearit.app.bookmark.presentation;
 import com.onair.hearit.app.auth.domain.RequestUser;
 import com.onair.hearit.app.bookmark.BookmarkFilter;
 import com.onair.hearit.app.bookmark.application.BookmarkService;
-import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV1;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
@@ -25,19 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookmarkController {
 
     private final BookmarkService bookmarkService;
-
-    //TODO 사용안하는 거 삭제
-    @GetMapping("/api/v1/bookmarks/hearits")
-    public ResponseEntity<PagedResponse<BookmarkHearitResponseV1>> readBookmarkHearitsV1(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size,
-            @AuthenticationPrincipal RequestUser requestUser) {
-        PagingRequest pagingRequest = new PagingRequest(page, size);
-        Page<BookmarkHearitResponseV2> v2Responses = bookmarkService.getBookmarkHearits(
-                requestUser.getUserInfo(), pagingRequest, BookmarkFilter.ALL);
-        Page<BookmarkHearitResponseV1> v1Responses = v2Responses.map(BookmarkHearitResponseV1::from);
-        return ResponseEntity.ok(PagedResponse.from(v1Responses));
-    }
 
     //TODO 안드로이드 업데이트 시 삭제
     @GetMapping("/api/v2/bookmarks/hearits")

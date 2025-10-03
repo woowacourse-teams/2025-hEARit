@@ -27,31 +27,6 @@ class BookmarkIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 페이지에 따른 북마크 목록을 반환한다.")
-    void readBookmarkHearitsTest_v1() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        String token = generateToken(member);
-        int bookmarkCount = 30;
-        for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
-        }
-
-        // when & then
-        RestAssured.given()
-                .header("Authorization", "Bearer " + token)
-                .param("page", 0)
-                .param("size", 5)
-                .when()
-                .get("/api/v1/bookmarks/hearits")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .body("content.size()", equalTo(5));
-    }
-
-    @Test
-    @DisplayName("로그인한 사용자가 북마크 목록 조회 시, 200 OK 및 페이지에 따른 북마크 목록을 반환한다.")
     void readBookmarkHearitsTest_v2() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -102,41 +77,15 @@ class BookmarkIntegrationTest extends IntegrationTest {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when & then
         RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .param("size", size)
                 .when()
-                .get("/api/v1/bookmarks/hearits")
+                .get("/api/v1/bookmarks")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
-    }
-
-    @Test
-    @DisplayName("로그인하지 않은 사용자가 북마크 목록 조회 시, 401 UNAUTHORIZED가 발생한다.")
-    void readBookmarkHearits_error_401_whenNotLogin() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        int bookmarkCount = 10;
-        for (int i = 0; i < bookmarkCount; i++) {
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
-        }
-
-        // when & then
-        RestAssured.given(this.spec)
-                .header("Authorization", "")
-                .param("page", 0)
-                .param("size", 20)
-                .when()
-                .get("/api/v1/bookmarks/hearits")
-                .then()
-                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Test

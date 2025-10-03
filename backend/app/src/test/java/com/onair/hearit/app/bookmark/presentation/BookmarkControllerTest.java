@@ -42,52 +42,20 @@ class BookmarkControllerTest extends ControllerTest {
     @MockitoBean
     private BookmarkService bookmarkService;
 
-    @Nested
-    @DisplayName("북마크 목록 조회 V1 API (/api/v1/bookmarks/hearits)")
-    class ReadBookmarkHearitsV1 {
-
-        @Test
-        @DisplayName("200 OK")
-        void readBookmarkHearitsV1_OK() throws Exception {
-            // given
-            var responses = getHearitResponses();
-            var pagedResponses = new PageImpl<>(responses, PageRequest.of(0, 20), responses.size());
-
-            given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
-            given(bookmarkService.getBookmarkHearits(any(), any(), any())).willReturn(pagedResponses);
-
-            // when & then
-            mockMvc.perform(get("/api/v1/bookmarks/hearits")
-                            .header("Authorization", "Bearer valid-token")
-                            .param("page", "0")
-                            .param("size", "20"))
-                    .andExpect(status().isOk())
-                    .andDo(document("v1-get-bookmarks-hearits-ok",
-                            resource(ResourceSnippetParameters.builder()
-                                    .tag("Bookmark API")
-                                    .summary("북마크 목록 조회 V1")
-                                    .description("로그인한 사용자가 북마크한 히어릿 목록을 `Page` 단위로 조회합니다.")
-                                    .queryParameters(
-                                            parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
-                                            parameterWithName("size").description("페이지 당 항목 수").defaultValue("20")
-                                    )
-                                    .responseFields(Stream.concat(
-                                                    Arrays.stream(new FieldDescriptor[]{
-                                                            fieldWithPath("content[].hearitId").description("히어릿 ID"),
-                                                            fieldWithPath("content[].bookmarkId").description("북마크 ID"),
-                                                            fieldWithPath("content[].title").description("히어릿 제목"),
-                                                            fieldWithPath("content[].summary").description("히어릿 요약"),
-                                                            fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                            fieldWithPath("content[].lastPlayTime").description(
-                                                                    "히어릿 마지막 재생 시간(ms)").optional(),
-                                                            fieldWithPath("content[].categoryColor").description("카테고리 색상 코드")
-                                                    }), Arrays.stream(
-                                                            com.onair.hearit.fixture.ApiDocSnippets.getCustomPagedResponseFields()))
-                                            .toArray(FieldDescriptor[]::new)
-                                    )
-                                    .build())
-                    ));
-        }
+    private List<BookmarkHearitResponseV2> getHearitResponses() {
+        return IntStream.range(1, 25).mapToObj(i -> new BookmarkHearitResponseV2(
+                        (long) i,
+                        (long) (1000 + i),
+                        "Title " + i,
+                        "Summary " + i + 1,
+                        100 + i,
+                        (long) 200 + i - 2,
+                        false,
+                        List.of(new BookmarkHearitResponseV2.SourceResponse("source1", "url1"),
+                                new BookmarkHearitResponseV2.SourceResponse("source2", "url2")),
+                        new BookmarkHearitResponseV2.CategoryResponse((long) i, "categoryName", "#FFFFFF")
+                ))
+                .toList();
     }
 
     @Nested
@@ -459,21 +427,5 @@ class BookmarkControllerTest extends ControllerTest {
                                     .build())
                     ));
         }
-    }
-
-    private List<BookmarkHearitResponseV2> getHearitResponses() {
-        return IntStream.range(1, 25).mapToObj(i -> new BookmarkHearitResponseV2(
-                        (long) i,
-                        (long) (1000 + i),
-                        "Title " + i,
-                        "Summary " + i + 1,
-                        100 + i,
-                        (long) 200 + i - 2,
-                        false,
-                        List.of(new BookmarkHearitResponseV2.SourceResponse("source1", "url1"),
-                                new BookmarkHearitResponseV2.SourceResponse("source2", "url2")),
-                        new BookmarkHearitResponseV2.CategoryResponse((long) i, "categoryName", "#FFFFFF")
-                ))
-                .toList();
     }
 }
