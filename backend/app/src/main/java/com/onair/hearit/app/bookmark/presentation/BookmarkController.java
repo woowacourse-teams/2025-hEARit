@@ -1,14 +1,13 @@
 package com.onair.hearit.app.bookmark.presentation;
 
 import com.onair.hearit.app.auth.domain.RequestUser;
+import com.onair.hearit.app.bookmark.BookmarkFilter;
 import com.onair.hearit.app.bookmark.application.BookmarkService;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV1;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
-import com.onair.hearit.app.bookmark.dto.BookmarkUnfinishedHearitResponse;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -27,6 +26,7 @@ public class BookmarkController {
 
     private final BookmarkService bookmarkService;
 
+    //TODO 사용안하는 거 삭제
     @GetMapping("/api/v1/bookmarks/hearits")
     public ResponseEntity<PagedResponse<BookmarkHearitResponseV1>> readBookmarkHearitsV1(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -34,29 +34,37 @@ public class BookmarkController {
             @AuthenticationPrincipal RequestUser requestUser) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         Page<BookmarkHearitResponseV2> v2Responses = bookmarkService.getBookmarkHearits(
-                requestUser.getUserInfo(), pagingRequest);
+                requestUser.getUserInfo(), pagingRequest, BookmarkFilter.ALL);
         Page<BookmarkHearitResponseV1> v1Responses = v2Responses.map(BookmarkHearitResponseV1::from);
         return ResponseEntity.ok(PagedResponse.from(v1Responses));
     }
 
+    //TODO 안드로이드 업데이트 시 삭제
     @GetMapping("/api/v2/bookmarks/hearits")
     public ResponseEntity<PagedResponse<BookmarkHearitResponseV2>> readBookmarkHearitsV2(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
             @AuthenticationPrincipal RequestUser requestUser) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        Page<BookmarkHearitResponseV2> bookmarkHearits = bookmarkService.getBookmarkHearits(
+        Page<BookmarkHearitResponseV2> bookmarkHearits = bookmarkService.getBookmarkHearitsV2(
                 requestUser.getUserInfo(),
-                pagingRequest);
+                pagingRequest,
+                BookmarkFilter.ALL);
         return ResponseEntity.ok(PagedResponse.from(bookmarkHearits));
     }
 
-    @GetMapping("/api/v1/bookmarks/hearits/unfinished")
-    public ResponseEntity<List<BookmarkUnfinishedHearitResponse>> readBookmarkUnfinishedHearits(
+    @GetMapping("/api/v1/bookmarks")
+    public ResponseEntity<PagedResponse<BookmarkHearitResponseV2>> readBookmarkHearits(
+            @RequestParam(name = "filter", defaultValue = "all") BookmarkFilter filter,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
             @AuthenticationPrincipal RequestUser requestUser) {
-        List<BookmarkUnfinishedHearitResponse> response =
-                bookmarkService.getBookmarkUnfinishedHearit(requestUser.getUserInfo());
-        return ResponseEntity.ok(response);
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        Page<BookmarkHearitResponseV2> bookmarkHearits = bookmarkService.getBookmarkHearits(
+                requestUser.getUserInfo(),
+                pagingRequest,
+                filter);
+        return ResponseEntity.ok(PagedResponse.from(bookmarkHearits));
     }
 
     @PostMapping("/api/v1/bookmarks/hearits/{hearitId}")
