@@ -1,10 +1,11 @@
+package com.onair.hearit.app.explore.application;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 
-import com.onair.hearit.app.explore.application.ExploreScoreCalculator;
 import com.onair.hearit.app.explore.application.scorefactor.ScoreFactor;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Category;
