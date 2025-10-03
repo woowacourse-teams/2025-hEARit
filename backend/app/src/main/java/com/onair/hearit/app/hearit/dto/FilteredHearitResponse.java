@@ -1,24 +1,30 @@
 package com.onair.hearit.app.hearit.dto;
 
+import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;
+import java.time.LocalDateTime;
 import java.util.List;
 
-public record HearitOfCategoryResponse(
+public record FilteredHearitResponse(
         Long id,
         String title,
         Integer playTime,
         Long lastPlayTime,
-        List<KeywordResponse> keywords
+        LocalDateTime createdAt,
+        List<KeywordResponse> keywords,
+        CategoryResponse category
 ) {
-    public static HearitOfCategoryResponse from(Hearit hearit, List<Keyword> keywords, Long lastPlayTime) {
+    public static FilteredHearitResponse from(Hearit hearit, List<Keyword> keywords, Long lastPlayTime) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
-        return new HearitOfCategoryResponse(
+        return new FilteredHearitResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getPlayTime(),
                 lastPlayTime,
-                keywordResponses
+                hearit.getCreatedAt(),
+                keywordResponses,
+                CategoryResponse.from(hearit.getCategory())
         );
     }
 
@@ -35,6 +41,12 @@ public record HearitOfCategoryResponse(
                     keyword.getId(),
                     keyword.getName()
             );
+        }
+    }
+
+    public record CategoryResponse(Long id, String name, String colorCode) {
+        public static CategoryResponse from(Category category) {
+            return new CategoryResponse(category.getId(), category.getName(), category.getColorCode());
         }
     }
 }

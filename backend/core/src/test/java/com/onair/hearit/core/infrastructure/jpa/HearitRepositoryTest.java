@@ -24,6 +24,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -82,6 +84,43 @@ class HearitRepositoryTest {
     }
 
     @Test
+    @DisplayName("멤버별 카테고리 내 히어릿 조회 시 마지막 재생 시간도 포함된다.")
+    void findWithPlayTimeByTest() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        PlayingHistory playingHistory1 = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit1, 14));
+        PlayingHistory playingHistory2 = dbHelper.insertPlayingHistory(
+                new PlayingHistory(member.getId(), hearit3, 300));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<HearitWithPlayTimeProjection> result =
+                hearitRepository.findWithPlayTimeBy(category.getId(), member.getId(), pageable);
+
+        HearitWithPlayTimeProjection projection1 = result.getContent().get(0);
+        HearitWithPlayTimeProjection projection2 = result.getContent().get(1);
+        HearitWithPlayTimeProjection projection3 = result.getContent().get(2);
+
+        // then
+        assertAll(() -> {
+            assertThat(result.getContent()).hasSize(3);
+            assertThat(projection1.getHearit().getId()).isEqualTo(hearit1.getId());
+            assertThat(projection1.getLastPlayTime()).isEqualTo(playingHistory1.getLastPlayTime());
+            assertThat(projection2.getHearit().getId()).isEqualTo(hearit2.getId());
+            assertThat(projection2.getLastPlayTime()).isNull();
+            assertThat(projection3.getHearit().getId()).isEqualTo(hearit3.getId());
+            assertThat(projection3.getLastPlayTime()).isEqualTo(playingHistory2.getLastPlayTime());
+        });
+    }
+
+    @Test
     @Disabled
     @DisplayName("최근 업로드된 히어릿을 마지막 재생시간과 함께 조회한다.")
     void findTopNHearitWithPlayTimeTest() throws InterruptedException {
@@ -99,13 +138,15 @@ class HearitRepositoryTest {
         PlayingHistory playingHistory2 = dbHelper.insertPlayingHistory(
                 new PlayingHistory(member.getId(), hearit3, 300));
 
-        // when
-        List<HearitWithPlayTimeProjection> result =
-                hearitRepository.findTopNHearitWithPlayTime(member.getId(), 5);
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Direction.DESC, "createdAt"));
 
-        HearitWithPlayTimeProjection projection3 = result.get(0);
-        HearitWithPlayTimeProjection projection2 = result.get(1);
-        HearitWithPlayTimeProjection projection1 = result.get(2);
+        // when
+        Page<HearitWithPlayTimeProjection> result =
+                hearitRepository.findWithPlayTimeBy(null, member.getId(), pageable);
+
+        HearitWithPlayTimeProjection projection3 = result.getContent().get(0);
+        HearitWithPlayTimeProjection projection2 = result.getContent().get(1);
+        HearitWithPlayTimeProjection projection1 = result.getContent().get(2);
 
         // then
         assertAll(
@@ -117,58 +158,5 @@ class HearitRepositoryTest {
                 () -> assertThat(projection3.getHearit().getId()).isEqualTo(hearit3.getId()),
                 () -> assertThat(projection3.getLastPlayTime()).isEqualTo(playingHistory2.getLastPlayTime())
         );
-    }
-
-    @Test
-    @DisplayName("멤버별 카테고리 내 히어릿 조회 시 마지막 재생 시간도 포함된다.")
-    void findWithPlayTimeByCategoryIdTest() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-        PlayingHistory playingHistory1 = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit1, 14));
-        PlayingHistory playingHistory2 = dbHelper.insertPlayingHistory(
-                new PlayingHistory(member.getId(), hearit3, 300));
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<HearitWithPlayTimeProjection> result =
-                hearitRepository.findWithPlayTimeByCategoryId(category.getId(), member.getId(), pageable);
-
-        HearitWithPlayTimeProjection projection3 = result.getContent().get(0);
-        HearitWithPlayTimeProjection projection2 = result.getContent().get(1);
-        HearitWithPlayTimeProjection projection1 = result.getContent().get(2);
-
-        // then
-        assertAll(() -> {
-            assertThat(result.getContent()).hasSize(3);
-            assertThat(projection1.getHearit().getId()).isEqualTo(hearit1.getId());
-            assertThat(projection1.getLastPlayTime()).isEqualTo(playingHistory1.getLastPlayTime());
-            assertThat(projection2.getHearit().getId()).isEqualTo(hearit2.getId());
-            assertThat(projection2.getLastPlayTime()).isNull();
-            assertThat(projection3.getHearit().getId()).isEqualTo(hearit3.getId());
-            assertThat(projection3.getLastPlayTime()).isEqualTo(playingHistory2.getLastPlayTime());
-        });
-    }
-
-    private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = new Hearit(
-                title,
-                "summary",
-                100,
-                "/hearit/audio/original/ORG_test.mp3",
-                "/hearit/audio/short/SHR_test.mp3",
-                "/hearit/script/SCR_test.json",
-                List.of(new Source("출처", "url")),
-                category);
-        Hearit savedHearit = dbHelper.insertHearit(hearit);
-        dbHelper.insertHearitKeyword(new HearitKeyword(savedHearit, keyword));
-        return savedHearit;
     }
 }

@@ -9,9 +9,11 @@ import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
-import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
+import com.onair.hearit.app.hearit.dto.FilteredHearitResponse;
+import com.onair.hearit.app.hearit.dto.HearitSortField;
+import com.onair.hearit.app.hearit.dto.HearitSortRequest;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
-import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
+import com.onair.hearit.app.hearit.dto.SortDirection;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -178,36 +180,6 @@ class HearitServiceTest {
     }
 
     @Test
-    @DisplayName("최근 업로드된 히어릿 10개를 조회할 수 있다.")
-    void getRecentHearits() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-
-        Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Category c2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Category c3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c2));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(c3));
-
-        // when
-        List<RecentHearitResponse> responses = hearitService.getRecentHearits(
-                TestFixture.createFixedMemberUserInfo(member));
-
-        // then
-        assertThat(responses).hasSize(10);
-    }
-
-    @Test
     @DisplayName("북마크한 카테고리가 3개 이상인 경우, 북마크 개수별로 정렬하여 3개의 카테고리와 히어릿들을 조회할 수 있다.")
     void getHearitsWithRecommendCategory() {
         // given
@@ -291,16 +263,18 @@ class HearitServiceTest {
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        PagingRequest request = new PagingRequest(0, 10);
+
+        HearitSortRequest sortRequest = new HearitSortRequest(HearitSortField.CREATED_AT, SortDirection.DESC);
+        PagingRequest pagingRequest = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category1.getId(),
-                request, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()));
+        PagedResponse<FilteredHearitResponse> result = hearitService.getFilteredHearits(category1.getId(),
+                sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
         // then
         assertAll(() -> {
             assertThat(result.content()).hasSize(2);
-            assertThat(result.content()).extracting(HearitOfCategoryResponse::id)
+            assertThat(result.content()).extracting(FilteredHearitResponse::id)
                     .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
         });
     }
@@ -315,11 +289,13 @@ class HearitServiceTest {
         Keyword keyword2 = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword2));
-        PagingRequest request = new PagingRequest(0, 10);
+
+        HearitSortRequest sortRequest = new HearitSortRequest(HearitSortField.CREATED_AT, SortDirection.DESC);
+        PagingRequest pagingRequest = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()));
+        PagedResponse<FilteredHearitResponse> result = hearitService.getFilteredHearits(category.getId(),
+                sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
         // then
         assertAll(() -> {
@@ -337,11 +313,13 @@ class HearitServiceTest {
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        PagingRequest request = new PagingRequest(1, 2);
+
+        HearitSortRequest sortRequest = new HearitSortRequest(HearitSortField.CREATED_AT, SortDirection.DESC);
+        PagingRequest pagingRequest = new PagingRequest(1, 2);
 
         // when
-        PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()));
+        PagedResponse<FilteredHearitResponse> result = hearitService.getFilteredHearits(category.getId(),
+                sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
         // then
         assertAll(() -> {
@@ -372,11 +350,12 @@ class HearitServiceTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit1, 450));
-        PagingRequest request = new PagingRequest(1, 2);
+        HearitSortRequest sortRequest = new HearitSortRequest(HearitSortField.CREATED_AT, SortDirection.DESC);
+        PagingRequest pagingRequest = new PagingRequest(1, 2);
 
         // when
-        PagedResponse<HearitOfCategoryResponse> result = hearitService.getHearitsByCategory(category.getId(),
-                request, TestFixture.createFixedMemberUserInfo(member));
+        PagedResponse<FilteredHearitResponse> result = hearitService.getFilteredHearits(category.getId(),
+                sortRequest, TestFixture.createFixedMemberUserInfo(member), pagingRequest);
 
         // then
         assertAll(

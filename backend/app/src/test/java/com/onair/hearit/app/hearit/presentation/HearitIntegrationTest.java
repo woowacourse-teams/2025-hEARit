@@ -7,9 +7,8 @@ import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.IntegrationTest;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
-import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
+import com.onair.hearit.app.hearit.dto.FilteredHearitResponse;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
-import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -101,42 +100,6 @@ class HearitIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("최근 등록된 히어릿 10개를 반환한다.")
-    void readRecentHearit() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-
-        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
-        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
-        Category category3 = dbHelper.insertCategory(new Category("React1", "#0000FF"));
-
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-
-        // when
-        List<RecentHearitResponse> responses = RestAssured.given(this.spec)
-                .when()
-                .get("/api/v1/hearits/recent")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .jsonPath()
-                .getList(".", RecentHearitResponse.class);
-
-        // then
-        assertThat(responses).hasSize(10);
-    }
-
-    @Test
     @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, 추천하는 3개의 카테고리와 히어릿들을 반환한다.")
     void readCategoriesHearit() {
         // given
@@ -202,7 +165,7 @@ class HearitIntegrationTest extends IntegrationTest {
         Hearit hearit3 = saveHearitWithCategoryAndKeyword(category2, keyword); // 카테고리 2의 히어릿
 
         // when
-        PagedResponse<HearitOfCategoryResponse> pagedResponse = RestAssured.given(this.spec)
+        PagedResponse<FilteredHearitResponse> pagedResponse = RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .queryParam("categoryId", category1.getId())
                 .queryParam("page", 0)
@@ -214,7 +177,7 @@ class HearitIntegrationTest extends IntegrationTest {
                 .extract()
                 .as(new TypeRef<>() {
                 });
-        List<HearitOfCategoryResponse> responses = pagedResponse.content();
+        List<FilteredHearitResponse> responses = pagedResponse.content();
 
         // then
         assertAll(
@@ -222,6 +185,46 @@ class HearitIntegrationTest extends IntegrationTest {
                 () -> assertThat(responses.get(0).id()).isEqualTo(hearit2.getId()), // 최신 hearit 먼저
                 () -> assertThat(responses.get(1).id()).isEqualTo(hearit1.getId())
         );
+    }
+
+    @Test
+    @DisplayName("히어릿을 등록된 날짜별 오름차순으로 정렬하여 반환한다.")
+    void readRecentHearit() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
+        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
+        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
+        Category category3 = dbHelper.insertCategory(new Category("React1", "#0000FF"));
+
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+        dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+
+        // when
+        PagedResponse<FilteredHearitResponse> pagedResponse = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .queryParam("sort", "createdAt,asc") // 카테고리 상관없이 필터링
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v1/hearits")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(new TypeRef<>() {
+                });
+        List<FilteredHearitResponse> responses = pagedResponse.content();
+
+        // then
+        assertThat(responses).hasSize(10);
     }
 
     private String generateToken(Member member) {

@@ -15,13 +15,12 @@ import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.ControllerTest;
 import com.onair.hearit.app.hearit.application.HearitService;
+import com.onair.hearit.app.hearit.dto.FilteredHearitResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse.CategoryResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse.SourceResponse;
-import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse.HearitResponse;
-import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -100,54 +99,8 @@ class HearitControllerTest extends ControllerTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("단일 히어릿 조회 V1")
-                                .responseFields(com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
-                                .build())
-                ));
-    }
-
-    @Test
-    @DisplayName("최근 업로드된 히어릿 조회 - 200 OK")
-    void readRecentHearitsV1_OK() throws Exception {
-        // given
-        var responses = List.of(
-                new RecentHearitResponse(99L, "10월 15일 히어릿", 300, (long) 1_000,
-                        LocalDateTime.of(2024, 10, 15, 10, 0),
-                        new RecentHearitResponse.CategoryResponse(2L, "IT 트렌드", "#FFFFFF")),
-                new RecentHearitResponse(98L, "10월 14일 히어릿", 400, (long) 1_500,
-                        LocalDateTime.of(2024, 10, 14, 10, 0),
-                        new RecentHearitResponse.CategoryResponse(9L, "Spring", "#FFFFFF")),
-                new RecentHearitResponse(96L, "10월 13일 히어릿", 100, (long) 1_100,
-                        LocalDateTime.of(2024, 10, 13, 10, 0),
-                        new RecentHearitResponse.CategoryResponse(8L, "Android", "#FFFFFF")),
-                new RecentHearitResponse(94L, "10월 12일 히어릿", 250, (long) 1_080,
-                        LocalDateTime.of(2024, 10, 12, 10, 0),
-                        new RecentHearitResponse.CategoryResponse(7L, "React", "#FFFFFF")),
-                new RecentHearitResponse(92L, "10월 11일 히어릿", 330, (long) 1_900,
-                        LocalDateTime.of(2024, 10, 11, 10, 0),
-                        new RecentHearitResponse.CategoryResponse(2L, "IT 트렌드", "#FFFFFF")
-                ));
-
-        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
-        given(hearitService.getRecentHearits(any())).willReturn(responses);
-
-        // when & then
-        mockMvc.perform(get("/api/v1/hearits/recent")
-                        .header("Authorization", "Bearer valid-token"))
-                .andExpect(status().isOk())
-                .andDo(document("v1-get-hearits-recent-ok",
-                        resource(ResourceSnippetParameters.builder()
-                                .tag("Hearit API")
-                                .summary("최근 업로드된 히어릿 조회 V1")
-                                .description("최근 업로드된 히어릿을 최신순으로 5개 조회합니다.")
                                 .responseFields(
-                                        fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("히어릿 ID"),
-                                        fieldWithPath("[].title").type(JsonFieldType.STRING).description("히어릿 제목"),
-                                        fieldWithPath("[].playTime").type(JsonFieldType.NUMBER).description("재생 시간(s)"),
-                                        fieldWithPath("[].lastPlayTime").type(JsonFieldType.NUMBER).description("마지막 재생 시간(ms)").optional(),
-                                        fieldWithPath("[].createdAt").type(JsonFieldType.STRING).description("생성 일시"),
-                                        fieldWithPath("[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                                        fieldWithPath("[].category.name").type(JsonFieldType.STRING).description("카테고리 이름"),
-                                        fieldWithPath("[].category.colorCode").type(JsonFieldType.STRING).description("카테고리 색상"))
+                                        com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ));
     }
@@ -229,35 +182,42 @@ class HearitControllerTest extends ControllerTest {
     }
 
     @Test
-    @DisplayName("카테고리별 히어릿 조회 V1 - 200 OK")
-    void getHearitsByCategoryWithPagination() throws Exception {
+    @DisplayName("히어릿 필터링 조회 V1 - 200 OK")
+    void readFilteredHearitsV1_OK() throws Exception {
         // given
         var categoryId = 1L;
-        var responses = List.of(new HearitOfCategoryResponse(101L, "Spring Boot Guide", 300, null,
-                        List.of(new HearitOfCategoryResponse.KeywordResponse(1L, "spring"),
-                                new HearitOfCategoryResponse.KeywordResponse(2L, "boot"))),
-                new HearitOfCategoryResponse(102L, "JPA Tips", 200, null,
-                        List.of(new HearitOfCategoryResponse.KeywordResponse(3L, "jpa"),
-                                new HearitOfCategoryResponse.KeywordResponse(4L, "hibernate"))));
+        var responses = List.of(new FilteredHearitResponse(101L, "Spring Boot Guide", 300, null,
+                        LocalDateTime.of(2024, 9, 30, 10, 30),
+                        List.of(new FilteredHearitResponse.KeywordResponse(1L, "spring"),
+                                new FilteredHearitResponse.KeywordResponse(2L, "boot")),
+                        new FilteredHearitResponse.CategoryResponse(3L, "Spring", "#FFFFFF")),
+                new FilteredHearitResponse(102L, "JPA Tips", 200, null,
+                        LocalDateTime.of(2024, 9, 29, 10, 0),
+                        List.of(new FilteredHearitResponse.KeywordResponse(3L, "jpa"),
+                                new FilteredHearitResponse.KeywordResponse(4L, "hibernate")),
+                        new FilteredHearitResponse.CategoryResponse(2L, "JPA", "#EEFFFF")));
         var pagedResponses = PagedResponse.from(new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
-        given(hearitService.getHearitsByCategory(any(), any(), any())).willReturn(pagedResponses);
+        given(hearitService.getFilteredHearits(any(), any(), any(), any())).willReturn(pagedResponses);
 
         // when & then
         mockMvc.perform(get("/api/v1/hearits")
                         .header("Authorization", "Bearer valid-token")
+                        .param("sort", "createdAt,desc")
                         .param("categoryId", String.valueOf(categoryId))
                         .param("page", "0")
                         .param("size", "20"))
                 .andExpect(status().isOk())
-                .andDo(document("v1-get-hearits-by-category-ok",
+                .andDo(document("v1-get-filtered-hearits-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
-                                .summary("카테고리별 히어릿 목록 조회 V1")
-                                .description("특정 카테고리에 속한 히어릿 목록을 `Page` 단위로 조회합니다.")
+                                .summary("히어릿 필터링 조회 V1")
+                                .description("카테고리 및 정렬 조건에 대해 필터링된 히어릿 목록을 `Page` 단위로 조회합니다.")
                                 .queryParameters(
-                                        parameterWithName("categoryId").description("조회할 카테고리의 ID"),
+                                        parameterWithName("categoryId").description("조회할 카테고리의 ID").optional(),
+                                        parameterWithName("sort").description("정렬 조건({createdAt,asc})")
+                                                .defaultValue("createdAt,desc"),
                                         parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
                                         parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")
                                 )
@@ -266,11 +226,17 @@ class HearitControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].lastPlayTime").description("히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].createdAt").description("히어릿 생성 일시"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
-                                                        fieldWithPath("content[].keywords[].name").description("키워드 이름")
+                                                        fieldWithPath("content[].keywords[].name").description("키워드 이름"),
+                                                        fieldWithPath("content[].category.id").description("카테고리 ID"),
+                                                        fieldWithPath("content[].category.name").description("카테고리 이름"),
+                                                        fieldWithPath("content[].category.colorCode").description("카테고리 컬러코드")
                                                 }),
-                                                Arrays.stream(com.onair.hearit.fixture.ApiDocSnippets.getCustomPagedResponseFields())
+                                                Arrays.stream(
+                                                        com.onair.hearit.fixture.ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
