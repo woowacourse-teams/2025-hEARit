@@ -1,5 +1,6 @@
 package com.onair.hearit.app.explore.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 
@@ -17,6 +18,7 @@ import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;

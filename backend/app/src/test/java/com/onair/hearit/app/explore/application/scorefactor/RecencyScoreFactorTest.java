@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.fixture.TestFixture;
 import java.time.LocalDateTime;
 import java.util.List;

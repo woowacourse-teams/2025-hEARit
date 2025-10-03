@@ -1,16 +1,18 @@
 package com.onair.hearit.app.explore.application.scoreprocessor;
 
+import com.onair.hearit.app.exception.custom.NotFoundException;
+import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;
+import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
-import com.onair.hearit.explore.application.ExploreScoreRefresher;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,12 +24,12 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public MemberExploreScoreProcessor(ExploreScoreRefresher exploreScoreRefresher,
+    public MemberExploreScoreProcessor(ExploreScoreInitializer exploreScoreInitializer,
                                        ExploredHearitQueryRepository exploredHearitQueryRepository,
                                        HearitKeywordRepository hearitKeywordRepository,
                                        MemberRepository memberRepository,
                                        BookmarkRepository bookmarkRepository) {
-        super(exploreScoreRefresher, exploredHearitQueryRepository, hearitKeywordRepository);
+        super(exploreScoreInitializer, exploredHearitQueryRepository, hearitKeywordRepository);
         this.memberRepository = memberRepository;
         this.bookmarkRepository = bookmarkRepository;
     }

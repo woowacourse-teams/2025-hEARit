@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.given;
 import com.onair.hearit.app.explore.application.ExploreScoreCalculator;
 import com.onair.hearit.app.explore.application.scorefactor.ScoreFactor;
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;

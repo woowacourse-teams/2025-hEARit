@@ -11,6 +11,7 @@ import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.ExploreScore;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;

@@ -4,10 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Bookmark;
+import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
