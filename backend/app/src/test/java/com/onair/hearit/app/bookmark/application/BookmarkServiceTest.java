@@ -5,33 +5,33 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.auth.domain.RequestUser;
+import com.onair.hearit.app.bookmark.BookmarkFilter;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
+import com.onair.hearit.app.exception.custom.AlreadyExistException;
+import com.onair.hearit.app.exception.custom.ForbiddenException;
+import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.UserInfo;
-import com.onair.hearit.app.exception.custom.AlreadyExistException;
-import com.onair.hearit.app.exception.custom.ForbiddenException;
-import com.onair.hearit.app.exception.custom.UnauthenticatedException;
-import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.fixture.TestFixture;
+import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -62,8 +62,24 @@ class BookmarkServiceTest {
     }
 
     @Test
-    @DisplayName("멤버 아이디에 따라 북마크한 히어릿 목록을 페이지에 따라 조회한다.")
-    void getBookmarkHearitsTest() {
+    @DisplayName("북마크 조회 시 비회원인 경우 빈 값을 반환한다.")
+    void getBookmarkHearits_isNotMemberGuest() {
+        RequestUser guest = RequestUser.guest("00000000-0000-0000-0000-000000000000");
+
+        // when
+        Page<BookmarkHearitResponseV2> bookmarkHearits = bookmarkService.getBookmarkHearits(guest.getUserInfo(),
+                new PagingRequest(0, 20), BookmarkFilter.ALL);
+
+        // then
+        assertAll(
+                () -> assertThat(bookmarkHearits.getTotalElements()).isZero(),
+                () -> assertThat(bookmarkHearits.getContent()).isEmpty());
+    }
+
+
+    @Test
+    @DisplayName("멤버가 북마크한 전체 히어릿 목록을 페이지에 따라 조회한다.")
+    void getAllBookmarkHearitsTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -74,31 +90,44 @@ class BookmarkServiceTest {
 
         // when
         List<BookmarkHearitResponseV2> responses = bookmarkService.getBookmarkHearits(
-                RequestUser.member(member.getId()).getUserInfo(), new PagingRequest(0, 20)).stream().toList();
+                RequestUser.member(member.getId()).getUserInfo(),
+                new PagingRequest(0, 20),
+                BookmarkFilter.ALL).stream().toList();
 
         // then
-        assertAll(() -> {
-            assertThat(responses).hasSize(1);
-            assertThat(responses.getFirst().bookmarkId()).isEqualTo(bookmark.getId());
-            assertThat(responses.getFirst().lastPlayTime()).isEqualTo(playingHistory.getLastPlayTime());
-        });
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(responses.getFirst().bookmarkId()).isEqualTo(bookmark.getId()),
+                () -> assertThat(responses.getFirst().lastPlayTime()).isEqualTo(playingHistory.getLastPlayTime()));
     }
 
     @Test
-    @DisplayName("로그인하지 않은 사용자는 북마크 목록 조회시 Unauthorized 예외를 던진다.")
-    void getBookmarkHearitsTest_() {
+    @DisplayName("멤버가 북마크한 청취 미완료 히어릿 목록을 페이지에 따라 조회한다.")
+    void getUnfinishedBookmarkHearitsTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserInfo guestInfo = RequestUser.guest(UUID.randomUUID().toString()).getUserInfo();
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
-        PagingRequest pagingRequest = new PagingRequest(0, 20);
+        Hearit finished = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Bookmark bookmark1 = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
+                new PlayingHistory(member.getId(), finished, 500_000L));
+
+        Hearit unfinished = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Bookmark bookmark2 = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished));
 
         // when
-        assertThatThrownBy(() -> bookmarkService.getBookmarkHearits(guestInfo, pagingRequest))
-                .isInstanceOf(UnauthenticatedException.class);
+        List<BookmarkHearitResponseV2> responses = bookmarkService.getBookmarkHearits(
+                RequestUser.member(member.getId()).getUserInfo(),
+                new PagingRequest(0, 20),
+                BookmarkFilter.UNFINISHED).stream().toList();
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(responses.getFirst().bookmarkId()).isEqualTo(bookmark2.getId()),
+                () -> assertThat(responses.getFirst().hearitId()).isEqualTo(unfinished.getId())
+        );
     }
 
     @Test
@@ -116,10 +145,10 @@ class BookmarkServiceTest {
 
         // then
         int currentBookmarkCount = bookmarkRepository.findAll().size();
-        assertAll(() -> {
-            assertThat(previousBookmarkCount + 1).isEqualTo(currentBookmarkCount);
-            assertThat(response.id()).isNotNull();
-        });
+        assertAll(
+                () -> assertThat(previousBookmarkCount + 1).isEqualTo(currentBookmarkCount),
+                () -> assertThat(response.id()).isNotNull()
+        );
     }
 
     @Test
