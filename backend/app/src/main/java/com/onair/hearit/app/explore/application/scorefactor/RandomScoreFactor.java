@@ -4,16 +4,17 @@ import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.UserType;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class RandomScoreFactor implements ScoreFactor {
 
     private static final int MAX_RANDOM_SCORE = 10;
 
-    private final Random random = new Random();
+    private final RandomNumberGenerator randomNumberGenerator;
 
     @Override
     public boolean isSupported(UserType userType) {
@@ -25,7 +26,7 @@ public class RandomScoreFactor implements ScoreFactor {
         return hearits.stream()
                 .collect(Collectors.toMap(
                         Hearit::getId,
-                        h -> random.nextDouble() * MAX_RANDOM_SCORE
+                        h -> randomNumberGenerator.getDouble() * MAX_RANDOM_SCORE
                 ));
     }
 }

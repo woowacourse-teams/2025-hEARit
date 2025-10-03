@@ -18,11 +18,9 @@ public class HearitExploreService {
     public CursorResponseV2<ExploredHearitResponse> getExploredHearits(UserInfo userInfo,
                                                                        CursorRequest cursorRequest) {
         ExploreScoreProcessor exploreScoreProcessor = getExploreScoreProcessor(userInfo);
-        List<ExploredHearitResponse> exploreHearitsResponses =
-                exploreScoreProcessor.getExploreHearitsResponse(
-                        userInfo,
-                        cursorRequest.cursorId(),
-                        cursorRequest.size());
+        exploreScoreProcessor.refreshScores(userInfo, cursorRequest.cursorId());
+        List<ExploredHearitResponse> exploreHearitsResponses = exploreScoreProcessor.getExploreHearits(
+                userInfo, cursorRequest.cursorId(), cursorRequest.size());
         return CursorResponseV2.from(exploreHearitsResponses);
     }
 
