@@ -1,16 +1,13 @@
 package com.onair.hearit.app.hearit.application;
 
-import com.onair.hearit.app.category.application.RecommendCategoryService;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
-import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.exception.custom.UnauthenticatedException;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
-import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
+import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
 import com.onair.hearit.core.domain.Bookmark;
-import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
@@ -38,7 +35,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HearitService {
 
-    private static final int HEARITS_PER_RECOMMENDED_CATEGORY = 5;
     private static final int KEYWORDS_PER_CATEGORIZED_HEARIT = 3;
 
     private final HearitRepository hearitRepository;
@@ -46,7 +42,6 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
-    private final RecommendCategoryService recommendCategoryService;
 
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
         Hearit hearit = getHearitById(hearitId);
@@ -87,13 +82,6 @@ public class HearitService {
         return List.of();
     }
 
-    public List<HearitsWithRecommendCategoryResponse> getHearitsWithRecommendCategory(UserInfo userInfo) {
-        List<Category> recommendCategories = recommendCategoryService.getRecommendedCategories(userInfo);
-        return recommendCategories.stream()
-                .map(this::toHearitsWithRecommendedWithCategory)
-                .toList();
-    }
-
     private Member getMemberByUserInfo(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
             throw new UnauthenticatedException();
@@ -104,11 +92,6 @@ public class HearitService {
     private Member getMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
-    }
-
-    private HearitsWithRecommendCategoryResponse toHearitsWithRecommendedWithCategory(Category category) {
-        List<Hearit> hearits = hearitRepository.findByCategory(category.getId(), HEARITS_PER_RECOMMENDED_CATEGORY);
-        return HearitsWithRecommendCategoryResponse.from(category, hearits);
     }
 
     public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(

@@ -1,4 +1,4 @@
-package com.onair.hearit.app.category.application;
+package com.onair.hearit.app.recommendation.application;
 
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.core.domain.Category;
@@ -18,19 +18,22 @@ import org.springframework.stereotype.Service;
 public class RecommendCategoryService {
 
     private static final String IT_TREND_CATEGORY_NAME = "IT 트렌드";
-    private static final int USER_BASED_RECOMMEND_COUNT = 3;
-    private static final int TOTAL_RECOMMEND_COUNT = 5;
+    private static final int RESERVED_RANDOM_COUNT = 1;
 
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
 
-    public List<Category> getRecommendedCategories(UserInfo userInfo) {
+    public List<Category> getRecommendedCategories(UserInfo userInfo, int totalRecommendCount) {
         List<Category> recommendations = new ArrayList<>();
         recommendations.add(getItTrendCategory());
+
+        int userBasedCount = calculateUserBasedCount(totalRecommendCount);
         if (userInfo.isMember()) {
-            recommendations.addAll(getUserBasedRecommendations(userInfo, recommendations));
+            recommendations.addAll(getUserBasedRecommendations(userInfo, userBasedCount, recommendations));
         }
-        recommendations.addAll(getRandomRecommendations(recommendations));
+
+        int randomCount = totalRecommendCount - recommendations.size();
+        recommendations.addAll(getRandomRecommendations(randomCount, recommendations));
         return recommendations;
     }
 
@@ -39,14 +42,19 @@ public class RecommendCategoryService {
                 .orElseThrow(() -> new NotFoundException("category", IT_TREND_CATEGORY_NAME));
     }
 
-    private List<Category> getUserBasedRecommendations(UserInfo userInfo, List<Category> alreadyRecommended) {
+    private int calculateUserBasedCount(int totalRecommendCount) {
+        int reservedCount = 1 /* IT 트렌드 */ + RESERVED_RANDOM_COUNT;
+        return Math.max(totalRecommendCount - reservedCount, 0);
+    }
+
+    private List<Category> getUserBasedRecommendations(UserInfo userInfo, int userBasedCount, List<Category> alreadyRecommended) {
         Member member = getMemberById(userInfo.getMemberId());
         List<Long> excludedIds = alreadyRecommended.stream()
                 .map(Category::getId)
                 .toList();
         return categoryRepository.findTopCategoriesByMemberBookmarks(
                 member.getId(),
-                USER_BASED_RECOMMEND_COUNT,
+                userBasedCount,
                 excludedIds
         );
     }
@@ -56,16 +64,15 @@ public class RecommendCategoryService {
                 .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
     }
 
-    private List<Category> getRandomRecommendations(List<Category> alreadyRecommended) {
-        int remainingCount = TOTAL_RECOMMEND_COUNT - alreadyRecommended.size();
-        if (remainingCount <= 0) {
+    private List<Category> getRandomRecommendations(int randomCount, List<Category> excludedCategories) {
+        if (randomCount <= 0) {
             return Collections.emptyList();
         }
-        return pickRandomCategories(alreadyRecommended, remainingCount);
+        return pickRandomCategories(excludedCategories, randomCount);
     }
 
-    private List<Category> pickRandomCategories(List<Category> recommendCategories, int count) {
-        List<Long> categoryIds = findCandidateIdsForRandomPick(recommendCategories);
+    private List<Category> pickRandomCategories(List<Category> excludedCategories, int count) {
+        List<Long> categoryIds = findCandidateIdsForRandomPick(excludedCategories);
         List<Long> mutableCategoryIds = new ArrayList<>(categoryIds);
         Collections.shuffle(mutableCategoryIds, new Random());
 

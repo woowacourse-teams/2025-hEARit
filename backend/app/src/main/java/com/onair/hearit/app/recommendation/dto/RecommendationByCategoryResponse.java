@@ -1,18 +1,18 @@
-package com.onair.hearit.app.hearit.dto;
+package com.onair.hearit.app.recommendation.dto;
 
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record HearitsWithRecommendCategoryResponse(
+public record RecommendationByCategoryResponse(
         Long categoryId,
         String categoryName,
         String colorCode,
         List<HearitResponse> hearits
 ) {
-    public static HearitsWithRecommendCategoryResponse from(Category category, List<Hearit> hearits) {
-        return new HearitsWithRecommendCategoryResponse(
+    public static RecommendationByCategoryResponse from(Category category, List<Hearit> hearits) {
+        return new RecommendationByCategoryResponse(
                 category.getId(),
                 category.getName(),
                 category.getColorCode(),

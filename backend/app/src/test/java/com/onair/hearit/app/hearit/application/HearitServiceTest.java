@@ -4,15 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.app.category.application.RecommendCategoryService;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
-import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
-import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse.HearitResponse;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -31,8 +28,6 @@ import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import java.util.List;
 import java.util.UUID;
-import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,7 +39,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import({DbHelper.class, TestJpaAuditingConfig.class, RecommendCategoryService.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, HearitService.class})
 @ActiveProfiles("fake-test")
 class HearitServiceTest {
 
@@ -70,20 +65,7 @@ class HearitServiceTest {
     PlayingHistoryRepository playingHistoryRepository;
 
     @Autowired
-    RecommendCategoryService recommendCategoryService;
-
-    private HearitService hearitService;
-
-    @BeforeEach
-    void setup() {
-        hearitService = new HearitService(
-                hearitRepository,
-                memberRepository,
-                bookmarkRepository,
-                hearitKeywordRepository,
-                playingHistoryRepository,
-                recommendCategoryService);
-    }
+    HearitService hearitService;
 
     @Test
     @DisplayName("히어릿 아이디로 단일 히어릿 정보를 조회 할 수 있다.")
@@ -180,42 +162,6 @@ class HearitServiceTest {
                 TestFixture.createFixedMemberUserInfo(member)))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("hearitId");
-    }
-
-    @Test
-    @DisplayName("추천카테고리별 히어릿들을 조회할 수 있다.")
-    void getHearitsWithRecommendCategory() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-
-        Category itTrend = dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
-        Category categoryA = dbHelper.insertCategory(TestFixture.createCategoryByName("Category A"));
-        Category categoryB = dbHelper.insertCategory(TestFixture.createCategoryByName("Category B"));
-
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(categoryA));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(categoryA));
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(categoryB));
-        Hearit hearit4 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(categoryB));
-        Hearit hearit_it1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(itTrend));
-        Hearit hearit_it2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(itTrend));
-
-        // when
-        List<HearitsWithRecommendCategoryResponse> responses = hearitService.getHearitsWithRecommendCategory(
-                TestFixture.createFixedMemberUserInfo(member));
-
-        // then
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(responses).hasSize(3);
-            softly.assertThat(responses).extracting("categoryName")
-                    .containsExactlyInAnyOrder("IT 트렌드", "Category A", "Category B");
-
-            HearitsWithRecommendCategoryResponse itTrendResponse = responses.stream()
-                    .filter(r -> r.categoryName().equals("IT 트렌드"))
-                    .findFirst()
-                    .orElseThrow();
-            softly.assertThat(itTrendResponse.hearits()).extracting(HearitResponse::hearitId)
-                    .containsExactlyInAnyOrder(hearit_it1.getId(), hearit_it2.getId());
-        });
     }
 
     @Test

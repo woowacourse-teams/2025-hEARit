@@ -1,4 +1,4 @@
-package com.onair.hearit.app.category.application;
+package com.onair.hearit.app.recommendation.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -17,6 +17,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -37,26 +39,25 @@ class RecommendCategoryServiceTest {
     @DisplayName("게스트 사용자(비로그인)의 추천 카테고리 조회 시")
     class Guest_User {
 
-        @Test
-        @DisplayName("IT 트렌드 1개와 랜덤 카테고리 4개를 포함하여 총 5개의 카테고리를 반환한다")
-        void guest_returns_itTrend_and_random() {
+        @ParameterizedTest
+        @ValueSource(ints = {3, 5, 10})
+        @DisplayName("요청한 개수만큼 IT 트렌드 1개와 나머지는 랜덤 카테고리로 구성하여 반환한다")
+        void guest_returns_itTrend_and_random_categories(int totalRecommendCount) {
             // given
+            Category itTrendCategory = dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
+            for (int i = 0; i < 15; i++) { // 충분한 수의 랜덤 카테고리 생성
+                dbHelper.insertCategory(TestFixture.createFixedCategory());
+            }
             UserInfo userInfo = new UserInfo(null, UUID.randomUUID().toString());
 
-            Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category c2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category c3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category c4 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category c5 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category itTrendCategory = dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
-
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo);
+            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo, totalRecommendCount);
 
             // then
             assertAll(
-                    () -> assertThat(recommendedCategories).hasSize(5),
-                    () -> assertThat(recommendedCategories.get(0).getId()).isEqualTo(itTrendCategory.getId())
+                    () -> assertThat(recommendedCategories).hasSize(totalRecommendCount),
+                    () -> assertThat(recommendedCategories.get(0).getId()).isEqualTo(itTrendCategory.getId()),
+                    () -> assertThat(recommendedCategories).doesNotHaveDuplicates()
             );
         }
     }
@@ -66,9 +67,10 @@ class RecommendCategoryServiceTest {
     class Member_User {
 
         @Test
-        @DisplayName("북마크한 카테고리가 3개 이상이면 IT 트렌드 1개, 사용자 추천 3개, 랜덤 1개를 반환한다")
+        @DisplayName("요청 개수가 5개이고 북마크가 충분하면, IT 트렌드(1), 사용자 추천(3), 랜덤(1)으로 구성하여 반환한다")
         void member_with_many_bookmarks() {
             // given
+            int totalRecommendCount = 5;
             Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
             Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -96,7 +98,7 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(member.getId(), null);
 
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo);
+            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo, totalRecommendCount);
 
             // then
             List<Long> recommendedIds = recommendedCategories.stream()
@@ -104,7 +106,7 @@ class RecommendCategoryServiceTest {
                     .toList();
             List<Long> expectedRandomIds = List.of(c4.getId(), c5.getId());
             assertAll(
-                    () -> assertThat(recommendedCategories).hasSize(5),
+                    () -> assertThat(recommendedCategories).hasSize(totalRecommendCount),
                     () -> assertThat(recommendedIds.get(0)).isEqualTo(itTrendCategory.getId()),
                     () -> assertThat(recommendedIds.get(1)).isEqualTo(c1.getId()),
                     () -> assertThat(recommendedIds.get(2)).isEqualTo(c2.getId()),
@@ -114,8 +116,9 @@ class RecommendCategoryServiceTest {
         }
 
         @Test
-        @DisplayName("북마크한 카테고리가 1개이면 IT 트렌드 1개, 사용자 추천 1개, 랜덤 3개를 반환한다")
+        @DisplayName("요청개수가 5개이고 북마크한 카테고리가 1개이면 IT 트렌드(1), 사용자 추천(1), 랜덤(3)으로 구성하여 반환한다")
         void member_with_one_bookmark() {
+            int totalRecommendCount = 5;
             Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
             Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -131,51 +134,45 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(member.getId(), null);
 
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo);
+            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo, totalRecommendCount);
 
             // then
-            List<Long> recommendedIds = recommendedCategories.stream()
-                    .map(Category::getId)
-                    .toList();
-
             List<Long> expectedRandomIds = List.of(c2.getId(), c3.getId(), c4.getId(), c5.getId());
+            List<Long> recommendedIds = recommendedCategories.stream().map(Category::getId).toList();
+
             assertAll(
-                    () -> assertThat(recommendedCategories).hasSize(5),
-                    () -> assertThat(recommendedIds.get(0)).isEqualTo(itTrendCategory.getId()),
-                    () -> assertThat(recommendedIds.get(1)).isEqualTo(c1.getId()),
-                    () -> assertThat(recommendedIds.subList(2, 5)).isSubsetOf(expectedRandomIds),
-                    () -> assertThat(recommendedIds.subList(2, 5)).doesNotHaveDuplicates()
+                    () -> assertThat(recommendedCategories).hasSize(totalRecommendCount),
+                    () -> assertThat(recommendedIds)
+                            .as("추천 목록은 'IT 트렌드', '사용자 추천' 순으로 시작해야 한다")
+                            .startsWith(itTrendCategory.getId(), c1.getId()),
+                    () -> assertThat(recommendedIds.subList(2, totalRecommendCount))
+                            .as("나머지는 랜덤 추천 후보 중에서 선택되어야 한다")
+                            .isSubsetOf(expectedRandomIds)
+                            .doesNotHaveDuplicates()
             );
         }
 
         @Test
-        @DisplayName("북마크한 카테고리가 없으면 IT 트렌드 1개, 랜덤 4개를 반환한다")
+        @DisplayName("북마크한 카테고리가 없으면 IT 트렌드와 랜덤으로 구성된다")
         void member_without_bookmarks() {
+            // given
             Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-
-            Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category c2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category c3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category c4 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category c5 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category itTrendCategory = dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
-
             UserInfo userInfo = new UserInfo(member.getId(), null);
 
+            Category itTrendCategory = dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
+            for (int i = 0; i < 10; i++) {
+                dbHelper.insertCategory(TestFixture.createCategoryByName("Random " + i));
+            }
+
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo);
+            int totalRecommendCount = 5;
+            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo, totalRecommendCount);
 
             // then
-            List<Long> recommendedIds = recommendedCategories.stream()
-                    .map(Category::getId)
-                    .toList();
-
-            List<Long> expectedRandomIds = List.of(c1.getId(), c2.getId(), c3.getId(), c4.getId(), c5.getId());
             assertAll(
-                    () -> assertThat(recommendedCategories).hasSize(5),
-                    () -> assertThat(recommendedIds.get(0)).isEqualTo(itTrendCategory.getId()),
-                    () -> assertThat(recommendedIds.subList(1, 5)).isSubsetOf(expectedRandomIds),
-                    () -> assertThat(recommendedIds.subList(1, 5)).doesNotHaveDuplicates()
+                    () -> assertThat(recommendedCategories).hasSize(totalRecommendCount),
+                    () -> assertThat(recommendedCategories.get(0).getId()).isEqualTo(itTrendCategory.getId()),
+                    () -> assertThat(recommendedCategories).doesNotHaveDuplicates()
             );
         }
     }
@@ -193,7 +190,7 @@ class RecommendCategoryServiceTest {
             UserInfo guest = new UserInfo(null, UUID.randomUUID().toString());
 
             // when & then
-            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategories(guest))
+            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategories(guest, 5))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("IT 트렌드");
         }
@@ -207,35 +204,29 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(nonExistId, null);
 
             // when & then
-            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategories(userInfo))
+            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategories(userInfo, 5))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("memberId");
         }
 
-        @Test
-        @DisplayName("전체 카테고리 수가 5개 미만일 경우, 모든 카테고리를 반환한다")
-        void less_than_total_categories() {
+        @ParameterizedTest
+        @ValueSource(ints = {5, 10})
+        @DisplayName("요청 개수보다 DB의 전체 카테고리 수가 적으면, 중복 없이 모든 카테고리를 반환한다")
+        void less_than_total_categories(int totalRecommendCount) {
             // given
             Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Category c2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Category c3 = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Category itTrendCategory = dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
             UserInfo guest = new UserInfo(null, UUID.randomUUID().toString());
 
             // when
-            List<Category> recommended = recommendCategoryService.getRecommendedCategories(guest);
+            List<Category> recommended = recommendCategoryService.getRecommendedCategories(guest, totalRecommendCount);
 
             // then
-            List<Long> ids = recommended.stream().map(Category::getId).toList();
+            List<Category> allCategories = List.of(itTrendCategory, c1, c2);
             assertAll(
-                    () -> assertThat(recommended).hasSize(4),
-                    () -> assertThat(ids).containsExactlyInAnyOrder(
-                            itTrendCategory.getId(),
-                            c1.getId(),
-                            c2.getId(),
-                            c3.getId()
-                    ),
-                    () -> assertThat(ids).doesNotHaveDuplicates()
+                    () -> assertThat(recommended).hasSize(allCategories.size()),
+                    () -> assertThat(recommended).containsExactlyInAnyOrderElementsOf(allCategories)
             );
         }
     }

@@ -8,7 +8,6 @@ import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.IntegrationTest;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
-import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -97,55 +96,6 @@ class HearitIntegrationTest extends IntegrationTest {
                 .get("/api/v1/hearits/{hearitId}", notFoundHearitId)
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
-    }
-
-    @Test
-    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, IT트랜드 + 추천 카테고리 3개 + 랜덤카테고리 를 선정하고 히어릿들을 반환한다.")
-    void readHomeCategoriesHearit() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-
-        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
-        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
-        Category category3 = dbHelper.insertCategory(new Category("React1", "#0000FF"));
-        Category category4 = dbHelper.insertCategory(new Category("React2", "#0000FF"));
-        Category category5 = dbHelper.insertCategory(new Category("React3", "#0000FF"));
-        Category category6 = dbHelper.insertCategory(new Category("React4", "#0000FF"));
-        Category itTrendCategory = dbHelper.insertCategory(new Category("IT 트렌드", "#0000FF"));
-
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit4 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        Hearit hearit5 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        Hearit hearit6 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-        Hearit hearit7 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category4));
-        Hearit hearit8 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category5));
-        Hearit hearit9 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category6));
-        Hearit hearit10 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(itTrendCategory));
-        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(itTrendCategory));
-
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit2));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit3));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit4));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit5));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit6));
-
-        // when
-        List<HearitsWithRecommendCategoryResponse> responses = RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .when()
-                .get("/api/v1/hearits/recommend-category")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .jsonPath()
-                .getList(".", HearitsWithRecommendCategoryResponse.class);
-
-        // then
-        assertThat(responses).hasSize(5);
     }
 
     @Test
