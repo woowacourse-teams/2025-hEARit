@@ -1,4 +1,4 @@
-package com.onair.hearit.explore.application.scorefactor;
+package com.onair.hearit.app.explore.application.scorefactor;
 
 import java.util.Random;
 import org.springframework.stereotype.Component;

@@ -1,11 +1,10 @@
-package com.onair.hearit.explore.application.scorefactor;
+package com.onair.hearit.app.explore.application.scorefactor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Source;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;

@@ -1,19 +1,19 @@
-package com.onair.hearit.explore.application;
+package com.onair.hearit.app.explore.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.DefaultRandomNumberGenerator;
+import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.UserType;
-import com.onair.hearit.explore.application.scorefactor.BookmarkScoreFactor;
-import com.onair.hearit.explore.application.scorefactor.DefaultRandomNumberGenerator;
-import com.onair.hearit.explore.application.scorefactor.RandomScoreFactor;
-import com.onair.hearit.explore.application.scorefactor.RecencyScoreFactor;
-import com.onair.hearit.fixture.DbHelper;
-import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
+import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ import org.springframework.test.context.jdbc.Sql;
         BookmarkScoreFactor.class, ExploreScoreCalculator.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-class ExploreScoreRefresherTest {
+class ExploreScoreInitializerTest {
 
     @Autowired
     private DbHelper dbHelper;
@@ -49,11 +49,11 @@ class ExploreScoreRefresherTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private ExploreScoreRefresher exploreScoreRefresher;
+    private ExploreScoreInitializer exploreScoreInitializer;
 
     @BeforeEach
     void setUp() {
-        exploreScoreRefresher = new ExploreScoreRefresher(exploreScoreCalculator, exploreScoreCommandRepository);
+        exploreScoreInitializer = new ExploreScoreInitializer(exploreScoreCalculator, exploreScoreCommandRepository);
     }
 
     @DisplayName("cursorId가 0이 아니면 갱신하지 않는다")
@@ -67,7 +67,7 @@ class ExploreScoreRefresherTest {
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
-        exploreScoreRefresher.refreshScores(cursorId, userUuid, UserType.GUEST);
+        exploreScoreInitializer.refreshScores(cursorId, userUuid, UserType.GUEST);
 
         // then
         assertThat(findExploreScores(userUuid)).isEmpty();
@@ -83,7 +83,7 @@ class ExploreScoreRefresherTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        exploreScoreRefresher.refreshScores(cursorId, userUuid, UserType.GUEST);
+        exploreScoreInitializer.refreshScores(cursorId, userUuid, UserType.GUEST);
 
         List<ExploreScoreRow> rows = findExploreScores(userUuid);
 

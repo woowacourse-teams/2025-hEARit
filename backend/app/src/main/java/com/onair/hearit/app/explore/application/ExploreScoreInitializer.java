@@ -1,7 +1,7 @@
-package com.onair.hearit.explore.application;
+package com.onair.hearit.app.explore.application;
 
-import com.onair.hearit.domain.UserType;
-import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
+import com.onair.hearit.core.domain.UserType;
+import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class ExploreScoreRefresher {
+public class ExploreScoreInitializer {
 
     private final ExploreScoreCalculator exploreScoreCalculator;
     private final ExploreScoreCommandRepository exploreScoreCommandRepository;

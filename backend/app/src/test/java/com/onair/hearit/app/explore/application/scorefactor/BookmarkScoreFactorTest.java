@@ -4,17 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.domain.Bookmark;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.domain.Bookmark;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.UserType;
-import com.onair.hearit.exception.custom.NotFoundException;
-import com.onair.hearit.fixture.DbHelper;
-import com.onair.hearit.infrastructure.jpa.BookmarkRepository;
-import com.onair.hearit.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
+import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -75,7 +73,7 @@ class BookmarkScoreFactorTest {
         // then
         assertThat(actual).isFalse();
     }
-    
+
     @Test
     @DisplayName("사용자의 카테고리별 북마크 비율에 비례하여 점수를 계산한다.")
     void basedOnBookmarkCounts() {

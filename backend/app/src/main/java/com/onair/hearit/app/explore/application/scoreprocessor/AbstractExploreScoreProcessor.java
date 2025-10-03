@@ -1,14 +1,14 @@
 package com.onair.hearit.app.explore.application.scoreprocessor;
 
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.HearitKeyword;
-import com.onair.hearit.domain.Keyword;
-import com.onair.hearit.domain.UserInfo;
-import com.onair.hearit.explore.application.ExploreScoreRefresher;
-import com.onair.hearit.explore.dto.ExploredHearitResponse;
-import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
-import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
-import com.onair.hearit.infrastructure.projection.ExploredHearitProjection;
+import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.HearitKeyword;
+import com.onair.hearit.core.domain.Keyword;
+import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.core.infrastructure.jpa.ExploredHearitQueryRepository;
+import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
+import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,13 +21,13 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
 
     protected static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
 
-    private final ExploreScoreRefresher exploreScoreRefresher;
+    private final ExploreScoreInitializer exploreScoreInitializer;
     private final ExploredHearitQueryRepository exploredHearitQueryRepository;
     protected final HearitKeywordRepository hearitKeywordRepository;
 
     @Override
-    public final void refreshScoresIfNeeded(UserInfo userInfo, long cursorId) {
-        exploreScoreRefresher.refreshScores(cursorId, getUserUuid(userInfo), userInfo.getUserType());
+    public final void refreshScores(UserInfo userInfo, long cursorId) {
+        exploreScoreInitializer.refreshScores(cursorId, getUserUuid(userInfo), userInfo.getUserType());
     }
 
     @Override

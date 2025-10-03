@@ -1,28 +1,27 @@
-package com.onair.hearit.explore.application.scoreprocessor;
+package com.onair.hearit.app.explore.application.scoreprocessor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.app.explore.application.ExploreScoreCalculator;
+import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
+import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.RandomNumberGenerator;
+import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.domain.ExploreScore;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.ExploreScore;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.UserInfo;
-import com.onair.hearit.explore.application.ExploreScoreCalculator;
-import com.onair.hearit.explore.application.ExploreScoreRefresher;
-import com.onair.hearit.explore.application.scorefactor.BookmarkScoreFactor;
-import com.onair.hearit.explore.application.scorefactor.RandomNumberGenerator;
-import com.onair.hearit.explore.application.scorefactor.RandomScoreFactor;
-import com.onair.hearit.explore.application.scorefactor.RecencyScoreFactor;
-import com.onair.hearit.explore.dto.ExploredHearitResponse;
-import com.onair.hearit.fixture.DbHelper;
-import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
-import com.onair.hearit.infrastructure.jpa.BookmarkRepository;
-import com.onair.hearit.infrastructure.jpa.ExploredHearitQueryRepository;
-import com.onair.hearit.infrastructure.jpa.HearitKeywordRepository;
-import com.onair.hearit.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
+import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
+import com.onair.hearit.core.infrastructure.jpa.ExploredHearitQueryRepository;
+import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
+import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +40,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql("/dbclean.sql")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, RandomScoreFactor.class, RecencyScoreFactor.class,
         BookmarkScoreFactor.class, ExploreScoreCalculator.class, ExploreScoreCommandRepository.class,
-        ExploreScoreRefresher.class})
+        ExploreScoreInitializer.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class MemberExploreScoreProcessorTest {
@@ -65,13 +64,13 @@ class MemberExploreScoreProcessorTest {
     private HearitKeywordRepository hearitKeywordRepository;
 
     @Autowired
-    private ExploreScoreRefresher exploreScoreRefresher;
+    private ExploreScoreInitializer exploreScoreInitializer;
 
     private MemberExploreScoreProcessor memberExploreScoreProcessor;
 
     @BeforeEach
     void setup() {
-        memberExploreScoreProcessor = new MemberExploreScoreProcessor(exploreScoreRefresher,
+        memberExploreScoreProcessor = new MemberExploreScoreProcessor(exploreScoreInitializer,
                 exploredHearitQueryRepository,
                 hearitKeywordRepository,
                 memberRepository,

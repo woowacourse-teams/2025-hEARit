@@ -1,28 +1,26 @@
 package com.onair.hearit.app.explore.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 
-import com.onair.hearit.common.dto.request.CursorRequest;
-import com.onair.hearit.common.dto.response.CursorResponseV2;
+import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.RandomNumberGenerator;
+import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.application.scoreprocessor.GuestExploreScoreProcessor;
+import com.onair.hearit.app.explore.application.scoreprocessor.MemberExploreScoreProcessor;
+import com.onair.hearit.app.explore.dto.CursorRequest;
+import com.onair.hearit.app.explore.dto.CursorResponseV2;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.domain.Bookmark;
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.domain.Bookmark;
-import com.onair.hearit.domain.Category;
-import com.onair.hearit.domain.Hearit;
-import com.onair.hearit.domain.Member;
-import com.onair.hearit.domain.Source;
-import com.onair.hearit.domain.UserInfo;
-import com.onair.hearit.explore.application.scorefactor.BookmarkScoreFactor;
-import com.onair.hearit.explore.application.scorefactor.RandomNumberGenerator;
-import com.onair.hearit.explore.application.scorefactor.RandomScoreFactor;
-import com.onair.hearit.explore.application.scorefactor.RecencyScoreFactor;
-import com.onair.hearit.explore.application.scoreprocessor.GuestExploreScoreProcessor;
-import com.onair.hearit.explore.application.scoreprocessor.MemberExploreScoreProcessor;
-import com.onair.hearit.explore.dto.ExploredHearitResponse;
-import com.onair.hearit.fixture.DbHelper;
-import com.onair.hearit.infrastructure.jdbc.ExploreScoreCommandRepository;
+import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +40,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql("/dbclean.sql")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, RandomScoreFactor.class, RecencyScoreFactor.class,
         BookmarkScoreFactor.class, ExploreScoreCalculator.class, ExploreScoreCommandRepository.class,
-        ExploreScoreRefresher.class, GuestExploreScoreProcessor.class, MemberExploreScoreProcessor.class})
+        ExploreScoreInitializer.class, GuestExploreScoreProcessor.class, MemberExploreScoreProcessor.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
