@@ -176,7 +176,7 @@ class RecommendationControllerTest extends ControllerTest {
                                 )
                                 .queryParameters(
                                         parameterWithName("categorySize").description("추천받을 카테고리 개수 (기본 5, 최대 20)").defaultValue("5"),
-                                        parameterWithName("hearitSize").description("카테고리 당 히어릿 개수 (기본 20, 최대 30)").defaultValue("5")
+                                        parameterWithName("hearitSize").description("카테고리 당 히어릿 개수 (기본 5, 최대 30)").defaultValue("5")
                                 )
                                 .responseFields(
                                         fieldWithPath("[].categoryId").description("카테고리 ID"),
@@ -256,7 +256,7 @@ class RecommendationControllerTest extends ControllerTest {
                                 .description("요청에서 지정한 카테고리 개수와 히어릿 개수에 따라, 추천된 카테고리별 최신 히어릿 목록을 조회합니다.")
                                 .queryParameters(
                                         parameterWithName("categorySize").description("추천받을 카테고리 개수 (기본 5, 최대 20)").defaultValue("5"),
-                                        parameterWithName("hearitSize").description("카테고리 당 히어릿 개수 (기본 20, 최대 30)").defaultValue("5")
+                                        parameterWithName("hearitSize").description("카테고리 당 히어릿 개수 (기본 5, 최대 30)").defaultValue("5")
                                 )
                                 .responseFields(
                                         fieldWithPath("[].categoryId").description("카테고리 ID"),
