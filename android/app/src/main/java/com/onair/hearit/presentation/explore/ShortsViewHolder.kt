@@ -110,19 +110,16 @@ class ShortsViewHolder(
     }
 
     fun highlightScriptLine(positionMs: Long) {
-        val current = item ?: return
-        val script = current.script ?: return
-        if (script.isEmpty()) return
-
-        val index = script.indexOfLast { it.start <= positionMs }
-        if (index < 0) {
+        val script = item?.script
+        if (script.isNullOrEmpty()) {
             scriptAdapter.highlightSubtitle(null)
             return
         }
 
+        val index = script.indexOfLast { it.start <= positionMs }
         val id = script.getOrNull(index)?.id
-        scriptAdapter.highlightSubtitle(id)
 
+        scriptAdapter.highlightSubtitle(id)
         (binding.rvExploreItemScript.layoutManager as? LinearLayoutManager)
             ?.scrollToPositionWithOffset(index, binding.rvExploreItemScript.height / 3)
     }
