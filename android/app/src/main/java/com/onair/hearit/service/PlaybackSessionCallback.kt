@@ -151,6 +151,11 @@ class PlaybackSessionCallback(
         val itemsWithStart = libraryPlaybackHandler.loadLibraryItemsWithStartPosition(playParams)
 
         withContext(Dispatchers.Main) {
+            prefetchController?.let {
+                it.setLibraryMode(false)
+                it.detach()
+            }
+
             session.player.setMediaItems(
                 itemsWithStart.mediaItems,
                 itemsWithStart.startIndex,
