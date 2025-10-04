@@ -22,8 +22,8 @@ class RecommendationIntegrationTest extends IntegrationTest {
     JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("요청한 카테고리·히어릿 개수에 맞춰 반환하며, IT트렌드와 랜덤카테고리는 항상 포함된다.")
-    void readRecommendationsByCategory() {
+    @DisplayName("(회원 - token O) 요청한 카테고리·히어릿 개수에 맞춰 반환하며, IT트렌드와 랜덤카테고리는 항상 포함된다.")
+    void readRecommendationsByCategory_member() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
@@ -76,6 +76,47 @@ class RecommendationIntegrationTest extends IntegrationTest {
                 .getList(".", RecommendationByCategoryResponse.class);
 
         // then
+        assertThat(responses).hasSize(categorySize);
+        assertThat(responses.get(0).hearits()).hasSize(hearitSize);
+    }
+
+    @Test
+    @DisplayName("(비회원 - token X)요청한 카테고리·히어릿 개수에 맞춰 반환하며, IT트렌드와 랜덤카테고리는 항상 포함된다.")
+    void readRecommendationsByCategory_guest() {
+        // given
+        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
+        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
+        Category category3 = dbHelper.insertCategory(new Category("React1", "#0000FF"));
+        Category category4 = dbHelper.insertCategory(new Category("React2", "#0000FF"));
+        Category category5 = dbHelper.insertCategory(new Category("React3", "#0000FF"));
+        Category category6 = dbHelper.insertCategory(new Category("React4", "#0000FF"));
+        Category itTrendCategory = dbHelper.insertCategory(new Category("IT 트렌드", "#0000FF"));
+
+        for (int i = 0; i < 5; i++) {
+            dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
+            dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+            dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
+            dbHelper.insertHearit(TestFixture.createFixedHearitWith(category4));
+            dbHelper.insertHearit(TestFixture.createFixedHearitWith(category5));
+            dbHelper.insertHearit(TestFixture.createFixedHearitWith(category6));
+            dbHelper.insertHearit(TestFixture.createFixedHearitWith(itTrendCategory));
+        }
+
+        // when
+        int categorySize = 5;
+        int hearitSize = 5;
+        List<RecommendationByCategoryResponse> responses = RestAssured.given(this.spec)
+                .queryParam("categorySize", categorySize)
+                .queryParam("hearitSize", hearitSize)
+                .when()
+                .get("/api/v1/recommendations/categories")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .jsonPath()
+                .getList(".", RecommendationByCategoryResponse.class);
+
+        // thena
         assertThat(responses).hasSize(categorySize);
         assertThat(responses.get(0).hearits()).hasSize(hearitSize);
     }
