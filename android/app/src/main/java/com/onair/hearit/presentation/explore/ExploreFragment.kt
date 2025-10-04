@@ -12,7 +12,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isEmpty
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isNotEmpty
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -227,26 +227,10 @@ class ExploreFragment :
     private fun handleShortsHearitsUpdate(shortsHearits: List<ExploreHearit>) {
         if (!isViewValid) return
         adapter.submitList(shortsHearits) {
-            if (!isViewValid) return@submitList
-            if (shortsHearits.isEmpty()) return@submitList
+            if (!isViewValid || shortsHearits.isEmpty()) return@submitList
 
-            // 레이아웃이 아직 안붙은 경우에 한 번 더 post로 지연
-            binding.rvExplore.post {
-                if (!isViewValid) return@post
-
-                if (binding.rvExplore.isEmpty()) {
-                    waitForRecyclerViewLayout()
-                } else {
-                    startPlaybackAndAnimation()
-                }
-            }
-        }
-    }
-
-    // 만약에 뷰가 없으면 기다렸다가 post 재시도
-    private fun waitForRecyclerViewLayout() {
-        binding.rvExplore.post {
-            if (isViewValid) {
+            binding.rvExplore.doOnNextLayout {
+                if (!isViewValid) return@doOnNextLayout
                 startPlaybackAndAnimation()
             }
         }
