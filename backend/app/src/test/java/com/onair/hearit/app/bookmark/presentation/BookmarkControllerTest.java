@@ -196,6 +196,7 @@ class BookmarkControllerTest extends ControllerTest {
                                             parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
                                             parameterWithName("size").description("페이지 당 항목 수").defaultValue("20"),
                                             parameterWithName("filter").description("북마크 필터 조건").defaultValue("all")
+                                                    .optional()
                                     )
                                     .responseFields(Stream.concat(
                                                     Arrays.stream(new FieldDescriptor[]{
@@ -254,8 +255,8 @@ class BookmarkControllerTest extends ControllerTest {
                                     .queryParameters(
                                             parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
                                             parameterWithName("size").description("페이지 당 항목 수").defaultValue("20"),
-                                            parameterWithName("filter").description("북마크 필터 조건")
-                                                    .defaultValue("unfinished")
+                                            parameterWithName("filter").description("북마크 필터 조건").defaultValue("all")
+                                                    .optional()
                                     )
                                     .responseFields(Stream.concat(
                                                     Arrays.stream(new FieldDescriptor[]{
@@ -308,6 +309,12 @@ class BookmarkControllerTest extends ControllerTest {
                                             Arrays.stream(BookmarkFilter.values())
                                                     .map(BookmarkFilter::getName)
                                                     .toList()) + ")`로 분류하고, `Page` 단위로 조회합니다.")
+                                    .queryParameters(
+                                            parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
+                                            parameterWithName("size").description("페이지 당 항목 수").defaultValue("20"),
+                                            parameterWithName("filter").description("북마크 필터 조건").defaultValue("all")
+                                                    .optional()
+                                    )
                                     .responseFields(
                                             com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
                                     .build())
