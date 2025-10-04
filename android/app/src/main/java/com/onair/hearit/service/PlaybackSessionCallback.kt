@@ -2,7 +2,6 @@ package com.onair.hearit.service
 
 import android.os.Bundle
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionCommand
@@ -13,7 +12,6 @@ import com.onair.hearit.presentation.executeAsync
 import com.onair.hearit.service.model.LibraryPlayParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @UnstableApi
@@ -25,54 +23,10 @@ class PlaybackSessionCallback(
     private val playbackPositionListener: PlaybackPositionListener,
     private val stateSaver: PlaybackStateSaver,
 ) : MediaSession.Callback {
+    private var prefetchController: AutoPrefetchController? = null
+
     // 컨트롤러가 세션에 연결될 때 호출됨
     // 기본 세션 명령어 + 커스텀 명령어(PRELOAD, START_LIBRARY_PLAY, PREFETCH_NEXT)를 등록
-
-    private var isLibraryMode = false
-    private var prefetch = false
-    private var attachedSession: MediaSession? = null
-
-    private val autoPrefetchWatcher =
-        object : Player.Listener {
-            override fun onEvents(
-                player: Player,
-                events: Player.Events,
-            ) {
-                if (!events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) &&
-                    !events.contains(Player.EVENT_POSITION_DISCONTINUITY) &&
-                    !events.contains(Player.EVENT_TIMELINE_CHANGED)
-                ) {
-                    return
-                }
-
-                val index = player.currentMediaItemIndex
-                val count = player.mediaItemCount
-
-                val remaining = (count - 1) - index
-
-                if (remaining <= PREFETCH_THRESHOLD) {
-                    val session = attachedSession ?: return
-                    prefetch = true
-                    serviceScope.launch {
-                        try {
-                            handlePrefetchNext(session)
-                        } finally {
-                            prefetch = false
-                        }
-                    }
-                }
-            }
-        }
-
-    private fun attachAutoPrefetch(
-        session: MediaSession,
-        player: Player,
-    ) {
-        attachedSession = session
-        player.removeListener(autoPrefetchWatcher)
-        player.addListener(autoPrefetchWatcher)
-    }
-
     override fun onConnect(
         session: MediaSession,
         controller: MediaSession.ControllerInfo,
@@ -205,9 +159,16 @@ class PlaybackSessionCallback(
             session.player.prepare()
             session.player.play()
 
-            isLibraryMode = true
+            prefetchController =
+                AutoPrefetchController(
+                    serviceScope = serviceScope,
+                    player = session.player,
+                    session = session,
+                    handlePrefetchNext = { handlePrefetchNext(it) },
+                ).also { it.attach() }
 
-            attachAutoPrefetch(session, session.player)
+            prefetchController?.setLibraryMode(true)
+
             playbackPositionListener.attach()
             playbackPositionListener.reset()
         }
@@ -233,11 +194,19 @@ class PlaybackSessionCallback(
         return SessionResult(SessionResult.RESULT_SUCCESS)
     }
 
+    override fun onDisconnected(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+    ) {
+        prefetchController?.detach()
+        prefetchController?.setLibraryMode(false)
+        super.onDisconnected(session, controller)
+    }
+
     companion object {
         private const val ACTION_PRELOAD_RECENT = "PRELOAD_RECENT"
         private const val ACTION_START_LIBRARY_PLAY = "START_LIBRARY_PLAY"
         private const val ACTION_FLUSH_PLAYBACK = "FLUSH_PLAYBACK"
-        private const val PREFETCH_THRESHOLD = 3
 
         val PRELOAD_RECENT_COMMAND = SessionCommand(ACTION_PRELOAD_RECENT, Bundle.EMPTY)
         val START_LIBRARY_PLAY_COMMAND = SessionCommand(ACTION_START_LIBRARY_PLAY, Bundle.EMPTY)
