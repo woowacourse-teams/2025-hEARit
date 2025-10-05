@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.app.fixture.IntegrationTest;
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.fixture.TestFixture;
 import io.restassured.RestAssured;
@@ -73,13 +75,15 @@ class ApiSecurityConfigTest extends IntegrationTest {
     void allowAccessWithValidToken() {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .get("/api/v1/bookmarks/hearits") // 인증 필요한 경로
+                .post("/api/v1/bookmarks/hearits/" + hearit.getId()) // 인증 필요한 경로
                 .then().log().all()
-                .statusCode(HttpStatus.OK);
+                .statusCode(HttpStatus.CREATED);
     }
 
     @Test

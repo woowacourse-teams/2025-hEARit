@@ -4,8 +4,8 @@ import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.exception.custom.UnauthenticatedException;
-import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
+import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.core.domain.Bookmark;
@@ -51,6 +51,17 @@ public class HearitService {
     private final HearitKeywordRepository hearitKeywordRepository;
     private final CategoryRepository categoryRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
+
+    private static Page<HearitOverviewResponse> mapToFilteredHearits(
+            Page<HearitWithPlayTimeProjection> hearitsWithPlayTime,
+            Map<Long, List<Keyword>> keywordMap) {
+        return hearitsWithPlayTime.map(projection -> {
+            Hearit hearit = projection.getHearit();
+            Long lastPlayTime = projection.getLastPlayTime();
+            List<Keyword> keywords = keywordMap.getOrDefault(hearit.getId(), Collections.emptyList());
+            return HearitOverviewResponse.from(hearit, keywords, lastPlayTime);
+        });
+    }
 
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
         Hearit hearit = getHearitById(hearitId);
@@ -158,17 +169,6 @@ public class HearitService {
         Map<Long, List<Keyword>> keywordMap = getKeywordsMap(hearitIds);
         Page<HearitOverviewResponse> response = mapToFilteredHearits(hearitsWithPlayTime, keywordMap);
         return PagedResponse.from(response);
-    }
-
-    private static Page<HearitOverviewResponse> mapToFilteredHearits(
-            Page<HearitWithPlayTimeProjection> hearitsWithPlayTime,
-            Map<Long, List<Keyword>> keywordMap) {
-        return hearitsWithPlayTime.map(projection -> {
-            Hearit hearit = projection.getHearit();
-            Long lastPlayTime = projection.getLastPlayTime();
-            List<Keyword> keywords = keywordMap.getOrDefault(hearit.getId(), Collections.emptyList());
-            return HearitOverviewResponse.from(hearit, keywords, lastPlayTime);
-        });
     }
 
     private Map<Long, List<Keyword>> getKeywordsMap(List<Long> hearitIds) {

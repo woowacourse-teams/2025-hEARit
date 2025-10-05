@@ -10,7 +10,6 @@ import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
-import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.fixture.TestFixture;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
@@ -34,7 +33,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
 
         for (int i = 0; i < 12; i++) {
-            Hearit hearit = dbHelper.insertHearit(createHearitWith(100 + i, category));
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 10L * i));
         }
 
@@ -58,9 +57,9 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
-        Hearit hearit = dbHelper.insertHearit(createHearitWith(101, category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 10L));
-        Hearit hearit2 = dbHelper.insertHearit(createHearitWith(102, category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit2, 20L));
 
         // when & then
@@ -83,7 +82,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
-        Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
@@ -105,7 +104,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
-        Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
                 new PlayingHistory(member.getId(), hearit, 20_000));
 
@@ -127,7 +126,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
     void createBookmarkTestWithConflict() {
         // given
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
-        Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
@@ -139,18 +138,6 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
                 .post("/api/v1/playing-histories")
                 .then()
                 .statusCode(HttpStatus.OK.value());
-    }
-
-    private Hearit createHearitWith(int playTime, Category category) {
-        return new Hearit("title",
-                "summary",
-                playTime,
-                "/hearit/audio/original/ORG_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
-                "/hearit/audio/short/SHR_bf7c513e-579e-4224-8505-3824bb22ed01.mp3",
-                "/hearit/script/SCR_bf7c513e-579e-4224-8505-3824bb22ed01.json",
-                List.of(new Source("원본은 CC BY 4.0 라이선스를 따릅니다.", "https://example.com/2")),
-                category
-        );
     }
 
     private String generateToken(Member member) {

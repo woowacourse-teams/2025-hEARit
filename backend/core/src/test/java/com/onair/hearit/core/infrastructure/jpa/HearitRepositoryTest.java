@@ -5,11 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
-import com.onair.hearit.core.domain.HearitKeyword;
-import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
-import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.fixture.DbHelper;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;

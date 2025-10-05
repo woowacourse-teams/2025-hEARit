@@ -2,8 +2,10 @@ package com.onair.hearit.app.bookmark.application;
 
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
-import com.onair.hearit.app.bookmark.dto.BookmarkUnfinishedHearitResponse;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkFilter;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkSort;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
+import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.AlreadyExistException;
 import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.exception.custom.NotFoundException;
@@ -16,12 +18,12 @@ import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.projection.BookmarkWithPlayingHistoryProjection;
-import java.util.Collections;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,15 +35,30 @@ public class BookmarkService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public Page<BookmarkHearitResponseV2> getBookmarkHearits(
-            UserInfo userInfo,
-            PagingRequest pagingRequest) {
+    public PagedResponse<BookmarkHearitResponseV2> getBookmarkHearits(UserInfo userInfo,
+                                                                      PagingRequest pagingRequest,
+                                                                      BookmarkFilter filter,
+                                                                      BookmarkSort sort) {
+        if (userInfo == null || userInfo.isGuest()) {
+            return PagedResponse.empty();
+        }
         Member member = getMemberByUserInfo(userInfo);
-        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findAllByMemberOrderByRecent(
-                member.getId(),
-                pageable);
-        return toBookmarkHearitResponse(projections);
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sort.toSort());
+        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(member.getId(),
+                filter.isFinished(), pageable);
+        return PagedResponse.from(toBookmarkHearitResponse(projections));
+    }
+
+    /*will be deprecated after the client update*/
+    public PagedResponse<BookmarkHearitResponseV2> getBookmarkHearitsV2(UserInfo userInfo,
+                                                                        PagingRequest pagingRequest,
+                                                                        BookmarkFilter filter) {
+        Member member = getMemberByUserInfo(userInfo);
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(),
+                Sort.by(Direction.DESC, "createdAt"));
+        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(member.getId(),
+                filter.isFinished(), pageable);
+        return PagedResponse.from(toBookmarkHearitResponse(projections));
     }
 
     private Page<BookmarkHearitResponseV2> toBookmarkHearitResponse(
@@ -51,11 +68,6 @@ public class BookmarkService {
                 p.getBookmark().getHearit(),
                 p.getPlayingHistory()
         ));
-    }
-
-    public List<BookmarkUnfinishedHearitResponse> getBookmarkUnfinishedHearit(UserInfo userInfo) {
-        //TODO: API Docs 우선 배포하여 비지니스 로직 구현 필요
-        return Collections.emptyList();
     }
 
     @Transactional

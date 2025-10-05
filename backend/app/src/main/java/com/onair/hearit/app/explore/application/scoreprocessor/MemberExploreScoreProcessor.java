@@ -29,7 +29,7 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
                                        HearitKeywordRepository hearitKeywordRepository,
                                        MemberRepository memberRepository,
                                        BookmarkRepository bookmarkRepository) {
-        super(exploreScoreInitializer, exploredHearitQueryRepository, hearitKeywordRepository);
+        super(hearitKeywordRepository, exploreScoreInitializer, exploredHearitQueryRepository);
         this.memberRepository = memberRepository;
         this.bookmarkRepository = bookmarkRepository;
     }

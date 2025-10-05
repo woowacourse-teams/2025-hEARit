@@ -82,87 +82,6 @@ class HearitServiceTest {
                 playingHistoryRepository);
     }
 
-    @Nested
-    class HearitDetailTest {
-        @Test
-        @DisplayName("히어릿 아이디로 단일 히어릿 정보를 조회 할 수 있다.")
-        void getHearitDetailTest() {
-            // given
-            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
-            Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
-            HearitKeyword hearitKeyword = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword));
-
-            // when
-            HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(),
-                    TestFixture.createFixedMemberUserInfo(member));
-
-            // then
-            assertAll(() -> {
-                assertThat(response.id()).isEqualTo(hearit.getId());
-                assertThat(response.title()).isEqualTo(hearit.getTitle());
-                assertThat(response.summary()).isEqualTo(hearit.getSummary());
-                assertThat(response.isBookmarked()).isTrue();
-                assertThat(response.bookmarkId()).isEqualTo(bookmark.getId());
-                assertThat(response.category().id()).isEqualTo(hearit.getCategory().getId());
-                assertThat(response.category().name()).isEqualTo(hearit.getCategory().getName());
-                assertThat(response.keywords()).hasSize(1);
-            });
-        }
-
-        @ParameterizedTest
-        @ValueSource(longs = {5000L, 1000L, 0L})
-        @DisplayName("lastPlayTime이 5000ms 이내로 저장된 경우 lastPlayTime은 0ms으로 초기화된다.")
-        void resetLastPlayTimeToZero_whenWithin5Seconds(long remainingSeconds) {
-            // given
-            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-
-            long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
-            playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
-
-            // when
-            HearitDetailResponse response = hearitService.getHearitDetail(
-                    hearit.getId(),
-                    TestFixture.createFixedMemberUserInfo(member)
-            );
-
-            // then
-            assertAll(
-                    () -> assertThat(response.id()).isEqualTo(hearit.getId()),
-                    () -> assertThat(response.lastPlayTime()).isEqualTo(0L)
-            );
-        }
-
-        @Test
-        @DisplayName("lastPlayTime이 5000ms 초과로 저장된 경우 lastPlayTime은 그대로 유지된다.")
-        void keepLastPlayTime_whenExceeds5Seconds() {
-            // given
-            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category)); //히어릿 playTime 500초
-
-            long remainingSeconds = 5001L;
-            Long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
-            playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
-
-            // when
-            HearitDetailResponse response = hearitService.getHearitDetail(
-                    hearit.getId(),
-                    TestFixture.createFixedMemberUserInfo(member)
-            );
-
-            // then
-            assertAll(
-                    () -> assertThat(response.id()).isEqualTo(hearit.getId()),
-                    () -> assertThat(response.lastPlayTime()).isEqualTo(lastPlayTime)
-            );
-        }
-    }
-
     @Test
     @DisplayName("존재하지 않는 히어릿 아이디로 단일 히어릿 조회 시 NoFoundException을 던진다.")
     void getHearitDetailNotFoundTest() {
@@ -250,6 +169,87 @@ class HearitServiceTest {
             assertThat(firstResponses.get(1).categoryId()).isEqualTo(secondResponses.get(1).categoryId());
             assertThat(firstResponses.get(2).categoryId()).isEqualTo(secondResponses.get(2).categoryId());
         });
+    }
+
+    @Nested
+    class HearitDetailTest {
+        @Test
+        @DisplayName("히어릿 아이디로 단일 히어릿 정보를 조회 할 수 있다.")
+        void getHearitDetailTest() {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+            Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
+            Keyword keyword = dbHelper.insertKeyword(TestFixture.createFixedKeyword());
+            HearitKeyword hearitKeyword = dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword));
+
+            // when
+            HearitDetailResponse response = hearitService.getHearitDetail(hearit.getId(),
+                    TestFixture.createFixedMemberUserInfo(member));
+
+            // then
+            assertAll(() -> {
+                assertThat(response.id()).isEqualTo(hearit.getId());
+                assertThat(response.title()).isEqualTo(hearit.getTitle());
+                assertThat(response.summary()).isEqualTo(hearit.getSummary());
+                assertThat(response.isBookmarked()).isTrue();
+                assertThat(response.bookmarkId()).isEqualTo(bookmark.getId());
+                assertThat(response.category().id()).isEqualTo(hearit.getCategory().getId());
+                assertThat(response.category().name()).isEqualTo(hearit.getCategory().getName());
+                assertThat(response.keywords()).hasSize(1);
+            });
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {5000L, 1000L, 0L})
+        @DisplayName("lastPlayTime이 5000ms 이내로 저장된 경우 lastPlayTime은 0ms으로 초기화된다.")
+        void resetLastPlayTimeToZero_whenWithin5Seconds(long remainingSeconds) {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+            long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
+            playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
+
+            // when
+            HearitDetailResponse response = hearitService.getHearitDetail(
+                    hearit.getId(),
+                    TestFixture.createFixedMemberUserInfo(member)
+            );
+
+            // then
+            assertAll(
+                    () -> assertThat(response.id()).isEqualTo(hearit.getId()),
+                    () -> assertThat(response.lastPlayTime()).isEqualTo(0L)
+            );
+        }
+
+        @Test
+        @DisplayName("lastPlayTime이 5000ms 초과로 저장된 경우 lastPlayTime은 그대로 유지된다.")
+        void keepLastPlayTime_whenExceeds5Seconds() {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category)); //히어릿 playTime 500초
+
+            long remainingSeconds = 5001L;
+            Long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
+            playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
+
+            // when
+            HearitDetailResponse response = hearitService.getHearitDetail(
+                    hearit.getId(),
+                    TestFixture.createFixedMemberUserInfo(member)
+            );
+
+            // then
+            assertAll(
+                    () -> assertThat(response.id()).isEqualTo(hearit.getId()),
+                    () -> assertThat(response.lastPlayTime()).isEqualTo(lastPlayTime)
+            );
+        }
     }
 
     @Nested

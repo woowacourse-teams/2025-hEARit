@@ -18,7 +18,7 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
     public GuestExploreScoreProcessor(ExploreScoreInitializer exploreScoreInitializer,
                                       ExploredHearitQueryRepository exploredHearitQueryRepository,
                                       HearitKeywordRepository hearitKeywordRepository) {
-        super(exploreScoreInitializer, exploredHearitQueryRepository, hearitKeywordRepository);
+        super(hearitKeywordRepository, exploreScoreInitializer, exploredHearitQueryRepository);
     }
 
     @Override

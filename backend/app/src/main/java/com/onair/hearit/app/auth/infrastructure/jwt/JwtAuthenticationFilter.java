@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header == null || !header.startsWith("Bearer ")) {
             return null;
         }
-        return header.substring("Bearer ".length());
+        return header.substring("Bearer " .length());
     }
 
     private boolean isWhitelisted(HttpServletRequest request) {
