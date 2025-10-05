@@ -121,7 +121,7 @@ class RecommendationIntegrationTest extends IntegrationTest {
                 .jsonPath()
                 .getList(".", RecommendationByCategoryResponse.class);
 
-        // thena
+        // then
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(responses).hasSize(categorySize);
 
