@@ -188,7 +188,7 @@ class HearitIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("히어릿을 등록된 날짜별 오름차순으로 정렬하여 반환한다.")
+    @DisplayName("히어릿을 요청 파라미터 기준으로 정렬하여 반환한다.")
     void readRecentHearit() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());

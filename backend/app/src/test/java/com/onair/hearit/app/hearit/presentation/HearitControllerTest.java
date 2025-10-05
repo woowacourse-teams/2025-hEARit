@@ -216,7 +216,7 @@ class HearitControllerTest extends ControllerTest {
                                 .description("카테고리 및 정렬 조건에 대해 필터링된 히어릿 목록을 `Page` 단위로 조회합니다.")
                                 .queryParameters(
                                         parameterWithName("categoryId").description("조회할 카테고리의 ID").optional(),
-                                        parameterWithName("sort").description("정렬 조건({createdAt,asc})")
+                                        parameterWithName("sort").description("정렬 조건(ex.{createdAt,desc})")
                                                 .defaultValue("createdAt,desc"),
                                         parameterWithName("page").description("페이지 번호 (0부터 시작)").defaultValue("0"),
                                         parameterWithName("size").description("페이지 당 항목 수 (기본 20)").defaultValue("20")

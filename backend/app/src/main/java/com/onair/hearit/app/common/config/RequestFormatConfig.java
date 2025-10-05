@@ -1,6 +1,6 @@
-package com.onair.hearit.app.hearit.config;
+package com.onair.hearit.app.common.config;
 
-import com.onair.hearit.app.common.converter.HearitSortConverter;
+import com.onair.hearit.app.hearit.dto.converter.HearitSortRequestConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -10,6 +10,6 @@ public class RequestFormatConfig implements WebMvcConfigurer {
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new HearitSortConverter());
+        registry.addConverter(new HearitSortRequestConverter());
     }
 }

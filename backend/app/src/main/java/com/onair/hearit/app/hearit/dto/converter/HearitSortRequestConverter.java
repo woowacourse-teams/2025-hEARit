@@ -1,12 +1,12 @@
-package com.onair.hearit.app.common.converter;
+package com.onair.hearit.app.hearit.dto.converter;
 
 import com.onair.hearit.app.exception.custom.InvalidInputException;
-import com.onair.hearit.app.hearit.dto.param.HearitSortField;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
+import com.onair.hearit.app.hearit.dto.param.HearitSortField;
 import com.onair.hearit.app.hearit.dto.param.SortDirection;
 import org.springframework.core.convert.converter.Converter;
 
-public class HearitSortConverter implements Converter<String, HearitSortRequest> {
+public class HearitSortRequestConverter implements Converter<String, HearitSortRequest> {
 
     @Override
     public HearitSortRequest convert(String source) {
