@@ -1,4 +1,4 @@
-package com.onair.hearit.app.hearit.dto;
+package com.onair.hearit.app.hearit.dto.param;
 
 import com.onair.hearit.app.exception.custom.InvalidInputException;
 import java.util.Arrays;

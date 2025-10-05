@@ -1,9 +1,9 @@
-package com.onair.hearit.app.hearit.dto.converter;
+package com.onair.hearit.app.common.converter;
 
 import com.onair.hearit.app.exception.custom.InvalidInputException;
-import com.onair.hearit.app.hearit.dto.HearitSortField;
+import com.onair.hearit.app.hearit.dto.param.HearitSortField;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
-import com.onair.hearit.app.hearit.dto.SortDirection;
+import com.onair.hearit.app.hearit.dto.param.SortDirection;
 import org.springframework.core.convert.converter.Converter;
 
 public class HearitSortConverter implements Converter<String, HearitSortRequest> {
@@ -19,7 +19,7 @@ public class HearitSortConverter implements Converter<String, HearitSortRequest>
         String directionPart = parts.length > 1 ? parts[1].trim() : "desc";
 
         HearitSortField field = HearitSortField.from(fieldPart);
-        SortDirection direction = SortDirection.valueOf(directionPart.toUpperCase());
+        SortDirection direction = SortDirection.from(directionPart);
 
         return new HearitSortRequest(field, direction);
 

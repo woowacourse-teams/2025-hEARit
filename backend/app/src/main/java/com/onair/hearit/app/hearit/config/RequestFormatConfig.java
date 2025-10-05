@@ -1,6 +1,6 @@
 package com.onair.hearit.app.hearit.config;
 
-import com.onair.hearit.app.hearit.dto.converter.HearitSortConverter;
+import com.onair.hearit.app.common.converter.HearitSortConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
