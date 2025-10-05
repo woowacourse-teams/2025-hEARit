@@ -16,10 +16,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.onair.hearit.app.auth.infrastructure.jwt.TokenStatus;
-import com.onair.hearit.app.bookmark.BookmarkFilter;
 import com.onair.hearit.app.bookmark.application.BookmarkService;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkFilter;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkSort;
+import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.AlreadyExistException;
 import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.fixture.ControllerTest;
@@ -67,7 +69,8 @@ class BookmarkControllerTest extends ControllerTest {
         void readBookmarkHearitsV2_OK() throws Exception {
             // given
             var responses = getHearitResponses();
-            var pagedResponses = new PageImpl<>(responses, PageRequest.of(0, 20), responses.size());
+            var pagedResponses = PagedResponse.from(
+                    new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
             given(bookmarkService.getBookmarkHearitsV2(any(), any(), any())).willReturn(pagedResponses);
@@ -167,22 +170,25 @@ class BookmarkControllerTest extends ControllerTest {
     @Nested
     @DisplayName("북마크 필터링 목록 조회 V1 API (/api/v1/bookmarks)")
     class ReadBookmarkHearitsWithFilterV1 {
+
         @Test
         @DisplayName("200 OK - 'all' 필터")
         void readBookmarkHearitsV1_OK_Filter_All() throws Exception {
             // given
             var responses = getHearitResponses();
-            var pagedResponses = new PageImpl<>(responses, PageRequest.of(0, 20), responses.size());
+            var pagedResponses = PagedResponse.from(
+                    new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
-            given(bookmarkService.getBookmarkHearits(any(), any(), any())).willReturn(pagedResponses);
+            given(bookmarkService.getBookmarkHearits(any(), any(), any(), any())).willReturn(pagedResponses);
 
             // when & then
             mockMvc.perform(get("/api/v1/bookmarks")
                             .header("Authorization", "Bearer valid-token")
                             .param("page", "0")
                             .param("size", "20")
-                            .param("filter", "all"))
+                            .param("filter", "all")
+                            .param("sort", "createdAt,desc"))
                     .andExpect(status().isOk())
                     .andDo(document("v1-get-bookmarks-hearits-all",
                             resource(ResourceSnippetParameters.builder()
@@ -195,8 +201,18 @@ class BookmarkControllerTest extends ControllerTest {
                                     .queryParameters(
                                             parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
                                             parameterWithName("size").description("페이지 당 항목 수").defaultValue("20"),
-                                            parameterWithName("filter").description("북마크 필터 조건").defaultValue("all")
+                                            parameterWithName("filter")
+                                                    .description("북마크 필터 조건 :" + String.join(", ",
+                                                            Arrays.stream(BookmarkFilter.values())
+                                                                    .map(BookmarkFilter::getName)
+                                                                    .toList()))
                                                     .optional()
+                                                    .defaultValue("all"),
+                                            parameterWithName("sort")
+                                                    .description("북마크 정렬 조건 :" + String.join(", ",
+                                                            BookmarkSort.getAllPossibleName()))
+                                                    .optional()
+                                                    .defaultValue("createdAt,desc")
                                     )
                                     .responseFields(Stream.concat(
                                                     Arrays.stream(new FieldDescriptor[]{
@@ -232,10 +248,11 @@ class BookmarkControllerTest extends ControllerTest {
         void readBookmarkHearitsV1_OK_Filter_UNFINISHED() throws Exception {
             // given
             var responses = getHearitResponses().subList(0, 5);
-            var pagedResponses = new PageImpl<>(responses, PageRequest.of(0, 20), responses.size());
+            var pagedResponses = PagedResponse.from(
+                    new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
-            given(bookmarkService.getBookmarkHearits(any(), any(), any())).willReturn(pagedResponses);
+            given(bookmarkService.getBookmarkHearits(any(), any(), any(), any())).willReturn(pagedResponses);
 
             // when & then
             mockMvc.perform(get("/api/v1/bookmarks")
@@ -248,15 +265,22 @@ class BookmarkControllerTest extends ControllerTest {
                             resource(ResourceSnippetParameters.builder()
                                     .tag("Bookmark API")
                                     .summary("북마크 목록 조회 V1")
-                                    .description("로그인한 사용자가 북마크한 히어릿 목록을 `filter(" + String.join(", ",
-                                            Arrays.stream(BookmarkFilter.values())
-                                                    .map(BookmarkFilter::getName)
-                                                    .toList()) + ")`로 분류하고, `Page` 단위로 조회합니다.")
+                                    .description("로그인한 사용자가 북마크한 히어릿 목록을 `filter`로 분류하고, `Page` 단위로 조회합니다.")
                                     .queryParameters(
                                             parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
                                             parameterWithName("size").description("페이지 당 항목 수").defaultValue("20"),
-                                            parameterWithName("filter").description("북마크 필터 조건").defaultValue("all")
+                                            parameterWithName("filter")
+                                                    .description("북마크 필터 조건 :" + String.join(", ",
+                                                            Arrays.stream(BookmarkFilter.values())
+                                                                    .map(BookmarkFilter::getName)
+                                                                    .toList()))
                                                     .optional()
+                                                    .defaultValue("all"),
+                                            parameterWithName("sort")
+                                                    .description("북마크 정렬 조건 :" + String.join(", ",
+                                                            BookmarkSort.getAllPossibleName()))
+                                                    .optional()
+                                                    .defaultValue("createdAt,desc")
                                     )
                                     .responseFields(Stream.concat(
                                                     Arrays.stream(new FieldDescriptor[]{
@@ -312,8 +336,18 @@ class BookmarkControllerTest extends ControllerTest {
                                     .queryParameters(
                                             parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
                                             parameterWithName("size").description("페이지 당 항목 수").defaultValue("20"),
-                                            parameterWithName("filter").description("북마크 필터 조건").defaultValue("all")
+                                            parameterWithName("filter")
+                                                    .description("북마크 필터 조건 :" + String.join(", ",
+                                                            Arrays.stream(BookmarkFilter.values())
+                                                                    .map(BookmarkFilter::getName)
+                                                                    .toList()))
                                                     .optional()
+                                                    .defaultValue("all"),
+                                            parameterWithName("sort")
+                                                    .description("북마크 정렬 조건 :" + String.join(", ",
+                                                            BookmarkSort.getAllPossibleName()))
+                                                    .optional()
+                                                    .defaultValue("createdAt,desc")
                                     )
                                     .responseFields(
                                             com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
