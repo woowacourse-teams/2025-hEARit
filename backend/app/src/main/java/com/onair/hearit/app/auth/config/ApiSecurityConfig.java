@@ -35,6 +35,7 @@ public class ApiSecurityConfig {
             "/api/*/categories/**",
             "/api/*/keywords/**",
             "/api/*/playing-histories/**",
+            "/api/*/bookmarks",
             "/api/*/recommendations/**",
     };
 

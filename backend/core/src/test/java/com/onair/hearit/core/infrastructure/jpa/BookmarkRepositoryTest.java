@@ -20,6 +20,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -47,16 +49,47 @@ class BookmarkRepositoryTest {
         Bookmark mideumBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit2));
         Bookmark newestBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit3));
 
+        Sort createdAt = Sort.by(Direction.DESC, "createdAt");
         // when
-        Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(
+        Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findFilteredByMember(
                 member.getId(),
-                PageRequest.of(0, 5));
+                null,
+                PageRequest.of(0, 5, createdAt));
 
         // then
         assertAll(() -> {
             assertThat(bookmarks.getContent().get(0).getBookmark().getId()).isEqualTo(newestBookmark.getId());
             assertThat(bookmarks.getContent().get(1).getBookmark().getId()).isEqualTo(mideumBookmark.getId());
             assertThat(bookmarks.getContent().get(2).getBookmark().getId()).isEqualTo(oldestBookmark.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("멤버의 북마크를 오래된 순으로 조회한다.")
+    void findAllByMemberOrderByOldestTest() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        Bookmark oldestBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
+        Bookmark mideumBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit2));
+        Bookmark newestBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit3));
+
+        Sort createdAt = Sort.by(Direction.ASC, "createdAt");
+        // when
+        Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findFilteredByMember(
+                member.getId(),
+                null,
+                PageRequest.of(0, 5, createdAt));
+
+        // then
+        assertAll(() -> {
+            assertThat(bookmarks.getContent().get(2).getBookmark().getId()).isEqualTo(newestBookmark.getId());
+            assertThat(bookmarks.getContent().get(1).getBookmark().getId()).isEqualTo(mideumBookmark.getId());
+            assertThat(bookmarks.getContent().get(0).getBookmark().getId()).isEqualTo(oldestBookmark.getId());
         });
     }
 
@@ -74,13 +107,14 @@ class BookmarkRepositoryTest {
                 (hearit.getPlayTime() - 10) * 1000L));
 
         // when
-        Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findAllByMemberOrderByRecent(
+        Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findFilteredByMember(
                 member.getId(),
+                null,
                 PageRequest.of(0, 5)
         );
 
         // then
-        BookmarkWithPlayingHistoryProjection projection = bookmarks.getContent().get(0);
+        BookmarkWithPlayingHistoryProjection projection = bookmarks.getContent().getFirst();
 
         assertAll(() -> {
             assertThat(bookmarks.getContent()).hasSize(1);
@@ -110,5 +144,69 @@ class BookmarkRepositoryTest {
 
         // then
         assertThat(categoryBookmarkCounts.getFirst().getCount()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("멤버의 북마크한 히어릿 중 청취 미완료인 목록을 최신순으로 조회한다. ")
+    void findUnfinishedByMemberOrderByRecentTest() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit finished1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit finished2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit unfinished1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit unfinished2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit unfinished3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished1));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished2));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished1, 500_000L));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished2, 500_000L));
+
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished1));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), unfinished1, 100L));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished2));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished3));
+
+        // when
+        var unfinishedBookmarks = bookmarkRepository.findFilteredByMember(
+                member.getId(),
+                false,
+                PageRequest.of(0, 5));
+
+        // then
+        assertThat(unfinishedBookmarks.getContent()).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("멤버의 북마크한 히어릿 중 청취 완료 목록을 최신순으로 조회한다. ")
+    void findFinishedByMemberOrderByRecentTest() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit finished1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit finished2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit unfinished1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit unfinished2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit unfinished3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished1));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished2));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished1, 500_000L));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished2, 500_000L));
+
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished1));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), unfinished1, 100L));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished2));
+        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished3));
+
+        // when
+        var finishedBookmarks = bookmarkRepository.findFilteredByMember(
+                member.getId(),
+                true,
+                PageRequest.of(0, 5));
+
+        // then
+        assertThat(finishedBookmarks.getContent()).hasSize(2);
     }
 }

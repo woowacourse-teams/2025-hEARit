@@ -15,19 +15,23 @@ import org.springframework.data.repository.query.Param;
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     @Query("""
-                SELECT
-                    b AS bookmark,
-                    ph AS playingHistory
-                FROM Bookmark b
-                JOIN FETCH b.hearit h
-                JOIN FETCH h.category c
-                LEFT JOIN PlayingHistory ph
-                    ON ph.hearitId = h.id AND ph.memberId = :memberId
-                WHERE b.member.id = :memberId
-                ORDER BY b.createdAt DESC
+            SELECT
+                b AS bookmark,
+                ph AS playingHistory
+            FROM Bookmark b
+            JOIN FETCH b.hearit h
+            JOIN FETCH h.category c
+            LEFT JOIN PlayingHistory ph
+                ON ph.hearitId = h.id
+                AND ph.memberId = :memberId
+            WHERE b.member.id = :memberId
+                AND (:isFinished IS NULL OR
+                    (:isFinished = true AND ph.isFinished = :isFinished) OR
+                    (:isFinished = false AND (ph.isFinished = false OR ph IS NULL)))
             """)
-    Page<BookmarkWithPlayingHistoryProjection> findAllByMemberOrderByRecent(@Param("memberId") Long memberId,
-                                                                            Pageable pageable);
+    Page<BookmarkWithPlayingHistoryProjection> findFilteredByMember(@Param("memberId") Long memberId,
+                                                                    @Param("isFinished") Boolean isFinished,
+                                                                    Pageable pageable);
 
     Optional<Bookmark> findByHearitAndMember(Hearit hearit, Member member);
 

@@ -14,7 +14,7 @@ public class RecencyScoreFactor implements ScoreFactor {
 
     private static final double MAX_RECENCY_SCORE = 20.0;
     private static final double MIN_RECENCY_SCORE = 0.0;
-    private static final double DAYS_PER_POINT = 2.0;
+    private static final double POINT_LOSS_PER_DAY = 0.5;
 
     @Override
     public boolean isSupported(UserType userType) {
@@ -22,16 +22,19 @@ public class RecencyScoreFactor implements ScoreFactor {
     }
 
     @Override
-    public Map<Long, Double> calculate(String uuid, List<Hearit> hearits) {
+    public Map<Long, Double> calculate(String ignored, List<Hearit> hearits) {
+        LocalDateTime now = LocalDateTime.now();
         return hearits.stream()
                 .collect(Collectors.toMap(
                         Hearit::getId,
-                        hearit -> {
-                            long daysFromCreatedAt =
-                                    Math.max(0, Duration.between(hearit.getCreatedAt(), LocalDateTime.now()).toDays());
-                            double score = MAX_RECENCY_SCORE - (daysFromCreatedAt / DAYS_PER_POINT);
-                            return Math.max(MIN_RECENCY_SCORE, score);
-                        }
+                        hearit -> calculateRecencyScore(hearit, now)
                 ));
+    }
+
+    private double calculateRecencyScore(Hearit hearit, LocalDateTime now) {
+        Duration duration = Duration.between(hearit.getCreatedAt(), now);
+        long daysPassed = duration.toDays();
+        double score = MAX_RECENCY_SCORE - (daysPassed * POINT_LOSS_PER_DAY);
+        return Math.max(MIN_RECENCY_SCORE, score);
     }
 }

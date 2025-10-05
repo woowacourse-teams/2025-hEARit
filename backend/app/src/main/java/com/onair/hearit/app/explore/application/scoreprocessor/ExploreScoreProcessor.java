@@ -8,5 +8,7 @@ public interface ExploreScoreProcessor {
 
     boolean isSupported(UserInfo userInfo);
 
-    List<ExploredHearitResponse> getExploreHearitsResponse(UserInfo userInfo, long cursorId, int size);
+    void refreshScores(UserInfo userInfo, long cursorId);
+
+    List<ExploredHearitResponse> getExploreHearits(UserInfo userInfo, long cursorId, int size);
 }

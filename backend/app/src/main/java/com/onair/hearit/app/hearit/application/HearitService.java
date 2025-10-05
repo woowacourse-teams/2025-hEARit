@@ -5,8 +5,8 @@ import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.exception.custom.UnauthenticatedException;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
-import com.onair.hearit.app.hearit.dto.HearitOfCategoryResponse;
-import com.onair.hearit.app.hearit.dto.RecentHearitResponse;
+import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
+import com.onair.hearit.app.hearit.dto.HearitSortRequest;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -63,6 +63,13 @@ public class HearitService {
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
     }
 
+    private Member getMemberByUserInfo(UserInfo userInfo) {
+        if (userInfo == null || userInfo.isGuest()) {
+            throw new UnauthenticatedException();
+        }
+        return getMemberById(userInfo.getMemberId());
+    }
+
     private Long calculateLastPlayTime(Hearit hearit, Member member) {
         Optional<Long> optionalLastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(),
                         member.getId())
@@ -78,42 +85,26 @@ public class HearitService {
         return lastPlayTime;
     }
 
-    public List<RecentHearitResponse> getRecentHearits(UserInfo userInfo) {
-        return List.of();
-    }
-
-    private Member getMemberByUserInfo(UserInfo userInfo) {
-        if (userInfo == null || userInfo.isGuest()) {
-            throw new UnauthenticatedException();
-        }
-        return getMemberById(userInfo.getMemberId());
-    }
-
     private Member getMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
     }
 
-    public PagedResponse<HearitOfCategoryResponse> getHearitsByCategory(
-            Long categoryId,
-            PagingRequest pagingRequest,
-            UserInfo userInfo) {
-        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-
+    public PagedResponse<HearitOverviewResponse> getFilteredHearits(
+            Long categoryId, HearitSortRequest sortRequest, UserInfo userInfo, PagingRequest pagingRequest) {
         Long memberId = (userInfo == null || userInfo.isGuest()) ? null : userInfo.getMemberId();
-        Page<HearitWithPlayTimeProjection> hearitsWithPlayTime =
-                hearitRepository.findWithPlayTimeByCategoryId(categoryId, memberId, pageable);
-        List<Hearit> hearits = hearitsWithPlayTime.getContent().stream()
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sortRequest.toSort());
+        Page<HearitWithPlayTimeProjection> hearitsWithPlayTime = hearitRepository.findWithPlayTimeBy(
+                categoryId,
+                memberId,
+                pageable
+        );
+        List<Long> hearitIds = hearitsWithPlayTime.stream()
                 .map(HearitWithPlayTimeProjection::getHearit)
+                .map(Hearit::getId)
                 .toList();
-        List<Long> hearitIds = hearits.stream().map(Hearit::getId).toList();
-        Map<Long, List<Keyword>> keywordsMap = getKeywordsMap(hearitIds);
-        Page<HearitOfCategoryResponse> response = hearitsWithPlayTime.map(projection -> {
-            Hearit hearit = projection.getHearit();
-            Long lastPlayTime = projection.getLastPlayTime();
-            List<Keyword> keywords = keywordsMap.getOrDefault(hearit.getId(), Collections.emptyList());
-            return HearitOfCategoryResponse.from(hearit, keywords, lastPlayTime);
-        });
+        Map<Long, List<Keyword>> keywordMap = getKeywordsMap(hearitIds);
+        Page<HearitOverviewResponse> response = mapToFilteredHearits(hearitsWithPlayTime, keywordMap);
         return PagedResponse.from(response);
     }
 
@@ -131,5 +122,16 @@ public class HearitService {
                                 .limit(KEYWORDS_PER_CATEGORIZED_HEARIT)
                                 .toList()
                 ));
+    }
+
+    private static Page<HearitOverviewResponse> mapToFilteredHearits(
+            Page<HearitWithPlayTimeProjection> hearitsWithPlayTime,
+            Map<Long, List<Keyword>> keywordMap) {
+        return hearitsWithPlayTime.map(projection -> {
+            Hearit hearit = projection.getHearit();
+            Long lastPlayTime = projection.getLastPlayTime();
+            List<Keyword> keywords = keywordMap.getOrDefault(hearit.getId(), Collections.emptyList());
+            return HearitOverviewResponse.from(hearit, keywords, lastPlayTime);
+        });
     }
 }
