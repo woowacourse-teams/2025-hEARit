@@ -1,8 +1,8 @@
 package com.onair.hearit.app.auth.infrastructure.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.app.exception.ErrorCode;
 import com.onair.hearit.app.auth.domain.RequestUser;
+import com.onair.hearit.app.exception.ErrorCode;
 import com.onair.hearit.core.log.exception.FilterExceptionLogger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
@@ -62,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header == null || !header.startsWith("Bearer ")) {
             return null;
         }
-        return header.substring("Bearer ".length());
+        return header.substring("Bearer " .length());
     }
 
     private boolean isWhitelisted(HttpServletRequest request) {
@@ -107,10 +108,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private ProblemDetail buildProblemDetail(ErrorCode errorCode, String detail, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(errorCode.getHttpStatus(), detail);
-        problemDetail.setTitle(errorCode.getTitle());
+        problemDetail.setTitle(errorCode.getHttpStatus().getReasonPhrase());
         problemDetail.setType(URI.create(request.getRequestURI()));
-        problemDetail.setProperty("code", errorCode.name());
-        problemDetail.setProperty("reissuable", errorCode == ErrorCode.ACCESS_TOKEN_EXPIRED);
+        String code = errorCode.name();
+        boolean reissuable = (errorCode == ErrorCode.ACCESS_TOKEN_EXPIRED);
+        problemDetail.setProperty("code", code);
+        problemDetail.setProperty("reissuable", reissuable);
+        Map<String, Object> properties = Map.of(
+                "code", code,
+                "reissuable", reissuable
+        );
+        problemDetail.setProperty("properties", properties);
         return problemDetail;
     }
 

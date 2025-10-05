@@ -72,6 +72,14 @@ public class Hearit {
         this.category = category;
     }
 
+    public Hearit(Long id, String title, String summary, Integer playTime, String originalAudioUrl,
+                  String shortAudioUrl, String scriptUrl, List<Source> sources, Category category,
+                  LocalDateTime createdAt) {
+        this(title, summary, playTime, originalAudioUrl, shortAudioUrl, scriptUrl, sources, category);
+        this.id = id;
+        this.createdAt = createdAt;
+    }
+
     public void updateMetaData(String title, String summary, Integer playTime, List<Source> sources,
                                Category category) {
         validateMetaData(title, summary, playTime, sources, category);

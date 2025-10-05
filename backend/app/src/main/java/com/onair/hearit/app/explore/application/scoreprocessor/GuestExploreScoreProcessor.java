@@ -1,14 +1,13 @@
 package com.onair.hearit.app.explore.application.scoreprocessor;
 
-import com.onair.hearit.app.explore.application.ExploreScoreCalculator;
+import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.UserInfo;
-import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
-import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
 import com.onair.hearit.core.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
+import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Component;
@@ -16,12 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
 
-    public GuestExploreScoreProcessor(ExploreScoreCalculator exploreScoreCalculator,
-                                      ExploreScoreCommandRepository exploreScoreCommandRepository,
+    public GuestExploreScoreProcessor(ExploreScoreInitializer exploreScoreInitializer,
                                       ExploredHearitQueryRepository exploredHearitQueryRepository,
                                       HearitKeywordRepository hearitKeywordRepository) {
-        super(exploreScoreCalculator, exploreScoreCommandRepository,
-                exploredHearitQueryRepository, hearitKeywordRepository);
+        super(exploreScoreInitializer, exploredHearitQueryRepository, hearitKeywordRepository);
     }
 
     @Override
@@ -30,7 +27,7 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    protected String getUserUuId(UserInfo userInfo) {
+    protected String getUserUuid(UserInfo userInfo) {
         return userInfo.getGuestId();
     }
 
