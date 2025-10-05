@@ -243,6 +243,31 @@ class HearitControllerTest extends ControllerTest {
                 ));
     }
 
+    @Test
+    @DisplayName("히어릿 필터링 조회 V1 - 400 Bad Request")
+    void readFilteredHearitsV1_BadRequest() throws Exception {
+        // given
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/hearits")
+                        .header("Authorization", "Bearer valid-token")
+                        .param("sort", "unknown-field")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isBadRequest())
+                .andDo(document("v1-get-filtered-hearits-bad-request",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("히어릿 필터링 조회 V1")
+                                .description("카테고리 및 정렬 조건에 대해 필터링된 히어릿 목록을 `Page` 단위로 조회합니다.")
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields()
+                                )
+                                .build())
+                ));
+    }
+
     private FieldDescriptor[] getHearitDetailResponseFields() {
         return new FieldDescriptor[]{
                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("히어릿 ID"),
