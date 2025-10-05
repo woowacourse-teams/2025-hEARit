@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RecommendationService {
 
-    private final RecommendCategoryService recommendCategoryService;
+    private final CategoryRecommender categoryRecommender;
     private final HearitRepository hearitRepository;
 
     public List<RecommendationByCategoryResponse> getCategoryRecommendations(UserInfo userInfo,
                                                                              int categorySize,
                                                                              int hearitSize) {
-        List<Category> recommendCategories = recommendCategoryService.getRecommendedCategories(userInfo, categorySize);
+        List<Category> recommendCategories = categoryRecommender.getRecommendedCategories(userInfo, categorySize);
         return recommendCategories.stream()
                 .map(category -> toRecommendationByCategoryResponse(category, hearitSize))
                 .toList();

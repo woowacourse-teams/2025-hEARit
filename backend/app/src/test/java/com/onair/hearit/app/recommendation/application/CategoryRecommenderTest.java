@@ -25,15 +25,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import({DbHelper.class, TestJpaAuditingConfig.class, RecommendCategoryService.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, CategoryRecommender.class})
 @ActiveProfiles("fake-test")
-class RecommendCategoryServiceTest {
+class CategoryRecommenderTest {
 
     @Autowired
     DbHelper dbHelper;
 
     @Autowired
-    RecommendCategoryService recommendCategoryService;
+    CategoryRecommender categoryRecommender;
 
     @Nested
     @DisplayName("게스트 사용자(비로그인)의 추천 카테고리 조회 시")
@@ -51,7 +51,7 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(null, UUID.randomUUID().toString());
 
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo, totalRecommendCount);
+            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo, totalRecommendCount);
 
             // then
             assertAll(
@@ -98,7 +98,7 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(member.getId(), null);
 
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo, totalRecommendCount);
+            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo, totalRecommendCount);
 
             // then
             List<Long> recommendedIds = recommendedCategories.stream()
@@ -134,7 +134,7 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(member.getId(), null);
 
             // when
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo, totalRecommendCount);
+            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo, totalRecommendCount);
 
             // then
             List<Long> expectedRandomIds = List.of(c2.getId(), c3.getId(), c4.getId(), c5.getId());
@@ -166,7 +166,7 @@ class RecommendCategoryServiceTest {
 
             // when
             int totalRecommendCount = 5;
-            List<Category> recommendedCategories = recommendCategoryService.getRecommendedCategories(userInfo, totalRecommendCount);
+            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo, totalRecommendCount);
 
             // then
             assertAll(
@@ -190,7 +190,7 @@ class RecommendCategoryServiceTest {
             UserInfo guest = new UserInfo(null, UUID.randomUUID().toString());
 
             // when & then
-            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategories(guest, 5))
+            assertThatThrownBy(() -> categoryRecommender.getRecommendedCategories(guest, 5))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("IT 트렌드");
         }
@@ -204,7 +204,7 @@ class RecommendCategoryServiceTest {
             UserInfo userInfo = new UserInfo(nonExistId, null);
 
             // when & then
-            assertThatThrownBy(() -> recommendCategoryService.getRecommendedCategories(userInfo, 5))
+            assertThatThrownBy(() -> categoryRecommender.getRecommendedCategories(userInfo, 5))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("memberId");
         }
@@ -220,7 +220,7 @@ class RecommendCategoryServiceTest {
             UserInfo guest = new UserInfo(null, UUID.randomUUID().toString());
 
             // when
-            List<Category> recommended = recommendCategoryService.getRecommendedCategories(guest, totalRecommendCount);
+            List<Category> recommended = categoryRecommender.getRecommendedCategories(guest, totalRecommendCount);
 
             // then
             List<Category> allCategories = List.of(itTrendCategory, c1, c2);

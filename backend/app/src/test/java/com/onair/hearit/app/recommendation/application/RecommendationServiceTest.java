@@ -19,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @Import({DbHelper.class, TestJpaAuditingConfig.class,
-        RecommendCategoryService.class, RecommendationService.class})
+        CategoryRecommender.class, RecommendationService.class})
 @ActiveProfiles("fake-test")
 class RecommendationServiceTest {
 

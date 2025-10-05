@@ -11,11 +11,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class RecommendCategoryService {
+public class CategoryRecommender {
 
     private static final String IT_TREND_CATEGORY_NAME = "IT 트렌드";
     private static final int RESERVED_RANDOM_COUNT = 1;
