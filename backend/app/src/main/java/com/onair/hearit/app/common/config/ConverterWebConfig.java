@@ -1,6 +1,7 @@
 package com.onair.hearit.app.common.config;
 
 import com.onair.hearit.app.bookmark.dto.converter.BookmarkFilterConverter;
+import com.onair.hearit.app.bookmark.dto.converter.BookmarkSortConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -11,5 +12,6 @@ public class ConverterWebConfig implements WebMvcConfigurer {
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new BookmarkFilterConverter());
+        registry.addConverter(new BookmarkSortConverter());
     }
 }

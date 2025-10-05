@@ -1,9 +1,11 @@
 package com.onair.hearit.app.bookmark.application;
 
-import com.onair.hearit.app.bookmark.BookmarkFilter;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkFilter;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkSort;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
+import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.AlreadyExistException;
 import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.exception.custom.NotFoundException;
@@ -20,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,34 +35,30 @@ public class BookmarkService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    public Page<BookmarkHearitResponseV2> getBookmarkHearits(UserInfo userInfo,
-                                                             PagingRequest pagingRequest,
-                                                             BookmarkFilter filter) {
+    public PagedResponse<BookmarkHearitResponseV2> getBookmarkHearits(UserInfo userInfo,
+                                                                      PagingRequest pagingRequest,
+                                                                      BookmarkFilter filter,
+                                                                      BookmarkSort sort) {
         if (userInfo == null || userInfo.isGuest()) {
-            return Page.empty();
+            return PagedResponse.empty();
         }
         Member member = getMemberByUserInfo(userInfo);
-        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<BookmarkWithPlayingHistoryProjection> projections = getFilteredBookmarkHearits(member, pageable, filter);
-        return toBookmarkHearitResponse(projections);
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sort.toSort());
+        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(member.getId(),
+                filter.isFinished(), pageable);
+        return PagedResponse.from(toBookmarkHearitResponse(projections));
     }
 
-    public Page<BookmarkHearitResponseV2> getBookmarkHearitsV2(UserInfo userInfo,
-                                                               PagingRequest pagingRequest,
-                                                               BookmarkFilter filter) {
+    /*will be deprecated after the client update*/
+    public PagedResponse<BookmarkHearitResponseV2> getBookmarkHearitsV2(UserInfo userInfo,
+                                                                        PagingRequest pagingRequest,
+                                                                        BookmarkFilter filter) {
         Member member = getMemberByUserInfo(userInfo);
-        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        Page<BookmarkWithPlayingHistoryProjection> projections = getFilteredBookmarkHearits(member, pageable, filter);
-        return toBookmarkHearitResponse(projections);
-    }
-
-    private Page<BookmarkWithPlayingHistoryProjection> getFilteredBookmarkHearits(Member member,
-                                                                                  Pageable pageable,
-                                                                                  BookmarkFilter filter) {
-        return switch (filter) {
-            case UNFINISHED -> bookmarkRepository.findUnfinishedByMemberOrderByRecent(member.getId(), pageable);
-            case ALL -> bookmarkRepository.findAllByMemberOrderByRecent(member.getId(), pageable);
-        };
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(),
+                Sort.by(Direction.DESC, "createdAt"));
+        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(member.getId(),
+                filter.isFinished(), pageable);
+        return PagedResponse.from(toBookmarkHearitResponse(projections));
     }
 
     private Page<BookmarkHearitResponseV2> toBookmarkHearitResponse(

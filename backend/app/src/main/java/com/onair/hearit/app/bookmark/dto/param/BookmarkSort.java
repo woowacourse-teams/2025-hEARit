@@ -1,12 +1,14 @@
 package com.onair.hearit.app.bookmark.dto.param;
 
 import java.util.Arrays;
-import lombok.AccessLevel;
+import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 @Getter
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class BookmarkSort {
 
     private final BookmarkSortType type;
@@ -21,6 +23,17 @@ public class BookmarkSort {
         BookmarkSortType type = BookmarkSortType.from(typeSource);
         BookmarkSortDirection direction = BookmarkSortDirection.from(directionSource);
         return new BookmarkSort(type, direction);
+    }
+
+    public static List<String> getAllPossibleName() {
+        return Arrays.stream(BookmarkSortType.values())
+                .flatMap(type -> Arrays.stream(BookmarkSortDirection.values())
+                        .map(direction -> type.name + "," + direction.name))
+                .toList();
+    }
+
+    public Sort toSort() {
+        return Sort.by(direction.direction, type.name);
     }
 
     @RequiredArgsConstructor
@@ -39,14 +52,16 @@ public class BookmarkSort {
         }
     }
 
+    @Getter
     @RequiredArgsConstructor
     public enum BookmarkSortDirection {
 
-        ASC("asc"),
-        DESC("desc"),
+        ASC("asc", Direction.ASC),
+        DESC("desc", Direction.DESC),
         ;
 
         private final String name;
+        private final Direction direction;
 
         static BookmarkSortDirection getDefault() {
             return DESC;

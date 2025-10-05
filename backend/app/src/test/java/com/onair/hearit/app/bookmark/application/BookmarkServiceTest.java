@@ -5,10 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.auth.domain.RequestUser;
-import com.onair.hearit.app.bookmark.BookmarkFilter;
 import com.onair.hearit.app.bookmark.dto.BookmarkHearitResponseV2;
 import com.onair.hearit.app.bookmark.dto.BookmarkInfoResponse;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkFilter;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkSort;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkSort.BookmarkSortDirection;
+import com.onair.hearit.app.bookmark.dto.param.BookmarkSort.BookmarkSortType;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
+import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.AlreadyExistException;
 import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.fixture.DbHelper;
@@ -31,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -64,16 +67,20 @@ class BookmarkServiceTest {
     @Test
     @DisplayName("북마크 조회 시 비회원인 경우 빈 값을 반환한다.")
     void getBookmarkHearits_isNotMemberGuest() {
+        // given
         RequestUser guest = RequestUser.guest("00000000-0000-0000-0000-000000000000");
 
         // when
-        Page<BookmarkHearitResponseV2> bookmarkHearits = bookmarkService.getBookmarkHearits(guest.getUserInfo(),
-                new PagingRequest(0, 20), BookmarkFilter.ALL);
+        PagedResponse<BookmarkHearitResponseV2> bookmarkHearits = bookmarkService.getBookmarkHearits(
+                guest.getUserInfo(),
+                new PagingRequest(0, 20),
+                BookmarkFilter.ALL,
+                new BookmarkSort(BookmarkSortType.CREATED_AT, BookmarkSortDirection.DESC));
 
         // then
         assertAll(
-                () -> assertThat(bookmarkHearits.getTotalElements()).isZero(),
-                () -> assertThat(bookmarkHearits.getContent()).isEmpty());
+                () -> assertThat(bookmarkHearits.size()).isZero(),
+                () -> assertThat(bookmarkHearits.content()).isEmpty());
     }
 
 
@@ -90,9 +97,11 @@ class BookmarkServiceTest {
 
         // when
         List<BookmarkHearitResponseV2> responses = bookmarkService.getBookmarkHearits(
-                RequestUser.member(member.getId()).getUserInfo(),
-                new PagingRequest(0, 20),
-                BookmarkFilter.ALL).stream().toList();
+                        RequestUser.member(member.getId()).getUserInfo(),
+                        new PagingRequest(0, 20),
+                        BookmarkFilter.ALL,
+                        new BookmarkSort(BookmarkSortType.CREATED_AT, BookmarkSortDirection.DESC))
+                .content();
 
         // then
         assertAll(
@@ -118,9 +127,11 @@ class BookmarkServiceTest {
 
         // when
         List<BookmarkHearitResponseV2> responses = bookmarkService.getBookmarkHearits(
-                RequestUser.member(member.getId()).getUserInfo(),
-                new PagingRequest(0, 20),
-                BookmarkFilter.UNFINISHED).stream().toList();
+                        RequestUser.member(member.getId()).getUserInfo(),
+                        new PagingRequest(0, 20),
+                        BookmarkFilter.UNFINISHED,
+                        new BookmarkSort(BookmarkSortType.CREATED_AT, BookmarkSortDirection.DESC))
+                .content();
 
         // then
         assertAll(
