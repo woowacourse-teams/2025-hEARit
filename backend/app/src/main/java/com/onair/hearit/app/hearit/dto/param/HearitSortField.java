@@ -2,19 +2,17 @@ package com.onair.hearit.app.hearit.dto.param;
 
 import com.onair.hearit.app.exception.custom.InvalidInputException;
 import java.util.Arrays;
+import lombok.Getter;
 
+@Getter
 public enum HearitSortField {
     CREATED_AT("createdAt"),
-    TITLE("title");
+    ;
 
     private final String field;
 
     HearitSortField(String field) {
         this.field = field;
-    }
-
-    public String getField() {
-        return field;
     }
 
     public static HearitSortField from(String value) {
