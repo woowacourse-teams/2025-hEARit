@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -21,7 +22,7 @@ public class RecommendationController {
             "/api/v1/hearits/recommend-category" /* To be deprecated */})
     public ResponseEntity<List<RecommendationByCategoryResponse>> readRecommendationsByCategory(
             @AuthenticationPrincipal RequestUser requestUser,
-            RecommendationRequest request) {
+            @ModelAttribute RecommendationRequest request) {
         List<RecommendationByCategoryResponse> responses =
                 recommendationService.getCategoryRecommendations(
                         requestUser.getUserInfo(),
