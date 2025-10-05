@@ -20,4 +20,11 @@ public enum BookmarkFilter {
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);
     }
+
+    public Boolean isFinished() {
+        if (this.equals(ALL)) {
+            return null;
+        }
+        return !this.equals(UNFINISHED);
+    }
 }
