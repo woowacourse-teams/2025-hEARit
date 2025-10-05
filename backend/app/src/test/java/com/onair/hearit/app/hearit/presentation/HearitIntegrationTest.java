@@ -8,7 +8,6 @@ import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.IntegrationTest;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
-import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -97,57 +96,6 @@ class HearitIntegrationTest extends IntegrationTest {
                 .get("/api/v1/hearits/{hearitId}", notFoundHearitId)
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value());
-    }
-
-    @Test
-    @DisplayName("카테고리별로 그룹화된 히어릿들을 조회 시, 추천하는 3개의 카테고리와 히어릿들을 반환한다.")
-    void readCategoriesHearit() {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        String token = generateToken(member);
-
-        Category category1 = dbHelper.insertCategory(new Category("Java", "#FF0000"));
-        Category category2 = dbHelper.insertCategory(new Category("Spring", "#00FF00"));
-        Category category3 = dbHelper.insertCategory(new Category("React1", "#0000FF"));
-        Category category4 = dbHelper.insertCategory(new Category("React2", "#0000FF"));
-        Category category5 = dbHelper.insertCategory(new Category("React3", "#0000FF"));
-        Category category6 = dbHelper.insertCategory(new Category("React4", "#0000FF"));
-
-        Hearit hearit11 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit12 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit13 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-        Hearit hearit21 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        Hearit hearit22 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
-        Hearit hearit31 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
-
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit11));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit12));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit13));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit21));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit22));
-        dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit31));
-
-        // when
-        List<HearitsWithRecommendCategoryResponse> responses = RestAssured.given(this.spec)
-                .header("Authorization", "Bearer " + token)
-                .when()
-                .get("/api/v1/hearits/recommend-category")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .jsonPath()
-                .getList(".", HearitsWithRecommendCategoryResponse.class);
-
-        // then
-        assertAll(() -> {
-            assertThat(responses).hasSize(3);
-            assertThat(responses.get(0).hearits()).hasSize(3);
-            assertThat(responses.get(1).hearits()).hasSize(2);
-            assertThat(responses.get(2).hearits()).hasSize(1);
-            assertThat(responses.get(0).categoryId()).isEqualTo(category1.getId());
-            assertThat(responses.get(1).categoryId()).isEqualTo(category2.getId());
-            assertThat(responses.get(2).categoryId()).isEqualTo(category3.getId());
-        });
     }
 
     @Test
