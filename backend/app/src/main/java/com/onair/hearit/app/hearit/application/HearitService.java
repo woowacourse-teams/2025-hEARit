@@ -146,7 +146,6 @@ public class HearitService {
             Long categoryId, HearitSortRequest sortRequest, UserInfo userInfo, PagingRequest pagingRequest) {
         Long memberId = (userInfo == null || userInfo.isGuest()) ? null : userInfo.getMemberId();
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sortRequest.toSort());
-
         Page<HearitWithPlayTimeProjection> hearitsWithPlayTime = hearitRepository.findWithPlayTimeBy(
                 categoryId,
                 memberId,
@@ -157,13 +156,19 @@ public class HearitService {
                 .map(Hearit::getId)
                 .toList();
         Map<Long, List<Keyword>> keywordMap = getKeywordsMap(hearitIds);
-        Page<FilteredHearitResponse> response = hearitsWithPlayTime.map(projection -> {
+        Page<FilteredHearitResponse> response = mapToFilteredHearits(hearitsWithPlayTime, keywordMap);
+        return PagedResponse.from(response);
+    }
+
+    private static Page<FilteredHearitResponse> mapToFilteredHearits(
+            Page<HearitWithPlayTimeProjection> hearitsWithPlayTime,
+            Map<Long, List<Keyword>> keywordMap) {
+        return hearitsWithPlayTime.map(projection -> {
             Hearit hearit = projection.getHearit();
             Long lastPlayTime = projection.getLastPlayTime();
             List<Keyword> keywords = keywordMap.getOrDefault(hearit.getId(), Collections.emptyList());
             return FilteredHearitResponse.from(hearit, keywords, lastPlayTime);
         });
-        return PagedResponse.from(response);
     }
 
     private Map<Long, List<Keyword>> getKeywordsMap(List<Long> hearitIds) {
