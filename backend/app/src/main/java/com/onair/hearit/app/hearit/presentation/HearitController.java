@@ -4,7 +4,7 @@ import com.onair.hearit.app.auth.domain.RequestUser;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.hearit.application.HearitService;
-import com.onair.hearit.app.hearit.dto.FilteredHearitResponse;
+import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
@@ -40,14 +40,14 @@ public class HearitController {
     }
 
     @GetMapping("/api/v1/hearits")
-    public ResponseEntity<PagedResponse<FilteredHearitResponse>> readFilteredHearits(
+    public ResponseEntity<PagedResponse<HearitOverviewResponse>> readFilteredHearits(
             @RequestParam(name = "categoryId", required = false) Long categoryId,
             @RequestParam(name = "sort", defaultValue = "createdAt,desc") HearitSortRequest sortRequest,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
             @AuthenticationPrincipal RequestUser requestUser) {
         PagingRequest pagingRequest = new PagingRequest(page, size);
-        PagedResponse<FilteredHearitResponse> responses = hearitService.getFilteredHearits(
+        PagedResponse<HearitOverviewResponse> responses = hearitService.getFilteredHearits(
                 categoryId,
                 sortRequest,
                 requestUser.getUserInfo(),

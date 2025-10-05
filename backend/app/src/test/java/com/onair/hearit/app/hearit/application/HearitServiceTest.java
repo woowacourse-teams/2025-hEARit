@@ -9,7 +9,7 @@ import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
-import com.onair.hearit.app.hearit.dto.FilteredHearitResponse;
+import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.param.HearitSortField;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
@@ -268,13 +268,13 @@ class HearitServiceTest {
         PagingRequest pagingRequest = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<FilteredHearitResponse> result = hearitService.getFilteredHearits(category1.getId(),
+        PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category1.getId(),
                 sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
         // then
         assertAll(() -> {
             assertThat(result.content()).hasSize(2);
-            assertThat(result.content()).extracting(FilteredHearitResponse::id)
+            assertThat(result.content()).extracting(HearitOverviewResponse::id)
                     .containsExactlyInAnyOrder(hearit2.getId(), hearit1.getId());
         });
     }
@@ -294,7 +294,7 @@ class HearitServiceTest {
         PagingRequest pagingRequest = new PagingRequest(0, 10);
 
         // when
-        PagedResponse<FilteredHearitResponse> result = hearitService.getFilteredHearits(category.getId(),
+        PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
                 sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
         // then
@@ -318,7 +318,7 @@ class HearitServiceTest {
         PagingRequest pagingRequest = new PagingRequest(1, 2);
 
         // when
-        PagedResponse<FilteredHearitResponse> result = hearitService.getFilteredHearits(category.getId(),
+        PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
                 sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
         // then
@@ -354,7 +354,7 @@ class HearitServiceTest {
         PagingRequest pagingRequest = new PagingRequest(1, 2);
 
         // when
-        PagedResponse<FilteredHearitResponse> result = hearitService.getFilteredHearits(category.getId(),
+        PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
                 sortRequest, TestFixture.createFixedMemberUserInfo(member), pagingRequest);
 
         // then

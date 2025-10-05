@@ -6,7 +6,7 @@ import com.onair.hearit.core.domain.Keyword;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record FilteredHearitResponse(
+public record HearitOverviewResponse(
         Long id,
         String title,
         Integer playTime,
@@ -15,9 +15,9 @@ public record FilteredHearitResponse(
         List<KeywordResponse> keywords,
         CategoryResponse category
 ) {
-    public static FilteredHearitResponse from(Hearit hearit, List<Keyword> keywords, Long lastPlayTime) {
+    public static HearitOverviewResponse from(Hearit hearit, List<Keyword> keywords, Long lastPlayTime) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
-        return new FilteredHearitResponse(
+        return new HearitOverviewResponse(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getPlayTime(),

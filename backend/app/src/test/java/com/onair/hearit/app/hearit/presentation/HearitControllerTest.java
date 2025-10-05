@@ -15,7 +15,7 @@ import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.ControllerTest;
 import com.onair.hearit.app.hearit.application.HearitService;
-import com.onair.hearit.app.hearit.dto.FilteredHearitResponse;
+import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse.CategoryResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse.SourceResponse;
@@ -186,16 +186,16 @@ class HearitControllerTest extends ControllerTest {
     void readFilteredHearitsV1_OK() throws Exception {
         // given
         var categoryId = 1L;
-        var responses = List.of(new FilteredHearitResponse(101L, "Spring Boot Guide", 300, null,
+        var responses = List.of(new HearitOverviewResponse(101L, "Spring Boot Guide", 300, null,
                         LocalDateTime.of(2024, 9, 30, 10, 30),
-                        List.of(new FilteredHearitResponse.KeywordResponse(1L, "spring"),
-                                new FilteredHearitResponse.KeywordResponse(2L, "boot")),
-                        new FilteredHearitResponse.CategoryResponse(3L, "Spring", "#FFFFFF")),
-                new FilteredHearitResponse(102L, "JPA Tips", 200, null,
+                        List.of(new HearitOverviewResponse.KeywordResponse(1L, "spring"),
+                                new HearitOverviewResponse.KeywordResponse(2L, "boot")),
+                        new HearitOverviewResponse.CategoryResponse(3L, "Spring", "#FFFFFF")),
+                new HearitOverviewResponse(102L, "JPA Tips", 200, null,
                         LocalDateTime.of(2024, 9, 29, 10, 0),
-                        List.of(new FilteredHearitResponse.KeywordResponse(3L, "jpa"),
-                                new FilteredHearitResponse.KeywordResponse(4L, "hibernate")),
-                        new FilteredHearitResponse.CategoryResponse(2L, "JPA", "#EEFFFF")));
+                        List.of(new HearitOverviewResponse.KeywordResponse(3L, "jpa"),
+                                new HearitOverviewResponse.KeywordResponse(4L, "hibernate")),
+                        new HearitOverviewResponse.CategoryResponse(2L, "JPA", "#EEFFFF")));
         var pagedResponses = PagedResponse.from(new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);

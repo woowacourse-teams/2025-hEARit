@@ -7,7 +7,7 @@ import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.IntegrationTest;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
-import com.onair.hearit.app.hearit.dto.FilteredHearitResponse;
+import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitsWithRecommendCategoryResponse;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -165,7 +165,7 @@ class HearitIntegrationTest extends IntegrationTest {
         Hearit hearit3 = saveHearitWithCategoryAndKeyword(category2, keyword); // 카테고리 2의 히어릿
 
         // when
-        PagedResponse<FilteredHearitResponse> pagedResponse = RestAssured.given(this.spec)
+        PagedResponse<HearitOverviewResponse> pagedResponse = RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .queryParam("categoryId", category1.getId())
                 .queryParam("page", 0)
@@ -177,7 +177,7 @@ class HearitIntegrationTest extends IntegrationTest {
                 .extract()
                 .as(new TypeRef<>() {
                 });
-        List<FilteredHearitResponse> responses = pagedResponse.content();
+        List<HearitOverviewResponse> responses = pagedResponse.content();
 
         // then
         assertAll(
@@ -209,7 +209,7 @@ class HearitIntegrationTest extends IntegrationTest {
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category3));
 
         // when
-        PagedResponse<FilteredHearitResponse> pagedResponse = RestAssured.given(this.spec)
+        PagedResponse<HearitOverviewResponse> pagedResponse = RestAssured.given(this.spec)
                 .header("Authorization", "Bearer " + token)
                 .queryParam("sort", "createdAt,asc") // 카테고리 상관없이 필터링
                 .queryParam("page", 0)
@@ -221,7 +221,7 @@ class HearitIntegrationTest extends IntegrationTest {
                 .extract()
                 .as(new TypeRef<>() {
                 });
-        List<FilteredHearitResponse> responses = pagedResponse.content();
+        List<HearitOverviewResponse> responses = pagedResponse.content();
 
         // then
         assertThat(responses).hasSize(10);
