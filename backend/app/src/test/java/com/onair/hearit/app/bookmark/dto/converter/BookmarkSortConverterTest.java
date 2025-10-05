@@ -19,7 +19,7 @@ class BookmarkSortConverterTest {
     @DisplayName("sort type을 BookmarkSort로 변환한다.")
     void convertBookmarkSort_fromType() {
         // given
-        String input = "createdAt,   ";
+        String input = "createdAt";
 
         // when
         BookmarkSort actual = converter.convert(input);

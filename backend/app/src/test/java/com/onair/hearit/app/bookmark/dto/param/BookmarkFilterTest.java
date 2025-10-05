@@ -1,4 +1,4 @@
-package com.onair.hearit.app.bookmark;
+package com.onair.hearit.app.bookmark.dto.param;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
