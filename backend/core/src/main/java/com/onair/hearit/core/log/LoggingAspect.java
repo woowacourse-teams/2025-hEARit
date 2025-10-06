@@ -38,7 +38,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class LoggingAspect {
 
-    private static final Logger errorLogger = LogManager.getLogger("errorLogger");
     private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
     private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
 
@@ -177,7 +176,7 @@ public class LoggingAspect {
                                               ErrorDetail errorDetail, Throwable throwable) {
         ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
         jsonLogger.error(maskingSupport.mask(exceptionLog));
-        errorLogger.error(exceptionLog, throwable);
+        jsonLogger.error(exceptionLog, throwable);
         consoleLogger.error("[ERROR] {} {} from {} → {}",
                 requestInfo.getHttpMethod(),
                 requestInfo.getRequestUri(),
@@ -191,7 +190,7 @@ public class LoggingAspect {
                                                  ErrorDetail errorDetail, Throwable throwable) {
         ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
         jsonLogger.error(maskingSupport.mask(exceptionLog));
-        errorLogger.error(exceptionLog);
+        jsonLogger.error(exceptionLog);
         consoleLogger.error("[ERROR] {} {} from {} → {}",
                 requestInfo.getHttpMethod(),
                 requestInfo.getRequestUri(),
