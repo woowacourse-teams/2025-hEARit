@@ -9,6 +9,8 @@ dependencies {
     implementation project(':admin')
 
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
 
