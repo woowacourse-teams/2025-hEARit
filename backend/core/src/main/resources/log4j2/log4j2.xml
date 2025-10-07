@@ -44,13 +44,14 @@
         <!-- 7개 파일 쌓이면 오래된 로그부터 삭제 -->
         <RollingFile name="RollingFile">
             <FileName>${logDir}/all-level.log</FileName>
-            <FilePattern>${logDir}/archive/all-level/%d{yyyy_MM_dd}.zip</FilePattern>
+            <FilePattern>${logDir}/app-%d{yyyy-MM-dd}.log.gz</FilePattern>
             <JsonLayout
                     complete="false"
                     compact="true"
                     eventEol="true"
                     objectMessageAsJsonObject="true"
-                    charset="UTF-8">
+                    charset="UTF-8"
+                    properties="true">
                 <KeyValuePair key="port" value="${spring:server.port}"/>
                 <KeyValuePair key="env" value="${env}"/>
             </JsonLayout>
@@ -58,40 +59,15 @@
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
             <DefaultRolloverStrategy>
-                <Delete basePath="${logDir}/archive/all-level" maxDepth="1">
-                    <IfLastModified age="7d"/>
-                </Delete>
-            </DefaultRolloverStrategy>
-        </RollingFile>
-
-        <!-- ERROR, FATAL 로그 파일-->
-        <!-- json 파일로 저장 -->
-        <!-- 1일마다 0시에 롤오버 발생 (날짜 디렉토리에 저장 ex C:/hearit/log/archive/error/2025_08_07.zip) -->
-        <!-- 20개 파일 쌓이면 오래된 로그부터 삭제 -->
-        <RollingFile name="RollingErrorFile">
-            <FileName>${logDir}/error.log</FileName>
-            <FilePattern>${logDir}/archive/error/%d{yyyy_MM_dd}.zip</FilePattern>
-            <JsonLayout complete="false"
-                        compact="true"
-                        eventEol="true"
-                        objectMessageAsJsonObject="true"
-                        includeStacktrace="true">
-                <KeyValuePair key="port" value="${spring:server.port}"/>
-                <KeyValuePair key="env" value="${env}"/>
-            </JsonLayout>
-            <Policies>
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-            </Policies>
-            <DefaultRolloverStrategy>
-                <Delete basePath="${logDir}/archive/error" maxDepth="1">
-                    <IfLastModified age="20d"/>
+                <Delete basePath="${logDir}" maxDepth="1">
+                    <IfFileName glob="app-*.log.gz"/>
+                    <IfLastModified age="3d"/>
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
     </Appenders>
 
     <Loggers>
-
         <!-- 최상위 로거 (모든 로그 이벤트 처리) -->
         <Root level="info">
             <AppenderRef ref="Console"/>
@@ -106,11 +82,6 @@
         <!-- JSON 파일 Logger-->
         <Logger name="jsonLogger" level="info" additivity="false">
             <AppenderRef ref="RollingFile"/>
-        </Logger>
-
-        <!-- 에러 Logger-->
-        <Logger name="errorLogger" level="error" additivity="false">
-            <AppenderRef ref="RollingErrorFile"/>
         </Logger>
     </Loggers>
 </Configuration>
