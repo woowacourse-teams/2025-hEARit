@@ -34,7 +34,7 @@
     <string name="home_recent_upload_hearit_title">최근 추가된 팟캐스트</string>
     <string name="home_playing_bookmark_hearit_title">북마크한 팟캐스트를 들어보세요</string>
     <string name="home_navigate_explore_text">숏캐스트를 구경하고\n더 많은 팟캐스트를 북마크해보세요!</string>
-    <string name="home_navigate_wootaeco_text">우아한테크코스 8기가 궁금하다면?\n선배님들의 후기를 들어보세요!</string>
+    <string name="home_navigate_wootaeco_text">우테코 합격비법이 궁금하다면?\n선배님들의 후기를 들어보세요!</string>
     <string name="home_toast_recommend_load_fail">추천 히어릿 목록 조회에 실패했습니다.</string>
     <string name="home_toast_playing_history_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
     <string name="home_toast_recent_upload_load_fail">최근 업로드된 히어릿 조회에 실패했습니다.</string>
