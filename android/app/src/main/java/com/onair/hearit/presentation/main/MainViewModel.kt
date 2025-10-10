@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.main
 
+import android.content.Intent
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,7 +12,9 @@ import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
+import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.splash.SplashActivity
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -41,6 +44,9 @@ class MainViewModel(
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
+
+    private val _navigateToDetail = SingleLiveData<Long>()
+    val navigateToDetail: LiveData<Long> = _navigateToDetail
 
     init {
         fetchRecentHearit()
@@ -117,6 +123,16 @@ class MainViewModel(
                     Timber.w(throwable)
                     _toastMessage.value = R.string.main_toast_clear_token_fail
                 }
+        }
+    }
+
+    fun handleDeepLinkIntent(intent: Intent) {
+        val fromDeeplink =
+            intent.getBooleanExtra(SplashActivity.OPEN_DETAIL_FROM_DEEPLINK, false)
+        val id = intent.getLongExtra(HEARIT_ID_KEY, -1L)
+
+        if (fromDeeplink && id > -1L) {
+            _navigateToDetail.value = id
         }
     }
 }
