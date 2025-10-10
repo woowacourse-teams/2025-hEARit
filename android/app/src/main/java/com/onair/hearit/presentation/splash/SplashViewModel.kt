@@ -1,10 +1,13 @@
 package com.onair.hearit.presentation.splash
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.DomainException.NetworkConnection
 import com.onair.hearit.domain.DomainException.UserNotRegistered
@@ -22,6 +25,9 @@ class SplashViewModel(
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
+
+    private val _navigateToMain = SingleLiveData<Long?>()
+    val navigateToMain: LiveData<Long?> = _navigateToMain
 
     fun checkValidAccessTokenWithDelay() {
         viewModelScope.launch {
@@ -94,7 +100,26 @@ class SplashViewModel(
         }
     }
 
+    fun handleDeeplink(uri: Uri?) {
+        val id =
+            if (uri?.host == KAKAO_LINK_HOST) {
+                uri.getQueryParameter("id")?.toLongOrNull()
+            } else {
+                null
+            }
+
+        if (id != null) {
+            _navigateToMain.value = id
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.SHARE_EVENT)
+        } else if (uri != null) {
+            _navigateToMain.value = null
+        } else {
+            _navigateToMain.value = null
+        }
+    }
+
     companion object {
         private const val DELAY_TIME = 1000L
+        private const val KAKAO_LINK_HOST = "kakaolink"
     }
 }

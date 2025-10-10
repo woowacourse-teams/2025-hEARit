@@ -3,7 +3,6 @@ package com.onair.hearit.presentation.splash
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -22,9 +21,8 @@ import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.databinding.ActivitySplashBinding
-import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import kotlinx.coroutines.delay
@@ -44,11 +42,11 @@ class SplashActivity : AppCompatActivity() {
         setupUpdateLauncher()
         observeViewModel()
         checkForUpdate()
+    }
 
-        val data: Uri? = intent?.data
-        if (data != null && data.host == KAKAO_LINK_HOST) {
-            AnalyticsProvider.get().logEvent(AnalyticsEventNames.SHARE_EVENT)
-        }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 
     private fun setupWindowInsets() {
@@ -93,15 +91,29 @@ class SplashActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         viewModel.checkToken.observe(this) { isValid ->
-            if (isValid) navigateToMain() else navigateToLogin()
+            if (isValid) {
+                viewModel.handleDeeplink(intent?.data)
+            } else {
+                navigateToLogin()
+            }
+        }
+        viewModel.navigateToMain.observe(this) { hearitId ->
+            navigateToMain(hearitId)
         }
         viewModel.toastMessage.observe(this) { messageResId ->
             Toast.makeText(this, getString(messageResId), Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun navigateToMain() {
-        val intent = Intent(this, MainActivity::class.java)
+    private fun navigateToMain(deeplinkHearitId: Long?) {
+        val intent =
+            Intent(this, MainActivity::class.java).apply {
+                if (deeplinkHearitId != null) {
+                    putExtra(OPEN_DETAIL_FROM_DEEPLINK, true)
+                    putExtra(HEARIT_ID_KEY, deeplinkHearitId)
+                }
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
         startActivity(intent)
         finish()
     }
@@ -119,6 +131,6 @@ class SplashActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val KAKAO_LINK_HOST = "kakaolink"
+        const val OPEN_DETAIL_FROM_DEEPLINK = "OPEN_DETAIL_FROM_DEEPLINK"
     }
 }
