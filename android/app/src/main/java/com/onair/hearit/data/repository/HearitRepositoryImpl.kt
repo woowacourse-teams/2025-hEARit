@@ -3,11 +3,11 @@ package com.onair.hearit.data.repository
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.CursorResult
-import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.repository.HearitRepository
@@ -41,6 +41,6 @@ class HearitRepositoryImpl(
             .getSearchHearits(searchTerm, page, size)
             .mapOrThrowDomain { it.toDomain() }
 
-    override suspend fun getCategoryHearits(): Result<List<GroupedCategory>> =
+    override suspend fun getCategoryHearits(): Result<List<RecommendationCategories>> =
         hearitRemoteDataSource.getCategoryHearits().mapListOrThrowDomain { it.toDomain() }
 }

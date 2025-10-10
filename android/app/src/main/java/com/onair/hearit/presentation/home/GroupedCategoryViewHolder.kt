@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemGroupedCategoryBinding
-import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.dpToPx
 
@@ -26,13 +26,13 @@ class GroupedCategoryViewHolder(
     }
 
     fun bind(
-        groupedCategory: GroupedCategory,
+        recommendationCategories: RecommendationCategories,
         clickListener: (Long, String, String) -> Unit,
     ) {
         binding.navigateClickListener = clickListener
-        binding.groupedCategory = groupedCategory
-        itemAdapter.updateColor(groupedCategory.colorCode)
-        itemAdapter.submitList(groupedCategory.hearits)
+        binding.groupedCategory = recommendationCategories
+        itemAdapter.updateColor(recommendationCategories.colorCode)
+        itemAdapter.submitList(recommendationCategories.hearits)
     }
 
     companion object {

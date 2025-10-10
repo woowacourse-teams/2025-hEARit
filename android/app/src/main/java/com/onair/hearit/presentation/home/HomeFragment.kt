@@ -212,7 +212,7 @@ class HomeFragment :
             playingBookmarkAdapter.submitList(dummy)
         }
 
-        viewModel.groupedCategory.observe(viewLifecycleOwner) { groupedCategory ->
+        viewModel.recommendationCategories.observe(viewLifecycleOwner) { groupedCategory ->
             groupedCategoryAdapter.submitList(groupedCategory)
         }
 

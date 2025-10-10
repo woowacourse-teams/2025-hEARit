@@ -6,16 +6,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.DomainException.UserNotRegistered
-import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.PlayingBookmarkHearit
 import com.onair.hearit.domain.model.PlayingHistoryHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
+import com.onair.hearit.domain.repository.RecommendationRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ class HomeViewModel(
     private val hearitRepository: HearitRepository,
     private val memberRepository: MemberRepository,
     private val playingHistoryRepository: PlayingHistoryRepository,
+    private val recommendationRepository: RecommendationRepository,
 ) : ViewModel() {
     private val _userInfo: MutableLiveData<UserInfo> = MutableLiveData()
     val userInfo: LiveData<UserInfo> = _userInfo
@@ -47,8 +49,10 @@ class HomeViewModel(
         MutableLiveData()
     val playingBookmarkHearits: LiveData<List<PlayingBookmarkHearit>> = _playingBookmarkHearits
 
-    private val _groupedCategory: MutableLiveData<List<GroupedCategory>> = MutableLiveData()
-    val groupedCategory: LiveData<List<GroupedCategory>> = _groupedCategory
+    private val _recommendationCategories: MutableLiveData<List<RecommendationCategories>> =
+        MutableLiveData()
+    val recommendationCategories: LiveData<List<RecommendationCategories>> =
+        _recommendationCategories
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -69,7 +73,7 @@ class HomeViewModel(
             val playingHistoryDeferred = async { playingHistoryRepository.getPlayingHistories() }
             val recentUploadDeferred = async { hearitRepository.getRecentUploadHearits() }
             val playingBookmarkDeferred = async { bookmarkRepository.getPlayingBookmarkHearits() }
-            val groupedDeferred = async { hearitRepository.getCategoryHearits() }
+            val groupedDeferred = async { recommendationRepository.getRecommendationCategories() }
 
             val recommendResult = recommendDeferred.await()
             val playingHistoryResult = playingHistoryDeferred.await()
@@ -102,7 +106,7 @@ class HomeViewModel(
             playingHistoryResult.onSuccess { _playingHistoryHearits.value = it }
             recentUploadResult.onSuccess { _recentUploadHearits.value = it }
             playingBookmarkResult.onSuccess { _playingBookmarkHearits.value = it }
-            groupedResult.onSuccess { _groupedCategory.value = it }
+            groupedResult.onSuccess { _recommendationCategories.value = it }
 
             _isLoading.value = false
         }

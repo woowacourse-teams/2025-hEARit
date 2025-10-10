@@ -7,7 +7,7 @@
 
         <variable
             name="groupedCategory"
-            type="com.onair.hearit.domain.model.GroupedCategory" />
+            type="com.onair.hearit.domain.model.RecommendationCategories" />
 
         <variable
             name="navigateClickListener"

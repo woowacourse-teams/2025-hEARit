@@ -1,10 +1,10 @@
 package com.onair.hearit.data.api
 
-import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecentUploadResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
+import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -16,7 +16,7 @@ interface HearitService {
     suspend fun getRecommendHearits(): Response<List<RecommendHearitResponse>>
 
     @GET("api/v1/hearits/recommend-category")
-    suspend fun getCategoryHearits(): Response<List<GroupedCategoryHearitResponse>>
+    suspend fun getCategoryHearits(): Response<List<RecommendationCategoriesResponse>>
 
     @GET("api/v1/hearits/recent")
     suspend fun getRecentUploadHearits(): Response<List<RecentUploadResponse>>

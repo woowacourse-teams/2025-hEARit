@@ -11,11 +11,13 @@ class HomeViewModelFactory : ViewModelProvider.Factory {
         val hearitRepository = RepositoryProvider.hearitRepository
         val memberRepository = RepositoryProvider.memberRepository
         val playingHistoryRepository = RepositoryProvider.playingHistoryRepository
+        val recommendationRepository = RepositoryProvider.recommendationRepository
         return HomeViewModel(
             bookmarkRepository,
             hearitRepository,
             memberRepository,
             playingHistoryRepository,
+            recommendationRepository,
         ) as T
     }
 }

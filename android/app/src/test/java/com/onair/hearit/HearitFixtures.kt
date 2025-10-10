@@ -1,12 +1,12 @@
 package com.onair.hearit
 
-import com.onair.hearit.data.dto.CategoryHearitResponse
 import com.onair.hearit.data.dto.CategoryResponse
-import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
+import com.onair.hearit.data.dto.RecommendationCategoriesResponse
+import com.onair.hearit.data.dto.RecommendationCategoryHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 import com.onair.hearit.data.dto.SourceResponse
 
@@ -118,26 +118,26 @@ object HearitFixtures {
         )
     }
 
-    fun createGroupedCategory(): GroupedCategoryHearitResponse {
+    fun createGroupedCategory(): RecommendationCategoriesResponse {
         val fakeHearits =
             listOf(
-                CategoryHearitResponse(
+                RecommendationCategoryHearitResponse(
                     createdAt = "2025-08-01T10:00:00Z",
                     hearitId = 1L,
                     title = "카테고리 히어릿 1",
                 ),
-                CategoryHearitResponse(
+                RecommendationCategoryHearitResponse(
                     createdAt = "2025-08-02T14:30:00Z",
                     hearitId = 2L,
                     title = "카테고리 히어릿 2",
                 ),
             )
 
-        return GroupedCategoryHearitResponse(
+        return RecommendationCategoriesResponse(
             categoryId = 10L,
             categoryName = "Android",
             colorCode = "#FF9800",
-            categoryHearitResponses = fakeHearits,
+            recommendationCategoryHearitResponses = fakeHearits,
         )
     }
 }

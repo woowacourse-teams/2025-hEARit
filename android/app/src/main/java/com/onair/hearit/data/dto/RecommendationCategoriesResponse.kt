@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GroupedCategoryHearitResponse(
+data class RecommendationCategoriesResponse(
     @SerialName("categoryId")
     val categoryId: Long,
     @SerialName("categoryName")
@@ -12,5 +12,5 @@ data class GroupedCategoryHearitResponse(
     @SerialName("colorCode")
     val colorCode: String,
     @SerialName("hearits")
-    val categoryHearitResponses: List<CategoryHearitResponse>,
+    val recommendationCategoryHearitResponses: List<RecommendationCategoryHearitResponse>,
 )

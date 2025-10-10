@@ -1,8 +1,6 @@
 package com.onair.hearit.data.mapper
 
 import com.onair.hearit.data.database.RecentHearitEntity
-import com.onair.hearit.data.dto.CategoryHearitResponse
-import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.PlayingBookmarkResponse
@@ -10,12 +8,13 @@ import com.onair.hearit.data.dto.PlayingHistoryResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecentUploadResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
+import com.onair.hearit.data.dto.RecommendationCategoriesResponse
+import com.onair.hearit.data.dto.RecommendationCategoryHearitResponse
 import com.onair.hearit.data.dto.SearchHearitResponse
 import com.onair.hearit.data.dto.SourceResponse
 import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.domain.model.CategoryHearit
 import com.onair.hearit.domain.model.CursorResult
-import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
@@ -25,6 +24,7 @@ import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.model.Source
@@ -127,15 +127,15 @@ fun SearchHearitResponse.toDomain(): PageResult<SearchedHearit> =
             ),
     )
 
-fun GroupedCategoryHearitResponse.toDomain(): GroupedCategory =
-    GroupedCategory(
+fun RecommendationCategoriesResponse.toDomain(): RecommendationCategories =
+    RecommendationCategories(
         categoryId = this.categoryId,
         categoryName = this.categoryName,
         colorCode = this.colorCode,
-        hearits = this.categoryHearitResponses.map { it.toDomain() },
+        hearits = this.recommendationCategoryHearitResponses.map { it.toDomain() },
     )
 
-fun CategoryHearitResponse.toDomain(): CategoryHearit =
+fun RecommendationCategoryHearitResponse.toDomain(): CategoryHearit =
     CategoryHearit(
         hearitId = this.hearitId,
         title = this.title,
