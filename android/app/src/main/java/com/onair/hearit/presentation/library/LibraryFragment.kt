@@ -42,6 +42,7 @@ class LibraryFragment :
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         binding.rvBookmark.adapter = bookmarkAdapter
+        binding.viewModel = viewModel
         return binding.root
     }
 

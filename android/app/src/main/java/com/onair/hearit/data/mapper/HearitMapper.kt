@@ -118,6 +118,7 @@ fun SearchHearitResponse.toDomain(): PageResult<SearchedHearit> =
                 page = page,
                 size = size,
                 totalPages = totalPages,
+                totalElements = totalElements,
                 isFirst = isFirst,
                 isLast = isLast,
             ),

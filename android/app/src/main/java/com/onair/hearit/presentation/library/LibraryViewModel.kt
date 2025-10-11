@@ -24,6 +24,9 @@ class LibraryViewModel(
     private val _bookmarks = MutableLiveData<List<Bookmark>>()
     val bookmarks: LiveData<List<Bookmark>> = _bookmarks
 
+    private val _totalCount = MutableLiveData<Int>()
+    val totalCount: LiveData<Int> = _totalCount
+
     private val _uiState = MutableLiveData<BookmarkUiState>()
     val uiState: LiveData<BookmarkUiState> = _uiState
 
@@ -63,6 +66,7 @@ class LibraryViewModel(
                 .onSuccess { pageResult ->
                     val currentList = _bookmarks.value.orEmpty()
                     _bookmarks.value = currentList + pageResult.items
+                    _totalCount.value = pageResult.paging.totalElements
                     _uiState.value = if (_bookmarks.value.isNullOrEmpty()) NoBookmarks else LoggedIn
 
                     nextPage =
