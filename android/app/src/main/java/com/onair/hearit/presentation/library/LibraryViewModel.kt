@@ -24,7 +24,7 @@ class LibraryViewModel(
     private val _bookmarks = MutableLiveData<List<Bookmark>>()
     val bookmarks: LiveData<List<Bookmark>> = _bookmarks
 
-    private val _totalCount = MutableLiveData<Int>()
+    private val _totalCount = MutableLiveData(0)
     val totalCount: LiveData<Int> = _totalCount
 
     private val _uiState = MutableLiveData<BookmarkUiState>()
@@ -36,7 +36,7 @@ class LibraryViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private val _isLoading = MutableLiveData<Boolean>(false)
+    private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
     private var nextPage: Int? = 0
