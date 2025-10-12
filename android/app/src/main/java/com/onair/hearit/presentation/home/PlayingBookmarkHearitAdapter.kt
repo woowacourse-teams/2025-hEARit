@@ -27,7 +27,7 @@ class PlayingBookmarkHearitAdapter(
                 override fun areItemsTheSame(
                     oldItem: PlayingBookmarkHearit,
                     newItem: PlayingBookmarkHearit,
-                ): Boolean = oldItem.id == newItem.id
+                ): Boolean = oldItem.bookmarkId == newItem.bookmarkId
 
                 override fun areContentsTheSame(
                     oldItem: PlayingBookmarkHearit,

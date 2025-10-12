@@ -201,9 +201,22 @@ fun PlayingHistoryResponse.toDomain(): PlayingHistoryHearit =
         category = this.category.toDomain(),
     )
 
-fun PlayingBookmarkResponse.toDomain(): PlayingBookmarkHearit =
+fun PlayingBookmarkResponse.toDomain(): PageResult<PlayingBookmarkHearit> =
+    PageResult(
+        items = content.map { it.toPlayingBookmarkHearit() },
+        paging =
+            Paging(
+                page = page,
+                size = size,
+                totalPages = totalPages,
+                isFirst = isFirst,
+                isLast = isLast,
+            ),
+    )
+
+private fun PlayingBookmarkResponse.Content.toPlayingBookmarkHearit(): PlayingBookmarkHearit =
     PlayingBookmarkHearit(
-        id = this.id,
+        bookmarkId = this.bookmarkId,
         title = this.title,
         playTime = this.playTime,
         lastPlayTime = this.lastPlayTime,

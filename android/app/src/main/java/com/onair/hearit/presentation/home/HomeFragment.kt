@@ -21,8 +21,6 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.domain.model.Category
-import com.onair.hearit.domain.model.PlayingBookmarkHearit
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -43,7 +41,7 @@ class HomeFragment :
     private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private val recentAdapter: PlayingHistoryHearitAdapter by lazy {
+    private val playingHistoryAdapter: PlayingHistoryHearitAdapter by lazy {
         PlayingHistoryHearitAdapter(this)
     }
 
@@ -140,16 +138,22 @@ class HomeFragment :
             centerScrollListener?.let { addOnScrollListener(it) }
         }
 
-        binding.rvHomeRecentUpload.adapter = recentUploadAdapter
-
-        binding.rvHomePlayingBookmark.adapter = playingBookmarkAdapter
-
         binding.rvHomePlayingHearit.apply {
-            adapter = recentAdapter
+            adapter = playingHistoryAdapter
             addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
         }
 
-        binding.rvHomeGroupedCategory.adapter = groupedCategoryAdapter
+        binding.rvHomeRecentUpload.apply {
+            adapter = recentUploadAdapter
+            addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
+        }
+
+        binding.rvHomePlayingBookmark.apply {
+            adapter = playingBookmarkAdapter
+            addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
+        }
+
+        binding.rvHomeRecommendationCategories.adapter = groupedCategoryAdapter
     }
 
     private fun observeViewModel() {
@@ -178,7 +182,7 @@ class HomeFragment :
 
         viewModel.playingHistoryHearits.observe(viewLifecycleOwner) { recentHearits ->
             binding.tvHomePlayingHistoryHearitTitle.isVisible = recentHearits.isNotEmpty()
-            recentAdapter.submitList(recentHearits)
+            playingHistoryAdapter.submitList(recentHearits)
         }
 
         viewModel.recentUploadHearits.observe(viewLifecycleOwner) { recentUploadHearits ->
@@ -186,19 +190,9 @@ class HomeFragment :
         }
 
         viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->
-            val dummy =
-                listOf(
-                    PlayingBookmarkHearit(
-                        id = 1,
-                        title = "더미데이터1 더미데이터2 터미네이터3",
-                        playTime = 600,
-                        lastPlayTime = 500000,
-                        category = Category(id = 1, colorCode = "#1883B5", name = "IT 트렌드"),
-                    ),
-                )
             binding.tvHomePlayingBookmarkTitle.isVisible = playingBookmarkHearits.isNotEmpty()
             binding.ibHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
-            playingBookmarkAdapter.submitList(dummy)
+            playingBookmarkAdapter.submitList(playingBookmarkHearits)
         }
 
         viewModel.recommendationCategories.observe(viewLifecycleOwner) { groupedCategory ->
@@ -309,7 +303,7 @@ class HomeFragment :
         centerScrollListener = null
         snapHelper.attachToRecyclerView(null)
         binding.rvHomeRecommend.adapter = null
-        binding.rvHomeGroupedCategory.adapter = null
+        binding.rvHomeRecommendationCategories.adapter = null
         _binding = null
         super.onDestroyView()
     }

@@ -17,8 +17,13 @@ interface BookmarkService {
         @Query("size") size: Int?,
     ): Response<BookmarkResponse>
 
-    @GET("api/v1/bookmarks/hearits/unfinished")
-    suspend fun getPlayingBookmarkHearits(): Response<List<PlayingBookmarkResponse>>
+    @GET("api/v1/bookmarks")
+    suspend fun getPlayingBookmarkHearits(
+        @Query("page") page: Int? = 0,
+        @Query("size") size: Int? = 10,
+        @Query("filter") filter: String? = "all",
+        @Query("sort") sort: String? = "createdAt,desc",
+    ): Response<PlayingBookmarkResponse>
 
     @POST("api/v1/bookmarks/hearits/{hearitId}")
     suspend fun postBookmark(

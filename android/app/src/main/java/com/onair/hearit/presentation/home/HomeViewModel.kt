@@ -105,7 +105,7 @@ class HomeViewModel(
             recommendResult.onSuccess { _recommendHearits.value = it }
             playingHistoryResult.onSuccess { _playingHistoryHearits.value = it }
             recentUploadResult.onSuccess { _recentUploadHearits.value = it.items }
-            playingBookmarkResult.onSuccess { _playingBookmarkHearits.value = it }
+            playingBookmarkResult.onSuccess { _playingBookmarkHearits.value = it.items }
             groupedResult.onSuccess { _recommendationCategories.value = it }
 
             _isLoading.value = false

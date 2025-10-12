@@ -11,7 +11,7 @@ interface BookmarkRemoteDataSource {
         size: Int?,
     ): Result<NetworkResult<BookmarkResponse>>
 
-    suspend fun getPlayingBookmarkHearits(): Result<NetworkResult<List<PlayingBookmarkResponse>>>
+    suspend fun getPlayingBookmarkHearits(): Result<NetworkResult<PlayingBookmarkResponse>>
 
     suspend fun addBookmark(hearitId: Long): Result<NetworkResult<BookmarkIdResponse>>
 

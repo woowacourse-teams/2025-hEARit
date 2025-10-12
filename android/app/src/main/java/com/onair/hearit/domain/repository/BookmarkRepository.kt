@@ -10,7 +10,7 @@ interface BookmarkRepository {
         size: Int?,
     ): Result<PageResult<Bookmark>>
 
-    suspend fun getPlayingBookmarkHearits(): Result<List<PlayingBookmarkHearit>>
+    suspend fun getPlayingBookmarkHearits(): Result<PageResult<PlayingBookmarkHearit>>
 
     suspend fun addBookmark(hearitId: Long): Result<Long>
 

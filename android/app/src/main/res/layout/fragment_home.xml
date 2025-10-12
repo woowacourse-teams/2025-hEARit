@@ -142,7 +142,7 @@
                 style="@style/pretendard_main_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="24dp"
                 android:text="@string/home_recent_upload_hearit_title"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_playing_hearit"
@@ -167,7 +167,7 @@
                 style="@style/pretendard_main_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="24dp"
                 android:text="@string/home_playing_bookmark_hearit_title"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_recent_upload"
@@ -204,7 +204,7 @@
                 android:layout_width="0dp"
                 android:layout_height="92dp"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="32dp"
                 android:background="@drawable/bg_gradient_home_shortcast"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
@@ -249,7 +249,7 @@
                 app:layout_constraintTop_toTopOf="@id/tv_home_wootaeco" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_grouped_category"
+                android:id="@+id/rv_home_recommendation_categories"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -261,7 +261,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_wootaeco"
                 tools:itemCount="5"
-                tools:listitem="@layout/item_grouped_category" />
+                tools:listitem="@layout/item_recommendation_category" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

@@ -25,7 +25,7 @@ class BookmarkRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getPlayingBookmarkHearits(): Result<NetworkResult<List<PlayingBookmarkResponse>>> =
+    override suspend fun getPlayingBookmarkHearits(): Result<NetworkResult<PlayingBookmarkResponse>> =
         handleApiCall(
             apiCall = { bookmarkService.getPlayingBookmarkHearits() },
             transform = { response ->
