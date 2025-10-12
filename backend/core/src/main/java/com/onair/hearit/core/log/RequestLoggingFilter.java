@@ -1,7 +1,7 @@
 package com.onair.hearit.core.log;
 
 import com.onair.hearit.core.log.dto.LogFormat;
-import com.onair.hearit.core.log.dto.RequestLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.RequestLogProperty;
 import com.onair.hearit.core.log.logger.ConsoleLogger;
 import com.onair.hearit.core.log.logger.JsonLogger;
 import jakarta.servlet.FilterChain;
@@ -20,9 +20,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class RequestLoggingFilter extends OncePerRequestFilter {
 
-    private final JsonLogger jsonLogger;
-    private final ConsoleLogger consoleLogger;
-
     private static final List<String> excludedPaths = List.of(
             "/admin/**",
             "/api/v1/admin/**",
@@ -31,6 +28,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             "/actuator/**"
     );
 
+    private final JsonLogger jsonLogger;
+    private final ConsoleLogger consoleLogger;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override

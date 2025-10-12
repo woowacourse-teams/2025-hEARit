@@ -1,7 +1,8 @@
 package com.onair.hearit.core.log.logger;
 
-import com.onair.hearit.core.log.dto.RequestLogProperty;
-import com.onair.hearit.core.log.dto.ResponseLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.ExceptionLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.RequestLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.ResponseLogProperty;
 import com.onair.hearit.core.log.formatter.ConsoleLogFormatter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +30,10 @@ public class ConsoleLogger {
     }
 
     public void warn(Object object) {
+        if (object instanceof ExceptionLogProperty exceptionLogProperty) {
+            consoleLogger.warn(ConsoleLogFormatter.formatExceptionLogProperty(exceptionLogProperty));
+            return;
+        }
         consoleLogger.warn(object);
     }
 
@@ -37,6 +42,10 @@ public class ConsoleLogger {
     }
 
     public void error(Object object, Throwable throwable) {
+        if (object instanceof ExceptionLogProperty exceptionLogProperty) {
+            consoleLogger.error(ConsoleLogFormatter.formatExceptionLogProperty(exceptionLogProperty));
+            return;
+        }
         consoleLogger.error(object, throwable);
     }
 

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JsonLogger {
 
-    private final MaskingSupport maskingSupport;
     private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
+    private final MaskingSupport maskingSupport;
 
     public void debug(Object object) {
         jsonLogger.debug(maskingSupport.mask(object));
@@ -23,6 +23,10 @@ public class JsonLogger {
 
     public void warn(Object object) {
         jsonLogger.warn(maskingSupport.mask(object));
+    }
+
+    public void warn(Object object, Throwable throwable) {
+        jsonLogger.warn(maskingSupport.mask(object), throwable);
     }
 
     public void error(Object object, Throwable throwable) {

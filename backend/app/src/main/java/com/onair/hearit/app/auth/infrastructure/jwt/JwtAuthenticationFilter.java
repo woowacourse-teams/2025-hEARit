@@ -3,7 +3,10 @@ package com.onair.hearit.app.auth.infrastructure.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.auth.domain.RequestUser;
 import com.onair.hearit.app.exception.ErrorCode;
-import com.onair.hearit.core.log.exception.FilterExceptionLogger;
+import com.onair.hearit.core.log.dto.LogFormat;
+import com.onair.hearit.core.log.dto.logproperty.ExceptionLogProperty;
+import com.onair.hearit.core.log.logger.ConsoleLogger;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,11 +31,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String DEVICE_UUID_HEADER = "X-Device-UUID";
 
+    private final JsonLogger jsonLogger;
+    private final ConsoleLogger consoleLogger;
+
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final List<String> whitelist;
     private final ObjectMapper objectMapper;
     private final JwtTokenProvider jwtTokenProvider;
-    private final FilterExceptionLogger filterExceptionLogger;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -112,19 +117,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws IOException {
         ProblemDetail problemDetail = buildProblemDetail(ErrorCode.AUTHENTICATION_REQUIRED, "인증이 필요한 요청입니다.", request);
         writeProblemDetailResponse(response, problemDetail);
-        filterExceptionLogger.warn(problemDetail);
+        logWarn(request, problemDetail);
     }
 
     private void handleTokenExpiredError(HttpServletResponse response, HttpServletRequest request) throws IOException {
         ProblemDetail problemDetail = buildProblemDetail(ErrorCode.ACCESS_TOKEN_EXPIRED, "만료된 토큰입니다.", request);
         writeProblemDetailResponse(response, problemDetail);
-        filterExceptionLogger.warn(problemDetail);
+        logWarn(request, problemDetail);
     }
 
     private void handleInvalidTokenError(HttpServletResponse response, HttpServletRequest request) throws IOException {
         ProblemDetail problemDetail = buildProblemDetail(ErrorCode.INVALID_ACCESS_TOKEN, "유효하지 않은 토큰입니다.", request);
         writeProblemDetailResponse(response, problemDetail);
-        filterExceptionLogger.warn(problemDetail);
+        logWarn(request, problemDetail);
+    }
+
+    private void logWarn(HttpServletRequest request, ProblemDetail problemDetail) {
+        ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.warnFromProblemDetail(request.getRequestURI(),
+                request.getMethod(), problemDetail);
+        LogFormat logFormat = new LogFormat(exceptionLogProperty);
+        jsonLogger.warn(logFormat);
+        consoleLogger.warn(exceptionLogProperty);
     }
 
     private ProblemDetail buildProblemDetail(ErrorCode errorCode, String detail, HttpServletRequest request) {

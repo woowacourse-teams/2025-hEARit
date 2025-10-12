@@ -1,5 +1,6 @@
 package com.onair.hearit.core.log.dto;
 
+import com.onair.hearit.core.log.dto.logproperty.LogProperty;
 import lombok.Getter;
 
 @Getter

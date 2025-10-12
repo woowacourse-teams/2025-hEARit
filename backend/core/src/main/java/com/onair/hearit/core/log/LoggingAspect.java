@@ -1,15 +1,12 @@
 package com.onair.hearit.core.log;
 
-import com.onair.hearit.core.log.dto.ExceptionLog;
-import com.onair.hearit.core.log.dto.ExceptionLog.ErrorDetail;
 import com.onair.hearit.core.log.dto.LogFormat;
-import com.onair.hearit.core.log.dto.RequestInfo;
-import com.onair.hearit.core.log.dto.RequestLogProperty;
-import com.onair.hearit.core.log.dto.ResponseLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.ExceptionLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.RequestLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.ResponseLogProperty;
 import com.onair.hearit.core.log.logger.ConsoleLogger;
 import com.onair.hearit.core.log.logger.JsonLogger;
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -102,21 +99,25 @@ public class LoggingAspect {
     @AfterReturning(value = "exceptionHandler()", returning = "problemDetail")
     public void logExceptionHandler(JoinPoint joinPoint, ProblemDetail problemDetail) {
         try {
-            RequestInfo requestInfo = RequestInfo.fromMdc();
+            HttpServletRequest httpServletRequest = getHttpServletRequest();
+            String endPoint = httpServletRequest.getRequestURI();
+            String method = httpServletRequest.getMethod();
             Optional<Throwable> throwable = extractThrowableFromArgs(joinPoint.getArgs());
-            ErrorDetail errorDetail = throwable.map(ErrorDetail::fromThrowable)
-                    .orElseGet(ErrorDetail::emptyErrorDetail);
             HttpStatus httpStatus = HttpStatus.resolve(problemDetail.getStatus());
 
             if (httpStatus == null || httpStatus.is5xxServerError()) {
                 if (throwable.isPresent()) {
-                    logServerErrorWithStackTrace(requestInfo, httpStatus, errorDetail, throwable.get());
+                    logServerErrorWithStackTrace(endPoint, method, httpStatus, throwable.get());
                     return;
                 }
-                logServerErrorWithoutStackTrace(requestInfo, httpStatus, errorDetail, throwable.get());
+                logServerErrorWithoutStackTrace(endPoint, method, httpStatus);
                 return;
             }
-            logClientError(problemDetail, requestInfo, errorDetail);
+            if (throwable.isPresent()) {
+                logClientErrorWithThrowable(endPoint, method, problemDetail, throwable.get());
+                return;
+            }
+            logClientErrorWithoutThrowable(endPoint, method, problemDetail);
         } catch (Exception e) {
             log.error("Error 로깅 중 예외가 발생했습니다.", e);
         }
@@ -129,44 +130,37 @@ public class LoggingAspect {
                 .findFirst();
     }
 
-    private void logServerErrorWithStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
-                                              ErrorDetail errorDetail, Throwable throwable) {
-        ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
+    private void logServerErrorWithStackTrace(String endPoint, String method, HttpStatus httpStatus,
+                                              Throwable throwable) {
+        ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.errorFromThrowable(endPoint, method,
+                httpStatus, throwable);
+        LogFormat exceptionLog = new LogFormat(exceptionLogProperty);
         jsonLogger.error(exceptionLog, throwable);
-        consoleLogger.error("[ERROR] {} {} from {} → {}",
-                requestInfo.getHttpMethod(),
-                requestInfo.getRequestUri(),
-                requestInfo.getIp(),
-                throwable.toString(),
-                throwable
-        );
+        consoleLogger.error(exceptionLog);
     }
 
-    private void logServerErrorWithoutStackTrace(RequestInfo requestInfo, HttpStatus httpStatus,
-                                                 ErrorDetail errorDetail, Throwable throwable) {
-        ExceptionLog exceptionLog = ExceptionLog.error(LocalDateTime.now(), requestInfo, httpStatus, errorDetail);
+    private void logServerErrorWithoutStackTrace(String endPoint, String method, HttpStatus httpStatus) {
+        ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.errorWithoutThrowable(endPoint, method,
+                httpStatus);
+        LogFormat exceptionLog = new LogFormat(exceptionLogProperty);
         jsonLogger.error(exceptionLog);
-        consoleLogger.error("[ERROR] {} {} from {} → {}",
-                requestInfo.getHttpMethod(),
-                requestInfo.getRequestUri(),
-                requestInfo.getIp(),
-                throwable.toString()
-        );
+        consoleLogger.error(exceptionLogProperty);
     }
 
-    private void logClientError(ProblemDetail problemDetail, RequestInfo requestInfo, ErrorDetail errorDetail) {
-        ExceptionLog exceptionLog = ExceptionLog.warn(LocalDateTime.now(), requestInfo,
-                HttpStatus.resolve(problemDetail.getStatus()),
-                errorDetail);
+    private void logClientErrorWithThrowable(String endPoint, String method, ProblemDetail problemDetail,
+                                             Throwable throwable) {
+        ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.warnFromThrowable(endPoint, method,
+                problemDetail, throwable);
+        LogFormat exceptionLog = new LogFormat(exceptionLogProperty);
         jsonLogger.warn(exceptionLog);
-        consoleLogger.warn(
-                "[WARN] {} {} from {} → status: {} / title: {} / detail: {}",
-                requestInfo.getHttpMethod(),
-                requestInfo.getRequestUri(),
-                requestInfo.getIp(),
-                problemDetail.getStatus(),
-                problemDetail.getTitle(),
-                problemDetail.getDetail()
-        );
+        consoleLogger.warn(exceptionLogProperty);
+    }
+
+    private void logClientErrorWithoutThrowable(String endPoint, String method, ProblemDetail problemDetail) {
+        ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.warnFromProblemDetail(endPoint, method,
+                problemDetail);
+        LogFormat exceptionLog = new LogFormat(exceptionLogProperty);
+        jsonLogger.warn(exceptionLog);
+        consoleLogger.warn(exceptionLogProperty);
     }
 }
