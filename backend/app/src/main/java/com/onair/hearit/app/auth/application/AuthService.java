@@ -11,9 +11,11 @@ import com.onair.hearit.app.auth.infrastructure.repository.RefreshTokenRepositor
 import com.onair.hearit.app.exception.custom.InvalidInputException;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.exception.custom.UnauthorizedException;
-import com.onair.hearit.core.domain.OAuthProvider;
 import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.OAuthProvider;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.core.log.dto.logproperty.AuthSignUpLogProperty;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    private final JsonLogger jsonLogger;
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -58,9 +62,10 @@ public class AuthService {
     public void signup(SignupRequest request) {
         validateDuplicatedId(request);
         String hash = passwordEncoder.encode(request.password());
-        memberRepository.save(
-                Member.createLocalUser(UUID.randomUUID().toString(), request.localId(), request.nickname(), hash,
-                        defaultProfileImage));
+        Member member = Member.createLocalUser(UUID.randomUUID().toString(), request.localId(), request.nickname(),
+                hash, defaultProfileImage);
+        Member savedMember = memberRepository.save(member);
+        jsonLogger.info(AuthSignUpLogProperty.fromLocal(savedMember));
     }
 
     private void validateDuplicatedId(SignupRequest request) {
@@ -83,7 +88,9 @@ public class AuthService {
     private Member signupWithUserInfo(OAuthUserInfoResponse userInfo, OAuthProvider provider) {
         Member member = Member.createSocialUser(
                 UUID.randomUUID().toString(), userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl(), provider);
-        return memberRepository.save(member);
+        Member savedMember = memberRepository.save(member);
+        jsonLogger.info(AuthSignUpLogProperty.ofOAuth(savedMember, provider));
+        return savedMember;
     }
 
     private LoginTokenResponse createTokenResponseFrom(Member member) {
