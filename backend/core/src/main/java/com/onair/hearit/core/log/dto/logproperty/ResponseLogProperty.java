@@ -1,5 +1,6 @@
-package com.onair.hearit.core.log.dto;
+package com.onair.hearit.core.log.dto.logproperty;
 
+import com.onair.hearit.core.log.dto.LogEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import lombok.AccessLevel;
