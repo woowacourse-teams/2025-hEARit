@@ -49,11 +49,15 @@ public class ConsoleLogger {
         consoleLogger.error(object, throwable);
     }
 
-    public void error(String format, Object... args) {
-        consoleLogger.error(format, args);
+    public void error(Object object) {
+        if (object instanceof ExceptionLogProperty exceptionLogProperty) {
+            consoleLogger.error(ConsoleLogFormatter.formatExceptionLogProperty(exceptionLogProperty));
+            return;
+        }
+        consoleLogger.error(object);
     }
 
-    public void error(Object object) {
-        consoleLogger.error(object);
+    public void error(String format, Object... args) {
+        consoleLogger.error(format, args);
     }
 }

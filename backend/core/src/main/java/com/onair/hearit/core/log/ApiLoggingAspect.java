@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -24,10 +23,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Aspect
-@Log4j2
 @Component
 @RequiredArgsConstructor
-public class LoggingAspect {
+public class ApiLoggingAspect {
 
     private final ConsoleLogger consoleLogger;
     private final JsonLogger jsonLogger;
@@ -116,7 +114,7 @@ public class LoggingAspect {
             }
             logClientErrorWithoutThrowable(endPoint, method, problemDetail);
         } catch (Exception e) {
-            log.error("Error 로깅 중 예외가 발생했습니다.", e);
+            jsonLogger.error("Error 로깅 중 예외가 발생했습니다.", e);
         }
     }
 
