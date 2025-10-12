@@ -202,8 +202,7 @@ fun SearchedHearitItem(
                 .background(
                     Gray1,
                     shape = RoundedCornerShape(8.dp),
-                )
-                .clickable { onClick(item.id) }
+                ).clickable { onClick(item.id) }
                 .padding(vertical = 16.dp),
     ) {
         Column(

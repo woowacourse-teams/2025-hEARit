@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        android:onClick="@{() -> clickListener.onClick(playingBookmarkHearit.bookmarkId)}">
+        android:onClick="@{() -> clickListener.onClick(playingBookmarkHearit.hearitId)}">
 
         <TextView
             android:id="@+id/recent_hearit_category"

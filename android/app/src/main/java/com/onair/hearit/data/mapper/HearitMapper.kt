@@ -216,6 +216,7 @@ fun PlayingBookmarkResponse.toDomain(): PageResult<PlayingBookmarkHearit> =
 
 private fun PlayingBookmarkResponse.Content.toPlayingBookmarkHearit(): PlayingBookmarkHearit =
     PlayingBookmarkHearit(
+        hearitId = this.hearitId,
         bookmarkId = this.bookmarkId,
         title = this.title,
         playTime = this.playTime,
