@@ -11,7 +11,7 @@ class RecommendationRemoteDataSourceImpl(
     private val recommendationService: RecommendationService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : RecommendationRemoteDataSource {
-    override suspend fun getRecommendCategories(): Result<NetworkResult<List<RecommendationCategoriesResponse>>> =
+    override suspend fun getRecommendationCategories(): Result<NetworkResult<List<RecommendationCategoriesResponse>>> =
         handleApiCall(
             apiCall = { recommendationService.getRecommendationCategories() },
             transform = { response ->

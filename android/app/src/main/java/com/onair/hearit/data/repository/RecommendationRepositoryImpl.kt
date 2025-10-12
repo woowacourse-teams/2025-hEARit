@@ -9,5 +9,7 @@ class RecommendationRepositoryImpl(
     private val recommendationDataSource: RecommendationRemoteDataSource,
 ) : RecommendationRepository {
     override suspend fun getRecommendationCategories(): Result<List<RecommendationCategories>> =
-        recommendationDataSource.getRecommendCategories().mapListOrThrowDomain { it.toDomain() }
+        recommendationDataSource
+            .getRecommendationCategories()
+            .mapListOrThrowDomain { it.toDomain() }
 }
