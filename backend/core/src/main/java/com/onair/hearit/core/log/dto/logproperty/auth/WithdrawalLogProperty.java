@@ -1,0 +1,33 @@
+package com.onair.hearit.core.log.dto.logproperty.auth;
+
+import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.log.dto.LogEvent;
+import com.onair.hearit.core.log.dto.logproperty.LogProperty;
+import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class WithdrawalLogProperty implements LogProperty {
+
+    private final long memberId;
+    private final int membershipDays;
+
+    public static WithdrawalLogProperty from(Member member) {
+        int membershipDays = getMembershipDays(member);
+        return new WithdrawalLogProperty(member.getId(), membershipDays);
+    }
+
+    private static int getMembershipDays(Member member) {
+        LocalDateTime createdAt = member.getCreatedAt();
+        LocalDateTime now = LocalDateTime.now();
+        return now.getDayOfYear() - createdAt.getDayOfYear();
+    }
+
+    @Override
+    public String getEventName() {
+        return LogEvent.WITHDRAWAL.getEventName();
+    }
+}

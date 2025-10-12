@@ -10,18 +10,18 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class AuthSignUpLogProperty implements LogProperty {
+public class SignUpLogProperty implements LogProperty {
 
     private final String signupProvider;
     private final String createdAt;
     private final long memberId;
 
-    public static AuthSignUpLogProperty ofOAuth(Member member, OAuthProvider provider) {
-        return new AuthSignUpLogProperty(provider.getName(), member.getCreatedAt().toString(), member.getId());
+    public static SignUpLogProperty ofOAuth(Member member, OAuthProvider provider) {
+        return new SignUpLogProperty(provider.getName(), member.getCreatedAt().toString(), member.getId());
     }
 
-    public static AuthSignUpLogProperty fromLocal(Member member) {
-        return new AuthSignUpLogProperty(OAuthProvider.NONE.getName(), member.getCreatedAt().toString(),
+    public static SignUpLogProperty fromLocal(Member member) {
+        return new SignUpLogProperty(OAuthProvider.NONE.getName(), member.getCreatedAt().toString(),
                 member.getId());
     }
 

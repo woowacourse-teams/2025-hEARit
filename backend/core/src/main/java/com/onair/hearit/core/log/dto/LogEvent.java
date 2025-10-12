@@ -15,8 +15,7 @@ public enum LogEvent {
     /* auth log event */
     SIGNUP("Auth_Signup"),
     LOGIN("Auth_Login"),
-    LOGOUT("Auth_Logout"),
-    REFRESH_TOKEN_EXPIRED("Auth_RefreshTokenExpired"),
+    TOKEN_REFRESH("Auth_Token_Refresh"),
     WITHDRAWAL("Auth_Withdrawal"),
 
     /* db log event */

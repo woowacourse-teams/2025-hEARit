@@ -1,5 +1,7 @@
 package com.onair.hearit.app.auth.infrastructure.jwt;
 
+import com.onair.hearit.core.log.dto.logproperty.auth.TokenRefreshLogProperty;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtTokenProvider {
 
+    private final JsonLogger jsonLogger;
+
     private final String secretKey;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
@@ -25,10 +29,12 @@ public class JwtTokenProvider {
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token.expiration}") long accessTokenExpiration,
-            @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration) {
+            @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration,
+            JsonLogger jsonLogger) {
         this.secretKey = secretKey;
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
+        this.jsonLogger = jsonLogger;
     }
 
     public String createAccessToken(Long memberId) {
@@ -71,8 +77,11 @@ public class JwtTokenProvider {
         try {
             parseClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            jsonLogger.warn(TokenRefreshLogProperty.failure(getMemberId(token), "토큰이 만료되었습니다."));
+            return false;
         } catch (JwtException e) {
-            log.info("validateToken() failed: {}", e.getMessage());
+            jsonLogger.warn(TokenRefreshLogProperty.failure(getMemberId(token), "토큰이 유효하지않습니다."));
             return false;
         }
     }
