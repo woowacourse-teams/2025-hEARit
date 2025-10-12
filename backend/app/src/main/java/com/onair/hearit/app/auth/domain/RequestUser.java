@@ -1,8 +1,11 @@
 package com.onair.hearit.app.auth.domain;
 
 import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.core.domain.UserType;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
+@Getter
 @Log4j2
 public class RequestUser {
 
@@ -18,6 +21,7 @@ public class RequestUser {
     }
 
     public static RequestUser guest(String guestId) {
+
         if (guestId == null || guestId.isBlank()) {
             log.warn("현재 X-Device-UUID Header가 비어있습니다.");
             return new RequestUser(null, FALLBACK_GUEST_ID);
@@ -30,6 +34,13 @@ public class RequestUser {
             throw new IllegalStateException("memberId는 null일 수 없습니다.");
         }
         return new RequestUser(memberId, null);
+    }
+
+    public String getUserType() {
+        if (memberId == null) {
+            return UserType.GUEST.getName();
+        }
+        return UserType.MEMBER.getName();
     }
 
     private void validate(Long memberId, String guestId) {

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,25 +38,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        String token = extractTokenFromHeader(request.getHeader("Authorization"));
+        try {
+            String token = extractTokenFromHeader(request.getHeader("Authorization"));
 
-        // 화이트리스트면 그냥 통과
-        if ((token == null || token.isBlank()) && isWhitelisted(request)) {
-            authenticateAsGuest(request);
-            chain.doFilter(request, response);
-            return;
-        }
-
-        // 토큰이 헤더에 존재하거나 인증이 필요한 엔드포인트 처리
-        TokenStatus tokenStatus = jwtTokenProvider.getTokenStatus(token);
-        switch (tokenStatus) {
-            case NOT_EXIST -> handleAuthenticatedRequiredError(response, request);
-            case EXPIRED -> handleTokenExpiredError(response, request);
-            case INVALID -> handleInvalidTokenError(response, request);
-            case VALID -> {
-                authenticateAsMember(token);
+            if ((token == null || token.isBlank()) && isWhitelisted(request)) {
+                authenticateAsGuest(request);
                 chain.doFilter(request, response);
+                return;
             }
+
+            TokenStatus tokenStatus = jwtTokenProvider.getTokenStatus(token);
+            switch (tokenStatus) {
+                case NOT_EXIST -> handleAuthenticatedRequiredError(response, request);
+                case EXPIRED -> handleTokenExpiredError(response, request);
+                case INVALID -> handleInvalidTokenError(response, request);
+                case VALID -> {
+                    authenticateAsMember(token);
+                    chain.doFilter(request, response);
+                }
+            }
+        } finally {
+            clearMdc();
         }
     }
 
@@ -63,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header == null || !header.startsWith("Bearer ")) {
             return null;
         }
-        return header.substring("Bearer " .length());
+        return header.substring("Bearer ".length());
     }
 
     private boolean isWhitelisted(HttpServletRequest request) {
@@ -73,18 +76,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void authenticateAsGuest(HttpServletRequest request) {
         String deviceUuid = request.getHeader(DEVICE_UUID_HEADER);
+        RequestUser guestUser = RequestUser.guest(deviceUuid);
+
+        setMdcForUser(guestUser);
+
         UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(RequestUser.guest(deviceUuid), null, null);
+                new UsernamePasswordAuthenticationToken(guestUser, null, null);
         SecurityContextHolder.getContext().setAuthentication(auth);
-        log.info("비회원으로 접속 완료, deviceUuid={}", deviceUuid);
     }
 
     private void authenticateAsMember(String token) {
         Long memberId = jwtTokenProvider.getMemberId(token);
+        RequestUser memberUser = RequestUser.member(memberId);
+
+        setMdcForUser(memberUser);
+
         UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(RequestUser.member(memberId), null, Collections.emptyList());
+                new UsernamePasswordAuthenticationToken(memberUser, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
-        log.info("회원으로 인증 완료, memberId={}", memberId);
+    }
+
+    private void setMdcForUser(RequestUser user) {
+        MDC.put("userType", user.getUserType());
+        MDC.put("memberId", String.valueOf(user.getMemberId()));
+        MDC.put("guestId", String.valueOf(user.getGuestId()));
+    }
+
+    private void clearMdc() {
+        MDC.remove("userType");
+        MDC.remove("memberId");
+        MDC.remove("guestId");
     }
 
     private void handleAuthenticatedRequiredError(HttpServletResponse response, HttpServletRequest request)
