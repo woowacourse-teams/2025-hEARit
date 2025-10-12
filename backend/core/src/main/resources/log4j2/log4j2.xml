@@ -14,7 +14,7 @@
         <!-- %n : 줄바꿈 문자 -->
         <Property name="consoleLogPattern">
             <!-- @formatter:off -->
-            %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %highlight{%-5level} %style{%pid}{magenta} --- [%15.15t] %style{%-40.40c{1.}}{cyan} : %msg%n
+            %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %highlight{%-5level} %style{%pid}{magenta} --- [%15.15t] %style{%-40.40c{1.}}{cyan} : %msg | ip=%X{ip} userType=%X{userType} memberId=%X{memberId} guestId=%X{guestId}%n
             <!-- @formatter:on -->
         </Property>
 
@@ -45,9 +45,20 @@
                     eventEol="true"
                     objectMessageAsJsonObject="true"
                     charset="UTF-8">
+                <!-- log context-->
+                <KeyValuePair key="ip" value="$${ctx:ip}"/>
+                <KeyValuePair key="timestamp" value="$${ctx:timestamp}"/>
+                <KeyValuePair key="deviceModel" value="$${ctx:deviceModel}"/>
+                <KeyValuePair key="appVersion" value="$${ctx:appVersion}"/>
+
+                <!-- user context -->
+                <KeyValuePair key="userType" value="$${ctx:userType}"/>
+                <KeyValuePair key="memberId" value="$${ctx:memberId}"/>
+                <KeyValuePair key="guestId" value="$${ctx:guestId}"/>
+
                 <!-- OpenTelemetry trace 정보 추가 -->
-                <KeyValuePair key="trace_id" value="$${ctx:trace_id}"/>
-                <KeyValuePair key="span_id" value="$${ctx:span_id}"/>
+                <KeyValuePair key="traceId" value="$${ctx:trace_id}"/>
+                <KeyValuePair key="spanId" value="$${ctx:span_id}"/>
                 <KeyValuePair key="port" value="${spring:server.port}"/>
                 <KeyValuePair key="env" value="${env}"/>
             </JsonLayout>

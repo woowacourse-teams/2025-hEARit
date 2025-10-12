@@ -28,11 +28,13 @@ public class MdcSetupFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        
+
         MDC.put("ip", httpServletRequest.getRemoteAddr());
         MDC.put("timestamp", LocalDateTime.now(ZoneId.of("Asia/Seoul")).toString());
         MDC.put("deviceModel", httpServletRequest.getHeader("Device-Model"));
         MDC.put("appVersion", httpServletRequest.getHeader("App-Version"));
+        MDC.put("guestId", httpServletRequest.getHeader("X-Device-UUID"));
+        MDC.put("userType", httpServletRequest.getHeader("unspecified"));
 
         /* latencyTime을 위한 value */
         MDC.put("startTime", String.valueOf(System.currentTimeMillis()));
