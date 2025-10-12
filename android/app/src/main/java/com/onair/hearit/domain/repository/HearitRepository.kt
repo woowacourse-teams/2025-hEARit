@@ -5,7 +5,7 @@ import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
-import com.onair.hearit.domain.model.RecommendationCategories
+import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
 
@@ -14,18 +14,25 @@ interface HearitRepository {
 
     suspend fun getRecommendHearits(): Result<List<RecommendHearit>>
 
-    suspend fun getRecentUploadHearits(): Result<List<RecentUploadHearit>>
-
     suspend fun getRandomHearits(
         cursorId: Long? = null,
         size: Int? = null,
     ): Result<CursorResult<RandomHearit>>
 
-    suspend fun getSearchHearits(
+    suspend fun getKeywordHearits(
         searchTerm: String,
         page: Int? = null,
         size: Int? = null,
     ): Result<PageResult<SearchedHearit>>
 
-    suspend fun getCategoryHearits(): Result<List<RecommendationCategories>>
+    suspend fun getCategoryHearits(
+        categoryId: Long,
+        page: Int? = 0,
+        size: Int? = 20,
+    ): Result<PageResult<SearchedCategoryHearit>>
+
+    suspend fun getRecentUploadHearits(
+        page: Int? = 0,
+        size: Int? = 20,
+    ): Result<PageResult<RecentUploadHearit>>
 }

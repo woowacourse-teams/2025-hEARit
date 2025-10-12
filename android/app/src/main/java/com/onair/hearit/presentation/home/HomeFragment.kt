@@ -23,7 +23,6 @@ import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.PlayingBookmarkHearit
-import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -183,17 +182,7 @@ class HomeFragment :
         }
 
         viewModel.recentUploadHearits.observe(viewLifecycleOwner) { recentUploadHearits ->
-            val dummy =
-                listOf(
-                    RecentUploadHearit(
-                        id = 1,
-                        title = "더미데이터1 더미데이터2 터미네이터3",
-                        playTime = 508,
-                        lastPlayTime = 123456,
-                        category = Category(id = 1, colorCode = "#8C46D2", name = "IT 트렌드"),
-                    ),
-                )
-            recentUploadAdapter.submitList(dummy)
+            recentUploadAdapter.submitList(recentUploadHearits)
         }
 
         viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->

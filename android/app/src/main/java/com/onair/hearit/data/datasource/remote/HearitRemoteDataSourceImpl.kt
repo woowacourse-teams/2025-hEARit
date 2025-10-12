@@ -6,11 +6,11 @@ import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.HearitResponse
+import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
-import com.onair.hearit.data.dto.RecentUploadResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
-import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.data.dto.SearchHearitsResponse
 
 class HearitRemoteDataSourceImpl(
     private val hearitService: HearitService,
@@ -34,15 +34,6 @@ class HearitRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getRecentUploadHearits(): Result<NetworkResult<List<RecentUploadResponse>>> =
-        handleApiCall(
-            apiCall = { hearitService.getRecentUploadHearits() },
-            transform = { response ->
-                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
-            },
-            errorHandler = errorResponseHandler,
-        )
-
     override suspend fun getRandomHearits(
         cursorId: Long?,
         size: Int?,
@@ -59,9 +50,28 @@ class HearitRemoteDataSourceImpl(
         searchTerm: String,
         page: Int?,
         size: Int?,
-    ): Result<NetworkResult<SearchHearitResponse>> =
+    ): Result<NetworkResult<SearchHearitsResponse>> =
         handleApiCall(
             apiCall = { hearitService.getSearchHearits(searchTerm, page, size) },
+            transform = { response ->
+                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
+            },
+            errorHandler = errorResponseHandler,
+        )
+
+    override suspend fun getHearits(
+        categoryId: Long?,
+        page: Int?,
+        size: Int?,
+    ): Result<NetworkResult<HearitsResponse>> =
+        handleApiCall(
+            apiCall = {
+                hearitService.getHearits(
+                    categoryId = categoryId,
+                    page = page,
+                    size = size,
+                )
+            },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },

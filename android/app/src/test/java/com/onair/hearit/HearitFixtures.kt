@@ -2,12 +2,12 @@ package com.onair.hearit
 
 import com.onair.hearit.data.dto.CategoryResponse
 import com.onair.hearit.data.dto.HearitResponse
+import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.RecommendationCategoryHearitResponse
-import com.onair.hearit.data.dto.SearchHearitResponse
 import com.onair.hearit.data.dto.SourceResponse
 
 object HearitFixtures {
@@ -80,34 +80,40 @@ object HearitFixtures {
         )
     }
 
-    fun createSearchHearit(): SearchHearitResponse {
+    fun createSearchHearit(): HearitsResponse {
         val fakeContents =
             listOf(
-                SearchHearitResponse.Content(
+                HearitsResponse.Content(
                     id = 1L,
-                    playTime = 150,
-                    keywords =
-                        listOf(
-                            KeywordResponse(0, "키워드3"),
-                            KeywordResponse(1, "키워드4"),
-                            KeywordResponse(2, "키워드5"),
-                        ),
                     title = "첫 번째 test 히어릿",
-                ),
-                SearchHearitResponse.Content(
-                    id = 2L,
-                    playTime = 210,
+                    playTime = 150,
+                    lastPlayTime = 160000,
+                    createdAt = "1234",
                     keywords =
                         listOf(
                             KeywordResponse(0, "키워드3"),
                             KeywordResponse(1, "키워드4"),
                             KeywordResponse(2, "키워드5"),
                         ),
+                    category = CategoryResponse.Content(0L, "카테고리 1", "#123456"),
+                ),
+                HearitsResponse.Content(
+                    id = 2L,
                     title = "두 번째 test 히어릿",
+                    playTime = 210,
+                    lastPlayTime = 222222,
+                    createdAt = "1234",
+                    keywords =
+                        listOf(
+                            KeywordResponse(0, "키워드3"),
+                            KeywordResponse(1, "키워드4"),
+                            KeywordResponse(2, "키워드5"),
+                        ),
+                    category = CategoryResponse.Content(0L, "카테고리 1", "#123456"),
                 ),
             )
 
-        return SearchHearitResponse(
+        return HearitsResponse(
             content = fakeContents,
             page = 0,
             size = fakeContents.size,

@@ -43,6 +43,7 @@
 
     <!--CategoryFragment-->
     <string name="category_text">전체 카테고리 목록</string>
+    <string name="category_toast_searched_hearits_load_fail">카테고리 히어릿 목록 조회에 실패했습니다</string>
 
     <!-- CreateHearitActivity-->
     <string name="create_hearit_main_title"><font color="#B677F3">생성하고자 하는 텍스트</font><font color="#EFF1F2">를 입력해주세요.</font></string>

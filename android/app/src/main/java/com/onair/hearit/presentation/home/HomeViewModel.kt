@@ -71,7 +71,7 @@ class HomeViewModel(
         viewModelScope.launch {
             val recommendDeferred = async { hearitRepository.getRecommendHearits() }
             val playingHistoryDeferred = async { playingHistoryRepository.getPlayingHistories() }
-            val recentUploadDeferred = async { hearitRepository.getRecentUploadHearits() }
+            val recentUploadDeferred = async { hearitRepository.getRecentUploadHearits(size = 10) }
             val playingBookmarkDeferred = async { bookmarkRepository.getPlayingBookmarkHearits() }
             val groupedDeferred = async { recommendationRepository.getRecommendationCategories() }
 
@@ -104,7 +104,7 @@ class HomeViewModel(
 
             recommendResult.onSuccess { _recommendHearits.value = it }
             playingHistoryResult.onSuccess { _playingHistoryHearits.value = it }
-            recentUploadResult.onSuccess { _recentUploadHearits.value = it }
+            recentUploadResult.onSuccess { _recentUploadHearits.value = it.items }
             playingBookmarkResult.onSuccess { _playingBookmarkHearits.value = it }
             groupedResult.onSuccess { _recommendationCategories.value = it }
 

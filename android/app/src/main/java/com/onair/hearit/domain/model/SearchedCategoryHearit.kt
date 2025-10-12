@@ -1,6 +1,6 @@
 package com.onair.hearit.domain.model
 
-data class RecentUploadHearit(
+data class SearchedCategoryHearit(
     val id: Long,
     val title: String,
     val playTime: Int,

@@ -2,15 +2,15 @@ package com.onair.hearit.data.mapper
 
 import com.onair.hearit.data.database.RecentHearitEntity
 import com.onair.hearit.data.dto.HearitResponse
+import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.PlayingBookmarkResponse
 import com.onair.hearit.data.dto.PlayingHistoryResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
-import com.onair.hearit.data.dto.RecentUploadResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.RecommendationCategoryHearitResponse
-import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.data.dto.SearchHearitsResponse
 import com.onair.hearit.data.dto.SourceResponse
 import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.domain.model.CategoryHearit
@@ -25,6 +25,7 @@ import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendationCategories
+import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.model.Source
@@ -36,13 +37,35 @@ fun RecentHearit.toData(): RecentHearitEntity =
         title = this.title,
     )
 
-private fun SearchHearitResponse.Content.toDomain(): SearchedHearit =
+private fun SearchHearitsResponse.Content.toSearchedHearit(): SearchedHearit =
     SearchedHearit(
         id = this.id,
         title = this.title,
         playTime = this.playTime,
         lastPlayTime = this.lastPlayTime,
         keywords = this.keywords.map { it.toDomain() },
+    )
+
+private fun HearitsResponse.Content.toSearchedCategoryHearit(): SearchedCategoryHearit =
+    SearchedCategoryHearit(
+        id = this.id,
+        title = this.title,
+        playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
+        createdAt = this.createdAt,
+        keywords = this.keywords.map { it.toDomain() },
+        category = this.category.toDomain(),
+    )
+
+private fun HearitsResponse.Content.toRecentUploadHearit(): RecentUploadHearit =
+    RecentUploadHearit(
+        id = this.id,
+        title = this.title,
+        playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
+        createdAt = this.createdAt,
+        keywords = this.keywords.map { it.toDomain() },
+        category = this.category.toDomain(),
     )
 
 private fun RandomHearitResponse.Content.toDomain(): RandomHearit =
@@ -114,9 +137,35 @@ fun KeywordResponse.toDomain(): Keyword =
         name = this.name,
     )
 
-fun SearchHearitResponse.toDomain(): PageResult<SearchedHearit> =
+fun SearchHearitsResponse.toSearchedHearit(): PageResult<SearchedHearit> =
     PageResult(
-        items = content.map { it.toDomain() },
+        items = content.map { it.toSearchedHearit() },
+        paging =
+            Paging(
+                page = page,
+                size = size,
+                totalPages = totalPages,
+                isFirst = isFirst,
+                isLast = isLast,
+            ),
+    )
+
+fun HearitsResponse.toSearchedCategoryHearit(): PageResult<SearchedCategoryHearit> =
+    PageResult(
+        items = content.map { it.toSearchedCategoryHearit() },
+        paging =
+            Paging(
+                page = page,
+                size = size,
+                totalPages = totalPages,
+                isFirst = isFirst,
+                isLast = isLast,
+            ),
+    )
+
+fun HearitsResponse.toRecentUploadHearit(): PageResult<RecentUploadHearit> =
+    PageResult(
+        items = content.map { it.toRecentUploadHearit() },
         paging =
             Paging(
                 page = page,
@@ -149,15 +198,6 @@ fun PlayingHistoryResponse.toDomain(): PlayingHistoryHearit =
         playTime = this.playTime,
         lastPlayTime = this.lastPlayTime,
         createdAt = this.createdAt,
-        category = this.category.toDomain(),
-    )
-
-fun RecentUploadResponse.toDomain(): RecentUploadHearit =
-    RecentUploadHearit(
-        id = this.id,
-        title = this.title,
-        playTime = this.playTime,
-        lastPlayTime = this.lastPlayTime,
         category = this.category.toDomain(),
     )
 
