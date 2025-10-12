@@ -1,6 +1,5 @@
 package com.onair.hearit.core.log;
 
-import com.onair.hearit.core.log.dto.LogFormat;
 import com.onair.hearit.core.log.dto.logproperty.ExceptionLogProperty;
 import com.onair.hearit.core.log.dto.logproperty.RequestLogProperty;
 import com.onair.hearit.core.log.dto.logproperty.ResponseLogProperty;
@@ -73,9 +72,8 @@ public class LoggingAspect {
     public void logRequest(JoinPoint joinPoint) {
         HttpServletRequest httpServletRequest = getHttpServletRequest();
         RequestLogProperty requestLogProperty = RequestLogProperty.of(httpServletRequest, joinPoint);
-        LogFormat apiRequest = new LogFormat(requestLogProperty);
+        jsonLogger.info(requestLogProperty);
         consoleLogger.info(requestLogProperty);
-        jsonLogger.info(apiRequest);
     }
 
     private HttpServletRequest getHttpServletRequest() {
@@ -91,8 +89,7 @@ public class LoggingAspect {
         HttpServletRequest httpServletRequest = getHttpServletRequest();
         String endPoint = httpServletRequest.getRequestURI();
         ResponseLogProperty responseLogProperty = ResponseLogProperty.of(endPoint, responseEntity);
-        LogFormat apiResponse = new LogFormat(responseLogProperty);
-        jsonLogger.info(apiResponse);
+        jsonLogger.info(responseLogProperty);
         consoleLogger.info(responseLogProperty);
     }
 
@@ -134,16 +131,14 @@ public class LoggingAspect {
                                               Throwable throwable) {
         ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.errorFromThrowable(endPoint, method,
                 httpStatus, throwable);
-        LogFormat exceptionLog = new LogFormat(exceptionLogProperty);
-        jsonLogger.error(exceptionLog, throwable);
-        consoleLogger.error(exceptionLog);
+        jsonLogger.error(exceptionLogProperty, throwable);
+        consoleLogger.error(exceptionLogProperty);
     }
 
     private void logServerErrorWithoutStackTrace(String endPoint, String method, HttpStatus httpStatus) {
         ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.errorWithoutThrowable(endPoint, method,
                 httpStatus);
-        LogFormat exceptionLog = new LogFormat(exceptionLogProperty);
-        jsonLogger.error(exceptionLog);
+        jsonLogger.error(exceptionLogProperty);
         consoleLogger.error(exceptionLogProperty);
     }
 
@@ -151,16 +146,14 @@ public class LoggingAspect {
                                              Throwable throwable) {
         ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.warnFromThrowable(endPoint, method,
                 problemDetail, throwable);
-        LogFormat exceptionLog = new LogFormat(exceptionLogProperty);
-        jsonLogger.warn(exceptionLog);
+        jsonLogger.warn(exceptionLogProperty);
         consoleLogger.warn(exceptionLogProperty);
     }
 
     private void logClientErrorWithoutThrowable(String endPoint, String method, ProblemDetail problemDetail) {
         ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.warnFromProblemDetail(endPoint, method,
                 problemDetail);
-        LogFormat exceptionLog = new LogFormat(exceptionLogProperty);
-        jsonLogger.warn(exceptionLog);
+        jsonLogger.warn(exceptionLogProperty);
         consoleLogger.warn(exceptionLogProperty);
     }
 }

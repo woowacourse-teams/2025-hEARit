@@ -1,6 +1,5 @@
 package com.onair.hearit.core.log.exception;
 
-import com.onair.hearit.core.log.dto.LogFormat;
 import com.onair.hearit.core.log.dto.logproperty.ExceptionLogProperty;
 import com.onair.hearit.core.log.logger.ConsoleLogger;
 import com.onair.hearit.core.log.logger.JsonLogger;
@@ -33,9 +32,8 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                             request.getMethod(),
                             HttpStatus.INTERNAL_SERVER_ERROR,
                             ex);
-            LogFormat exception = new LogFormat(exceptionLogProperty);
 
-            jsonLogger.error(exception);
+            jsonLogger.error(exceptionLogProperty);
             consoleLogger.error(exceptionLogProperty);
             throw ex;
         }

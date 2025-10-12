@@ -42,8 +42,8 @@ public class ExceptionLogProperty implements LogProperty {
     }
 
     @Override
-    public LogEvent getlogEvent() {
-        return LogEvent.EXCEPTION;
+    public String getEventName() {
+        return LogEvent.EXCEPTION.getEventName();
     }
 
     @Getter

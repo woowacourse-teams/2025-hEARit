@@ -3,7 +3,6 @@ package com.onair.hearit.app.auth.infrastructure.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.auth.domain.RequestUser;
 import com.onair.hearit.app.exception.ErrorCode;
-import com.onair.hearit.core.log.dto.LogFormat;
 import com.onair.hearit.core.log.dto.logproperty.ExceptionLogProperty;
 import com.onair.hearit.core.log.logger.ConsoleLogger;
 import com.onair.hearit.core.log.logger.JsonLogger;
@@ -135,8 +134,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void logWarn(HttpServletRequest request, ProblemDetail problemDetail) {
         ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.warnFromProblemDetail(request.getRequestURI(),
                 request.getMethod(), problemDetail);
-        LogFormat logFormat = new LogFormat(exceptionLogProperty);
-        jsonLogger.warn(logFormat);
+        jsonLogger.warn(exceptionLogProperty);
         consoleLogger.warn(exceptionLogProperty);
     }
 

@@ -40,7 +40,7 @@ public class ResponseLogProperty implements LogProperty {
     }
 
     @Override
-    public LogEvent getlogEvent() {
-        return LogEvent.RESPONSE;
+    public String getEventName() {
+        return LogEvent.RESPONSE.getEventName();
     }
 }

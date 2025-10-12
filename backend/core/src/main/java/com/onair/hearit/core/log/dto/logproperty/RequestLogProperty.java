@@ -66,7 +66,7 @@ public class RequestLogProperty implements LogProperty {
     }
 
     @Override
-    public LogEvent getlogEvent() {
-        return LogEvent.REQUEST;
+    public String getEventName() {
+        return LogEvent.REQUEST.getEventName();
     }
 }

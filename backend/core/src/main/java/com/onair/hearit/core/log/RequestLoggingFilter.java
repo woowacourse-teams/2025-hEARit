@@ -1,6 +1,5 @@
 package com.onair.hearit.core.log;
 
-import com.onair.hearit.core.log.dto.LogFormat;
 import com.onair.hearit.core.log.dto.logproperty.RequestLogProperty;
 import com.onair.hearit.core.log.logger.ConsoleLogger;
 import com.onair.hearit.core.log.logger.JsonLogger;
@@ -47,11 +46,10 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } finally {
             RequestLogProperty requestLogProperty = RequestLogProperty.forFilter(request);
-            LogFormat apiRequest = new LogFormat(requestLogProperty);
 
             boolean aopEntered = "true".equals(MDC.get("AOP_ENTERED"));
             if (!aopEntered) {
-                jsonLogger.info(apiRequest);
+                jsonLogger.info(requestLogProperty);
                 consoleLogger.info(requestLogProperty);
             }
         }

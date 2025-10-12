@@ -23,7 +23,7 @@ public class ConsoleLogFormatter {
     public static String formatResponseLogProperty(ResponseLogProperty responseLogProperty) {
         return String.format(
                 "[%s] ← %s statusCode=%d timeTakenMs=%d responseSizeBytes=%s",
-                responseLogProperty.getlogEvent().getEventName(),
+                responseLogProperty.getEventName(),
                 responseLogProperty.getEndPoint(),
                 responseLogProperty.getStatus(),
                 responseLogProperty.getTimeTakenMs(),
@@ -38,7 +38,7 @@ public class ConsoleLogFormatter {
         Object body = requestLogProperty.getRequestBody();
 
         return String.format("[%s] → %s params=%s body=%s",
-                requestLogProperty.getlogEvent().getEventName(),
+                requestLogProperty.getEventName(),
                 endPoint + " " + method,
                 toFlatParamString(params),
                 truncateBody(body == null ? "null" : body.toString())
@@ -50,7 +50,7 @@ public class ConsoleLogFormatter {
         Status httpStatus = exceptionLogProperty.getHttpStatus();
 
         return String.format("[%s] → %s exception=%s statusCode=%d, message=%s",
-                exceptionLogProperty.getlogEvent().getEventName(),
+                exceptionLogProperty.getEventName(),
                 exceptionLogProperty.getEndPoint() + " " + exceptionLogProperty.getMethod(),
                 errorDetail.getExceptionName(),
                 httpStatus.getCode(),
