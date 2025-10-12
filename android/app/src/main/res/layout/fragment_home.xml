@@ -12,10 +12,6 @@
         <variable
             name="viewModel"
             type="com.onair.hearit.presentation.home.HomeViewModel" />
-
-        <variable
-            name="onNavigateToBookmark"
-            type="kotlin.jvm.functions.Function0&lt;kotlin.Unit>" />
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -159,7 +155,6 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_recent_upload_title"
                 tools:itemCount="3"
-                tools:layout_editor_absoluteX="-12dp"
                 tools:listitem="@layout/item_recent_upload_hearit" />
 
             <TextView
