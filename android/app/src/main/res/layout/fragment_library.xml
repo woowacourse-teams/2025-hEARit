@@ -67,6 +67,20 @@
             app:layout_constraintTop_toBottomOf="@id/tv_bookmarked_hearit_title"
             tools:text="히어릿 100개" />
 
+        <ImageButton
+            android:id="@+id/ib_play_all"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="-8dp"
+            android:layout_marginEnd="20dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@null"
+            android:padding="4dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/img_play"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_bookmarked_hearit_title" />
+
         <FrameLayout
             android:id="@+id/fl_login_state"
             android:layout_width="match_parent"

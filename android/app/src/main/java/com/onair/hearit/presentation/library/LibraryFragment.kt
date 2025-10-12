@@ -1,16 +1,23 @@
 package com.onair.hearit.presentation.library
 
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.OptIn
+import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.analytics.AnalyticsEventNames
@@ -22,6 +29,12 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
+import com.onair.hearit.service.PlaybackService
+import com.onair.hearit.service.PlaybackSessionCallback
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
+import kotlinx.coroutines.launch
 
 class LibraryFragment :
     Fragment(),
@@ -33,6 +46,8 @@ class LibraryFragment :
     private val mainViewModel: MainViewModel by activityViewModels()
     private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
     private val bookmarkAdapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
+
+    private var mediaController: MediaController? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,6 +70,25 @@ class LibraryFragment :
         setupWindowInsets()
         observeViewModel()
         setupInfiniteScroll()
+        binding.ibPlayAll.setOnClickListener { startPlaylistFromTopBookmark() }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (mediaController == null) {
+            val token =
+                SessionToken(
+                    requireContext(),
+                    ComponentName(
+                        requireContext(),
+                        PlaybackService::class.java,
+                    ),
+                )
+            viewLifecycleOwner.lifecycleScope.launch {
+                mediaController =
+                    MediaController.Builder(requireContext(), token).buildAsync().await()
+            }
+        }
     }
 
     private fun setupWindowInsets() {
@@ -121,6 +155,23 @@ class LibraryFragment :
         )
     }
 
+    @OptIn(UnstableApi::class)
+    private fun startPlaylistFromTopBookmark() {
+        val latestBookmark = viewModel.bookmarks.value?.firstOrNull() ?: return
+
+        val args =
+            Bundle().apply {
+                putLong(EXTRA_SEED_HEARIT_ID, latestBookmark.hearitId)
+                putLong(EXTRA_SEED_BOOKMARK_ID, latestBookmark.bookmarkId)
+                putLong(EXTRA_START_POSITION_MS, latestBookmark.lastPlayTime ?: 0L)
+            }
+
+        mediaController?.sendCustomCommand(
+            PlaybackSessionCallback.START_LIBRARY_PLAY_COMMAND,
+            args,
+        )
+    }
+
     override fun onClickOption(bookmarkId: Long) {
         val sheet = BookmarkOptionBottomSheet.newInstance(bookmarkId)
         sheet.show(childFragmentManager, sheet.tag)
@@ -133,6 +184,12 @@ class LibraryFragment :
                 putExtra(PREVIOUS_SCREEN_KEY, PlayerDetailActivity.LIBRARY_SCREEN_ID)
             }
         (activity as? MainActivity)?.launchDetailActivity(intent)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mediaController?.release()
+        mediaController = null
     }
 
     override fun onDestroyView() {
