@@ -3,11 +3,11 @@ package com.onair.hearit
 import com.onair.hearit.HearitFixtures.createFakeHearit
 import com.onair.hearit.HearitFixtures.createFakeRandomHearit
 import com.onair.hearit.HearitFixtures.createFakeRecommendHearit
-import com.onair.hearit.HearitFixtures.createGroupedCategory
 import com.onair.hearit.HearitFixtures.createSearchHearit
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
+import com.onair.hearit.data.mapper.toSearchedHearit
 import com.onair.hearit.data.repository.HearitRepositoryImpl
 import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
@@ -124,23 +124,23 @@ class HearitRepositoryImplTest {
         }
 
     @Test
-    fun `getSearchHearits 성공 시 PageResult 도메인 모델 반환`() =
+    fun `getKeywordHearits 성공 시 PageResult 도메인 모델 반환`() =
         runTest {
             val mockPageResultDto = createSearchHearit()
-            val expectedDomainResult = mockPageResultDto.toDomain()
+            val expectedDomainResult = mockPageResultDto.toSearchedHearit()
 
             coEvery {
                 mockHearitRemoteDataSource.getSearchHearits("test", 1, 10)
             } returns Result.success(NetworkResult.Success(mockPageResultDto))
 
-            val result = hearitRepository.getSearchHearits("test", 1, 10)
+            val result = hearitRepository.getKeywordHearits("test", 1, 10)
 
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrNull()).isEqualTo(expectedDomainResult)
         }
 
     @Test
-    fun `getSearchHearits 실패 시 Result failure 반환`() =
+    fun `getKeywordHearits 실패 시 Result failure 반환`() =
         runTest {
             val expectedException = RuntimeException("검색 오류")
 
@@ -148,36 +148,7 @@ class HearitRepositoryImplTest {
                 mockHearitRemoteDataSource.getSearchHearits("test", 1, 10)
             } returns Result.failure(expectedException)
 
-            val result = hearitRepository.getSearchHearits("test", 1, 10)
-
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isEqualTo(expectedException)
-        }
-
-    @Test
-    fun `getCategoryHearits 성공 시 GroupedCategory 도메인 모델 반환`() =
-        runTest {
-            val mockDtoList = listOf(createGroupedCategory())
-            val expectedDomainList = mockDtoList.map { it.toDomain() }
-
-            coEvery { mockHearitRemoteDataSource.getCategoryHearits() } returns
-                Result.success(NetworkResult.Success(mockDtoList))
-
-            val result = hearitRepository.getCategoryHearits()
-
-            assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrNull()).isEqualTo(expectedDomainList)
-        }
-
-    @Test
-    fun `getCategoryHearits 실패 시 Result failure 반환`() =
-        runTest {
-            val expectedException = RuntimeException("카테고리 오류")
-
-            coEvery { mockHearitRemoteDataSource.getCategoryHearits() } returns
-                Result.failure(expectedException)
-
-            val result = hearitRepository.getCategoryHearits()
+            val result = hearitRepository.getKeywordHearits("test", 1, 10)
 
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isEqualTo(expectedException)

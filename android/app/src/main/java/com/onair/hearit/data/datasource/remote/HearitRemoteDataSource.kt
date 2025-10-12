@@ -30,5 +30,5 @@ interface HearitRemoteDataSource {
         size: Int?,
     ): Result<NetworkResult<HearitsResponse>>
 
-    suspend fun getCategoryHearits(): Result<NetworkResult<List<RecommendationCategoriesResponse>>>
+    suspend fun getRecommendationCategoryHearits(): Result<NetworkResult<List<RecommendationCategoriesResponse>>>
 }

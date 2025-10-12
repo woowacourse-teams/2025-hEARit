@@ -78,7 +78,7 @@ class HearitRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getCategoryHearits(): Result<NetworkResult<List<RecommendationCategoriesResponse>>> =
+    override suspend fun getRecommendationCategoryHearits(): Result<NetworkResult<List<RecommendationCategoriesResponse>>> =
         handleApiCall(
             apiCall = { hearitService.getCategoryHearits() },
             transform = { response ->
