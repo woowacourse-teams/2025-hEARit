@@ -1,19 +1,16 @@
 package com.onair.hearit.core.log;
 
-import com.onair.hearit.core.log.dto.RequestInfo;
-import com.onair.hearit.core.log.dto.RequestLog;
-import com.onair.hearit.core.log.formatter.ConsoleLogFormatter;
+import com.onair.hearit.core.log.dto.LogFormat;
+import com.onair.hearit.core.log.dto.RequestLogProperty;
+import com.onair.hearit.core.log.logger.ConsoleLogger;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -23,8 +20,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class RequestLoggingFilter extends OncePerRequestFilter {
 
-    private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
-    private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
+    private final JsonLogger jsonLogger;
+    private final ConsoleLogger consoleLogger;
 
     private static final List<String> excludedPaths = List.of(
             "/admin/**",
@@ -50,18 +47,13 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } finally {
-            Map<String, String[]> parameterMap = request.getParameterMap();
-
-            RequestLog requestLog = RequestLog.ofFilter(
-                    LocalDateTime.now(),
-                    RequestInfo.fromMdc(),
-                    parameterMap
-            );
+            RequestLogProperty requestLogProperty = RequestLogProperty.forFilter(request);
+            LogFormat apiRequest = new LogFormat(requestLogProperty);
 
             boolean aopEntered = "true".equals(MDC.get("AOP_ENTERED"));
             if (!aopEntered) {
-                jsonLogger.info(requestLog);
-                consoleLogger.info(ConsoleLogFormatter.formatRequestLog(requestLog));
+                jsonLogger.info(apiRequest);
+                consoleLogger.info(requestLogProperty);
             }
         }
     }

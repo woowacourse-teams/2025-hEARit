@@ -3,7 +3,8 @@ package com.onair.hearit.core.log.exception;
 import com.onair.hearit.core.log.dto.ExceptionLog;
 import com.onair.hearit.core.log.dto.ExceptionLog.ErrorDetail;
 import com.onair.hearit.core.log.dto.RequestInfo;
-import com.onair.hearit.core.log.mask.MaskingSupport;
+import com.onair.hearit.core.log.logger.ConsoleLogger;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,8 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
@@ -22,11 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class FilterExceptionLogger extends OncePerRequestFilter {
 
-    private static final Logger errorLogger = LogManager.getLogger("errorLogger");
-    private static final Logger consoleLogger = LogManager.getLogger("consoleLogger");
-    private static final Logger jsonLogger = LogManager.getLogger("jsonLogger");
-
-    private final MaskingSupport maskingSupport;
+    private final ConsoleLogger consoleLogger;
+    private final JsonLogger jsonLogger;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -42,8 +38,7 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     errorDetail);
 
-            jsonLogger.error(maskingSupport.mask(exceptionLog));
-            errorLogger.error(exceptionLog, ex);
+            jsonLogger.error(exceptionLog);
             consoleLogger.error("[FILTER ERROR] {} {} from {} → {}",
                     requestInfo.getHttpMethod(),
                     requestInfo.getRequestUri(),
@@ -70,7 +65,7 @@ public class FilterExceptionLogger extends OncePerRequestFilter {
                 errorDetail
         );
 
-        jsonLogger.warn(maskingSupport.mask(exceptionLog));
+        jsonLogger.warn(exceptionLog);
         consoleLogger.warn("[FILTER WARN] {} {} from {} → status: {} / title: {} / detail: {}",
                 requestInfo.getHttpMethod(),
                 requestInfo.getRequestUri(),
