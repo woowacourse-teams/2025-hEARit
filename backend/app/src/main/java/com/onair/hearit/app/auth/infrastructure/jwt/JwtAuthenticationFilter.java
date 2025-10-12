@@ -3,7 +3,7 @@ package com.onair.hearit.app.auth.infrastructure.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.auth.domain.RequestUser;
 import com.onair.hearit.app.exception.ErrorCode;
-import com.onair.hearit.core.log.dto.logproperty.ExceptionLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.api.ExceptionLogProperty;
 import com.onair.hearit.core.log.logger.ConsoleLogger;
 import com.onair.hearit.core.log.logger.JsonLogger;
 import jakarta.servlet.FilterChain;

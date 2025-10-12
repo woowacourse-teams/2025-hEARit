@@ -1,6 +1,7 @@
-package com.onair.hearit.core.log.dto.logproperty;
+package com.onair.hearit.core.log.dto.logproperty.api;
 
 import com.onair.hearit.core.log.dto.LogEvent;
+import com.onair.hearit.core.log.dto.logproperty.LogProperty;
 import jakarta.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

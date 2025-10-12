@@ -1,6 +1,6 @@
 package com.onair.hearit.core.log.exception;
 
-import com.onair.hearit.core.log.dto.logproperty.ExceptionLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.api.ExceptionLogProperty;
 import com.onair.hearit.core.log.logger.ConsoleLogger;
 import com.onair.hearit.core.log.logger.JsonLogger;
 import jakarta.servlet.FilterChain;

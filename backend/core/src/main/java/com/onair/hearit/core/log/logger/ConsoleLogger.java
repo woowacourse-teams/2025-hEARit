@@ -1,8 +1,8 @@
 package com.onair.hearit.core.log.logger;
 
-import com.onair.hearit.core.log.dto.logproperty.ExceptionLogProperty;
-import com.onair.hearit.core.log.dto.logproperty.RequestLogProperty;
-import com.onair.hearit.core.log.dto.logproperty.ResponseLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.api.ExceptionLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.api.RequestLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.api.ResponseLogProperty;
 import com.onair.hearit.core.log.formatter.ConsoleLogFormatter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

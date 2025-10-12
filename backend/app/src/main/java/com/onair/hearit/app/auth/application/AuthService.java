@@ -14,7 +14,7 @@ import com.onair.hearit.app.exception.custom.UnauthorizedException;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.OAuthProvider;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
-import com.onair.hearit.core.log.dto.logproperty.AuthSignUpLogProperty;
+import com.onair.hearit.core.log.dto.logproperty.auth.AuthSignUpLogProperty;
 import com.onair.hearit.core.log.logger.JsonLogger;
 import java.time.LocalDateTime;
 import java.util.UUID;
