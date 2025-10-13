@@ -41,10 +41,10 @@ public class DataSourceConfig {
     @DependsOn({"masterDataSource", "replicaDataSource"})
     public DataSource routingDataSource(
             @Qualifier("masterDataSource") DataSource master,
-            @Qualifier("replicaDataSource") DataSource slave) {
+            @Qualifier("replicaDataSource") DataSource replica) {
         Map<Object, Object> dataSources = new HashMap<>();
         dataSources.put(DataSourceType.MASTER, master);
-        dataSources.put(DataSourceType.REPLICA, slave);
+        dataSources.put(DataSourceType.REPLICA, replica);
 
         RoutingDataSource routingDataSource = new RoutingDataSource();
         routingDataSource.setDefaultTargetDataSource(master);
