@@ -11,6 +11,7 @@
     <string name="all_open_license">오픈 라이선스</string>
     <string name="all_account_info">설정 및 계정 정보</string>
     <string name="all_login_button_text">로그인 하러가기</string>
+    <string name="all_feedback">피드백 및 문의하기</string>
     <string name="all_toast_categories_load_fail">카테고리 조회에 실패했습니다.</string>
     <string name="all_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
     <string name="all_toast_save_user_info_fail">유저 정보 저장에 실패했습니다.</string>
@@ -82,7 +83,6 @@
     <string name="explore_navigate_to_detail_hearit">팟캐스트 이어 듣기</string>
 
     <!-- SettingFragment-->
-    <string name="setting_feedback">피드백 및 문의하기</string>
     <string name="setting_notification">알림</string>
     <string name="setting_recommend_notification">히어릿 추천 알림</string>
     <string name="setting_app_version">앱 버전 v%s</string>

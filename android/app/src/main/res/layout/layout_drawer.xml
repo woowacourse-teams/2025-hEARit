@@ -101,5 +101,18 @@
             android:textColor="@color/hearit_red1"
             app:layout_constraintTop_toBottomOf="@id/tv_drawer_logout"
             app:visibleIfCondition="@{viewModel.isLoggedIn}" />
+
+        <TextView
+            android:id="@+id/tv_drawer_feedback"
+            style="@style/pretendard_sub_title"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginBottom="12dp"
+            android:gravity="center"
+            android:paddingHorizontal="24dp"
+            android:text="@string/all_feedback"
+            android:textColor="@color/hearit_gray4"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
