@@ -6,8 +6,10 @@ import com.onair.hearit.data.dto.BookmarkResponse
 
 interface BookmarkRemoteDataSource {
     suspend fun getBookmarks(
-        page: Int?,
-        size: Int?,
+        page: Int? = 0,
+        size: Int? = 10,
+        filter: String,
+        sort: String? = "createdAt,desc",
     ): Result<NetworkResult<BookmarkResponse>>
 
     suspend fun addBookmark(hearitId: Long): Result<NetworkResult<BookmarkIdResponse>>

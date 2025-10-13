@@ -12,6 +12,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnNextLayout
+import androidx.core.view.isNotEmpty
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +24,7 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentExploreBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.presentation.DetailResult
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
@@ -43,14 +46,21 @@ class ExploreFragment :
     private var _binding: FragmentExploreBinding? = null
     private val binding get() = _binding!!
 
+    private val isViewValid: Boolean
+        get() = _binding != null
+
     private val viewModel: ExploreViewModel by activityViewModels { ExploreViewModelFactory() }
 
     private val playerManager by lazy {
         ExplorePlayerManager(
             context = requireContext().applicationContext,
             lifecycleScope = viewLifecycleOwner.lifecycleScope,
-            onPlaybackEnded = { scrollToNextItem() },
-            onPositionUpdated = { position -> highlightScript(position) },
+            onPlaybackEnded = {
+                if (isViewValid) scrollToNextItem()
+            },
+            onPositionUpdated = { position ->
+                if (isViewValid) highlightScript(position)
+            },
         )
     }
     private val player get() = playerManager.player
@@ -101,38 +111,47 @@ class ExploreFragment :
 
         (activity as? PlayerControllerView)?.pause()
 
-        // 복귀 예약이 있다면 재개
         viewModel.resumeIfScheduled()
     }
 
     override fun onResume() {
         super.onResume()
-        player.playWhenReady = true
+        if (lastPlayingIndex != RecyclerView.NO_POSITION) {
+            player.playWhenReady = true
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        player.playWhenReady = false
 
-        // 현재 카드/재생 위치 저장 → 다음 attach 때 재개
-        val index = currentIndex()
-        viewModel.scheduleResume(
-            resumeIndex = index,
-            playerPositionMs = playerManager.getCurrentPosition(),
-        )
+        if (lastPlayingIndex != RecyclerView.NO_POSITION) {
+            player.playWhenReady = false
+
+            if (isViewValid) {
+                val index = currentIndex()
+                viewModel.scheduleResume(
+                    resumeIndex = index,
+                    playerPositionMs = playerManager.getCurrentPosition(),
+                )
+            }
+        }
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         animator?.removeAllListeners()
         animator?.cancel()
         animator?.setTarget(null)
+        animator = null
+
         binding.rvExplore.clearOnScrollListeners()
         snapHelper.attachToRecyclerView(null)
         binding.rvExplore.adapter = null
+
         playerManager.stop()
-        _binding = null
         lastPlayingIndex = RecyclerView.NO_POSITION
+
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onDestroy() {
@@ -158,6 +177,8 @@ class ExploreFragment :
                     recyclerView: RecyclerView,
                     newState: Int,
                 ) {
+                    if (!isViewValid) return
+
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         val index = currentIndex()
                         if (index != RecyclerView.NO_POSITION && index != lastPlayingIndex) {
@@ -175,23 +196,15 @@ class ExploreFragment :
 
     private fun observeViewModel() {
         viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
-            adapter.submitList(shortsHearits) {
-                val bindingSafe = _binding ?: return@submitList
-                if (shortsHearits.isNotEmpty()) {
-                    viewModel.loadAnimation()
-
-                    // 초기/복귀 시: 스냅 정착 후 재생 + 프리패치
-                    bindingSafe.rvExplore.post {
-                        val index = currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
-                        switchTo(index)
-                        viewModel.maybeLoadMore(index, adapter.itemCount)
-                    }
-                }
-            }
+            handleShortsHearitsUpdate(shortsHearits)
         }
 
         viewModel.shouldPlayAnimation.observe(viewLifecycleOwner) { isEnabled ->
-            if (isEnabled) startSwipeAnimation()
+            if (!isViewValid) return@observe
+
+            if (isEnabled && binding.rvExplore.isNotEmpty()) {
+                startSwipeAnimation()
+            }
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
@@ -203,13 +216,37 @@ class ExploreFragment :
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (!isViewValid) return@observe
             binding.frExploreSkeleton.apply {
                 if (isLoading) startShimmer() else stopShimmer()
             }
         }
     }
 
+    // 피드 목록이 갱신 되었을 때
+    private fun handleShortsHearitsUpdate(shortsHearits: List<ExploreHearit>) {
+        if (!isViewValid) return
+        adapter.submitList(shortsHearits) {
+            if (!isViewValid || shortsHearits.isEmpty()) return@submitList
+
+            binding.rvExplore.doOnNextLayout {
+                if (!isViewValid) return@doOnNextLayout
+                startPlaybackAndAnimation()
+            }
+        }
+    }
+
+    // 현재 인덱스의 아이템을 재생하고, 추가적으로 애니메이션 트리거
+    private fun startPlaybackAndAnimation() {
+        val index = currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
+        switchTo(index)
+        viewModel.maybeLoadMore(index, adapter.itemCount)
+        viewModel.loadAnimation()
+    }
+
     private fun currentIndex(): Int {
+        if (!isViewValid) return RecyclerView.NO_POSITION
+
         val layoutManager =
             binding.rvExplore.layoutManager as? LinearLayoutManager
                 ?: return RecyclerView.NO_POSITION
@@ -218,11 +255,12 @@ class ExploreFragment :
     }
 
     private fun highlightScript(positionMs: Long) {
-        val bindingSafe = _binding ?: return
+        if (!isViewValid) return
+
         val index = currentIndex()
         if (index == RecyclerView.NO_POSITION) return
         val holder =
-            bindingSafe.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
+            binding.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
         holder?.highlightScriptLine(positionMs)
     }
 
@@ -230,8 +268,16 @@ class ExploreFragment :
         index: Int,
         startPosition: Long = 0L,
     ) {
-        val item = adapter.currentList.getOrNull(index) ?: return
-        playerManager.playAudio(item.audioUrl, startPosition)
+        val list = adapter.currentList
+        if (index !in list.indices) return
+
+        val item = list[index]
+        val url =
+            item.audioUrl?.takeIf { it.isNotBlank() } ?: run {
+                return
+            }
+
+        playerManager.playAudio(url, startPosition)
     }
 
     private fun switchTo(newPosition: Int) {
@@ -239,9 +285,12 @@ class ExploreFragment :
         val startPos = viewModel.consumeResumePositionMs()
         playAudioAtIndex(newPosition, startPos)
         lastPlayingIndex = newPosition
+        player.playWhenReady = true
     }
 
     private fun scrollToNextItem() {
+        if (!isViewValid) return
+
         val currentPosition = currentIndex()
         val nextPosition = currentPosition + 1
         if (nextPosition < adapter.itemCount) {
@@ -250,22 +299,32 @@ class ExploreFragment :
     }
 
     private fun startSwipeAnimation() {
+        if (!isViewValid) return
+
         binding.lavExploreSwipeUp.visibility = View.VISIBLE
-        animator =
-            ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
-                duration = 1300
-                repeatCount = 1
-                repeatMode = ObjectAnimator.RESTART
-                addListener(
-                    object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator) {
-                            _binding?.lavExploreSwipeUp?.visibility = View.INVISIBLE
-                        }
-                    },
-                )
-                start()
-            }
+
+        animator?.removeAllListeners()
+        animator?.cancel()
+        animator?.setTarget(null)
+
+        animator = createSwipeAnimator()
     }
+
+    private fun createSwipeAnimator() =
+        ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
+            duration = 1300
+            repeatCount = 1
+            repeatMode = ObjectAnimator.RESTART
+            addListener(
+                object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        if (!isViewValid) return
+                        _binding?.lavExploreSwipeUp?.visibility = View.INVISIBLE
+                    }
+                },
+            )
+            start()
+        }
 
     private fun navigateToDetail(
         hearitId: Long,

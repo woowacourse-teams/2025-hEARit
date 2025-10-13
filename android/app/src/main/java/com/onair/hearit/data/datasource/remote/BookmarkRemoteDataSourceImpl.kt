@@ -15,9 +15,11 @@ class BookmarkRemoteDataSourceImpl(
     override suspend fun getBookmarks(
         page: Int?,
         size: Int?,
+        filter: String,
+        sort: String?,
     ): Result<NetworkResult<BookmarkResponse>> =
         handleApiCall(
-            apiCall = { bookmarkService.getBookmarks(page, size) },
+            apiCall = { bookmarkService.getBookmarks(page, size, filter) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },

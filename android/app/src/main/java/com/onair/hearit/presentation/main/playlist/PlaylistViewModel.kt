@@ -47,7 +47,7 @@ class PlaylistViewModel(
         _isLoading.value = true
         viewModelScope.launch {
             bookmarkRepository
-                .getBookmarks(page = page, size = null)
+                .getBookmarks(page = null, size = null, filter = "all")
                 .onSuccess { pageResult ->
                     val currentList = _bookmarks.value.orEmpty()
                     _bookmarks.value = currentList + pageResult.items
