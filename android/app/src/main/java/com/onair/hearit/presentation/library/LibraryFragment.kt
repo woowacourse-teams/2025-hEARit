@@ -132,6 +132,11 @@ class LibraryFragment :
                 putExtra(PREVIOUS_SCREEN_KEY, PlayerDetailActivity.LIBRARY_SCREEN_ID)
             }
         (activity as? MainActivity)?.launchDetailActivity(intent)
+
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.LIBRARY_TO_DETAIL,
+            mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+        )
     }
 
     override fun onDestroyView() {
