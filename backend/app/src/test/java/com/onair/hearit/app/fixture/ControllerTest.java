@@ -3,6 +3,8 @@ package com.onair.hearit.app.fixture;
 import com.onair.hearit.app.auth.config.ApiSecurityConfig;
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.core.log.exception.FilterExceptionLogger;
+import com.onair.hearit.core.log.logger.ConsoleLogger;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,12 @@ public abstract class ControllerTest {
 
     @MockitoBean
     protected FilterExceptionLogger filterExceptionLogger;
+
+    @MockitoBean
+    protected JsonLogger jsonLogger;
+
+    @MockitoBean
+    protected ConsoleLogger consoleLogger;
 
     @BeforeEach
     public void setUpMockMvc() {

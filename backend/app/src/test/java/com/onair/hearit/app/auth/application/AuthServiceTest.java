@@ -18,6 +18,7 @@ import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.jpa.RefreshTokenRepository;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Disabled;
@@ -37,6 +38,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Import({AuthService.class, BCryptPasswordEncoder.class, JwtTokenProvider.class,
         DbHelper.class, TestJpaAuditingConfig.class})
 class AuthServiceTest {
+
+    @MockitoBean
+    JsonLogger jsonLogger;
 
     @MockitoBean
     OAuthServiceRegistry oAuthServiceRegistry;
