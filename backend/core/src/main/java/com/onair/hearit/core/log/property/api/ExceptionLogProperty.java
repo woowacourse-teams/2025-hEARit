@@ -1,7 +1,7 @@
-package com.onair.hearit.core.log.dto.logproperty.api;
+package com.onair.hearit.core.log.property.api;
 
-import com.onair.hearit.core.log.dto.LogEvent;
-import com.onair.hearit.core.log.dto.logproperty.LogProperty;
+import com.onair.hearit.core.log.LogEvent;
+import com.onair.hearit.core.log.property.LogProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

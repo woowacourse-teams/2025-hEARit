@@ -1,8 +1,8 @@
 package com.onair.hearit.core.log;
 
-import com.onair.hearit.core.log.dto.logproperty.api.RequestLogProperty;
 import com.onair.hearit.core.log.logger.ConsoleLogger;
 import com.onair.hearit.core.log.logger.JsonLogger;
+import com.onair.hearit.core.log.property.api.RequestLogProperty;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

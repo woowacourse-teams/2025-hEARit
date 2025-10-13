@@ -1,7 +1,7 @@
 package com.onair.hearit.app.auth.infrastructure.jwt;
 
-import com.onair.hearit.core.log.dto.logproperty.auth.TokenRefreshLogProperty;
 import com.onair.hearit.core.log.logger.JsonLogger;
+import com.onair.hearit.core.log.property.auth.TokenRefreshLogProperty;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;

@@ -1,9 +1,9 @@
-package com.onair.hearit.core.log.dto.logproperty.auth;
+package com.onair.hearit.core.log.property.auth;
 
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.OAuthProvider;
-import com.onair.hearit.core.log.dto.LogEvent;
-import com.onair.hearit.core.log.dto.logproperty.LogProperty;
+import com.onair.hearit.core.log.LogEvent;
+import com.onair.hearit.core.log.property.LogProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

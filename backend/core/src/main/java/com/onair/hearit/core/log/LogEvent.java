@@ -1,4 +1,4 @@
-package com.onair.hearit.core.log.dto;
+package com.onair.hearit.core.log;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

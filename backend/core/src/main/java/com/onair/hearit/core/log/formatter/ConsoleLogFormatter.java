@@ -1,10 +1,10 @@
 package com.onair.hearit.core.log.formatter;
 
-import com.onair.hearit.core.log.dto.logproperty.api.ExceptionLogProperty;
-import com.onair.hearit.core.log.dto.logproperty.api.ExceptionLogProperty.ErrorDetail;
-import com.onair.hearit.core.log.dto.logproperty.api.ExceptionLogProperty.Status;
-import com.onair.hearit.core.log.dto.logproperty.api.RequestLogProperty;
-import com.onair.hearit.core.log.dto.logproperty.api.ResponseLogProperty;
+import com.onair.hearit.core.log.property.api.ExceptionLogProperty;
+import com.onair.hearit.core.log.property.api.ExceptionLogProperty.ErrorDetail;
+import com.onair.hearit.core.log.property.api.ExceptionLogProperty.Status;
+import com.onair.hearit.core.log.property.api.RequestLogProperty;
+import com.onair.hearit.core.log.property.api.ResponseLogProperty;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

@@ -14,7 +14,7 @@
         <!-- %n : 줄바꿈 문자 -->
         <Property name="consoleLogPattern">
             <!-- @formatter:off -->
-            %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %highlight{%-5level} %style{%pid}{magenta} --- [%15.15t] %style{%-40.40c{1.}}{cyan} : %msg | ip=%X{ip} userType=%X{userType} memberId=%X{memberId} guestId=%X{guestId}%n
+            %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %highlight{%-5level} %style{%pid}{magenta} --- [%15.15t] %style{%-40.40c{1.}}{cyan} : %msg%n
             <!-- @formatter:on -->
         </Property>
 

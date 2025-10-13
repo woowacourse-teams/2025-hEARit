@@ -1,9 +1,9 @@
 package com.onair.hearit.core.log;
 
 import com.onair.hearit.core.log.dbtrace.QueryExecutionContext;
-import com.onair.hearit.core.log.dto.logproperty.db.DbErrorLogProperty;
-import com.onair.hearit.core.log.dto.logproperty.db.SlowQueryLogProperty;
 import com.onair.hearit.core.log.logger.JsonLogger;
+import com.onair.hearit.core.log.property.db.DbErrorLogProperty;
+import com.onair.hearit.core.log.property.db.SlowQueryLogProperty;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DbLoggingAspect {
 
-    private static final long SLOW_QUERY_THRESHOLD_MS = 500;
+    private static final long SLOW_QUERY_THRESHOLD_MS = 0;
 
     private final JsonLogger jsonLogger;
 

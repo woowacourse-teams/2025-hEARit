@@ -1,4 +1,4 @@
-package com.onair.hearit.core.log.dto.logproperty;
+package com.onair.hearit.core.log.property;
 
 public interface LogProperty {
 
