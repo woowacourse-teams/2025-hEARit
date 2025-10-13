@@ -1,9 +1,7 @@
 package com.onair.hearit.data.mapper
 
 import com.onair.hearit.data.database.RecentHearitEntity
-import com.onair.hearit.data.dto.CategoryHearitResponse
 import com.onair.hearit.data.dto.ExploreHearitResponse
-import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.KeywordResponse
@@ -17,7 +15,6 @@ import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.domain.model.CategoryHearit
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
-import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.PageResult

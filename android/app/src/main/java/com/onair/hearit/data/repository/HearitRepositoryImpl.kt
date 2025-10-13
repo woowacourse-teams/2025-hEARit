@@ -7,10 +7,8 @@ import com.onair.hearit.data.mapper.toSearchedCategoryHearit
 import com.onair.hearit.data.mapper.toSearchedHearit
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
-import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.PageResult
-import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedCategoryHearit
