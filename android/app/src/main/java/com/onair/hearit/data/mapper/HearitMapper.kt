@@ -1,11 +1,13 @@
 package com.onair.hearit.data.mapper
 
 import com.onair.hearit.data.database.RecentHearitEntity
+import com.onair.hearit.data.dto.CategoryHearitResponse
+import com.onair.hearit.data.dto.ExploreHearitResponse
+import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.PlayingHistoryResponse
-import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.RecommendationCategoryHearitResponse
@@ -14,18 +16,19 @@ import com.onair.hearit.data.dto.SourceResponse
 import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.domain.model.CategoryHearit
 import com.onair.hearit.domain.model.CursorResult
+import com.onair.hearit.domain.model.ExploreHearit
+import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.PlayingHistoryHearit
-import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.domain.model.SingleHearit
 import com.onair.hearit.domain.model.Source
 import com.onair.hearit.domain.model.UserInfo
 
@@ -66,8 +69,8 @@ private fun HearitsResponse.Content.toRecentUploadHearit(): RecentUploadHearit =
         category = this.category.toDomain(),
     )
 
-private fun RandomHearitResponse.Content.toDomain(): RandomHearit =
-    RandomHearit(
+private fun ExploreHearitResponse.Content.toDomain(): ExploreHearit =
+    ExploreHearit(
         id = this.id,
         title = this.title,
         categoryColorCode = this.categoryColorCode,
@@ -78,6 +81,8 @@ private fun RandomHearitResponse.Content.toDomain(): RandomHearit =
                 it.toDomain()
             },
         cursorId = this.cursorId,
+        audioUrl = null,
+        script = null,
     )
 
 fun RecentHearitEntity.toDomain(): RecentHearit =
@@ -95,14 +100,14 @@ fun RecommendHearitResponse.toDomain(): RecommendHearit =
         categoryColor = this.categoryColor,
     )
 
-fun RandomHearitResponse.toDomain(): CursorResult<RandomHearit> =
+fun ExploreHearitResponse.toDomain(): CursorResult<ExploreHearit> =
     CursorResult(
         items = content.map { it.toDomain() },
         isEmpty = this.isEmpty,
     )
 
-fun HearitResponse.toDomain(): SingleHearit =
-    SingleHearit(
+fun HearitResponse.toDomain(): Hearit =
+    Hearit(
         id = this.id,
         title = this.title,
         summary = this.summary,
@@ -114,6 +119,8 @@ fun HearitResponse.toDomain(): SingleHearit =
         bookmarkId = this.bookmarkId,
         category = this.category.toDomain(),
         keywords = this.keywords.map { it.toDomain() },
+        audioUrl = null,
+        script = null,
     )
 
 fun UserInfoResponse.toDomain(): UserInfo =

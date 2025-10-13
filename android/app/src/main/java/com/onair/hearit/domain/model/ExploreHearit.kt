@@ -1,13 +1,13 @@
 package com.onair.hearit.domain.model
 
-data class ShortsHearit(
+data class ExploreHearit(
     val id: Long,
     val title: String,
-    val audioUrl: String,
-    val script: List<ScriptLine>,
+    val categoryColorCode: String,
     val isBookmarked: Boolean,
     val bookmarkId: Long?,
     val keywords: List<Keyword>,
-    val categoryColorCode: String,
     val cursorId: Long,
+    val audioUrl: String?,
+    val script: List<ScriptLine>?,
 )

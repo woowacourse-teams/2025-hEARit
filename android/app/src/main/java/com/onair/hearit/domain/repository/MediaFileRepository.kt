@@ -4,7 +4,6 @@ import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.OriginalAudioUrl
 import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.domain.model.ShortAudioUrl
-import com.onair.hearit.domain.model.SingleHearit
 
 interface MediaFileRepository {
     suspend fun getShortAudioUrl(hearitId: Long): Result<ShortAudioUrl>
@@ -13,5 +12,5 @@ interface MediaFileRepository {
 
     suspend fun getOriginalAudioUrl(hearitId: Long): Result<OriginalAudioUrl>
 
-    suspend fun getOriginalHearitItem(item: SingleHearit): Result<Hearit>
+    suspend fun getOriginalHearitItem(item: Hearit): Result<Hearit>
 }

@@ -2,7 +2,7 @@ package com.onair.hearit.data.api
 
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.HearitsResponse
-import com.onair.hearit.data.dto.RandomHearitResponse
+import com.onair.hearit.data.dto.ExploreHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.SearchHearitsResponse
@@ -30,7 +30,7 @@ interface HearitService {
     suspend fun getRandomHearits(
         @Query("cursorId") cursorId: Long?,
         @Query("size") size: Int?,
-    ): Response<RandomHearitResponse>
+    ): Response<ExploreHearitResponse>
 
     @GET("api/v1/hearits/search")
     suspend fun getSearchHearits(

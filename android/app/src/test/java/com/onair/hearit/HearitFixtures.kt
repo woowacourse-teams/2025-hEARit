@@ -1,9 +1,10 @@
 package com.onair.hearit
 
 import com.onair.hearit.data.dto.CategoryResponse
+import com.onair.hearit.data.dto.ExploreHearitResponse
+import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.KeywordResponse
-import com.onair.hearit.data.dto.RandomHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.RecommendationCategoryHearitResponse
@@ -42,10 +43,10 @@ object HearitFixtures {
             categoryColor = "purple",
         )
 
-    fun createFakeRandomHearit(): RandomHearitResponse {
+    fun createFakeRandomHearit(): ExploreHearitResponse {
         val fakeContents =
             listOf(
-                RandomHearitResponse.Content(
+                ExploreHearitResponse.Content(
                     id = 1L,
                     title = "첫 번째 히어릿",
                     categoryColorCode = "#FF5733",
@@ -58,7 +59,7 @@ object HearitFixtures {
                         ),
                     cursorId = 0L,
                 ),
-                RandomHearitResponse.Content(
+                ExploreHearitResponse.Content(
                     id = 2L,
                     title = "두 번째 히어릿",
                     categoryColorCode = "#33C1FF",
@@ -74,7 +75,7 @@ object HearitFixtures {
                 ),
             )
 
-        return RandomHearitResponse(
+        return ExploreHearitResponse(
             content = fakeContents,
             isEmpty = false,
         )

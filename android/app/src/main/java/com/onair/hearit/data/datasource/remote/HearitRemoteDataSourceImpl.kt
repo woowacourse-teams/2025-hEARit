@@ -5,6 +5,8 @@ import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NUL
 import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
+import com.onair.hearit.data.dto.ExploreHearitResponse
+import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
@@ -37,7 +39,7 @@ class HearitRemoteDataSourceImpl(
     override suspend fun getRandomHearits(
         cursorId: Long?,
         size: Int?,
-    ): Result<NetworkResult<RandomHearitResponse>> =
+    ): Result<NetworkResult<ExploreHearitResponse>> =
         handleApiCall(
             apiCall = { hearitService.getRandomHearits(cursorId, size) },
             transform = { response ->

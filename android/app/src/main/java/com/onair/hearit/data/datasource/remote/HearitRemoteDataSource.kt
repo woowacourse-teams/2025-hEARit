@@ -1,6 +1,8 @@
 package com.onair.hearit.data.datasource.remote
 
 import com.onair.hearit.data.datasource.NetworkResult
+import com.onair.hearit.data.dto.ExploreHearitResponse
+import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.RandomHearitResponse
@@ -16,7 +18,7 @@ interface HearitRemoteDataSource {
     suspend fun getRandomHearits(
         cursorId: Long?,
         size: Int?,
-    ): Result<NetworkResult<RandomHearitResponse>>
+    ): Result<NetworkResult<ExploreHearitResponse>>
 
     suspend fun getSearchHearits(
         searchTerm: String,
