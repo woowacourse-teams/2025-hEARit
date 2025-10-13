@@ -69,7 +69,6 @@ class HearitExploreServiceTest {
                 List.of(guestExploreScoreProcessor, memberExploreScoreProcessor));
     }
 
-
     @DisplayName("회원이 처음 탐색 요청 시(cursorId=0), 최신, 랜덤, 북마크 점수 순으로 정렬하여 반환한다")
     @Test
     void getExploredHearitsForMember_firstRequest() {

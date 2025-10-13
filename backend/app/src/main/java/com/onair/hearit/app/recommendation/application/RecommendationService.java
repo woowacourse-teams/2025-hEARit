@@ -8,6 +8,7 @@ import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ public class RecommendationService {
     private final CategoryRecommender categoryRecommender;
     private final HearitRepository hearitRepository;
 
+    @Transactional(readOnly = true)
     public List<RecommendationByCategoryResponse> getCategoryRecommendations(UserInfo userInfo,
                                                                              int categorySize,
                                                                              int hearitSize) {
