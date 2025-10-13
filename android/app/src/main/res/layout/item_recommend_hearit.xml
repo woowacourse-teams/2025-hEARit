@@ -12,13 +12,18 @@
         <variable
             name="recommendClickListener"
             type="com.onair.hearit.presentation.HearitClickListener" />
+
+        <variable
+            name="source"
+            type="com.onair.hearit.domain.model.HearitSource" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:background="@drawable/bg_gray1_radius_8dp"
-        android:onClick="@{() -> recommendClickListener.onClick(item.id)}"
+        android:onClick="@{() -> recommendClickListener.onClick(item.id, source)}"
         app:backgroundColor="@{item.categoryColor}">
 
         <TextView

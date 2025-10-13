@@ -19,8 +19,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys.ITEM_ID
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.domain.model.HearitSource
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -108,10 +110,12 @@ class HomeFragment :
         }
 
         binding.tvHomePlayingBookmarkTitle.setOnClickListener {
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_library)
         }
 
         binding.ibHomePlayingBookmark.setOnClickListener {
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_library)
         }
 
@@ -121,6 +125,7 @@ class HomeFragment :
         }
 
         binding.tvHomeWootaeco.setOnClickListener {
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_WOOTAECO_SELECTED)
             navigateToSearch(id = 13, name = "우아한테크코스", colorCode = "#12C6B0")
         }
     }
@@ -292,7 +297,35 @@ class HomeFragment :
         (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
-    override fun onClick(hearitId: Long) {
+    override fun onClick(
+        hearitId: Long,
+        source: HearitSource,
+    ) {
+        when (source) {
+            HearitSource.PLAYING_HISTORY ->
+                AnalyticsProvider.get().logEvent(
+                    AnalyticsEventNames.HOME_PLAYING_HISTORY_SELECTED,
+                    mapOf(ITEM_ID to hearitId.toString()),
+                )
+
+            HearitSource.RECOMMEND ->
+                AnalyticsProvider.get().logEvent(
+                    AnalyticsEventNames.HOME_RECOMMEND_SELECTED,
+                    mapOf(ITEM_ID to hearitId.toString()),
+                )
+
+            HearitSource.RECENT_UPLOAD ->
+                AnalyticsProvider.get().logEvent(
+                    AnalyticsEventNames.HOME_RECENT_UPLOAD_SELECTED,
+                    mapOf(ITEM_ID to hearitId.toString()),
+                )
+
+            HearitSource.PLAYING_BOOKMARK ->
+                AnalyticsProvider.get().logEvent(
+                    AnalyticsEventNames.HOME_PLAYING_BOOKMARK_SELECTED,
+                    mapOf(ITEM_ID to hearitId.toString()),
+                )
+        }
         navigateToPlayerDetail(hearitId)
     }
 

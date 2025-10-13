@@ -12,6 +12,11 @@
         <variable
             name="clickListener"
             type="com.onair.hearit.presentation.HearitClickListener" />
+
+        <variable
+            name="source"
+            type="com.onair.hearit.domain.model.HearitSource" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:background="@drawable/bg_gray1_radius_8dp"
-        android:onClick="@{() -> clickListener.onClick(searchedHearit.id)}"
+        android:onClick="@{() -> clickListener.onClick(searchedHearit.id, source)}"
         android:paddingVertical="16dp">
 
         <TextView
