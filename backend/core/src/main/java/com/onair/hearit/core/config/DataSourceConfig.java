@@ -17,11 +17,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 
 @Configuration
-@Profile("!integration-test")
+//@Profile("!integration-test")
 public class DataSourceConfig {
 
     public static final String MASTER_PROPERTY = "spring.datasource.master";
-    public static final String SLAVE_PROPERTY = "spring.datasource.slave";
+    public static final String REPLICA_PROPERTY = "spring.datasource.replica";
 
     @Bean
     @ConfigurationProperties(MASTER_PROPERTY)
@@ -32,21 +32,21 @@ public class DataSourceConfig {
     }
 
     @Bean
-    @ConfigurationProperties(SLAVE_PROPERTY)
-    public DataSource slaveDataSource() {
+    @ConfigurationProperties(REPLICA_PROPERTY)
+    public DataSource replicaDataSource() {
         return DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .build();
     }
 
     @Bean
-    @DependsOn({"masterDataSource", "slaveDataSource"})
+    @DependsOn({"masterDataSource", "replicaDataSource"})
     public DataSource routingDataSource(
             @Qualifier("masterDataSource") DataSource master,
-            @Qualifier("slaveDataSource") DataSource slave) {
+            @Qualifier("replicaDataSource") DataSource slave) {
         Map<Object, Object> dataSources = new HashMap<>();
         dataSources.put(DataSourceType.MASTER, master);
-        dataSources.put(DataSourceType.SLAVE, slave);
+        dataSources.put(DataSourceType.REPLICA, slave);
 
         RoutingDataSource routingDataSource = new RoutingDataSource();
         routingDataSource.setDefaultTargetDataSource(master);
