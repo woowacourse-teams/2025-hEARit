@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.onair.hearit.app.explore.application.scorefactor.ScoreFactor;
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.UserType;
@@ -30,7 +31,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, TestJpaAuditingConfig.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ExploreScoreCalculatorTest {
