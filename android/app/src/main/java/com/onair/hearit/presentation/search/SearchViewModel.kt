@@ -115,6 +115,17 @@ class SearchViewModel(
         fetchResultData(isInitial = false)
     }
 
+    fun fetchResultData(isInitial: Boolean) {
+        if (isLoading) return
+        val input = currentInput ?: return
+        isLoading = true
+
+        when (input) {
+            is SearchInput.Category -> fetchCategoryResultData(input.id, isInitial)
+            is SearchInput.Keyword -> fetchKeywordResultData(input.term, isInitial)
+        }
+    }
+
     fun fetchCategoryResultData(
         categoryId: Long,
         isInitial: Boolean,
@@ -177,17 +188,6 @@ class SearchViewModel(
             } finally {
                 isLoading = false
             }
-        }
-    }
-
-    fun fetchResultData(isInitial: Boolean) {
-        if (isLoading) return
-        val input = currentInput ?: return
-        isLoading = true
-
-        when (input) {
-            is SearchInput.Category -> fetchCategoryResultData(input.id, isInitial)
-            is SearchInput.Keyword -> fetchKeywordResultData(input.term, isInitial)
         }
     }
 

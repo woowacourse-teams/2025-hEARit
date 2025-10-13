@@ -7,7 +7,7 @@
 
         <variable
             name="playingBookmarkHearit"
-            type="com.onair.hearit.domain.model.PlayingBookmarkHearit" />
+            type="com.onair.hearit.domain.model.Bookmark" />
 
         <variable
             name="clickListener"

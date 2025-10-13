@@ -17,7 +17,7 @@ class GetBookmarksUseCase(
         size: Int? = null,
     ): Result<PageResult<Bookmark>> =
         runCatching {
-            val bookmarksPage = bookmarkRepository.getBookmarks(page, size).getOrThrow()
+            val bookmarksPage = bookmarkRepository.getBookmarks(page, size, "all").getOrThrow()
 
             val updatedItems =
                 coroutineScope {

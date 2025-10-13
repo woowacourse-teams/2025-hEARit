@@ -27,7 +27,7 @@ class PlaylistViewModel(
     private fun fetchBookmarks() {
         viewModelScope.launch {
             bookmarkRepository
-                .getBookmarks(page = null, size = null)
+                .getBookmarks(page = null, size = null, filter = "all")
                 .onSuccess { pageResult ->
                     _bookmarks.value = pageResult.items
                 }.onFailure { throwable ->

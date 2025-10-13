@@ -3,12 +3,12 @@ package com.onair.hearit.presentation.home
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.model.PlayingBookmarkHearit
+import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.presentation.HearitClickListener
 
 class PlayingBookmarkHearitAdapter(
     private val hearitClickListener: HearitClickListener,
-) : ListAdapter<PlayingBookmarkHearit, PlayingBookmarkHearitViewHolder>(DiffCallback) {
+) : ListAdapter<Bookmark, PlayingBookmarkHearitViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
@@ -23,15 +23,15 @@ class PlayingBookmarkHearitAdapter(
 
     companion object {
         private val DiffCallback =
-            object : DiffUtil.ItemCallback<PlayingBookmarkHearit>() {
+            object : DiffUtil.ItemCallback<Bookmark>() {
                 override fun areItemsTheSame(
-                    oldItem: PlayingBookmarkHearit,
-                    newItem: PlayingBookmarkHearit,
+                    oldItem: Bookmark,
+                    newItem: Bookmark,
                 ): Boolean = oldItem.bookmarkId == newItem.bookmarkId
 
                 override fun areContentsTheSame(
-                    oldItem: PlayingBookmarkHearit,
-                    newItem: PlayingBookmarkHearit,
+                    oldItem: Bookmark,
+                    newItem: Bookmark,
                 ): Boolean = oldItem == newItem
             }
     }

@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemPlayingBookmarkHearitBinding
-import com.onair.hearit.domain.model.PlayingBookmarkHearit
+import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.presentation.HearitClickListener
 
 class PlayingBookmarkHearitViewHolder private constructor(
@@ -15,7 +15,7 @@ class PlayingBookmarkHearitViewHolder private constructor(
         binding.clickListener = hearitClickListener
     }
 
-    fun bind(item: PlayingBookmarkHearit) {
+    fun bind(item: Bookmark) {
         binding.playingBookmarkHearit = item
     }
 

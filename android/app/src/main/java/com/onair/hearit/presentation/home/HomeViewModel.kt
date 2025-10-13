@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.DomainException.UserNotRegistered
-import com.onair.hearit.domain.model.PlayingBookmarkHearit
+import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.PlayingHistoryHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
@@ -45,9 +45,9 @@ class HomeViewModel(
     private val _recentUploadHearits: MutableLiveData<List<RecentUploadHearit>> = MutableLiveData()
     val recentUploadHearits: LiveData<List<RecentUploadHearit>> = _recentUploadHearits
 
-    private val _playingBookmarkHearits: MutableLiveData<List<PlayingBookmarkHearit>> =
+    private val _playingBookmarkHearits: MutableLiveData<List<Bookmark>> =
         MutableLiveData()
-    val playingBookmarkHearits: LiveData<List<PlayingBookmarkHearit>> = _playingBookmarkHearits
+    val playingBookmarkHearits: LiveData<List<Bookmark>> = _playingBookmarkHearits
 
     private val _recommendationCategories: MutableLiveData<List<RecommendationCategories>> =
         MutableLiveData()
@@ -72,7 +72,14 @@ class HomeViewModel(
             val recommendDeferred = async { hearitRepository.getRecommendHearits() }
             val playingHistoryDeferred = async { playingHistoryRepository.getPlayingHistories() }
             val recentUploadDeferred = async { hearitRepository.getRecentUploadHearits(size = 10) }
-            val playingBookmarkDeferred = async { bookmarkRepository.getPlayingBookmarkHearits() }
+            val playingBookmarkDeferred =
+                async {
+                    bookmarkRepository.getBookmarks(
+                        page = 0,
+                        size = 10,
+                        filter = "unfinished",
+                    )
+                }
             val groupedDeferred = async { recommendationRepository.getRecommendationCategories() }
 
             val recommendResult = recommendDeferred.await()
