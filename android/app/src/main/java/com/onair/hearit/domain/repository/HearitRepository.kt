@@ -1,22 +1,22 @@
 package com.onair.hearit.domain.repository
 
 import com.onair.hearit.domain.model.CursorResult
+import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.PageResult
-import com.onair.hearit.domain.model.RandomHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.domain.model.SingleHearit
 
 interface HearitRepository {
-    suspend fun getHearit(hearitId: Long): Result<SingleHearit>
+    suspend fun getHearit(hearitId: Long): Result<Hearit>
 
     suspend fun getRecommendHearits(): Result<List<RecommendHearit>>
 
     suspend fun getRandomHearits(
         cursorId: Long? = null,
         size: Int? = null,
-    ): Result<CursorResult<RandomHearit>>
+    ): Result<CursorResult<ExploreHearit>>
 
     suspend fun getSearchHearits(
         searchTerm: String,
