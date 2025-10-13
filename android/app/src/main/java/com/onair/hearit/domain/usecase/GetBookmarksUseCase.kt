@@ -15,9 +15,10 @@ class GetBookmarksUseCase(
     suspend operator fun invoke(
         page: Int? = null,
         size: Int? = null,
+        filter: String = "all",
     ): Result<PageResult<Bookmark>> =
         runCatching {
-            val bookmarksPage = bookmarkRepository.getBookmarks(page, size, "all").getOrThrow()
+            val bookmarksPage = bookmarkRepository.getBookmarks(page, size, filter).getOrThrow()
 
             val updatedItems =
                 coroutineScope {

@@ -20,6 +20,7 @@ fun CategoryResponse.toDomain(): PageResult<Category> =
                 page = page,
                 size = size,
                 totalPages = totalPages,
+                totalElements = totalElements,
                 isFirst = isFirst,
                 isLast = isLast,
             ),

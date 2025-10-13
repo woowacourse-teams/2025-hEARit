@@ -27,6 +27,7 @@ fun BookmarkResponse.toDomain(): PageResult<Bookmark> =
                 page = page,
                 size = size,
                 totalPages = totalPages,
+                totalElements = totalElements,
                 isFirst = isFirst,
                 isLast = isLast,
             ),
