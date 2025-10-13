@@ -14,7 +14,7 @@ interface HearitRepository {
 
     suspend fun getRecommendHearits(): Result<List<RecommendHearit>>
 
-    suspend fun getRandomHearits(
+    suspend fun getExploreHearits(
         cursorId: Long? = null,
         size: Int? = null,
     ): Result<CursorResult<ExploreHearit>>

@@ -1,8 +1,8 @@
 package com.onair.hearit.data.api
 
+import com.onair.hearit.data.dto.ExploreHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.HearitsResponse
-import com.onair.hearit.data.dto.ExploreHearitResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.SearchHearitsResponse

@@ -34,7 +34,7 @@ class HearitRemoteDataSourceImpl(
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun getRandomHearits(
+    override suspend fun getExploreHearits(
         cursorId: Long?,
         size: Int?,
     ): Result<NetworkResult<ExploreHearitResponse>> =

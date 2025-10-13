@@ -13,7 +13,7 @@ interface HearitRemoteDataSource {
 
     suspend fun getRecommendHearits(): Result<NetworkResult<List<RecommendHearitResponse>>>
 
-    suspend fun getRandomHearits(
+    suspend fun getExploreHearits(
         cursorId: Long?,
         size: Int?,
     ): Result<NetworkResult<ExploreHearitResponse>>

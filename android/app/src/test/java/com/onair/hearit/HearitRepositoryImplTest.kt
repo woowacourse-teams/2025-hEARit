@@ -100,10 +100,10 @@ class HearitRepositoryImplTest {
             val mockPageResultDto = createFakeRandomHearit()
             val expectedDomainResult = mockPageResultDto.toDomain()
 
-            coEvery { mockHearitRemoteDataSource.getRandomHearits(1, 10) } returns
+            coEvery { mockHearitRemoteDataSource.getExploreHearits(1, 10) } returns
                 Result.success(NetworkResult.Success(mockPageResultDto))
 
-            val result = hearitRepository.getRandomHearits(1, 10)
+            val result = hearitRepository.getExploreHearits(1, 10)
 
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrNull()).isEqualTo(expectedDomainResult)
@@ -114,10 +114,10 @@ class HearitRepositoryImplTest {
         runTest {
             val expectedException = RuntimeException("랜덤 데이터 오류")
 
-            coEvery { mockHearitRemoteDataSource.getRandomHearits(1, 10) } returns
+            coEvery { mockHearitRemoteDataSource.getExploreHearits(1, 10) } returns
                 Result.failure(expectedException)
 
-            val result = hearitRepository.getRandomHearits(1, 10)
+            val result = hearitRepository.getExploreHearits(1, 10)
 
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isEqualTo(expectedException)

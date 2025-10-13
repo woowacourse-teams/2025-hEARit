@@ -128,7 +128,7 @@ class ExploreViewModel(
 
         viewModelScope.launch {
             try {
-                val result = hearitRepository.getRandomHearits(cursorId)
+                val result = hearitRepository.getExploreHearits(cursorId)
                 result
                     .onSuccess { randomItems ->
                         isEndOfFeed = randomItems.isEmpty

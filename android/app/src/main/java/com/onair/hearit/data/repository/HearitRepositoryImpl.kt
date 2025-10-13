@@ -24,12 +24,12 @@ class HearitRepositoryImpl(
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =
         hearitRemoteDataSource.getRecommendHearits().mapListOrThrowDomain { it.toDomain() }
 
-    override suspend fun getRandomHearits(
+    override suspend fun getExploreHearits(
         cursorId: Long?,
         size: Int?,
     ): Result<CursorResult<ExploreHearit>> =
         hearitRemoteDataSource
-            .getRandomHearits(cursorId, size)
+            .getExploreHearits(cursorId, size)
             .mapOrThrowDomain { it.toDomain() }
 
     override suspend fun getKeywordHearits(

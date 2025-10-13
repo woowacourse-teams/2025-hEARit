@@ -84,8 +84,8 @@ object HearitFixtures {
                 SearchHearitsResponse.Content(
                     id = 1L,
                     title = "첫 번째 test 히어릿",
-                    playTime = 150,
-                    lastPlayTime = 160000,
+                    playTime = 123,
+                    lastPlayTime = 101101,
                     keywords =
                         listOf(
                             KeywordResponse(0, "키워드3"),
@@ -96,8 +96,8 @@ object HearitFixtures {
                 SearchHearitsResponse.Content(
                     id = 2L,
                     title = "두 번째 test 히어릿",
-                    playTime = 210,
-                    lastPlayTime = 222222,
+                    playTime = 123,
+                    lastPlayTime = 99999,
                     keywords =
                         listOf(
                             KeywordResponse(0, "키워드3"),
