@@ -6,22 +6,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.DomainException.UserNotRegistered
-import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.PlayingHistoryHearit
+import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
+import com.onair.hearit.domain.repository.RecommendationRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class HomeViewModel(
+    private val bookmarkRepository: BookmarkRepository,
     private val hearitRepository: HearitRepository,
     private val memberRepository: MemberRepository,
     private val playingHistoryRepository: PlayingHistoryRepository,
+    private val recommendationRepository: RecommendationRepository,
 ) : ViewModel() {
     private val _userInfo: MutableLiveData<UserInfo> = MutableLiveData()
     val userInfo: LiveData<UserInfo> = _userInfo
@@ -32,11 +38,21 @@ class HomeViewModel(
     private val _recommendHearits: MutableLiveData<List<RecommendHearit>> = MutableLiveData()
     val recommendHearits: LiveData<List<RecommendHearit>> = _recommendHearits
 
-    private val _recentHearits: MutableLiveData<List<PlayingHistoryHearit>> = MutableLiveData()
-    val recentHearits: LiveData<List<PlayingHistoryHearit>> = _recentHearits
+    private val _playingHistoryHearits: MutableLiveData<List<PlayingHistoryHearit>> =
+        MutableLiveData()
+    val playingHistoryHearits: LiveData<List<PlayingHistoryHearit>> = _playingHistoryHearits
 
-    private val _groupedCategory: MutableLiveData<List<GroupedCategory>> = MutableLiveData()
-    val groupedCategory: LiveData<List<GroupedCategory>> = _groupedCategory
+    private val _recentUploadHearits: MutableLiveData<List<RecentUploadHearit>> = MutableLiveData()
+    val recentUploadHearits: LiveData<List<RecentUploadHearit>> = _recentUploadHearits
+
+    private val _playingBookmarkHearits: MutableLiveData<List<Bookmark>> =
+        MutableLiveData()
+    val playingBookmarkHearits: LiveData<List<Bookmark>> = _playingBookmarkHearits
+
+    private val _recommendationCategories: MutableLiveData<List<RecommendationCategories>> =
+        MutableLiveData()
+    val recommendationCategories: LiveData<List<RecommendationCategories>> =
+        _recommendationCategories
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -53,30 +69,51 @@ class HomeViewModel(
         _isLoading.value = true
 
         viewModelScope.launch {
-            val recentDeferred = async { playingHistoryRepository.getPlayingHistories() }
             val recommendDeferred = async { hearitRepository.getRecommendHearits() }
-            val groupedDeferred = async { hearitRepository.getCategoryHearits() }
+            val playingHistoryDeferred = async { playingHistoryRepository.getPlayingHistories() }
+            val recentUploadDeferred = async { hearitRepository.getRecentUploadHearits(size = 10) }
+            val playingBookmarkDeferred =
+                async {
+                    bookmarkRepository.getBookmarks(
+                        page = 0,
+                        size = 10,
+                        filter = "unfinished",
+                    )
+                }
+            val groupedDeferred = async { recommendationRepository.getRecommendationCategories() }
 
-            val recentResult = recentDeferred.await()
             val recommendResult = recommendDeferred.await()
+            val playingHistoryResult = playingHistoryDeferred.await()
+            val recentUploadResult = recentUploadDeferred.await()
+            val playingBookmarkResult = playingBookmarkDeferred.await()
             val groupedResult = groupedDeferred.await()
 
-            recentResult.onFailure { throwable ->
-                Timber.w(throwable)
-                _toastMessage.value = R.string.home_toast_recent_load_fail
-            }
             recommendResult.onFailure { throwable ->
                 Timber.w(throwable)
                 _toastMessage.value = R.string.home_toast_recommend_load_fail
+            }
+            playingHistoryResult.onFailure { throwable ->
+                Timber.w(throwable)
+                _toastMessage.value = R.string.home_toast_playing_history_load_fail
+            }
+            recentUploadResult.onFailure { throwable ->
+                Timber.w(throwable)
+                _toastMessage.value = R.string.home_toast_recent_upload_load_fail
+            }
+            playingBookmarkResult.onFailure { throwable ->
+                Timber.w(throwable)
+                _toastMessage.value = R.string.home_toast_playing_bookmark_load_fail
             }
             groupedResult.onFailure { throwable ->
                 Timber.w(throwable)
                 _toastMessage.value = R.string.home_toast_grouped_category_load_fail
             }
 
-            recentResult.onSuccess { _recentHearits.value = it }
             recommendResult.onSuccess { _recommendHearits.value = it }
-            groupedResult.onSuccess { _groupedCategory.value = it }
+            playingHistoryResult.onSuccess { _playingHistoryHearits.value = it }
+            recentUploadResult.onSuccess { _recentUploadHearits.value = it.items }
+            playingBookmarkResult.onSuccess { _playingBookmarkHearits.value = it.items }
+            groupedResult.onSuccess { _recommendationCategories.value = it }
 
             _isLoading.value = false
         }
@@ -100,19 +137,6 @@ class HomeViewModel(
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }
-                }
-        }
-    }
-
-    fun loadRecentHearits() {
-        viewModelScope.launch {
-            playingHistoryRepository
-                .getPlayingHistories()
-                .onSuccess { recentHearits ->
-                    _recentHearits.value = recentHearits
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.home_toast_recent_load_fail
                 }
         }
     }

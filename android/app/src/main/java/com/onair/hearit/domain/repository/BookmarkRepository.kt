@@ -7,6 +7,7 @@ interface BookmarkRepository {
     suspend fun getBookmarks(
         page: Int?,
         size: Int?,
+        filter: String,
     ): Result<PageResult<Bookmark>>
 
     suspend fun addBookmark(hearitId: Long): Result<Long>

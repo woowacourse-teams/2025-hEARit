@@ -1,13 +1,11 @@
 package com.onair.hearit
 
-import com.onair.hearit.data.dto.CategoryHearitResponse
 import com.onair.hearit.data.dto.CategoryResponse
 import com.onair.hearit.data.dto.ExploreHearitResponse
-import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
-import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.data.dto.SearchHearitsResponse
 import com.onair.hearit.data.dto.SourceResponse
 
 object HearitFixtures {
@@ -80,34 +78,36 @@ object HearitFixtures {
         )
     }
 
-    fun createSearchHearit(): SearchHearitResponse {
+    fun createSearchHearit(): SearchHearitsResponse {
         val fakeContents =
             listOf(
-                SearchHearitResponse.Content(
+                SearchHearitsResponse.Content(
                     id = 1L,
-                    playTime = 150,
-                    keywords =
-                        listOf(
-                            KeywordResponse(0, "키워드3"),
-                            KeywordResponse(1, "키워드4"),
-                            KeywordResponse(2, "키워드5"),
-                        ),
                     title = "첫 번째 test 히어릿",
-                ),
-                SearchHearitResponse.Content(
-                    id = 2L,
-                    playTime = 210,
+                    playTime = 123,
+                    lastPlayTime = 101101,
                     keywords =
                         listOf(
                             KeywordResponse(0, "키워드3"),
                             KeywordResponse(1, "키워드4"),
                             KeywordResponse(2, "키워드5"),
                         ),
+                ),
+                SearchHearitsResponse.Content(
+                    id = 2L,
                     title = "두 번째 test 히어릿",
+                    playTime = 123,
+                    lastPlayTime = 99999,
+                    keywords =
+                        listOf(
+                            KeywordResponse(0, "키워드3"),
+                            KeywordResponse(1, "키워드4"),
+                            KeywordResponse(2, "키워드5"),
+                        ),
                 ),
             )
 
-        return SearchHearitResponse(
+        return SearchHearitsResponse(
             content = fakeContents,
             page = 0,
             size = fakeContents.size,
@@ -115,29 +115,6 @@ object HearitFixtures {
             totalElements = 10,
             isFirst = true,
             isLast = false,
-        )
-    }
-
-    fun createGroupedCategory(): GroupedCategoryHearitResponse {
-        val fakeHearits =
-            listOf(
-                CategoryHearitResponse(
-                    createdAt = "2025-08-01T10:00:00Z",
-                    hearitId = 1L,
-                    title = "카테고리 히어릿 1",
-                ),
-                CategoryHearitResponse(
-                    createdAt = "2025-08-02T14:30:00Z",
-                    hearitId = 2L,
-                    title = "카테고리 히어릿 2",
-                ),
-            )
-
-        return GroupedCategoryHearitResponse(
-            categoryId = 10L,
-            categoryName = "Android",
-            colorCode = "#FF9800",
-            categoryHearitResponses = fakeHearits,
         )
     }
 }

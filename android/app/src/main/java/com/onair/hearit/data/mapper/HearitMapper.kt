@@ -1,27 +1,30 @@
 package com.onair.hearit.data.mapper
 
 import com.onair.hearit.data.database.RecentHearitEntity
-import com.onair.hearit.data.dto.CategoryHearitResponse
 import com.onair.hearit.data.dto.ExploreHearitResponse
-import com.onair.hearit.data.dto.GroupedCategoryHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
+import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.KeywordResponse
 import com.onair.hearit.data.dto.PlayingHistoryResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
-import com.onair.hearit.data.dto.SearchHearitResponse
+import com.onair.hearit.data.dto.RecommendationCategoriesResponse
+import com.onair.hearit.data.dto.RecommendationCategoryHearitResponse
+import com.onair.hearit.data.dto.SearchHearitsResponse
 import com.onair.hearit.data.dto.SourceResponse
 import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.domain.model.CategoryHearit
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
-import com.onair.hearit.domain.model.GroupedCategory
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.PlayingHistoryHearit
 import com.onair.hearit.domain.model.RecentHearit
+import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.RecommendationCategories
+import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.Source
 import com.onair.hearit.domain.model.UserInfo
@@ -32,13 +35,35 @@ fun RecentHearit.toData(): RecentHearitEntity =
         title = this.title,
     )
 
-private fun SearchHearitResponse.Content.toDomain(): SearchedHearit =
+private fun SearchHearitsResponse.Content.toSearchedHearit(): SearchedHearit =
     SearchedHearit(
         id = this.id,
         title = this.title,
         playTime = this.playTime,
         lastPlayTime = this.lastPlayTime,
         keywords = this.keywords.map { it.toDomain() },
+    )
+
+private fun HearitsResponse.Content.toSearchedCategoryHearit(): SearchedCategoryHearit =
+    SearchedCategoryHearit(
+        id = this.id,
+        title = this.title,
+        playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
+        createdAt = this.createdAt,
+        keywords = this.keywords.map { it.toDomain() },
+        category = this.category.toDomain(),
+    )
+
+private fun HearitsResponse.Content.toRecentUploadHearit(): RecentUploadHearit =
+    RecentUploadHearit(
+        id = this.id,
+        title = this.title,
+        playTime = this.playTime,
+        lastPlayTime = this.lastPlayTime,
+        createdAt = this.createdAt,
+        keywords = this.keywords.map { it.toDomain() },
+        category = this.category.toDomain(),
     )
 
 private fun ExploreHearitResponse.Content.toDomain(): ExploreHearit =
@@ -114,28 +139,57 @@ fun KeywordResponse.toDomain(): Keyword =
         name = this.name,
     )
 
-fun SearchHearitResponse.toDomain(): PageResult<SearchedHearit> =
+fun SearchHearitsResponse.toSearchedHearit(): PageResult<SearchedHearit> =
     PageResult(
-        items = content.map { it.toDomain() },
+        items = content.map { it.toSearchedHearit() },
         paging =
             Paging(
                 page = page,
                 size = size,
                 totalPages = totalPages,
+                totalElements = totalElements,
                 isFirst = isFirst,
                 isLast = isLast,
             ),
     )
 
-fun GroupedCategoryHearitResponse.toDomain(): GroupedCategory =
-    GroupedCategory(
+fun HearitsResponse.toSearchedCategoryHearit(): PageResult<SearchedCategoryHearit> =
+    PageResult(
+        items = content.map { it.toSearchedCategoryHearit() },
+        paging =
+            Paging(
+                page = page,
+                size = size,
+                totalPages = totalPages,
+                totalElements = totalElements,
+                isFirst = isFirst,
+                isLast = isLast,
+            ),
+    )
+
+fun HearitsResponse.toRecentUploadHearit(): PageResult<RecentUploadHearit> =
+    PageResult(
+        items = content.map { it.toRecentUploadHearit() },
+        paging =
+            Paging(
+                page = page,
+                size = size,
+                totalPages = totalPages,
+                totalElements = totalElements,
+                isFirst = isFirst,
+                isLast = isLast,
+            ),
+    )
+
+fun RecommendationCategoriesResponse.toDomain(): RecommendationCategories =
+    RecommendationCategories(
         categoryId = this.categoryId,
         categoryName = this.categoryName,
         colorCode = this.colorCode,
-        hearits = this.categoryHearitResponses.map { it.toDomain() },
+        hearits = this.recommendationCategoryHearitResponses.map { it.toDomain() },
     )
 
-fun CategoryHearitResponse.toDomain(): CategoryHearit =
+fun RecommendationCategoryHearitResponse.toDomain(): CategoryHearit =
     CategoryHearit(
         hearitId = this.hearitId,
         title = this.title,

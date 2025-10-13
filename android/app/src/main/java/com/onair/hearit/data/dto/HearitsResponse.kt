@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SearchHearitResponse(
+data class HearitsResponse(
     @SerialName("content")
     val content: List<Content>,
     @SerialName("page")
@@ -30,7 +30,11 @@ data class SearchHearitResponse(
         val playTime: Int,
         @SerialName("lastPlayTime")
         val lastPlayTime: Long? = null,
+        @SerialName("createdAt")
+        val createdAt: String,
         @SerialName("keywords")
         val keywords: List<KeywordResponse>,
+        @SerialName("category")
+        val category: CategoryResponse.Content,
     )
 }
