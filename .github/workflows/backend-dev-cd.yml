@@ -75,7 +75,7 @@ jobs:
           path: ~/hearit
 
       - name: Make deploy script executable
-        run: chmod +x ~/hearit/deploy.sh
+        run: sudo chmod +x ~/hearit/deploy.sh
 
       - name: Run deploy script with sudo
         run: sudo bash ~/hearit/deploy.sh
