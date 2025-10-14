@@ -1,4 +1,4 @@
-package com.onair.hearit.domain.model
+package com.onair.hearit.analytics
 
 enum class HearitSource {
     PLAYING_HISTORY,

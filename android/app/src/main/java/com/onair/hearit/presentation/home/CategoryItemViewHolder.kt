@@ -3,9 +3,9 @@ package com.onair.hearit.presentation.home
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.ItemCategoryHearitBinding
 import com.onair.hearit.domain.model.CategoryHearit
-import com.onair.hearit.domain.model.HearitSource
 import com.onair.hearit.presentation.HearitClickListener
 
 class CategoryItemViewHolder private constructor(

@@ -15,7 +15,7 @@
 
         <variable
             name="source"
-            type="com.onair.hearit.domain.model.HearitSource" />
+            type="com.onair.hearit.analytics.HearitSource" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

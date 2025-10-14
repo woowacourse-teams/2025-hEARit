@@ -1,6 +1,6 @@
 package com.onair.hearit.presentation
 
-import com.onair.hearit.domain.model.HearitSource
+import com.onair.hearit.analytics.HearitSource
 
 interface HearitClickListener {
     fun onClick(
