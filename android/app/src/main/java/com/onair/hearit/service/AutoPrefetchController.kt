@@ -4,6 +4,7 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * AutoPrefetchController
@@ -18,6 +19,7 @@ class AutoPrefetchController(
     private val handlePrefetchNext: suspend (MediaSession) -> Unit,
 ) : Player.Listener {
     private var isLibraryMode: Boolean = false
+    private val isPrefetching = AtomicBoolean(false)
 
     fun setLibraryMode(enabled: Boolean) {
         isLibraryMode = enabled
@@ -37,8 +39,6 @@ class AutoPrefetchController(
     ) {
         if (!isLibraryMode) return
 
-        // 아이템이 변경되거나, 갑자기 재생 위치가 변경도거나, 재생 목록이 변경될 때 먹게 이벤트를 실행하게 된다면,
-        // 이미 넘어가고 나서 이벤트를 처리하거나 하는 중복적인 오류가 있을 수 있어서 이벤트를 많이 사용하지 않도록 처리하기 위함
         if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
             events.contains(Player.EVENT_POSITION_DISCONTINUITY) ||
             events.contains(Player.EVENT_TIMELINE_CHANGED)
@@ -46,10 +46,23 @@ class AutoPrefetchController(
             return
         }
 
+        if (!events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) &&
+            !events.contains(Player.EVENT_IS_PLAYING_CHANGED) &&
+            !events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)
+        ) {
+            return
+        }
+
         if (!shouldPrefetch(player)) return
 
+        if (!isPrefetching.compareAndSet(false, true)) return
+
         serviceScope.launch {
-            handlePrefetchNext(session)
+            try {
+                handlePrefetchNext(session)
+            } finally {
+                isPrefetching.set(false)
+            }
         }
     }
 
