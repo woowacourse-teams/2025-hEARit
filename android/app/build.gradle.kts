@@ -13,6 +13,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint")
     id("com.google.firebase.crashlytics")
     id("com.google.android.gms.oss-licenses-plugin")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -212,4 +213,8 @@ dependencies {
 
     // open license
     implementation(libs.play.services.oss.licenses)
+
+    // hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
 }
