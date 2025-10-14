@@ -5,9 +5,7 @@ import com.onair.hearit.core.log.logger.JsonLogger;
 import com.onair.hearit.core.log.property.db.DbErrorLogProperty;
 import com.onair.hearit.core.log.property.db.SlowQueryLogProperty;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -28,30 +26,39 @@ public class DbLoggingAspect {
     }
 
     @Around("repositoryMethod()")
-    public Object logSlowQuery(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object logQuery(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
+        String methodName = joinPoint.getSignature().toShortString();
+        Throwable caughtException = null;
 
         try {
             return joinPoint.proceed();
+        } catch (Throwable ex) {
+            caughtException = ex;
+            throw ex;
         } finally {
-            long endTime = System.currentTimeMillis();
-            long executionTime = endTime - startTime;
-
-            if (executionTime > SLOW_QUERY_THRESHOLD_MS) {
+            try {
+                long executionTime = System.currentTimeMillis() - startTime;
                 String query = QueryExecutionContext.getLastSql();
-                String methodName = joinPoint.getSignature().getName();
-                SlowQueryLogProperty slowQueryLogProperty = SlowQueryLogProperty.of(query, executionTime, methodName);
-                jsonLogger.warn(slowQueryLogProperty);
+
+                // 예외 발생 시 에러 로깅
+                if (caughtException != null) {
+                    logDbError(query, methodName, caughtException);
+                }
+                // Slow Query 로깅 (예외가 있어도 실행 시간은 기록)
+                else if (executionTime > SLOW_QUERY_THRESHOLD_MS) {
+                    logSlowQuery(query, methodName, executionTime);
+                }
+            } catch (Exception loggingException) {
+                jsonLogger.warn(loggingException.getMessage(), loggingException);
+            } finally {
+                QueryExecutionContext.clear();
             }
-            QueryExecutionContext.clear();
         }
     }
 
-    @AfterThrowing(pointcut = "repositoryMethod()", throwing = "ex")
-    public void logDbError(JoinPoint joinPoint, Throwable ex) {
+    public void logDbError(String query, String methodName, Throwable ex) {
         try {
-            String methodName = joinPoint.getSignature().getName();
-            String query = QueryExecutionContext.getLastSql();
             String exceptionName = ex.getClass().getSimpleName();
             String exceptionMessage = ex.getMessage();
 
@@ -60,6 +67,16 @@ public class DbLoggingAspect {
             jsonLogger.error(dbErrorLogProperty);
         } finally {
             QueryExecutionContext.clear();
+        }
+    }
+
+    public void logSlowQuery(String query, String methodName, long executionTime) {
+        try {
+            SlowQueryLogProperty slowQueryLogProperty =
+                    SlowQueryLogProperty.of(query, executionTime, methodName);
+            jsonLogger.warn(slowQueryLogProperty);
+        } catch (Exception e) {
+            jsonLogger.error("Slow Query 로깅 실패", e);
         }
     }
 }
