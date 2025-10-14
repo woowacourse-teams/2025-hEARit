@@ -1,7 +1,7 @@
 package com.onair.hearit.core.log.config;
 
 import com.onair.hearit.core.log.MdcSetupFilter;
-import com.onair.hearit.core.log.RequestLoggingFilter;
+import com.onair.hearit.core.log.RequestLoggingFallbackFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +19,9 @@ public class LogFilterConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<RequestLoggingFilter> requestLoggingFilterRegistration(RequestLoggingFilter filter) {
-        FilterRegistrationBean<RequestLoggingFilter> registration = new FilterRegistrationBean<>(filter);
+    public FilterRegistrationBean<RequestLoggingFallbackFilter> requestLoggingFilterRegistration(
+            RequestLoggingFallbackFilter filter) {
+        FilterRegistrationBean<RequestLoggingFallbackFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         registration.addUrlPatterns("/*");
         return registration;

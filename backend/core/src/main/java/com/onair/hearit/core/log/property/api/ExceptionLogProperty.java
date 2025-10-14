@@ -42,6 +42,17 @@ public class ExceptionLogProperty implements LogProperty {
                 errorDetail);
     }
 
+    public static ExceptionLogProperty from(String endPoint, String method, HttpStatus httpStatus,
+                                            String exceptionMessage) {
+        ErrorDetail errorDetail = ErrorDetail.of(
+                exceptionMessage,
+                "unknown",
+                "unknown",
+                -1,
+                httpStatus.name());
+        return new ExceptionLogProperty(endPoint, method, Status.from(httpStatus), errorDetail);
+    }
+
     @Override
     public String getEventName() {
         return LogEvent.EXCEPTION.getEventName();
