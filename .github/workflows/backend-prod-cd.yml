@@ -46,14 +46,14 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build with Gradle
+      - name: Build executable Spring Boot jar
         working-directory: backend
-        run: ./gradlew clean build
+        run: ./gradlew clean :boot:bootJar
 
       - name: Rename jar to app.jar
         working-directory: backend/boot/build/libs
         run: |
-          JAR_NAME=$(ls *.jar | head -n 1)
+          JAR_NAME=$(find . -name "*.jar" ! -name "*-plain.jar")
           mv "$JAR_NAME" app.jar
 
       - name: Upload jar artifact
