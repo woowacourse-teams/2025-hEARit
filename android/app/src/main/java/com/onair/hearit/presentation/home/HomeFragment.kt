@@ -278,7 +278,7 @@ class HomeFragment :
     ) {
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_SELECTED,
-            mapOf(CATEGORY_NAME to name),
+            mapOf(ITEM_ID to id.toString(), CATEGORY_NAME to name),
         )
 
         parentFragmentManager
@@ -302,41 +302,26 @@ class HomeFragment :
         (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
+    private fun logHomeHearitClick(
+        source: HearitSource,
+        hearitId: Long,
+    ) {
+        val event =
+            when (source) {
+                HearitSource.PLAYING_HISTORY -> AnalyticsEventNames.HOME_PLAYING_HISTORY_SELECTED
+                HearitSource.RECOMMEND -> AnalyticsEventNames.HOME_RECOMMEND_SELECTED
+                HearitSource.RECENT_UPLOAD -> AnalyticsEventNames.HOME_RECENT_UPLOAD_SELECTED
+                HearitSource.PLAYING_BOOKMARK -> AnalyticsEventNames.HOME_PLAYING_BOOKMARK_SELECTED
+                HearitSource.RECOMMENDATION_CATEGORY -> AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_HEARIT_SELECTED
+            }
+        AnalyticsProvider.get().logEvent(event, mapOf(ITEM_ID to hearitId.toString()))
+    }
+
     override fun onClick(
         hearitId: Long,
         source: HearitSource,
     ) {
-        when (source) {
-            HearitSource.PLAYING_HISTORY ->
-                AnalyticsProvider.get().logEvent(
-                    AnalyticsEventNames.HOME_PLAYING_HISTORY_SELECTED,
-                    mapOf(ITEM_ID to hearitId.toString()),
-                )
-
-            HearitSource.RECOMMEND ->
-                AnalyticsProvider.get().logEvent(
-                    AnalyticsEventNames.HOME_RECOMMEND_SELECTED,
-                    mapOf(ITEM_ID to hearitId.toString()),
-                )
-
-            HearitSource.RECENT_UPLOAD ->
-                AnalyticsProvider.get().logEvent(
-                    AnalyticsEventNames.HOME_RECENT_UPLOAD_SELECTED,
-                    mapOf(ITEM_ID to hearitId.toString()),
-                )
-
-            HearitSource.PLAYING_BOOKMARK ->
-                AnalyticsProvider.get().logEvent(
-                    AnalyticsEventNames.HOME_PLAYING_BOOKMARK_SELECTED,
-                    mapOf(ITEM_ID to hearitId.toString()),
-                )
-
-            HearitSource.RECOMMENDATION_CATEGORY ->
-                AnalyticsProvider.get().logEvent(
-                    AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_HEARIT_SELECTED,
-                    mapOf(ITEM_ID to hearitId.toString()),
-                )
-        }
+        logHomeHearitClick(source, hearitId)
         navigateToPlayerDetail(hearitId)
     }
 
