@@ -1,6 +1,6 @@
-package com.onair.hearit.app.auth.domain;
+package com.onair.hearit.core.domain;
 
-import com.onair.hearit.app.exception.custom.InvalidInputException;
+import com.onair.hearit.core.domain.exception.RefreshTokenDomainException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,19 +46,19 @@ public class RefreshToken {
 
     private void validateExpiryDate(LocalDateTime expiryDate) {
         if (expiryDate == null) {
-            throw new InvalidInputException("멤버는 null이 될 수 없습니다.");
+            throw new RefreshTokenDomainException("만료일은 null이 될 수 없습니다.");
         }
     }
 
     private void validateToken(String token) {
         if (token == null) {
-            throw new InvalidInputException("멤버는 null이 될 수 없습니다.");
+            throw new RefreshTokenDomainException("리프레시 토큰은 null이 될 수 없습니다.");
         }
     }
 
     private void validateMember(Long memberId) {
         if (memberId == null) {
-            throw new InvalidInputException("멤버는 null이 될 수 없습니다.");
+            throw new RefreshTokenDomainException("멤버는 null이 될 수 없습니다.");
         }
     }
 

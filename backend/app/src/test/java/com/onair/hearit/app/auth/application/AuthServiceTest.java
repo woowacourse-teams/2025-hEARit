@@ -4,20 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.app.auth.domain.RefreshToken;
 import com.onair.hearit.app.auth.dto.request.LoginRequest;
 import com.onair.hearit.app.auth.dto.request.SignupRequest;
 import com.onair.hearit.app.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.app.auth.infrastructure.repository.RefreshTokenRepository;
 import com.onair.hearit.app.exception.custom.InvalidInputException;
 import com.onair.hearit.app.exception.custom.UnauthorizedException;
+import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.OAuthProvider;
+import com.onair.hearit.core.domain.RefreshToken;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
-import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.infrastructure.jpa.RefreshTokenRepository;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Disabled;
@@ -37,6 +38,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Import({AuthService.class, BCryptPasswordEncoder.class, JwtTokenProvider.class,
         DbHelper.class, TestJpaAuditingConfig.class})
 class AuthServiceTest {
+
+    @MockitoBean
+    JsonLogger jsonLogger;
 
     @MockitoBean
     OAuthServiceRegistry oAuthServiceRegistry;

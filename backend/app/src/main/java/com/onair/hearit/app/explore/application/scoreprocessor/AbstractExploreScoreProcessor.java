@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractExploreScoreProcessor implements ExploreScoreProcessor {
@@ -32,7 +31,6 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ExploredHearitResponse> getExploreHearits(UserInfo userInfo, long cursorId, int size) {
         String userUuid = getUserUuid(userInfo);
         List<ExploredHearitProjection> exploredHearitProjections =

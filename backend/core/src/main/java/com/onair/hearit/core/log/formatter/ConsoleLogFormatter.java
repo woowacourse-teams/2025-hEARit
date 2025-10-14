@@ -1,11 +1,17 @@
 package com.onair.hearit.core.log.formatter;
 
-import com.onair.hearit.core.log.dto.RequestLog;
-import com.onair.hearit.core.log.dto.ResponseLog;
+import com.onair.hearit.core.log.property.api.ExceptionLogProperty;
+import com.onair.hearit.core.log.property.api.ExceptionLogProperty.ErrorDetail;
+import com.onair.hearit.core.log.property.api.ExceptionLogProperty.Status;
+import com.onair.hearit.core.log.property.api.RequestLogProperty;
+import com.onair.hearit.core.log.property.api.ResponseLogProperty;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ConsoleLogFormatter {
 
     private static final List<String> SENSITIVE_KEYS = List.of(
@@ -14,22 +20,41 @@ public class ConsoleLogFormatter {
             "refreshToken",
             "url");
 
-    public static String formatRequestLog(RequestLog requestLog) {
-        String method = requestLog.getRequestInfo().getHttpMethod();
-        String uri = requestLog.getRequestInfo().getRequestUri();
-        String ip = requestLog.getRequestInfo().getIp();
-        String time = requestLog.getTimestamp();
-        Map<String, List<String>> params = requestLog.getRequestParameter();
-        Object body = requestLog.getRequestBody();
+    public static String formatResponseLogProperty(ResponseLogProperty responseLogProperty) {
+        return String.format(
+                "[%s] ← %s statusCode=%d timeTakenMs=%d responseSizeBytes=%s",
+                responseLogProperty.getEventName(),
+                responseLogProperty.getEndPoint(),
+                responseLogProperty.getStatus(),
+                responseLogProperty.getTimeTakenMs(),
+                responseLogProperty.getBodySizeBytes()
+        );
+    }
 
-        return String.format("[%s] %s → %s %s from %s params=%s body=%s",
-                requestLog.getLogType(),
-                time,
-                method,
-                uri,
-                ip,
+    public static String formatRequestLogProperty(RequestLogProperty requestLogProperty) {
+        String endPoint = requestLogProperty.getEndPoint();
+        String method = requestLogProperty.getMethod();
+        Map<String, List<String>> params = requestLogProperty.getRequestParameter();
+        Object body = requestLogProperty.getRequestBody();
+
+        return String.format("[%s] → %s params=%s body=%s",
+                requestLogProperty.getEventName(),
+                endPoint + " " + method,
                 toFlatParamString(params),
                 truncateBody(body == null ? "null" : body.toString())
+        );
+    }
+
+    public static String formatExceptionLogProperty(ExceptionLogProperty exceptionLogProperty) {
+        ErrorDetail errorDetail = exceptionLogProperty.getErrorDetail();
+        Status httpStatus = exceptionLogProperty.getHttpStatus();
+
+        return String.format("[%s] → %s exception=%s statusCode=%d, message=%s",
+                exceptionLogProperty.getEventName(),
+                exceptionLogProperty.getEndPoint() + " " + exceptionLogProperty.getMethod(),
+                errorDetail.getExceptionName(),
+                httpStatus.getCode(),
+                errorDetail.getMessage()
         );
     }
 
@@ -51,26 +76,5 @@ public class ConsoleLogFormatter {
             raw = raw.replaceAll(regex, "$1****");
         }
         return raw;
-    }
-
-    public static String formatResponseLog(ResponseLog<?> responseLog) {
-        String time = responseLog.timestamp();
-        String method = responseLog.requestInfo().getHttpMethod();
-        String uri = responseLog.requestInfo().getRequestUri();
-        String ip = responseLog.requestInfo().getIp();
-        long timeTaken = responseLog.timeTakenMs();
-        Object body = responseLog.responseBody();
-
-        return String.format(
-                "[%s] %s ← %s %s from %s timeTaken=%dms statusCode=%d body=%s",
-                responseLog.logType(),
-                time,
-                method,
-                uri,
-                ip,
-                timeTaken,
-                responseLog.status(),
-                truncateBody(body == null ? "null" : body.toString())
-        );
     }
 }

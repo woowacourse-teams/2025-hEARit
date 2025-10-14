@@ -18,12 +18,6 @@
             <!-- @formatter:on -->
         </Property>
 
-        <Property name="fileLogPattern">
-            <!-- @formatter:off -->
-            %d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level %pid --- [%15.15t] %-40.40c{1.} : %msg%n
-            <!-- @formatter:on -->
-        </Property>
-
         <!-- 로그 파일 저장되는 디렉토리(상대경로) -->
         <Property name="logDir">log</Property>
 
@@ -50,8 +44,21 @@
                     compact="true"
                     eventEol="true"
                     objectMessageAsJsonObject="true"
-                    charset="UTF-8"
-                    properties="true">
+                    charset="UTF-8">
+                <!-- log context-->
+                <KeyValuePair key="ip" value="$${ctx:ip}"/>
+                <KeyValuePair key="timestamp" value="$${ctx:timestamp}"/>
+                <KeyValuePair key="deviceModel" value="$${ctx:deviceModel}"/>
+                <KeyValuePair key="appVersion" value="$${ctx:appVersion}"/>
+
+                <!-- user context -->
+                <KeyValuePair key="userType" value="$${ctx:userType}"/>
+                <KeyValuePair key="memberId" value="$${ctx:memberId}"/>
+                <KeyValuePair key="guestId" value="$${ctx:guestId}"/>
+
+                <!-- OpenTelemetry trace 정보 추가 -->
+                <KeyValuePair key="traceId" value="$${ctx:trace_id}"/>
+                <KeyValuePair key="spanId" value="$${ctx:span_id}"/>
                 <KeyValuePair key="port" value="${spring:server.port}"/>
                 <KeyValuePair key="env" value="${env}"/>
             </JsonLayout>

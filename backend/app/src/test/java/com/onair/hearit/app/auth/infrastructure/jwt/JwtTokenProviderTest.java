@@ -2,7 +2,7 @@ package com.onair.hearit.app.auth.infrastructure.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,8 @@ class JwtTokenProviderTest {
         JwtTokenProvider tokenProvider = new JwtTokenProvider(
                 shortSecretKey,
                 shortExpiration,
-                60000L
+                60000L,
+                new JsonLogger(null)
         );
 
         String token = tokenProvider.createAccessToken(1L);

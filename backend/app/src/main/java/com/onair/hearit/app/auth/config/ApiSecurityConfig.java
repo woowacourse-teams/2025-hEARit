@@ -3,7 +3,8 @@ package com.onair.hearit.app.auth.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.core.log.exception.FilterExceptionLogger;
+import com.onair.hearit.core.log.logger.ConsoleLogger;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import java.util.Arrays;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -39,9 +40,10 @@ public class ApiSecurityConfig {
             "/api/*/recommendations/**",
     };
 
+    private final JsonLogger jsonLogger;
+    private final ConsoleLogger consoleLogger;
     private final ObjectMapper objectMapper;
     private final JwtTokenProvider jwtTokenProvider;
-    private final FilterExceptionLogger filterExceptionLogger;
 
     @Bean
     @Order(2)
@@ -56,12 +58,13 @@ public class ApiSecurityConfig {
                         .anyRequest().authenticated()
                 ).addFilterBefore(
                         new JwtAuthenticationFilter(
+                                jsonLogger,
+                                consoleLogger,
                                 Stream.concat(
                                         Arrays.stream(PUBLIC_GET_ENDPOINTS),
                                         Arrays.stream(PUBLIC_AUTH_ENDPOINTS)).toList(),
                                 objectMapper,
-                                jwtTokenProvider,
-                                filterExceptionLogger),
+                                jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class
                 ).build();
     }

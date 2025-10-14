@@ -9,11 +9,12 @@ import com.onair.hearit.app.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.app.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.app.auth.dto.response.OAuthUserInfoResponse;
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.OAuthProvider;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
-import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.log.logger.JsonLogger;
 import java.util.UUID;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +31,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Import({AuthService.class, BCryptPasswordEncoder.class, JwtTokenProvider.class,
         DbHelper.class, TestJpaAuditingConfig.class})
 class AuthKakaoServiceTest {
+
+    @MockitoBean
+    JsonLogger jsonLogger;
 
     @MockitoBean
     OAuthServiceRegistry oAuthServiceRegistry;

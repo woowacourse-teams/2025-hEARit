@@ -1,5 +1,7 @@
 package com.onair.hearit.app.auth.infrastructure.jwt;
 
+import com.onair.hearit.core.log.logger.JsonLogger;
+import com.onair.hearit.core.log.property.auth.TokenRefreshLogProperty;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -10,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,6 +21,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtTokenProvider {
 
+    private final JsonLogger jsonLogger;
+
     private final String secretKey;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
@@ -25,10 +30,12 @@ public class JwtTokenProvider {
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token.expiration}") long accessTokenExpiration,
-            @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration) {
+            @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration,
+            JsonLogger jsonLogger) {
         this.secretKey = secretKey;
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
+        this.jsonLogger = jsonLogger;
     }
 
     public String createAccessToken(Long memberId) {
@@ -71,8 +78,15 @@ public class JwtTokenProvider {
         try {
             parseClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            Long memberId = Optional.ofNullable(e.getClaims())
+                    .map(Claims::getSubject)
+                    .map(Long::parseLong)
+                    .orElse(-1L);
+            jsonLogger.warn(TokenRefreshLogProperty.failure(memberId, "토큰이 만료되었습니다."));
+            return false;
         } catch (JwtException e) {
-            log.info("validateToken() failed: {}", e.getMessage());
+            jsonLogger.warn(TokenRefreshLogProperty.failure(-1L, "토큰이 유효하지 않습니다."));
             return false;
         }
     }
@@ -90,8 +104,14 @@ public class JwtTokenProvider {
             }
             return TokenStatus.VALID;
         } catch (ExpiredJwtException e) {
+            Long memberId = Optional.ofNullable(e.getClaims())
+                    .map(Claims::getSubject)
+                    .map(Long::parseLong)
+                    .orElse(-1L);
+            jsonLogger.warn(TokenRefreshLogProperty.failure(memberId, "토큰이 만료되었습니다."));
             return TokenStatus.EXPIRED;
         } catch (JwtException e) {
+            jsonLogger.warn(TokenRefreshLogProperty.failure(-1L, "토큰이 유효하지 않습니다."));
             return TokenStatus.INVALID;
         }
     }

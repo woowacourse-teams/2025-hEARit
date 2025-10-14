@@ -1,19 +1,24 @@
 package com.onair.hearit.app.auth.application;
 
-import com.onair.hearit.app.auth.domain.RefreshToken;
 import com.onair.hearit.app.auth.dto.request.LoginRequest;
 import com.onair.hearit.app.auth.dto.request.OAuthLoginRequest;
 import com.onair.hearit.app.auth.dto.request.SignupRequest;
 import com.onair.hearit.app.auth.dto.response.LoginTokenResponse;
 import com.onair.hearit.app.auth.dto.response.OAuthUserInfoResponse;
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
-import com.onair.hearit.app.auth.infrastructure.repository.RefreshTokenRepository;
 import com.onair.hearit.app.exception.custom.InvalidInputException;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.exception.custom.UnauthorizedException;
-import com.onair.hearit.core.domain.OAuthProvider;
 import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.OAuthProvider;
+import com.onair.hearit.core.domain.RefreshToken;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.core.infrastructure.jpa.RefreshTokenRepository;
+import com.onair.hearit.core.log.logger.JsonLogger;
+import com.onair.hearit.core.log.property.auth.LoginLogProperty;
+import com.onair.hearit.core.log.property.auth.SignUpLogProperty;
+import com.onair.hearit.core.log.property.auth.TokenRefreshLogProperty;
+import com.onair.hearit.core.log.property.auth.WithdrawalLogProperty;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private final JsonLogger jsonLogger;
+
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -41,6 +48,7 @@ public class AuthService {
     public LoginTokenResponse login(LoginRequest request) {
         Member member = getMemberByLocalId(request.localId());
         validatePassword(request, member);
+        jsonLogger.info(LoginLogProperty.successLocal(member));
         return createTokenResponseFrom(member);
     }
 
@@ -58,9 +66,10 @@ public class AuthService {
     public void signup(SignupRequest request) {
         validateDuplicatedId(request);
         String hash = passwordEncoder.encode(request.password());
-        memberRepository.save(
-                Member.createLocalUser(UUID.randomUUID().toString(), request.localId(), request.nickname(), hash,
-                        defaultProfileImage));
+        Member member = Member.createLocalUser(UUID.randomUUID().toString(), request.localId(), request.nickname(),
+                hash, defaultProfileImage);
+        Member savedMember = memberRepository.save(member);
+        jsonLogger.info(SignUpLogProperty.fromLocal(savedMember));
     }
 
     private void validateDuplicatedId(SignupRequest request) {
@@ -76,14 +85,16 @@ public class AuthService {
         Member member = memberRepository.findBySocialIdAndOAuthProvider(userInfo.id(), provider)
                 .orElseGet(() -> signupWithUserInfo(userInfo, provider));
         LoginTokenResponse loginTokenResponse = createTokenResponseFrom(member);
-        log.info("memberId:{}가 {} 로그인 성공", member.getId(), provider.name());
+        jsonLogger.info(LoginLogProperty.successOAuth(member, provider));
         return loginTokenResponse;
     }
 
     private Member signupWithUserInfo(OAuthUserInfoResponse userInfo, OAuthProvider provider) {
         Member member = Member.createSocialUser(
                 UUID.randomUUID().toString(), userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl(), provider);
-        return memberRepository.save(member);
+        Member savedMember = memberRepository.save(member);
+        jsonLogger.info(SignUpLogProperty.ofOAuth(savedMember, provider));
+        return savedMember;
     }
 
     private LoginTokenResponse createTokenResponseFrom(Member member) {
@@ -105,10 +116,9 @@ public class AuthService {
     public String reissue(String refreshToken) {
         validateRefreshTokenExpired(refreshToken);
         Long memberId = jwtTokenProvider.getMemberId(refreshToken);
-        log.info("memberId:{}가 reissue 요청 수신", memberId);
         validateRefreshToken(refreshToken, memberId);
         String newAccessToken = jwtTokenProvider.createAccessToken(memberId);
-        log.info("memberId:{}의 token reissue 성공", memberId);
+        jsonLogger.info(TokenRefreshLogProperty.success(memberId));
         return newAccessToken;
     }
 
@@ -133,5 +143,6 @@ public class AuthService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
         member.withdraw();
+        jsonLogger.info(WithdrawalLogProperty.from(member));
     }
 }
