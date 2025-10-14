@@ -1,18 +1,27 @@
 package com.onair.hearit.presentation.library
 
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.OptIn
+import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentLibraryBinding
@@ -22,6 +31,12 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
+import com.onair.hearit.service.PlaybackService
+import com.onair.hearit.service.PlaybackSessionCallback
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
+import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
+import kotlinx.coroutines.launch
 
 class LibraryFragment :
     Fragment(),
@@ -34,6 +49,26 @@ class LibraryFragment :
     private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
     private val bookmarkAdapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
 
+    private var mediaController: MediaController? = null
+
+    private val playerListener =
+        object : Player.Listener {
+            override fun onEvents(
+                player: Player,
+                events: Player.Events,
+            ) {
+                if (events.containsAny(
+                        Player.EVENT_MEDIA_ITEM_TRANSITION,
+                        Player.EVENT_MEDIA_METADATA_CHANGED,
+                        Player.EVENT_PLAY_WHEN_READY_CHANGED,
+                        Player.EVENT_PLAYBACK_STATE_CHANGED,
+                    )
+                ) {
+                    updatePlayAllIcon(mediaController)
+                }
+            }
+        }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -42,6 +77,7 @@ class LibraryFragment :
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         binding.rvBookmark.adapter = bookmarkAdapter
+        binding.viewModel = viewModel
         return binding.root
     }
 
@@ -54,6 +90,29 @@ class LibraryFragment :
         setupWindowInsets()
         observeViewModel()
         setupInfiniteScroll()
+        setupPlayAllButton()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (mediaController == null) {
+            val token =
+                SessionToken(
+                    requireContext(),
+                    ComponentName(
+                        requireContext(),
+                        PlaybackService::class.java,
+                    ),
+                )
+            viewLifecycleOwner.lifecycleScope.launch {
+                mediaController =
+                    MediaController.Builder(requireContext(), token).buildAsync().await()
+                mediaController?.addListener(playerListener)
+                updatePlayAllIcon(mediaController)
+            }
+        } else {
+            updatePlayAllIcon(mediaController)
+        }
     }
 
     private fun setupWindowInsets() {
@@ -120,6 +179,64 @@ class LibraryFragment :
         )
     }
 
+    private fun setupPlayAllButton() {
+        binding.ibPlayAll.setOnClickListener {
+            val controller = mediaController
+            if (controller == null) {
+                startPlaylistFromTopBookmark()
+                return@setOnClickListener
+            }
+
+            if (isLibraryMode(controller)) {
+                if (controller.isPlaying) controller.pause() else controller.play()
+            } else {
+                startPlaylistFromTopBookmark()
+            }
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun startPlaylistFromTopBookmark() {
+        val latestBookmark = viewModel.bookmarks.value?.firstOrNull() ?: return
+
+        val args =
+            Bundle().apply {
+                putLong(EXTRA_SEED_HEARIT_ID, latestBookmark.hearitId)
+                putLong(EXTRA_SEED_BOOKMARK_ID, latestBookmark.bookmarkId)
+                putLong(EXTRA_START_POSITION_MS, latestBookmark.lastPlayTime ?: 0L)
+            }
+
+        mediaController?.sendCustomCommand(
+            PlaybackSessionCallback.START_LIBRARY_PLAY_COMMAND,
+            args,
+        )
+    }
+
+    private fun updatePlayAllIcon(controller: MediaController?) {
+        if (controller == null) {
+            binding.ibPlayAll.setImageResource(R.drawable.img_play)
+            return
+        }
+
+        if (isLibraryMode(controller)) {
+            val isPlaying =
+                controller.playWhenReady && controller.playbackState == Player.STATE_READY
+            binding.ibPlayAll.setImageResource(if (isPlaying) R.drawable.img_pause else R.drawable.img_play)
+        } else {
+            binding.ibPlayAll.setImageResource(R.drawable.img_play)
+        }
+    }
+
+    private fun isLibraryMode(controller: MediaController?): Boolean {
+        val mode =
+            controller
+                ?.currentMediaItem
+                ?.mediaMetadata
+                ?.extras
+                ?.getString(MODE_KEY)
+        return mode.equals(LIBRARY_MODE, ignoreCase = true)
+    }
+
     override fun onClickOption(bookmarkId: Long) {
         val sheet = BookmarkOptionBottomSheet.newInstance(bookmarkId)
         sheet.show(childFragmentManager, sheet.tag)
@@ -134,6 +251,13 @@ class LibraryFragment :
         (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
+    override fun onStop() {
+        super.onStop()
+        mediaController?.removeListener(playerListener)
+        mediaController?.release()
+        mediaController = null
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -141,5 +265,7 @@ class LibraryFragment :
 
     companion object {
         private const val LOAD_MORE_THRESHOLD = 3
+        private const val MODE_KEY = "PLAYBACK_MODE"
+        private const val LIBRARY_MODE = "LIBRARY"
     }
 }
