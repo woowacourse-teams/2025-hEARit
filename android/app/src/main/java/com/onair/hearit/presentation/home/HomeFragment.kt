@@ -59,8 +59,8 @@ class HomeFragment :
         PlayingBookmarkHearitAdapter(this)
     }
 
-    private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy {
-        GroupedCategoryAdapter(
+    private val recommendationCategoryAdapter: RecommendationCategoryAdapter by lazy {
+        RecommendationCategoryAdapter(
             this,
             navigateClickListener = { id, name, colorCode ->
                 navigateToSearch(
@@ -158,7 +158,7 @@ class HomeFragment :
             addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
         }
 
-        binding.rvHomeRecommendationCategories.adapter = groupedCategoryAdapter
+        binding.rvHomeRecommendationCategories.adapter = recommendationCategoryAdapter
     }
 
     private fun observeViewModel() {
@@ -200,8 +200,8 @@ class HomeFragment :
             playingBookmarkAdapter.submitList(playingBookmarkHearits)
         }
 
-        viewModel.recommendationCategories.observe(viewLifecycleOwner) { groupedCategory ->
-            groupedCategoryAdapter.submitList(groupedCategory)
+        viewModel.recommendationCategories.observe(viewLifecycleOwner) { recommendationCategories ->
+            recommendationCategoryAdapter.submitList(recommendationCategories)
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
