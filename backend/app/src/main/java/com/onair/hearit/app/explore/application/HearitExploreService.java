@@ -16,6 +16,7 @@ public class HearitExploreService {
 
     private final List<ExploreScoreProcessor> exploreScoreProcessors;
 
+    @Transactional
     public CursorResponseV2<ExploredHearitResponse> getExploredHearits(UserInfo userInfo,
                                                                        CursorRequest cursorRequest) {
         ExploreScoreProcessor exploreScoreProcessor = getExploreScoreProcessor(userInfo);
