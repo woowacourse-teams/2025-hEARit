@@ -27,6 +27,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @RequiredArgsConstructor
 public class ApiLoggingAspect {
 
+    private static final String LOGGED_BY_AOP = "loggedByAop";
+    private static final String TRUE = "true";
+
     private final ConsoleLogger consoleLogger;
     private final JsonLogger jsonLogger;
 
@@ -62,12 +65,8 @@ public class ApiLoggingAspect {
     }
 
     @Before("allMapping()")
-    public void markAopEntered() {
-        MDC.put("AOP_ENTERED", "true");
-    }
-
-    @Before("allMapping()")
     public void logRequest(JoinPoint joinPoint) {
+        MDC.put(LOGGED_BY_AOP, TRUE);
         HttpServletRequest httpServletRequest = getHttpServletRequest();
         RequestLogProperty requestLogProperty = RequestLogProperty.of(httpServletRequest, joinPoint);
         jsonLogger.info(requestLogProperty);
@@ -93,6 +92,10 @@ public class ApiLoggingAspect {
 
     @AfterReturning(value = "exceptionHandler()", returning = "problemDetail")
     public void logExceptionHandler(JoinPoint joinPoint, ProblemDetail problemDetail) {
+        if (!TRUE.equals(MDC.get(LOGGED_BY_AOP))) {
+            logRequest(joinPoint);
+            MDC.put(LOGGED_BY_AOP, TRUE);
+        }
         try {
             HttpServletRequest httpServletRequest = getHttpServletRequest();
             String endPoint = httpServletRequest.getRequestURI();
