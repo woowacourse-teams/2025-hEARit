@@ -46,13 +46,13 @@ public class RefreshToken {
 
     private void validateExpiryDate(LocalDateTime expiryDate) {
         if (expiryDate == null) {
-            throw new RefreshTokenDomainException("멤버는 null이 될 수 없습니다.");
+            throw new RefreshTokenDomainException("만료일은 null이 될 수 없습니다.");
         }
     }
 
     private void validateToken(String token) {
         if (token == null) {
-            throw new RefreshTokenDomainException("멤버는 null이 될 수 없습니다.");
+            throw new RefreshTokenDomainException("리프레시 토큰은 null이 될 수 없습니다.");
         }
     }
 

@@ -34,7 +34,9 @@ public class MdcSetupFilter implements Filter {
         MDC.put("deviceModel", httpServletRequest.getHeader("Device-Model"));
         MDC.put("appVersion", httpServletRequest.getHeader("App-Version"));
         MDC.put("guestId", httpServletRequest.getHeader("X-Device-UUID"));
-        MDC.put("userType", httpServletRequest.getHeader("unspecified"));
+
+        /* JwtAuthenticationFilter 에서 설정해주지만, filter 에러 발생 시 빈 값 방지를 위한 초기화 설정입니다. */
+        MDC.put("userType", "unspecified");
 
         /* latencyTime을 위한 value */
         MDC.put("startTime", String.valueOf(System.currentTimeMillis()));

@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -78,10 +79,14 @@ public class JwtTokenProvider {
             parseClaims(token);
             return true;
         } catch (ExpiredJwtException e) {
-            jsonLogger.warn(TokenRefreshLogProperty.failure(getMemberId(token), "토큰이 만료되었습니다."));
+            Long memberId = Optional.ofNullable(e.getClaims())
+                    .map(Claims::getSubject)
+                    .map(Long::parseLong)
+                    .orElse(-1L);
+            jsonLogger.warn(TokenRefreshLogProperty.failure(memberId, "토큰이 만료되었습니다."));
             return false;
         } catch (JwtException e) {
-            jsonLogger.warn(TokenRefreshLogProperty.failure(getMemberId(token), "토큰이 유효하지않습니다."));
+            jsonLogger.warn(TokenRefreshLogProperty.failure(-1L, "토큰이 유효하지 않습니다."));
             return false;
         }
     }
@@ -99,8 +104,14 @@ public class JwtTokenProvider {
             }
             return TokenStatus.VALID;
         } catch (ExpiredJwtException e) {
+            Long memberId = Optional.ofNullable(e.getClaims())
+                    .map(Claims::getSubject)
+                    .map(Long::parseLong)
+                    .orElse(-1L);
+            jsonLogger.warn(TokenRefreshLogProperty.failure(memberId, "토큰이 만료되었습니다."));
             return TokenStatus.EXPIRED;
         } catch (JwtException e) {
+            jsonLogger.warn(TokenRefreshLogProperty.failure(-1L, "토큰이 유효하지 않습니다."));
             return TokenStatus.INVALID;
         }
     }
