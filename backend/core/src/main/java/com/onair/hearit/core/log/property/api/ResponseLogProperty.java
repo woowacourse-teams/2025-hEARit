@@ -3,7 +3,6 @@ package com.onair.hearit.core.log.property.api;
 import com.onair.hearit.core.log.LogEvent;
 import com.onair.hearit.core.log.property.LogProperty;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,10 +33,15 @@ public class ResponseLogProperty implements LogProperty {
     }
 
     private static long calculateTimeTakenMs() {
-        return Optional.ofNullable(MDC.get("startTime"))
-                .map(Long::parseLong)
-                .map(startTime -> System.currentTimeMillis() - startTime)
-                .orElse(-1L);
+        String startTime = MDC.get("startTime");
+        if (startTime == null) {
+            return -1L;
+        }
+        try {
+            return System.currentTimeMillis() - Long.parseLong(startTime);
+        } catch (NumberFormatException e) {
+            return -1L;
+        }
     }
 
     @Override
