@@ -66,8 +66,7 @@ public class ApiGlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex,
-                                                               HttpServletRequest request) {
+    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {
         return buildProblemDetail(ErrorCode.INVALID_INPUT, "요청 본문을 읽을 수 없습니다", request);
     }
 
