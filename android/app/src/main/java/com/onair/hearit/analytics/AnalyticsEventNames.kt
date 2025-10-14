@@ -5,6 +5,9 @@ object AnalyticsEventNames {
     const val HOME_PLAYING_HISTORY_SELECTED = "home_playing_history_selected"
     const val HOME_RECENT_UPLOAD_SELECTED = "home_recent_upload_selected"
     const val HOME_PLAYING_BOOKMARK_SELECTED = "home_playing_bookmark_selected"
+    const val HOME_RECOMMENDATION_CATEGORY_SELECTED = "home_recommendation_category_selected"
+    const val HOME_RECOMMENDATION_CATEGORY_HEARIT_SELECTED =
+        "home_recommendation_category_hearit_selected"
     const val HOME_BOOKMARK_SELECTED = "home_bookmark_selected"
     const val HOME_EXPLORE_SELECTED = "home_explore_selected"
     const val HOME_WOOTAECO_SELECTED = "home_wootaeco_selected"

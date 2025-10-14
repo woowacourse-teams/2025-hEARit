@@ -5,4 +5,5 @@ enum class HearitSource {
     RECOMMEND,
     RECENT_UPLOAD,
     PLAYING_BOOKMARK,
+    RECOMMENDATION_CATEGORY,
 }

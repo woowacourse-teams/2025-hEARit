@@ -276,6 +276,11 @@ class HomeFragment :
         name: String,
         colorCode: String,
     ) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_SELECTED,
+            mapOf(ITEM_ID to name),
+        )
+
         parentFragmentManager
             .beginTransaction()
             .replace(
@@ -323,6 +328,12 @@ class HomeFragment :
             HearitSource.PLAYING_BOOKMARK ->
                 AnalyticsProvider.get().logEvent(
                     AnalyticsEventNames.HOME_PLAYING_BOOKMARK_SELECTED,
+                    mapOf(ITEM_ID to hearitId.toString()),
+                )
+
+            HearitSource.RECOMMENDATION_CATEGORY ->
+                AnalyticsProvider.get().logEvent(
+                    AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_HEARIT_SELECTED,
                     mapOf(ITEM_ID to hearitId.toString()),
                 )
         }

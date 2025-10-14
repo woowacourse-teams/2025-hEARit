@@ -5,11 +5,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemCategoryHearitBinding
 import com.onair.hearit.domain.model.CategoryHearit
+import com.onair.hearit.domain.model.HearitSource
 import com.onair.hearit.presentation.HearitClickListener
 
 class CategoryItemViewHolder private constructor(
     private val binding: ItemCategoryHearitBinding,
-    private val hearitClickListener: HearitClickListener,
+    private val source: HearitSource,
+    hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     init {
         binding.hearitClickListener = hearitClickListener
@@ -21,16 +23,18 @@ class CategoryItemViewHolder private constructor(
     ) {
         binding.categoryHearit = item
         binding.categoryColor = color
+        binding.source = source
     }
 
     companion object {
         fun create(
             parent: ViewGroup,
+            source: HearitSource,
             hearitClickListener: HearitClickListener,
         ): CategoryItemViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemCategoryHearitBinding.inflate(inflater, parent, false)
-            return CategoryItemViewHolder(binding, hearitClickListener)
+            return CategoryItemViewHolder(binding, source, hearitClickListener)
         }
     }
 }
