@@ -3,6 +3,7 @@ package com.onair.hearit.core.infrastructure.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -30,7 +31,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({DbHelper.class, TestJpaAuditingConfig.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class})
 public class HearitRepositorySearchTest {
 
     @Autowired

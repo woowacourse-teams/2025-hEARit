@@ -14,6 +14,7 @@ import com.onair.hearit.app.explore.dto.CursorRequest;
 import com.onair.hearit.app.explore.dto.CursorResponseV2;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -40,9 +41,10 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, TestJpaAuditingConfig.class, RandomScoreFactor.class, RecencyScoreFactor.class,
-        BookmarkScoreFactor.class, ExploreScoreCalculator.class, ExploreScoreCommandRepository.class,
-        ExploreScoreInitializer.class, GuestExploreScoreProcessor.class, MemberExploreScoreProcessor.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, RandomScoreFactor.class,
+        RecencyScoreFactor.class, BookmarkScoreFactor.class, ExploreScoreCalculator.class,
+        ExploreScoreCommandRepository.class, ExploreScoreInitializer.class, GuestExploreScoreProcessor.class,
+        MemberExploreScoreProcessor.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
@@ -66,7 +68,6 @@ class HearitExploreServiceTest {
         hearitExploreService = new HearitExploreService(
                 List.of(guestExploreScoreProcessor, memberExploreScoreProcessor));
     }
-
 
     @DisplayName("회원이 처음 탐색 요청 시(cursorId=0), 최신, 랜덤, 북마크 점수 순으로 정렬하여 반환한다")
     @Test

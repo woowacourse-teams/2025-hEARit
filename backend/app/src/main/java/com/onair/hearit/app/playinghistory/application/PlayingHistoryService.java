@@ -1,12 +1,12 @@
 package com.onair.hearit.app.playinghistory.application;
 
+import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
 import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.UserInfo;
-import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import java.util.Collections;
@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class PlayingHistoryService {
     private final PlayingHistoryRepository playingHistoryRepository;
     private final PlayingHistoryBuffer playingHistoryBuffer;
 
+    @Transactional(readOnly = true)
     public List<RecentlyPlayedHearitResponse> getRecentPlayingHistory(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
             return Collections.emptyList();

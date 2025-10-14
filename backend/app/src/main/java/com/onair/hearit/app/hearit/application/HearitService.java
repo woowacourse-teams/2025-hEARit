@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,7 @@ public class HearitService {
     private final HearitKeywordRepository hearitKeywordRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
 
+    @Transactional(readOnly = true)
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
         Hearit hearit = getHearitById(hearitId);
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId());
@@ -90,6 +92,7 @@ public class HearitService {
                 .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
     }
 
+    @Transactional(readOnly = true)
     public PagedResponse<HearitOverviewResponse> getFilteredHearits(
             Long categoryId, HearitSortRequest sortRequest, UserInfo userInfo, PagingRequest pagingRequest) {
         Long memberId = (userInfo == null || userInfo.isGuest()) ? null : userInfo.getMemberId();

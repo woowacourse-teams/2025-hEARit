@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,7 @@ public class HearitSearchService {
     private final MemberRepository memberRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
 
+    @Transactional(readOnly = true)
     public PagedResponse<HearitSearchResponse> search(String searchTerm, PagingRequest pagingRequest,
                                                       UserInfo userInfo) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());

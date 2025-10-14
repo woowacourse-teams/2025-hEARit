@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.auth.domain.RequestUser;
+import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.domain.Category;
@@ -38,8 +39,8 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({DbHelper.class, TestJpaAuditingConfig.class, PlayingHistoryBuffer.class,
-        PlayingHistoryCommandRepository.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class,
+        PlayingHistoryBuffer.class, PlayingHistoryCommandRepository.class})
 class PlayingHistoryServiceTest {
 
     @Autowired
