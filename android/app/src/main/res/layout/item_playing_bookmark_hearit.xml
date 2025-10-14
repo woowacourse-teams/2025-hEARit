@@ -12,6 +12,10 @@
         <variable
             name="clickListener"
             type="com.onair.hearit.presentation.HearitClickListener" />
+
+        <variable
+            name="source"
+            type="com.onair.hearit.analytics.HearitSource" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,7 +23,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        android:onClick="@{() -> clickListener.onClick(playingBookmarkHearit.hearitId)}">
+        android:onClick="@{() -> clickListener.onClick(playingBookmarkHearit.hearitId, source)}">
 
         <TextView
             android:id="@+id/recent_hearit_category"

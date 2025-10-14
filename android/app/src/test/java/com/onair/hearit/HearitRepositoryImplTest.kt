@@ -95,7 +95,7 @@ class HearitRepositoryImplTest {
         }
 
     @Test
-    fun `getRandomHearits 성공 시 PageResult 도메인 모델 반환`() =
+    fun `getExploreHearits 성공 시 PageResult 도메인 모델 반환`() =
         runTest {
             val mockPageResultDto = createFakeRandomHearit()
             val expectedDomainResult = mockPageResultDto.toDomain()
@@ -110,7 +110,7 @@ class HearitRepositoryImplTest {
         }
 
     @Test
-    fun `getRandomHearits 실패 시 Result failure 반환`() =
+    fun `getExploreHearits 실패 시 Result failure 반환`() =
         runTest {
             val expectedException = RuntimeException("랜덤 데이터 오류")
 

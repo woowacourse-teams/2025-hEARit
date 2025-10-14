@@ -12,6 +12,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -81,6 +84,11 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                     backStackTag,
                 ).addToBackStack(backStackTag)
                 .commit()
+
+            AnalyticsProvider.get().logEvent(
+                AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
+                mapOf(AnalyticsParamKeys.ITEM_NAME to name),
+            )
         }
 
         is DetailResult.Keyword -> {
@@ -97,6 +105,11 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                     backStackTag,
                 ).addToBackStack(backStackTag)
                 .commit()
+
+            AnalyticsProvider.get().logEvent(
+                AnalyticsEventNames.SEARCH_KEYWORD_ENTERED,
+                mapOf(AnalyticsParamKeys.ITEM_NAME to term),
+            )
         }
     }
 }

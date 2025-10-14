@@ -8,7 +8,7 @@ import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.dpToPx
 
-class GroupedCategoryViewHolder(
+class RecommendationCategoryViewHolder(
     private val binding: ItemRecommendationCategoryBinding,
     hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
@@ -39,10 +39,10 @@ class GroupedCategoryViewHolder(
         fun create(
             parent: ViewGroup,
             hearitClickListener: HearitClickListener,
-        ): GroupedCategoryViewHolder {
+        ): RecommendationCategoryViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemRecommendationCategoryBinding.inflate(inflater, parent, false)
-            return GroupedCategoryViewHolder(binding, hearitClickListener)
+            return RecommendationCategoryViewHolder(binding, hearitClickListener)
         }
 
         private const val DEFAULT_COLOR = "#000000"

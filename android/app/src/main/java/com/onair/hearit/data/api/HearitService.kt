@@ -27,7 +27,7 @@ interface HearitService {
     ): Response<HearitsResponse>
 
     @GET("api/v2/hearits/explore")
-    suspend fun getRandomHearits(
+    suspend fun getExploreHearits(
         @Query("cursorId") cursorId: Long?,
         @Query("size") size: Int?,
     ): Response<ExploreHearitResponse>

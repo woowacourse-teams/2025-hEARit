@@ -39,7 +39,7 @@ class HearitRemoteDataSourceImpl(
         size: Int?,
     ): Result<NetworkResult<ExploreHearitResponse>> =
         handleApiCall(
-            apiCall = { hearitService.getRandomHearits(cursorId, size) },
+            apiCall = { hearitService.getExploreHearits(cursorId, size) },
             transform = { response ->
                 response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
             },
