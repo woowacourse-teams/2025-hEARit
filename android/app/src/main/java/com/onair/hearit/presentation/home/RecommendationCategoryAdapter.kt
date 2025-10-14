@@ -6,17 +6,17 @@ import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.presentation.HearitClickListener
 
-class GroupedCategoryAdapter(
+class RecommendationCategoryAdapter(
     private val hearitClickListener: HearitClickListener,
     private val navigateClickListener: (Long, String, String) -> Unit,
-) : ListAdapter<RecommendationCategories, GroupedCategoryViewHolder>(DiffCallback) {
+) : ListAdapter<RecommendationCategories, RecommendationCategoryViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): GroupedCategoryViewHolder = GroupedCategoryViewHolder.create(parent, hearitClickListener)
+    ): RecommendationCategoryViewHolder = RecommendationCategoryViewHolder.create(parent, hearitClickListener)
 
     override fun onBindViewHolder(
-        holder: GroupedCategoryViewHolder,
+        holder: RecommendationCategoryViewHolder,
         position: Int,
     ) {
         holder.bind(getItem(position), navigateClickListener)

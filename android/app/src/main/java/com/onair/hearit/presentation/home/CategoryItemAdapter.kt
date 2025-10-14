@@ -3,6 +3,7 @@ package com.onair.hearit.presentation.home
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.domain.model.CategoryHearit
 import com.onair.hearit.presentation.HearitClickListener
 
@@ -13,7 +14,12 @@ class CategoryItemAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): CategoryItemViewHolder = CategoryItemViewHolder.create(parent, hearitClickListener)
+    ): CategoryItemViewHolder =
+        CategoryItemViewHolder.create(
+            parent,
+            HearitSource.RECOMMENDATION_CATEGORY,
+            hearitClickListener,
+        )
 
     override fun onBindViewHolder(
         holder: CategoryItemViewHolder,

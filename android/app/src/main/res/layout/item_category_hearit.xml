@@ -16,13 +16,17 @@
         <variable
             name="hearitClickListener"
             type="com.onair.hearit.presentation.HearitClickListener" />
+
+        <variable
+            name="source"
+            type="com.onair.hearit.analytics.HearitSource" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="200dp"
         android:layout_height="148dp"
         android:background="@drawable/bg_gray1_radius_8dp"
-        android:onClick="@{() -> hearitClickListener.onClick(categoryHearit.hearitId)}">
+        android:onClick="@{() -> hearitClickListener.onClick(categoryHearit.hearitId, source)}">
 
         <TextView
             android:id="@+id/tv_category_hearit"

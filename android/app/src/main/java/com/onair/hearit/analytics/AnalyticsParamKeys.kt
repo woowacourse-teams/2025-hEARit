@@ -5,5 +5,6 @@ object AnalyticsParamKeys {
     const val SOURCE_NAME = "source_name"
     const val KEYWORD_NAME = "keyword_name"
     const val ITEM_NAME = "item_name"
+    const val ITEM_ID = "item_id"
     const val ITEM_INDEX = "item_index"
 }

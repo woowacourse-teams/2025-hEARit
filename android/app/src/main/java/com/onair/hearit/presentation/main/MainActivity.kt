@@ -63,13 +63,13 @@ class MainActivity :
     PlayerControllerView,
     PlaybackStarter {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var detailResultLauncher: ActivityResultLauncher<Intent>
     private val backPressInterval = 1000L
     private var backPressedTime: Long = 0L
     private var loadingDialog: AlertDialog? = null
     private var mediaController: MediaController? = null
     private var currentSelectedItemId: Int = R.id.nav_home
     private var hasSentPreload = false
-    private lateinit var detailResultLauncher: ActivityResultLauncher<Intent>
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
 
     private val mainViewModel: MainViewModel by viewModels { MainViewModelFactory() }
@@ -208,6 +208,11 @@ class MainActivity :
             mainViewModel.performLogout()
         }
         binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
+
+        binding.layoutDrawer.tvDrawerFeedback.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, FEEDBACK_URL.toUri())
+            startActivity(intent)
+        }
     }
 
     private fun attachController() {
@@ -472,5 +477,7 @@ class MainActivity :
             "https://glistening-eclipse-58b.notion.site/231d39b9c3c3809b9f92ec3e812ea24b?source=copy_link"
         private const val TERMS_OF_USE_URL =
             "https://glistening-eclipse-58b.notion.site/231d39b9c3c3800eb03cc7e1fc00f6f1?source=copy_link"
+        private const val FEEDBACK_URL =
+            "https://docs.google.com/forms/d/e/1FAIpQLSfHy20uq3LGUmxngS38QmDjGbJLHPXSlgUcp_yYfsQygXzC_Q/viewform"
     }
 }

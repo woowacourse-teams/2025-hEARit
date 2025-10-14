@@ -19,6 +19,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys.CATEGORY_NAME
+import com.onair.hearit.analytics.AnalyticsParamKeys.ITEM_ID
+import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.HearitClickListener
@@ -57,8 +60,8 @@ class HomeFragment :
         PlayingBookmarkHearitAdapter(this)
     }
 
-    private val groupedCategoryAdapter: GroupedCategoryAdapter by lazy {
-        GroupedCategoryAdapter(
+    private val recommendationCategoryAdapter: RecommendationCategoryAdapter by lazy {
+        RecommendationCategoryAdapter(
             this,
             navigateClickListener = { id, name, colorCode ->
                 navigateToSearch(
@@ -108,10 +111,12 @@ class HomeFragment :
         }
 
         binding.tvHomePlayingBookmarkTitle.setOnClickListener {
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_library)
         }
 
         binding.ibHomePlayingBookmark.setOnClickListener {
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_library)
         }
 
@@ -153,7 +158,7 @@ class HomeFragment :
             addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
         }
 
-        binding.rvHomeRecommendationCategories.adapter = groupedCategoryAdapter
+        binding.rvHomeRecommendationCategories.adapter = recommendationCategoryAdapter
     }
 
     private fun observeViewModel() {
@@ -195,8 +200,8 @@ class HomeFragment :
             playingBookmarkAdapter.submitList(playingBookmarkHearits)
         }
 
-        viewModel.recommendationCategories.observe(viewLifecycleOwner) { groupedCategory ->
-            groupedCategoryAdapter.submitList(groupedCategory)
+        viewModel.recommendationCategories.observe(viewLifecycleOwner) { recommendationCategories ->
+            recommendationCategoryAdapter.submitList(recommendationCategories)
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
@@ -271,6 +276,11 @@ class HomeFragment :
         name: String,
         colorCode: String,
     ) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_SELECTED,
+            mapOf(ITEM_ID to id.toString(), CATEGORY_NAME to name),
+        )
+
         parentFragmentManager
             .beginTransaction()
             .replace(
@@ -292,7 +302,26 @@ class HomeFragment :
         (activity as? MainActivity)?.launchDetailActivity(intent)
     }
 
-    override fun onClick(hearitId: Long) {
+    private fun logHomeHearitClick(
+        source: HearitSource,
+        hearitId: Long,
+    ) {
+        val event =
+            when (source) {
+                HearitSource.PLAYING_HISTORY -> AnalyticsEventNames.HOME_PLAYING_HISTORY_SELECTED
+                HearitSource.RECOMMEND -> AnalyticsEventNames.HOME_RECOMMEND_SELECTED
+                HearitSource.RECENT_UPLOAD -> AnalyticsEventNames.HOME_RECENT_UPLOAD_SELECTED
+                HearitSource.PLAYING_BOOKMARK -> AnalyticsEventNames.HOME_PLAYING_BOOKMARK_SELECTED
+                HearitSource.RECOMMENDATION_CATEGORY -> AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_HEARIT_SELECTED
+            }
+        AnalyticsProvider.get().logEvent(event, mapOf(ITEM_ID to hearitId.toString()))
+    }
+
+    override fun onClick(
+        hearitId: Long,
+        source: HearitSource,
+    ) {
+        logHomeHearitClick(source, hearitId)
         navigateToPlayerDetail(hearitId)
     }
 
