@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys.CATEGORY_NAME
 import com.onair.hearit.analytics.AnalyticsParamKeys.ITEM_ID
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
@@ -125,7 +126,6 @@ class HomeFragment :
         }
 
         binding.tvHomeWootaeco.setOnClickListener {
-            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_WOOTAECO_SELECTED)
             navigateToSearch(id = 13, name = "우아한테크코스", colorCode = "#12C6B0")
         }
     }
@@ -278,7 +278,7 @@ class HomeFragment :
     ) {
         AnalyticsProvider.get().logEvent(
             AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_SELECTED,
-            mapOf(ITEM_ID to name),
+            mapOf(CATEGORY_NAME to name),
         )
 
         parentFragmentManager
