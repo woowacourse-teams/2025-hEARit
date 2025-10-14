@@ -3,13 +3,13 @@ package com.onair.hearit.presentation.home
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.onair.hearit.databinding.ItemGroupedCategoryBinding
-import com.onair.hearit.domain.model.GroupedCategory
+import com.onair.hearit.databinding.ItemRecommendationCategoryBinding
+import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.dpToPx
 
 class GroupedCategoryViewHolder(
-    private val binding: ItemGroupedCategoryBinding,
+    private val binding: ItemRecommendationCategoryBinding,
     hearitClickListener: HearitClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     private val itemAdapter = CategoryItemAdapter(hearitClickListener, DEFAULT_COLOR)
@@ -26,13 +26,13 @@ class GroupedCategoryViewHolder(
     }
 
     fun bind(
-        groupedCategory: GroupedCategory,
+        recommendationCategories: RecommendationCategories,
         clickListener: (Long, String, String) -> Unit,
     ) {
         binding.navigateClickListener = clickListener
-        binding.groupedCategory = groupedCategory
-        itemAdapter.updateColor(groupedCategory.colorCode)
-        itemAdapter.submitList(groupedCategory.hearits)
+        binding.recommendationCategory = recommendationCategories
+        itemAdapter.updateColor(recommendationCategories.colorCode)
+        itemAdapter.submitList(recommendationCategories.hearits)
     }
 
     companion object {
@@ -41,7 +41,7 @@ class GroupedCategoryViewHolder(
             hearitClickListener: HearitClickListener,
         ): GroupedCategoryViewHolder {
             val inflater = LayoutInflater.from(parent.context)
-            val binding = ItemGroupedCategoryBinding.inflate(inflater, parent, false)
+            val binding = ItemRecommendationCategoryBinding.inflate(inflater, parent, false)
             return GroupedCategoryViewHolder(binding, hearitClickListener)
         }
 

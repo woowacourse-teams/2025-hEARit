@@ -6,11 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.CursorResult
-import com.onair.hearit.domain.model.RandomHearit
-import com.onair.hearit.domain.model.ShortsHearit
+import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
-import com.onair.hearit.domain.usecase.GetShortsHearitUseCase
+import com.onair.hearit.domain.usecase.GetExploreHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -21,10 +20,10 @@ import timber.log.Timber
 class ExploreViewModel(
     private val hearitRepository: HearitRepository,
     private val exploreDataStoreRepository: ExploreDataStoreRepository,
-    private val getShortsHearitUseCase: GetShortsHearitUseCase,
+    private val getExploreHearitUseCase: GetExploreHearitUseCase,
 ) : ViewModel() {
-    private val _shortsHearits = MutableLiveData<List<ShortsHearit>>()
-    val shortsHearits: LiveData<List<ShortsHearit>> = _shortsHearits
+    private val _shortsHearits = MutableLiveData<List<ExploreHearit>>()
+    val shortsHearits: LiveData<List<ExploreHearit>> = _shortsHearits
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -42,7 +41,7 @@ class ExploreViewModel(
     private var isEndOfFeed: Boolean = false // 더 이상 페이지가 없는지
     private var nextCursorId: Long? = -1L // 다음 페이지 시작 커서
 
-    private var resumeItem: ShortsHearit? = null // 복귀 시 표시할 아이템
+    private var resumeItem: ExploreHearit? = null // 복귀 시 표시할 아이템
     private var resumePositionMs: Long = 0L // 복귀 시 플레이어 시작 위치(ms)
     private var resumeScheduled: Boolean = false // 다음 attach 때 재개 예정인지
 
@@ -129,7 +128,7 @@ class ExploreViewModel(
 
         viewModelScope.launch {
             try {
-                val result = hearitRepository.getRandomHearits(cursorId)
+                val result = hearitRepository.getExploreHearits(cursorId)
                 result
                     .onSuccess { randomItems ->
                         isEndOfFeed = randomItems.isEmpty
@@ -151,15 +150,15 @@ class ExploreViewModel(
         }
     }
 
-    private suspend fun buildShortsHearit(cursorItems: CursorResult<RandomHearit>): List<ShortsHearit> =
+    private suspend fun buildShortsHearit(cursorItems: CursorResult<ExploreHearit>): List<ExploreHearit> =
         coroutineScope {
             cursorItems.items
-                .map { item -> async { getShortsHearitUseCase(item).getOrNull() } }
+                .map { item -> async { getExploreHearitUseCase(item).getOrNull() } }
                 .awaitAll()
                 .mapNotNull { it }
         }
 
-    private fun updateShortsHearit(newItems: List<ShortsHearit>) {
+    private fun updateShortsHearit(newItems: List<ExploreHearit>) {
         val combined =
             if (resumeItem != null) {
                 val uniqueNew = newItems.filter { it.id != resumeItem?.id }

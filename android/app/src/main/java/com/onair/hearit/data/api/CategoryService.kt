@@ -1,7 +1,6 @@
 package com.onair.hearit.data.api
 
 import com.onair.hearit.data.dto.CategoryResponse
-import com.onair.hearit.data.dto.SearchHearitResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -12,11 +11,4 @@ interface CategoryService {
         @Query("page") page: Int?,
         @Query("size") size: Int?,
     ): Response<CategoryResponse>
-
-    @GET("api/v1/hearits")
-    suspend fun getHearitsByCategoryId(
-        @Query("categoryId") categoryId: Long,
-        @Query("page") page: Int?,
-        @Query("size") size: Int?,
-    ): Response<SearchHearitResponse>
 }

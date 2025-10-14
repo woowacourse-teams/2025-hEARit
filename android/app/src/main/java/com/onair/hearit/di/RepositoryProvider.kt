@@ -11,6 +11,7 @@ import com.onair.hearit.data.repository.MemberRepositoryImpl
 import com.onair.hearit.data.repository.PlayingHistoryRepositoryImpl
 import com.onair.hearit.data.repository.RecentHearitRepositoryImpl
 import com.onair.hearit.data.repository.RecentKeywordRepositoryImpl
+import com.onair.hearit.data.repository.RecommendationRepositoryImpl
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.CategoryRepository
@@ -21,6 +22,7 @@ import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
+import com.onair.hearit.domain.repository.RecommendationRepository
 
 object RepositoryProvider {
     private lateinit var appContext: Context
@@ -76,5 +78,9 @@ object RepositoryProvider {
 
     val playingHistoryRepository: PlayingHistoryRepository by lazy {
         PlayingHistoryRepositoryImpl(playingHistoryDataSource = DataSourceProvider.playingHistoryDataSource)
+    }
+
+    val recommendationRepository: RecommendationRepository by lazy {
+        RecommendationRepositoryImpl(recommendationDataSource = DataSourceProvider.recommendationRemoteDataSource)
     }
 }

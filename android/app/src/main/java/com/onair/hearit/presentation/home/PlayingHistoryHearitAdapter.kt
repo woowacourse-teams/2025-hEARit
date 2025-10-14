@@ -6,16 +6,16 @@ import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.PlayingHistoryHearit
 import com.onair.hearit.presentation.HearitClickListener
 
-class RecentHearitAdapter(
+class PlayingHistoryHearitAdapter(
     private val hearitClickListener: HearitClickListener,
-) : ListAdapter<PlayingHistoryHearit, RecentHearitViewHolder>(DiffCallback) {
+) : ListAdapter<PlayingHistoryHearit, PlayingHistoryHearitViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): RecentHearitViewHolder = RecentHearitViewHolder.create(parent, hearitClickListener)
+    ): PlayingHistoryHearitViewHolder = PlayingHistoryHearitViewHolder.create(parent, hearitClickListener)
 
     override fun onBindViewHolder(
-        holder: RecentHearitViewHolder,
+        holder: PlayingHistoryHearitViewHolder,
         position: Int,
     ) {
         holder.bind(getItem(position))

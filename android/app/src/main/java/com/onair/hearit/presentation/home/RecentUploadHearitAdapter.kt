@@ -3,33 +3,33 @@ package com.onair.hearit.presentation.home
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.presentation.HearitClickListener
 
-class RecommendHearitAdapter(
+class RecentUploadHearitAdapter(
     private val hearitClickListener: HearitClickListener,
-) : ListAdapter<RecommendHearit, RecommendViewHolder>(DiffCallback) {
+) : ListAdapter<RecentUploadHearit, RecentUploadHearitViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): RecommendViewHolder = RecommendViewHolder.create(parent, hearitClickListener)
+    ): RecentUploadHearitViewHolder = RecentUploadHearitViewHolder.create(parent, hearitClickListener)
 
     override fun onBindViewHolder(
-        holder: RecommendViewHolder,
+        holder: RecentUploadHearitViewHolder,
         position: Int,
     ) = holder.bind(getItem(position))
 
     companion object {
-        val DiffCallback =
-            object : DiffUtil.ItemCallback<RecommendHearit>() {
+        private val DiffCallback =
+            object : DiffUtil.ItemCallback<RecentUploadHearit>() {
                 override fun areItemsTheSame(
-                    oldItem: RecommendHearit,
-                    newItem: RecommendHearit,
+                    oldItem: RecentUploadHearit,
+                    newItem: RecentUploadHearit,
                 ): Boolean = oldItem.id == newItem.id
 
                 override fun areContentsTheSame(
-                    oldItem: RecommendHearit,
-                    newItem: RecommendHearit,
+                    oldItem: RecentUploadHearit,
+                    newItem: RecentUploadHearit,
                 ): Boolean = oldItem == newItem
             }
     }

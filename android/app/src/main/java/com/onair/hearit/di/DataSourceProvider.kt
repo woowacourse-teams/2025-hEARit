@@ -24,6 +24,8 @@ import com.onair.hearit.data.datasource.remote.MemberRemoteDataSource
 import com.onair.hearit.data.datasource.remote.MemberRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.PlayingHistoryDataSource
 import com.onair.hearit.data.datasource.remote.PlayingHistoryDataSourceImpl
+import com.onair.hearit.data.datasource.remote.RecommendationRemoteDataSource
+import com.onair.hearit.data.datasource.remote.RecommendationRemoteDataSourceImpl
 
 object DataSourceProvider {
     private lateinit var dataStore: DataStore<Preferences>
@@ -89,6 +91,13 @@ object DataSourceProvider {
     val playingHistoryDataSource: PlayingHistoryDataSource by lazy {
         PlayingHistoryDataSourceImpl(
             playingHistoryService = NetworkProvider.playingHistoryService,
+            errorResponseHandler = errorHandler,
+        )
+    }
+
+    val recommendationRemoteDataSource: RecommendationRemoteDataSource by lazy {
+        RecommendationRemoteDataSourceImpl(
+            recommendationService = NetworkProvider.recommendationService,
             errorResponseHandler = errorHandler,
         )
     }

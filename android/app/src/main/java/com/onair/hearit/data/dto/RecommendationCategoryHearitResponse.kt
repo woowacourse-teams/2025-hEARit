@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CategoryHearitResponse(
+data class RecommendationCategoryHearitResponse(
     @SerialName("createdAt")
     val createdAt: String,
     @SerialName("hearitId")
