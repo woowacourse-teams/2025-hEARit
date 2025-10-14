@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DbLoggingAspect {
 
-    private static final long SLOW_QUERY_THRESHOLD_MS = 0;
+    private static final long SLOW_QUERY_THRESHOLD_MS = 500;
 
     private final JsonLogger jsonLogger;
 
@@ -42,8 +42,8 @@ public class DbLoggingAspect {
                 String methodName = joinPoint.getSignature().getName();
                 SlowQueryLogProperty slowQueryLogProperty = SlowQueryLogProperty.of(query, executionTime, methodName);
                 jsonLogger.warn(slowQueryLogProperty);
-                QueryExecutionContext.clear();
             }
+            QueryExecutionContext.clear();
         }
     }
 

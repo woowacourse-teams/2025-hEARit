@@ -19,7 +19,7 @@ public class TokenRefreshLogProperty implements LogProperty {
 
     public static TokenRefreshLogProperty success(long memberId) {
         return new TokenRefreshLogProperty(memberId, LocalDateTime.now(ZoneId.of("Asia/Seoul")).toString(),
-                true, "null");
+                true, null);
     }
 
     public static TokenRefreshLogProperty failure(long memberId, String failureReason) {
