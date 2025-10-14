@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.domain.Category;
@@ -37,7 +38,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({DbHelper.class, TestJpaAuditingConfig.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class})
 class HearitSearchServiceTest {
 
     @Autowired

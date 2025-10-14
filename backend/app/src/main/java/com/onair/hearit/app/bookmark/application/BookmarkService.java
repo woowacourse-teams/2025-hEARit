@@ -35,6 +35,7 @@ public class BookmarkService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
 
+    @Transactional(readOnly = true)
     public PagedResponse<BookmarkHearitResponseV2> getBookmarkHearits(UserInfo userInfo,
                                                                       PagingRequest pagingRequest,
                                                                       BookmarkFilter filter,
@@ -50,6 +51,7 @@ public class BookmarkService {
     }
 
     /*will be deprecated after the client update*/
+    @Transactional(readOnly = true)
     public PagedResponse<BookmarkHearitResponseV2> getBookmarkHearitsV2(UserInfo userInfo,
                                                                         PagingRequest pagingRequest,
                                                                         BookmarkFilter filter) {

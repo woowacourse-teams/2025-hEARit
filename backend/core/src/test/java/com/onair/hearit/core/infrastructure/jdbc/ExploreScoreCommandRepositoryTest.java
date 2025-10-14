@@ -3,6 +3,7 @@ package com.onair.hearit.core.infrastructure.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
@@ -22,7 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import({ExploreScoreCommandRepository.class, DbHelper.class, TestJpaAuditingConfig.class})
+@Import({ExploreScoreCommandRepository.class, DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 public class ExploreScoreCommandRepositoryTest {

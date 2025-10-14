@@ -20,17 +20,18 @@ import org.springframework.data.domain.Pageable;
 public abstract class AbstractExploreScoreProcessor implements ExploreScoreProcessor {
 
     protected static final int KEYWORDS_PER_HEARIT_FOR_RANDOM = 5;
+
     protected final HearitKeywordRepository hearitKeywordRepository;
     private final ExploreScoreInitializer exploreScoreInitializer;
     private final ExploredHearitQueryRepository exploredHearitQueryRepository;
 
     @Override
-    public final void refreshScores(UserInfo userInfo, long cursorId) {
+    public void refreshScores(UserInfo userInfo, long cursorId) {
         exploreScoreInitializer.refreshScores(cursorId, getUserUuid(userInfo), userInfo.getUserType());
     }
 
     @Override
-    public final List<ExploredHearitResponse> getExploreHearits(UserInfo userInfo, long cursorId, int size) {
+    public List<ExploredHearitResponse> getExploreHearits(UserInfo userInfo, long cursorId, int size) {
         String userUuid = getUserUuid(userInfo);
         List<ExploredHearitProjection> exploredHearitProjections =
                 exploredHearitQueryRepository.findExploredHearits(userUuid, cursorId, Pageable.ofSize(size));
