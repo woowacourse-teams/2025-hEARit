@@ -4,6 +4,7 @@ import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.log.LogEvent;
 import com.onair.hearit.core.log.property.LogProperty;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class WithdrawalLogProperty implements LogProperty {
     private static int getMembershipDays(Member member) {
         LocalDateTime createdAt = member.getCreatedAt();
         LocalDateTime now = LocalDateTime.now();
-        return now.getDayOfYear() - createdAt.getDayOfYear();
+        return (int) ChronoUnit.DAYS.between(createdAt, now);
     }
 
     @Override
