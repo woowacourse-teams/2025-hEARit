@@ -37,18 +37,16 @@ class AutoPrefetchController(
         player: Player,
         events: Player.Events,
     ) {
-        if (!isLibraryMode) return
+        val hasPrefetchTrigger =
+            events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
+                events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) ||
+                events.contains(Player.EVENT_IS_PLAYING_CHANGED) ||
+                events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)
 
-        if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
-            events.contains(Player.EVENT_POSITION_DISCONTINUITY) ||
-            events.contains(Player.EVENT_TIMELINE_CHANGED)
-        ) {
-            return
-        }
+        if (!hasPrefetchTrigger) return
 
-        if (!events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) &&
-            !events.contains(Player.EVENT_IS_PLAYING_CHANGED) &&
-            !events.contains(Player.EVENT_MEDIA_METADATA_CHANGED)
+        if (events.contains(Player.EVENT_TIMELINE_CHANGED) ||
+            events.contains(Player.EVENT_POSITION_DISCONTINUITY)
         ) {
             return
         }
