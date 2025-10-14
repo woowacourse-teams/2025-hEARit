@@ -70,6 +70,7 @@ class LibraryPlaybackHandler(
     suspend fun prefetchNextPage(): PrefetchResult =
         withContext(Dispatchers.IO) {
             val pageToLoad = nextPage ?: return@withContext PrefetchResult(emptyList(), null)
+
             val pageResult =
                 getBookmarksUseCase(page = pageToLoad, size = DEFAULT_PAGE_SIZE).getOrNull()
 
@@ -122,11 +123,15 @@ class LibraryPlaybackHandler(
 
             allItems.addAll(items)
             if (seedInPage >= 0) {
+                nextPage = if (!result.paging.isLast) (result.paging.page + 1) else null
                 val globalIndex = allItems.size - items.size + seedInPage
                 return LibraryLoadResult(allItems, globalIndex)
             }
 
-            if (result.paging.isLast) return LibraryLoadResult(allItems, -1)
+            if (result.paging.isLast) {
+                nextPage = null
+                return LibraryLoadResult(allItems, -1)
+            }
             currentPage++
         }
     }

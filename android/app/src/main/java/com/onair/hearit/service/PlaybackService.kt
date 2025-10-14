@@ -39,22 +39,12 @@ class PlaybackService : MediaSessionService() {
         super.onCreate()
 
         initializePlayer()
-        mediaItemManager =
-            PlaybackMediaItemManager(
-                getPlaybackInfoUseCase = getPlaybackInfoUseCase,
-            )
-        libraryPlaybackHandler =
-            LibraryPlaybackHandler(
-                getBookmarksUseCase = getBookmarksUseCase,
-                mediaItemManager = mediaItemManager,
-            )
 
+        mediaItemManager = PlaybackMediaItemManager(getPlaybackInfoUseCase)
+        libraryPlaybackHandler = LibraryPlaybackHandler(getBookmarksUseCase, mediaItemManager)
         recentPlaybackHandler =
-            RecentPlaybackHandler(
-                recentHearitRepository = recentHearitRepository,
-                getPlaybackInfoUseCase = getPlaybackInfoUseCase,
-                mediaItemManager = mediaItemManager,
-            )
+            RecentPlaybackHandler(recentHearitRepository, getPlaybackInfoUseCase, mediaItemManager)
+
         playbackPositionListener = PlaybackPositionListener(player)
         stateSaver = PlaybackStateSaver(player, serviceScope, this)
         player.addListener(stateSaver.listener)
@@ -69,6 +59,7 @@ class PlaybackService : MediaSessionService() {
                 channelId = CHANNEL_ID,
                 notificationId = NOTIFICATION_ID,
             ).also { it.attach(player) }
+
         player.addListener(
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
