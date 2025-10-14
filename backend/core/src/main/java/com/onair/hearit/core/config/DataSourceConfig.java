@@ -24,17 +24,21 @@ public class DataSourceConfig {
     @Bean
     @ConfigurationProperties(MASTER_PROPERTY)
     public DataSource masterDataSource() {
-        return DataSourceBuilder.create()
+        HikariDataSource ds = DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .build();
+        ds.setPoolName(MASTER_PROPERTY);
+        return ds;
     }
 
     @Bean
     @ConfigurationProperties(REPLICA_PROPERTY)
     public DataSource replicaDataSource() {
-        return DataSourceBuilder.create()
+        HikariDataSource ds = DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .build();
+        ds.setPoolName(REPLICA_PROPERTY);
+        return ds;
     }
 
     @Bean
