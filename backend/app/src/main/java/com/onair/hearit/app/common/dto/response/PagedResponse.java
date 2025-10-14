@@ -1,0 +1,42 @@
+package com.onair.hearit.app.common.dto.response;
+
+import java.util.Collections;
+import java.util.List;
+import org.springframework.data.domain.Page;
+
+public record PagedResponse<T>(
+        List<T> content,
+        int page,
+        int size,
+        int totalPages,
+        long totalElements,
+        boolean isFirst,
+        boolean isLast
+) {
+    public static <T> PagedResponse<T> from(Page<T> pageResult) {
+        if (pageResult.isEmpty()) {
+            return empty();
+        }
+        return new PagedResponse<>(
+                pageResult.getContent(),
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalPages(),
+                pageResult.getTotalElements(),
+                pageResult.isFirst(),
+                pageResult.isLast()
+        );
+    }
+
+    public static <T> PagedResponse<T> empty() {
+        return new PagedResponse<>(
+                Collections.emptyList(),
+                0,
+                0,
+                0,
+                0,
+                true,
+                true
+        );
+    }
+}

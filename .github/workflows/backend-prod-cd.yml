@@ -30,6 +30,8 @@ jobs:
       MYSQL_TEST_USER_PASSWORD: ${{ secrets.MYSQL_TEST_USER_PASSWORD }}
       TEST_MYSQL_PORT: ${{ secrets.TEST_MYSQL_PORT }}
       DB_MYSQL_HOST: ${{ secrets.DB_MYSQL_HOST }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MYSQL_WRITER_ENDPOINT: ${{ secrets.MYSQL_WRITER_ENDPOINT }}
 
     steps:
       - name: Checkout source
@@ -49,7 +51,7 @@ jobs:
         run: ./gradlew clean build
 
       - name: Rename jar to app.jar
-        working-directory: backend/build/libs
+        working-directory: backend/boot/build/libs
         run: |
           JAR_NAME=$(ls *.jar | head -n 1)
           mv "$JAR_NAME" app.jar
@@ -58,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: backend-jar
-          path: backend/build/libs/app.jar
+          path: backend/boot/build/libs/app.jar
 
   deploy:
     name: Deploy on EC2 for prod
@@ -73,7 +75,7 @@ jobs:
           path: ~/hearit
 
       - name: Make deploy script executable
-        run: chmod +x ~/hearit/deploy.sh
+        run: sudo chmod +x ~/hearit/deploy.sh
 
       - name: Run deploy script with sudo
         run: sudo bash ~/hearit/deploy.sh
