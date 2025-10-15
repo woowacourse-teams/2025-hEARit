@@ -28,7 +28,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    @Deprecated(since = "android version 1.3.0", forRemoval = true)
     private static final String DEVICE_UUID_HEADER = "X-Device-UUID";
+
+    private static final String DEVICE_UUID_HEADER_V2 = "Device-Uuid";
 
     private final JsonLogger jsonLogger;
     private final ConsoleLogger consoleLogger;
@@ -79,7 +82,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void authenticateAsGuest(HttpServletRequest request) {
-        String deviceUuid = request.getHeader(DEVICE_UUID_HEADER);
+        String deviceUuid = getDeviceUuid(request);
         RequestUser guestUser = RequestUser.guest(deviceUuid);
 
         setMdcForUser(guestUser);
@@ -87,6 +90,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(guestUser, null, null);
         SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    private static String getDeviceUuid(HttpServletRequest request) {
+        String deviceUuid = request.getHeader(DEVICE_UUID_HEADER_V2);
+        if (deviceUuid == null) {
+            return request.getHeader(DEVICE_UUID_HEADER);
+        }
+        return deviceUuid;
     }
 
     private void authenticateAsMember(String token) {

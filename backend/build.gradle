@@ -28,4 +28,10 @@ subprojects {
             exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
         }
     }
+
+    processResources {
+        filesMatching("**/application.properties") {
+            expand(project.properties)
+        }
+    }
 }

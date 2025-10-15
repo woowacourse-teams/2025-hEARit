@@ -48,8 +48,8 @@
                 <!-- log context-->
                 <KeyValuePair key="ip" value="$${ctx:ip}"/>
                 <KeyValuePair key="timestamp" value="$${ctx:timestamp}"/>
-                <KeyValuePair key="deviceModel" value="$${ctx:deviceModel}"/>
-                <KeyValuePair key="appVersion" value="$${ctx:appVersion}"/>
+                <KeyValuePair key="androidAppVersion" value="$${ctx:androidAppVersion}"/>
+                <KeyValuePair key="serverVersion" value="$${ctx:serverVersion}"/>
 
                 <!-- user context -->
                 <KeyValuePair key="userType" value="$${ctx:userType}"/>
