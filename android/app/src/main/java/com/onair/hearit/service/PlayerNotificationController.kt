@@ -13,9 +13,10 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.ui.PlayerNotificationManager
 import com.onair.hearit.R
+import javax.inject.Inject
 
 @OptIn(UnstableApi::class)
-class PlayerNotificationController(
+class PlayerNotificationController @Inject constructor(
     private val service: MediaSessionService,
     private val mediaSession: MediaSession,
     private val channelId: String,

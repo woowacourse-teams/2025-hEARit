@@ -26,7 +26,7 @@ import timber.log.Timber
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
-    private val viewModel: LoginViewModel by viewModels { LoginViewModelFactory() }
+    private val viewModel: LoginViewModel by viewModels()
 
     private lateinit var kakaoLoginHelper: KakaoLoginHelper
 

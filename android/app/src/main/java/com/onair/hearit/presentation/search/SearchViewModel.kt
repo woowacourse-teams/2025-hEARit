@@ -2,6 +2,7 @@ package com.onair.hearit.presentation.search
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
@@ -15,16 +16,19 @@ import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.presentation.SingleLiveData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class SearchViewModel(
+@HiltViewModel
+class SearchViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val hearitRepository: HearitRepository,
     private val recentKeywordRepository: RecentKeywordRepository,
-    initialInput: SearchInput?,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _searchUiState = MutableLiveData<SearchUiState>()
     val searchUiState: LiveData<SearchUiState> = _searchUiState
@@ -44,7 +48,9 @@ class SearchViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private val currentInput = initialInput
+    val initialInput: SearchInput?
+        get() = savedStateHandle.get<SearchInput>("initialInput")
+    var currentInput = initialInput
 
     val currentCategory: Category? =
         (currentInput as? SearchInput.Category)?.let {
@@ -59,6 +65,11 @@ class SearchViewModel(
     private var currentPage = 0
     private var isLastPage = false
     private var isLoading = false
+
+    fun setInitialInput(input: SearchInput) {
+        savedStateHandle["initialInput"] = input
+        currentInput = input
+    }
 
     fun refreshSearchResults() {
         resetPaging()

@@ -8,7 +8,9 @@ import android.view.WindowManager
 import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.DialogFragment
 import com.onair.hearit.databinding.DialogLoginRequiredBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginRequiredDialogFragment(
     private val onPositive: () -> Unit,
 ) : DialogFragment() {

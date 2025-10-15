@@ -24,8 +24,9 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.SearchViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SearchResultPageFragment :
     Fragment(),
     HearitClickListener {
@@ -34,11 +35,8 @@ class SearchResultPageFragment :
     private val binding get() = _binding!!
 
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val viewModel: SearchViewModel by viewModels()
 
-    private val viewModel: SearchViewModel by viewModels {
-        val input = requireArguments().let { SearchInput.from(it) }
-        SearchViewModelFactory(input)
-    }
     private val searchedAdapter: SearchedHearitAdapter by lazy { SearchedHearitAdapter(this) }
 
     override fun onCreateView(
@@ -57,6 +55,9 @@ class SearchResultPageFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
+        val input = requireArguments().let { SearchInput.from(it) }
+        viewModel.setInitialInput(input)
+
         setupWindowInsets()
         setupRecyclerView()
         fetchData()

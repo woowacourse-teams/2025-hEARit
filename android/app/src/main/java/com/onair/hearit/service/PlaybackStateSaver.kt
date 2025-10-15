@@ -3,7 +3,8 @@ package com.onair.hearit.service
 import androidx.annotation.OptIn
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import com.onair.hearit.di.RepositoryProvider
+import com.onair.hearit.domain.repository.PlayingHistoryRepository
+import com.onair.hearit.domain.repository.RecentHearitRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -11,11 +12,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class PlaybackStateSaver(
+class PlaybackStateSaver @Inject constructor(
     private val player: Player,
     private val serviceScope: CoroutineScope,
-    private var service: PlaybackService?,
+    private val recentHearitRepository: RecentHearitRepository,
+    private val playingHistoryRepository: PlayingHistoryRepository,
 ) {
     private var saveJob: Job? = null
 
@@ -38,9 +41,9 @@ class PlaybackStateSaver(
         // IO에서 저장 (완료까지 대기)
         withContext(Dispatchers.IO) {
             runCatching {
-                RepositoryProvider.recentHearitRepository.updateRecentHearitPosition(id, lastPos)
+                recentHearitRepository.updateRecentHearitPosition(id, lastPos)
                 if (lastPos >= 1_000L) {
-                    RepositoryProvider.playingHistoryRepository.addPlayingHistory(id, lastPos)
+                    playingHistoryRepository.addPlayingHistory(id, lastPos)
                 }
             }
         }
@@ -65,7 +68,6 @@ class PlaybackStateSaver(
                     // 마지막 곡 끝난 시점: 히스토리 + 최근 위치 0으로 초기화 저장
                     recordCurrent(minRecordMs = 1_000L)
                     stopSavingPosition(finished = true)
-                    service?.stopSelf()
                 }
             }
 
@@ -117,11 +119,10 @@ class PlaybackStateSaver(
 
     fun release() {
         saveJob?.cancel()
-        service?.let { player.removeListener(listener) }
+        player.removeListener(listener)
         // 앱/서비스 종료 시점: 최근 위치 + 히스토리 한 번 더
         savePlaybackPosition()
         recordCurrent(minRecordMs = 1_000L)
-        service = null
     }
 
     @OptIn(UnstableApi::class)
@@ -140,7 +141,7 @@ class PlaybackStateSaver(
             }
             mediaId?.let { id ->
                 runCatching {
-                    RepositoryProvider.recentHearitRepository.updateRecentHearitPosition(
+                    recentHearitRepository.updateRecentHearitPosition(
                         id,
                         lastPosition,
                     )
@@ -155,7 +156,7 @@ class PlaybackStateSaver(
     ) {
         serviceScope.launch(Dispatchers.IO) {
             runCatching {
-                RepositoryProvider.playingHistoryRepository.addPlayingHistory(
+                playingHistoryRepository.addPlayingHistory(
                     hearitId,
                     lastPlayTime,
                 )

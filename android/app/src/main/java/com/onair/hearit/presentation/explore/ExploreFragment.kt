@@ -37,8 +37,10 @@ import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
+@AndroidEntryPoint
 class ExploreFragment :
     Fragment(),
     ShortsClickListener {
@@ -49,7 +51,7 @@ class ExploreFragment :
     private val isViewValid: Boolean
         get() = _binding != null
 
-    private val viewModel: ExploreViewModel by activityViewModels { ExploreViewModelFactory() }
+    private val viewModel: ExploreViewModel by activityViewModels()
 
     private val playerManager by lazy {
         ExplorePlayerManager(

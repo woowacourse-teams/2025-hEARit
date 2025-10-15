@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.onair.hearit.databinding.BottomSheetBookmarkOptionBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class BookmarkOptionBottomSheet : BottomSheetDialogFragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: BottomSheetBookmarkOptionBinding? = null

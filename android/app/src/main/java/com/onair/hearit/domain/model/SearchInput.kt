@@ -1,6 +1,8 @@
 package com.onair.hearit.domain.model
 
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.core.os.bundleOf
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -9,17 +11,43 @@ import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.IntentValues.CATEGORY_VALUE
 import com.onair.hearit.presentation.IntentValues.KEYWORD_VALUE
+import kotlinx.parcelize.Parcelize
 
-sealed class SearchInput {
+@Parcelize
+sealed class SearchInput : Parcelable {
+    @Parcelize
     data class Keyword(
         val term: String,
-    ) : SearchInput()
+    ) : SearchInput() {
+        override fun describeContents(): Int {
+            TODO("Not yet implemented")
+        }
 
+        override fun writeToParcel(
+            dest: Parcel,
+            flags: Int,
+        ) {
+            TODO("Not yet implemented")
+        }
+    }
+
+    @Parcelize
     data class Category(
         val id: Long,
         val name: String,
         val colorCode: String,
-    ) : SearchInput()
+    ) : SearchInput() {
+        override fun describeContents(): Int {
+            TODO("Not yet implemented")
+        }
+
+        override fun writeToParcel(
+            dest: Parcel,
+            flags: Int,
+        ) {
+            TODO("Not yet implemented")
+        }
+    }
 
     fun toBundle(): Bundle =
         when (this) {

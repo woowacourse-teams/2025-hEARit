@@ -13,9 +13,10 @@ import com.onair.hearit.service.model.LibraryPlayParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @UnstableApi
-class PlaybackSessionCallback(
+class PlaybackSessionCallback @Inject constructor(
     private val serviceScope: CoroutineScope,
     private val mediaItemManager: PlaybackMediaItemManager,
     private val libraryPlaybackHandler: LibraryPlaybackHandler,

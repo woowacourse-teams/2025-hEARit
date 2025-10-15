@@ -15,12 +15,15 @@ import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.splash.SplashActivity
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class MainViewModel(
+@HiltViewModel
+class MainViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val recentHearitRepository: RecentHearitRepository,

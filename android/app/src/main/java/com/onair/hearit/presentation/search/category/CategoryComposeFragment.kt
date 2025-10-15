@@ -19,9 +19,13 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.SearchViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class CategoryComposeFragment : Fragment() {
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private val viewModel: SearchViewModel by viewModels()
+
     private val category by lazy {
         SearchInput.Category(
             arguments?.getLong(CATEGORY_ID_KEY) ?: -1L,
@@ -30,10 +34,9 @@ class CategoryComposeFragment : Fragment() {
         )
     }
 
-    private val mainViewModel: MainViewModel by activityViewModels()
-
-    private val viewModel: SearchViewModel by viewModels {
-        SearchViewModelFactory(category)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.setInitialInput(category)
     }
 
     override fun onCreateView(

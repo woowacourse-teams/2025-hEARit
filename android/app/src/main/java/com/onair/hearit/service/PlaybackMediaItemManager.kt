@@ -10,9 +10,10 @@ import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @UnstableApi
-class PlaybackMediaItemManager(
+class PlaybackMediaItemManager @Inject constructor(
     private val getPlaybackInfoUseCase: GetPlaybackInfoUseCase,
 ) {
     fun buildMediaItem(

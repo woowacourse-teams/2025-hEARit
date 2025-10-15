@@ -14,10 +14,13 @@ import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.library.BookmarkUiState.LoggedIn
 import com.onair.hearit.presentation.library.BookmarkUiState.NoBookmarks
 import com.onair.hearit.presentation.library.BookmarkUiState.NotLoggedIn
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class LibraryViewModel(
+@HiltViewModel
+class LibraryViewModel @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val memberRepository: MemberRepository,
 ) : ViewModel() {

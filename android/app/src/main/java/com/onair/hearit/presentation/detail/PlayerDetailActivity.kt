@@ -60,17 +60,18 @@ import com.onair.hearit.service.PlaybackSessionCallback
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.abs
 
 @OptIn(UnstableApi::class)
+@AndroidEntryPoint
 class PlayerDetailActivity :
     AppCompatActivity(),
     PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
-
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
     private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
@@ -84,15 +85,14 @@ class PlayerDetailActivity :
         intent.getStringExtra(PREVIOUS_SCREEN_KEY) ?: UNKNOWN_SCREEN_ID
     }
     private val hearitId: Long by lazy { intent.getLongExtra(HEARIT_ID_KEY, -1) }
+
     private val lastPosition: Long by lazy { intent.getLongExtra(LAST_POSITION_KEY, 0) }
 
     /** 딥링크 or 앱 내부 등 현재 사용하고자 하는 id*/
     private val currentHearitId: Long
         get() = viewModel.hearit.value?.id ?: hearitId
 
-    private val viewModel: PlayerDetailViewModel by viewModels {
-        PlayerDetailViewModelFactory(hearitId)
-    }
+    private val viewModel: PlayerDetailViewModel by viewModels()
 
     private val playerListener =
         object : Player.Listener {
@@ -113,6 +113,7 @@ class PlayerDetailActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        viewModel.updateHearitId(hearitId)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
         binding.lifecycleOwner = this

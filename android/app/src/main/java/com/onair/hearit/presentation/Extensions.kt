@@ -2,6 +2,9 @@ package com.onair.hearit.presentation
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import android.os.Parcelable
 import android.view.View
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.os.bundleOf
@@ -190,4 +193,14 @@ fun <T> executeAsync(
             }
         completer.addCancellationListener({ job.cancel() }, Runnable::run)
         operationName
+    }
+
+inline fun <reified T : Parcelable> Bundle.getParcelableCompat(key: String): T? =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelable(key, T::class.java)
+            ?: error("$key 데이터를 찾을 수 없습니다.")
+    } else {
+        @Suppress("DEPRECATION")
+        getParcelable(key) as? T
+            ?: error("$key 데이터를 찾을 수 없습니다.")
     }

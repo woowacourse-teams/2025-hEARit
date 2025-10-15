@@ -36,8 +36,10 @@ import com.onair.hearit.service.PlaybackSessionCallback
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class LibraryFragment :
     Fragment(),
     BookmarkClickListener {
@@ -46,7 +48,7 @@ class LibraryFragment :
     private val binding get() = _binding!!
 
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
+    private val viewModel: LibraryViewModel by viewModels()
     private val bookmarkAdapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
 
     private var mediaController: MediaController? = null

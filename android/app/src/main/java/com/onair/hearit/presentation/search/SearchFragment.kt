@@ -17,19 +17,23 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.databinding.FragmentSearchBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
+import com.onair.hearit.presentation.getParcelableCompat
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SearchFragment :
     Fragment(),
     CategoryClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SearchViewModel by viewModels { SearchViewModelFactory(null) }
+    private val viewModel: SearchViewModel by viewModels()
     private val categoryAdapter: CategoryAdapter by lazy { CategoryAdapter(this) }
 
     override fun onCreateView(
@@ -46,6 +50,9 @@ class SearchFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
+        val initialInput = arguments?.getParcelableCompat<SearchInput>("initialInput")
+        initialInput?.let { viewModel.setInitialInput(it) }
+
         setupWindowInsets()
         setupCategoryRecyclerView()
         setupSearchInput()

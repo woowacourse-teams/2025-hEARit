@@ -8,10 +8,13 @@ import com.onair.hearit.R
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.presentation.SingleLiveData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class PlaylistViewModel(
+@HiltViewModel
+class PlaylistViewModel @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
 ) : ViewModel() {
     private val _bookmarks: MutableLiveData<List<Bookmark>> = MutableLiveData()

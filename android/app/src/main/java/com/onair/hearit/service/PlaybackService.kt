@@ -12,26 +12,35 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import com.onair.hearit.di.RepositoryProvider.recentHearitRepository
-import com.onair.hearit.di.UseCaseProvider.getBookmarksUseCase
-import com.onair.hearit.di.UseCaseProvider.getPlaybackInfoUseCase
 import com.onair.hearit.presentation.main.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import javax.inject.Inject
 
 @OptIn(UnstableApi::class)
+@AndroidEntryPoint
 class PlaybackService : MediaSessionService() {
-    private lateinit var player: ExoPlayer
+    @Inject
+    lateinit var player: ExoPlayer
+
+    @Inject
+    lateinit var playbackStateSaver: PlaybackStateSaver
     private lateinit var mediaSession: MediaSession
-    private lateinit var stateSaver: PlaybackStateSaver
-    private lateinit var mediaItemManager: PlaybackMediaItemManager
+
+    @Inject
+    lateinit var mediaItemManager: PlaybackMediaItemManager
     private lateinit var playbackPositionListener: PlaybackPositionListener
 
     private var notificationController: PlayerNotificationController? = null
-    private lateinit var libraryPlaybackHandler: LibraryPlaybackHandler
-    private lateinit var recentPlaybackHandler: RecentPlaybackHandler
+
+    @Inject
+    lateinit var libraryPlaybackHandler: LibraryPlaybackHandler
+
+    @Inject
+    lateinit var recentPlaybackHandler: RecentPlaybackHandler
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -39,16 +48,7 @@ class PlaybackService : MediaSessionService() {
         super.onCreate()
 
         initializePlayer()
-
-        mediaItemManager = PlaybackMediaItemManager(getPlaybackInfoUseCase)
-        libraryPlaybackHandler = LibraryPlaybackHandler(getBookmarksUseCase, mediaItemManager)
-        recentPlaybackHandler =
-            RecentPlaybackHandler(recentHearitRepository, getPlaybackInfoUseCase, mediaItemManager)
-
-        playbackPositionListener = PlaybackPositionListener(player)
-        stateSaver = PlaybackStateSaver(player, serviceScope, this)
-        player.addListener(stateSaver.listener)
-
+        player.addListener(playbackStateSaver.listener)
         initializeMediaSession()
 
         // 2) 알림 + 포그라운드 제어는 컨트롤러에 위임
@@ -133,7 +133,7 @@ class PlaybackService : MediaSessionService() {
                         libraryPlaybackHandler,
                         recentPlaybackHandler,
                         playbackPositionListener,
-                        stateSaver,
+                        playbackStateSaver,
                     ),
                 ).build()
     }
@@ -152,9 +152,9 @@ class PlaybackService : MediaSessionService() {
         super.onDestroy()
         serviceScope.cancel()
         notificationController?.detach()
-        stateSaver.release()
+        playbackStateSaver.release()
         mediaSession.release()
-        player.removeListener(stateSaver.listener)
+        player.removeListener(playbackStateSaver.listener)
         playbackPositionListener.detach()
         player.release()
     }
@@ -163,8 +163,7 @@ class PlaybackService : MediaSessionService() {
         private const val NOTIFICATION_ID = 1001
         private const val SESSION_ID = "hearit_session"
         private const val CHANNEL_ID = "hearit_channel"
-
-        const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
+        private const val ACTION_STOP_SERVICE = "action_stop_service"
 
         fun stopIntent(context: Context) =
             Intent(context, PlaybackService::class.java).apply {

@@ -29,14 +29,15 @@ import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
-import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
 import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class ScriptFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentScriptBinding? = null
@@ -56,9 +57,7 @@ class ScriptFragment : Fragment() {
     private val hearitId: Long by lazy {
         requireArguments().getLong(HEARIT_ID_KEY)
     }
-    private val viewModel: PlayerDetailViewModel by activityViewModels {
-        PlayerDetailViewModelFactory(hearitId)
-    }
+    private val viewModel: PlayerDetailViewModel by activityViewModels()
 
     private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
 
@@ -80,6 +79,7 @@ class ScriptFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
+        viewModel.updateHearitId(hearitId)
 
         setupWindowInsets()
         setupRecyclerView()

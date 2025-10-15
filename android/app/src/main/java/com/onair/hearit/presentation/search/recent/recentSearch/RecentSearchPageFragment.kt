@@ -11,10 +11,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.onair.hearit.databinding.FragmentRecentSearchPageBinding
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.presentation.getParcelableCompat
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class RecentSearchPageFragment :
     Fragment(),
     RecentSearchClickListener {
@@ -24,9 +26,7 @@ class RecentSearchPageFragment :
 
     private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
-    private val viewModel: SearchViewModel by viewModels({ requireActivity() }) {
-        SearchViewModelFactory(null)
-    }
+    private val viewModel: SearchViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +42,9 @@ class RecentSearchPageFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
+        val input: SearchInput? = arguments?.getParcelableCompat("initialInput")
+        input?.let { viewModel.setInitialInput(it) }
+
         setupWindowInsets()
         setupListeners()
         setupRecyclerView()
