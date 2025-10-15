@@ -13,6 +13,7 @@ object AnalyticsEventNames {
     const val SEARCH_CATEGORY_SELECTED = "search_category_selected"
     const val SEARCH_KEYWORD_ENTERED = "search_keyword_entered"
     const val SEARCH_HEARIT_SELECTED = "search_hearit_selected"
+    const val DETAIL_KAKAO_SHARE = "detail_kakao_share"
     const val DETAIL_KEYWORD_SELECTED = "detail_keyword_selected"
     const val DETAIL_CATEGORY_SELECTED = "detail_category_selected"
     const val DETAIL_SOURCE_SELECTED = "detail_source_selected"

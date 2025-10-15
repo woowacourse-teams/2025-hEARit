@@ -457,6 +457,10 @@ class PlayerDetailActivity :
                     Timber.e(error, getString(R.string.player_detail_invite_error_kakao))
                     showToast(getString(R.string.player_detail_invite_error_kakao))
                 } else if (sharingResult != null) {
+                    AnalyticsProvider.get().logEvent(
+                        AnalyticsEventNames.DETAIL_KAKAO_SHARE,
+                        mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+                    )
                     startActivity(sharingResult.intent)
                 }
             }
@@ -468,6 +472,10 @@ class PlayerDetailActivity :
             // ex) Chrome, 삼성 인터넷, FireFox, 웨일 등
             try {
                 KakaoCustomTabsClient.openWithDefault(context, sharerUrl)
+                AnalyticsProvider.get().logEvent(
+                    AnalyticsEventNames.DETAIL_KAKAO_SHARE,
+                    mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+                )
                 return
             } catch (e: UnsupportedOperationException) {
                 // CustomTabsServiceConnection 지원 브라우저가 없을 때 예외처리
@@ -479,6 +487,10 @@ class PlayerDetailActivity :
             // ex) 다음, 네이버 등
             try {
                 KakaoCustomTabsClient.open(context, sharerUrl)
+                AnalyticsProvider.get().logEvent(
+                    AnalyticsEventNames.DETAIL_KAKAO_SHARE,
+                    mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+                )
                 return
             } catch (e: ActivityNotFoundException) {
                 // 디바이스에 설치된 인터넷 브라우저가 없을 때 예외처리
