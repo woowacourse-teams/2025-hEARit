@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-
+        MDC.put("loggedByAop", "true");
         try {
             String token = extractTokenFromHeader(request.getHeader("Authorization"));
 
