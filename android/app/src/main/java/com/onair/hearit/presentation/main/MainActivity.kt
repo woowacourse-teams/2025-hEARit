@@ -49,7 +49,6 @@ import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.presentation.splash.SplashActivity
-import com.onair.hearit.presentation.splash.SplashViewModel
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
@@ -74,7 +73,6 @@ class MainActivity :
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
 
     private val mainViewModel: MainViewModel by viewModels()
-    private val splashViewModel: SplashViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -381,15 +379,6 @@ class MainActivity :
 
     private fun showToast(message: String?) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun navigateToSplash() {
-        val intent =
-            Intent(this, SplashActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-        startActivity(intent)
-        finish()
     }
 
     private fun navigateToLicense() {
