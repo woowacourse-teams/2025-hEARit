@@ -19,15 +19,13 @@ sealed class SearchInput : Parcelable {
     data class Keyword(
         val term: String,
     ) : SearchInput() {
-        override fun describeContents(): Int {
-            TODO("Not yet implemented")
-        }
+        override fun describeContents(): Int = 0
 
         override fun writeToParcel(
             dest: Parcel,
             flags: Int,
         ) {
-            TODO("Not yet implemented")
+            dest.writeString(term)
         }
     }
 
@@ -37,15 +35,15 @@ sealed class SearchInput : Parcelable {
         val name: String,
         val colorCode: String,
     ) : SearchInput() {
-        override fun describeContents(): Int {
-            TODO("Not yet implemented")
-        }
+        override fun describeContents(): Int = 0
 
         override fun writeToParcel(
             dest: Parcel,
             flags: Int,
         ) {
-            TODO("Not yet implemented")
+            dest.writeLong(id)
+            dest.writeString(name)
+            dest.writeString(colorCode)
         }
     }
 

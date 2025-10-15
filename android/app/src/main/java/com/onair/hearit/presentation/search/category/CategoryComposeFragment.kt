@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -24,19 +23,18 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CategoryComposeFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val viewModel: SearchViewModel by viewModels()
-
-    private val category by lazy {
-        SearchInput.Category(
-            arguments?.getLong(CATEGORY_ID_KEY) ?: -1L,
-            arguments?.getString(CATEGORY_NAME_KEY) ?: "카테고리",
-            arguments?.getString(CATEGORY_COLOR_KEY) ?: "#000000",
-        )
-    }
+    private val searchViewModel: SearchViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.setInitialInput(category)
+
+        val category =
+            SearchInput.Category(
+                arguments?.getLong(CATEGORY_ID_KEY) ?: -1L,
+                arguments?.getString(CATEGORY_NAME_KEY) ?: "카테고리",
+                arguments?.getString(CATEGORY_COLOR_KEY) ?: "#000000",
+            )
+        searchViewModel.setInitialInput(category)
     }
 
     override fun onCreateView(
@@ -48,7 +46,7 @@ class CategoryComposeFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 CategorySearchScreen(
-                    viewModel = viewModel,
+                    viewModel = searchViewModel,
                     mainViewModel = mainViewModel,
                     onBack = { parentFragmentManager.popBackStack() },
                     onHearitClick = { heartId -> onHearitClick(heartId) },
