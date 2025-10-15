@@ -72,6 +72,8 @@ class PlayerDetailActivity :
     AppCompatActivity(),
     PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
+    private val viewModel: PlayerDetailViewModel by viewModels()
+
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
     private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
@@ -90,9 +92,7 @@ class PlayerDetailActivity :
 
     /** 딥링크 or 앱 내부 등 현재 사용하고자 하는 id*/
     private val currentHearitId: Long
-        get() = viewModel.hearit.value?.id ?: hearitId
-
-    private val viewModel: PlayerDetailViewModel by viewModels()
+        get() = viewModel.hearit.value?.id ?: viewModel.hearitId
 
     private val playerListener =
         object : Player.Listener {
@@ -113,7 +113,10 @@ class PlayerDetailActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        viewModel.updateHearitId(hearitId)
+        val hearitIdFromIntent = intent.getLongExtra(HEARIT_ID_KEY, -1)
+        if (hearitIdFromIntent != -1L) {
+            viewModel.updateHearitId(hearitIdFromIntent)
+        }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_player_detail)
         binding.lifecycleOwner = this

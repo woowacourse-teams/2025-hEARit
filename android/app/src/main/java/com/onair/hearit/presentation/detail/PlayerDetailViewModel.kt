@@ -25,7 +25,8 @@ class PlayerDetailViewModel @Inject constructor(
     private val getHearitUseCase: GetHearitUseCase,
     private val bookmarkRepository: BookmarkRepository,
 ) : ViewModel() {
-    var hearitId: Long = savedStateHandle["hearitId"] ?: 0L
+    var hearitId: Long = savedStateHandle["hearitId"] ?: -1L
+        private set
 
     private val _hearit: MutableLiveData<Hearit?> = MutableLiveData()
     val hearit: LiveData<Hearit?> = _hearit
@@ -39,13 +40,10 @@ class PlayerDetailViewModel @Inject constructor(
     private val _showLoginDialog = SingleLiveData<Unit>()
     val showLoginDialog: LiveData<Unit> = _showLoginDialog
 
-    init {
-        fetchData()
-    }
-
     fun updateHearitId(id: Long) {
         savedStateHandle["hearitId"] = id
         hearitId = id
+        fetchData()
     }
 
     fun toggleBookmark() {
@@ -79,6 +77,8 @@ class PlayerDetailViewModel @Inject constructor(
     }
 
     private fun fetchData() {
+        if (hearitId <= 0) return
+
         viewModelScope.launch {
             getHearitUseCase(hearitId)
                 .onSuccess {
