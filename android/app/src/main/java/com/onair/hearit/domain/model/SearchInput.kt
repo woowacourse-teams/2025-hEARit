@@ -1,7 +1,6 @@
 package com.onair.hearit.domain.model
 
 import android.os.Bundle
-import android.os.Parcel
 import android.os.Parcelable
 import androidx.core.os.bundleOf
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
@@ -18,34 +17,14 @@ sealed class SearchInput : Parcelable {
     @Parcelize
     data class Keyword(
         val term: String,
-    ) : SearchInput() {
-        override fun describeContents(): Int = 0
-
-        override fun writeToParcel(
-            dest: Parcel,
-            flags: Int,
-        ) {
-            dest.writeString(term)
-        }
-    }
+    ) : SearchInput()
 
     @Parcelize
     data class Category(
         val id: Long,
         val name: String,
         val colorCode: String,
-    ) : SearchInput() {
-        override fun describeContents(): Int = 0
-
-        override fun writeToParcel(
-            dest: Parcel,
-            flags: Int,
-        ) {
-            dest.writeLong(id)
-            dest.writeString(name)
-            dest.writeString(colorCode)
-        }
-    }
+    ) : SearchInput()
 
     fun toBundle(): Bundle =
         when (this) {
