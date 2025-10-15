@@ -10,9 +10,12 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class TokenAuthenticator(
-    private val preferenceProvider: () -> PreferencesLocalDataSource,
+@Singleton
+class TokenAuthenticator @Inject constructor(
+    private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val authServiceProvider: () -> AuthService,
 ) : Authenticator {
     private val json =
@@ -70,12 +73,9 @@ class TokenAuthenticator(
     }
 
     private suspend fun refreshToken(): String? {
-        val preferencesLocalDataSource = preferenceProvider()
-        val authService = authServiceProvider()
-        val refreshToken =
-            preferencesLocalDataSource.getRefreshToken().getOrNull() ?: return null
+        val refreshToken = preferencesLocalDataSource.getRefreshToken().getOrNull() ?: return null
         return try {
-            val response = authService.postRefreshToken(TokenReissueRequest(refreshToken))
+            val response = authServiceProvider().postRefreshToken(TokenReissueRequest(refreshToken))
             val tokenResponse = response.body() ?: return null
             preferencesLocalDataSource.saveAccessToken(tokenResponse.accessToken)
             tokenResponse.accessToken

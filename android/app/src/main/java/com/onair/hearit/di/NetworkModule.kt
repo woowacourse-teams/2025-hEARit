@@ -37,18 +37,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideTokenAuthenticator(
+    fun provideOkHttpClient(
         preferencesLocalDataSource: PreferencesLocalDataSource,
-        authService: AuthService,
-    ): TokenAuthenticator =
-        TokenAuthenticator(
-            { preferencesLocalDataSource },
-            { authService },
-        )
+        @RefreshRetrofit refreshAuthService: AuthService,
+    ): OkHttpClient {
+        val tokenAuthenticator =
+            TokenAuthenticator(
+                preferencesLocalDataSource,
+                { refreshAuthService },
+            )
 
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(tokenAuthenticator: TokenAuthenticator): OkHttpClient {
         val builder =
             OkHttpClient
                 .Builder()
@@ -61,7 +59,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(
+    @NormalRetrofit
+    fun provideNormalRetrofit(
         json: Json,
         client: OkHttpClient,
     ): Retrofit =
@@ -74,33 +73,66 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthService(retrofit: Retrofit): AuthService = retrofit.create()
+    @RefreshRetrofit
+    fun provideRefreshRetrofit(json: Json): Retrofit =
+        Retrofit
+            .Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(json.asConverterFactory(CONTENT_TYPE.toMediaType()))
+            .build()
 
     @Provides
     @Singleton
-    fun provideCategoryService(retrofit: Retrofit): CategoryService = retrofit.create()
+    fun provideNormalAuthService(
+        @NormalRetrofit retrofit: Retrofit,
+    ): AuthService = retrofit.create()
 
     @Provides
     @Singleton
-    fun provideHearitService(retrofit: Retrofit): HearitService = retrofit.create()
+    @RefreshRetrofit
+    fun provideRefreshAuthService(
+        @RefreshRetrofit retrofit: Retrofit,
+    ): AuthService = retrofit.create()
 
     @Provides
     @Singleton
-    fun provideMediaFileService(retrofit: Retrofit): MediaFileService = retrofit.create()
+    fun provideCategoryService(
+        @NormalRetrofit retrofit: Retrofit,
+    ): CategoryService = retrofit.create()
 
     @Provides
     @Singleton
-    fun provideBookmarkService(retrofit: Retrofit): BookmarkService = retrofit.create()
+    fun provideHearitService(
+        @NormalRetrofit retrofit: Retrofit,
+    ): HearitService = retrofit.create()
 
     @Provides
     @Singleton
-    fun provideMemberService(retrofit: Retrofit): MemberService = retrofit.create()
+    fun provideMediaFileService(
+        @NormalRetrofit retrofit: Retrofit,
+    ): MediaFileService = retrofit.create()
 
     @Provides
     @Singleton
-    fun providePlayingHistoryService(retrofit: Retrofit): PlayingHistoryService = retrofit.create()
+    fun provideBookmarkService(
+        @NormalRetrofit retrofit: Retrofit,
+    ): BookmarkService = retrofit.create()
 
     @Provides
     @Singleton
-    fun provideRecommendationService(retrofit: Retrofit): RecommendationService = retrofit.create()
+    fun provideMemberService(
+        @NormalRetrofit retrofit: Retrofit,
+    ): MemberService = retrofit.create()
+
+    @Provides
+    @Singleton
+    fun providePlayingHistoryService(
+        @NormalRetrofit retrofit: Retrofit,
+    ): PlayingHistoryService = retrofit.create()
+
+    @Provides
+    @Singleton
+    fun provideRecommendationService(
+        @NormalRetrofit retrofit: Retrofit,
+    ): RecommendationService = retrofit.create()
 }
