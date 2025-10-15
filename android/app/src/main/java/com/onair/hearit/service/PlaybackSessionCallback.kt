@@ -23,6 +23,8 @@ class PlaybackSessionCallback(
     private val playbackPositionListener: PlaybackPositionListener,
     private val stateSaver: PlaybackStateSaver,
 ) : MediaSession.Callback {
+    private var prefetchController: AutoPrefetchController? = null
+
     // 컨트롤러가 세션에 연결될 때 호출됨
     // 기본 세션 명령어 + 커스텀 명령어(PRELOAD, START_LIBRARY_PLAY, PREFETCH_NEXT)를 등록
     override fun onConnect(
@@ -36,7 +38,6 @@ class PlaybackSessionCallback(
                 .buildUpon()
                 .add(PRELOAD_RECENT_COMMAND) // 최근 항목 미리 불러오기
                 .add(START_LIBRARY_PLAY_COMMAND) // 라이브러리 재생 시작
-                .add(PREFETCH_NEXT_COMMAND) // 다음 페이지 미리 가져오기
                 .add(FLUSH_PLAYBACK_COMMAND)
                 .build()
 
@@ -79,7 +80,6 @@ class PlaybackSessionCallback(
         executeAsync(serviceScope, "onCustomCommand") {
             when (command.customAction) {
                 ACTION_START_LIBRARY_PLAY -> handleStartLibraryPlay(session, args)
-                ACTION_PREFETCH_NEXT -> handlePrefetchNext(session)
                 ACTION_PRELOAD_RECENT -> recentPlaybackHandler.preloadRecentItem(session)
                 ACTION_FLUSH_PLAYBACK -> handleFlushPlayback()
 
@@ -120,7 +120,6 @@ class PlaybackSessionCallback(
                     runCatching { mediaItemManager.resolveMediaItem(item) }.getOrElse { item }
                 }.ifEmpty { mediaItems }
 
-        // 인덱스가 범위를 벗어나지 않도록 보정
         val safeStartIndex =
             if (resolvedItems.isNotEmpty()) {
                 startIndex.coerceIn(0, resolvedItems.size - 1)
@@ -152,6 +151,11 @@ class PlaybackSessionCallback(
         val itemsWithStart = libraryPlaybackHandler.loadLibraryItemsWithStartPosition(playParams)
 
         withContext(Dispatchers.Main) {
+            prefetchController?.let {
+                it.setLibraryMode(false)
+                it.detach()
+            }
+
             session.player.setMediaItems(
                 itemsWithStart.mediaItems,
                 itemsWithStart.startIndex,
@@ -160,13 +164,22 @@ class PlaybackSessionCallback(
             session.player.prepare()
             session.player.play()
 
+            prefetchController =
+                AutoPrefetchController(
+                    serviceScope = serviceScope,
+                    player = session.player,
+                    session = session,
+                    handlePrefetchNext = { handlePrefetchNext(it) },
+                ).also { it.attach() }
+
+            prefetchController?.setLibraryMode(true)
+
             playbackPositionListener.attach()
             playbackPositionListener.reset()
         }
         return SessionResult(SessionResult.RESULT_SUCCESS)
     }
 
-    // 다음 페이지 아이템 미리 가져오기
     private suspend fun handlePrefetchNext(session: MediaSession): SessionResult {
         val (newItems, _) = libraryPlaybackHandler.prefetchNextPage()
 
@@ -182,20 +195,26 @@ class PlaybackSessionCallback(
     }
 
     private suspend fun handleFlushPlayback(): SessionResult {
-        // 저장 완료까지 기다림
         stateSaver.flushNowBlocking()
         return SessionResult(SessionResult.RESULT_SUCCESS)
+    }
+
+    override fun onDisconnected(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+    ) {
+        prefetchController?.detach()
+        prefetchController?.setLibraryMode(false)
+        super.onDisconnected(session, controller)
     }
 
     companion object {
         private const val ACTION_PRELOAD_RECENT = "PRELOAD_RECENT"
         private const val ACTION_START_LIBRARY_PLAY = "START_LIBRARY_PLAY"
-        private const val ACTION_PREFETCH_NEXT = "PREFETCH_NEXT"
         private const val ACTION_FLUSH_PLAYBACK = "FLUSH_PLAYBACK"
 
         val PRELOAD_RECENT_COMMAND = SessionCommand(ACTION_PRELOAD_RECENT, Bundle.EMPTY)
         val START_LIBRARY_PLAY_COMMAND = SessionCommand(ACTION_START_LIBRARY_PLAY, Bundle.EMPTY)
-        val PREFETCH_NEXT_COMMAND = SessionCommand(ACTION_PREFETCH_NEXT, Bundle.EMPTY)
         val FLUSH_PLAYBACK_COMMAND = SessionCommand(ACTION_FLUSH_PLAYBACK, Bundle.EMPTY)
     }
 }

@@ -9,10 +9,11 @@ import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RecentSearch
 import com.onair.hearit.domain.model.SearchInput
+import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.CategoryRepository
+import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
-import com.onair.hearit.domain.usecase.GetSearchResultUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,8 +22,8 @@ import timber.log.Timber
 
 class SearchViewModel(
     private val categoryRepository: CategoryRepository,
+    private val hearitRepository: HearitRepository,
     private val recentKeywordRepository: RecentKeywordRepository,
-    private val getSearchResultUseCase: GetSearchResultUseCase,
     initialInput: SearchInput?,
 ) : ViewModel() {
     private val _searchUiState = MutableLiveData<SearchUiState>()
@@ -37,6 +38,12 @@ class SearchViewModel(
     private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
     val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
 
+    private val _categoryHearits = MutableStateFlow<List<SearchedCategoryHearit>>(emptyList())
+    val categoryHearits: StateFlow<List<SearchedCategoryHearit>> = _categoryHearits
+
+    private val _toastMessage = SingleLiveData<Int>()
+    val toastMessage: LiveData<Int> = _toastMessage
+
     private val currentInput = initialInput
 
     val currentCategory: Category? =
@@ -47,12 +54,6 @@ class SearchViewModel(
                 colorCode = it.colorCode,
             )
         }
-
-    private val _categoryHearits = MutableStateFlow<List<SearchedHearit>>(emptyList())
-    val categoryHearits: StateFlow<List<SearchedHearit>> = _categoryHearits
-
-    private val _toastMessage = SingleLiveData<Int>()
-    val toastMessage: LiveData<Int> = _toastMessage
 
     private var paging: Paging? = null
     private var currentPage = 0
@@ -119,10 +120,52 @@ class SearchViewModel(
         val input = currentInput ?: return
         isLoading = true
 
+        when (input) {
+            is SearchInput.Category -> fetchCategoryResultData(input.id, isInitial)
+            is SearchInput.Keyword -> fetchKeywordResultData(input.term, isInitial)
+        }
+    }
+
+    fun fetchCategoryResultData(
+        categoryId: Long,
+        isInitial: Boolean,
+    ) {
         viewModelScope.launch {
             try {
                 val page = if (isInitial) 0 else currentPage + 1
-                val result = getSearchResultUseCase(input, page)
+                val result = hearitRepository.getCategoryHearits(categoryId, page)
+
+                result
+                    .onSuccess { pageResult ->
+                        paging = pageResult.paging
+                        currentPage = pageResult.paging.page
+
+                        val updatedList =
+                            if (isInitial) {
+                                pageResult.items
+                            } else {
+                                _categoryHearits.value + pageResult.items
+                            }
+
+                        _categoryHearits.value = updatedList
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.category_toast_searched_hearits_load_fail
+                    }
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun fetchKeywordResultData(
+        term: String,
+        isInitial: Boolean,
+    ) {
+        viewModelScope.launch {
+            try {
+                val page = if (isInitial) 0 else currentPage + 1
+                val result = hearitRepository.getKeywordHearits(term, page)
 
                 result
                     .onSuccess { pageResult ->
@@ -136,7 +179,6 @@ class SearchViewModel(
                                 _searchedHearits.value.orEmpty() + pageResult.items
                             }
 
-                        _categoryHearits.value = updatedList
                         _searchedHearits.value = updatedList
                         updateUiState(updatedList)
                     }.onFailure { throwable ->

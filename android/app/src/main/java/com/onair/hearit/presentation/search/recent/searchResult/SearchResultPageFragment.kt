@@ -13,7 +13,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsParamKeys.ITEM_ID
+import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.FragmentSearchResultPageBinding
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -113,7 +117,15 @@ class SearchResultPageFragment :
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onClick(hearitId: Long) {
+    override fun onClick(
+        hearitId: Long,
+        source: HearitSource,
+    ) {
+        AnalyticsProvider.get().logEvent(
+            AnalyticsEventNames.SEARCH_HEARIT_SELECTED,
+            mapOf(ITEM_ID to hearitId.toString()),
+        )
+
         val intent = PlayerDetailActivity.newIntent(requireActivity(), hearitId)
         (activity as? MainActivity)?.launchDetailActivity(intent)
     }

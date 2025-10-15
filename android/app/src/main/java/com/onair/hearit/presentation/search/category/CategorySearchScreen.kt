@@ -46,8 +46,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.R
+import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
-import com.onair.hearit.domain.model.SearchedHearit
+import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.theme.DarkGray
@@ -97,7 +98,7 @@ fun CategorySearchScreen(
 fun GradientBackgroundScreen(
     colorCode: String,
     categoryName: String,
-    hearits: List<SearchedHearit>,
+    hearits: List<SearchedCategoryHearit>,
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -189,7 +190,7 @@ fun GradientBackgroundScreen(
 
 @Composable
 fun SearchedHearitItem(
-    item: SearchedHearit,
+    item: SearchedCategoryHearit,
     color: Color,
     onClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -320,47 +321,59 @@ fun CustomLinearProgressBar(
 fun GradientBackgroundScreenPreview() {
     val dummyHearits =
         listOf(
-            SearchedHearit(
+            SearchedCategoryHearit(
                 0,
                 "이건 첫 번째 레슨, 좋은 건 너만 알기",
                 playTime = 123,
                 lastPlayTime = 83782,
+                createdAt = "1234",
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
-            SearchedHearit(
+            SearchedCategoryHearit(
                 1,
                 "이제 두 번째 레슨, 슬픔도 너만 갖기",
                 playTime = 1234,
                 lastPlayTime = 192013,
+                createdAt = "1234",
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
-            SearchedHearit(
+            SearchedCategoryHearit(
                 2,
                 "드디어 세 번째 레슨, 일희일비 않기",
                 playTime = 1234,
                 lastPlayTime = 99999,
+                createdAt = "1234",
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
-            SearchedHearit(
+            SearchedCategoryHearit(
                 3,
                 "드디어 세 번째 레슨, 일희일비 않기",
                 playTime = 1234,
                 lastPlayTime = 99999,
+                createdAt = "1234",
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
-            SearchedHearit(
+            SearchedCategoryHearit(
                 4,
                 "드디어 세 번째 레슨, 일희일비 않기",
                 playTime = 1234,
                 lastPlayTime = 99999,
+                createdAt = "1234",
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
-            SearchedHearit(
+            SearchedCategoryHearit(
                 5,
                 "드디어 세 번째 레슨, 일희일비 않기",
                 playTime = 1234,
                 lastPlayTime = 99999,
+                createdAt = "1234",
                 keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
         )
 
@@ -379,12 +392,14 @@ fun GradientBackgroundScreenPreview() {
 @Preview(showBackground = true)
 fun SearchedHearitItemPreview() {
     val dummy =
-        SearchedHearit(
+        SearchedCategoryHearit(
             0,
             "드디어 세 번째 레슨, 일희일비 않기. 좀 더 강해져야 돼. 웃어 넘길 수 있게...",
             playTime = 350,
             lastPlayTime = 99999,
+            createdAt = "1234",
             keywords = listOf(Keyword(1, "유노윤호"), Keyword(2, "U-KNOW")),
+            category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
         )
 
     MaterialTheme {

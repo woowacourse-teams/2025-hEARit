@@ -311,6 +311,16 @@ class PlayerDetailActivity :
     ) {
         val controller = mediaController ?: return
 
+        val audioUri =
+            hearit.audioUrl
+                ?.takeIf { it.isNotBlank() }
+                ?.toUri()
+                ?: run {
+                    Timber.w("Missing audioUrl for hearit id=${hearit.id}")
+                    Toast.makeText(this, "오디오 URL이 없어 재생할 수 없어요.", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
         val extras =
             Bundle().apply {
                 putLong(KEY_BOOKMARK_ID, hearit.bookmarkId ?: -1L)
@@ -321,7 +331,7 @@ class PlayerDetailActivity :
             MediaItem
                 .Builder()
                 .setMediaId(hearit.id.toString())
-                .setUri(hearit.audioUrl.toUri())
+                .setUri(audioUri)
                 .setMediaMetadata(
                     MediaMetadata
                         .Builder()

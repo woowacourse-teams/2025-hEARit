@@ -6,12 +6,16 @@
     <data>
 
         <variable
-            name="recentHearit"
-            type="com.onair.hearit.domain.model.PlayingHistoryHearit" />
+            name="playingBookmarkHearit"
+            type="com.onair.hearit.domain.model.Bookmark" />
 
         <variable
             name="clickListener"
             type="com.onair.hearit.presentation.HearitClickListener" />
+
+        <variable
+            name="source"
+            type="com.onair.hearit.analytics.HearitSource" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,7 +23,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        android:onClick="@{() -> clickListener.onClick(recentHearit.id)}">
+        android:onClick="@{() -> clickListener.onClick(playingBookmarkHearit.hearitId, source)}">
 
         <TextView
             android:id="@+id/recent_hearit_category"
@@ -27,12 +31,12 @@
             android:layout_width="162dp"
             android:layout_height="96dp"
             android:gravity="center"
-            android:text="@{recentHearit.category.name}"
+            android:text="@{playingBookmarkHearit.category.name}"
             android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:roundedBackgroundColor="@{recentHearit.category.colorCode}"
+            app:roundedBackgroundColor="@{playingBookmarkHearit.category.colorCode}"
             tools:text="우아한테크코스" />
 
         <TextView
@@ -43,7 +47,7 @@
             android:layout_marginTop="12dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="@{recentHearit.title}"
+            android:text="@{playingBookmarkHearit.title}"
             app:layout_constraintEnd_toEndOf="@id/recent_hearit_category"
             app:layout_constraintStart_toStartOf="@id/recent_hearit_category"
             app:layout_constraintTop_toBottomOf="@id/recent_hearit_category"
@@ -56,11 +60,11 @@
             android:layout_height="4dp"
             android:layout_marginTop="8dp"
             android:progressDrawable="@drawable/recent_progress_bar"
-            app:lastPlayTime="@{recentHearit.lastPlayTime}"
+            app:lastPlayTime="@{playingBookmarkHearit.lastPlayTime}"
             app:layout_constraintEnd_toEndOf="@id/tv_recent_hearit_title"
             app:layout_constraintStart_toStartOf="@id/tv_recent_hearit_title"
             app:layout_constraintTop_toBottomOf="@id/tv_recent_hearit_title"
-            app:totalPlayTime="@{recentHearit.playTime}"
+            app:totalPlayTime="@{playingBookmarkHearit.playTime}"
             tools:max="100"
             tools:progress="20" />
 

@@ -11,6 +11,7 @@
     <string name="all_open_license">오픈 라이선스</string>
     <string name="all_account_info">설정 및 계정 정보</string>
     <string name="all_login_button_text">로그인 하러가기</string>
+    <string name="all_feedback">피드백 및 문의하기</string>
     <string name="all_toast_categories_load_fail">카테고리 조회에 실패했습니다.</string>
     <string name="all_toast_user_info_load_fail">유저 정보 조회에 실패했습니다.</string>
     <string name="all_toast_save_user_info_fail">유저 정보 저장에 실패했습니다.</string>
@@ -28,16 +29,22 @@
     <!-- HomeFragment-->
     <string name="home_logo_description">IT를 쉽게 들을 수 있는 팟캐스트, 히어릿</string>
     <string name="home_recent_hearit_text">최근에 들은 히어릿</string>
-    <string name="home_navigate_to_explore_text">더 많은 히어릿을\n듣고 싶다면?</string>
     <string name="home_recommend_hearit_text">오늘 추천하는 팟캐스트</string>
     <string name="home_grouped_category_text">%s 카테고리</string>
-    <string name="home_recent_hearit_title">%s님이 듣고 있는 팟캐스트</string>
+    <string name="home_playing_history_hearit_title">%s님이 듣고 있는 팟캐스트</string>
+    <string name="home_recent_upload_hearit_title">최근 추가된 팟캐스트</string>
+    <string name="home_playing_bookmark_hearit_title">북마크한 팟캐스트를 들어보세요</string>
+    <string name="home_navigate_explore_text">숏캐스트를 구경하고\n더 많은 팟캐스트를 북마크해보세요!</string>
+    <string name="home_navigate_wootaeco_text">우테코 합격비법이 궁금하다면?\n선배님들의 후기를 들어보세요!</string>
     <string name="home_toast_recommend_load_fail">추천 히어릿 목록 조회에 실패했습니다.</string>
-    <string name="home_toast_recent_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
+    <string name="home_toast_playing_history_load_fail">최근 들은 히어릿 조회에 실패했습니다.</string>
+    <string name="home_toast_recent_upload_load_fail">최근 업로드된 히어릿 조회에 실패했습니다.</string>
+    <string name="home_toast_playing_bookmark_load_fail">듣고 있는 북마크 조회에 실패했습니다.</string>
     <string name="home_toast_grouped_category_load_fail">카테고리별 히어릿 조회에 실패했습니다.</string>
 
     <!--CategoryFragment-->
     <string name="category_text">전체 카테고리 목록</string>
+    <string name="category_toast_searched_hearits_load_fail">카테고리 히어릿 목록 조회에 실패했습니다</string>
 
     <!-- CreateHearitActivity-->
     <string name="create_hearit_main_title"><font color="#B677F3">생성하고자 하는 텍스트</font><font color="#EFF1F2">를 입력해주세요.</font></string>
@@ -78,7 +85,6 @@
     <string name="explore_navigate_to_detail_hearit">팟캐스트 이어 듣기</string>
 
     <!-- SettingFragment-->
-    <string name="setting_feedback">피드백 및 문의하기</string>
     <string name="setting_notification">알림</string>
     <string name="setting_recommend_notification">히어릿 추천 알림</string>
     <string name="setting_app_version">앱 버전 v%s</string>
@@ -92,6 +98,7 @@
     <string name="library_login_button_text">로그인 하러가기</string>
     <string name="library_toast_bookmark_load_fail">북마크 조회에 실패했습니다.</string>
     <string name="library_bottom_sheet_bookmark_delete">북마크에서 삭제하기</string>
+    <string name="library_bookmarked_hearit_total_count">히어릿 %d개</string>
 
     <!-- SearchFragment-->
     <string name="search_category_text">카테고리</string>

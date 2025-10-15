@@ -1,12 +1,10 @@
 package com.onair.hearit.presentation.setting
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -53,11 +51,6 @@ class SettingFragment : Fragment() {
         binding.ibBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-
-        binding.tvSettingFeedback.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, FEEDBACK_URL.toUri())
-            startActivity(intent)
-        }
     }
 
     private fun observeViewModel() {
@@ -77,10 +70,5 @@ class SettingFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    companion object {
-        private const val FEEDBACK_URL =
-            "https://docs.google.com/forms/d/e/1FAIpQLSfHy20uq3LGUmxngS38QmDjGbJLHPXSlgUcp_yYfsQygXzC_Q/viewform"
     }
 }

@@ -1,6 +1,6 @@
 package com.onair.hearit.domain.model
 
-data class GroupedCategory(
+data class RecommendationCategories(
     val categoryId: Long,
     val categoryName: String,
     val colorCode: String,

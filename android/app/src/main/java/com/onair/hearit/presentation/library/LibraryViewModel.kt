@@ -24,6 +24,9 @@ class LibraryViewModel(
     private val _bookmarks = MutableLiveData<List<Bookmark>>()
     val bookmarks: LiveData<List<Bookmark>> = _bookmarks
 
+    private val _totalCount = MutableLiveData(0)
+    val totalCount: LiveData<Int> = _totalCount
+
     private val _uiState = MutableLiveData<BookmarkUiState>()
     val uiState: LiveData<BookmarkUiState> = _uiState
 
@@ -33,7 +36,7 @@ class LibraryViewModel(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private val _isLoading = MutableLiveData<Boolean>(false)
+    private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
     private var nextPage: Int? = 0
@@ -59,10 +62,11 @@ class LibraryViewModel(
         _isLoading.value = true
         viewModelScope.launch {
             bookmarkRepository
-                .getBookmarks(page = page, size = null)
+                .getBookmarks(page = page, size = null, filter = "all")
                 .onSuccess { pageResult ->
                     val currentList = _bookmarks.value.orEmpty()
                     _bookmarks.value = currentList + pageResult.items
+                    _totalCount.value = pageResult.paging.totalElements
                     _uiState.value = if (_bookmarks.value.isNullOrEmpty()) NoBookmarks else LoggedIn
 
                     nextPage =

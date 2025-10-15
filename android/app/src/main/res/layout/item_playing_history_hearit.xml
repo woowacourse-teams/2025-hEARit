@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="playingHistoryHearit"
+            type="com.onair.hearit.domain.model.PlayingHistoryHearit" />
+
+        <variable
+            name="clickListener"
+            type="com.onair.hearit.presentation.HearitClickListener" />
+
+        <variable
+            name="source"
+            type="com.onair.hearit.analytics.HearitSource" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> clickListener.onClick(playingHistoryHearit.id, source)}">
+
+        <TextView
+            android:id="@+id/recent_hearit_category"
+            style="@style/prompt_logo"
+            android:layout_width="162dp"
+            android:layout_height="96dp"
+            android:gravity="center"
+            android:text="@{playingHistoryHearit.category.name}"
+            android:textSize="22sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:roundedBackgroundColor="@{playingHistoryHearit.category.colorCode}"
+            tools:text="우아한테크코스" />
+
+        <TextView
+            android:id="@+id/tv_recent_hearit_title"
+            style="@style/pretendard_bottom_title"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="12dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="@{playingHistoryHearit.title}"
+            app:layout_constraintEnd_toEndOf="@id/recent_hearit_category"
+            app:layout_constraintStart_toStartOf="@id/recent_hearit_category"
+            app:layout_constraintTop_toBottomOf="@id/recent_hearit_category"
+            tools:text="안드로이드 CI/CD, Github로 자동화하기어쩌구저쩌구.." />
+
+        <ProgressBar
+            android:id="@+id/pb_hearit_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:progressDrawable="@drawable/recent_progress_bar"
+            app:lastPlayTime="@{playingHistoryHearit.lastPlayTime}"
+            app:layout_constraintEnd_toEndOf="@id/tv_recent_hearit_title"
+            app:layout_constraintStart_toStartOf="@id/tv_recent_hearit_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_recent_hearit_title"
+            app:totalPlayTime="@{playingHistoryHearit.playTime}"
+            tools:max="100"
+            tools:progress="20" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
