@@ -90,10 +90,6 @@ public class RequestLoggingFallbackFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean isLoggedBySecurityFilter() {
-        return TRUE.equals(MDC.get("loggedBySecurity"));
-    }
-
     private boolean isLoggedByAop() {
         return TRUE.equals(MDC.get(LOGGED_BY_AOP));
     }
