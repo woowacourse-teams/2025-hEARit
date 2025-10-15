@@ -18,7 +18,7 @@ public abstract class ApiTest {
     void setUp() {
         RestAssured.port = port;
         this.spec = new RequestSpecBuilder()
-                .addHeader("X-Device-UUID", UUID.randomUUID().toString())
+                .addHeader("Device-Uuid", UUID.randomUUID().toString())
                 .build();
     }
 }

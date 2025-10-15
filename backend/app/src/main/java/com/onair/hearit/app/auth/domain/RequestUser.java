@@ -21,9 +21,8 @@ public class RequestUser {
     }
 
     public static RequestUser guest(String guestId) {
-
         if (guestId == null || guestId.isBlank()) {
-            log.warn("현재 X-Device-UUID Header가 비어있습니다.");
+            log.warn("현재 Device-Uuid Header가 비어있습니다.");
             return new RequestUser(null, FALLBACK_GUEST_ID);
         }
         return new RequestUser(null, guestId);
