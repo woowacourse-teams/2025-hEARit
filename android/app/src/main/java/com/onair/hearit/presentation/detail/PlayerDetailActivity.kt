@@ -1,13 +1,13 @@
 package com.onair.hearit.presentation.detail
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
-import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -34,6 +34,9 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.kakao.sdk.common.util.KakaoCustomTabsClient
+import com.kakao.sdk.share.ShareClient
+import com.kakao.sdk.share.WebSharerClient
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
@@ -83,6 +86,10 @@ class PlayerDetailActivity :
     private val hearitId: Long by lazy { intent.getLongExtra(HEARIT_ID_KEY, -1) }
     private val lastPosition: Long by lazy { intent.getLongExtra(LAST_POSITION_KEY, 0) }
 
+    /** 딥링크 or 앱 내부 등 현재 사용하고자 하는 id*/
+    private val currentHearitId: Long
+        get() = viewModel.hearit.value?.id ?: hearitId
+
     private val viewModel: PlayerDetailViewModel by viewModels {
         PlayerDetailViewModelFactory(hearitId)
     }
@@ -118,11 +125,31 @@ class PlayerDetailActivity :
         setupRecyclerView()
         observeViewModel()
         startScriptSyncLoop()
+        handleIncomingIntent(intent)
 
-        supportFragmentManager.addOnBackStackChangedListener {
-            val fragment = supportFragmentManager.findFragmentById(R.id.fragment_container_view)
-            binding.fragmentContainerView.visibility =
-                if (fragment?.isVisible == true) View.VISIBLE else View.GONE
+        binding.btnDetailShare.setOnClickListener { startKakaoInvite(this@PlayerDetailActivity) }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIncomingIntent(intent)
+    }
+
+    private fun handleIncomingIntent(intent: Intent) {
+        // 딥링크로부터 받은 id를 추출하기 위함
+        val deepLinkHearitId =
+            intent.data
+                ?.takeIf { uri -> uri.scheme?.startsWith("kakao") == true && uri.host == "kakaolink" }
+                ?.getQueryParameter("id")
+                ?.toLongOrNull()
+                ?.takeIf { it > 0 }
+
+        // 딥링크 id -> Activity가 최초 실행될 때 저장된 id
+        val targetId = deepLinkHearitId ?: hearitId
+
+        if (targetId > -1) {
+            viewModel.refreshData(targetId)
         }
     }
 
@@ -183,7 +210,7 @@ class PlayerDetailActivity :
                             .setCustomAnimations(R.anim.slide_up, 0)
                             .replace(
                                 R.id.fragment_container_view,
-                                ScriptFragment.newInstance(hearitId),
+                                ScriptFragment.newInstance(currentHearitId),
                             ).addToBackStack(null)
                             .commit()
                         return true
@@ -323,8 +350,7 @@ class PlayerDetailActivity :
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
-                    val controller = mediaController
-                    if (controller != null) {
+                    mediaController?.let { controller ->
                         val position = controller.currentPosition
                         val current =
                             scriptAdapter.currentList.firstOrNull { position in it.start until it.end }
@@ -375,7 +401,7 @@ class PlayerDetailActivity :
             val resultIntent =
                 Intent().apply {
                     putExtra(TYPE_KEY, EXPLORE_VALUE)
-                    putExtra(HEARIT_ID_KEY, hearitId)
+                    putExtra(HEARIT_ID_KEY, currentHearitId)
                     viewModel.bookmarkId.value?.let { putExtra(BOOKMARK_ID_KEY, it) }
                 }
             setResult(RESULT_OK, resultIntent)
@@ -413,6 +439,67 @@ class PlayerDetailActivity :
         Toast.makeText(this, message ?: "", Toast.LENGTH_SHORT).show()
     }
 
+    private fun startKakaoInvite(context: Context) {
+        val hearit = viewModel.hearit.value ?: return
+        val arguments =
+            hashMapOf(
+                TEMPLATE_TITLE_KEY to hearit.title,
+                TEMPLATE_HEARIT_ID_KEY to hearit.id.toString(),
+            )
+
+        if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
+            ShareClient.instance.shareCustom(
+                context,
+                TEMPLATE_ID,
+                arguments,
+            ) { sharingResult, error ->
+                if (error != null) {
+                    Timber.e(error, getString(R.string.player_detail_invite_error_kakao))
+                    showToast(getString(R.string.player_detail_invite_error_kakao))
+                } else if (sharingResult != null) {
+                    AnalyticsProvider.get().logEvent(
+                        AnalyticsEventNames.DETAIL_KAKAO_SHARE,
+                        mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+                    )
+                    startActivity(sharingResult.intent)
+                }
+            }
+        } else {
+            // 카카오톡 미설치: 웹 공유 사용 권장
+            val sharerUrl = WebSharerClient.instance.makeCustomUrl(TEMPLATE_ID, arguments)
+
+            // 1. CustomTabsServiceConnection 지원 브라우저 열기
+            // ex) Chrome, 삼성 인터넷, FireFox, 웨일 등
+            try {
+                KakaoCustomTabsClient.openWithDefault(context, sharerUrl)
+                AnalyticsProvider.get().logEvent(
+                    AnalyticsEventNames.DETAIL_KAKAO_SHARE,
+                    mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+                )
+                return
+            } catch (e: UnsupportedOperationException) {
+                // CustomTabsServiceConnection 지원 브라우저가 없을 때 예외처리
+                Timber.w(e, getString(R.string.player_detail_invite_error_browser))
+                showToast(getString(R.string.player_detail_invite_error_browser))
+            }
+
+            // 2. CustomTabsServiceConnection 미지원 브라우저 열기
+            // ex) 다음, 네이버 등
+            try {
+                KakaoCustomTabsClient.open(context, sharerUrl)
+                AnalyticsProvider.get().logEvent(
+                    AnalyticsEventNames.DETAIL_KAKAO_SHARE,
+                    mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
+                )
+                return
+            } catch (e: ActivityNotFoundException) {
+                // 디바이스에 설치된 인터넷 브라우저가 없을 때 예외처리
+                Timber.e(e, getString(R.string.player_detail_invite_error_browser))
+                showToast(getString(R.string.player_detail_invite_error_browser))
+            }
+        }
+    }
+
     override fun onClickCategory(
         id: Long,
         name: String,
@@ -447,8 +534,7 @@ class PlayerDetailActivity :
                 AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
                 mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
             )
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            startActivity(intent)
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
         } catch (e: Exception) {
             Timber.w(e)
             showToast(ERROR_INVALID_LINK_MESSAGE)
@@ -482,7 +568,9 @@ class PlayerDetailActivity :
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
         private const val SCRIPT_ITEM_HEIGHT_DP = 16
-
+        private const val TEMPLATE_ID = 124931L
+        private const val TEMPLATE_TITLE_KEY = "title"
+        private const val TEMPLATE_HEARIT_ID_KEY = "id"
         private const val KEY_BOOKMARK_ID = "BOOKMARK_ID"
         private const val KEY_PLAYBACK_MODE = "PLAYBACK_MODE"
 
