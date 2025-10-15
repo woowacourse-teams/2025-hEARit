@@ -3,8 +3,9 @@ package com.onair.hearit.data.datasource
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
+import javax.inject.Inject
 
-class ErrorResponseHandler {
+class ErrorResponseHandler @Inject constructor() {
     fun getError(exception: Throwable): NetworkResult.Failure =
         when (exception) {
             is HttpException -> {

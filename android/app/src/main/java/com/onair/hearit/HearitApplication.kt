@@ -3,6 +3,7 @@ package com.onair.hearit
 import android.app.Application
 import android.util.Log
 import com.kakao.sdk.common.KakaoSdk
+import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.presentation.UserIdManager
@@ -22,6 +23,7 @@ class HearitApplication : Application() {
         super.onCreate()
 
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_KEY)
+        AnalyticsProvider.init(this)
         initUuid()
         initialTimber()
     }

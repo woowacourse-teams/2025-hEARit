@@ -9,10 +9,8 @@ import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @OptIn(UnstableApi::class)
-@Singleton
 class RecentPlaybackHandler @Inject constructor(
     private val recentHearitRepository: RecentHearitRepository,
     private val getPlaybackInfoUseCase: GetPlaybackInfoUseCase,
