@@ -3,8 +3,9 @@ package com.onair.hearit.domain.usecase
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
+import javax.inject.Inject
 
-class GetNextBookmarkUseCase(
+class GetNextBookmarkUseCase @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val mediaFileRepository: MediaFileRepository,
 ) {

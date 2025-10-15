@@ -3,8 +3,9 @@ package com.onair.hearit.domain.usecase
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
+import javax.inject.Inject
 
-class GetHearitUseCase(
+class GetHearitUseCase @Inject constructor(
     private val hearitRepository: HearitRepository,
     private val mediaFileRepository: MediaFileRepository,
 ) {
