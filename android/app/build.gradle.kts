@@ -23,8 +23,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 10205
-        versionName = "1.2.5"
+        versionCode = 10300
+        versionName = "1.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders += mapOf()
@@ -190,6 +190,7 @@ dependencies {
 
     // kakao SDK
     implementation(libs.v2.user)
+    implementation(libs.v2.share)
 
     // dataStore
     implementation(libs.androidx.datastore.preferences)

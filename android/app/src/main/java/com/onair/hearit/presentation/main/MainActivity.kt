@@ -37,6 +37,7 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.databinding.ActivityMainBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.PlaybackStarter
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -45,7 +46,6 @@ import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.navigate
-import com.onair.hearit.presentation.observeOnce
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.presentation.splash.SplashActivity
@@ -101,6 +101,7 @@ class MainActivity :
         observeViewModel()
         showFragment(HomeFragment())
         setupBottomControllerClick()
+        mainViewModel.handleDeepLinkIntent(intent)
     }
 
     override fun onResume() {
@@ -263,6 +264,10 @@ class MainActivity :
 
         mainViewModel.toastMessage.observe(this) { resId ->
             showToast(getString(resId))
+        }
+
+        mainViewModel.navigateToDetail.observe(this) { hearitId ->
+            navigateToDetail(hearitId)
         }
     }
 
@@ -461,12 +466,10 @@ class MainActivity :
     }
 
     override fun onNewIntent(intent: Intent) {
-        splashViewModel.checkToken.observeOnce(this) { isLoggedIn ->
-            if (!isLoggedIn) {
-                navigateToSplash()
-            }
-        }
         super.onNewIntent(intent)
+        mainViewModel.handleDeepLinkIntent(intent)
+        intent.removeExtra(SplashActivity.OPEN_DETAIL_FROM_DEEPLINK)
+        intent.removeExtra(HEARIT_ID_KEY)
     }
 
     companion object {

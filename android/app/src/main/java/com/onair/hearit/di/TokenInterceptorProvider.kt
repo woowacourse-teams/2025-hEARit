@@ -6,7 +6,7 @@ object TokenInterceptorProvider {
     private const val NO_AUTH_KEY = "No-Auth"
     private const val AUTH_HEADER_NAME = "Authorization"
     private const val BEARER_PREFIX = "Bearer"
-    private const val DEVICE_UUID_HEADER = "X-Device-UUID"
+    private const val DEVICE_UUID_HEADER = "Device-Uuid"
 
     @Volatile
     private var accessToken: String? = null
