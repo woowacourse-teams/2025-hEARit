@@ -29,7 +29,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
     void canAccessPublicGetListPathWithoutAuth() {
         // when & then
         RestAssured.given().log().all()
-                .header("X-Device-UUID", UUID.randomUUID().toString())
+                .header("Device-Uuid", UUID.randomUUID().toString())
                 .when()
                 .get("/api/v1/categories") // 인증 필요없는 경로
                 .then().log().all()

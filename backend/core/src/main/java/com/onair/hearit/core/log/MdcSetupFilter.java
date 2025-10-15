@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,6 +22,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MdcSetupFilter implements Filter {
 
+    @Value("${app.version}")
+    private String appVersionServer;
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -28,9 +32,9 @@ public class MdcSetupFilter implements Filter {
 
         MDC.put("ip", httpServletRequest.getRemoteAddr());
         MDC.put("timestamp", LocalDateTime.now(ZoneId.of("Asia/Seoul")).toString());
-        MDC.put("deviceModel", httpServletRequest.getHeader("Device-Model"));
-        MDC.put("appVersion", httpServletRequest.getHeader("App-Version"));
-        MDC.put("guestId", httpServletRequest.getHeader("X-Device-UUID"));
+        MDC.put("androidAppVersion", httpServletRequest.getHeader("App-Version"));
+        MDC.put("serverVersion", appVersionServer);
+        MDC.put("guestId", httpServletRequest.getHeader("Device-Uuid"));
 
         /* JwtAuthenticationFilter 에서 설정해주지만, filter 에러 발생 시 빈 값 방지를 위한 초기화 설정입니다. */
         MDC.put("userType", "unspecified");
