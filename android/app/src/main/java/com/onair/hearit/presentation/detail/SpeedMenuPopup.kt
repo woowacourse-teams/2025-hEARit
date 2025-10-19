@@ -45,18 +45,14 @@ class SpeedMenuPopup(
 
         val itemH = context.dp(48)
         val dividerH = context.dp(1)
-        val verticalPadding = context.dp(8)
         val count = labels.size
         val contentHeight =
-            (itemH * count) +
-                (dividerH * (count - 1).coerceAtLeast(0)) +
-                verticalPadding
+            (itemH * count) + (dividerH * (count - 1).coerceAtLeast(0))
 
         popup.height = contentHeight
         popup.show()
 
         popup.listView?.apply {
-            setPadding(0, context.dp(4), 0, context.dp(4))
             clipToPadding = false
 
             isVerticalScrollBarEnabled = false
@@ -93,6 +89,8 @@ class SpeedMenuPopup(
             speedText.text = getItem(position)
             check.visibility = if (position == checkedIndex) VISIBLE else INVISIBLE
             divider.visibility = if (position == count - 1) INVISIBLE else VISIBLE
+
+            view.isActivated = (position == checkedIndex)
             return view
         }
     }
