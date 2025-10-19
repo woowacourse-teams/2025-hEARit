@@ -36,12 +36,10 @@ class SpeedMenuPopup(
                 anchorView = this@SpeedMenuPopup.anchorView
                 isModal = true
                 width = context.dp(200)
-                setBackgroundDrawable(
-                    ContextCompat.getDrawable(
-                        context,
-                        R.drawable.bg_gray1_radius_8dp,
-                    ),
-                )
+                val customBackground =
+                    ContextCompat.getDrawable(context, R.drawable.bg_gray1_radius_8dp)
+                customBackground?.alpha = (0.95f * 255).toInt()
+                setBackgroundDrawable(customBackground)
                 setAdapter(SpeedAdapter(context, labels))
             }
 
