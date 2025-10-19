@@ -15,7 +15,7 @@ public class FileSourceService {
     private final String sourceBaseUrl;
     private final HearitRepository hearitRepository;
 
-    public FileSourceService(@Value("${amazon.s3.bucket}") String sourceBaseUrl, HearitRepository hearitRepository) {
+    public FileSourceService(@Value("${aws.s3.bucket.url}") String sourceBaseUrl, HearitRepository hearitRepository) {
         this.sourceBaseUrl = sourceBaseUrl;
         this.hearitRepository = hearitRepository;
     }

@@ -10,7 +10,7 @@ public class UrlMasker {
     public static final int SUFFIX_LEN = 10;
     public static final int PREFIX_LEN = 10;
 
-    @Value("${amazon.s3.bucket}")
+    @Value("${aws.s3.bucket.url}")
     private String baseBucketUrl;
 
     public String maskUrl(String url) {
