@@ -11,7 +11,6 @@ import android.widget.ImageView
 import android.widget.ListPopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toDrawable
 import com.onair.hearit.R
 import java.math.BigDecimal
 import kotlin.math.roundToInt
@@ -46,13 +45,24 @@ class SpeedMenuPopup(
                 setAdapter(SpeedAdapter(context, labels))
             }
 
+        val itemH = context.dp(48)
+        val dividerH = context.dp(1)
+        val verticalPadding = context.dp(8)
+        val count = labels.size
+        val contentHeight =
+            (itemH * count) +
+                (dividerH * (count - 1).coerceAtLeast(0)) +
+                verticalPadding
+
+        popup.height = contentHeight
         popup.show()
 
         popup.listView?.apply {
-            divider = 0x40FFFFFF.toDrawable()
-            dividerHeight = context.dp(1)
             setPadding(0, context.dp(4), 0, context.dp(4))
             clipToPadding = false
+
+            isVerticalScrollBarEnabled = false
+            overScrollMode = View.OVER_SCROLL_NEVER
 
             setOnItemClickListener { _, _, position, _ ->
                 if (position in speedOptions.indices) {
@@ -80,9 +90,11 @@ class SpeedMenuPopup(
                     .inflate(R.layout.item_speed_row, parent, false)
             val speedText = view.findViewById<TextView>(R.id.tv_speed_label)
             val check = view.findViewById<ImageView>(R.id.iv_check)
+            val divider = view.findViewById<View>(R.id.view_divider)
 
             speedText.text = getItem(position)
             check.visibility = if (position == checkedIndex) VISIBLE else INVISIBLE
+            divider.visibility = if (position == count - 1) INVISIBLE else VISIBLE
             return view
         }
     }
