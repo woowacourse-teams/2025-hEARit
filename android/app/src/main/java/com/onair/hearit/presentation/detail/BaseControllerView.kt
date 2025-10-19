@@ -5,8 +5,6 @@ import android.util.AttributeSet
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.widget.LinearLayout
-import android.widget.PopupMenu
-import androidx.core.view.get
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
@@ -113,33 +111,16 @@ class BaseControllerView
         }
 
         private fun showSpeedMenu() {
-            val popup = PopupMenu(context, binding.playSpeed)
-
-            // 배속 메뉴 구성
-            speedOptions.forEachIndexed { index, speed ->
-                popup.menu.add(0, index, index, "${speed}x")
-            }
-
-            // 현재 속도 체크
-            val currentSpeed = player.playbackParameters.speed
-            val checkedIndex =
-                speedOptions
-                    .indexOfFirst { floatsAreEqualWithinTolerance(it, currentSpeed) }
-                    .takeIf { it >= 0 } ?: defaultSpeedIndex()
-
-            popup.menu[checkedIndex].isChecked = true
-            popup.menu.setGroupCheckable(0, true, true)
-
-            popup.setOnMenuItemClickListener { item ->
-                val index = item.itemId
-                if (index in speedOptions.indices) {
-                    applySpeed(speedOptions[index])
-                    true
-                } else {
-                    false
-                }
-            }
-            popup.show()
+            SpeedMenuPopup(
+                context = context,
+                anchorView = binding.playSpeed,
+                speedOptions = speedOptions,
+                selectedSpeed = player.playbackParameters.speed,
+                onSelected = { speed, _ ->
+                    applySpeed(speed)
+                },
+                areEqual = { speedA, speedB -> floatsAreEqualWithinTolerance(speedA, speedB) },
+            ).show()
         }
 
         private fun updateUI() {
