@@ -140,10 +140,10 @@ class PlayerDetailActivity :
         // 딥링크로부터 받은 id를 추출하기 위함
         val deepLinkHearitId =
             intent.data
-                ?.takeIf { uri -> uri.scheme?.startsWith("kakao") == true && uri.host == "kakaolink" }
+                ?.takeIf { uri -> uri.scheme?.startsWith("kakao") == true }
                 ?.getQueryParameter("id")
                 ?.toLongOrNull()
-                ?.takeIf { it > 0 }
+                ?.takeIf { it > -1 }
 
         // 딥링크 id -> Activity가 최초 실행될 때 저장된 id
         val targetId = deepLinkHearitId ?: hearitId
