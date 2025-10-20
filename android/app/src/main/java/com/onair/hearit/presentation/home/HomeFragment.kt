@@ -115,11 +115,6 @@ class HomeFragment :
             (activity as MainActivity).selectTab(R.id.nav_library)
         }
 
-        binding.ibHomePlayingBookmark.setOnClickListener {
-            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
-            (activity as MainActivity).selectTab(R.id.nav_library)
-        }
-
         binding.tvHomeShortcast.setOnClickListener {
             AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_EXPLORE_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_explore)
@@ -166,6 +161,11 @@ class HomeFragment :
             binding.frHomeSkeleton.apply {
                 if (isLoading) startShimmer() else stopShimmer()
             }
+            binding.tvHomePlayingHistoryHearitTitle.isVisible = !isLoading
+            binding.tvHomeRecentUploadTitle.isVisible = !isLoading
+            binding.tvHomePlayingBookmarkTitle.isVisible = !isLoading
+            binding.tvHomeShortcast.isVisible = !isLoading
+            binding.tvHomeWootaeco.isVisible = !isLoading
         }
 
         viewModel.isLoggedIn.observe(viewLifecycleOwner) { isLoggedIn ->
@@ -196,7 +196,6 @@ class HomeFragment :
 
         viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->
             binding.tvHomePlayingBookmarkTitle.isVisible = playingBookmarkHearits.isNotEmpty()
-            binding.ibHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
             playingBookmarkAdapter.submitList(playingBookmarkHearits)
         }
 
