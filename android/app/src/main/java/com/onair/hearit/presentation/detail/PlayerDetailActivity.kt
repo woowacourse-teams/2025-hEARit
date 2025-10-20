@@ -34,6 +34,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.kakao.sdk.common.util.KakaoCustomTabsClient
 import com.kakao.sdk.share.ShareClient
 import com.kakao.sdk.share.WebSharerClient
@@ -41,6 +42,7 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.KEYWORD_NAME
+import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_DETAIL
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
@@ -130,6 +132,22 @@ class PlayerDetailActivity :
         binding.btnDetailShare.setOnClickListener { startKakaoInvite(this@PlayerDetailActivity) }
     }
 
+    override fun onStart() {
+        super.onStart()
+        connectController()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logEvent(
+            FirebaseAnalytics.Event.SCREEN_VIEW,
+            mapOf(
+                FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_DETAIL,
+                FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
+            ),
+        )
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
@@ -151,11 +169,6 @@ class PlayerDetailActivity :
         if (targetId > -1) {
             viewModel.refreshData(targetId)
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        connectController()
     }
 
     private fun connectController() {

@@ -13,9 +13,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_LOGIN
 import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.databinding.ActivityLoginBinding
 import com.onair.hearit.di.AnalyticsProvider
@@ -39,6 +41,17 @@ class LoginActivity : AppCompatActivity() {
         setupKakaoLogin()
         setupListeners()
         observeViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logEvent(
+            FirebaseAnalytics.Event.SCREEN_VIEW,
+            mapOf(
+                FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_LOGIN,
+                FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
+            ),
+        )
     }
 
     private fun setupWindowInsets() {

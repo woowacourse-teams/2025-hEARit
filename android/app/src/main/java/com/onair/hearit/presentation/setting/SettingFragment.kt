@@ -9,7 +9,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SETTING
 import com.onair.hearit.databinding.FragmentSettingBinding
+import com.onair.hearit.di.AnalyticsProvider
 
 class SettingFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -37,6 +40,17 @@ class SettingFragment : Fragment() {
         setupWindowInsets()
         setupListener()
         observeViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logEvent(
+            FirebaseAnalytics.Event.SCREEN_VIEW,
+            mapOf(
+                FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_SETTING,
+                FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
+            ),
+        )
     }
 
     private fun setupWindowInsets() {

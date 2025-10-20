@@ -17,10 +17,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys.CATEGORY_NAME
 import com.onair.hearit.analytics.AnalyticsParamKeys.ITEM_ID
+import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_HOME
 import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
@@ -95,6 +97,17 @@ class HomeFragment :
         setupListeners()
         setupRecyclerView()
         observeViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logEvent(
+            FirebaseAnalytics.Event.SCREEN_VIEW,
+            mapOf(
+                FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_HOME,
+                FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
+            ),
+        )
     }
 
     private fun setupWindowInsets() {
