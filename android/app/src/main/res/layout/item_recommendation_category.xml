@@ -26,23 +26,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
             android:onClick="@{() -> navigateClickListener.invoke(recommendationCategory.categoryId, recommendationCategory.categoryName, recommendationCategory.colorCode)}"
             android:text="@{@string/home_grouped_category_text(recommendationCategory.categoryName)}"
+            app:drawableEndCompat="@drawable/ic_right"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Spring 카테고리" />
-
-        <ImageButton
-            android:id="@+id/ib_navigate_to_search"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@color/transparent"
-            android:contentDescription="@null"
-            android:onClick="@{() -> navigateClickListener.invoke(recommendationCategory.categoryId, recommendationCategory.categoryName, recommendationCategory.colorCode)}"
-            android:src="@drawable/ic_right"
-            app:layout_constraintBottom_toBottomOf="@id/tv_category_title"
-            app:layout_constraintStart_toEndOf="@id/tv_category_title"
-            app:layout_constraintTop_toTopOf="@id/tv_category_title" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_category_items"
