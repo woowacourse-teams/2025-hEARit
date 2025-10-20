@@ -199,24 +199,16 @@
                 android:layout_width="0dp"
                 android:layout_height="92dp"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/bg_gradient_home_shortcast"
+                android:drawablePadding="4dp"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
                 android:text="@string/home_navigate_explore_text"
+                app:drawableEndCompat="@drawable/ic_home_arrow"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_playing_bookmark" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_home_arrow"
-                app:layout_constraintBottom_toBottomOf="@id/tv_home_shortcast"
-                app:layout_constraintEnd_toEndOf="@id/tv_home_shortcast"
-                app:layout_constraintTop_toTopOf="@id/tv_home_shortcast" />
 
             <TextView
                 android:id="@+id/tv_home_wootaeco"
@@ -229,19 +221,10 @@
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
                 android:text="@string/home_navigate_wootaeco_text"
+                app:drawableEndCompat="@drawable/ic_home_arrow"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_home_arrow"
-                app:layout_constraintBottom_toBottomOf="@id/tv_home_wootaeco"
-                app:layout_constraintEnd_toEndOf="@id/tv_home_wootaeco"
-                app:layout_constraintTop_toTopOf="@id/tv_home_wootaeco" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_recommendation_categories"
