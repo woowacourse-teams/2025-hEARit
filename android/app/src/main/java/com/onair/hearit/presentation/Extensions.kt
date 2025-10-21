@@ -114,6 +114,12 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
     }
 }
 
+inline fun FloatArray.indexOfSpeedOrDefault(
+    target: Float = 1f,
+    areEqual: (Float, Float) -> Boolean,
+    defaultIndex: Int = 0,
+): Int = indexOfFirst { areEqual(it, target) }.takeIf { it >= 0 } ?: defaultIndex
+
 private suspend fun View.awaitAlpha(
     target: Float,
     duration: Long,

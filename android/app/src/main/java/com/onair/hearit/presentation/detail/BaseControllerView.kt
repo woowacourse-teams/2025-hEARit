@@ -13,6 +13,7 @@ import androidx.media3.common.util.Util
 import androidx.media3.ui.TimeBar
 import com.onair.hearit.R
 import com.onair.hearit.databinding.LayoutControllerBinding
+import com.onair.hearit.presentation.indexOfSpeedOrDefault
 import java.math.BigDecimal
 import java.util.Formatter
 import java.util.Locale
@@ -34,7 +35,10 @@ class BaseControllerView
 
         private val window = Timeline.Window()
         private val speedOptions = floatArrayOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
-        private var playSpeedIndex = defaultSpeedIndex()
+        private val defaultIndex by lazy {
+            speedOptions.indexOfSpeedOrDefault(1f, ::floatsAreEqualWithinTolerance)
+        }
+        private var playSpeedIndex = defaultIndex
 
         private val progressRunnable = Runnable { updateProgress() }
 
@@ -94,19 +98,27 @@ class BaseControllerView
         private fun syncSpeedIndexWithPlayer() {
             val currentSpeed = player.playbackParameters.speed
             playSpeedIndex =
-                speedOptions
-                    .indexOfFirst { floatsAreEqualWithinTolerance(it, currentSpeed) }
-                    .takeIf { it >= 0 }
-                    ?: defaultSpeedIndex()
+                speedOptions.indexOfSpeedOrDefault(
+                    target = currentSpeed,
+                    areEqual = ::floatsAreEqualWithinTolerance,
+                    defaultIndex = defaultIndex,
+                )
             updateSpeedLabel()
         }
 
         private fun applySpeed(speed: Float) {
+            val current = player.playbackParameters.speed
+            if (floatsAreEqualWithinTolerance(current, speed)) return
+
             player.playbackParameters = player.playbackParameters.withSpeed(speed)
-            playSpeedIndex = speedOptions
-                .indexOfFirst { floatsAreEqualWithinTolerance(it, speed) }
-                .takeIf { it >= 0 }
-                ?: defaultSpeedIndex()
+
+            playSpeedIndex =
+                speedOptions.indexOfSpeedOrDefault(
+                    target = speed,
+                    areEqual = ::floatsAreEqualWithinTolerance,
+                    defaultIndex = defaultIndex,
+                )
+
             updateSpeedLabel()
         }
 
@@ -192,8 +204,6 @@ class BaseControllerView
             binding.playSpeed.text =
                 context.getString(R.string.player_detail_player_speed_label, speedString)
         }
-
-        private fun defaultSpeedIndex(): Int = speedOptions.indexOfFirst { floatsAreEqualWithinTolerance(it, 1f) }.takeIf { it >= 0 } ?: 0
 
         private inner class ComponentListener :
             Player.Listener,

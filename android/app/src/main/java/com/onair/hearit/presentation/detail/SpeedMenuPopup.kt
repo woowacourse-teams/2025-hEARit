@@ -12,8 +12,9 @@ import android.widget.ListPopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.onair.hearit.R
+import com.onair.hearit.presentation.dpToPx
+import com.onair.hearit.presentation.indexOfSpeedOrDefault
 import java.math.BigDecimal
-import kotlin.math.roundToInt
 
 class SpeedMenuPopup(
     private val context: Context,
@@ -24,9 +25,11 @@ class SpeedMenuPopup(
     private val areEqual: (Float, Float) -> Boolean,
 ) {
     private var checkedIndex: Int =
-        speedOptions
-            .indexOfFirst { areEqual(it, selectedSpeed) }
-            .takeIf { it >= 0 } ?: defaultSpeedIndex()
+        speedOptions.indexOfSpeedOrDefault(
+            target = selectedSpeed,
+            areEqual = areEqual,
+            defaultIndex = speedOptions.indexOfSpeedOrDefault(1f, areEqual),
+        )
 
     private val labels: List<String> = speedOptions.map { it.toSpeedLabel() }
 
@@ -35,7 +38,7 @@ class SpeedMenuPopup(
             ListPopupWindow(context, null, androidx.appcompat.R.attr.listPopupWindowStyle).apply {
                 anchorView = this@SpeedMenuPopup.anchorView
                 isModal = true
-                width = context.dp(200)
+                width = 200.dpToPx(context)
                 val customBackground =
                     ContextCompat.getDrawable(context, R.drawable.bg_gray1_radius_8dp)
                 customBackground?.alpha = (0.95f * 255).toInt()
@@ -43,11 +46,11 @@ class SpeedMenuPopup(
                 setAdapter(SpeedAdapter(context, labels))
             }
 
-        val itemH = context.dp(48)
-        val dividerH = context.dp(1)
+        val itemHeight = 48.dpToPx(context)
+        val dividerHeight = 1.dpToPx(context)
         val count = labels.size
         val contentHeight =
-            (itemH * count) + (dividerH * (count - 1).coerceAtLeast(0))
+            (itemHeight * count) + (dividerHeight * (count - 1).coerceAtLeast(0))
 
         popup.height = contentHeight
         popup.show()
@@ -94,10 +97,6 @@ class SpeedMenuPopup(
             return view
         }
     }
-
-    private fun defaultSpeedIndex(): Int = speedOptions.indexOfFirst { areEqual(it, 1f) }.takeIf { it >= 0 } ?: 0
-
-    private fun Context.dp(value: Int): Int = (value * resources.displayMetrics.density).roundToInt()
 
     private fun Float.toSpeedLabel(): String {
         val s = BigDecimal(this.toDouble()).stripTrailingZeros().toPlainString()
