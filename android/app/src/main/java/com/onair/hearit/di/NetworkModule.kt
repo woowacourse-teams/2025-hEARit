@@ -39,22 +39,20 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(
         preferencesLocalDataSource: PreferencesLocalDataSource,
-        @RefreshRetrofit refreshAuthService: AuthService,
+        @RefreshRetrofit refreshAuthService: dagger.Lazy<AuthService>,
     ): OkHttpClient {
         val tokenAuthenticator =
             TokenAuthenticator(
                 preferencesLocalDataSource,
-                { refreshAuthService },
+                refreshAuthService::get,
             )
 
-        val builder =
-            OkHttpClient
-                .Builder()
-                .addInterceptor(TokenInterceptorProvider.provide())
-                .addInterceptor(LoggingInterceptorProvider.provide())
-                .authenticator(tokenAuthenticator)
-
-        return builder.build()
+        return OkHttpClient
+            .Builder()
+            .addInterceptor(TokenInterceptorProvider.provide())
+            .addInterceptor(LoggingInterceptorProvider.provide())
+            .authenticator(tokenAuthenticator)
+            .build()
     }
 
     @Provides
