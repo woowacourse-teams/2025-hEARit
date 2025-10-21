@@ -37,7 +37,7 @@ class TokenAuthenticator @Inject constructor(
 
             return when {
                 // 토큰 만료 - 갱신 가능
-                errorResponse?.properties?.reissuable == true -> {
+                errorResponse?.reissuable == true -> {
                     refreshTokenAndRetry(response.request)
                 }
 

@@ -7,8 +7,9 @@ import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.PlayingHistoryRequest
 import com.onair.hearit.data.dto.PlayingHistoryResponse
+import javax.inject.Inject
 
-class PlayingHistoryDataSourceImpl(
+class PlayingHistoryDataSourceImpl @Inject constructor(
     private val playingHistoryService: PlayingHistoryService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : PlayingHistoryDataSource {

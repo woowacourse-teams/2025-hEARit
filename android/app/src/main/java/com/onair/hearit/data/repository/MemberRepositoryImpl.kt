@@ -5,8 +5,9 @@ import com.onair.hearit.data.datasource.remote.MemberRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.MemberRepository
+import javax.inject.Inject
 
-class MemberRepositoryImpl(
+class MemberRepositoryImpl @Inject constructor(
     private val preferencesLocalDataSource: PreferencesLocalDataSource,
     private val memberRemoteDataSource: MemberRemoteDataSource,
 ) : MemberRepository {

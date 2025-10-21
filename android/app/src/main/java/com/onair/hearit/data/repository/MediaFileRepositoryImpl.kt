@@ -7,8 +7,9 @@ import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.domain.model.ShortAudioUrl
 import com.onair.hearit.domain.repository.MediaFileRepository
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
-class MediaFileRepositoryImpl(
+class MediaFileRepositoryImpl @Inject constructor(
     private val mediaFileRemoteDataSource: MediaFileRemoteDataSource,
 ) : MediaFileRepository {
     override suspend fun getShortAudioUrl(hearitId: Long): Result<ShortAudioUrl> =

@@ -6,8 +6,9 @@ import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.UserInfoResponse
+import javax.inject.Inject
 
-class MemberRemoteDataSourceImpl(
+class MemberRemoteDataSourceImpl @Inject constructor(
     private val memberService: MemberService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : MemberRemoteDataSource {

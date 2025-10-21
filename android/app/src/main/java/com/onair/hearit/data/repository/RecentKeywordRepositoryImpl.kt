@@ -5,8 +5,9 @@ import com.onair.hearit.data.mapper.toData
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.domain.model.RecentSearch
 import com.onair.hearit.domain.repository.RecentKeywordRepository
+import javax.inject.Inject
 
-class RecentKeywordRepositoryImpl(
+class RecentKeywordRepositoryImpl @Inject constructor(
     private val hearitLocalDataSource: HearitLocalDataSource,
 ) : RecentKeywordRepository {
     override suspend fun getKeywords(): Result<List<RecentSearch>> =
