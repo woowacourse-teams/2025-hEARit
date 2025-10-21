@@ -174,11 +174,6 @@ class HomeFragment :
             binding.frHomeSkeleton.apply {
                 if (isLoading) startShimmer() else stopShimmer()
             }
-            binding.tvHomePlayingHistoryHearitTitle.isVisible = !isLoading
-            binding.tvHomeRecentUploadTitle.isVisible = !isLoading
-            binding.tvHomePlayingBookmarkTitle.isVisible = !isLoading
-            binding.tvHomeShortcast.isVisible = !isLoading
-            binding.tvHomeWootaeco.isVisible = !isLoading
         }
 
         viewModel.isLoggedIn.observe(viewLifecycleOwner) { isLoggedIn ->
