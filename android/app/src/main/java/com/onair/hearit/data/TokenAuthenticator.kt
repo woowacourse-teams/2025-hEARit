@@ -25,23 +25,19 @@ class TokenAuthenticator(
         route: Route?,
         response: Response,
     ): Request? {
-        if (response.request.header("X-Retry-Attempt") == "1") return null
-        if (response.request.header("No-Auth") == "true") return null
+        val request = response.request
 
-        if (response.code == 401) {
-            val errorBody = response.peekBody(Long.MAX_VALUE).string()
-            val errorResponse = parseErrorResponse(errorBody)
+        // 재시도 헤더가 있거나 인증 필요 없는 경우 바로 null 반환
+        if (request.header("X-Retry-Attempt") == "1" || request.header("No-Auth") == "true") return null
 
-            return when {
-                // 토큰 만료 - 갱신 가능
-                errorResponse?.reissuable == true -> {
-                    refreshTokenAndRetry(response.request)
-                }
-
-                else -> null
-            }
-        }
-        return null
+        return (
+            response
+                .takeIf { it.code == 401 }
+                ?.peekBody(Long.MAX_VALUE)
+                ?.string()
+                ?.let(::parseErrorResponse)
+        )?.takeIf { it.reissuable }
+            ?.let { refreshTokenAndRetry(request) }
     }
 
     private fun refreshTokenAndRetry(originalRequest: Request): Request? =
