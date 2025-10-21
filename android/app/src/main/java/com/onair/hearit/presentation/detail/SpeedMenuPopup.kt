@@ -1,15 +1,8 @@
 package com.onair.hearit.presentation.detail
 
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
-import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.ImageView
 import android.widget.ListPopupWindow
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.onair.hearit.R
 import com.onair.hearit.presentation.dpToPx
@@ -43,7 +36,7 @@ class SpeedMenuPopup(
                     ContextCompat.getDrawable(context, R.drawable.bg_gray1_radius_8dp)
                 customBackground?.alpha = (0.95f * 255).toInt()
                 setBackgroundDrawable(customBackground)
-                setAdapter(SpeedAdapter(context, labels))
+                setAdapter(SpeedAdapter(context, labels, checkedIndex))
             }
 
         val itemHeight = 48.dpToPx(context)
@@ -61,40 +54,17 @@ class SpeedMenuPopup(
             isVerticalScrollBarEnabled = false
             overScrollMode = View.OVER_SCROLL_NEVER
 
+            val adapter = SpeedAdapter(context, labels, checkedIndex)
+            setAdapter(adapter)
+
             setOnItemClickListener { _, _, position, _ ->
                 if (position in speedOptions.indices) {
                     checkedIndex = position
-                    (adapter as? SpeedAdapter)?.notifyDataSetChanged()
+                    adapter.updateCheckedIndex(position)
                     onSelected(speedOptions[position], position)
                     popup.dismiss()
                 }
             }
-        }
-    }
-
-    private inner class SpeedAdapter(
-        context: Context,
-        items: List<String>,
-    ) : ArrayAdapter<String>(context, 0, items) {
-        override fun getView(
-            position: Int,
-            convertView: View?,
-            parent: ViewGroup,
-        ): View {
-            val view =
-                convertView ?: LayoutInflater
-                    .from(context)
-                    .inflate(R.layout.item_speed_row, parent, false)
-            val speedText = view.findViewById<TextView>(R.id.tv_speed_label)
-            val check = view.findViewById<ImageView>(R.id.iv_check)
-            val divider = view.findViewById<View>(R.id.view_divider)
-
-            speedText.text = getItem(position)
-            check.visibility = if (position == checkedIndex) VISIBLE else INVISIBLE
-            divider.visibility = if (position == count - 1) INVISIBLE else VISIBLE
-
-            view.isActivated = (position == checkedIndex)
-            return view
         }
     }
 
