@@ -8,6 +8,7 @@ data class ErrorResponse(
     val title: String,
     val status: Int,
     val detail: String = "",
-    val instance: String? = null,
+    val code: String,
+    val reissuable: Boolean,
     val properties: ErrorProperties? = null,
 )

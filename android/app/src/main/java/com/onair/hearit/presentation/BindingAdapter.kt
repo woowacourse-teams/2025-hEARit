@@ -116,7 +116,7 @@ fun setImageUrl(
 }
 
 @BindingAdapter("visibleIfCondition")
-fun setVisibleIfLogin(
+fun setVisibleIfCondition(
     view: View,
     condition: Boolean,
 ) {
