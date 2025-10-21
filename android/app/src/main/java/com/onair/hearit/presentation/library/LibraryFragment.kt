@@ -21,9 +21,11 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_LIBRARY
 import com.onair.hearit.databinding.FragmentLibraryBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
@@ -113,6 +115,17 @@ class LibraryFragment :
         } else {
             updatePlayAllIcon(mediaController)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logEvent(
+            FirebaseAnalytics.Event.SCREEN_VIEW,
+            mapOf(
+                FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_LIBRARY,
+                FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
+            ),
+        )
     }
 
     private fun setupWindowInsets() {

@@ -118,6 +118,7 @@
                 android:text="@{@string/home_playing_history_hearit_title(userInfo.nickname)}"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/indicator_container"
+                app:visibleIfCondition="@{!viewModel.isLoading}"
                 tools:text="hEARit님이 듣고 있는 팟캐스트" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -142,6 +143,7 @@
                 android:text="@string/home_recent_upload_hearit_title"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_playing_hearit"
+                app:visibleIfCondition="@{!viewModel.isLoading}"
                 tools:text="최근 추가된 팟캐스트" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -163,22 +165,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+                android:drawablePadding="8dp"
                 android:text="@string/home_playing_bookmark_hearit_title"
+                app:drawableEndCompat="@drawable/ic_right"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_recent_upload"
+                app:visibleIfCondition="@{!viewModel.isLoading}"
                 tools:text="북마크한 팟캐스트를 들어보세요" />
-
-            <ImageButton
-                android:id="@+id/ib_home_playing_bookmark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:background="@null"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_right"
-                app:layout_constraintBottom_toBottomOf="@id/tv_home_playing_bookmark_title"
-                app:layout_constraintStart_toEndOf="@id/tv_home_playing_bookmark_title"
-                app:layout_constraintTop_toTopOf="@id/tv_home_playing_bookmark_title" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_playing_bookmark"
@@ -199,24 +192,17 @@
                 android:layout_width="0dp"
                 android:layout_height="92dp"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/bg_gradient_home_shortcast"
+                android:drawablePadding="4dp"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
                 android:text="@string/home_navigate_explore_text"
+                app:drawableEndCompat="@drawable/ic_home_arrow"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_bookmark" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_home_arrow"
-                app:layout_constraintBottom_toBottomOf="@id/tv_home_shortcast"
-                app:layout_constraintEnd_toEndOf="@id/tv_home_shortcast"
-                app:layout_constraintTop_toTopOf="@id/tv_home_shortcast" />
+                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_bookmark"
+                app:visibleIfCondition="@{!viewModel.isLoading}" />
 
             <TextView
                 android:id="@+id/tv_home_wootaeco"
@@ -229,19 +215,11 @@
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
                 android:text="@string/home_navigate_wootaeco_text"
+                app:drawableEndCompat="@drawable/ic_home_arrow"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_home_arrow"
-                app:layout_constraintBottom_toBottomOf="@id/tv_home_wootaeco"
-                app:layout_constraintEnd_toEndOf="@id/tv_home_wootaeco"
-                app:layout_constraintTop_toTopOf="@id/tv_home_wootaeco" />
+                app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast"
+                app:visibleIfCondition="@{!viewModel.isLoading}" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_recommendation_categories"

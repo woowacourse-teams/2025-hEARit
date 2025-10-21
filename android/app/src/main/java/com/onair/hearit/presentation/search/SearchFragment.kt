@@ -12,9 +12,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
+import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SEARCH
 import com.onair.hearit.databinding.FragmentSearchBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
@@ -51,6 +53,17 @@ class SearchFragment :
         setupSearchInput()
         observeViewModel()
         viewModel.getCategories()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logEvent(
+            FirebaseAnalytics.Event.SCREEN_VIEW,
+            mapOf(
+                FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_SEARCH,
+                FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
+            ),
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")

@@ -17,10 +17,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys.CATEGORY_NAME
 import com.onair.hearit.analytics.AnalyticsParamKeys.ITEM_ID
+import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_HOME
 import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
@@ -97,6 +99,17 @@ class HomeFragment :
         observeViewModel()
     }
 
+    override fun onResume() {
+        super.onResume()
+        AnalyticsProvider.get().logEvent(
+            FirebaseAnalytics.Event.SCREEN_VIEW,
+            mapOf(
+                FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_HOME,
+                FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
+            ),
+        )
+    }
+
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -111,11 +124,6 @@ class HomeFragment :
         }
 
         binding.tvHomePlayingBookmarkTitle.setOnClickListener {
-            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
-            (activity as MainActivity).selectTab(R.id.nav_library)
-        }
-
-        binding.ibHomePlayingBookmark.setOnClickListener {
             AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_library)
         }
@@ -196,7 +204,6 @@ class HomeFragment :
 
         viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->
             binding.tvHomePlayingBookmarkTitle.isVisible = playingBookmarkHearits.isNotEmpty()
-            binding.ibHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
             playingBookmarkAdapter.submitList(playingBookmarkHearits)
         }
 
@@ -313,6 +320,7 @@ class HomeFragment :
                 HearitSource.RECENT_UPLOAD -> AnalyticsEventNames.HOME_RECENT_UPLOAD_SELECTED
                 HearitSource.PLAYING_BOOKMARK -> AnalyticsEventNames.HOME_PLAYING_BOOKMARK_SELECTED
                 HearitSource.RECOMMENDATION_CATEGORY -> AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_HEARIT_SELECTED
+                HearitSource.SEARCH_KEYWORD -> AnalyticsEventNames.SEARCH_KEYWORD_SELECTED
             }
         AnalyticsProvider.get().logEvent(event, mapOf(ITEM_ID to hearitId.toString()))
     }
