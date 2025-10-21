@@ -10,10 +10,13 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.onair.hearit.di.ServiceScope
 import com.onair.hearit.presentation.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -36,6 +39,7 @@ class PlaybackService : MediaSessionService() {
     lateinit var recentPlaybackHandler: RecentPlaybackHandler
 
     @Inject
+    @ServiceScope
     lateinit var serviceScope: CoroutineScope
 
     private lateinit var mediaSession: MediaSession
@@ -109,16 +113,18 @@ class PlaybackService : MediaSessionService() {
         startId: Int,
     ): Int {
         if (intent?.action == ACTION_STOP_SERVICE) {
-            runCatching {
-                player.pause()
-                player.clearMediaItems()
-            }.onFailure { e ->
-                Timber.e(e, "플레이어를 정상적으로 중지하지 못했습니다.")
-            }
+            serviceScope.launch(Dispatchers.Main) {
+                runCatching {
+                    player.pause()
+                    player.clearMediaItems()
+                }.onFailure { e ->
+                    Timber.e(e, "플레이어를 정상적으로 중지하지 못했습니다.")
+                }
 
-            serviceScope.cancel()
-            stopForeground(STOP_FOREGROUND_REMOVE)
-            stopSelf()
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
+                serviceScope.cancel()
+            }
             return START_NOT_STICKY
         }
 

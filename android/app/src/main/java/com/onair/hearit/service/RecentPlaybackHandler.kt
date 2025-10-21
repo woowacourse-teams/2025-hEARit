@@ -36,10 +36,13 @@ class RecentPlaybackHandler @Inject constructor(
             val player = session.player
             val recentItem = mediaItemManager.buildMediaItem(it)
             val resumePosition = it.lastPosition?.coerceAtLeast(0L) ?: 0L
+
             // 플레이어에 미디어 아이템을 세팅하고 준비시킴 (직접 플레이어 제어)
-            player.playWhenReady = false
-            player.setMediaItems(listOf(recentItem), 0, resumePosition)
-            player.prepare()
+            withContext(Dispatchers.Main) {
+                player.playWhenReady = false
+                player.setMediaItems(listOf(recentItem), 0, resumePosition)
+                player.prepare()
+            }
         }
     }
 

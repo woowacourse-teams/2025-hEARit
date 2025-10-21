@@ -64,7 +64,12 @@ class PlaybackSessionCallback @Inject constructor(
                 if (mediaItems.isNotEmpty()) startIndex.coerceIn(0, mediaItems.size - 1) else 0
             val nextId = mediaItems.getOrNull(targetIndex)?.mediaId?.toLongOrNull()
 
-            nextId?.let { stateSaver.recordCurrent(minRecordMs = 1_000) }
+            nextId?.let {
+                withContext(Dispatchers.Main) {
+                    stateSaver.recordCurrent(minRecordMs = 1_000)
+                }
+            }
+
             processMediaItems(mediaItems, startIndex, startPositionMs)
         }
 
@@ -79,13 +84,18 @@ class PlaybackSessionCallback @Inject constructor(
         args: Bundle,
     ): ListenableFuture<SessionResult> =
         executeAsync(serviceScope, "onCustomCommand") {
-            when (command.customAction) {
-                ACTION_START_LIBRARY_PLAY -> handleStartLibraryPlay(session, args)
-                ACTION_PRELOAD_RECENT -> recentPlaybackHandler.preloadRecentItem(session)
-                ACTION_FLUSH_PLAYBACK -> handleFlushPlayback()
+            val result: SessionResult =
+                when (command.customAction) {
+                    ACTION_START_LIBRARY_PLAY -> handleStartLibraryPlay(session, args)
+                    ACTION_PRELOAD_RECENT -> {
+                        recentPlaybackHandler.preloadRecentItem(session)
+                        SessionResult(SessionResult.RESULT_SUCCESS)
+                    }
 
-                else -> super.onCustomCommand(session, controller, command, args).get()
-            } as SessionResult
+                    ACTION_FLUSH_PLAYBACK -> handleFlushPlayback()
+                    else -> super.onCustomCommand(session, controller, command, args).get()
+                }
+            result
         }
 
     // 세션 재개 시 호출 → 최근 재생 아이템/포지션 가져옴
@@ -146,8 +156,13 @@ class PlaybackSessionCallback @Inject constructor(
         if (loadIndexOnly.items.isEmpty()) {
             return SessionResult(SessionError.ERROR_BAD_VALUE)
         }
+
         val nextId = loadIndexOnly.items.getOrNull(loadIndexOnly.seedIndex)?.hearitId
-        nextId?.let { stateSaver.recordCurrent(minRecordMs = 1_000L) }
+        nextId?.let {
+            withContext(Dispatchers.Main) {
+                stateSaver.recordCurrent(minRecordMs = 1_000)
+            }
+        }
 
         val itemsWithStart = libraryPlaybackHandler.loadLibraryItemsWithStartPosition(playParams)
 
