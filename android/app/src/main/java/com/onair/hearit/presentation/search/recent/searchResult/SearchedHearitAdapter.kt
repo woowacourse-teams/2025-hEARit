@@ -3,6 +3,7 @@ package com.onair.hearit.presentation.search.recent.searchResult
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.presentation.HearitClickListener
 
@@ -12,7 +13,7 @@ class SearchedHearitAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): SearchedHearitViewHolder = SearchedHearitViewHolder.create(parent, clickListener)
+    ): SearchedHearitViewHolder = SearchedHearitViewHolder.create(parent, HearitSource.SEARCH_KEYWORD, clickListener)
 
     override fun onBindViewHolder(
         holder: SearchedHearitViewHolder,
