@@ -26,46 +26,68 @@ class SpeedMenuPopup(
 
     private val labels: List<String> = speedOptions.map { it.toSpeedLabel() }
 
+    private var popup: ListPopupWindow? = null
+    private var adapter: SpeedAdapter? = null
+
     fun show() {
-        val popup =
-            ListPopupWindow(context, null, androidx.appcompat.R.attr.listPopupWindowStyle).apply {
-                anchorView = this@SpeedMenuPopup.anchorView
-                isModal = true
-                width = 200.dpToPx(context)
-                val customBackground =
-                    ContextCompat.getDrawable(context, R.drawable.bg_gray1_radius_8dp)
-                customBackground?.alpha = (0.95f * 255).toInt()
-                setBackgroundDrawable(customBackground)
-                setAdapter(SpeedAdapter(context, labels, checkedIndex))
-            }
+        val popupWindow = ensurePopup()
+        val adapter = ensureSpeedAdapter()
 
-        val itemHeight = 48.dpToPx(context)
-        val dividerHeight = 1.dpToPx(context)
-        val count = labels.size
-        val contentHeight =
-            (itemHeight * count) + (dividerHeight * (count - 1).coerceAtLeast(0))
+        adapter.updateCheckedIndex(checkedIndex)
 
-        popup.height = contentHeight
-        popup.show()
+        popupWindow.anchorView = anchorView
+        popupWindow.height = calculateContentHeight()
 
-        popup.listView?.apply {
-            clipToPadding = false
+        if (!popupWindow.isShowing) {
+            popupWindow.show()
+        } else {
+            popupWindow.listView?.invalidateViews()
+        }
+    }
 
-            isVerticalScrollBarEnabled = false
-            overScrollMode = View.OVER_SCROLL_NEVER
+    private fun ensurePopup(): ListPopupWindow {
+        popup?.let { return it }
 
-            val adapter = SpeedAdapter(context, labels, checkedIndex)
-            setAdapter(adapter)
+        return ListPopupWindow(
+            context,
+            null,
+            androidx.appcompat.R.attr.listPopupWindowStyle,
+        ).apply {
+            isModal = true
+            width = 200.dpToPx(context)
+
+            ContextCompat
+                .getDrawable(context, R.drawable.bg_gray1_radius_8dp)
+                ?.let { backgroundDrawable ->
+                    backgroundDrawable.alpha = (0.95f * 255).toInt()
+                    setBackgroundDrawable(backgroundDrawable)
+                }
+
+            setAdapter(ensureSpeedAdapter())
 
             setOnItemClickListener { _, _, position, _ ->
                 if (position in speedOptions.indices) {
                     checkedIndex = position
-                    adapter.updateCheckedIndex(position)
+                    adapter?.updateCheckedIndex(position)
                     onSelected(speedOptions[position], position)
-                    popup.dismiss()
+                    dismiss()
                 }
             }
+
+            popup = this
         }
+    }
+
+    private fun ensureSpeedAdapter(): SpeedAdapter {
+        adapter?.let { return it }
+        return SpeedAdapter(context, labels, checkedIndex).also { adapter = it }
+    }
+
+    private fun calculateContentHeight(): Int {
+        val itemHeight = 48.dpToPx(context)
+        val dividerHeight = 1.dpToPx(context)
+        val itemCount = labels.size
+        return (itemHeight * itemCount) + (dividerHeight * (itemCount - 1).coerceAtLeast(0))
     }
 
     private fun Float.toSpeedLabel(): String {
