@@ -3,11 +3,20 @@ package com.onair.hearit.di
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.analytics.FirebaseCrashlyticsLogger
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
-object CrashlyticsProvider {
-    private val logger: CrashlyticsLogger by lazy {
-        FirebaseCrashlyticsLogger(FirebaseCrashlytics.getInstance())
-    }
+@Module
+@InstallIn(SingletonComponent::class)
+object CrashlyticsModule {
+    @Provides
+    @Singleton
+    fun provideFirebaseCrashlytics(): FirebaseCrashlytics = FirebaseCrashlytics.getInstance()
 
-    fun get(): CrashlyticsLogger = logger
+    @Provides
+    @Singleton
+    fun provideCrashlyticsLogger(crashlytics: FirebaseCrashlytics): CrashlyticsLogger = FirebaseCrashlyticsLogger(crashlytics)
 }

@@ -3,8 +3,8 @@ package com.onair.hearit
 import android.app.Application
 import android.util.Log
 import com.kakao.sdk.common.KakaoSdk
+import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.presentation.UserIdManager
 import dagger.hilt.android.HiltAndroidApp
@@ -14,9 +14,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
 class HearitApplication : Application() {
+    @Inject
+    lateinit var releaseTree: ReleaseTree
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
@@ -58,29 +61,24 @@ class HearitApplication : Application() {
     }
 
     private fun plantReleaseTimberTree() {
-        Timber.plant(ReleaseTree())
+        Timber.plant(releaseTree)
     }
 
-    class ReleaseTree : Timber.Tree() {
+    class ReleaseTree @Inject constructor(
+        private val crashlyticsLogger: CrashlyticsLogger,
+    ) : Timber.Tree() {
         override fun log(
             priority: Int,
             tag: String?,
             message: String,
             t: Throwable?,
         ) {
-            if (priority == Log.VERBOSE || priority == Log.DEBUG) {
-                return
-            }
+            if (priority == Log.VERBOSE || priority == Log.DEBUG) return
 
-            if (t != null) {
-                if (priority == Log.ERROR) {
-                    CrashlyticsProvider.get().recordException(t)
-                } else if (priority == Log.WARN) {
-                    val warningMessage = t.message ?: ERROR_UNKNOWN_MESSAGE
-                    CrashlyticsProvider.get().recordException(
-                        RuntimeException(warningMessage, t),
-                    )
-                }
+            val throwableToLog = t ?: if (priority >= Log.WARN) RuntimeException(message) else null
+
+            throwableToLog?.let {
+                crashlyticsLogger.recordException(it)
             }
         }
 
@@ -92,6 +90,5 @@ class HearitApplication : Application() {
 
     companion object {
         private const val TIMBER_LOG_PREFIX = "hEARit_LOG"
-        private const val ERROR_UNKNOWN_MESSAGE = "알 수 없는 Error"
     }
 }
