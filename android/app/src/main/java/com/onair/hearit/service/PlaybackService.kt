@@ -10,11 +10,11 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import com.onair.hearit.di.ServiceScope
 import com.onair.hearit.presentation.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
+import timber.log.Timber
 import javax.inject.Inject
 
 @OptIn(UnstableApi::class)
@@ -36,7 +36,6 @@ class PlaybackService : MediaSessionService() {
     lateinit var recentPlaybackHandler: RecentPlaybackHandler
 
     @Inject
-    @ServiceScope
     lateinit var serviceScope: CoroutineScope
 
     private lateinit var mediaSession: MediaSession
@@ -109,16 +108,21 @@ class PlaybackService : MediaSessionService() {
         flags: Int,
         startId: Int,
     ): Int {
-        super.onStartCommand(intent, flags, startId)
         if (intent?.action == ACTION_STOP_SERVICE) {
             runCatching {
                 player.pause()
                 player.clearMediaItems()
+            }.onFailure { e ->
+                Timber.e(e, "플레이어를 정상적으로 중지하지 못했습니다.")
             }
+
+            serviceScope.cancel()
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
             return START_NOT_STICKY
         }
+
+        super.onStartCommand(intent, flags, startId)
         return START_STICKY
     }
 
