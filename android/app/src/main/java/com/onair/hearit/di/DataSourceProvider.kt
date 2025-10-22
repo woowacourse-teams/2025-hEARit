@@ -39,7 +39,7 @@ object DataSourceProvider {
 
     val authRemoteDataSource: AuthRemoteDataSource by lazy {
         AuthRemoteDataSourceImpl(
-            authService = NetworkProvider.authService,
+            authService = NetworkProvider.authServiceNoAuth,
             errorResponseHandler = errorHandler,
         )
     }

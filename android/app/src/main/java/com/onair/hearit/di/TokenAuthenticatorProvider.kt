@@ -10,7 +10,7 @@ object TokenAuthenticatorProvider {
         authenticator =
             TokenAuthenticator(
                 { DataSourceProvider.preferencesLocalDataSource },
-                { NetworkProvider.authService },
+                { NetworkProvider.authServiceNoAuth },
             )
     }
 

@@ -16,26 +16,20 @@ object TokenInterceptorProvider {
 
     fun provide(): Interceptor =
         Interceptor { chain ->
-            val originalRequest = chain.request()
+            val original = chain.request()
+            val noAuth = original.header(NO_AUTH_KEY) == "true"
 
-            if (originalRequest.header(NO_AUTH_KEY) != null) {
-                val newRequest =
-                    originalRequest
-                        .newBuilder()
-                        .removeHeader(NO_AUTH_KEY)
-                        .build()
-                return@Interceptor chain.proceed(newRequest)
+            val builder =
+                original
+                    .newBuilder()
+                    .removeHeader(NO_AUTH_KEY)
+
+            if (!noAuth) {
+                accessToken?.let { token ->
+                    builder.header(AUTH_HEADER_NAME, "$BEARER_PREFIX $token")
+                }
+                deviceUuid?.let { builder.header(DEVICE_UUID_HEADER, it) }
             }
-
-            val builder = originalRequest.newBuilder()
-
-            // Authorization 추가
-            accessToken?.let { token ->
-                builder.header(AUTH_HEADER_NAME, "$BEARER_PREFIX $token")
-            }
-
-            // Device UUID 추가
-            deviceUuid?.let { builder.header(DEVICE_UUID_HEADER, it) }
 
             chain.proceed(builder.build())
         }
