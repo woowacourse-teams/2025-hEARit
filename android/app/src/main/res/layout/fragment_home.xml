@@ -101,7 +101,6 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="12dp"
-                android:layout_marginBottom="16dp"
                 android:gravity="center"
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -114,15 +113,15 @@
                 style="@style/pretendard_main_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="16dp"
                 android:text="@{@string/home_playing_history_hearit_title(userInfo.nickname)}"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/indicator_container"
-                app:visibleIfCondition="@{!viewModel.isLoading}"
+                app:visibleIfCondition="@{!viewModel.isLoading &amp;&amp; viewModel.playingHistoryHearits.size() != 0}"
                 tools:text="hEARit님이 듣고 있는 팟캐스트" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_playing_hearit"
+                android:id="@+id/rv_home_playing_history_hearit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -142,7 +141,8 @@
                 android:layout_marginTop="24dp"
                 android:text="@string/home_recent_upload_hearit_title"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_hearit"
+                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_history_hearit"
+                app:layout_goneMarginTop="24dp"
                 app:visibleIfCondition="@{!viewModel.isLoading}"
                 tools:text="최근 추가된 팟캐스트" />
 
@@ -166,11 +166,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:drawablePadding="8dp"
+                android:gravity="center_vertical"
                 android:text="@string/home_playing_bookmark_hearit_title"
                 app:drawableEndCompat="@drawable/ic_right"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_recent_upload"
-                app:visibleIfCondition="@{!viewModel.isLoading}"
+                app:visibleIfCondition="@{!viewModel.isLoading &amp;&amp; viewModel.playingBookmarkHearits.size() != 0}"
                 tools:text="북마크한 팟캐스트를 들어보세요" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -192,7 +193,7 @@
                 android:layout_width="0dp"
                 android:layout_height="92dp"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/bg_gradient_home_shortcast"
                 android:drawablePadding="4dp"
                 android:gravity="center_vertical"
@@ -210,7 +211,7 @@
                 android:layout_width="0dp"
                 android:layout_height="92dp"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/bg_gradient_home_wootaeco"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"

@@ -151,7 +151,7 @@ class HomeFragment :
             centerScrollListener?.let { addOnScrollListener(it) }
         }
 
-        binding.rvHomePlayingHearit.apply {
+        binding.rvHomePlayingHistoryHearit.apply {
             adapter = playingHistoryAdapter
             addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
         }
@@ -195,6 +195,7 @@ class HomeFragment :
 
         viewModel.playingHistoryHearits.observe(viewLifecycleOwner) { recentHearits ->
             binding.tvHomePlayingHistoryHearitTitle.isVisible = recentHearits.isNotEmpty()
+            binding.rvHomePlayingHistoryHearit.isVisible = recentHearits.isNotEmpty()
             playingHistoryAdapter.submitList(recentHearits)
         }
 
@@ -204,6 +205,7 @@ class HomeFragment :
 
         viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->
             binding.tvHomePlayingBookmarkTitle.isVisible = playingBookmarkHearits.isNotEmpty()
+            binding.rvHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
             playingBookmarkAdapter.submitList(playingBookmarkHearits)
         }
 
