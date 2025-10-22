@@ -18,7 +18,7 @@ object TokenInterceptorProvider {
         Interceptor { chain ->
             val originalRequest = chain.request()
 
-            if (originalRequest.header(NO_AUTH_KEY) != null) {
+            if (originalRequest.header(NO_AUTH_KEY) != "true") {
                 val newRequest =
                     originalRequest
                         .newBuilder()
