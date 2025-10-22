@@ -49,6 +49,7 @@ class SplashActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        viewModel.checkValidAccessTokenWithDelay()
     }
 
     private fun setupWindowInsets() {
@@ -93,11 +94,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         viewModel.checkToken.observe(this) { isValid ->
-            if (isValid) {
-                viewModel.handleDeeplink(intent?.data)
-            } else {
-                navigateToLogin()
-            }
+            if (isValid) processIncomingIntent() else navigateToLogin()
         }
         viewModel.navigateToMain.observe(this) { hearitId ->
             navigateToMain(hearitId)
@@ -105,6 +102,13 @@ class SplashActivity : AppCompatActivity() {
         viewModel.toastMessage.observe(this) { messageResId ->
             Toast.makeText(this, getString(messageResId), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun processIncomingIntent() {
+        val uri = intent?.data
+        viewModel.handleDeeplink(uri)
+        intent?.data = null
+        intent?.removeExtra(HEARIT_ID_KEY)
     }
 
     private fun navigateToMain(deeplinkHearitId: Long?) {
