@@ -43,13 +43,14 @@ class LibraryViewModel(
 
     init {
         getUserInfo()
-        refreshBookmarks()
     }
 
     fun refreshBookmarks() {
         nextPage = 0
         _bookmarks.value = emptyList()
-        fetchData(page = 0)
+        if (userInfo.value != UserInfo.default()) {
+            fetchData(page = 0)
+        }
     }
 
     fun loadNextPage() {
@@ -76,13 +77,8 @@ class LibraryViewModel(
                             null
                         }
                 }.onFailure { throwable ->
-                    when (throwable) {
-                        is UserNotRegistered -> _uiState.value = NotLoggedIn
-                        else -> {
-                            Timber.w(throwable)
-                            _toastMessage.value = R.string.library_toast_bookmark_load_fail
-                        }
-                    }
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.library_toast_bookmark_load_fail
                 }
             _isLoading.value = false
         }
@@ -112,6 +108,7 @@ class LibraryViewModel(
                 .getUserInfo()
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo
+                    refreshBookmarks()
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
