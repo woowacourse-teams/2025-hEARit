@@ -7,9 +7,6 @@ import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
@@ -166,21 +163,6 @@ fun View.flash(
 }
 
 fun View.hideFlashImmediately() = hideAndReset()
-
-fun <T> LiveData<T>.observeOnce(
-    lifecycleOwner: LifecycleOwner,
-    observer: Observer<T>,
-) {
-    observe(
-        lifecycleOwner,
-        object : Observer<T> {
-            override fun onChanged(value: T) {
-                observer.onChanged(value)
-                removeObserver(this)
-            }
-        },
-    )
-}
 
 fun <T> executeAsync(
     serviceScope: CoroutineScope,
