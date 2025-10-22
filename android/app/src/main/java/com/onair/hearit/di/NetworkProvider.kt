@@ -19,47 +19,61 @@ import retrofit2.create
 object NetworkProvider {
     private val contentType = "application/json".toMediaType()
 
+    private val logging by lazy { LoggingInterceptorProvider.provide() }
+
     private val json =
         Json {
             ignoreUnknownKeys = true
         }
 
-    private val okhttpClient: OkHttpClient by lazy {
-        val builder =
-            OkHttpClient
-                .Builder()
-                .addInterceptor(TokenInterceptorProvider.provide())
-                .addInterceptor(LoggingInterceptorProvider.provide())
-
-        TokenAuthenticatorProvider.provide()?.let { authenticator ->
-            builder.authenticator(authenticator)
-        }
-
-        builder.build()
+    private val noAuthOkHttp: OkHttpClient by lazy {
+        OkHttpClient
+            .Builder()
+            .addInterceptor(logging)
+            .build()
     }
 
-    private val retrofit: Retrofit by lazy {
+    private val authOkHttp: OkHttpClient by lazy {
+        OkHttpClient
+            .Builder()
+            .addInterceptor(TokenInterceptorProvider.provide())
+            .addInterceptor(logging)
+            .apply {
+                TokenAuthenticatorProvider.provide()?.let { authenticator(it) }
+            }.build()
+    }
+
+    private val retrofitNoAuth: Retrofit by lazy {
         Retrofit
             .Builder()
             .baseUrl(BuildConfig.BASE_URL)
-            .client(okhttpClient)
+            .client(noAuthOkHttp)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
     }
 
-    val authService: AuthService by lazy { retrofit.create() }
+    private val retrofitAuth: Retrofit by lazy {
+        Retrofit
+            .Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .client(authOkHttp)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+    }
 
-    val categoryService: CategoryService by lazy { retrofit.create() }
+    val authServiceNoAuth: AuthService by lazy { retrofitNoAuth.create() }
 
-    val hearitService: HearitService by lazy { retrofit.create() }
+    val categoryService: CategoryService by lazy { retrofitAuth.create() }
 
-    val mediaFileService: MediaFileService by lazy { retrofit.create() }
+    val hearitService: HearitService by lazy { retrofitAuth.create() }
 
-    val bookmarkService: BookmarkService by lazy { retrofit.create() }
+    val mediaFileService: MediaFileService by lazy { retrofitAuth.create() }
 
-    val memberService: MemberService by lazy { retrofit.create() }
+    val bookmarkService: BookmarkService by lazy { retrofitAuth.create() }
 
-    val playingHistoryService: PlayingHistoryService by lazy { retrofit.create() }
+    val memberService: MemberService by lazy { retrofitAuth.create() }
 
-    val recommendationService: RecommendationService by lazy { retrofit.create() }
+    val playingHistoryService: PlayingHistoryService by lazy { retrofitAuth.create() }
+
+    val recommendationService: RecommendationService by lazy { retrofitAuth.create() }
 }
