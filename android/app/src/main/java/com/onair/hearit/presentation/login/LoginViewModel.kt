@@ -46,6 +46,10 @@ class LoginViewModel(
                 runCatching {
                     preferencesLocalDataSource.saveAccessToken(accessToken).getOrThrow()
                     preferencesLocalDataSource.saveRefreshToken(refreshToken).getOrThrow()
+                }.recoverCatching { throwable ->
+                    // saveAccessToken이 성공했지만 saveRefreshToken이 실패하는 경우 롤백
+                    preferencesLocalDataSource.clearData()
+                    throw throwable
                 }
 
             result
