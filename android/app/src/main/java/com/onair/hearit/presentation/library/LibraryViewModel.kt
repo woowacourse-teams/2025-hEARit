@@ -93,6 +93,9 @@ class LibraryViewModel(
                         _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }.orEmpty()
                     _bookmarks.value = updatedList
 
+                    val newCount = (_totalCount.value ?: 0) - 1
+                    _totalCount.value = newCount.coerceAtLeast(0)
+
                     if (updatedList.isEmpty()) {
                         _uiState.value = NoBookmarks
                     }
