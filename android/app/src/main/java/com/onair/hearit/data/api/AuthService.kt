@@ -25,7 +25,6 @@ interface AuthService {
     @POST("api/v1/auth/token/refresh")
     suspend fun postRefreshToken(
         @Body tokenReissueRequest: TokenReissueRequest,
-        @Header("No-Auth") noAuth: Boolean = true,
     ): Response<TokenReissueResponse>
 
     @DELETE("api/v1/auth/withdraw")
