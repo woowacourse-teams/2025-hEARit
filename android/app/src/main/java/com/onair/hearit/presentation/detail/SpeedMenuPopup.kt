@@ -40,6 +40,10 @@ class SpeedMenuPopup(
 
         if (!popupWindow.isShowing) {
             popupWindow.show()
+            popupWindow.listView?.apply {
+                isVerticalScrollBarEnabled = false
+                overScrollMode = View.OVER_SCROLL_NEVER
+            }
         } else {
             popupWindow.listView?.invalidateViews()
         }
