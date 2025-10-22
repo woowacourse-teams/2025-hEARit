@@ -10,7 +10,6 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
-import timber.log.Timber
 
 class TokenAuthenticator(
     private val preferenceProvider: () -> PreferencesLocalDataSource,
@@ -76,7 +75,6 @@ class TokenAuthenticator(
         val refreshToken =
             preferencesLocalDataSource.getRefreshToken().getOrNull() ?: return null
         return try {
-            Timber.d("aaa")
             val response = authService.postRefreshToken(TokenReissueRequest(refreshToken))
             val tokenResponse = response.body() ?: return null
             preferencesLocalDataSource.saveAccessToken(tokenResponse.accessToken)

@@ -143,7 +143,6 @@
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_playing_history_hearit"
                 app:layout_goneMarginTop="24dp"
-                app:visibleIfCondition="@{!viewModel.isLoading}"
                 tools:text="최근 추가된 팟캐스트" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -171,7 +170,7 @@
                 app:drawableEndCompat="@drawable/ic_right"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_recent_upload"
-                app:visibleIfCondition="@{!viewModel.isLoading &amp;&amp; viewModel.playingBookmarkHearits.size() != 0}"
+                app:visibleIfCondition="@{!viewModel.isLoading &amp;&amp; viewModel.playingHistoryHearits.size() != 0}"
                 tools:text="북마크한 팟캐스트를 들어보세요" />
 
             <androidx.recyclerview.widget.RecyclerView

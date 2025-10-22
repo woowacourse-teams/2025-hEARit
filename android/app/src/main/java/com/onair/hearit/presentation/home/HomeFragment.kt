@@ -193,10 +193,9 @@ class HomeFragment :
             }
         }
 
-        viewModel.playingHistoryHearits.observe(viewLifecycleOwner) { recentHearits ->
-            binding.tvHomePlayingHistoryHearitTitle.isVisible = recentHearits.isNotEmpty()
-            binding.rvHomePlayingHistoryHearit.isVisible = recentHearits.isNotEmpty()
-            playingHistoryAdapter.submitList(recentHearits)
+        viewModel.playingHistoryHearits.observe(viewLifecycleOwner) { playingHistoryHearits ->
+            binding.rvHomePlayingHistoryHearit.isVisible = playingHistoryHearits.isNotEmpty()
+            playingHistoryAdapter.submitList(playingHistoryHearits)
         }
 
         viewModel.recentUploadHearits.observe(viewLifecycleOwner) { recentUploadHearits ->
@@ -204,7 +203,6 @@ class HomeFragment :
         }
 
         viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->
-            binding.tvHomePlayingBookmarkTitle.isVisible = playingBookmarkHearits.isNotEmpty()
             binding.rvHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
             playingBookmarkAdapter.submitList(playingBookmarkHearits)
         }
