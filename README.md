@@ -10,7 +10,7 @@
 **개발자를 위한 오디오 학습 플랫폼**, 히어릿(hEARit)이 여러분의 귀를 채워드립니다.
 
 <p align="left">
-  <a href="https://play.google.com/store/apps/details?id=com.example.app">
+  <a href="https://play.google.com/store/apps/details?id=com.onair.hearit&hl=ko">
   <img alt="Get it on Google Play"
        src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
        height="60"/>
