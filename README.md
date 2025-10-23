@@ -6,8 +6,16 @@
 
 빠르게 변하는 IT 트렌드와 기술 스택을 쉽게 들을 수 있는 팟캐스트 서비스입니다.
 복잡한 문서나 긴 글 대신, 원하는 정보를 들으며  IT 세상을 따라가 보세요.
-
+ 
 **개발자를 위한 오디오 학습 플랫폼**, 히어릿(hEARit)이 여러분의 귀를 채워드립니다.
+
+<p align="left">
+  <a href="https://play.google.com/store/apps/details?id=com.example.app">
+  <img alt="Get it on Google Play"
+       src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+       height="60"/>
+  </a>
+</p>
 
 ## 서비스 소개
 
