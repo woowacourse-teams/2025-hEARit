@@ -7,19 +7,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
@@ -27,15 +29,17 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SCRIPT
 import com.onair.hearit.databinding.FragmentScriptBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
 import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
-import com.onair.hearit.presentation.dpToPx
+import com.onair.hearit.presentation.detail.script.component.Scripts
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -44,16 +48,9 @@ class ScriptFragment : Fragment() {
     private var _binding: FragmentScriptBinding? = null
     private val binding get() = _binding!!
 
-    private var isUserScrolling = false
     private var lastUserScrollTime = 0L
 
     private var mediaController: MediaController? = null
-
-    private val adapter: ScriptAdapter by lazy {
-        ScriptAdapter({ item ->
-            mediaController?.seekTo(item.start)
-        })
-    }
 
     private val hearitId: Long by lazy {
         requireArguments().getLong(HEARIT_ID_KEY)
@@ -64,7 +61,9 @@ class ScriptFragment : Fragment() {
 
     private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
 
-    private val itemHeightPx: Int by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(requireContext()) }
+    private val highlightedIdState = MutableStateFlow<Long?>(null)
+    private val highlightedIndexState = MutableStateFlow(-1)
+    private val isUserScrollingState = MutableStateFlow(false)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -84,7 +83,7 @@ class ScriptFragment : Fragment() {
         binding.lifecycleOwner = this
 
         setupWindowInsets()
-        setupRecyclerView()
+        setUpScripts()
         setupBackPressedHandler()
         observeViewModel()
         connectToMediaController()
@@ -107,26 +106,6 @@ class ScriptFragment : Fragment() {
             v.setPadding(0, 0, 0, 0)
             insets
         }
-    }
-
-    private fun setupRecyclerView() {
-        binding.rvScript.adapter = adapter
-
-        binding.rvScript.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(
-                    recyclerView: RecyclerView,
-                    newState: Int,
-                ) {
-                    if (newState == RecyclerView.SCROLL_STATE_DRAGGING ||
-                        newState == RecyclerView.SCROLL_STATE_SETTLING
-                    ) {
-                        isUserScrolling = true
-                        lastUserScrollTime = System.currentTimeMillis()
-                    }
-                }
-            },
-        )
     }
 
     private fun setupBackPressedHandler() {
@@ -154,11 +133,6 @@ class ScriptFragment : Fragment() {
 
     @UnstableApi
     private fun observeViewModel() {
-        viewModel.hearit.observe(viewLifecycleOwner) { hearit ->
-            binding.hearit = hearit
-            adapter.submitList(hearit?.script)
-        }
-
         viewModel.bookmarkId.observe(viewLifecycleOwner) { bookmarkId ->
             binding.baseController.setBookmarkSelected(bookmarkId != null)
         }
@@ -201,31 +175,21 @@ class ScriptFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (isActive) {
+                    val hearit = viewModel.hearit.value
+                    val scripts = hearit?.script.orEmpty()
+
                     val position = controller.currentPosition
-                    val currentItem =
-                        adapter.currentList
-                            .firstOrNull { position in it.start until it.end }
-                    val currentIndex = adapter.currentList.indexOf(currentItem)
+                    val currentItem = scripts.firstOrNull { position in it.start until it.end }
+                    val currentIndex = scripts.indexOf(currentItem)
 
                     val now = System.currentTimeMillis()
-
-                    if (isUserScrolling) {
-                        val isVisible = isItemVisible(currentIndex)
-                        if (now - lastUserScrollTime > USER_SCROLL_IDLE_THRESHOLD_MS && isVisible) {
-                            isUserScrolling = false
-                        }
+                    if (isUserScrollingState.value) {
+                        val idleReached = now - lastUserScrollTime > USER_SCROLL_IDLE_THRESHOLD_MS
+                        if (idleReached && currentIndex >= 0) isUserScrollingState.value = false
                     }
 
-                    currentItem?.let { adapter.highlightScriptLine(it.id) }
-
-                    if (!isUserScrolling && currentItem != null) {
-                        val scriptHeight = binding.rvScript.height
-                        if (scriptHeight > 0) {
-                            val centerOffset = scriptHeight / 2 - itemHeightPx / 2
-                            (binding.rvScript.layoutManager as? LinearLayoutManager)
-                                ?.scrollToPositionWithOffset(currentIndex, centerOffset)
-                        }
-                    }
+                    highlightedIdState.value = currentItem?.id
+                    highlightedIndexState.value = currentIndex
 
                     delay(updateInterval)
                 }
@@ -233,11 +197,34 @@ class ScriptFragment : Fragment() {
         }
     }
 
-    private fun isItemVisible(position: Int): Boolean {
-        val layoutManager = binding.rvScript.layoutManager as? LinearLayoutManager ?: return false
-        val first = layoutManager.findFirstVisibleItemPosition()
-        val last = layoutManager.findLastVisibleItemPosition()
-        return position in first..last
+    private fun setUpScripts() {
+        binding.cvScript.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed,
+        )
+        binding.cvScript.setContent {
+            val hearit = viewModel.hearit.observeAsState().value
+            val scripts: List<ScriptLine> = hearit?.script.orEmpty()
+
+            val highlightedId by highlightedIdState.collectAsStateWithLifecycle()
+            val highlightedIndex by highlightedIndexState.collectAsStateWithLifecycle()
+            val isUserScrolling by isUserScrollingState.collectAsStateWithLifecycle()
+
+            Scripts(
+                scriptLines = scripts,
+                highlightedId = highlightedId,
+                highlightedIndex = highlightedIndex,
+                isUserScrolling = isUserScrolling,
+                onLineClick = { item ->
+                    mediaController?.seekTo(item.start)
+                },
+                onUserScrollStateChange = { scrolling ->
+                    isUserScrollingState.value = scrolling
+                    if (scrolling) {
+                        lastUserScrollTime = System.currentTimeMillis()
+                    }
+                },
+            )
+        }
     }
 
     private fun showLoginRequiredDialog() {
@@ -274,7 +261,6 @@ class ScriptFragment : Fragment() {
     companion object {
         private const val SCRIPT_SYNC_INTERVAL_MS = 300L
         private const val USER_SCROLL_IDLE_THRESHOLD_MS = 3000L
-        private const val SCRIPT_ITEM_HEIGHT_DP = 16
 
         fun newInstance(hearitId: Long) =
             ScriptFragment().apply {
