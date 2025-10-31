@@ -71,19 +71,6 @@ fun setHighlightedStyle(
     textView.typeface = ResourcesCompat.getFont(context, fontRes)
 }
 
-@BindingAdapter(value = ["scriptIsHighlighted", "scriptIsPast"], requireAll = false)
-fun setScriptTextColor(
-    textView: TextView,
-    isHighlighted: Boolean = false,
-    isPast: Boolean = false,
-) {
-    val context = textView.context
-    val highlightTextColor = ContextCompat.getColor(context, R.color.hearit_gray4)
-    val normalTextColor = ContextCompat.getColor(context, R.color.hearit_dark_gray)
-
-    textView.setTextColor(if (isHighlighted || isPast) highlightTextColor else normalTextColor)
-}
-
 @BindingAdapter("formattedDate")
 fun setFormattedDate(
     textView: TextView,
