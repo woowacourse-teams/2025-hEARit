@@ -133,6 +133,10 @@ class ScriptFragment : Fragment() {
 
     @UnstableApi
     private fun observeViewModel() {
+        viewModel.hearit.observe(viewLifecycleOwner) { hearit ->
+            binding.hearit = hearit
+        }
+
         viewModel.bookmarkId.observe(viewLifecycleOwner) { bookmarkId ->
             binding.baseController.setBookmarkSelected(bookmarkId != null)
         }
