@@ -64,6 +64,7 @@ class ScriptFragment : Fragment() {
     private val highlightedIdState = MutableStateFlow<Long?>(null)
     private val highlightedIndexState = MutableStateFlow(-1)
     private val isUserScrollingState = MutableStateFlow(false)
+    private val followModeState = MutableStateFlow(true)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -212,13 +213,16 @@ class ScriptFragment : Fragment() {
             val highlightedId by highlightedIdState.collectAsStateWithLifecycle()
             val highlightedIndex by highlightedIndexState.collectAsStateWithLifecycle()
             val isUserScrolling by isUserScrollingState.collectAsStateWithLifecycle()
+            val followHighlight by followModeState.collectAsStateWithLifecycle()
 
             Scripts(
                 scriptLines = scripts,
                 highlightedId = highlightedId,
                 highlightedIndex = highlightedIndex,
                 isUserScrolling = isUserScrolling,
+                followHighlight = followHighlight,
                 onLineClick = { item ->
+                    followModeState.value = true
                     mediaController?.seekTo(item.start)
                 },
                 onUserScrollStateChange = { scrolling ->
@@ -226,6 +230,9 @@ class ScriptFragment : Fragment() {
                     if (scrolling) {
                         lastUserScrollTime = System.currentTimeMillis()
                     }
+                },
+                onStopFollow = {
+                    followModeState.value = false
                 },
             )
         }

@@ -30,13 +30,24 @@ fun Scripts(
     highlightedId: Long?,
     highlightedIndex: Int,
     isUserScrolling: Boolean,
+    followHighlight: Boolean,
     onLineClick: (ScriptLine) -> Unit,
     onUserScrollStateChange: (Boolean) -> Unit,
+    onStopFollow: () -> Unit,
 ) {
     val listState = rememberLazyListState()
 
     var isAuto by remember { mutableStateOf(false) }
     var lastCentered by remember { mutableIntStateOf(-1) }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }.collect { inProgress ->
+            onUserScrollStateChange(inProgress)
+            if (inProgress && !isAuto) {
+                onStopFollow()
+            }
+        }
+    }
 
     suspend fun awaitLayoutReady() {
         snapshotFlow { listState.layoutInfo.visibleItemsInfo.isNotEmpty() }
@@ -83,7 +94,8 @@ fun Scripts(
         }
     }
 
-    LaunchedEffect(highlightedIndex, scriptLines.size) {
+    LaunchedEffect(highlightedIndex, scriptLines.size, followHighlight) {
+        if (!followHighlight) return@LaunchedEffect
         if (isUserScrolling || isAuto) return@LaunchedEffect
         if (highlightedIndex !in scriptLines.indices) return@LaunchedEffect
         if (lastCentered == highlightedIndex) return@LaunchedEffect
@@ -98,7 +110,10 @@ fun Scripts(
                 .fillMaxSize()
                 .pointerInput(Unit) {
                     detectDragGestures(
-                        onDragStart = { onUserScrollStateChange(true) },
+                        onDragStart = {
+                            onUserScrollStateChange(true)
+                            onStopFollow()
+                        },
                         onDragEnd = { onUserScrollStateChange(false) },
                         onDragCancel = { onUserScrollStateChange(false) },
                     ) { _, _ -> }
