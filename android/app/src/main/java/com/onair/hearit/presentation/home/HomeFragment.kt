@@ -74,13 +74,7 @@ class HomeFragment :
     private val recommendationCategoryAdapter: RecommendationCategoryAdapter by lazy {
         RecommendationCategoryAdapter(
             this,
-            navigateClickListener = { id, name, colorCode ->
-                navigateToSearch(
-                    id,
-                    name,
-                    colorCode,
-                )
-            },
+            navigateClickListener = ::navigateToSearch,
         )
     }
     private val snapHelper = PagerSnapHelper()
@@ -182,21 +176,26 @@ class HomeFragment :
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     updateLoadingState(state.isLoading)
+                    updateAdSections(state.isLoading)
+
+                    updatePlayingHistorySection(
+                        state.playingHistoryHearits,
+                        !state.isLoading && state.showPlayingHistory,
+                    )
+                    updateRecentUploadSection(
+                        state.recentUploadHearits,
+                        !state.isLoading && state.showRecentUpload,
+                    )
+                    updateBookmarkSection(
+                        state.playingBookmarkHearits,
+                        !state.isLoading && state.showBookmark,
+                    )
 
                     if (!state.isLoading) {
                         updateUserInfo(state.userInfo, state.isLoggedIn)
                         updateRecommendSection(state.recommendHearits)
-                        updatePlayingHistorySection(state.playingHistoryHearits)
-                        updateRecentUploadSection(state.recentUploadHearits)
-                        updateBookmarkSection(state.playingBookmarkHearits)
                         updateCategoriesSection(state.recommendationCategories)
                     }
-
-                    binding.tvHomeRecentUploadTitle.isVisible = state.showRecentUpload
-                    binding.tvHomePlayingHistoryHearitTitle.isVisible = state.showPlayingHistory
-                    binding.tvHomePlayingBookmarkTitle.isVisible = state.showBookmark
-                    binding.tvHomeShortcast.isVisible = !state.isLoading
-                    binding.tvHomeWootaeco.isVisible = !state.isLoading
                 }
             }
         }
@@ -207,12 +206,9 @@ class HomeFragment :
     }
 
     private fun updateLoadingState(isLoading: Boolean) {
-        if (isLoading) {
-            binding.frHomeSkeleton.isVisible = true
-            binding.frHomeSkeleton.startShimmer()
-        } else {
-            binding.frHomeSkeleton.stopShimmer()
-            binding.frHomeSkeleton.isVisible = false
+        binding.frHomeSkeleton.apply {
+            isVisible = isLoading
+            if (isLoading) startShimmer() else stopShimmer()
         }
     }
 
@@ -233,22 +229,39 @@ class HomeFragment :
         }
     }
 
-    private fun updatePlayingHistorySection(playingHistoryHearits: List<PlayingHistoryHearit>) {
-        binding.rvHomePlayingHistoryHearit.isVisible = playingHistoryHearits.isNotEmpty()
+    private fun updatePlayingHistorySection(
+        playingHistoryHearits: List<PlayingHistoryHearit>,
+        shouldShow: Boolean,
+    ) {
+        binding.tvHomePlayingHistoryHearitTitle.isVisible = shouldShow
+        binding.rvHomePlayingHistoryHearit.isVisible = shouldShow
         playingHistoryAdapter.submitList(playingHistoryHearits)
     }
 
-    private fun updateRecentUploadSection(recentUploadHearits: List<RecentUploadHearit>) {
+    private fun updateRecentUploadSection(
+        recentUploadHearits: List<RecentUploadHearit>,
+        shouldShow: Boolean,
+    ) {
+        binding.tvHomeRecentUploadTitle.isVisible = shouldShow
         recentUploadAdapter.submitList(recentUploadHearits)
     }
 
-    private fun updateBookmarkSection(playingBookmarkHearits: List<Bookmark>) {
-        binding.rvHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
+    private fun updateBookmarkSection(
+        playingBookmarkHearits: List<Bookmark>,
+        shouldShow: Boolean,
+    ) {
+        binding.tvHomePlayingBookmarkTitle.isVisible = shouldShow
+        binding.rvHomePlayingBookmark.isVisible = shouldShow
         playingBookmarkAdapter.submitList(playingBookmarkHearits)
     }
 
     private fun updateCategoriesSection(recommendationCategories: List<RecommendationCategories>) {
         recommendationCategoryAdapter.submitList(recommendationCategories)
+    }
+
+    private fun updateAdSections(isLoading: Boolean) {
+        binding.tvHomeShortcast.isVisible = !isLoading
+        binding.tvHomeWootaeco.isVisible = !isLoading
     }
 
     private fun setupIndicator(size: Int = 5) {
