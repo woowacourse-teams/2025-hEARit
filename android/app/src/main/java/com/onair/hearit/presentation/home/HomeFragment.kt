@@ -15,6 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -26,6 +28,12 @@ import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_HOME
 import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.domain.model.Bookmark
+import com.onair.hearit.domain.model.PlayingHistoryHearit
+import com.onair.hearit.domain.model.RecentUploadHearit
+import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.RecommendationCategories
+import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -36,6 +44,7 @@ import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import kotlinx.coroutines.launch
 
 class HomeFragment :
     Fragment(),
@@ -91,8 +100,6 @@ class HomeFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        binding.lifecycleOwner = viewLifecycleOwner
-        binding.viewModel = viewModel
         setupWindowInsets()
         setupListeners()
         setupRecyclerView()
@@ -171,50 +178,77 @@ class HomeFragment :
     }
 
     private fun observeViewModel() {
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.frHomeSkeleton.apply {
-                if (isLoading) startShimmer() else stopShimmer()
-            }
-        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    updateLoadingState(state.isLoading)
 
-        viewModel.isLoggedIn.observe(viewLifecycleOwner) { isLoggedIn ->
-            mainViewModel.updateLoginState(isLoggedIn)
-        }
+                    if (!state.isLoading) {
+                        updateUserInfo(state.userInfo, state.isLoggedIn)
+                        updateRecommendSection(state.recommendHearits)
+                        updatePlayingHistorySection(state.playingHistoryHearits)
+                        updateRecentUploadSection(state.recentUploadHearits)
+                        updateBookmarkSection(state.playingBookmarkHearits)
+                        updateCategoriesSection(state.recommendationCategories)
+                    }
 
-        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
-            binding.userInfo = userInfo
-        }
-
-        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendHearits ->
-            recommendAdapter.submitList(recommendHearits) {
-                if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                    scrollToMiddlePosition()
-                    setupIndicator()
+                    binding.tvHomeRecentUploadTitle.isVisible = state.showRecentUpload
+                    binding.tvHomePlayingHistoryHearitTitle.isVisible = state.showPlayingHistory
+                    binding.tvHomePlayingBookmarkTitle.isVisible = state.showBookmark
+                    binding.tvHomeShortcast.isVisible = !state.isLoading
+                    binding.tvHomeWootaeco.isVisible = !state.isLoading
                 }
             }
-        }
-
-        viewModel.playingHistoryHearits.observe(viewLifecycleOwner) { playingHistoryHearits ->
-            binding.rvHomePlayingHistoryHearit.isVisible = playingHistoryHearits.isNotEmpty()
-            playingHistoryAdapter.submitList(playingHistoryHearits)
-        }
-
-        viewModel.recentUploadHearits.observe(viewLifecycleOwner) { recentUploadHearits ->
-            recentUploadAdapter.submitList(recentUploadHearits)
-        }
-
-        viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->
-            binding.rvHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
-            playingBookmarkAdapter.submitList(playingBookmarkHearits)
-        }
-
-        viewModel.recommendationCategories.observe(viewLifecycleOwner) { recommendationCategories ->
-            recommendationCategoryAdapter.submitList(recommendationCategories)
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(getString(resId))
         }
+    }
+
+    private fun updateLoadingState(isLoading: Boolean) {
+        if (isLoading) {
+            binding.frHomeSkeleton.isVisible = true
+            binding.frHomeSkeleton.startShimmer()
+        } else {
+            binding.frHomeSkeleton.stopShimmer()
+            binding.frHomeSkeleton.isVisible = false
+        }
+    }
+
+    private fun updateUserInfo(
+        userInfo: UserInfo,
+        isLoggedIn: Boolean,
+    ) {
+        mainViewModel.updateLoginState(isLoggedIn)
+        binding.userInfo = userInfo
+    }
+
+    private fun updateRecommendSection(recommendHearits: List<RecommendHearit>) {
+        recommendAdapter.submitList(recommendHearits) {
+            if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                scrollToMiddlePosition()
+                setupIndicator()
+            }
+        }
+    }
+
+    private fun updatePlayingHistorySection(playingHistoryHearits: List<PlayingHistoryHearit>) {
+        binding.rvHomePlayingHistoryHearit.isVisible = playingHistoryHearits.isNotEmpty()
+        playingHistoryAdapter.submitList(playingHistoryHearits)
+    }
+
+    private fun updateRecentUploadSection(recentUploadHearits: List<RecentUploadHearit>) {
+        recentUploadAdapter.submitList(recentUploadHearits)
+    }
+
+    private fun updateBookmarkSection(playingBookmarkHearits: List<Bookmark>) {
+        binding.rvHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
+        playingBookmarkAdapter.submitList(playingBookmarkHearits)
+    }
+
+    private fun updateCategoriesSection(recommendationCategories: List<RecommendationCategories>) {
+        recommendationCategoryAdapter.submitList(recommendationCategories)
     }
 
     private fun setupIndicator(size: Int = 5) {
