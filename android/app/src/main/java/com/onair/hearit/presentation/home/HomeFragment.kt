@@ -200,9 +200,7 @@ class HomeFragment :
             }
         }
 
-        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
-        }
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId -> showToast(resId) }
     }
 
     private fun updateLoadingState(isLoading: Boolean) {
@@ -322,8 +320,8 @@ class HomeFragment :
         }
     }
 
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), getString(messageResId), Toast.LENGTH_SHORT).show()
     }
 
     private fun navigateToSearch(
