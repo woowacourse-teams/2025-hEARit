@@ -1,16 +1,10 @@
 package com.onair.hearit.presentation.home
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.DomainException.UserNotRegistered
-import com.onair.hearit.domain.model.Bookmark
-import com.onair.hearit.domain.model.PlayingHistoryHearit
-import com.onair.hearit.domain.model.RecentUploadHearit
-import com.onair.hearit.domain.model.RecommendHearit
-import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
@@ -18,7 +12,10 @@ import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
 import com.onair.hearit.domain.repository.RecommendationRepository
 import com.onair.hearit.presentation.SingleLiveData
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -29,36 +26,14 @@ class HomeViewModel(
     private val playingHistoryRepository: PlayingHistoryRepository,
     private val recommendationRepository: RecommendationRepository,
 ) : ViewModel() {
-    private val _userInfo: MutableLiveData<UserInfo> = MutableLiveData()
-    val userInfo: LiveData<UserInfo> = _userInfo
-
-    private val _isLoggedIn: MutableLiveData<Boolean> = MutableLiveData()
-    val isLoggedIn: LiveData<Boolean> = _isLoggedIn
-
-    private val _recommendHearits: MutableLiveData<List<RecommendHearit>> = MutableLiveData()
-    val recommendHearits: LiveData<List<RecommendHearit>> = _recommendHearits
-
-    private val _playingHistoryHearits: MutableLiveData<List<PlayingHistoryHearit>> =
-        MutableLiveData()
-    val playingHistoryHearits: LiveData<List<PlayingHistoryHearit>> = _playingHistoryHearits
-
-    private val _recentUploadHearits: MutableLiveData<List<RecentUploadHearit>> = MutableLiveData()
-    val recentUploadHearits: LiveData<List<RecentUploadHearit>> = _recentUploadHearits
-
-    private val _playingBookmarkHearits: MutableLiveData<List<Bookmark>> =
-        MutableLiveData()
-    val playingBookmarkHearits: LiveData<List<Bookmark>> = _playingBookmarkHearits
-
-    private val _recommendationCategories: MutableLiveData<List<RecommendationCategories>> =
-        MutableLiveData()
-    val recommendationCategories: LiveData<List<RecommendationCategories>> =
-        _recommendationCategories
+    private val _uiState = MutableStateFlow(HomeUiState(isLoading = true))
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private val _isLoading = MutableLiveData(false)
-    val isLoading: LiveData<Boolean> = _isLoading
+    // 로딩 중인 작업 개수 추적
+    private val loadingJobs = mutableSetOf<String>()
 
     init {
         fetchUserInfo()
@@ -66,56 +41,100 @@ class HomeViewModel(
     }
 
     private fun fetchData() {
-        _isLoading.value = true
+        fetchRecommendHearits()
+        fetchPlayingHistory()
+        fetchRecentUpload()
+        fetchBookmarks()
+        fetchCategories()
+    }
 
+    private fun startLoading(jobKey: String) {
+        loadingJobs.add(jobKey)
+        _uiState.update { it.copy(isLoading = true) }
+    }
+
+    private fun finishLoading(jobKey: String) {
+        loadingJobs.remove(jobKey)
+        if (loadingJobs.isEmpty()) {
+            _uiState.update { it.copy(isLoading = false) }
+        }
+    }
+
+    private fun fetchRecommendHearits() {
         viewModelScope.launch {
-            val recommendDeferred = async { hearitRepository.getRecommendHearits() }
-            val playingHistoryDeferred = async { playingHistoryRepository.getPlayingHistories() }
-            val recentUploadDeferred = async { hearitRepository.getRecentUploadHearits(size = 10) }
-            val playingBookmarkDeferred =
-                async {
-                    bookmarkRepository.getBookmarks(
-                        page = 0,
-                        size = 10,
-                        filter = "unfinished",
-                    )
+            startLoading("recommend")
+            hearitRepository
+                .getRecommendHearits()
+                .onSuccess { hearits ->
+                    _uiState.update { it.copy(recommendHearits = hearits) }
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.home_toast_recommend_load_fail
                 }
-            val groupedDeferred = async { recommendationRepository.getRecommendationCategories() }
+            finishLoading("recommend")
+        }
+    }
 
-            val recommendResult = recommendDeferred.await()
-            val playingHistoryResult = playingHistoryDeferred.await()
-            val recentUploadResult = recentUploadDeferred.await()
-            val playingBookmarkResult = playingBookmarkDeferred.await()
-            val groupedResult = groupedDeferred.await()
+    private fun fetchPlayingHistory() {
+        viewModelScope.launch {
+            startLoading("history")
+            playingHistoryRepository
+                .getPlayingHistories()
+                .onSuccess { history ->
+                    _uiState.update { it.copy(playingHistoryHearits = history) }
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.home_toast_playing_history_load_fail
+                }
+            finishLoading("history")
+        }
+    }
 
-            recommendResult.onFailure { throwable ->
-                Timber.w(throwable)
-                _toastMessage.value = R.string.home_toast_recommend_load_fail
-            }
-            playingHistoryResult.onFailure { throwable ->
-                Timber.w(throwable)
-                _toastMessage.value = R.string.home_toast_playing_history_load_fail
-            }
-            recentUploadResult.onFailure { throwable ->
-                Timber.w(throwable)
-                _toastMessage.value = R.string.home_toast_recent_upload_load_fail
-            }
-            playingBookmarkResult.onFailure { throwable ->
-                Timber.w(throwable)
-                _toastMessage.value = R.string.home_toast_playing_bookmark_load_fail
-            }
-            groupedResult.onFailure { throwable ->
-                Timber.w(throwable)
-                _toastMessage.value = R.string.home_toast_grouped_category_load_fail
-            }
+    private fun fetchRecentUpload() {
+        viewModelScope.launch {
+            startLoading("recentUpload")
+            hearitRepository
+                .getRecentUploadHearits(size = 10)
+                .onSuccess { response ->
+                    _uiState.update { it.copy(recentUploadHearits = response.items) }
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.home_toast_recent_upload_load_fail
+                }
+            finishLoading("recentUpload")
+        }
+    }
 
-            recommendResult.onSuccess { _recommendHearits.value = it }
-            playingHistoryResult.onSuccess { _playingHistoryHearits.value = it }
-            recentUploadResult.onSuccess { _recentUploadHearits.value = it.items }
-            playingBookmarkResult.onSuccess { _playingBookmarkHearits.value = it.items }
-            groupedResult.onSuccess { _recommendationCategories.value = it }
+    private fun fetchBookmarks() {
+        viewModelScope.launch {
+            startLoading("bookmark")
+            bookmarkRepository
+                .getBookmarks(
+                    page = 0,
+                    size = 10,
+                    filter = "unfinished",
+                ).onSuccess { pageResult ->
+                    _uiState.update { it.copy(playingBookmarkHearits = pageResult.items) }
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.home_toast_playing_bookmark_load_fail
+                }
+            finishLoading("bookmark")
+        }
+    }
 
-            _isLoading.value = false
+    private fun fetchCategories() {
+        viewModelScope.launch {
+            startLoading("categories")
+            recommendationRepository
+                .getRecommendationCategories()
+                .onSuccess { categories ->
+                    _uiState.update { it.copy(recommendationCategories = categories) }
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.home_toast_grouped_category_load_fail
+                }
+            finishLoading("categories")
         }
     }
 
@@ -124,17 +143,21 @@ class HomeViewModel(
             memberRepository
                 .getUserInfo()
                 .onSuccess { userInfo ->
-                    _userInfo.value = userInfo
-                    _isLoggedIn.value = true
+                    _uiState.update {
+                        it.copy(userInfo = userInfo, isLoggedIn = true)
+                    }
                 }.onFailure { throwable ->
-                    _isLoggedIn.value = false
-
                     when (throwable) {
-                        is UserNotRegistered -> _userInfo.value = UserInfo.default()
+                        is UserNotRegistered -> {
+                            _uiState.update {
+                                it.copy(userInfo = UserInfo.default(), isLoggedIn = false)
+                            }
+                        }
 
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
+                            _uiState.update { it.copy(isLoggedIn = false) }
                         }
                     }
                 }
