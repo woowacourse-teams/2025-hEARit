@@ -134,6 +134,7 @@ class HomeFragment :
         }
 
         binding.tvHomeWootaeco.setOnClickListener {
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_WOOTAECO_SELECTED)
             navigateToSearch(id = 13, name = "우아한테크코스", colorCode = "#12C6B0")
         }
     }
