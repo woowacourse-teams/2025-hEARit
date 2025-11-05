@@ -40,6 +40,11 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.dpToPx
+import com.onair.hearit.presentation.home.adapter.PlayingBookmarkHearitAdapter
+import com.onair.hearit.presentation.home.adapter.PlayingHistoryHearitAdapter
+import com.onair.hearit.presentation.home.adapter.RecentUploadHearitAdapter
+import com.onair.hearit.presentation.home.adapter.RecommendHearitAdapter
+import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
 import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
