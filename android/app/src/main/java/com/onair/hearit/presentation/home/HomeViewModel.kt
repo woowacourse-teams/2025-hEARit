@@ -131,7 +131,7 @@ class HomeViewModel(
                         _uiState.update { it.copy(recommendationCategories = categories) }
                     }.onFailure { throwable ->
                         Timber.w(throwable)
-                        _toastMessage.value = R.string.home_toast_grouped_category_load_fail
+                        _toastMessage.value = R.string.home_toast_recommendation_category_load_fail
                     }
             }
         }
@@ -163,12 +163,12 @@ class HomeViewModel(
         }
     }
 
-    private suspend inline fun <T> safeLoad(
+    private suspend inline fun safeLoad(
         jobKey: HomeLoadKey,
-        block: () -> T,
-    ): T? {
+        block: () -> Unit,
+    ) {
         startLoading(jobKey)
-        return try {
+        try {
             block()
         } finally {
             withContext(NonCancellable) { finishLoading(jobKey) }
