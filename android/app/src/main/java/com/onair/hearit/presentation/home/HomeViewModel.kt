@@ -12,11 +12,13 @@ import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
 import com.onair.hearit.domain.repository.RecommendationRepository
 import com.onair.hearit.presentation.SingleLiveData
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class HomeViewModel(
@@ -62,79 +64,79 @@ class HomeViewModel(
 
     private fun fetchRecommendHearits() {
         viewModelScope.launch {
-            startLoading("recommend")
-            hearitRepository
-                .getRecommendHearits()
-                .onSuccess { hearits ->
-                    _uiState.update { it.copy(recommendHearits = hearits) }
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.home_toast_recommend_load_fail
-                }
-            finishLoading("recommend")
+            safeLoad("recommend") {
+                hearitRepository
+                    .getRecommendHearits()
+                    .onSuccess { hearits ->
+                        _uiState.update { it.copy(recommendHearits = hearits) }
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.home_toast_recommend_load_fail
+                    }
+            }
         }
     }
 
     private fun fetchPlayingHistory() {
         viewModelScope.launch {
-            startLoading("history")
-            playingHistoryRepository
-                .getPlayingHistories()
-                .onSuccess { history ->
-                    _uiState.update { it.copy(playingHistoryHearits = history) }
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.home_toast_playing_history_load_fail
-                }
-            finishLoading("history")
+            safeLoad("history") {
+                playingHistoryRepository
+                    .getPlayingHistories()
+                    .onSuccess { history ->
+                        _uiState.update { it.copy(playingHistoryHearits = history) }
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.home_toast_playing_history_load_fail
+                    }
+            }
         }
     }
 
     private fun fetchRecentUpload() {
         viewModelScope.launch {
-            startLoading("recentUpload")
-            hearitRepository
-                .getRecentUploadHearits(size = 10)
-                .onSuccess { response ->
-                    _uiState.update { it.copy(recentUploadHearits = response.items) }
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.home_toast_recent_upload_load_fail
-                }
-            finishLoading("recentUpload")
+            safeLoad("recentUpload") {
+                hearitRepository
+                    .getRecentUploadHearits(size = 10)
+                    .onSuccess { response ->
+                        _uiState.update { it.copy(recentUploadHearits = response.items) }
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.home_toast_recent_upload_load_fail
+                    }
+            }
         }
     }
 
     private fun fetchBookmarks() {
         viewModelScope.launch {
-            startLoading("bookmark")
-            bookmarkRepository
-                .getBookmarks(
-                    page = 0,
-                    size = 10,
-                    filter = "unfinished",
-                ).onSuccess { pageResult ->
-                    _uiState.update { it.copy(playingBookmarkHearits = pageResult.items) }
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.home_toast_playing_bookmark_load_fail
-                }
-            finishLoading("bookmark")
+            safeLoad("bookmark") {
+                bookmarkRepository
+                    .getBookmarks(
+                        page = 0,
+                        size = 10,
+                        filter = "unfinished",
+                    ).onSuccess { pageResult ->
+                        _uiState.update { it.copy(playingBookmarkHearits = pageResult.items) }
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.home_toast_playing_bookmark_load_fail
+                    }
+            }
         }
     }
 
     private fun fetchCategories() {
         viewModelScope.launch {
-            startLoading("categories")
-            recommendationRepository
-                .getRecommendationCategories()
-                .onSuccess { categories ->
-                    _uiState.update { it.copy(recommendationCategories = categories) }
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.home_toast_grouped_category_load_fail
-                }
-            finishLoading("categories")
+            safeLoad("categories") {
+                recommendationRepository
+                    .getRecommendationCategories()
+                    .onSuccess { categories ->
+                        _uiState.update { it.copy(recommendationCategories = categories) }
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.home_toast_grouped_category_load_fail
+                    }
+            }
         }
     }
 
@@ -161,6 +163,18 @@ class HomeViewModel(
                         }
                     }
                 }
+        }
+    }
+
+    private suspend inline fun <T> safeLoad(
+        jobKey: String,
+        block: () -> T,
+    ): T? {
+        startLoading(jobKey)
+        return try {
+            block()
+        } finally {
+            withContext(NonCancellable) { finishLoading(jobKey) }
         }
     }
 }
