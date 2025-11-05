@@ -35,7 +35,7 @@ class HomeViewModel(
     val toastMessage: LiveData<Int> = _toastMessage
 
     // 로딩 중인 작업 개수 추적
-    private val loadingJobs = mutableSetOf<String>()
+    private val loadingJobs = mutableSetOf<HomeLoadKey>()
 
     init {
         fetchUserInfo()
@@ -50,12 +50,12 @@ class HomeViewModel(
         fetchCategories()
     }
 
-    private fun startLoading(jobKey: String) {
+    private fun startLoading(jobKey: HomeLoadKey) {
         loadingJobs.add(jobKey)
         _uiState.update { it.copy(isLoading = true) }
     }
 
-    private fun finishLoading(jobKey: String) {
+    private fun finishLoading(jobKey: HomeLoadKey) {
         loadingJobs.remove(jobKey)
         if (loadingJobs.isEmpty()) {
             _uiState.update { it.copy(isLoading = false) }
@@ -64,7 +64,7 @@ class HomeViewModel(
 
     private fun fetchRecommendHearits() {
         viewModelScope.launch {
-            safeLoad("recommend") {
+            safeLoad(HomeLoadKey.RECOMMEND) {
                 hearitRepository
                     .getRecommendHearits()
                     .onSuccess { hearits ->
@@ -79,7 +79,7 @@ class HomeViewModel(
 
     private fun fetchPlayingHistory() {
         viewModelScope.launch {
-            safeLoad("history") {
+            safeLoad(HomeLoadKey.PLAYING_HISTORY) {
                 playingHistoryRepository
                     .getPlayingHistories()
                     .onSuccess { history ->
@@ -94,7 +94,7 @@ class HomeViewModel(
 
     private fun fetchRecentUpload() {
         viewModelScope.launch {
-            safeLoad("recentUpload") {
+            safeLoad(HomeLoadKey.RECENT_UPLOAD) {
                 hearitRepository
                     .getRecentUploadHearits(size = 10)
                     .onSuccess { response ->
@@ -109,7 +109,7 @@ class HomeViewModel(
 
     private fun fetchBookmarks() {
         viewModelScope.launch {
-            safeLoad("bookmark") {
+            safeLoad(HomeLoadKey.PLAYING_BOOKMARKS) {
                 bookmarkRepository
                     .getBookmarks(
                         page = 0,
@@ -127,7 +127,7 @@ class HomeViewModel(
 
     private fun fetchCategories() {
         viewModelScope.launch {
-            safeLoad("categories") {
+            safeLoad(HomeLoadKey.RECOMMENDATION_CATEGORIES) {
                 recommendationRepository
                     .getRecommendationCategories()
                     .onSuccess { categories ->
@@ -167,7 +167,7 @@ class HomeViewModel(
     }
 
     private suspend inline fun <T> safeLoad(
-        jobKey: String,
+        jobKey: HomeLoadKey,
         block: () -> T,
     ): T? {
         startLoading(jobKey)
