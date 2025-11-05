@@ -28,14 +28,11 @@ class HomeViewModel(
     private val playingHistoryRepository: PlayingHistoryRepository,
     private val recommendationRepository: RecommendationRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(HomeUiState(isLoading = true))
+    private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
-
-    // 로딩 중인 작업 개수 추적
-    private val loadingJobs = mutableSetOf<HomeLoadKey>()
 
     init {
         fetchUserInfo()
@@ -51,14 +48,14 @@ class HomeViewModel(
     }
 
     private fun startLoading(jobKey: HomeLoadKey) {
-        loadingJobs.add(jobKey)
-        _uiState.update { it.copy(isLoading = true) }
+        _uiState.update { state ->
+            state.copy(loadingKeys = state.loadingKeys + jobKey)
+        }
     }
 
     private fun finishLoading(jobKey: HomeLoadKey) {
-        loadingJobs.remove(jobKey)
-        if (loadingJobs.isEmpty()) {
-            _uiState.update { it.copy(isLoading = false) }
+        _uiState.update { state ->
+            state.copy(loadingKeys = state.loadingKeys - jobKey)
         }
     }
 
