@@ -29,6 +29,28 @@ val HearitTypoGraphy =
                 fontSize = 24.sp,
                 lineHeight = 32.sp,
             ),
+        // Title: 작은 제목
+        titleLarge =
+            TextStyle(
+                fontFamily = PretendardFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 22.sp,
+                lineHeight = 28.sp,
+            ),
+        titleMedium =
+            TextStyle(
+                fontFamily = PretendardFontFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp,
+                lineHeight = 22.sp,
+            ),
+        titleSmall =
+            TextStyle(
+                fontFamily = PretendardFontFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 15.sp,
+                lineHeight = 20.sp,
+            ),
         // Body: 본문
         bodyLarge =
             TextStyle(
