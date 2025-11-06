@@ -37,6 +37,7 @@ v2Share = "2.21.7"
 v2User = "2.21.7"
 room-runtime = "2.7.2"
 activityCompose = "1.10.1"
+runtimeLivedata = "1.9.4"
 
 [libraries]
 androidx-concurrent-futures-ktx = { module = "androidx.concurrent:concurrent-futures-ktx", version.ref = "concurrentFuturesKtx" }
@@ -86,6 +87,7 @@ v2-share = { module = "com.kakao.sdk:v2-share", version.ref = "v2Share" }
 v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
