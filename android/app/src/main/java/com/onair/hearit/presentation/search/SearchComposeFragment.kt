@@ -6,8 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -20,6 +18,7 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
 class SearchComposeFragment :
     Fragment(),
@@ -35,29 +34,15 @@ class SearchComposeFragment :
     ): View =
         ComposeView(requireContext()).apply {
             setContent {
-                // 기존 테마 적용
-//                SearchNavHost(
-//                    onBackClick = {
-//                        parentFragmentManager.popBackStack()
-//                    },
                 SearchMainScreen(
                     viewModel,
-                    {},
-                    {},
+                    onSearchBarClick = { navigateToRecent() },
                     onCategoryClick = { id, name, color ->
                         onCategoryClick(id, name, color)
                     },
                 )
             }
         }
-
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?,
-    ) {
-        super.onViewCreated(view, savedInstanceState)
-        setupWindowInsets(view)
-    }
 
     override fun onResume() {
         super.onResume()
@@ -70,12 +55,12 @@ class SearchComposeFragment :
         )
     }
 
-    private fun setupWindowInsets(view: View) {
-        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, systemBars.top, 0, 0)
-            insets
-        }
+    private fun navigateToRecent() {
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container_view, SearchRecentFragment())
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onCategoryClick(

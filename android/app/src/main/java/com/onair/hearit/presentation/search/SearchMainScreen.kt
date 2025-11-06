@@ -56,7 +56,6 @@ import com.onair.hearit.presentation.theme.HearitTypoGraphy
 @Composable
 fun SearchMainScreen(
     viewModel: SearchViewModel,
-    onBackClick: () -> Unit,
     onSearchBarClick: () -> Unit,
     onCategoryClick: (Long, String, String) -> Unit,
 ) {
@@ -129,12 +128,13 @@ fun SearchMainTopBar(
                     style = HearitTypoGraphy.headlineMedium,
                 )
             },
-            scrollBehavior = scrollBehavior,
+            modifier = Modifier,
             colors =
                 TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = HearitBlack,
                     scrolledContainerColor = HearitBlack,
                 ),
+            scrollBehavior = scrollBehavior,
         )
 
         SearchBarInput(
