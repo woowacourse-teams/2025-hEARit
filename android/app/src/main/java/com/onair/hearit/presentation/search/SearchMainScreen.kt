@@ -121,10 +121,10 @@ fun SearchMainTopBar(
             title = {
                 Text(
                     text = stringResource(R.string.menu_search),
-                    color = Gray4,
                     modifier =
                         Modifier
                             .padding(start = 4.dp),
+                    color = Gray4,
                     style = HearitTypoGraphy.headlineMedium,
                 )
             },
@@ -208,13 +208,13 @@ fun CategoryGridList(
                 .fillMaxSize()
                 .background(HearitBlack)
                 .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding =
             PaddingValues(
                 top = 12.dp,
                 bottom = 40.dp,
             ),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(
             items = categories,
