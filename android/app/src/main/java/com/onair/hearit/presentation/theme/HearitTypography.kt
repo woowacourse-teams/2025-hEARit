@@ -55,7 +55,7 @@ val HearitTypoGraphy =
         bodyLarge =
             TextStyle(
                 fontFamily = PretendardFontFamily,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
             ),

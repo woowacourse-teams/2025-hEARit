@@ -35,9 +35,7 @@ class SearchComposeFragment :
                 SearchMainScreen(
                     viewModel,
                     onSearchBarClick = { navigateToRecent() },
-                    onCategoryClick = { id, name, color ->
-                        onCategoryClick(id, name, color)
-                    },
+                    onCategoryClick = ::onCategoryClick,
                 )
             }
         }
