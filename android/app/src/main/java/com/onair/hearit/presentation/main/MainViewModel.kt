@@ -9,7 +9,7 @@ import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
-import com.onair.hearit.domain.usecase.auth.GetRecentHearitUseCase
+import com.onair.hearit.domain.usecase.GetRecentHearitUseCase
 import com.onair.hearit.domain.usecase.auth.LogoutUseCase
 import com.onair.hearit.domain.usecase.auth.WithdrawUseCase
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY

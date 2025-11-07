@@ -7,13 +7,15 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.di.TokenInterceptorProvider
-import com.onair.hearit.domain.repository.AuthRepository
+import com.onair.hearit.domain.usecase.auth.KakaoLoginUseCase
+import com.onair.hearit.domain.usecase.auth.SaveTokenUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class LoginViewModel(
-    private val authRepository: AuthRepository,
+    private val kakaoLoginUseCase: KakaoLoginUseCase,
+    private val saveTokenUseCase: SaveTokenUseCase,
 ) : ViewModel() {
     private val _loginState = MutableLiveData<Boolean>()
     val loginState: LiveData<Boolean> = _loginState
@@ -23,8 +25,7 @@ class LoginViewModel(
 
     fun kakaoLogin(accessToken: String) {
         viewModelScope.launch {
-            authRepository
-                .kakaoLogin(accessToken)
+            kakaoLoginUseCase(accessToken)
                 .onSuccess { appToken ->
                     saveToken(appToken.accessToken, appToken.refreshToken)
                 }.onFailure { throwable ->
@@ -40,17 +41,7 @@ class LoginViewModel(
         refreshToken: String,
     ) {
         viewModelScope.launch {
-            val result =
-                runCatching {
-                    authRepository.saveToken(accessToken).getOrThrow()
-                    authRepository.saveRefreshToken(refreshToken).getOrThrow()
-                }.recoverCatching { throwable ->
-                    // saveAccessToken이 성공했지만 saveRefreshToken이 실패하는 경우 롤백
-                    authRepository.clearAuthData()
-                    throw throwable
-                }
-
-            result
+            saveTokenUseCase(accessToken, refreshToken)
                 .onSuccess {
                     TokenInterceptorProvider.setAccessToken(accessToken)
                     AuthEventManager.onLoginSuccess()
@@ -59,17 +50,6 @@ class LoginViewModel(
                     Timber.w(throwable)
                     _toastMessage.value = R.string.login_toast_save_token_fail
                     _loginState.value = false
-                }
-        }
-    }
-
-    fun clearData() {
-        viewModelScope.launch {
-            authRepository
-                .clearAuthData()
-                .onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.main_toast_clear_token_fail
                 }
         }
     }
