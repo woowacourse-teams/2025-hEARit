@@ -14,7 +14,7 @@ class SaveTokenUseCase(
             authRepository.saveRefreshToken(refreshToken).getOrThrow()
         }.recoverCatching { throwable ->
             // 부분 성공 시 롤백
-            authRepository.clearAuthData()
+            authRepository.clearAuthData().getOrThrow()
             throw throwable
         }
 }

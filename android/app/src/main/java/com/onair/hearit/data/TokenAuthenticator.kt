@@ -70,17 +70,21 @@ class TokenAuthenticator(
     }
 
     private suspend fun refreshToken(): String? {
-        val preferencesLocalDataSource = preferenceProvider()
+        val authLocalDataSource = preferenceProvider()
         val authService = authServiceProvider()
         val refreshToken =
-            preferencesLocalDataSource.getRefreshToken().getOrNull() ?: return null
+            authLocalDataSource.getRefreshToken().getOrNull() ?: return null
         return try {
             val response = authService.postRefreshToken(TokenReissueRequest(refreshToken))
-            val tokenResponse = response.body() ?: return null
-            preferencesLocalDataSource.saveAccessToken(tokenResponse.accessToken)
+            val tokenResponse =
+                response.body() ?: run {
+                    authLocalDataSource.clearAuthData()
+                    return null
+                }
+            authLocalDataSource.saveAccessToken(tokenResponse.accessToken)
             tokenResponse.accessToken
         } catch (_: Exception) {
-            preferencesLocalDataSource.clearAuthData()
+            authLocalDataSource.clearAuthData()
             null
         }
     }
