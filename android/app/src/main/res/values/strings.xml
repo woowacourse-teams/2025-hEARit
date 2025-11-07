@@ -137,6 +137,7 @@
     <string name="main_toast_finish_back_pressed">뒤로가기 버튼을 한 번 더 누르면 종료됩니다.</string>
     <string name="main_toast_player_last_position_save_fail">마지막 포지션 저장에 실패했습니다.</string>
     <string name="main_toast_clear_token_fail">액세스 토큰 삭제에 실패했습니다.</string>
+    <string name="main_toast_clear_user_fail">유저 정보 삭제에 실패했습니다.</string>
 
     <!-- BottomPlayerView-->
     <string name="bottom_player_view_default_duration">--:--</string>

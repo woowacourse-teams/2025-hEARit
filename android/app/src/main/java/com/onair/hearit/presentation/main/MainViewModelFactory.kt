@@ -9,9 +9,11 @@ class MainViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val authRepository = RepositoryProvider.authRepository
         val recentHearitRepository = RepositoryProvider.recentHearitRepository
+        val userRepository = RepositoryProvider.userRepository
         return MainViewModel(
             authRepository,
             recentHearitRepository,
+            userRepository,
         ) as T
     }
 }

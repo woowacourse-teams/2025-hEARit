@@ -42,4 +42,9 @@ class UserRepositoryImpl(
             }
 
     override suspend fun saveUserId(userId: String): Result<Boolean> = userLocalDataSource.saveUserId(userId)
+
+    override suspend fun clearUserData(): Result<Boolean> =
+        runCatching {
+            userLocalDataSource.clearData().getOrThrow()
+        }
 }

@@ -11,6 +11,7 @@ import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
+import com.onair.hearit.domain.repository.UserRepository
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.splash.SplashActivity
@@ -22,6 +23,7 @@ import timber.log.Timber
 class MainViewModel(
     private val authRepository: AuthRepository,
     private val recentHearitRepository: RecentHearitRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     private val _recentHearit = MutableLiveData<RecentHearit?>()
     val recentHearit: LiveData<RecentHearit?> = _recentHearit
@@ -35,16 +37,16 @@ class MainViewModel(
     private val _withdrawState = MutableLiveData<Boolean>()
     val withdrawState: LiveData<Boolean> = _withdrawState
 
-    val hearitUpdated = MutableLiveData<Unit>()
-
     private val _categoryUpdated = MutableSharedFlow<Unit>(replay = 0, extraBufferCapacity = 1)
+
     val categoryUpdated: SharedFlow<Unit> = _categoryUpdated
-
     private val _toastMessage = SingleLiveData<Int>()
-    val toastMessage: LiveData<Int> = _toastMessage
 
+    val toastMessage: LiveData<Int> = _toastMessage
     private val _navigateToDetail = SingleLiveData<Long>()
+
     val navigateToDetail: LiveData<Long> = _navigateToDetail
+    val hearitUpdated = MutableLiveData<Unit>()
 
     init {
         fetchRecentHearit()
@@ -68,7 +70,7 @@ class MainViewModel(
                 Timber.w(error)
                 _toastMessage.value = R.string.logout_fail
             } else {
-                clearData()
+                clearAuthData()
                 TokenInterceptorProvider.setAccessToken(null)
                 _toastMessage.value = R.string.logout_success
             }
@@ -88,7 +90,6 @@ class MainViewModel(
                             return@unlink
                         }
 
-                        clearData()
                         _withdrawState.value = true
                         _toastMessage.value = R.string.withdraw_success
                     }
@@ -113,13 +114,26 @@ class MainViewModel(
         }
     }
 
-    private fun clearData() {
+    private fun clearAuthData() {
         viewModelScope.launch {
             authRepository
                 .clearAuthData()
-                .onFailure { throwable ->
+                .onSuccess {
+                    clearUserData()
+                }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.main_toast_clear_token_fail
+                }
+        }
+    }
+
+    private fun clearUserData() {
+        viewModelScope.launch {
+            userRepository
+                .clearUserData()
+                .onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.main_toast_clear_user_fail
                 }
         }
     }

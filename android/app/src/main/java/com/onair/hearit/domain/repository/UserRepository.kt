@@ -10,4 +10,6 @@ interface UserRepository {
     suspend fun getOrCreateUserId(): Result<String>
 
     suspend fun saveUserId(userId: String): Result<Boolean>
+
+    suspend fun clearUserData(): Result<Boolean>
 }
