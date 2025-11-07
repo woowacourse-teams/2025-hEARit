@@ -4,6 +4,7 @@ import com.onair.hearit.domain.usecase.GetBookmarksUseCase
 import com.onair.hearit.domain.usecase.GetExploreHearitUseCase
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
+import com.onair.hearit.domain.usecase.InitializeDeviceUuidUseCase
 
 object UseCaseProvider {
     val getHearitUseCase: GetHearitUseCase by lazy {
@@ -30,5 +31,8 @@ object UseCaseProvider {
             bookmarkRepository = RepositoryProvider.bookmarkRepository,
             mediaFileRepository = RepositoryProvider.mediaFileRepository,
         )
+    }
+    val initializeDeviceUuidUseCase: InitializeDeviceUuidUseCase by lazy {
+        InitializeDeviceUuidUseCase(RepositoryProvider.userRepository)
     }
 }

@@ -10,6 +10,7 @@ import com.onair.hearit.di.DatabaseProvider
 import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.TokenAuthenticatorProvider
 import com.onair.hearit.di.TokenInterceptorProvider
+import com.onair.hearit.di.UseCaseProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,8 +44,8 @@ class HearitApplication : Application() {
 
     private fun initUuid() {
         appScope.launch {
-            RepositoryProvider.userRepository
-                .getOrCreateUserId()
+            UseCaseProvider
+                .initializeDeviceUuidUseCase()
                 .onSuccess { uuid ->
                     TokenInterceptorProvider.setDeviceUuid(uuid)
                 }.onFailure { throwable ->
