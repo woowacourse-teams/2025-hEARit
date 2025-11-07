@@ -121,7 +121,7 @@ fun SearchMainTopBar(
             title = {
                 Text(
                     text = stringResource(R.string.menu_search),
-                    color = Color.White,
+                    color = Gray4,
                     modifier =
                         Modifier
                             .padding(start = 4.dp),
@@ -145,7 +145,7 @@ fun SearchMainTopBar(
         Text(
             text = stringResource(R.string.search_category_text),
             modifier = Modifier.padding(start = 20.dp, top = 12.dp, bottom = 12.dp),
-            color = Color.White,
+            color = Gray4,
             style = HearitTypoGraphy.titleLarge,
         )
     }

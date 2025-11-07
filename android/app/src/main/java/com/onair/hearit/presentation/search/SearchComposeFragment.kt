@@ -10,8 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsEventNames
-import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SEARCH
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
@@ -68,11 +66,6 @@ class SearchComposeFragment :
         name: String,
         colorCode: String,
     ) {
-        AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
-            mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
-        )
-
         val fragment =
             CategoryComposeFragment().apply {
                 arguments =
