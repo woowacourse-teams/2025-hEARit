@@ -4,9 +4,11 @@ import com.onair.hearit.domain.usecase.GetBookmarksUseCase
 import com.onair.hearit.domain.usecase.GetExploreHearitUseCase
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
+import com.onair.hearit.domain.usecase.GetRecentHearitUseCase
 import com.onair.hearit.domain.usecase.InitializeDeviceUuidUseCase
-import com.onair.hearit.domain.usecase.auth.GetRecentHearitUseCase
+import com.onair.hearit.domain.usecase.auth.KakaoLoginUseCase
 import com.onair.hearit.domain.usecase.auth.LogoutUseCase
+import com.onair.hearit.domain.usecase.auth.SaveTokenUseCase
 import com.onair.hearit.domain.usecase.auth.WithdrawUseCase
 
 object UseCaseProvider {
@@ -36,6 +38,22 @@ object UseCaseProvider {
         )
     }
 
+    val getRecentHearitUseCase: GetRecentHearitUseCase by lazy {
+        GetRecentHearitUseCase(RepositoryProvider.recentHearitRepository)
+    }
+
+    val initializeDeviceUuidUseCase: InitializeDeviceUuidUseCase by lazy {
+        InitializeDeviceUuidUseCase(RepositoryProvider.userRepository)
+    }
+
+    val kakaoLoginUseCase: KakaoLoginUseCase by lazy {
+        KakaoLoginUseCase(RepositoryProvider.authRepository)
+    }
+
+    val saveTokenUseCase: SaveTokenUseCase by lazy {
+        SaveTokenUseCase(RepositoryProvider.authRepository)
+    }
+
     val logoutUseCase: LogoutUseCase by lazy {
         LogoutUseCase(
             authRepository = RepositoryProvider.authRepository,
@@ -48,13 +66,5 @@ object UseCaseProvider {
             authRepository = RepositoryProvider.authRepository,
             userRepository = RepositoryProvider.userRepository,
         )
-    }
-
-    val getRecentHearitUseCase: GetRecentHearitUseCase by lazy {
-        GetRecentHearitUseCase(RepositoryProvider.recentHearitRepository)
-    }
-
-    val initializeDeviceUuidUseCase: InitializeDeviceUuidUseCase by lazy {
-        InitializeDeviceUuidUseCase(RepositoryProvider.userRepository)
     }
 }

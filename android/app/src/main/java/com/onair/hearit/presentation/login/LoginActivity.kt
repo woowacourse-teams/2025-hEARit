@@ -91,10 +91,7 @@ class LoginActivity : AppCompatActivity() {
 
         binding.tvNoLoginHearit.setOnClickListener {
             AuthEventManager.onLoginSuccess()
-            lifecycleScope.launch {
-                viewModel.clearData()
-                navigateToMain()
-            }
+            navigateToMain()
         }
     }
 

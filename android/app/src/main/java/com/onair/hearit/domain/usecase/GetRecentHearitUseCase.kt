@@ -1,4 +1,4 @@
-package com.onair.hearit.domain.usecase.auth
+package com.onair.hearit.domain.usecase
 
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.RecentHearitRepository
