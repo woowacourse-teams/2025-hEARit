@@ -7,7 +7,7 @@ import com.onair.hearit.di.RepositoryProvider
 @Suppress("UNCHECKED_CAST")
 class SettingViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val memberRepository = RepositoryProvider.memberRepository
+        val memberRepository = RepositoryProvider.userRepository
         return SettingViewModel(memberRepository) as T
     }
 }

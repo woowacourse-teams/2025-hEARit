@@ -14,9 +14,9 @@ import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
-import com.onair.hearit.domain.repository.MemberRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
 import com.onair.hearit.domain.repository.RecommendationRepository
+import com.onair.hearit.domain.repository.UserRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -25,7 +25,7 @@ import timber.log.Timber
 class HomeViewModel(
     private val bookmarkRepository: BookmarkRepository,
     private val hearitRepository: HearitRepository,
-    private val memberRepository: MemberRepository,
+    private val userRepository: UserRepository,
     private val playingHistoryRepository: PlayingHistoryRepository,
     private val recommendationRepository: RecommendationRepository,
 ) : ViewModel() {
@@ -121,7 +121,7 @@ class HomeViewModel(
 
     private fun fetchUserInfo() {
         viewModelScope.launch {
-            memberRepository
+            userRepository
                 .getUserInfo()
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo

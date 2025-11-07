@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.data.AuthEventManager
-import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
+import com.onair.hearit.data.datasource.local.AuthLocalDataSource
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.presentation.SingleLiveData
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class LoginViewModel(
-    private val preferencesLocalDataSource: PreferencesLocalDataSource,
+    private val authLocalDataSource: AuthLocalDataSource,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
     private val _loginState = MutableLiveData<Boolean>()
@@ -44,11 +44,11 @@ class LoginViewModel(
         viewModelScope.launch {
             val result =
                 runCatching {
-                    preferencesLocalDataSource.saveAccessToken(accessToken).getOrThrow()
-                    preferencesLocalDataSource.saveRefreshToken(refreshToken).getOrThrow()
+                    authLocalDataSource.saveAccessToken(accessToken).getOrThrow()
+                    authLocalDataSource.saveRefreshToken(refreshToken).getOrThrow()
                 }.recoverCatching { throwable ->
                     // saveAccessToken이 성공했지만 saveRefreshToken이 실패하는 경우 롤백
-                    preferencesLocalDataSource.clearData()
+                    authLocalDataSource.clearData()
                     throw throwable
                 }
 
@@ -67,7 +67,7 @@ class LoginViewModel(
 
     fun clearData() {
         viewModelScope.launch {
-            preferencesLocalDataSource
+            authLocalDataSource
                 .clearData()
                 .onFailure { throwable ->
                     Timber.w(throwable)
