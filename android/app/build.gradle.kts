@@ -153,6 +153,7 @@ dependencies {
 
     // LiveData
     implementation(libs.androidx.lifecycle.livedata.ktx)
+    testImplementation(libs.androidx.core.testing)
 
     // test
     testImplementation(libs.mockk)
