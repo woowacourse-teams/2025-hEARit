@@ -205,7 +205,7 @@ class MainActivity :
         }
         binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
             stopService(PlaybackService.stopIntent(this))
-            mainViewModel.performLogout()
+            mainViewModel.logout()
         }
         binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener {
             stopService(PlaybackService.stopIntent(this))

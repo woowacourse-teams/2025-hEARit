@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
@@ -60,63 +59,24 @@ class MainViewModel(
         _isLoggedIn.value = isLoggedIn
     }
 
-    fun performLogout() {
-        _isLoggingOut.value = true
+    fun logout() {
+        viewModelScope.launch {
+            _isLoggingOut.value = true
 
-        UserApiClient.instance.logout { error ->
+            logoutUseCase()
+                .onSuccess {
+                    _toastMessage.value = R.string.logout_success
+                    TokenInterceptorProvider.setAccessToken(null)
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.logout_fail
+                }
+
             _isLoggingOut.value = false
-
-            if (error != null) {
-                Timber.w(error)
-                _toastMessage.value = R.string.logout_fail
-            } else {
-                executeLogout()
-            }
         }
     }
 
     fun withdraw() {
-        viewModelScope
-            .launch {
-                UserApiClient.instance.unlink { error ->
-                    if (error != null) {
-                        Timber.w(error)
-                        _toastMessage.value = R.string.withdraw_fail
-                        _withdrawState.value = false
-                        return@unlink
-                    }
-
-                    executeWithdraw()
-                }
-            }
-    }
-
-    private fun fetchRecentHearit() {
-        viewModelScope.launch {
-            getRecentHearitUseCase()
-                .onSuccess { recent ->
-                    _recentHearit.value = recent
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.main_toast_recent_load_fail
-                }
-        }
-    }
-
-    private fun executeLogout() {
-        viewModelScope.launch {
-            logoutUseCase()
-                .onSuccess {
-                    TokenInterceptorProvider.setAccessToken(null)
-                    _toastMessage.value = R.string.logout_success
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.main_toast_clear_token_fail
-                }
-        }
-    }
-
-    private fun executeWithdraw() {
         viewModelScope.launch {
             withdrawUseCase()
                 .onSuccess {
@@ -127,6 +87,18 @@ class MainViewModel(
                     Timber.w(throwable)
                     _withdrawState.value = false
                     _toastMessage.value = R.string.withdraw_fail
+                }
+        }
+    }
+
+    private fun fetchRecentHearit() {
+        viewModelScope.launch {
+            getRecentHearitUseCase()
+                .onSuccess { recent ->
+                    _recentHearit.value = recent
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.main_toast_recent_load_fail
                 }
         }
     }
