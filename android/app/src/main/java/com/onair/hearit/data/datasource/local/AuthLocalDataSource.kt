@@ -1,8 +1,6 @@
 package com.onair.hearit.data.datasource.local
 
-import com.onair.hearit.domain.model.UserInfo
-
-interface PreferencesLocalDataSource {
+interface AuthLocalDataSource {
     suspend fun getAccessToken(): Result<String>
 
     suspend fun getRefreshToken(): Result<String>
@@ -11,9 +9,5 @@ interface PreferencesLocalDataSource {
 
     suspend fun saveRefreshToken(refreshToken: String): Result<Boolean>
 
-    suspend fun getUserInfo(): Result<UserInfo>
-
-    suspend fun saveUserInfo(userInfo: UserInfo): Result<Boolean>
-
-    suspend fun clearData(): Result<Boolean>
+    suspend fun clearAuthData(): Result<Boolean>
 }
