@@ -27,8 +27,6 @@ class UserRepositoryImpl(
                 .getOrThrow()
         }
 
-    override suspend fun getUserId(): Result<String> = userLocalDataSource.getUserId()
-
     override suspend fun getOrCreateUserId(): Result<String> =
         userLocalDataSource
             .getUserId()
@@ -40,8 +38,6 @@ class UserRepositoryImpl(
                     .getOrThrow()
                 newId
             }
-
-    override suspend fun saveUserId(userId: String): Result<Boolean> = userLocalDataSource.saveUserId(userId)
 
     override suspend fun clearUserData(): Result<Boolean> =
         runCatching {
