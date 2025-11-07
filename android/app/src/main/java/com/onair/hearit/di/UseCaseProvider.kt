@@ -5,6 +5,9 @@ import com.onair.hearit.domain.usecase.GetExploreHearitUseCase
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 import com.onair.hearit.domain.usecase.InitializeDeviceUuidUseCase
+import com.onair.hearit.domain.usecase.auth.GetRecentHearitUseCase
+import com.onair.hearit.domain.usecase.auth.LogoutUseCase
+import com.onair.hearit.domain.usecase.auth.WithdrawUseCase
 
 object UseCaseProvider {
     val getHearitUseCase: GetHearitUseCase by lazy {
@@ -32,6 +35,25 @@ object UseCaseProvider {
             mediaFileRepository = RepositoryProvider.mediaFileRepository,
         )
     }
+
+    val logoutUseCase: LogoutUseCase by lazy {
+        LogoutUseCase(
+            authRepository = RepositoryProvider.authRepository,
+            userRepository = RepositoryProvider.userRepository,
+        )
+    }
+
+    val withdrawUseCase: WithdrawUseCase by lazy {
+        WithdrawUseCase(
+            authRepository = RepositoryProvider.authRepository,
+            userRepository = RepositoryProvider.userRepository,
+        )
+    }
+
+    val getRecentHearitUseCase: GetRecentHearitUseCase by lazy {
+        GetRecentHearitUseCase(RepositoryProvider.recentHearitRepository)
+    }
+
     val initializeDeviceUuidUseCase: InitializeDeviceUuidUseCase by lazy {
         InitializeDeviceUuidUseCase(RepositoryProvider.userRepository)
     }

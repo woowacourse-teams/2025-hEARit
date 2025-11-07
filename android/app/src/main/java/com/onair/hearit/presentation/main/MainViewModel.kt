@@ -9,9 +9,9 @@ import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
-import com.onair.hearit.domain.repository.AuthRepository
-import com.onair.hearit.domain.repository.RecentHearitRepository
-import com.onair.hearit.domain.repository.UserRepository
+import com.onair.hearit.domain.usecase.auth.GetRecentHearitUseCase
+import com.onair.hearit.domain.usecase.auth.LogoutUseCase
+import com.onair.hearit.domain.usecase.auth.WithdrawUseCase
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.splash.SplashActivity
@@ -21,9 +21,9 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MainViewModel(
-    private val authRepository: AuthRepository,
-    private val recentHearitRepository: RecentHearitRepository,
-    private val userRepository: UserRepository,
+    private val getRecentHearitUseCase: GetRecentHearitUseCase,
+    private val logoutUseCase: LogoutUseCase,
+    private val withdrawUseCase: WithdrawUseCase,
 ) : ViewModel() {
     private val _recentHearit = MutableLiveData<RecentHearit?>()
     val recentHearit: LiveData<RecentHearit?> = _recentHearit
@@ -70,41 +70,30 @@ class MainViewModel(
                 Timber.w(error)
                 _toastMessage.value = R.string.logout_fail
             } else {
-                clearAuthData()
-                TokenInterceptorProvider.setAccessToken(null)
-                _toastMessage.value = R.string.logout_success
+                executeLogout()
             }
         }
     }
 
     fun withdraw() {
-        viewModelScope.launch {
-            authRepository
-                .withdraw()
-                .onSuccess {
-                    UserApiClient.instance.unlink { error ->
-                        if (error != null) {
-                            Timber.w(error)
-                            _toastMessage.value = R.string.withdraw_fail
-                            _withdrawState.value = false
-                            return@unlink
-                        }
-
-                        _withdrawState.value = true
-                        _toastMessage.value = R.string.withdraw_success
+        viewModelScope
+            .launch {
+                UserApiClient.instance.unlink { error ->
+                    if (error != null) {
+                        Timber.w(error)
+                        _toastMessage.value = R.string.withdraw_fail
+                        _withdrawState.value = false
+                        return@unlink
                     }
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _withdrawState.value = false
-                    _toastMessage.value = R.string.withdraw_fail
+
+                    executeWithdraw()
                 }
-        }
+            }
     }
 
     private fun fetchRecentHearit() {
         viewModelScope.launch {
-            recentHearitRepository
-                .getRecentHearit()
+            getRecentHearitUseCase()
                 .onSuccess { recent ->
                     _recentHearit.value = recent
                 }.onFailure { throwable ->
@@ -114,12 +103,12 @@ class MainViewModel(
         }
     }
 
-    private fun clearAuthData() {
+    private fun executeLogout() {
         viewModelScope.launch {
-            authRepository
-                .clearAuthData()
+            logoutUseCase()
                 .onSuccess {
-                    clearUserData()
+                    TokenInterceptorProvider.setAccessToken(null)
+                    _toastMessage.value = R.string.logout_success
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.main_toast_clear_token_fail
@@ -127,13 +116,17 @@ class MainViewModel(
         }
     }
 
-    private fun clearUserData() {
+    private fun executeWithdraw() {
         viewModelScope.launch {
-            userRepository
-                .clearUserData()
-                .onFailure { throwable ->
+            withdrawUseCase()
+                .onSuccess {
+                    TokenInterceptorProvider.setAccessToken(null)
+                    _withdrawState.value = true
+                    _toastMessage.value = R.string.withdraw_success
+                }.onFailure { throwable ->
                     Timber.w(throwable)
-                    _toastMessage.value = R.string.main_toast_clear_user_fail
+                    _withdrawState.value = false
+                    _toastMessage.value = R.string.withdraw_fail
                 }
         }
     }
