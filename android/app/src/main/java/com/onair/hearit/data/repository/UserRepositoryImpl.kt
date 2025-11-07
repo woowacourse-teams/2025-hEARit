@@ -18,13 +18,17 @@ class UserRepositoryImpl(
                     .getUserInfo()
                     .getOrThrow()
 
-            if (localUser.id != -1L) return@runCatching localUser
+            // 로컬 default(-1)면 remote만 쓰고 local은 반환하지 않음
+            if (localUser.id == -1L) {
+                return@runCatching userRemoteDataSource
+                    .getUserInfo()
+                    .mapOrThrowDomain { it.toDomain() }
+                    .onSuccess { userLocalDataSource.saveUserInfo(it) }
+                    .getOrThrow()
+            }
 
-            userRemoteDataSource
-                .getUserInfo()
-                .mapOrThrowDomain { it.toDomain() }
-                .onSuccess { userLocalDataSource.saveUserInfo(it) }
-                .getOrThrow()
+            // 로컬 이미 정상 → 바로 반환
+            return@runCatching localUser
         }
 
     override suspend fun getOrCreateUserId(): Result<String> =
