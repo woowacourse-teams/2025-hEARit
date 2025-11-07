@@ -199,13 +199,18 @@ class MainActivity :
         binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
         binding.layoutDrawer.tvTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
         binding.layoutDrawer.tvOpenLicense.setOnClickListener { navigateToLicense() }
-        binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
+        binding.layoutDrawer.tvDrawerLogin.setOnClickListener {
+            stopService(PlaybackService.stopIntent(this))
+            navigateToLogin()
+        }
         binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
-            val stopIntent = PlaybackService.stopIntent(this)
-            stopService(stopIntent)
+            stopService(PlaybackService.stopIntent(this))
             mainViewModel.performLogout()
         }
-        binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
+        binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener {
+            stopService(PlaybackService.stopIntent(this))
+            confirmAndWithdraw()
+        }
 
         binding.layoutDrawer.tvDrawerFeedback.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, FEEDBACK_URL.toUri())
