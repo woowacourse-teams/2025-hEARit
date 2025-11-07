@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
-import com.onair.hearit.data.datasource.local.AuthLocalDataSource
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.AuthRepository
@@ -22,7 +21,6 @@ import timber.log.Timber
 
 class MainViewModel(
     private val authRepository: AuthRepository,
-    private val authLocalDataSource: AuthLocalDataSource,
     private val recentHearitRepository: RecentHearitRepository,
 ) : ViewModel() {
     private val _recentHearit = MutableLiveData<RecentHearit?>()
@@ -117,8 +115,8 @@ class MainViewModel(
 
     private fun clearData() {
         viewModelScope.launch {
-            authLocalDataSource
-                .clearData()
+            authRepository
+                .clearAuthData()
                 .onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.main_toast_clear_token_fail

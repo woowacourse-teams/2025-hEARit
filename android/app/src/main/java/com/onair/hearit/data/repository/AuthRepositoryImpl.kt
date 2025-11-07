@@ -15,12 +15,20 @@ class AuthRepositoryImpl(
     override suspend fun checkAccessToken(accessToken: String): Result<Unit> =
         authRemoteDataSource.checkAccessToken(accessToken).mapOrThrowDomain { }
 
+    override suspend fun getAccessToken(): Result<String> = authLocalDataSource.getAccessToken()
+
+    override suspend fun getRefreshToken(): Result<String> = authLocalDataSource.getRefreshToken()
+
     override suspend fun getTokens(): Result<Pair<String, String>> =
         runCatching {
             val accessToken = authLocalDataSource.getAccessToken().getOrThrow()
             val refreshToken = authLocalDataSource.getRefreshToken().getOrThrow()
             accessToken to refreshToken
         }
+
+    override suspend fun saveAccessToken(accessToken: String): Result<Boolean> = authLocalDataSource.saveAccessToken(accessToken)
+
+    override suspend fun saveRefreshToken(refreshToken: String): Result<Boolean> = authLocalDataSource.saveRefreshToken(refreshToken)
 
     override suspend fun saveToken(accessToken: String): Result<Unit> =
         runCatching {
@@ -41,4 +49,6 @@ class AuthRepositoryImpl(
         runCatching {
             authRemoteDataSource.withdraw()
         }
+
+    override suspend fun clearAuthData(): Result<Boolean> = authLocalDataSource.clearAuthData()
 }
