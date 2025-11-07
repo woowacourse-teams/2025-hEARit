@@ -5,9 +5,9 @@ interface AuthLocalDataSource {
 
     suspend fun getRefreshToken(): Result<String>
 
-    suspend fun saveAccessToken(accessToken: String): Result<Boolean>
+    suspend fun saveAccessToken(accessToken: String): Result<Unit>
 
-    suspend fun saveRefreshToken(refreshToken: String): Result<Boolean>
+    suspend fun saveRefreshToken(refreshToken: String): Result<Unit>
 
-    suspend fun clearAuthData(): Result<Boolean>
+    suspend fun clearAuthData(): Result<Unit>
 }

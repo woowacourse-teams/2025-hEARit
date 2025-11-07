@@ -11,9 +11,9 @@ interface AuthRepository {
 
     suspend fun getTokens(): Result<Pair<String, String>>
 
-    suspend fun saveAccessToken(accessToken: String): Result<Boolean>
+    suspend fun saveAccessToken(accessToken: String): Result<Unit>
 
-    suspend fun saveRefreshToken(refreshToken: String): Result<Boolean>
+    suspend fun saveRefreshToken(refreshToken: String): Result<Unit>
 
     suspend fun saveToken(accessToken: String): Result<Unit>
 
@@ -23,5 +23,5 @@ interface AuthRepository {
 
     suspend fun withdraw(): Result<Unit>
 
-    suspend fun clearAuthData(): Result<Boolean>
+    suspend fun clearAuthData(): Result<Unit>
 }

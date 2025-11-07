@@ -23,7 +23,7 @@ class UserRepositoryImpl(
                 return@runCatching userRemoteDataSource
                     .getUserInfo()
                     .mapOrThrowDomain { it.toDomain() }
-                    .onSuccess { userLocalDataSource.saveUserInfo(it) }
+                    .onSuccess { userLocalDataSource.saveUserInfo(it).getOrThrow() }
                     .getOrThrow()
             }
 

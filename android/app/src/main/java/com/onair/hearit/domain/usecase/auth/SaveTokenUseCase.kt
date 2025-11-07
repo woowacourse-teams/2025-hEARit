@@ -8,7 +8,7 @@ class SaveTokenUseCase(
     suspend operator fun invoke(
         accessToken: String,
         refreshToken: String,
-    ): Result<Boolean> =
+    ): Result<Unit> =
         runCatching {
             authRepository.saveToken(accessToken).getOrThrow()
             authRepository.saveRefreshToken(refreshToken).getOrThrow()

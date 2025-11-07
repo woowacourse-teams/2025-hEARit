@@ -22,28 +22,25 @@ class AuthLocalDataSourceImpl(
                 ?: throw IllegalStateException("refresh token이 존재하지 않습니다.")
         }
 
-    override suspend fun saveAccessToken(accessToken: String): Result<Boolean> =
+    override suspend fun saveAccessToken(accessToken: String): Result<Unit> =
         runCatching {
             dataStore.edit { preferences ->
                 preferences[ACCESS_TOKEN_KEY] = accessToken
             }
-            true
         }
 
-    override suspend fun saveRefreshToken(refreshToken: String): Result<Boolean> =
+    override suspend fun saveRefreshToken(refreshToken: String): Result<Unit> =
         runCatching {
             dataStore.edit { preferences ->
                 preferences[REFRESH_TOKEN_KEY] = refreshToken
             }
-            true
         }
 
-    override suspend fun clearAuthData(): Result<Boolean> =
+    override suspend fun clearAuthData(): Result<Unit> =
         runCatching {
             dataStore.edit { preferences ->
                 preferences.clear()
             }
-            true
         }
 
     companion object {
