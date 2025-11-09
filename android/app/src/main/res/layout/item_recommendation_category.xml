@@ -29,7 +29,7 @@
             android:drawablePadding="8dp"
             android:gravity="center_vertical"
             android:onClick="@{() -> navigateClickListener.invoke(recommendationCategory.categoryId, recommendationCategory.categoryName, recommendationCategory.colorCode)}"
-            android:text="@{@string/home_grouped_category_text(recommendationCategory.categoryName)}"
+            android:text="@{@string/home_recommendation_category_text(recommendationCategory.categoryName)}"
             app:drawableEndCompat="@drawable/ic_right"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

@@ -15,6 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -26,16 +28,28 @@ import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_HOME
 import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.domain.model.Bookmark
+import com.onair.hearit.domain.model.PlayingHistoryHearit
+import com.onair.hearit.domain.model.RecentUploadHearit
+import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.domain.model.RecommendationCategories
+import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.dpToPx
+import com.onair.hearit.presentation.home.adapter.PlayingBookmarkHearitAdapter
+import com.onair.hearit.presentation.home.adapter.PlayingHistoryHearitAdapter
+import com.onair.hearit.presentation.home.adapter.RecentUploadHearitAdapter
+import com.onair.hearit.presentation.home.adapter.RecommendHearitAdapter
+import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
 import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import kotlinx.coroutines.launch
 
 class HomeFragment :
     Fragment(),
@@ -65,13 +79,7 @@ class HomeFragment :
     private val recommendationCategoryAdapter: RecommendationCategoryAdapter by lazy {
         RecommendationCategoryAdapter(
             this,
-            navigateClickListener = { id, name, colorCode ->
-                navigateToSearch(
-                    id,
-                    name,
-                    colorCode,
-                )
-            },
+            navigateClickListener = ::navigateToSearch,
         )
     }
     private val snapHelper = PagerSnapHelper()
@@ -91,8 +99,6 @@ class HomeFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        binding.lifecycleOwner = viewLifecycleOwner
-        binding.viewModel = viewModel
         setupWindowInsets()
         setupListeners()
         setupRecyclerView()
@@ -134,6 +140,7 @@ class HomeFragment :
         }
 
         binding.tvHomeWootaeco.setOnClickListener {
+            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_WOOTAECO_SELECTED)
             navigateToSearch(id = 13, name = "우아한테크코스", colorCode = "#12C6B0")
         }
     }
@@ -170,50 +177,94 @@ class HomeFragment :
     }
 
     private fun observeViewModel() {
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.frHomeSkeleton.apply {
-                if (isLoading) startShimmer() else stopShimmer()
-            }
-        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    updateLoadingState(state.isLoading)
+                    updateAdSections(state.isLoading)
 
-        viewModel.isLoggedIn.observe(viewLifecycleOwner) { isLoggedIn ->
-            mainViewModel.updateLoginState(isLoggedIn)
-        }
+                    updatePlayingHistorySection(
+                        state.playingHistoryHearits,
+                        !state.isLoading && state.showPlayingHistory,
+                    )
+                    updateRecentUploadSection(
+                        state.recentUploadHearits,
+                        !state.isLoading && state.showRecentUpload,
+                    )
+                    updateBookmarkSection(
+                        state.playingBookmarkHearits,
+                        !state.isLoading && state.showBookmark,
+                    )
 
-        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
-            binding.userInfo = userInfo
-        }
-
-        viewModel.recommendHearits.observe(viewLifecycleOwner) { recommendHearits ->
-            recommendAdapter.submitList(recommendHearits) {
-                if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                    scrollToMiddlePosition()
-                    setupIndicator()
+                    if (!state.isLoading) {
+                        updateUserInfo(state.userInfo, state.isLoggedIn)
+                        updateRecommendSection(state.recommendHearits)
+                        updateCategoriesSection(state.recommendationCategories)
+                    }
                 }
             }
         }
 
-        viewModel.playingHistoryHearits.observe(viewLifecycleOwner) { playingHistoryHearits ->
-            binding.rvHomePlayingHistoryHearit.isVisible = playingHistoryHearits.isNotEmpty()
-            playingHistoryAdapter.submitList(playingHistoryHearits)
-        }
+        viewModel.toastMessage.observe(viewLifecycleOwner) { resId -> showToast(resId) }
+    }
 
-        viewModel.recentUploadHearits.observe(viewLifecycleOwner) { recentUploadHearits ->
-            recentUploadAdapter.submitList(recentUploadHearits)
+    private fun updateLoadingState(isLoading: Boolean) {
+        binding.frHomeSkeleton.apply {
+            isVisible = isLoading
+            if (isLoading) startShimmer() else stopShimmer()
         }
+    }
 
-        viewModel.playingBookmarkHearits.observe(viewLifecycleOwner) { playingBookmarkHearits ->
-            binding.rvHomePlayingBookmark.isVisible = playingBookmarkHearits.isNotEmpty()
-            playingBookmarkAdapter.submitList(playingBookmarkHearits)
-        }
+    private fun updateUserInfo(
+        userInfo: UserInfo,
+        isLoggedIn: Boolean,
+    ) {
+        mainViewModel.updateLoginState(isLoggedIn)
+        binding.userInfo = userInfo
+    }
 
-        viewModel.recommendationCategories.observe(viewLifecycleOwner) { recommendationCategories ->
-            recommendationCategoryAdapter.submitList(recommendationCategories)
+    private fun updateRecommendSection(recommendHearits: List<RecommendHearit>) {
+        recommendAdapter.submitList(recommendHearits) {
+            if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                scrollToMiddlePosition()
+                setupIndicator()
+            }
         }
+    }
 
-        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
-        }
+    private fun updatePlayingHistorySection(
+        playingHistoryHearits: List<PlayingHistoryHearit>,
+        shouldShow: Boolean,
+    ) {
+        binding.tvHomePlayingHistoryHearitTitle.isVisible = shouldShow
+        binding.rvHomePlayingHistoryHearit.isVisible = shouldShow
+        playingHistoryAdapter.submitList(playingHistoryHearits)
+    }
+
+    private fun updateRecentUploadSection(
+        recentUploadHearits: List<RecentUploadHearit>,
+        shouldShow: Boolean,
+    ) {
+        binding.tvHomeRecentUploadTitle.isVisible = shouldShow
+        recentUploadAdapter.submitList(recentUploadHearits)
+    }
+
+    private fun updateBookmarkSection(
+        playingBookmarkHearits: List<Bookmark>,
+        shouldShow: Boolean,
+    ) {
+        binding.tvHomePlayingBookmarkTitle.isVisible = shouldShow
+        binding.rvHomePlayingBookmark.isVisible = shouldShow
+        playingBookmarkAdapter.submitList(playingBookmarkHearits)
+    }
+
+    private fun updateCategoriesSection(recommendationCategories: List<RecommendationCategories>) {
+        recommendationCategoryAdapter.submitList(recommendationCategories)
+    }
+
+    private fun updateAdSections(isLoading: Boolean) {
+        binding.tvHomeShortcast.isVisible = !isLoading
+        binding.tvHomeWootaeco.isVisible = !isLoading
     }
 
     private fun setupIndicator(size: Int = 5) {
@@ -274,8 +325,8 @@ class HomeFragment :
         }
     }
 
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(requireContext(), getString(messageResId), Toast.LENGTH_SHORT).show()
     }
 
     private fun navigateToSearch(
