@@ -9,9 +9,6 @@
             name="userInfo"
             type="com.onair.hearit.domain.model.UserInfo" />
 
-        <variable
-            name="viewModel"
-            type="com.onair.hearit.presentation.home.HomeViewModel" />
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -52,8 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:shimmer_auto_start="true"
-                app:visibleIfCondition="@{viewModel.isLoading}">
+                app:shimmer_auto_start="true">
 
                 <include layout="@layout/item_home_skeleton" />
             </com.facebook.shimmer.ShimmerFrameLayout>
@@ -117,7 +113,6 @@
                 android:text="@{@string/home_playing_history_hearit_title(userInfo.nickname)}"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/indicator_container"
-                app:visibleIfCondition="@{!viewModel.isLoading &amp;&amp; viewModel.playingHistoryHearits.size() != 0}"
                 tools:text="hEARit님이 듣고 있는 팟캐스트" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -170,7 +165,6 @@
                 app:drawableEndCompat="@drawable/ic_right"
                 app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
                 app:layout_constraintTop_toBottomOf="@id/rv_home_recent_upload"
-                app:visibleIfCondition="@{!viewModel.isLoading &amp;&amp; viewModel.playingHistoryHearits.size() != 0}"
                 tools:text="북마크한 팟캐스트를 들어보세요" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -201,8 +195,7 @@
                 app:drawableEndCompat="@drawable/ic_home_arrow"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_bookmark"
-                app:visibleIfCondition="@{!viewModel.isLoading}" />
+                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_bookmark" />
 
             <TextView
                 android:id="@+id/tv_home_wootaeco"
@@ -218,8 +211,7 @@
                 app:drawableEndCompat="@drawable/ic_home_arrow"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast"
-                app:visibleIfCondition="@{!viewModel.isLoading}" />
+                app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_recommendation_categories"
