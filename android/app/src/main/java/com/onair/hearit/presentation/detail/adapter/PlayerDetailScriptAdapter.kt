@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.detail
+package com.onair.hearit.presentation.detail.adapter
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
