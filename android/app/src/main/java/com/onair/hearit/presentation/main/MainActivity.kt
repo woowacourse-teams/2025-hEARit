@@ -46,7 +46,7 @@ import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.navigate
-import com.onair.hearit.presentation.search.SearchComposeFragment
+import com.onair.hearit.presentation.search.main.SearchComposeFragment
 import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.presentation.splash.SplashActivity
 import com.onair.hearit.presentation.toDetailResult

@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search
+package com.onair.hearit.presentation.search.main
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,12 +10,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SEARCH
+import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
+import com.onair.hearit.presentation.IntentKeys
+import com.onair.hearit.presentation.search.CategoryClickListener
+import com.onair.hearit.presentation.search.SearchViewModel
+import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
 class SearchComposeFragment :
@@ -45,7 +47,7 @@ class SearchComposeFragment :
         AnalyticsProvider.get().logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
-                FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_SEARCH,
+                FirebaseAnalytics.Param.SCREEN_NAME to AnalyticsParamKeys.SCREEN_NAME_SEARCH,
                 FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
             ),
         )
@@ -68,9 +70,9 @@ class SearchComposeFragment :
             CategoryComposeFragment().apply {
                 arguments =
                     bundleOf(
-                        CATEGORY_ID_KEY to id,
-                        CATEGORY_NAME_KEY to name,
-                        CATEGORY_COLOR_KEY to colorCode,
+                        IntentKeys.CATEGORY_ID_KEY to id,
+                        IntentKeys.CATEGORY_NAME_KEY to name,
+                        IntentKeys.CATEGORY_COLOR_KEY to colorCode,
                     )
             }
 
