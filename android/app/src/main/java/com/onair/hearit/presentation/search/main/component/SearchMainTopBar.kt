@@ -55,7 +55,7 @@ fun SearchMainTopBar(
             },
             modifier = Modifier,
             colors =
-                TopAppBarDefaults.largeTopAppBarColors(
+                TopAppBarDefaults.topAppBarColors(
                     containerColor = HearitBlack,
                     scrolledContainerColor = HearitBlack,
                 ),
