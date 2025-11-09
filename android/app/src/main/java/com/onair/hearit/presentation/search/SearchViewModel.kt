@@ -42,8 +42,8 @@ class SearchViewModel(
     private val _categoryHearits = MutableStateFlow<List<SearchedCategoryHearit>>(emptyList())
     val categoryHearits: StateFlow<List<SearchedCategoryHearit>> = _categoryHearits
 
-    private val _toastMessage = SingleLiveData<Int>()
-    val toastMessage: LiveData<Int> = _toastMessage
+    private val _toastMessage = SingleLiveData<Int?>()
+    val toastMessage: LiveData<Int?> = _toastMessage
 
     private val currentInput = initialInput
 
@@ -201,6 +201,10 @@ class SearchViewModel(
                     _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
                 }
         }
+    }
+
+    fun clearToastMessage() {
+        _toastMessage.value = null
     }
 
     private fun updateUiState(hearits: List<SearchedHearit>) {
