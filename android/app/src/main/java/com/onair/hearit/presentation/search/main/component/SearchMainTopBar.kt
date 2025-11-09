@@ -53,7 +53,6 @@ fun SearchMainTopBar(
                     style = HearitTypoGraphy.headlineMedium,
                 )
             },
-            modifier = Modifier,
             colors =
                 TopAppBarDefaults.topAppBarColors(
                     containerColor = HearitBlack,
@@ -92,7 +91,7 @@ fun SearchBarInput(
                     .background(HearitBlack)
                     .clickable(onClick = onSearchBarClick)
                     .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.Bottom,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = stringResource(R.string.search_keyword),
