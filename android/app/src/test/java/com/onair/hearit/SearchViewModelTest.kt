@@ -58,7 +58,7 @@ class SearchViewModelTest {
     }
 
     @Test
-    fun getCategories_성공_시_categories에_데이터가_설정된다() =
+    fun `getCategories 성공 시 categories에 데이터가 설정된다`() =
         runTest {
             // Given
             val mockCategories =
@@ -87,7 +87,7 @@ class SearchViewModelTest {
         }
 
     @Test
-    fun getCategories_실패_시_toast_메시지가_발생한다() =
+    fun `getCategories 실패 시 toast 메시지가 발생한다`() =
         runTest {
             // Given
             val exception = Exception("Network Error")
