@@ -7,13 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.concurrent.futures.await
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -39,7 +39,6 @@ import com.onair.hearit.presentation.detail.script.component.Scripts
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -47,8 +46,6 @@ class ScriptFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentScriptBinding? = null
     private val binding get() = _binding!!
-
-    private var lastUserScrollTime = 0L
 
     private var mediaController: MediaController? = null
 
@@ -59,12 +56,9 @@ class ScriptFragment : Fragment() {
         PlayerDetailViewModelFactory(hearitId)
     }
 
-    private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
+    private val scriptViewModel: ScriptViewModel by viewModels { ScriptViewModelFactory() }
 
-    private val highlightedIdState = MutableStateFlow<Long?>(null)
-    private val highlightedIndexState = MutableStateFlow(-1)
-    private val isUserScrollingState = MutableStateFlow(false)
-    private val followModeState = MutableStateFlow(true)
+    private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -181,20 +175,10 @@ class ScriptFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (isActive) {
                     val hearit = viewModel.hearit.value
-                    val scripts = hearit?.script.orEmpty()
+                    val scripts: List<ScriptLine> = hearit?.script.orEmpty()
 
-                    val position = controller.currentPosition
-                    val currentItem = scripts.firstOrNull { position in it.start until it.end }
-                    val currentIndex = scripts.indexOf(currentItem)
-
-                    val now = System.currentTimeMillis()
-                    if (isUserScrollingState.value) {
-                        val idleReached = now - lastUserScrollTime > USER_SCROLL_IDLE_THRESHOLD_MS
-                        if (idleReached && currentIndex >= 0) isUserScrollingState.value = false
-                    }
-
-                    highlightedIdState.value = currentItem?.id
-                    highlightedIndexState.value = currentIndex
+                    val position: Long = controller.currentPosition
+                    scriptViewModel.tick(position, scripts)
 
                     delay(updateInterval)
                 }
@@ -210,10 +194,14 @@ class ScriptFragment : Fragment() {
             val hearit = viewModel.hearit.observeAsState().value
             val scripts: List<ScriptLine> = hearit?.script.orEmpty()
 
-            val highlightedId by highlightedIdState.collectAsStateWithLifecycle()
-            val highlightedIndex by highlightedIndexState.collectAsStateWithLifecycle()
-            val isUserScrolling by isUserScrollingState.collectAsStateWithLifecycle()
-            val followHighlight by followModeState.collectAsStateWithLifecycle()
+            val highlightedId: Long? =
+                scriptViewModel.highlightedId.collectAsStateWithLifecycle().value
+            val highlightedIndex: Int =
+                scriptViewModel.highlightedIndex.collectAsStateWithLifecycle().value
+            val isUserScrolling: Boolean =
+                scriptViewModel.isUserScrolling.collectAsStateWithLifecycle().value
+            val followHighlight: Boolean =
+                scriptViewModel.followModeEnabled.collectAsStateWithLifecycle().value
 
             Scripts(
                 scriptLines = scripts,
@@ -222,17 +210,14 @@ class ScriptFragment : Fragment() {
                 isUserScrolling = isUserScrolling,
                 followHighlight = followHighlight,
                 onLineClick = { item ->
-                    followModeState.value = true
+                    scriptViewModel.resumeFollowMode()
                     mediaController?.seekTo(item.start)
                 },
-                onUserScrollStateChange = { scrolling ->
-                    isUserScrollingState.value = scrolling
-                    if (scrolling) {
-                        lastUserScrollTime = System.currentTimeMillis()
-                    }
+                onUserScrollStateChange = { isScrolling ->
+                    scriptViewModel.onUserScrollStateChange(isScrolling)
                 },
                 onStopFollow = {
-                    followModeState.value = false
+                    scriptViewModel.stopFollowMode()
                 },
             )
         }
@@ -271,7 +256,6 @@ class ScriptFragment : Fragment() {
 
     companion object {
         private const val SCRIPT_SYNC_INTERVAL_MS = 300L
-        private const val USER_SCROLL_IDLE_THRESHOLD_MS = 3000L
 
         fun newInstance(hearitId: Long) =
             ScriptFragment().apply {
