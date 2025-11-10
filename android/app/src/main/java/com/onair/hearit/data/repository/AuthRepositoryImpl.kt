@@ -26,14 +26,9 @@ class AuthRepositoryImpl(
             accessToken to refreshToken
         }
 
-    override suspend fun saveAccessToken(accessToken: String): Result<Unit> =
-        runCatching { authLocalDataSource.saveAccessToken(accessToken).getOrThrow() }
+    override suspend fun saveAccessToken(accessToken: String): Result<Unit> = authLocalDataSource.saveAccessToken(accessToken)
 
-    override suspend fun saveRefreshToken(refreshToken: String): Result<Unit> =
-        runCatching { authLocalDataSource.saveRefreshToken(refreshToken).getOrThrow() }
-
-    override suspend fun saveToken(accessToken: String): Result<Unit> =
-        runCatching { authLocalDataSource.saveAccessToken(accessToken).getOrThrow() }
+    override suspend fun saveRefreshToken(refreshToken: String): Result<Unit> = authLocalDataSource.saveRefreshToken(refreshToken)
 
     override suspend fun kakaoLogin(accessToken: String): Result<LoginToken> =
         authRemoteDataSource
@@ -45,7 +40,7 @@ class AuthRepositoryImpl(
             .refreshAccessToken(TokenReissueRequest(refreshToken))
             .mapOrThrowDomain { it.accessToken }
 
-    override suspend fun withdraw(): Result<Unit> = runCatching { authRemoteDataSource.withdraw() }
+    override suspend fun withdraw(): Result<Unit> = authRemoteDataSource.withdraw().mapOrThrowDomain { }
 
-    override suspend fun clearAuthData(): Result<Unit> = runCatching { authLocalDataSource.clearAuthData().getOrThrow() }
+    override suspend fun clearAuthData(): Result<Unit> = authLocalDataSource.clearAuthData()
 }

@@ -15,8 +15,6 @@ interface AuthRepository {
 
     suspend fun saveRefreshToken(refreshToken: String): Result<Unit>
 
-    suspend fun saveToken(accessToken: String): Result<Unit>
-
     suspend fun kakaoLogin(accessToken: String): Result<LoginToken>
 
     suspend fun reissue(refreshToken: String): Result<String>

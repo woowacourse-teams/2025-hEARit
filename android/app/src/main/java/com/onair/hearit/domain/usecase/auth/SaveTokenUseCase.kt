@@ -10,7 +10,7 @@ class SaveTokenUseCase(
         refreshToken: String,
     ): Result<Unit> =
         runCatching {
-            authRepository.saveToken(accessToken).getOrThrow()
+            authRepository.saveAccessToken(accessToken).getOrThrow()
             authRepository.saveRefreshToken(refreshToken).getOrThrow()
         }.recoverCatching { throwable ->
             // 부분 성공 시 롤백

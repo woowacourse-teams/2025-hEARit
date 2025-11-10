@@ -39,7 +39,8 @@ class AuthLocalDataSourceImpl(
     override suspend fun clearAuthData(): Result<Unit> =
         runCatching {
             dataStore.edit { preferences ->
-                preferences.clear()
+                preferences.remove(ACCESS_TOKEN_KEY)
+                preferences.remove(REFRESH_TOKEN_KEY)
             }
         }
 
