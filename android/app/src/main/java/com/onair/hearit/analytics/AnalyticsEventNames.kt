@@ -10,6 +10,7 @@ object AnalyticsEventNames {
         "home_recommendation_category_hearit_selected"
     const val HOME_BOOKMARK_SELECTED = "home_bookmark_selected"
     const val HOME_EXPLORE_SELECTED = "home_explore_selected"
+    const val HOME_WOOTAECO_SELECTED = "home_wootaeco_selected"
     const val SEARCH_CATEGORY_SELECTED = "search_category_selected"
     const val SEARCH_KEYWORD_ENTERED = "search_keyword_entered"
     const val SEARCH_KEYWORD_SELECTED = "search_keyword_selected"
