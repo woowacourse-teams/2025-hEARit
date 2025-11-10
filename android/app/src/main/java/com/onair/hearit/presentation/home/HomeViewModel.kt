@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
-import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
@@ -143,20 +142,31 @@ class HomeViewModel(
                 .getUserInfo()
                 .onSuccess { userInfo ->
                     _uiState.update {
-                        it.copy(userInfo = userInfo, isLoggedIn = true)
+                        it.copy(
+                            userInfo = userInfo,
+                            isLoggedIn = true,
+                        )
                     }
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
                             _uiState.update {
-                                it.copy(userInfo = UserInfo.default(), isLoggedIn = false)
+                                it.copy(
+                                    userInfo = null,
+                                    isLoggedIn = false,
+                                )
                             }
                         }
 
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
-                            _uiState.update { it.copy(isLoggedIn = false) }
+                            _uiState.update {
+                                it.copy(
+                                    userInfo = null,
+                                    isLoggedIn = false,
+                                )
+                            }
                         }
                     }
                 }

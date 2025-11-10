@@ -11,24 +11,36 @@ class UserRepositoryImpl(
     private val userLocalDataSource: UserLocalDataSource,
     private val userRemoteDataSource: UserRemoteDataSource,
 ) : UserRepository {
+    private var cachedUserInfo: UserInfo? = null
+
     override suspend fun getUserInfo(): Result<UserInfo> =
         runCatching {
-            val localUser =
+            // 1️⃣ 메모리 캐시 확인
+            cachedUserInfo?.let { return@runCatching it }
+
+            // 2️⃣ 로컬에서 시도
+            val local =
                 userLocalDataSource
                     .getUserInfo()
-                    .getOrThrow()
+                    .getOrNull()
 
-            // 로컬 default(-1)면 remote만 쓰고 local은 반환하지 않음
-            if (localUser.id == -1L) {
-                return@runCatching userRemoteDataSource
-                    .getUserInfo()
-                    .mapOrThrowDomain { it.toDomain() }
-                    .onSuccess { userLocalDataSource.saveUserInfo(it).getOrThrow() }
-                    .getOrThrow()
+            if (local != null) {
+                cachedUserInfo = local
+                return@runCatching local
             }
 
-            // 로컬 이미 정상 → 바로 반환
-            return@runCatching localUser
+            // 3️⃣ 원격에서 가져오기 (예외 발생 가능)
+            val remote =
+                userRemoteDataSource
+                    .getUserInfo()
+                    .mapOrThrowDomain { it.toDomain() }
+                    .getOrThrow()
+
+            // 원격 정상 응답 → 로컬 반영 + 캐시 갱신
+            userLocalDataSource.saveUserInfo(remote)
+            cachedUserInfo = remote
+
+            remote
         }
 
     override suspend fun getOrCreateUserId(): Result<String> =
@@ -45,6 +57,7 @@ class UserRepositoryImpl(
 
     override suspend fun clearUserData(): Result<Boolean> =
         runCatching {
+            cachedUserInfo = null
             userLocalDataSource.clearData().getOrThrow()
         }
 }

@@ -29,10 +29,16 @@ class UserLocalDataSourceImpl(
     override suspend fun getUserInfo(): Result<UserInfo> =
         runCatching {
             val prefs = dataStore.data.first()
+            val userId = prefs[LOGGED_USER_ID_KEY]
+
+            if (userId == null || userId == -1L) {
+                throw IllegalStateException("저장된 유저 정보가 없습니다")
+            }
+
             UserInfo(
-                id = prefs[LOGGED_USER_ID_KEY] ?: -1,
+                id = userId,
                 nickname = prefs[NICKNAME_KEY] ?: "hEARit",
-                profileImage = prefs[PROFILE_URL_KEY] ?: "",
+                profileImage = prefs[PROFILE_URL_KEY],
             )
         }
 
