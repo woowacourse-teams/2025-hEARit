@@ -50,7 +50,7 @@ class SplashViewModel(
         authRepository
             .checkAccessToken(accessToken)
             .onSuccess {
-                val saved = authRepository.saveToken(accessToken).isSuccess
+                val saved = authRepository.saveAccessToken(accessToken).isSuccess
                 if (!saved) {
                     Timber.w("accessToken 저장에 실패했습니다.")
                 }
