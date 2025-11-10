@@ -193,8 +193,13 @@ class SearchViewModel(
 
     fun saveRecentKeyword(recentKeyword: String) {
         viewModelScope.launch {
+            val recentSearch =
+                RecentSearch(
+                    term = recentKeyword,
+                    searchedAt = System.currentTimeMillis(),
+                )
             recentKeywordRepository
-                .saveKeyword(recentKeyword)
+                .saveKeyword(recentSearch)
                 .onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
