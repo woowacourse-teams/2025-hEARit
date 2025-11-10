@@ -78,14 +78,10 @@ class SearchComposeFragment :
                     )
             }
 
-        parentFragmentManager.beginTransaction().apply {
-            val currentFragment =
-                parentFragmentManager.findFragmentById(R.id.fragment_container_view)
-            if (currentFragment != null) hide(currentFragment)
-
-            add(R.id.fragment_container_view, fragment)
-            addToBackStack(null)
-            commit()
-        }
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container_view, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }
