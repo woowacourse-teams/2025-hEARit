@@ -12,7 +12,7 @@ import okhttp3.Response
 import okhttp3.Route
 
 class TokenAuthenticator(
-    private val preferenceProvider: () -> AuthLocalDataSource,
+    private val authLocalDataSourceProvider: () -> AuthLocalDataSource,
     private val authServiceProvider: () -> AuthService,
 ) : Authenticator {
     private val json =
@@ -70,7 +70,7 @@ class TokenAuthenticator(
     }
 
     private suspend fun refreshToken(): String? {
-        val authLocalDataSource = preferenceProvider()
+        val authLocalDataSource = authLocalDataSourceProvider()
         val authService = authServiceProvider()
         val refreshToken =
             authLocalDataSource.getRefreshToken().getOrNull() ?: return null
