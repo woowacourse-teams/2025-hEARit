@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -96,7 +97,7 @@ class SearchFragment :
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
+            showToast(resId)
         }
     }
 
@@ -108,8 +109,12 @@ class SearchFragment :
             .commit()
     }
 
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    private fun showToast(
+        @StringRes resId: Int?,
+    ) {
+        resId?.let {
+            Toast.makeText(requireContext(), getString(it), Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onCategoryClick(

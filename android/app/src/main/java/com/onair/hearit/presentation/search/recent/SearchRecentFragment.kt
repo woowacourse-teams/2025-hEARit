@@ -11,6 +11,7 @@ import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -141,7 +142,7 @@ class SearchRecentFragment :
                 ?.trim()
         if (searchTerm.isNullOrEmpty()) return
         if (searchTerm.length < MIN_SEARCH_LENGTH) {
-            showToast(getString(R.string.search_toast_min_length))
+            showToast(R.string.search_toast_min_length)
             return
         }
         if (searchTerm == lastSearchTerm) return
@@ -163,7 +164,7 @@ class SearchRecentFragment :
             recentSearchAdapter.submitList(keywords)
         }
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
+            showToast(resId)
         }
     }
 
@@ -194,8 +195,12 @@ class SearchRecentFragment :
             ).commit()
     }
 
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    private fun showToast(
+        @StringRes resId: Int?,
+    ) {
+        resId?.let {
+            Toast.makeText(requireContext(), getString(it), Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showKeyboard() {
