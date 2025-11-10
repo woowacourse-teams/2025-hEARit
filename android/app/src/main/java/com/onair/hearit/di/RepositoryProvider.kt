@@ -77,7 +77,7 @@ object RepositoryProvider {
     }
 
     val playingHistoryRepository: PlayingHistoryRepository by lazy {
-        PlayingHistoryRepositoryImpl(playingHistoryDataSource = DataSourceProvider.playingHistoryDataSource)
+        PlayingHistoryRepositoryImpl(playingHistoryRemoteDataSource = DataSourceProvider.playingHistoryRemoteDataSource)
     }
 
     val recommendationRepository: RecommendationRepository by lazy {

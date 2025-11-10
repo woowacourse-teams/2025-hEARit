@@ -22,8 +22,8 @@ import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSource
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSourceImpl
-import com.onair.hearit.data.datasource.remote.PlayingHistoryDataSource
-import com.onair.hearit.data.datasource.remote.PlayingHistoryDataSourceImpl
+import com.onair.hearit.data.datasource.remote.PlayingHistoryRemoteDataSource
+import com.onair.hearit.data.datasource.remote.PlayingHistoryRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.RecommendationRemoteDataSource
 import com.onair.hearit.data.datasource.remote.RecommendationRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.UserRemoteDataSource
@@ -88,8 +88,8 @@ object DataSourceProvider {
         )
     }
 
-    val playingHistoryDataSource: PlayingHistoryDataSource by lazy {
-        PlayingHistoryDataSourceImpl(
+    val playingHistoryRemoteDataSource: PlayingHistoryRemoteDataSource by lazy {
+        PlayingHistoryRemoteDataSourceImpl(
             playingHistoryService = NetworkProvider.playingHistoryService,
             errorResponseHandler = errorHandler,
         )
