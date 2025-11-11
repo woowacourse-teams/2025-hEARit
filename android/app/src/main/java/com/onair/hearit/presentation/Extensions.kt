@@ -3,9 +3,12 @@ package com.onair.hearit.presentation
 import android.content.Context
 import android.content.Intent
 import android.view.View
+import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
@@ -179,3 +182,11 @@ fun <T> executeAsync(
         completer.addCancellationListener({ job.cancel() }, Runnable::run)
         operationName
     }
+
+fun Fragment.showToast(
+    @StringRes resId: Int?,
+) {
+    resId?.let {
+        Toast.makeText(requireContext(), getString(it), Toast.LENGTH_SHORT).show()
+    }
+}

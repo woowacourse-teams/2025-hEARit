@@ -36,13 +36,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.R
@@ -57,7 +54,7 @@ import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.Gray3
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
-import com.onair.hearit.presentation.theme.Pretendard
+import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import com.onair.hearit.presentation.toHashtagName
 import com.onair.hearit.presentation.toTimeString
 
@@ -146,13 +143,8 @@ fun GradientBackgroundScreen(
         ) {
             Text(
                 text = categoryName,
-                style =
-                    TextStyle(
-                        color = Gray4,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = Pretendard,
-                    ),
+                color = Gray4,
+                style = HearitTypoGraphy.headlineMedium,
             )
 
             Spacer(modifier = Modifier.width(4.dp))
@@ -216,16 +208,10 @@ fun SearchedHearitItem(
                 modifier =
                     Modifier
                         .padding(start = 20.dp, end = 8.dp),
+                color = Gray4,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 2,
-                style =
-                    TextStyle(
-                        color = Gray4,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        lineHeight = 20.sp,
-                        fontFamily = Pretendard,
-                    ),
+                style = HearitTypoGraphy.bodyLarge,
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -240,13 +226,8 @@ fun SearchedHearitItem(
                 item.keywords.forEach { keyword ->
                     Text(
                         text = keyword.toHashtagName(),
-                        style =
-                            TextStyle(
-                                color = Gray2,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                fontFamily = Pretendard,
-                            ),
+                        color = Gray2,
+                        style = HearitTypoGraphy.labelMedium,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
@@ -256,9 +237,7 @@ fun SearchedHearitItem(
                 Text(
                     text = item.playTime.toTimeString(),
                     color = Gray4,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = Pretendard,
+                    style = HearitTypoGraphy.labelMedium,
                 )
             }
 
@@ -341,33 +320,6 @@ fun GradientBackgroundScreenPreview() {
             ),
             SearchedCategoryHearit(
                 2,
-                "드디어 세 번째 레슨, 일희일비 않기",
-                playTime = 1234,
-                lastPlayTime = 99999,
-                createdAt = "1234",
-                keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
-                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
-            ),
-            SearchedCategoryHearit(
-                3,
-                "드디어 세 번째 레슨, 일희일비 않기",
-                playTime = 1234,
-                lastPlayTime = 99999,
-                createdAt = "1234",
-                keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
-                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
-            ),
-            SearchedCategoryHearit(
-                4,
-                "드디어 세 번째 레슨, 일희일비 않기",
-                playTime = 1234,
-                lastPlayTime = 99999,
-                createdAt = "1234",
-                keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
-                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
-            ),
-            SearchedCategoryHearit(
-                5,
                 "드디어 세 번째 레슨, 일희일비 않기",
                 playTime = 1234,
                 lastPlayTime = 99999,

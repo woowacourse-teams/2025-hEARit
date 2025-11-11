@@ -522,13 +522,13 @@ class PlayerDetailActivity :
             AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
-        val input = SearchInput.Category(id, name, colorCode)
-        val resultIntent =
-            Intent().apply {
-                putExtras(input.toBundle())
-            }
-        setResult(RESULT_OK, resultIntent)
-        finish()
+//        val input = SearchInput.Category(id, name, colorCode)
+//        val resultIntent =
+//            Intent().apply {
+//                putExtras(input.toBundle())
+//            }
+//        setResult(RESULT_OK, resultIntent)
+//        finish()
     }
 
     override fun onClickSource(
