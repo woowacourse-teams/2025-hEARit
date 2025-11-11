@@ -46,15 +46,12 @@ fun SearchMainTopBar(
             title = {
                 Text(
                     text = stringResource(R.string.menu_search),
-                    modifier =
-                        Modifier
-                            .padding(start = 4.dp),
                     color = Gray4,
                     style = HearitTypoGraphy.headlineMedium,
                 )
             },
             colors =
-                TopAppBarDefaults.topAppBarColors(
+                TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = HearitBlack,
                     scrolledContainerColor = HearitBlack,
                 ),
@@ -63,7 +60,7 @@ fun SearchMainTopBar(
 
         SearchBarInput(
             onSearchBarClick = onSearchBarClick,
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier.padding(vertical = 8.dp),
         )
 
         Text(

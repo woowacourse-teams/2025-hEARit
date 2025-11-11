@@ -32,7 +32,7 @@ fun SearchMainScreen(
     val categories by viewModel.categories.observeAsState(initial = emptyList())
     val toastMessage by viewModel.toastMessage.observeAsState()
     val context = LocalContext.current
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     LaunchedEffect(Unit) {
         viewModel.getCategories()
@@ -49,7 +49,8 @@ fun SearchMainScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(HearitBlack),
+                .background(HearitBlack)
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SearchMainTopBar(
                 scrollBehavior = scrollBehavior,
@@ -67,10 +68,7 @@ fun SearchMainScreen(
                 )
                 onCategoryClick(category.id, category.name, category.colorCode)
             },
-            modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+            modifier = Modifier.padding(paddingValues),
         )
     }
 }
