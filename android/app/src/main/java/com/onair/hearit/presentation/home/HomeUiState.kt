@@ -17,8 +17,6 @@ data class HomeUiState(
     val recommendationCategories: List<RecommendationCategories> = emptyList(),
     val loadingKeys: Set<HomeLoadKey> = emptySet(),
 ) {
-    val showUserInfo: Boolean
-        get() = userInfo != null
     val showRecentUpload: Boolean
         get() = !isLoading && recentUploadHearits.isNotEmpty()
 
