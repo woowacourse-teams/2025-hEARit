@@ -103,6 +103,7 @@ class HomeFragment :
         setupWindowInsets()
         setupListeners()
         setupRecyclerView()
+        setupSwipeRefresh()
         observeViewModel()
     }
 
@@ -177,6 +178,20 @@ class HomeFragment :
         binding.rvHomeRecommendationCategories.adapter = recommendationCategoryAdapter
     }
 
+    private fun setupSwipeRefresh() {
+        binding.swipeRefreshLayout.apply {
+            setColorSchemeResources(
+                R.color.hearit_purple1,
+                R.color.hearit_purple2,
+                R.color.hearit_purple3,
+            )
+
+            setOnRefreshListener {
+                viewModel.refresh()
+            }
+        }
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -202,12 +217,18 @@ class HomeFragment :
                         state.playingBookmarkHearits,
                         state.showBookmark,
                     )
+                    updateCategoriesSection(
+                        state.recommendationCategories,
+                        state.showCategories,
+                    )
+                }
+            }
+        }
 
-                    if (!state.isLoading) {
-                        updateUserInfo(state.userInfo, state.isLoggedIn)
-                        updateRecommendSection(state.recommendHearits)
-                        updateCategoriesSection(state.recommendationCategories)
-                    }
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isRefreshing.collect { refreshing ->
+                    binding.swipeRefreshLayout.isRefreshing = refreshing
                 }
             }
         }

@@ -13,6 +13,7 @@ import com.onair.hearit.domain.repository.PlayingHistoryRepository
 import com.onair.hearit.domain.repository.RecommendationRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,12 +32,36 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
         fetchUserInfo()
         fetchData()
+    }
+
+    fun refresh() {
+        _isRefreshing.value = true
+
+        viewModelScope.launch {
+            try {
+                coroutineScope {
+                    launch { fetchRecommendHearits() }
+                    launch { fetchPlayingHistory() }
+                    launch { fetchRecentUpload() }
+                    launch { fetchBookmarks() }
+                    launch { fetchCategories() }
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "홈 데이터 새로고침 실패")
+                _toastMessage.value = R.string.all_refresh_fail
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
     }
 
     private fun fetchData() {

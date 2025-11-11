@@ -11,223 +11,229 @@
 
     </data>
 
-    <androidx.core.widget.NestedScrollView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/hearit_black1"
-            android:clipChildren="false"
-            android:clipToPadding="false">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/tv_home_logo"
-                style="@style/prompt_logo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/app_name"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_home_description"
-                style="@style/pretendard_body"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="@string/home_logo_description"
-                android:textColor="@color/hearit_gray2"
-                app:layout_constraintStart_toStartOf="@id/tv_home_logo"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_logo" />
-
-            <com.facebook.shimmer.ShimmerFrameLayout
-                android:id="@+id/fr_home_skeleton"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:shimmer_auto_start="true">
+                android:background="@color/hearit_black1"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
-                <include layout="@layout/item_home_skeleton" />
-            </com.facebook.shimmer.ShimmerFrameLayout>
+                <TextView
+                    android:id="@+id/tv_home_logo"
+                    style="@style/prompt_logo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/app_name"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/iv_profile"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="20dp"
-                android:contentDescription="@null"
-                android:scaleType="centerCrop"
-                app:imageUrl="@{userInfo.profileImage}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage"
-                tools:src="@drawable/img_default_profile" />
+                <TextView
+                    android:id="@+id/tv_home_description"
+                    style="@style/pretendard_body"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/home_logo_description"
+                    android:textColor="@color/hearit_gray2"
+                    app:layout_constraintStart_toStartOf="@id/tv_home_logo"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_logo" />
 
-            <TextView
-                android:id="@+id/tv_home_recommend"
-                style="@style/pretendard_main_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/home_recommend_hearit_text"
-                android:textColor="@color/hearit_gray4"
-                app:layout_constraintStart_toStartOf="@id/tv_home_description"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
+                <com.facebook.shimmer.ShimmerFrameLayout
+                    android:id="@+id/fr_home_skeleton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shimmer_auto_start="true">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_recommend"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_recommend"
-                tools:itemCount="5"
-                tools:listitem="@layout/item_recommend_hearit" />
+                    <include layout="@layout/item_home_skeleton" />
+                </com.facebook.shimmer.ShimmerFrameLayout>
 
-            <LinearLayout
-                android:id="@+id/indicator_container"
-                android:layout_width="160dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_recommend"
-                tools:background="@color/black" />
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_profile"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:contentDescription="@null"
+                    android:scaleType="centerCrop"
+                    app:imageUrl="@{userInfo.profileImage}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage"
+                    tools:src="@drawable/img_default_profile" />
 
-            <TextView
-                android:id="@+id/tv_home_playing_history_hearit_title"
-                style="@style/pretendard_main_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@{@string/home_playing_history_hearit_title(userInfo.nickname)}"
-                app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
-                app:layout_constraintTop_toBottomOf="@id/indicator_container"
-                tools:text="hEARit님이 듣고 있는 팟캐스트" />
+                <TextView
+                    android:id="@+id/tv_home_recommend"
+                    style="@style/pretendard_main_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/home_recommend_hearit_text"
+                    android:textColor="@color/hearit_gray4"
+                    app:layout_constraintStart_toStartOf="@id/tv_home_description"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_playing_history_hearit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingHorizontal="20dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_playing_history_hearit_title"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_playing_history_hearit" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_home_recommend"
+                    android:layout_width="match_parent"
+                    android:layout_height="340dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_recommend"
+                    tools:itemCount="5"
+                    tools:listitem="@layout/item_recommend_hearit" />
 
-            <TextView
-                android:id="@+id/tv_home_recent_upload_title"
-                style="@style/pretendard_main_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/home_recent_upload_hearit_title"
-                app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_history_hearit"
-                app:layout_goneMarginTop="24dp"
-                tools:text="최근 추가된 팟캐스트" />
+                <LinearLayout
+                    android:id="@+id/indicator_container"
+                    android:layout_width="160dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/rv_home_recommend"
+                    tools:background="@color/black" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_recent_upload"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingHorizontal="20dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_recent_upload_title"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_recent_upload_hearit" />
+                <TextView
+                    android:id="@+id/tv_home_playing_history_hearit_title"
+                    style="@style/pretendard_main_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@{@string/home_playing_history_hearit_title(userInfo.nickname)}"
+                    app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
+                    app:layout_constraintTop_toBottomOf="@id/indicator_container"
+                    tools:text="hEARit님이 듣고 있는 팟캐스트" />
 
-            <TextView
-                android:id="@+id/tv_home_playing_bookmark_title"
-                style="@style/pretendard_main_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:drawablePadding="8dp"
-                android:gravity="center_vertical"
-                android:text="@string/home_playing_bookmark_hearit_title"
-                app:drawableEndCompat="@drawable/ic_right"
-                app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_recent_upload"
-                tools:text="북마크한 팟캐스트를 들어보세요" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_home_playing_history_hearit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="20dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_playing_history_hearit_title"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_playing_history_hearit" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_playing_bookmark"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingHorizontal="20dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_playing_bookmark_title"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_playing_bookmark_hearit" />
+                <TextView
+                    android:id="@+id/tv_home_recent_upload_title"
+                    style="@style/pretendard_main_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/home_recent_upload_hearit_title"
+                    app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
+                    app:layout_constraintTop_toBottomOf="@id/rv_home_playing_history_hearit"
+                    app:layout_goneMarginTop="24dp"
+                    tools:text="최근 추가된 팟캐스트" />
 
-            <TextView
-                android:id="@+id/tv_home_shortcast"
-                style="@style/pretendard_category"
-                android:layout_width="0dp"
-                android:layout_height="92dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/bg_gradient_home_shortcast"
-                android:drawablePadding="4dp"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:text="@string/home_navigate_explore_text"
-                app:drawableEndCompat="@drawable/ic_home_arrow"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rv_home_playing_bookmark" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_home_recent_upload"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="20dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_recent_upload_title"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_recent_upload_hearit" />
 
-            <TextView
-                android:id="@+id/tv_home_wootaeco"
-                style="@style/pretendard_category"
-                android:layout_width="0dp"
-                android:layout_height="92dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/bg_gradient_home_wootaeco"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:text="@string/home_navigate_wootaeco_text"
-                app:drawableEndCompat="@drawable/ic_home_arrow"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast" />
+                <TextView
+                    android:id="@+id/tv_home_playing_bookmark_title"
+                    style="@style/pretendard_main_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/home_playing_bookmark_hearit_title"
+                    app:drawableEndCompat="@drawable/ic_right"
+                    app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
+                    app:layout_constraintTop_toBottomOf="@id/rv_home_recent_upload"
+                    tools:text="북마크한 팟캐스트를 들어보세요" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_home_recommendation_categories"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="72dp"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_wootaeco"
-                tools:itemCount="5"
-                tools:listitem="@layout/item_recommendation_category" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_home_playing_bookmark"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="20dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_playing_bookmark_title"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_playing_bookmark_hearit" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
+                <TextView
+                    android:id="@+id/tv_home_shortcast"
+                    style="@style/pretendard_category"
+                    android:layout_width="0dp"
+                    android:layout_height="92dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_gradient_home_shortcast"
+                    android:drawablePadding="4dp"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/home_navigate_explore_text"
+                    app:drawableEndCompat="@drawable/ic_home_arrow"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/rv_home_playing_bookmark" />
+
+                <TextView
+                    android:id="@+id/tv_home_wootaeco"
+                    style="@style/pretendard_category"
+                    android:layout_width="0dp"
+                    android:layout_height="92dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_gradient_home_wootaeco"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/home_navigate_wootaeco_text"
+                    app:drawableEndCompat="@drawable/ic_home_arrow"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_home_recommendation_categories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="72dp"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    android:orientation="vertical"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_wootaeco"
+                    tools:itemCount="5"
+                    tools:listitem="@layout/item_recommendation_category" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </layout>
