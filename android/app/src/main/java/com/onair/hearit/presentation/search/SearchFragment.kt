@@ -6,8 +6,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -25,6 +23,7 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
+import com.onair.hearit.presentation.showToast
 
 class SearchFragment :
     Fragment(),
@@ -107,14 +106,6 @@ class SearchFragment :
             .replace(R.id.fragment_container_view, SearchRecentFragment())
             .addToBackStack(null)
             .commit()
-    }
-
-    private fun showToast(
-        @StringRes resId: Int?,
-    ) {
-        resId?.let {
-            Toast.makeText(requireContext(), getString(it), Toast.LENGTH_SHORT).show()
-        }
     }
 
     override fun onCategoryClick(

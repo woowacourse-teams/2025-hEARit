@@ -10,8 +10,6 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -28,6 +26,7 @@ import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchAdap
 import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchClickListener
 import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchPageFragment
 import com.onair.hearit.presentation.search.recent.searchResult.SearchResultPageFragment
+import com.onair.hearit.presentation.showToast
 import kotlinx.coroutines.launch
 
 class SearchRecentFragment :
@@ -193,14 +192,6 @@ class SearchRecentFragment :
                 R.id.fragment_search_container_view,
                 SearchResultPageFragment.newInstance(input),
             ).commit()
-    }
-
-    private fun showToast(
-        @StringRes resId: Int?,
-    ) {
-        resId?.let {
-            Toast.makeText(requireContext(), getString(it), Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun showKeyboard() {
