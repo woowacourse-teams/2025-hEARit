@@ -99,6 +99,7 @@ class HomeFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
+
         setupWindowInsets()
         setupListeners()
         setupRecyclerView()
@@ -152,10 +153,10 @@ class HomeFragment :
             }
 
         binding.rvHomeRecommend.apply {
-            doOnPreDraw { scrollToMiddlePosition() }
             adapter = recommendAdapter
             snapHelper.attachToRecyclerView(this)
             centerScrollListener?.let { addOnScrollListener(it) }
+            isVisible = false
         }
 
         binding.rvHomePlayingHistoryHearit.apply {
@@ -183,17 +184,23 @@ class HomeFragment :
                     updateLoadingState(state.isLoading)
                     updateAdSections(state.isLoading)
 
+                    updateUserInfo(state.userInfo, state.isLoggedIn)
+
+                    updateRecommendSection(
+                        state.recommendHearits,
+                        state.showRecommendHearits,
+                    )
                     updatePlayingHistorySection(
                         state.playingHistoryHearits,
-                        !state.isLoading && state.showPlayingHistory,
+                        state.showPlayingHistory,
                     )
                     updateRecentUploadSection(
                         state.recentUploadHearits,
-                        !state.isLoading && state.showRecentUpload,
+                        state.showRecentUpload,
                     )
                     updateBookmarkSection(
                         state.playingBookmarkHearits,
-                        !state.isLoading && state.showBookmark,
+                        state.showBookmark,
                     )
 
                     if (!state.isLoading) {
@@ -223,9 +230,15 @@ class HomeFragment :
         binding.userInfo = userInfo
     }
 
-    private fun updateRecommendSection(recommendHearits: List<RecommendHearit>) {
+    private fun updateRecommendSection(
+        recommendHearits: List<RecommendHearit>,
+        shouldShow: Boolean,
+    ) {
+        binding.indicatorContainer.isVisible = shouldShow
+        binding.rvHomeRecommend.isVisible = shouldShow
+
         recommendAdapter.submitList(recommendHearits) {
-            if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            binding.rvHomeRecommend.doOnPreDraw {
                 scrollToMiddlePosition()
                 setupIndicator()
             }
@@ -246,6 +259,7 @@ class HomeFragment :
         shouldShow: Boolean,
     ) {
         binding.tvHomeRecentUploadTitle.isVisible = shouldShow
+        binding.rvHomeRecentUpload.isVisible = shouldShow
         recentUploadAdapter.submitList(recentUploadHearits)
     }
 
@@ -258,7 +272,11 @@ class HomeFragment :
         playingBookmarkAdapter.submitList(playingBookmarkHearits)
     }
 
-    private fun updateCategoriesSection(recommendationCategories: List<RecommendationCategories>) {
+    private fun updateCategoriesSection(
+        recommendationCategories: List<RecommendationCategories>,
+        shouldShow: Boolean,
+    ) {
+        binding.rvHomeRecommendationCategories.isVisible = shouldShow
         recommendationCategoryAdapter.submitList(recommendationCategories)
     }
 
