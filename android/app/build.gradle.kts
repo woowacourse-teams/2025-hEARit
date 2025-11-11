@@ -213,4 +213,7 @@ dependencies {
 
     // open license
     implementation(libs.play.services.oss.licenses)
+
+    // swipe Refresh Layout
+    implementation(libs.androidx.swiperefreshlayout)
 }
