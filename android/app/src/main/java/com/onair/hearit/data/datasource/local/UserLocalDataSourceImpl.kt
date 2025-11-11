@@ -38,7 +38,7 @@ class UserLocalDataSourceImpl(
             UserInfo(
                 id = userId,
                 nickname = prefs[NICKNAME_KEY] ?: "hEARit",
-                profileImage = prefs[PROFILE_URL_KEY],
+                profileImage = prefs[PROFILE_URL_KEY]?.takeIf { it.isNotEmpty() },
             )
         }
 

@@ -37,7 +37,7 @@ class UserRepositoryImpl(
                     .getOrThrow()
 
             // 원격 정상 응답 → 로컬 반영 + 캐시 갱신
-            userLocalDataSource.saveUserInfo(remote)
+            userLocalDataSource.saveUserInfo(remote).getOrThrow()
             cachedUserInfo = remote
 
             remote
