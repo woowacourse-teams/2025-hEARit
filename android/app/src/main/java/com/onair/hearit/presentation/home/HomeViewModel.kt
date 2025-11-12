@@ -45,7 +45,10 @@ class HomeViewModel(
 
     fun refresh() {
         _isRefreshing.value = true
+        fetchData()
+    }
 
+    private fun fetchData() {
         viewModelScope.launch {
             try {
                 coroutineScope {
@@ -56,20 +59,12 @@ class HomeViewModel(
                     launch { fetchCategories() }
                 }
             } catch (e: Exception) {
-                Timber.e(e, "홈 데이터 새로고침 실패")
+                Timber.e(e, "홈 데이터 로드 실패")
                 _toastMessage.value = R.string.all_refresh_fail
             } finally {
                 _isRefreshing.value = false
             }
         }
-    }
-
-    private fun fetchData() {
-        fetchRecommendHearits()
-        fetchPlayingHistory()
-        fetchRecentUpload()
-        fetchBookmarks()
-        fetchCategories()
     }
 
     private fun startLoading(jobKey: HomeLoadKey) {
