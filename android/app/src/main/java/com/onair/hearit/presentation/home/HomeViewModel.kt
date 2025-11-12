@@ -58,9 +58,6 @@ class HomeViewModel(
                     launch { fetchBookmarks() }
                     launch { fetchCategories() }
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "홈 데이터 로드 실패")
-                _toastMessage.value = R.string.all_refresh_fail
             } finally {
                 _isRefreshing.value = false
             }

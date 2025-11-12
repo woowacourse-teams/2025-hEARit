@@ -21,7 +21,6 @@
     <string name="logout_fail">로그아웃에 실패했습니다</string>
     <string name="withdraw_success">회원탈퇴에 성공했습니다</string>
     <string name="withdraw_fail">회원탈퇴에 실패했습니다</string>
-    <string name="all_refresh_fail">새로고침에 실패했습니다</string>
     <string name="all_keyword_name"># %s</string>
     <string name="all_login_dialog_message_body"><font color="#B677F3">북마크 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
     <string name="all_dialog_login_positive">로그인</string>
