@@ -15,7 +15,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
-import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
@@ -273,10 +272,6 @@ class MainActivity :
             .setPositiveButton(R.string.dialog_withdraw) { _, _ -> mainViewModel.withdraw() }
             .setNegativeButton(R.string.all_cancel, null)
             .show()
-    }
-
-    private fun openUrl(url: String) {
-        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
     }
 
     fun showFragment(

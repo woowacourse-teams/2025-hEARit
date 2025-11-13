@@ -1,0 +1,64 @@
+package com.onair.hearit.presentation.setting
+
+import android.content.Context
+import android.content.Intent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.onair.hearit.R
+import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.presentation.setting.component.SettingContent
+import com.onair.hearit.presentation.setting.component.SettingTopBar
+import com.onair.hearit.presentation.theme.HearitBlack
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen(
+    onBackClick: () -> Unit,
+    viewModel: SettingViewModel,
+) {
+    val context = LocalContext.current
+    val privacyPolicyUrl = stringResource(id = R.string.privacy_policy_url)
+    val termsUrl = stringResource(id = R.string.terms_of_use_url)
+    val userInfo by viewModel.userInfo.observeAsState(UserInfo.default())
+
+    Scaffold(
+        topBar = {
+            SettingTopBar(onBackClick = onBackClick)
+        },
+        containerColor = HearitBlack,
+    ) { padding ->
+        SettingContent(
+            userInfo = userInfo,
+            onProfileClick = { /* 내정보 화면으로 이동 */ },
+            onPrivacyPolicyClick = { openUrl(privacyPolicyUrl, context) },
+            onTermsClick = { openUrl(termsUrl, context) },
+            onOpenSourceClick = { navigateToLicense(context) },
+            onLoginClick = { },
+            onLogoutClick = { },
+            onWithdrawalClick = { },
+            modifier = Modifier.padding(padding),
+        )
+    }
+}
+
+private fun navigateToLicense(context: Context) {
+    OssLicensesMenuActivity.setActivityTitle(context.getString(R.string.oss_license_title))
+    val intent = Intent(context, OssLicensesMenuActivity::class.java)
+    context.startActivity(intent)
+}
+
+private fun openUrl(
+    url: String,
+    context: Context,
+) {
+    context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+}
