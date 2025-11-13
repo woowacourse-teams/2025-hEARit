@@ -16,9 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.net.toUri
-import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -29,7 +27,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
@@ -47,7 +44,6 @@ import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.search.main.SearchComposeFragment
-import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.presentation.splash.SplashActivity
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
@@ -57,7 +53,6 @@ import kotlinx.coroutines.launch
 @OptIn(UnstableApi::class)
 class MainActivity :
     AppCompatActivity(),
-    DrawerClickListener,
     PlayerControllerView,
     PlaybackStarter {
     private lateinit var binding: ActivityMainBinding
@@ -76,7 +71,6 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        binding.layoutDrawer.viewModel = mainViewModel
         binding.lifecycleOwner = this
 
         lifecycleScope.launch {
@@ -93,7 +87,6 @@ class MainActivity :
         setupBackPressHandler()
         setupWindowInsets()
         setupNavigation()
-        setupDrawer()
         attachController()
         observeViewModel()
         showFragment(HomeFragment())
@@ -148,9 +141,8 @@ class MainActivity :
     }
 
     private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.customDrawer) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, systemBars.top, 0, systemBars.bottom)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            v.setPadding(0, 0, 0, 0)
             insets
         }
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
@@ -192,25 +184,17 @@ class MainActivity :
     }
 
     private fun setupDrawer() {
-        binding.layoutDrawer.tvDrawerAccountInfo.setOnClickListener {
-            showFragment(SettingFragment(), addToBackStack = true)
-            binding.drawerLayout.closeDrawer(GravityCompat.END)
-        }
-        binding.layoutDrawer.tvDrawerPrivacyPolicy.setOnClickListener { openUrl(PRIVACY_POLICY_URL) }
-        binding.layoutDrawer.tvTermsOfUse.setOnClickListener { openUrl(TERMS_OF_USE_URL) }
-        binding.layoutDrawer.tvOpenLicense.setOnClickListener { navigateToLicense() }
-        binding.layoutDrawer.tvDrawerLogin.setOnClickListener { navigateToLogin() }
-        binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
-            val stopIntent = PlaybackService.stopIntent(this)
-            stopService(stopIntent)
-            mainViewModel.performLogout()
-        }
-        binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
-
-        binding.layoutDrawer.tvDrawerFeedback.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, FEEDBACK_URL.toUri())
-            startActivity(intent)
-        }
+//        binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
+//            val stopIntent = PlaybackService.stopIntent(this)
+//            stopService(stopIntent)
+//            mainViewModel.performLogout()
+//        }
+//        binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
+//
+//        binding.layoutDrawer.tvDrawerFeedback.setOnClickListener {
+//            val intent = Intent(Intent.ACTION_VIEW, FEEDBACK_URL.toUri())
+//            startActivity(intent)
+//        }
     }
 
     private fun attachController() {
@@ -295,7 +279,7 @@ class MainActivity :
         startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
     }
 
-    private fun showFragment(
+    fun showFragment(
         fragment: Fragment,
         addToBackStack: Boolean = false,
     ) {
@@ -379,12 +363,6 @@ class MainActivity :
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun navigateToLicense() {
-        OssLicensesMenuActivity.setActivityTitle(HEARIT_OPEN_LICENSE_TITLE)
-        val intent = Intent(this, OssLicensesMenuActivity::class.java)
-        startActivity(intent)
-    }
-
     private fun handleForceLogout() {
         lifecycleScope.launch {
             val intent =
@@ -399,10 +377,6 @@ class MainActivity :
                     Toast.LENGTH_LONG,
                 ).show()
         }
-    }
-
-    override fun openDrawer() {
-        binding.drawerLayout.openDrawer(GravityCompat.END)
     }
 
     override fun showPlayerControlView() {
@@ -461,14 +435,6 @@ class MainActivity :
     }
 
     companion object {
-        private const val HEARIT_OPEN_LICENSE_TITLE = "hEARit Open Source Licenses"
         private const val PLAYER_HIDE_OFFSET = 100f
-
-        private const val PRIVACY_POLICY_URL =
-            "https://glistening-eclipse-58b.notion.site/231d39b9c3c3809b9f92ec3e812ea24b?source=copy_link"
-        private const val TERMS_OF_USE_URL =
-            "https://glistening-eclipse-58b.notion.site/231d39b9c3c3800eb03cc7e1fc00f6f1?source=copy_link"
-        private const val FEEDBACK_URL =
-            "https://docs.google.com/forms/d/e/1FAIpQLSfHy20uq3LGUmxngS38QmDjGbJLHPXSlgUcp_yYfsQygXzC_Q/viewform"
     }
 }

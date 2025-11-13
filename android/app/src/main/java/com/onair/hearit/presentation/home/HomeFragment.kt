@@ -45,7 +45,6 @@ import com.onair.hearit.presentation.home.adapter.PlayingHistoryHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecentUploadHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecommendHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
-import com.onair.hearit.presentation.main.DrawerClickListener
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
@@ -125,10 +124,6 @@ class HomeFragment :
     }
 
     private fun setupListeners() {
-        binding.ivProfile.setOnClickListener {
-            (activity as? DrawerClickListener)?.openDrawer()
-        }
-
         binding.tvHomePlayingBookmarkTitle.setOnClickListener {
             AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_library)
