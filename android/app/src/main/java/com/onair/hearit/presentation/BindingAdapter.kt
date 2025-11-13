@@ -28,7 +28,7 @@ fun setFormattedPlayTime(
 ) {
     val minutes = timeInSeconds / 60
     val seconds = timeInSeconds % 60
-    textView.text = String.format("%02d:%02d", minutes, seconds)
+    textView.text = String.format(Locale.ROOT, "%02d:%02d", minutes, seconds)
 }
 
 @BindingAdapter("exploreHighlightedStyle")
