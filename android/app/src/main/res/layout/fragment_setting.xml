@@ -39,7 +39,7 @@
             android:background="@color/hearit_gray1"
             android:gravity="center"
             android:paddingVertical="16dp"
-            android:text="@string/all_account_info"
+            android:text="내정보"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
