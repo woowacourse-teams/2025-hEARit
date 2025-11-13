@@ -3,13 +3,17 @@ package com.onair.hearit.app.auth.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
+import com.onair.hearit.core.log.MdcSetupFilter;
+import com.onair.hearit.core.log.RequestLoggingFallbackFilter;
 import com.onair.hearit.core.log.logger.ConsoleLogger;
 import com.onair.hearit.core.log.logger.JsonLogger;
 import java.util.Arrays;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -44,6 +48,24 @@ public class ApiSecurityConfig {
     private final ConsoleLogger consoleLogger;
     private final ObjectMapper objectMapper;
     private final JwtTokenProvider jwtTokenProvider;
+
+    @Bean
+    public FilterRegistrationBean<MdcSetupFilter> mdcSetupFilter() {
+        FilterRegistrationBean<MdcSetupFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new MdcSetupFilter());
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        registrationBean.addUrlPatterns("/*");
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<RequestLoggingFallbackFilter> requestLoggingFallbackFilter() {
+        FilterRegistrationBean<RequestLoggingFallbackFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new RequestLoggingFallbackFilter(jsonLogger, consoleLogger));
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        registrationBean.addUrlPatterns("/*");
+        return registrationBean;
+    }
 
     @Bean
     @Order(2)
