@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../core/presentation/widgets/script_view.dart';
+import '../detail/hearit_detail.dart';
+import '../detail/hearit_detail_screen.dart';
 import 'explore_viewmodel.dart';
-import 'widgets/explore_widgets.dart';
+import 'explore_models.dart';
+import 'widgets/explore_feed_page.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -98,9 +100,29 @@ class ExploreScreenState extends State<ExploreScreen> {
     }
   }
 
+  Future<void> _openDetailFromExplore(ExploreFeedItem item) async {
+    await _viewModel.pauseAudio();
+    await _viewModel.setPlaybackEnabled(false);
+
+    final stub = HearitDetail.fromSummaryStub(
+      id: item.id,
+      title: item.title,
+      categoryName: '탐색',
+      accentColor: item.categoryColor,
+      createdAt: DateTime.now(),
+      lastPlayTime: _viewModel.position,
+    );
+
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => HearitDetailScreen(detail: stub),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final active = _viewModel.activeItem;
     return Scaffold(
       backgroundColor: const Color(0xFF1F1F1F),
@@ -147,94 +169,13 @@ class ExploreScreenState extends State<ExploreScreen> {
                 },
                 itemBuilder: (context, index) {
                   final item = _viewModel.items[index];
-                  return Stack(
-                    children: [
-                      Positioned(
-                        top: 16,
-                        left: horizontalPadding,
-                        right: horizontalPadding,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ExploreHighlightBanner(text: _viewModel.pitchLine),
-                            const SizedBox(height: 26),
-                            Text(
-                              item.title,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 24,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            ExploreKeywords(keywords: item.keywords),
-                            const SizedBox(height: 8),
-                            Transform.translate(
-                              offset: const Offset(0, -30),
-                              child: ExploreCover(
-                                categoryColor: item.categoryColor,
-                                assetPath: 'assets/images/explore_LP.png',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        left: horizontalPadding,
-                        right: horizontalPadding,
-                        bottom: 0,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              height: 170,
-                              width: double.infinity,
-                              child: ScriptView(
-                                scripts: item.scripts ?? const [],
-                                position: _viewModel.position,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            ExploreContinueButton(
-                              onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('팟캐스트 이어듣기 기능이 준비 중입니다.'),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Overlay painted last to stay on top of other content.
-                      if (_centerStatusIcon != null)
-                        Positioned.fill(
-                          child: IgnorePointer(
-                            child: Transform.translate(
-                              offset: const Offset(0, 100),
-                              child: Center(
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF9533F5,
-                                    ).withOpacity(0.7),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    _centerStatusIcon,
-                                    size: 40,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
+                  return ExploreFeedPage(
+                    item: item,
+                    pitchLine: _viewModel.pitchLine,
+                    position: _viewModel.position,
+                    centerStatusIcon: _centerStatusIcon,
+                    horizontalPadding: horizontalPadding,
+                    onContinuePressed: () => _openDetailFromExplore(item),
                   );
                 },
               );

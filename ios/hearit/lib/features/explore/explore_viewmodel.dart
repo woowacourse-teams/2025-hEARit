@@ -32,6 +32,7 @@ class ExploreViewModel extends ChangeNotifier {
   bool _userSeeking = false;
   String? _currentSourceUrl;
   VoidCallback? _onActiveCompleted;
+  Duration? _resumePosition;
 
   Duration _position = Duration.zero;
   Duration _totalDuration = const Duration(seconds: 12);
@@ -124,12 +125,19 @@ class ExploreViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _maybePlayItem(ExploreFeedItem item) async {
+  Future<void> _maybePlayItem(ExploreFeedItem item,
+      {Duration? startPosition}) async {
     if (item.shortAudioUrl == null || item.shortAudioUrl!.isEmpty) return;
     _currentSourceUrl = item.shortAudioUrl;
     await playerController.loadSource(item.shortAudioUrl!);
-    await playerController.seek(Duration.zero);
-    _progressNotifier.value = 0;
+    final start = startPosition ?? Duration.zero;
+    await playerController.seek(start);
+    _position = start;
+    final durationMs = _totalDuration.inMilliseconds;
+    _progressNotifier.value =
+        durationMs > 0 && start > Duration.zero
+            ? (start.inMilliseconds / durationMs).clamp(0.0, 1.0)
+            : 0;
     _completionHandled = false; // allow completion for this source
     if (!playerController.isPlaying) {
       await playerController.togglePlayback();
@@ -143,12 +151,14 @@ class ExploreViewModel extends ChangeNotifier {
   Future<void> setPlaybackEnabled(bool enabled) async {
     _playbackEnabled = enabled;
     if (!enabled) {
+      _resumePosition = _position;
       await pauseAudio();
       return;
     }
     final current = activeItem;
     if (current != null && current.detailLoaded) {
-      await _maybePlayItem(current);
+      await _maybePlayItem(current, startPosition: _resumePosition);
+      _resumePosition = null;
     }
   }
 

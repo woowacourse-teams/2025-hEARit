@@ -18,6 +18,7 @@ class _MainNavigationState extends State<MainNavigation> {
     4,
     (_) => GlobalKey<NavigatorState>(),
   );
+  late final _TabRouteObserver _exploreRouteObserver;
 
   static const List<_NavItem> _navItems = [
     _NavItem(label: '홈', icon: Icons.home),
@@ -25,6 +26,21 @@ class _MainNavigationState extends State<MainNavigation> {
     _NavItem(label: '탐색', icon: Icons.explore),
     _NavItem(label: '설정', icon: Icons.settings),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _exploreRouteObserver = _TabRouteObserver(onStackChanged: _onExploreStackChanged);
+  }
+
+  void _onExploreStackChanged() {
+    if (!mounted) return;
+    setState(() {});
+    final isExploreRoot = !(_navigatorKeys[2].currentState?.canPop() ?? false);
+    if (_currentIndex == 2 && isExploreRoot) {
+      ExploreScreenState.setActivePlayback(true);
+    }
+  }
 
   void _onItemTapped(int index) {
     if (_currentIndex == 2 && index != 2) {
@@ -79,6 +95,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   _TabNavigator(
                     navigatorKey: _navigatorKeys[2],
                     builder: (_) => const ExploreScreen(),
+                    observers: [_exploreRouteObserver],
                   ),
                   _TabNavigator(
                     navigatorKey: _navigatorKeys[3],
@@ -93,6 +110,9 @@ class _MainNavigationState extends State<MainNavigation> {
               valueListenable: ExploreScreenState.progressListenable(),
               builder: (context, value, _) {
                 if (_currentIndex != 2) return const SizedBox.shrink();
+                final isExploreRoot =
+                    !(_navigatorKeys[2].currentState?.canPop() ?? false);
+                if (!isExploreRoot) return const SizedBox.shrink();
                 return SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 5,
@@ -165,19 +185,59 @@ class _MainNavigationState extends State<MainNavigation> {
 }
 
 class _TabNavigator extends StatelessWidget {
-  const _TabNavigator({required this.navigatorKey, required this.builder});
+  const _TabNavigator({
+    required this.navigatorKey,
+    required this.builder,
+    this.observers,
+  });
 
   final GlobalKey<NavigatorState> navigatorKey;
   final WidgetBuilder builder;
+  final List<NavigatorObserver>? observers;
 
   @override
   Widget build(BuildContext context) {
     return Navigator(
       key: navigatorKey,
+      observers: observers ?? const [],
       onGenerateRoute: (settings) {
         return MaterialPageRoute(builder: builder, settings: settings);
       },
     );
+  }
+}
+
+class _TabRouteObserver extends NavigatorObserver {
+  _TabRouteObserver({required this.onStackChanged});
+
+  final VoidCallback onStackChanged;
+
+  void _notify() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => onStackChanged());
+  }
+
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    super.didPush(route, previousRoute);
+    _notify();
+  }
+
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    super.didPop(route, previousRoute);
+    _notify();
+  }
+
+  @override
+  void didRemove(Route route, Route? previousRoute) {
+    super.didRemove(route, previousRoute);
+    _notify();
+  }
+
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    _notify();
   }
 }
 

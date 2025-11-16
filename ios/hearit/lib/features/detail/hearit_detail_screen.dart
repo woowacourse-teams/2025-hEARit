@@ -35,6 +35,8 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
 
   @override
   void dispose() {
+    // Stop audio when leaving the detail screen so explore preview can resume cleanly.
+    _viewModel.playerController.pause();
     _viewModel.removeListener(_onViewModelUpdated);
     _viewModel.dispose();
     super.dispose();

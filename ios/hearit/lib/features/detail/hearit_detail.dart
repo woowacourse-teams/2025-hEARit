@@ -97,6 +97,7 @@ class HearitDetail {
     required String categoryName,
     required Color accentColor,
     required DateTime createdAt,
+    Duration? lastPlayTime,
   }) =>
       HearitDetail(
         id: id,
@@ -104,7 +105,7 @@ class HearitDetail {
         summary: '',
         sources: const [],
         playTime: Duration.zero,
-        lastPlayTime: null,
+        lastPlayTime: lastPlayTime,
         createdAt: createdAt,
         isBookmarked: false,
         bookmarkId: null,

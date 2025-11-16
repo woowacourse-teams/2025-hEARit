@@ -35,13 +35,15 @@ class HearitDetailViewModel extends ChangeNotifier {
   }) : _detail = detail,
        _playerController = playerController,
        _bookmarked = detail.isBookmarked,
-       _repository = repository ?? DetailRepository();
+       _repository = repository ?? DetailRepository(),
+       _resumePosition = detail.lastPlayTime;
 
   HearitDetail get detail => _detail;
   HearitDetail _detail;
   final HearitPlayerController _playerController;
   final DetailRepository _repository;
   HearitPlayerController get playerController => _playerController;
+  Duration? _resumePosition;
 
   final List<double> _speedOptions = [0.75, 1.0, 1.25, 1.5];
   int _speedIndex = 1;
@@ -69,6 +71,7 @@ class HearitDetailViewModel extends ChangeNotifier {
     try {
       final latest = await _repository.fetchDetail(_detail.id);
       _detail = latest;
+      _resumePosition ??= latest.lastPlayTime;
       _bookmarked = latest.isBookmarked;
       _playerController.setExternalDuration(latest.playTime);
       notifyListeners();
@@ -82,6 +85,10 @@ class HearitDetailViewModel extends ChangeNotifier {
       final url = await _repository.fetchOriginalAudioUrl(_detail.id);
       if (url != null && url.isNotEmpty) {
         await _playerController.loadSource(url);
+        final resumePosition = _resumePosition ?? _detail.lastPlayTime;
+        if (resumePosition != null && resumePosition > Duration.zero) {
+          await _playerController.seek(resumePosition);
+        }
       }
     } catch (_) {
       // ignore audio load errors for now
