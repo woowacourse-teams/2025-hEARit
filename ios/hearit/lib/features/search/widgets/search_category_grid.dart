@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import '../search_models.dart';
 
 class SearchCategoryGrid extends StatelessWidget {
-  const SearchCategoryGrid({
-    super.key,
-    required this.categories,
-    this.onTap,
-  });
+  const SearchCategoryGrid({super.key, required this.categories, this.onTap});
 
   final List<SearchCategory> categories;
   final void Function(SearchCategory category)? onTap;
@@ -20,8 +16,8 @@ class SearchCategoryGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
         childAspectRatio: 2.8,
       ),
       itemCount: categories.length,
@@ -48,6 +44,7 @@ class SearchCategoryGrid extends StatelessWidget {
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.4,
+                  fontSize: 18,
                 ),
               ),
             ),

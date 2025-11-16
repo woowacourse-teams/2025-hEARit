@@ -68,6 +68,7 @@ flutter:
   assets:
     - assets/images/LP.png
     - assets/images/detail_LP.png
+    - assets/images/explore_LP.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

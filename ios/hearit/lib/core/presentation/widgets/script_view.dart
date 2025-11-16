@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../hearit_detail_viewmodel.dart';
+import 'package:hearit/features/detail/hearit_detail_viewmodel.dart';
 
 class ScriptView extends StatefulWidget {
   const ScriptView({super.key, required this.scripts, required this.position});

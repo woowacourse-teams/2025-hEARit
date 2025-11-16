@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/home/home_screen.dart';
+import '../../features/explore/explore_screen.dart';
 import '../../features/search/search_screen.dart';
 import '../../features/setting/setting_screen.dart';
 
@@ -21,22 +22,31 @@ class _MainNavigationState extends State<MainNavigation> {
   static const List<_NavItem> _navItems = [
     _NavItem(label: '홈', icon: Icons.home),
     _NavItem(label: '검색', icon: Icons.search),
-    _NavItem(label: '탐색', icon: Icons.compass_calibration_rounded),
+    _NavItem(label: '탐색', icon: Icons.explore),
     _NavItem(label: '설정', icon: Icons.settings),
   ];
 
   void _onItemTapped(int index) {
+    if (_currentIndex == 2 && index != 2) {
+      // Pause explore audio when leaving the explore tab.
+      ExploreScreenState.pauseActiveAudio();
+      ExploreScreenState.setActivePlayback(false);
+    }
     if (_currentIndex == index) {
       _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
     } else {
       setState(() {
         _currentIndex = index;
       });
+      if (index == 2) {
+        ExploreScreenState.setActivePlayback(true);
+      }
     }
   }
 
   Future<bool> _onWillPop() async {
-    final NavigatorState currentNav = _navigatorKeys[_currentIndex].currentState!;
+    final NavigatorState currentNav =
+        _navigatorKeys[_currentIndex].currentState!;
     if (currentNav.canPop()) {
       currentNav.pop();
       return false;
@@ -50,61 +60,104 @@ class _MainNavigationState extends State<MainNavigation> {
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: const Color(0xFF1F1F1F),
-        body: IndexedStack(
-          index: _currentIndex,
+        body: Column(
           children: [
-            _TabNavigator(
-              navigatorKey: _navigatorKeys[0],
-              builder: (_) => HomeScreen(onExploreTap: () => _onItemTapped(2)),
+            Expanded(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: [
+                  _TabNavigator(
+                    navigatorKey: _navigatorKeys[0],
+                    builder: (_) =>
+                        HomeScreen(onExploreTap: () => _onItemTapped(2)),
+                  ),
+                  _TabNavigator(
+                    navigatorKey: _navigatorKeys[1],
+                    builder: (_) =>
+                        SearchScreen(onBackToHome: () => _onItemTapped(0)),
+                  ),
+                  _TabNavigator(
+                    navigatorKey: _navigatorKeys[2],
+                    builder: (_) => const ExploreScreen(),
+                  ),
+                  _TabNavigator(
+                    navigatorKey: _navigatorKeys[3],
+                    builder: (_) =>
+                        SettingScreen(onBackToHome: () => _onItemTapped(0)),
+                  ),
+                ],
+              ),
             ),
-            _TabNavigator(
-              navigatorKey: _navigatorKeys[1],
-              builder: (_) => SearchScreen(onBackToHome: () => _onItemTapped(0)),
+            // Progress bar only shows on explore tab. Draggable to seek.
+            ValueListenableBuilder<double>(
+              valueListenable: ExploreScreenState.progressListenable(),
+              builder: (context, value, _) {
+                if (_currentIndex != 2) return const SizedBox.shrink();
+                return SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 5,
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 0,
+                    ),
+                    overlayShape: SliderComponentShape.noOverlay,
+                    activeTrackColor: const Color(0xFFA86BFF),
+                    inactiveTrackColor: const Color(0xFF555555),
+                    thumbColor: Colors.transparent,
+                  ),
+                  child: Slider(
+                    value: value.clamp(0.0, 1.0),
+                    onChanged: (v) {
+                      ExploreScreenState.updateTempProgress(v);
+                    },
+                    onChangeStart: (_) => ExploreScreenState.beginUserSeek(),
+                    onChangeEnd: (v) => ExploreScreenState.endUserSeek(v),
+                  ),
+                );
+              },
             ),
-            _TabNavigator(
-              navigatorKey: _navigatorKeys[2],
-              builder: (_) => const _PlaceholderScreen(label: '탐색'),
-            ),
-            _TabNavigator(
-              navigatorKey: _navigatorKeys[3],
-              builder: (_) => SettingScreen(onBackToHome: () => _onItemTapped(0)),
+            SafeArea(
+              top: false,
+              bottom: false,
+              child: MediaQuery.removePadding(
+                context: context,
+                removeBottom: true,
+                child: Container(
+                  color: const Color(0xFF2C2C2C),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                    child: BottomNavigationBar(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      type: BottomNavigationBarType.fixed,
+                      currentIndex: _currentIndex,
+                      onTap: _onItemTapped,
+                      showSelectedLabels: false,
+                      showUnselectedLabels: false,
+                      items: _navItems
+                          .map(
+                            (item) => BottomNavigationBarItem(
+                              icon: _NavVisual(
+                                icon: item.icon,
+                                label: item.label,
+                                color: const Color(0xFFBFBFBF),
+                                iconSize: 34,
+                              ),
+                              activeIcon: _NavVisual(
+                                icon: item.icon,
+                                label: item.label,
+                                color: const Color(0xFFA86BFF),
+                                iconSize: 34,
+                              ),
+                              label: item.label,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
-        ),
-        bottomNavigationBar: Container(
-          color: const Color(0xFF2C2C2C),
-          padding: const EdgeInsets.only(top: 4),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: BottomNavigationBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              type: BottomNavigationBarType.fixed,
-              currentIndex: _currentIndex,
-              onTap: _onItemTapped,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-              items: _navItems
-                  .map(
-                    (item) => BottomNavigationBarItem(
-                      icon: _NavVisual(
-                        icon: item.icon,
-                        label: item.label,
-                        color: const Color(0xFFBFBFBF),
-                        iconSize: 38,
-                      ),
-                      activeIcon: _NavVisual(
-                        icon: item.icon,
-                        label: item.label,
-                        color: const Color(0xFFA86BFF),
-                        iconSize: 38,
-                      ),
-                      label: item.label,
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
         ),
       ),
     );
@@ -155,6 +208,7 @@ class _NavVisual extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Icon(icon, size: iconSize, color: color),
+        const SizedBox(height: 4),
         Text(
           label,
           textHeightBehavior: const TextHeightBehavior(
@@ -186,9 +240,9 @@ class _PlaceholderScreen extends StatelessWidget {
       child: Text(
         '$label 화면 준비 중',
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.white70,
-              fontWeight: FontWeight.w600,
-            ),
+          color: Colors.white70,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

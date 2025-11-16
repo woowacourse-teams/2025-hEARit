@@ -39,6 +39,8 @@ class HearitPlayerController extends ChangeNotifier {
     return processing == ProcessingState.loading ||
         processing == ProcessingState.buffering;
   }
+  ProcessingState? get processingState => _latestState?.processingState;
+  bool get isCompleted => _latestState?.processingState == ProcessingState.completed;
 
   double get currentSpeed => _currentSpeed;
 
@@ -52,6 +54,10 @@ class HearitPlayerController extends ChangeNotifier {
     } else {
       await _audioHandler.play();
     }
+  }
+
+  Future<void> pause() async {
+    await _audioHandler.pause();
   }
 
   Future<void> seekRelative(Duration offset) async {

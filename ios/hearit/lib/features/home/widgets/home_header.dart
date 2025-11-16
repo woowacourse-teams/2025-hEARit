@@ -6,7 +6,7 @@ class HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Column(
@@ -28,17 +28,6 @@ class HomeHeader extends StatelessWidget {
                   ),
             ),
           ],
-        ),
-        CircleAvatar(
-          radius: 18,
-          backgroundColor: const Color(0xFF6C5CE7),
-          child: Text(
-            'H',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
         ),
       ],
     );

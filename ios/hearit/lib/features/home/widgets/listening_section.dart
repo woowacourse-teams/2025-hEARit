@@ -121,7 +121,7 @@ class ListeningCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
-                    fontSize: 30,
+                    fontSize: 24,
                     letterSpacing: 0.4,
                   ),
                 ),

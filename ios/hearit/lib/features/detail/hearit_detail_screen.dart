@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/audio/hearit_player_controller.dart';
+import '../../core/presentation/widgets/script_view.dart';
 import 'hearit_detail.dart';
 import 'hearit_detail_viewmodel.dart';
 import 'widgets/audio_controls.dart';
 import 'widgets/detail_header.dart';
 import 'widgets/hearit_info_card.dart';
-import 'widgets/script_view.dart';
 import 'widgets/source_card.dart';
 import 'widgets/summary_card.dart';
 
