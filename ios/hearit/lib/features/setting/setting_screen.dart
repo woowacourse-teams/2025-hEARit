@@ -10,7 +10,7 @@ class SettingScreen extends StatelessWidget {
   static const Color _backgroundColor = Color(0xFF1F1F1F);
   static const TextStyle _itemTextStyle = TextStyle(
     color: Colors.white70,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: FontWeight.w500,
   );
 
@@ -39,9 +39,9 @@ class SettingScreen extends StatelessWidget {
   }
 
   void _openLicenses(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const OssLicensesPage()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const OssLicensesPage()));
   }
 
   @override
@@ -60,7 +60,7 @@ class SettingScreen extends StatelessWidget {
           '설정',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 16,
+            fontSize: 24,
             fontWeight: FontWeight.w600,
           ),
         ),

@@ -110,9 +110,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final double viewPortWidth = MediaQuery.of(context).size.width - 40;
     final double pageWidth = viewPortWidth * _pageController.viewportFraction;
 
-    return Container(
-      color: const Color(0xFF1F1F1F),
-      child: SafeArea(
+    return Scaffold(
+      backgroundColor: const Color(0xFF1F1F1F),
+      body: SafeArea(
+        bottom: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: SingleChildScrollView(
