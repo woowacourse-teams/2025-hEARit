@@ -53,6 +53,9 @@ class ExploreViewModel extends ChangeNotifier {
     _items.clear();
     _nextCursorId = 0;
     _hasMore = true;
+    _activeIndex = 0;
+    _position = Duration.zero;
+    _progressNotifier.value = 0;
     _initialLoading = true;
     notifyListeners();
     await _fetchPage();

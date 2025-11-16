@@ -100,6 +100,18 @@ class ExploreScreenState extends State<ExploreScreen> {
     }
   }
 
+  Future<void> _refreshExplore() async {
+    _overlayTimer?.cancel();
+    _centerStatusIcon = null;
+    _currentIndex = 0;
+    if (_pageController.hasClients) {
+      _pageController.jumpToPage(0);
+    }
+    await _viewModel.pauseAudio();
+    await _viewModel.setPlaybackEnabled(false);
+    await _viewModel.loadInitial();
+  }
+
   Future<void> _openDetailFromExplore(ExploreFeedItem item) async {
     await _viewModel.pauseAudio();
     await _viewModel.setPlaybackEnabled(false);
@@ -156,28 +168,36 @@ class ExploreScreenState extends State<ExploreScreen> {
                 );
               }
               const double horizontalPadding = 22;
-              return PageView.builder(
-                controller: _pageController,
-                scrollDirection: Axis.vertical,
-                itemCount: _viewModel.items.length,
-                onPageChanged: (index) {
-                  _viewModel.setActiveIndex(index);
-                  _currentIndex = index;
-                  if (index >= _viewModel.items.length - 3) {
-                    _viewModel.loadMore();
-                  }
-                },
-                itemBuilder: (context, index) {
-                  final item = _viewModel.items[index];
-                  return ExploreFeedPage(
-                    item: item,
-                    pitchLine: _viewModel.pitchLine,
-                    position: _viewModel.position,
-                    centerStatusIcon: _centerStatusIcon,
-                    horizontalPadding: horizontalPadding,
-                    onContinuePressed: () => _openDetailFromExplore(item),
-                  );
-                },
+              return RefreshIndicator(
+                color: const Color(0xFFA86BFF),
+                backgroundColor: const Color(0xFF1F1F1F),
+                onRefresh: _refreshExplore,
+                child: PageView.builder(
+                  controller: _pageController,
+                  scrollDirection: Axis.vertical,
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
+                  itemCount: _viewModel.items.length,
+                  onPageChanged: (index) {
+                    _viewModel.setActiveIndex(index);
+                    _currentIndex = index;
+                    if (index >= _viewModel.items.length - 3) {
+                      _viewModel.loadMore();
+                    }
+                  },
+                  itemBuilder: (context, index) {
+                    final item = _viewModel.items[index];
+                    return ExploreFeedPage(
+                      item: item,
+                      pitchLine: _viewModel.pitchLine,
+                      position: _viewModel.position,
+                      centerStatusIcon: _centerStatusIcon,
+                      horizontalPadding: horizontalPadding,
+                      onContinuePressed: () => _openDetailFromExplore(item),
+                    );
+                  },
+                ),
               );
             },
           ),
