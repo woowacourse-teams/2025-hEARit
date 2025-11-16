@@ -47,16 +47,22 @@ class HearitDetailViewModel extends ChangeNotifier {
   int _speedIndex = 1;
   bool _bookmarked;
   List<ScriptLine> _scripts = [];
+  bool _initialLoading = true;
 
   bool get isBookmarked => _bookmarked;
   String get speedLabel => '${_currentSpeed.toStringAsFixed(1)}x';
   double get _currentSpeed => _speedOptions[_speedIndex];
   List<ScriptLine> get scripts => _scripts;
+  bool get isInitialLoading => _initialLoading;
 
   Future<void> loadAll() async {
+    _initialLoading = true;
+    notifyListeners();
     await loadDetail();
     await _loadAudio();
     await _loadScripts();
+    _initialLoading = false;
+    notifyListeners();
   }
 
   Future<void> loadDetail() async {

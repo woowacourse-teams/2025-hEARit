@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../detail/hearit_detail.dart';
+import '../detail/hearit_detail_screen.dart';
+import 'category_hearit_screen.dart';
+import 'search_models.dart';
 import 'search_viewmodel.dart';
+import 'widgets/search_category_grid.dart';
 import 'widgets/search_result_card.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -216,41 +221,99 @@ class _SearchScreenState extends State<SearchScreen> {
             Expanded(
               child: Container(
                 color: const Color(0xFF1F1F1F), // 스크롤 영역 전체 배경 고정
-                child: !_viewModel.hasSearched
-                    ? const SizedBox.shrink()
-                    : _viewModel.results.isEmpty && !_viewModel.isLoading
-                    ? Center(
-                        child: Text(
-                          '검색 결과가 없습니다.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.white70,
-                          ),
+                child: !_viewModel.hasSearched && !_viewModel.hasQuery
+                    ? SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '카테고리',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            if (_viewModel.categoriesLoading)
+                              const LinearProgressIndicator(
+                                minHeight: 2,
+                                color: Color(0xFFA86BFF),
+                                backgroundColor: Color(0xFF3B3B46),
+                              )
+                            else if (_viewModel.categoriesError != null)
+                              Text(
+                                _viewModel.categoriesError!,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.redAccent,
+                                ),
+                              )
+                            else
+                              SearchCategoryGrid(
+                                categories: _viewModel.categories,
+                                onTap: (category) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => CategoryHearitScreen(
+                                        category: category,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                          ],
                         ),
                       )
-                    : MediaQuery.removePadding(
-                        context: context,
-                        removeTop: true, // 상단 고정 UI 위로 스크롤 방지
-                        child: ListView.separated(
-                          padding: const EdgeInsets.only(
-                            left: 20,
-                            right: 20,
-                            bottom: 20,
+                    : _viewModel.results.isEmpty && !_viewModel.isLoading
+                        ? Center(
+                            child: Text(
+                              '검색 결과가 없습니다.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.white70,
+                              ),
+                            ),
+                          )
+                        : MediaQuery.removePadding(
+                            context: context,
+                            removeTop: true, // 상단 고정 UI 위로 스크롤 방지
+                            child: ListView.separated(
+                              padding: const EdgeInsets.only(
+                                left: 20,
+                                right: 20,
+                                bottom: 20,
+                              ),
+                              physics: const ClampingScrollPhysics(),
+                              itemCount: _viewModel.results.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final data = _viewModel.results[index];
+                                return SearchResultCard(
+                                  data: data,
+                                  onTap: () => _openDetail(data),
+                                );
+                              },
+                            ),
                           ),
-                          physics: const ClampingScrollPhysics(),
-                          itemCount: _viewModel.results.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final data = _viewModel.results[index];
-                            return SearchResultCard(data: data);
-                          },
-                        ),
-                      ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _openDetail(SearchHearit data) {
+    final stub = HearitDetail.fromSummaryStub(
+      id: data.id,
+      title: data.title,
+      categoryName: '검색',
+      accentColor: const Color(0xFFA86BFF),
+      createdAt: DateTime.now(),
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => HearitDetailScreen(detail: stub)),
     );
   }
 }

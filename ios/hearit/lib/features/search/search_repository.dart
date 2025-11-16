@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../core/network/api_client.dart';
 import 'search_models.dart';
 
@@ -16,6 +18,55 @@ class SearchRepository {
       '/api/v1/hearits/search',
       queryParameters: {
         'searchTerm': term,
+        'page': page,
+        'size': size,
+      },
+      parser: (raw) => raw as Map<String, dynamic>? ?? <String, dynamic>{},
+    );
+    final List<dynamic> content = data['content'] as List<dynamic>? ?? const [];
+    return content
+        .whereType<Map<String, dynamic>>()
+        .map(_mapHearit)
+        .toList();
+  }
+
+  Future<List<SearchCategory>> fetchCategories({
+    int page = 0,
+    int size = 20,
+  }) async {
+    final Map<String, dynamic> data = await _apiClient.get<Map<String, dynamic>>(
+      '/api/v1/categories',
+      queryParameters: {
+        'page': page,
+        'size': size,
+      },
+      parser: (raw) => raw as Map<String, dynamic>? ?? <String, dynamic>{},
+    );
+    final List<dynamic> content = data['content'] as List<dynamic>? ?? const [];
+    return content
+        .whereType<Map<String, dynamic>>()
+        .map(_mapCategory)
+        .toList();
+  }
+
+  SearchCategory _mapCategory(Map<String, dynamic> json) {
+    return SearchCategory(
+      id: _asInt(json['id']),
+      name: json['name'] as String? ?? '',
+      color: _parseColor(json['colorCode'] as String?),
+    );
+  }
+
+  Future<List<SearchHearit>> fetchHearitsByCategory({
+    required int categoryId,
+    int page = 0,
+    int size = 20,
+  }) async {
+    final Map<String, dynamic> data = await _apiClient.get<Map<String, dynamic>>(
+      '/api/v1/hearits',
+      queryParameters: {
+        'categoryId': categoryId,
+        'sort': 'createdAt,desc',
         'page': page,
         'size': size,
       },
@@ -51,5 +102,17 @@ class SearchRepository {
   int _asInt(dynamic value) {
     if (value is int) return value;
     return int.tryParse(value.toString()) ?? 0;
+  }
+
+  Color _parseColor(String? hex) {
+    if (hex == null || hex.isEmpty) return const Color(0xFF3B3B46);
+    final cleaned = hex.replaceAll('#', '');
+    if (cleaned.length == 6) {
+      return Color(int.parse('FF$cleaned', radix: 16));
+    }
+    if (cleaned.length == 8) {
+      return Color(int.parse(cleaned, radix: 16));
+    }
+    return const Color(0xFF3B3B46);
   }
 }

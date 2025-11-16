@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class SearchHearit {
   const SearchHearit({
     required this.id,
@@ -30,4 +32,16 @@ class SearchHearit {
     final seconds = playTime.inSeconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
+}
+
+class SearchCategory {
+  const SearchCategory({
+    required this.id,
+    required this.name,
+    required this.color,
+  });
+
+  final int id;
+  final String name;
+  final Color color;
 }

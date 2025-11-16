@@ -52,51 +52,49 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              DetailHeader(
-                categoryName: detail.category.name,
-                onBack: () => Navigator.of(context).pop(),
-                onShare: () {},
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      HearitInfoCard(
-                        detail: detail,
-                        formatDate: _viewModel.formatDate,
-                      ),
-                      const SizedBox(height: 24),
-                      Center(
-                        child: SizedBox(
-                          height: 160,
-                          width: double.infinity,
-                          child: AnimatedBuilder(
-                            animation: Listenable.merge([
-                              _viewModel,
-                              _viewModel.playerController,
-                            ]),
-                            builder: (context, _) {
-                              return ScriptView(
+          child: AnimatedBuilder(
+            animation: Listenable.merge([
+              _viewModel,
+              _viewModel.playerController,
+            ]),
+            builder: (context, _) {
+              if (_viewModel.isInitialLoading) {
+                return _Skeleton(detail: detail);
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
+                  DetailHeader(
+                    categoryName: detail.category.name,
+                    onBack: () => Navigator.of(context).pop(),
+                    onShare: () {},
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          HearitInfoCard(
+                            detail: detail,
+                            formatDate: _viewModel.formatDate,
+                          ),
+                          const SizedBox(height: 24),
+                          Center(
+                            child: SizedBox(
+                              height: 160,
+                              width: double.infinity,
+                              child: ScriptView(
                                 scripts: _viewModel.scripts,
                                 position: _viewModel.playerController.position,
-                              );
-                            },
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      SizedBox(
-                        height: 150,
-                        child: AnimatedBuilder(
-                          animation: _viewModel,
-                          builder: (context, _) {
-                            return AudioControls(
+                          const SizedBox(height: 4),
+                          SizedBox(
+                            height: 150,
+                            child: AudioControls(
                               controller: _viewModel.playerController,
                               isBookmarked: _viewModel.isBookmarked,
                               onBookmarkToggle: _viewModel.toggleBookmark,
@@ -105,25 +103,77 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                               onSpeedTap: _viewModel.cycleSpeed,
                               speedLabel: _viewModel.speedLabel,
                               formatDuration: _viewModel.formatDuration,
-                            );
-                          },
-                        ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SourceCard(sources: detail.sources),
+                          const SizedBox(height: 12),
+                          SummaryCard(
+                            summary: detail.summary,
+                            keywords: detail.keywords,
+                          ),
+                          const SizedBox(height: 12),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      SourceCard(sources: detail.sources),
-                      const SizedBox(height: 12),
-                      SummaryCard(
-                        summary: detail.summary,
-                        keywords: detail.keywords,
-                      ),
-                      const SizedBox(height: 12),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _Skeleton extends StatelessWidget {
+  const _Skeleton({required this.detail});
+
+  final HearitDetail detail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        DetailHeader(
+          categoryName: detail.category.name,
+          onBack: () => Navigator.of(context).pop(),
+          onShare: () {},
+        ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _shimmerBox(height: 360), // HearitInfoCard 영역
+                const SizedBox(height: 24),
+                _shimmerBox(height: 160), // ScriptView 영역
+                const SizedBox(height: 12),
+                _shimmerBox(height: 200), // AudioControls 영역
+                const SizedBox(height: 16),
+                _shimmerBox(height: 110), // SourceCard 영역
+                const SizedBox(height: 12),
+                _shimmerBox(height: 140), // SummaryCard 영역
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _shimmerBox({required double height}) {
+    return Container(
+      height: height,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFF2B2B2B),
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }

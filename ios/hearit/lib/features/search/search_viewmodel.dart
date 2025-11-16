@@ -8,6 +8,7 @@ class SearchViewModel extends ChangeNotifier {
   SearchViewModel({SearchRepository? repository})
     : _repository = repository ?? SearchRepository() {
     searchController.addListener(_handleInputChanged);
+    loadCategories();
   }
 
   final SearchRepository _repository;
@@ -19,6 +20,9 @@ class SearchViewModel extends ChangeNotifier {
   bool _hasSearched = false;
   String? _error;
   List<SearchHearit> _results = const [];
+  List<SearchCategory> _categories = const [];
+  bool _categoriesLoading = false;
+  String? _categoriesError;
   final List<_SearchSnapshot> _history = [];
 
   String get query => _query;
@@ -28,6 +32,9 @@ class SearchViewModel extends ChangeNotifier {
   String? get error => _error;
   List<SearchHearit> get results => _results;
   bool get canGoBack => _history.isNotEmpty;
+  List<SearchCategory> get categories => _categories;
+  bool get categoriesLoading => _categoriesLoading;
+  String? get categoriesError => _categoriesError;
 
   void _handleInputChanged() {
     final String newQuery = searchController.text;
@@ -75,6 +82,23 @@ class SearchViewModel extends ChangeNotifier {
     _error = null;
     _history.clear();
     _handleInputChanged();
+  }
+
+  Future<void> loadCategories() async {
+    if (_categories.isNotEmpty || _categoriesLoading) return;
+    _categoriesLoading = true;
+    _categoriesError = null;
+    notifyListeners();
+
+    try {
+      _categories = await _repository.fetchCategories();
+    } catch (error, stack) {
+      debugPrint('SearchViewModel.loadCategories error: $error\n$stack');
+      _categoriesError = '카테고리를 불러오지 못했습니다.';
+    } finally {
+      _categoriesLoading = false;
+      notifyListeners();
+    }
   }
 
   void stepBack() {

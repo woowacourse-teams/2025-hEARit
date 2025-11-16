@@ -12,13 +12,10 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
-
-  late final List<Widget> _pages = [
-    HomeScreen(onExploreTap: () => _onItemTapped(2)),
-    SearchScreen(onBackToHome: () => _onItemTapped(0)),
-    const _PlaceholderScreen(label: '탐색'),
-    const _PlaceholderScreen(label: '라이브러리'),
-  ];
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = List.generate(
+    4,
+    (_) => GlobalKey<NavigatorState>(),
+  );
 
   static const List<_NavItem> _navItems = [
     _NavItem(label: '홈', icon: Icons.home),
@@ -28,51 +25,104 @@ class _MainNavigationState extends State<MainNavigation> {
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+    if (_currentIndex == index) {
+      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
+    }
+  }
+
+  Future<bool> _onWillPop() async {
+    final NavigatorState currentNav = _navigatorKeys[_currentIndex].currentState!;
+    if (currentNav.canPop()) {
+      currentNav.pop();
+      return false;
+    }
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
-      body: IndexedStack(index: _currentIndex, children: _pages),
-      bottomNavigationBar: Container(
-        color: const Color(0xFF2C2C2C),
-        padding: const EdgeInsets.only(top: 4),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: BottomNavigationBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            type: BottomNavigationBarType.fixed,
-            currentIndex: _currentIndex,
-            onTap: _onItemTapped,
-            showSelectedLabels: false,
-            showUnselectedLabels: false,
-            items: _navItems
-                .map(
-                  (item) => BottomNavigationBarItem(
-                    icon: _NavVisual(
-                      icon: item.icon,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF1F1F1F),
+        body: IndexedStack(
+          index: _currentIndex,
+          children: [
+            _TabNavigator(
+              navigatorKey: _navigatorKeys[0],
+              builder: (_) => HomeScreen(onExploreTap: () => _onItemTapped(2)),
+            ),
+            _TabNavigator(
+              navigatorKey: _navigatorKeys[1],
+              builder: (_) => SearchScreen(onBackToHome: () => _onItemTapped(0)),
+            ),
+            _TabNavigator(
+              navigatorKey: _navigatorKeys[2],
+              builder: (_) => const _PlaceholderScreen(label: '탐색'),
+            ),
+            _TabNavigator(
+              navigatorKey: _navigatorKeys[3],
+              builder: (_) => const _PlaceholderScreen(label: '라이브러리'),
+            ),
+          ],
+        ),
+        bottomNavigationBar: Container(
+          color: const Color(0xFF2C2C2C),
+          padding: const EdgeInsets.only(top: 4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: BottomNavigationBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              type: BottomNavigationBarType.fixed,
+              currentIndex: _currentIndex,
+              onTap: _onItemTapped,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              items: _navItems
+                  .map(
+                    (item) => BottomNavigationBarItem(
+                      icon: _NavVisual(
+                        icon: item.icon,
+                        label: item.label,
+                        color: const Color(0xFFBFBFBF),
+                        iconSize: 38,
+                      ),
+                      activeIcon: _NavVisual(
+                        icon: item.icon,
+                        label: item.label,
+                        color: const Color(0xFFA86BFF),
+                        iconSize: 38,
+                      ),
                       label: item.label,
-                      color: const Color(0xFFBFBFBF),
-                      iconSize: 38,
                     ),
-                    activeIcon: _NavVisual(
-                      icon: item.icon,
-                      label: item.label,
-                      color: const Color(0xFFA86BFF),
-                      iconSize: 38,
-                    ),
-                    label: item.label,
-                  ),
-                )
-                .toList(),
+                  )
+                  .toList(),
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TabNavigator extends StatelessWidget {
+  const _TabNavigator({required this.navigatorKey, required this.builder});
+
+  final GlobalKey<NavigatorState> navigatorKey;
+  final WidgetBuilder builder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: navigatorKey,
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute(builder: builder, settings: settings);
+      },
     );
   }
 }
@@ -104,7 +154,6 @@ class _NavVisual extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Icon(icon, size: iconSize, color: color),
-        const SizedBox(height: 5),
         Text(
           label,
           textHeightBehavior: const TextHeightBehavior(
@@ -136,9 +185,9 @@ class _PlaceholderScreen extends StatelessWidget {
       child: Text(
         '$label 화면 준비 중',
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: Colors.white70,
-          fontWeight: FontWeight.w600,
-        ),
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
+            ),
       ),
     );
   }

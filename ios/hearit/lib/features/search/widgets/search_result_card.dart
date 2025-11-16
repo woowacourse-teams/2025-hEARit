@@ -33,22 +33,25 @@ class SearchResultCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      data.title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
+              SizedBox(
+                height: 52, // reserve space for up to 2 lines of title
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        data.title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
