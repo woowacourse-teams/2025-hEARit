@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/audio/hearit_player_controller.dart';
 
-class AudioControls extends StatelessWidget {
+class AudioControls extends StatefulWidget {
   const AudioControls({
     super.key,
     required this.controller,
@@ -27,16 +27,34 @@ class AudioControls extends StatelessWidget {
   final String Function(Duration) formatDuration;
 
   @override
+  State<AudioControls> createState() => _AudioControlsState();
+}
+
+class _AudioControlsState extends State<AudioControls> {
+  double? _dragPositionMillis;
+
+  Duration _effectivePosition(Duration position, Duration duration) {
+    if (_dragPositionMillis != null) {
+      final ms = _dragPositionMillis!.clamp(
+        0.0,
+        duration.inMilliseconds.toDouble(),
+      );
+      return Duration(milliseconds: ms.round());
+    }
+    return position > duration ? duration : position;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: controller,
+      animation: widget.controller,
       builder: (context, _) {
-        final duration = controller.duration;
-        final position = controller.position;
-        final clampedPosition = position > duration ? duration : position;
+        final duration = widget.controller.duration;
+        final currentPosition =
+            _effectivePosition(widget.controller.position, duration);
         final totalMillis = math.max(duration.inMilliseconds, 1);
-        final isBuffering = controller.isBuffering;
-        final playing = controller.isPlaying;
+        final isBuffering = widget.controller.isBuffering;
+        final playing = widget.controller.isPlaying;
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -52,31 +70,49 @@ class AudioControls extends StatelessWidget {
                 overlayColor: const Color(0x33A86BFF),
               ),
               child: Slider(
-                value: clampedPosition.inMilliseconds.toDouble(),
+                value: currentPosition.inMilliseconds.toDouble(),
                 max: totalMillis.toDouble(),
+                onChangeStart: duration == Duration.zero
+                    ? null
+                    : (value) => setState(() {
+                          _dragPositionMillis = value;
+                        }),
                 onChanged: duration == Duration.zero
                     ? null
-                    : (value) => controller.seek(
-                        Duration(milliseconds: value.round()),
-                      ),
+                    : (value) => setState(() {
+                          _dragPositionMillis = value;
+                        }),
+                onChangeEnd: duration == Duration.zero
+                    ? null
+                    : (value) async {
+                        final target = Duration(milliseconds: value.round());
+                        await widget.controller.seek(target);
+                        if (mounted) {
+                          setState(() {
+                            _dragPositionMillis = null;
+                          });
+                        } else {
+                          _dragPositionMillis = null;
+                        }
+                      },
               ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  formatDuration(clampedPosition),
+                  widget.formatDuration(currentPosition),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 Text(
-                  formatDuration(duration),
+                  widget.formatDuration(duration),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
@@ -86,17 +122,19 @@ class AudioControls extends StatelessWidget {
               children: [
                 IconButton(
                   iconSize: 40,
-                  onPressed: onBookmarkToggle,
+                  onPressed: widget.onBookmarkToggle,
                   icon: Icon(
-                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                    color: isBookmarked
+                    widget.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                    color: widget.isBookmarked
                         ? const Color(0xFF9533F5)
                         : Colors.white,
                   ),
                 ),
                 IconButton(
                   iconSize: 40,
-                  onPressed: () => onSeekRelative(const Duration(seconds: -10)),
+                  onPressed: () => widget.onSeekRelative(
+                    const Duration(seconds: -10),
+                  ),
                   icon: const Icon(Icons.replay_10, color: Colors.white),
                 ),
                 Container(
@@ -117,7 +155,7 @@ class AudioControls extends StatelessWidget {
                           ),
                         )
                       : IconButton(
-                          onPressed: onTogglePlayback,
+                          onPressed: widget.onTogglePlayback,
                           icon: Icon(
                             playing ? Icons.pause : Icons.play_arrow,
                             color: Colors.white,
@@ -127,18 +165,20 @@ class AudioControls extends StatelessWidget {
                 ),
                 IconButton(
                   iconSize: 40,
-                  onPressed: () => onSeekRelative(const Duration(seconds: 10)),
+                  onPressed: () => widget.onSeekRelative(
+                    const Duration(seconds: 10),
+                  ),
                   icon: const Icon(Icons.forward_10, color: Colors.white),
                 ),
                 GestureDetector(
-                  onTap: onSpeedTap,
+                  onTap: widget.onSpeedTap,
                   child: Text(
-                    speedLabel,
+                    widget.speedLabel,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 24,
-                    ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 24,
+                        ),
                   ),
                 ),
               ],

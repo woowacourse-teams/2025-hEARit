@@ -73,7 +73,7 @@ class HomeRepository {
 
   RecommendCardData _mapRecommendation(Map<String, dynamic> json) {
     return RecommendCardData(
-      id: _asInt(json['id']),
+      id: _asInt(json['id'] ?? json['hearitId']),
       categoryName: json['categoryName'] as String? ?? '추천',
       title: json['title'] as String? ?? '',
       categoryColor: _parseColor(

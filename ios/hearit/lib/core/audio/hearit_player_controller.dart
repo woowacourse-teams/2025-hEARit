@@ -7,18 +7,35 @@ import 'package:just_audio/just_audio.dart';
 import 'audio_handler.dart';
 
 class HearitPlayerController extends ChangeNotifier {
-  HearitPlayerController({double initialSpeed = 1.0}) {
-    _audioHandler = LocalAudioHandler();
-    _audioHandler.setSpeed(initialSpeed);
+  HearitPlayerController({
+    required LocalAudioHandler audioHandler,
+    double initialSpeed = 1.0,
+  }) : _audioHandler = audioHandler {
     _currentSpeed = initialSpeed;
+
+    _audioHandler.setSpeed(initialSpeed);
+
+    // Listen: duration updates
     _durationSub = _audioHandler.durationStream.listen((duration) {
       _duration = duration ?? Duration.zero;
+
+      // Update mediaItem with new duration
+      if (_currentMediaItem != null) {
+        final updated = _currentMediaItem!.copyWith(duration: _duration);
+        _currentMediaItem = updated;
+        _audioHandler.mediaItem.add(updated);
+      }
+
       notifyListeners();
     });
+
+    // Listen: position updates
     _positionSub = _audioHandler.positionStream.listen((position) {
       _position = position;
       notifyListeners();
     });
+
+    // Listen: play/pause/processing state
     _playerStateSub = _audioHandler.playerStateStream.listen((state) {
       _latestState = state;
       notifyListeners();
@@ -26,28 +43,35 @@ class HearitPlayerController extends ChangeNotifier {
   }
 
   late final LocalAudioHandler _audioHandler;
+
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   PlayerState? _latestState;
   double _currentSpeed = 1.0;
 
+  MediaItem? _currentMediaItem;
+
   Duration get duration => _duration;
   Duration get position => _position;
-  bool get isPlaying => _latestState?.playing ?? false;
-  bool get isBuffering {
-    final processing = _latestState?.processingState;
-    return processing == ProcessingState.loading ||
-        processing == ProcessingState.buffering;
-  }
-  ProcessingState? get processingState => _latestState?.processingState;
-  bool get isCompleted => _latestState?.processingState == ProcessingState.completed;
-
   double get currentSpeed => _currentSpeed;
+
+  bool get isPlaying => _latestState?.playing ?? false;
+
+  bool get isBuffering {
+    final s = _latestState?.processingState;
+    return s == ProcessingState.loading || s == ProcessingState.buffering;
+  }
+
+  bool get isCompleted =>
+      _latestState?.processingState == ProcessingState.completed;
 
   late final StreamSubscription<Duration?> _durationSub;
   late final StreamSubscription<Duration> _positionSub;
   late final StreamSubscription<PlayerState> _playerStateSub;
 
+  // ──────────────────────────────
+  // Controls
+  // ──────────────────────────────
   Future<void> togglePlayback() async {
     if (isPlaying) {
       await _audioHandler.pause();
@@ -56,9 +80,7 @@ class HearitPlayerController extends ChangeNotifier {
     }
   }
 
-  Future<void> pause() async {
-    await _audioHandler.pause();
-  }
+  Future<void> pause() async => _audioHandler.pause();
 
   Future<void> seekRelative(Duration offset) async {
     final target = _position + offset;
@@ -69,23 +91,55 @@ class HearitPlayerController extends ChangeNotifier {
     await _audioHandler.seek(position);
   }
 
+  // ──────────────────────────────
+  // Speed
+  // ──────────────────────────────
   Future<void> setSpeed(double speed) async {
     _currentSpeed = speed;
     await _audioHandler.setSpeed(speed);
+
+    // iOS Now Playing Info에 speed 반영
+    if (_currentMediaItem != null) {
+      final updated = _currentMediaItem!.copyWith(
+        extras: {...?_currentMediaItem!.extras, "speed": speed},
+      );
+      _currentMediaItem = updated;
+      _audioHandler.mediaItem.add(updated);
+    }
+
     notifyListeners();
   }
 
-  /// Allows externally provided durations (e.g., metadata) to update UI while
-  /// using a static/local audio source.
+  // ──────────────────────────────
+  // Duration injection
+  // ──────────────────────────────
   void setExternalDuration(Duration duration) {
     _duration = duration;
+
+    if (_currentMediaItem != null) {
+      final updated = _currentMediaItem!.copyWith(duration: duration);
+      _currentMediaItem = updated;
+      _audioHandler.mediaItem.add(updated);
+    }
+
     notifyListeners();
   }
 
-  Future<void> loadSource(String url) async {
-    await _audioHandler.setSource(url);
+  // ──────────────────────────────
+  // Load Source + MediaItem 설정
+  // ──────────────────────────────
+  Future<void> loadSource(String url, {MediaItem? mediaItem}) async {
+    if (mediaItem != null) {
+      _currentMediaItem = mediaItem;
+      _audioHandler.mediaItem.add(mediaItem);
+    }
+
+    await _audioHandler.setSource(url, mediaItem: mediaItem);
   }
 
+  // ──────────────────────────────
+  // Dispose
+  // ──────────────────────────────
   @override
   void dispose() {
     _durationSub.cancel();

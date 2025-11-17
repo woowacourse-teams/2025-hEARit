@@ -23,6 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late final HomeViewModel _viewModel;
   late final PageController _pageController;
   double _page = 0;
+  static const bool _showListeningAndBookmarks = false;
+  static const bool _showRecentlyAdded = true;
 
   @override
   void initState() {
@@ -159,7 +161,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         clipBehavior: Clip.none,
                         itemCount: _viewModel.todayRecommendedHearits.length,
                         itemBuilder: (context, index) {
-                          return Container(color: Colors.transparent);
+                          final hearit = _viewModel.todayRecommendedHearits[index];
+                          final detail =
+                              _viewModel.toHearitDetailFromRecommend(hearit);
+                          return GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () => _openHearitDetail(detail),
+                            child: const SizedBox.expand(),
+                          );
                         },
                       ),
                       Positioned(
@@ -174,32 +183,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
-                ListeningSection(
-                  title: 'hEARit님이 듣고 있는 팟캐스트',
-                  items: _viewModel.listeningNowHearits,
-                  onTap: (data) => _openHearitDetail(
-                    _viewModel.toHearitDetailFromListening(data),
+                const SizedBox(height: 36),
+                if (_showListeningAndBookmarks) ...[
+                  ListeningSection(
+                    title: 'hEARit님이 듣고 있는 팟캐스트',
+                    items: _viewModel.listeningNowHearits,
+                    onTap: (data) => _openHearitDetail(
+                      _viewModel.toHearitDetailFromListening(data),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                ListeningSection(
-                  title: '최근 추가된 팟캐스트',
-                  items: _viewModel.recentlyAddedHearits,
-                  onTap: (data) => _openHearitDetail(
-                    _viewModel.toHearitDetailFromListening(data),
+                  // const SizedBox(height: 10),
+                  ListeningSection(
+                    title: '북마크한 팟캐스트를 들어보세요',
+                    items: _viewModel.bookmarkedHearits,
+                    showChevron: true,
+                    onTap: (data) => _openHearitDetail(
+                      _viewModel.toHearitDetailFromListening(data),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                ListeningSection(
-                  title: '북마크한 팟캐스트를 들어보세요',
-                  items: _viewModel.bookmarkedHearits,
-                  showChevron: true,
-                  onTap: (data) => _openHearitDetail(
-                    _viewModel.toHearitDetailFromListening(data),
+                  // const SizedBox(height: 24),
+                ],
+                if (_showRecentlyAdded) ...[
+                  ListeningSection(
+                    title: '최근 추가된 팟캐스트',
+                    items: _viewModel.recentlyAddedHearits,
+                    onTap: (data) => _openHearitDetail(
+                      _viewModel.toHearitDetailFromListening(data),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
+                  // const SizedBox(height: 24),
+                ],
                 ExploreShortcutCard(onTap: widget.onExploreTap),
                 const SizedBox(height: 32),
                 CategorySection(

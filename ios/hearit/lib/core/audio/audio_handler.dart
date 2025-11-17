@@ -94,9 +94,17 @@ class LocalAudioHandler extends BaseAudioHandler with SeekHandler {
     playbackState.add(playbackState.value.copyWith(speed: speed));
   }
 
-  Future<void> setSource(String url) async {
+  Future<void> setSource(String url, {MediaItem? mediaItem}) async {
     await _initializing;
     await _player.setUrl(url);
+
+    if (mediaItem != null) {
+      this.mediaItem.add(mediaItem);
+    }
+  }
+
+  Future<void> updateMediaItem(MediaItem updated) async {
+    mediaItem.add(updated);
   }
 
   Future<void> disposeHandler() async {

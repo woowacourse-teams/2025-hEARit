@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../core/audio/hearit_player_controller.dart';
 import 'detail_repository.dart';
@@ -50,6 +55,7 @@ class HearitDetailViewModel extends ChangeNotifier {
   bool _bookmarked;
   List<ScriptLine> _scripts = [];
   bool _initialLoading = true;
+  static Future<Uri>? _artworkUriFuture;
 
   bool get isBookmarked => _bookmarked;
   String get speedLabel => '${_currentSpeed.toStringAsFixed(1)}x';
@@ -61,9 +67,15 @@ class HearitDetailViewModel extends ChangeNotifier {
     _initialLoading = true;
     notifyListeners();
     await loadDetail();
-    await _loadAudio();
-    await _loadScripts();
+
+    // Kick off audio & script loads concurrently; render UI as soon as detail is ready.
     _initialLoading = false;
+    notifyListeners();
+
+    await Future.wait([
+      _loadAudio(),
+      _loadScripts(),
+    ]);
     notifyListeners();
   }
 
@@ -84,7 +96,18 @@ class HearitDetailViewModel extends ChangeNotifier {
     try {
       final url = await _repository.fetchOriginalAudioUrl(_detail.id);
       if (url != null && url.isNotEmpty) {
-        await _playerController.loadSource(url);
+        final artUri = await _resolveArtworkUri();
+        await _playerController.loadSource(
+          url,
+          mediaItem: MediaItem(
+            id: 'hearit-${_detail.id}',
+            title: _detail.title,
+            album: _detail.category.name,
+            artist: _detail.category.name,
+            duration: _detail.playTime,
+            artUri: artUri,
+          ),
+        );
         final resumePosition = _resumePosition ?? _detail.lastPlayTime;
         if (resumePosition != null && resumePosition > Duration.zero) {
           await _playerController.seek(resumePosition);
@@ -102,6 +125,20 @@ class HearitDetailViewModel extends ChangeNotifier {
       _scripts = [];
     }
     notifyListeners();
+  }
+
+  Future<Uri> _resolveArtworkUri() {
+    _artworkUriFuture ??= _loadArtworkUri();
+    return _artworkUriFuture!;
+  }
+
+  Future<Uri> _loadArtworkUri() async {
+    // Copy bundled asset to a temporary file so iOS Now Playing can read it.
+    final bytes = await rootBundle.load('assets/images/detail_LP.png');
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/detail_LP.png');
+    await file.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+    return Uri.file(file.path);
   }
 
   void toggleBookmark() {

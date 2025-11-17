@@ -1,14 +1,30 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'core/audio/audio_handler.dart';
 import 'core/audio/hearit_player_controller.dart';
 import 'core/presentation/main_navigation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.white,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+  ));
+  final audioHandler = await AudioService.init(
+    builder: () => LocalAudioHandler(),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'hearit.playback',
+      androidNotificationChannelName: 'Hearit Playback',
+      androidNotificationOngoing: true,
+    ),
+  );
   runApp(
     ChangeNotifierProvider(
-      create: (_) => HearitPlayerController(),
+      create: (_) => HearitPlayerController(audioHandler: audioHandler),
       child: const MyApp(),
     ),
   );

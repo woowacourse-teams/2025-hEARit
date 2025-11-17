@@ -69,7 +69,7 @@ class ListeningSection extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         SizedBox(
-          height: 210,
+          height: 190,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: items.length,

@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/audio/hearit_player_controller.dart';
 import '../detail/hearit_detail.dart';
 import '../detail/hearit_detail_screen.dart';
 import 'explore_viewmodel.dart';
@@ -28,7 +30,9 @@ class ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
-    _viewModel = ExploreViewModel()..addListener(_onViewModelUpdated);
+    _viewModel = ExploreViewModel(
+      controller: context.read<HearitPlayerController>(),
+    )..addListener(_onViewModelUpdated);
     _viewModel.setOnCompleted(_handleCompleted);
     _viewModel.loadInitial();
     _pageController = PageController();

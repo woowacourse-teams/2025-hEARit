@@ -10,7 +10,7 @@ import 'explore_repository.dart';
 class ExploreViewModel extends ChangeNotifier {
   ExploreViewModel({ExploreRepository? repository, HearitPlayerController? controller})
     : _repository = repository ?? ExploreRepository(),
-      playerController = controller ?? HearitPlayerController() {
+      playerController = controller! {
     _playerListener = _playerListenerImpl;
     playerController.addListener(_playerListener);
   }

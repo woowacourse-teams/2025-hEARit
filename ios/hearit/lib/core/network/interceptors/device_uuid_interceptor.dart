@@ -9,7 +9,7 @@ class DeviceUUIDInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     final uuid = await DeviceUUIDService.getUUID();
-    options.headers['X-Device-UUID'] = uuid;
+    options.headers['Device-UUID'] = uuid;
     handler.next(options);
   }
 }
