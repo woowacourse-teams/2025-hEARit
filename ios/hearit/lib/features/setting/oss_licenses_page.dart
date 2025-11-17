@@ -72,10 +72,8 @@ class OssLicensesPage extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: data.length,
-            separatorBuilder: (_, __) => const Divider(
-              height: 1,
-              color: Color(0xFF3A3A3A),
-            ),
+            separatorBuilder: (_, __) =>
+                const Divider(height: 1, color: Color(0xFF3A3A3A)),
             itemBuilder: (context, index) {
               final package = data[index];
               return ListTile(
@@ -94,7 +92,10 @@ class OssLicensesPage extends StatelessWidget {
                         style: const TextStyle(color: Colors.white70),
                       )
                     : null,
-                trailing: const Icon(Icons.chevron_right, color: Colors.white70),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  color: Colors.white70,
+                ),
               );
             },
           );
@@ -127,18 +128,15 @@ class _LicenseDetailPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1F1F1F),
         elevation: 0,
-        title: Text(
-          package.name,
-          style: const TextStyle(color: Colors.white),
-        ),
+        title: Text(package.name, style: const TextStyle(color: Colors.white)),
         actions: [
           IconButton(
             icon: const Icon(Icons.copy, color: Colors.white),
             onPressed: () {
               Clipboard.setData(ClipboardData(text: _bodyText()));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('라이선스가 복사되었습니다.')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('라이선스가 복사되었습니다.')));
             },
           ),
         ],

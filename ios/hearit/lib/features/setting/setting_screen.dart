@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hearit/oss_licenses.dart' as ossdata;
 
 import 'oss_licenses_page.dart';
 
@@ -41,7 +42,7 @@ class SettingScreen extends StatelessWidget {
   void _openLicenses(BuildContext context) {
     Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => const OssLicensesPage()));
+    ).push(MaterialPageRoute(builder: (_) => OssLicensesPage()));
   }
 
   @override
