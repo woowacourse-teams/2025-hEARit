@@ -44,28 +44,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        MDC.put("loggedByAop", "true");
-        try {
-            String token = extractTokenFromHeader(request.getHeader("Authorization"));
+        String token = extractTokenFromHeader(request.getHeader("Authorization"));
 
-            if ((token == null || token.isBlank()) && isWhitelisted(request)) {
-                authenticateAsGuest(request);
+        if ((token == null || token.isBlank()) && isWhitelisted(request)) {
+            authenticateAsGuest(request);
+            chain.doFilter(request, response);
+            return;
+        }
+
+        TokenStatus tokenStatus = jwtTokenProvider.getTokenStatus(token);
+        switch (tokenStatus) {
+            case NOT_EXIST -> handleAuthenticatedRequiredError(response, request);
+            case EXPIRED -> handleTokenExpiredError(response, request);
+            case INVALID -> handleInvalidTokenError(response, request);
+            case VALID -> {
+                authenticateAsMember(token);
                 chain.doFilter(request, response);
-                return;
             }
-
-            TokenStatus tokenStatus = jwtTokenProvider.getTokenStatus(token);
-            switch (tokenStatus) {
-                case NOT_EXIST -> handleAuthenticatedRequiredError(response, request);
-                case EXPIRED -> handleTokenExpiredError(response, request);
-                case INVALID -> handleInvalidTokenError(response, request);
-                case VALID -> {
-                    authenticateAsMember(token);
-                    chain.doFilter(request, response);
-                }
-            }
-        } finally {
-            clearMdc();
         }
     }
 
@@ -117,12 +112,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         MDC.put("guestId", String.valueOf(user.getGuestId()));
     }
 
-    private void clearMdc() {
-        MDC.remove("userType");
-        MDC.remove("memberId");
-        MDC.remove("guestId");
-    }
-
     private void handleAuthenticatedRequiredError(HttpServletResponse response, HttpServletRequest request)
             throws IOException {
         ProblemDetail problemDetail = buildProblemDetail(ErrorCode.AUTHENTICATION_REQUIRED, "인증이 필요한 요청입니다.", request);
@@ -143,6 +132,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void logWarn(HttpServletRequest request, ProblemDetail problemDetail) {
+        MDC.put("loggedByFilter", "true");
         ExceptionLogProperty exceptionLogProperty = ExceptionLogProperty.warnFromProblemDetail(request.getRequestURI(),
                 request.getMethod(), problemDetail);
         jsonLogger.warn(exceptionLogProperty);
