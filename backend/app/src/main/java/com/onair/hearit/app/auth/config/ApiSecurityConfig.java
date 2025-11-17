@@ -54,18 +54,29 @@ public class ApiSecurityConfig {
     private String serverVersion;
 
     @Bean
-    public FilterRegistrationBean<MdcSetupFilter> mdcSetupFilter() {
+    public MdcSetupFilter mdcSetupFilter() {
+        return new MdcSetupFilter(serverVersion);
+    }
+
+    @Bean
+    public FilterRegistrationBean<MdcSetupFilter> mdcSetupFilterRegistration(MdcSetupFilter mdcSetupFilter) {
         FilterRegistrationBean<MdcSetupFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new MdcSetupFilter(serverVersion));
+        registrationBean.setFilter(mdcSetupFilter);
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
 
     @Bean
-    public FilterRegistrationBean<RequestLoggingFallbackFilter> requestLoggingFallbackFilter() {
+    public RequestLoggingFallbackFilter requestLoggingFilter() {
+        return new RequestLoggingFallbackFilter(jsonLogger, consoleLogger);
+    }
+
+    @Bean
+    public FilterRegistrationBean<RequestLoggingFallbackFilter> requestLoggingFallbackFilterRegistration(
+            RequestLoggingFallbackFilter requestLoggingFallbackFilter) {
         FilterRegistrationBean<RequestLoggingFallbackFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new RequestLoggingFallbackFilter(jsonLogger, consoleLogger));
+        registrationBean.setFilter(requestLoggingFallbackFilter);
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
