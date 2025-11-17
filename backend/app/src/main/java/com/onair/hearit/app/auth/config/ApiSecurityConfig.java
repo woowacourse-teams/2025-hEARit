@@ -10,6 +10,7 @@ import com.onair.hearit.core.log.logger.JsonLogger;
 import java.util.Arrays;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,10 +50,13 @@ public class ApiSecurityConfig {
     private final ObjectMapper objectMapper;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Value("${app.version}")
+    private String serverVersion;
+
     @Bean
     public FilterRegistrationBean<MdcSetupFilter> mdcSetupFilter() {
         FilterRegistrationBean<MdcSetupFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new MdcSetupFilter());
+        registrationBean.setFilter(new MdcSetupFilter(serverVersion));
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;

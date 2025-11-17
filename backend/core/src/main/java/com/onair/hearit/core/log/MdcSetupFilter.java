@@ -9,8 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * 필터 체인에서 가장 먼저 실행되고 가장 마지막에 finally가 호출되는 Servlet Filter.
@@ -18,10 +18,10 @@ import org.springframework.beans.factory.annotation.Value;
  * 이는 요청 처리 중 유지되어야 하는 MDC 값이 의도치 않게 삭제되지 않도록 하기 위함이다.
  * </p>
  */
+@RequiredArgsConstructor
 public class MdcSetupFilter implements Filter {
 
-    @Value("${app.version}")
-    private String appVersionServer;
+    private final String appVersionServer;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
