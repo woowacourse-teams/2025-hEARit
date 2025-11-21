@@ -5,9 +5,10 @@ permissions:
   contents: read
 
 on:
-  pull_request:
-    branches: [ "develop-be", "feat/#727-ssm-deploy-script" ]
-  workflow_dispatch:
+  push:
+    branches: [ "release" ]
+    paths:
+      - 'backend/**'
 
 jobs:
   build:
