@@ -7,10 +7,6 @@ permissions:
 on:
   pull_request:
     branches: [ "develop-be", "feat/#727-ssm-deploy-script" ]
-#  push:
-#    branches: [ "release" ]
-#    paths:
-#      - 'backend/**'
   workflow_dispatch:
 
 jobs:
@@ -88,14 +84,26 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ap-northeast-2
 
+      - name: Create SSM command JSON
+        run: |
+          cat <<EOF > ssm_command.json
+          {
+            "commands": [
+              "aws s3 cp s3://hearit-artifacts/prod/{{JAR_FILE}} /home/ubuntu/hearit/app.jar",
+              "sudo bash /home/ubuntu/hearit/deploy.sh"
+            ]
+          }
+          EOF
+
+      - name: Replace JAR filename in JSON
+        run: |
+          sed -i "s/{{JAR_FILE}}/${{ env.NEW_JAR_NAME }}/g" ssm_command.json
+
       - name: Deploy using SSM
         run: |
           aws ssm send-command \
             --instance-ids "${{ secrets.PROD_EC2_ID }}" \
             --document-name "AWS-RunShellScript" \
             --comment "Deploy hEARit backend" \
-            --parameters "commands=[
-              \"aws s3 cp s3://hearit-artifacts/prod/${{ env.NEW_JAR_NAME }} /home/ubuntu/hearit/app.jar\",
-              \"sudo bash /home/ubuntu/hearit/deploy.sh\"
-            ]" \
+            --parameters file://ssm_command.json \
             --region ap-northeast-2
