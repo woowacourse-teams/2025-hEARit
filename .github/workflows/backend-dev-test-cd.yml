@@ -111,16 +111,19 @@ jobs:
           # Artifact 파일을 S3 버킷의 루트에 복사합니다.
           aws s3 cp /tmp/artifact/*.jar s3://${{ secrets.S3_BUCKET_NAME }}/app.jar
       
-      # 4. SSM Command 실행
+      # 4. SSM Command 실행 (jq를 사용하여 스크립트 내용 JSON 인코딩)
       - name: Execute Deployment Script via SSM
         run: |
-          # 1. 배포 스크립트 파일 내용 전체를 읽어옵니다.
-          SCRIPT_CONTENT=$(cat backend/deploy-via-ssm.sh)
+          SCRIPT_CONTENT_JSON=$(cat backend/deploy-via-ssm.sh | jq -Rs .)
           
-          # 2. SSM Send-Command 명령 실행
+          if [ -z "$SCRIPT_CONTENT_JSON" ]; then
+            echo "에러: 배포 스크립트(backend/deploy-via-ssm.sh)를 읽지 못했거나 내용이 비어 있습니다."
+            exit 1
+          fi
+          
           aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID_DEV }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters commands="$SCRIPT_CONTENT" \
+            --parameters commands="[${SCRIPT_CONTENT_JSON}]" \ 
             --region ${{ env.AWS_REGION }} \
             --comment "Deploying new artifact via SSM for ${{ github.sha }}"
