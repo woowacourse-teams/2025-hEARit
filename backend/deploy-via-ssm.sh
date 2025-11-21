@@ -6,7 +6,7 @@
 
 # --- 1. 환경 변수 설정  ---
 S3_BUCKET="hearit-artifacts"     # Artifact가 저장된 S3 버킷 이름
-SERVICE_NAME="hearit-dev"        # Systemd 서비스 이름 (hearit-dev.service)
+SERVICE_NAME="hearit-dev"        # Systemd 서비스 이름
 APP_PATH="/home/ubuntu/hearit"   # JAR 파일이 최종적으로 위치할 디렉토리
 REGION="ap-northeast-2"          # EC2 인스턴스의 리전 
 
@@ -44,7 +44,7 @@ if [ "$STATUS" = "active" ]; then
   echo "성공: $SERVICE_NAME 서비스가 성공적으로 시작되었습니다. (상태: $STATUS)"
 else
   echo "실패: $SERVICE_NAME 서비스 시작 실패. (상태: $STATUS)"
-  # 상세 로그 확인 명령 
+  # 상세 로그 확인 
   sudo journalctl -u $SERVICE_NAME --since "1 minute ago"
   exit 1
 fi
