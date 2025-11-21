@@ -1,0 +1,127 @@
+name: Backend CD to EC2 via SSM
+
+# on:
+#   push:
+#     branches: [ "develop-be" ]
+#     paths:
+#       - 'backend/**'
+#   workflow_dispatch:
+
+on:
+  pull_request:
+    branches:
+      - "feat/#727-ssm-deploy-script"
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+
+# =======================================================
+# 1. BUILD JOB: JAR 파일을 빌드하고 Artifact로 저장
+#    (기존 로직 유지)
+# =======================================================
+jobs:
+  build:
+    name: Build and Upload Artifact
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_TEST_USER_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        ports:
+          - 13307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      MYSQL_TEST_USER_PASSWORD: ${{ secrets.MYSQL_TEST_USER_PASSWORD }}
+      TEST_MYSQL_PORT: ${{ secrets.TEST_MYSQL_PORT }}
+      DB_MYSQL_HOST: ${{ secrets.DB_MYSQL_HOST }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MYSQL_WRITER_ENDPOINT: ${{ secrets.MYSQL_WRITER_ENDPOINT }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build executable Spring Boot jar
+        working-directory: backend
+        run: ./gradlew clean :boot:bootJar
+
+      - name: Rename jar to app.jar
+        working-directory: backend/boot/build/libs
+        run: |
+          JAR_NAME=$(find . -name "*.jar" ! -name "*-plain.jar")
+          mv "$JAR_NAME" app.jar
+
+      - name: Upload jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/boot/build/libs/app.jar
+
+# -------------------------------------------------------
+  
+# =======================================================
+# 2. DEPLOY JOB: Artifact를 S3에 업로드 후, SSM 명령 전송
+# =======================================================
+  deploy:
+    name: Deploy via SSM Command
+    needs: build
+    runs-on: ubuntu-latest
+    
+    env:
+      AWS_REGION: ap-northeast-2 
+
+    steps:
+      - name: Checkout Code (to read deployment script)
+        uses: actions/checkout@v4
+        
+      # 1. 빌드된 아티팩트 다운로드
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jar 
+          path: /tmp/artifact 
+      
+      # 2. AWS 자격 증명 설정
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 3. S3에 JAR 파일 업로드
+      - name: Upload JAR to S3
+        run: |
+          # Artifact 파일을 S3 버킷의 루트에 복사합니다.
+          aws s3 cp /tmp/artifact/*.jar s3://${{ secrets.S3_BUCKET_NAME }}/app.jar
+      
+      # 4. SSM Command 실행
+      - name: Execute Deployment Script via SSM
+        run: |
+          # 1. 배포 스크립트 파일 내용 전체를 읽어옵니다.
+          SCRIPT_CONTENT=$(cat backend/deploy-via-ssm.sh)
+          
+          # 2. SSM Send-Command 명령 실행
+          aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands="$SCRIPT_CONTENT" \
+            --region ${{ env.AWS_REGION }} \
+            --comment "Deploying new artifact via SSM for ${{ github.sha }}"
