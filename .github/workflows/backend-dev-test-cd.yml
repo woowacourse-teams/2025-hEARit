@@ -1,11 +1,4 @@
-name: Backend CD to EC2 via SSM
-
-# on:
-#   push:
-#     branches: [ "develop-be" ]
-#     paths:
-#       - 'backend/**'
-#   workflow_dispatch:
+name: Backend CD to EC2 via SSM (OIDC)
 
 on:
   push:
@@ -14,15 +7,19 @@ on:
       - 'backend/**'
   workflow_dispatch:
 
-# =======================================================
-# 1. BUILD JOB: JAR 파일을 빌드하고 Artifact로 저장
-#    (기존 로직 유지)
-# =======================================================
+# OIDC 인증을 위해 필수 권한 설정
+permissions:
+  id-token: write # OIDC 토큰 발급 권한
+  contents: read  # 코드 Checkout 권한
+
 jobs:
   build:
     name: Build and Upload Artifact
     runs-on: ubuntu-latest
-
+    
+    outputs:
+      jar_name: ${{ steps.set_jar_name.outputs.jar_name }}
+    
     services:
       mysql:
         image: mysql:8.0
@@ -43,89 +40,83 @@ jobs:
       DB_MYSQL_HOST: ${{ secrets.DB_MYSQL_HOST }}
       MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
       MYSQL_WRITER_ENDPOINT: ${{ secrets.MYSQL_WRITER_ENDPOINT }}
+      AWS_REGION: ap-northeast-2 
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
-
       - name: Build executable Spring Boot jar
         working-directory: backend
         run: ./gradlew clean :boot:bootJar
-
-      - name: Rename jar to app.jar
+      
+      # 1. JAR 파일 이름에 커밋 SHA를 붙이고, Job Output으로 설정
+      - name: Rename jar with SHA
+        id: set_jar_name # Step ID 정의
         working-directory: backend/boot/build/libs
         run: |
           JAR_NAME=$(find . -name "*.jar" ! -name "*-plain.jar")
-          mv "$JAR_NAME" app.jar
+          NEW_NAME="app-${{ github.sha }}.jar"
+          mv "$JAR_NAME" "$NEW_NAME"
+          
+          # 다음 Job으로 전달하기 위해 Output과 Environment에 설정
+          echo "NEW_JAR_NAME=$NEW_NAME" >> $GITHUB_ENV
+          echo "jar_name=$NEW_NAME" >> $GITHUB_OUTPUT 
 
-      - name: Upload jar artifact
-        uses: actions/upload-artifact@v4
+      # 2. OIDC를 사용하여 AWS 임시 자격 증명 획득 (S3 업로드를 위해)
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: backend-jar
-          path: backend/boot/build/libs/app.jar
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      # 3. S3에 JAR 파일 업로드 (Artifact 대신 S3에 바로 업로드)
+      - name: Upload jar to S3
+        run: |
+          aws s3 cp backend/boot/build/libs/${{ env.NEW_JAR_NAME }} \
+            s3://${{ secrets.S3_BUCKET_NAME }}/dev/${{ env.NEW_JAR_NAME }}
 
 # -------------------------------------------------------
   
 # =======================================================
-# 2. DEPLOY JOB: Artifact를 S3에 업로드 후, SSM 명령 전송
+# 2. DEPLOY JOB: SSM 명령 전송
 # =======================================================
   deploy:
     name: Deploy via SSM Command
+    # Build 잡의 output을 사용하기 위해 needs 설정
     needs: build
     runs-on: ubuntu-latest
     
+    # Build 잡의 output을 환경 변수로 설정
     env:
-      AWS_REGION: ap-northeast-2 
+      AWS_REGION: ap-northeast-2
+      NEW_JAR_NAME: ${{ needs.build.outputs.jar_name }} # Job 간 환경 변수 전달
 
     steps:
-      - name: Checkout Code (to read deployment script)
+      # 1. Checkout Code (deploy 스크립트를 읽기 위해 필요)
+      - name: Checkout Code
         uses: actions/checkout@v4
         
-      # 1. 빌드된 아티팩트 다운로드
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-jar 
-          path: /tmp/artifact 
-      
-      # 2. AWS 자격 증명 설정
-      - name: Configure AWS Credentials
+      # 2. OIDC를 사용하여 AWS 임시 자격 증명 획득
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 3. S3에 JAR 파일 업로드
-      - name: Upload JAR to S3
-        run: |
-          # Artifact 파일을 S3 버킷의 루트에 복사합니다.
-          aws s3 cp /tmp/artifact/*.jar s3://${{ secrets.S3_BUCKET_NAME }}/app.jar
-
-    
-      
-      # 4. SSM Command 실행 (jq를 사용하여 스크립트 내용 JSON 인코딩)
-      - name: Execute Deployment Script via SSM (Fixed)
+      # 3. SSM Command 실행 및 스크립트 전달
+      - name: Execute Deployment Script via SSM
         run: |
           SCRIPT_CONTENT_JSON=$(cat backend/deploy-via-ssm.sh | jq -Rs .)
-
-          if [ -z "$SCRIPT_CONTENT_JSON" ]; then
-            echo "에러: 배포 스크립트(backend/deploy-via-ssm.sh)를 읽지 못했거나 내용이 비어 있습니다."
-            exit 1
-          fi
-
+          
+          DOWNLOAD_COMMAND="aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/dev/${{ env.NEW_JAR_NAME }} /home/ubuntu/hearit/app.jar"
+          DEPLOY_SCRIPT_PATH="sudo bash backend/deploy-via-ssm.sh"
+          
+          FULL_COMMAND="$DOWNLOAD_COMMAND && $DEPLOY_SCRIPT_PATH"
+          
           aws ssm send-command \
-          --instance-ids "${{ secrets.EC2_INSTANCE_ID_DEV }}" \
-          --document-name "AWS-RunShellScript" \
-          --comment "Deploying new artifact via SSM for ${{ github.sha }}" \
-          --region "${{ env.AWS_REGION }}" \
-          --parameters '{"commands": ['"$SCRIPT_CONTENT_JSON"']}' 
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID_DEV }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploying ${{ env.NEW_JAR_NAME }}" \
+            --region ${{ env.AWS_REGION }} \
+            --parameters commands='["'"$FULL_COMMAND"'"]'
