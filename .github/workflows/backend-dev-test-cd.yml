@@ -9,7 +9,7 @@ name: Backend CD to EC2 via SSM
 
 on:
   pull_request:
-    branches: [ feat/#727-ssm-deploy-script ]
+    branches: [ "feat/#727-ssm-deploy-script" ]
     paths:
       - 'backend/**'
   workflow_dispatch:
