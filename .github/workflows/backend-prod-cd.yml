@@ -1,5 +1,9 @@
 name: Backend CD to EC2 for prod
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
 #  push:
 #    branches: [ "release" ]
