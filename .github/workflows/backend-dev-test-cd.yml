@@ -8,8 +8,8 @@ name: Backend CD to EC2 via SSM
 #   workflow_dispatch:
 
 on:
-  pull_request:
-    branches: [ "develop-be" ]
+  push:
+    branches: [ "feat/#727-ssm-deploy-script" ]
     paths:
       - 'backend/**'
   workflow_dispatch:
