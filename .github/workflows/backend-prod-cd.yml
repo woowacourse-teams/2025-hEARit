@@ -5,12 +5,10 @@ permissions:
   contents: read
 
 on:
-#  push:
-#    branches: [ "release" ]
-  pull_request:
-    branches: [ "develop-be", "730-chore-prod-cd-change-to-s3" ]
-#    paths:
-#      - 'backend/**'
+  push:
+    branches: [ "release" ]
+    paths:
+      - 'backend/**'
   workflow_dispatch:
 
 jobs:
