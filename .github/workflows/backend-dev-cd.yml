@@ -1,16 +1,21 @@
 name: Backend CD to EC2 for dev
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
-  push:
-    branches: [ "develop-be" ]
-    paths:
-      - 'backend/**'
+  pull_request:
+    branches: [ "develop-be", "feat/#727-ssm-deploy-script" ]
   workflow_dispatch:
 
 jobs:
   build:
     name: Build and Upload Artifact
     runs-on: ubuntu-latest
+
+    outputs:
+      jar-name: ${{ steps.jar-rename.outputs.jar-name }}
 
     services:
       mysql:
@@ -50,32 +55,55 @@ jobs:
         working-directory: backend
         run: ./gradlew clean :boot:bootJar
 
-      - name: Rename jar to app.jar
+      - name: Rename jar with timestamp
+        id: jar-rename
         working-directory: backend/boot/build/libs
         run: |
+          TS=$(date +"%Y%m%d-%H%M%S")
           JAR_NAME=$(find . -name "*.jar" ! -name "*-plain.jar")
-          mv "$JAR_NAME" app.jar
+          NEW_NAME="app-${TS}.jar"
+          mv "$JAR_NAME" "$NEW_NAME"
+          echo "jar-name=$NEW_NAME" >> $GITHUB_OUTPUT
 
-      - name: Upload jar artifact
-        uses: actions/upload-artifact@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: backend-jar
-          path: backend/boot/build/libs/app.jar
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      - name: Upload jar to S3
+        run: |
+          aws s3 cp backend/boot/build/libs/${{ steps.jar-rename.outputs.jar-name }} \
+            s3://hearit-artifacts/dev/${{ steps.jar-rename.outputs.jar-name }}
 
   deploy:
     name: Deploy on EC2 for dev
     needs: build
-    runs-on: [ self-hosted, backend-dev, Linux, ARM64 ]
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Download jar artifact
-        uses: actions/download-artifact@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: backend-jar
-          path: ~/hearit
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ap-northeast-2
 
-      - name: Make deploy script executable
-        run: sudo chmod +x ~/hearit/deploy.sh
+      - name: Create SSM command JSON
+        run: |
+          cat <<EOF > ssm_command.json
+          {
+            "commands": [
+              "aws s3 cp s3://hearit-artifacts/dev/${{ needs.build.outputs.jar-name }} /home/ubuntu/hearit/app.jar",
+              "sudo bash /home/ubuntu/hearit/deploy.sh"
+            ]
+          }
+          EOF
 
-      - name: Run deploy script with sudo
-        run: sudo bash ~/hearit/deploy.sh
+      - name: Deploy using SSM
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ secrets.DEV_EC2_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy hEARit backend" \
+            --parameters file://ssm_command.json \
+            --region ap-northeast-2
