@@ -14,6 +14,9 @@ jobs:
     name: Build and Upload Artifact
     runs-on: ubuntu-latest
 
+    outputs:
+      jar-name: ${{ steps.jar-rename.outputs.jar-name }}
+
     services:
       mysql:
         image: mysql:8.0
@@ -53,13 +56,14 @@ jobs:
         run: ./gradlew clean :boot:bootJar
 
       - name: Rename jar with timestamp
+        id: jar-rename
         working-directory: backend/boot/build/libs
         run: |
           TS=$(date +"%Y%m%d-%H%M%S")
           JAR_NAME=$(find . -name "*.jar" ! -name "*-plain.jar")
           NEW_NAME="app-${TS}.jar"
           mv "$JAR_NAME" "$NEW_NAME"
-          echo "NEW_JAR_NAME=$NEW_NAME" >> $GITHUB_ENV
+          echo "jar-name=$NEW_NAME" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -69,8 +73,8 @@ jobs:
 
       - name: Upload jar to S3
         run: |
-          aws s3 cp backend/boot/build/libs/${{ env.NEW_JAR_NAME }} \
-            s3://hearit-artifacts/prod/${{ env.NEW_JAR_NAME }}
+          aws s3 cp backend/boot/build/libs/${{ steps.jar-rename.outputs.jar-name }} \
+            s3://hearit-artifacts/prod/${{ steps.jar-rename.outputs.jar-name }}
 
   deploy:
     name: Deploy on EC2 for prod
@@ -89,15 +93,11 @@ jobs:
           cat <<EOF > ssm_command.json
           {
             "commands": [
-              "aws s3 cp s3://hearit-artifacts/prod/{{JAR_FILE}} /home/ubuntu/hearit/app.jar",
+              "aws s3 cp s3://hearit-artifacts/prod/${{ needs.build.outputs.jar-name }} /home/ubuntu/hearit/app.jar",
               "sudo bash /home/ubuntu/hearit/deploy.sh"
             ]
           }
           EOF
-
-      - name: Replace JAR filename in JSON
-        run: |
-          sed -i "s/{{JAR_FILE}}/${{ env.NEW_JAR_NAME }}/g" ssm_command.json
 
       - name: Deploy using SSM
         run: |
