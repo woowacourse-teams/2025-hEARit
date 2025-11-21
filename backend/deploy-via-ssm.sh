@@ -44,7 +44,7 @@ if [ "$STATUS" = "active" ]; then
   echo "성공: $SERVICE_NAME 서비스가 성공적으로 시작되었습니다. (상태: $STATUS)"
 else
   echo "실패: $SERVICE_NAME 서비스 시작 실패. (상태: $STATUS)"
-  # 상세 로그 확인 
+  # 상세 로그 
   sudo journalctl -u $SERVICE_NAME --since "1 minute ago"
   exit 1
 fi
