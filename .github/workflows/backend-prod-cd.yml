@@ -1,5 +1,9 @@
 name: Backend CD to EC2 for prod
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   push:
     branches: [ "release" ]
@@ -50,32 +54,46 @@ jobs:
         working-directory: backend
         run: ./gradlew clean :boot:bootJar
 
-      - name: Rename jar to app.jar
+      - name: Rename jar with timestamp
         working-directory: backend/boot/build/libs
         run: |
+          TS=$(date +"%Y%m%d-%H%M%S")
           JAR_NAME=$(find . -name "*.jar" ! -name "*-plain.jar")
-          mv "$JAR_NAME" app.jar
+          NEW_NAME="app-${TS}.jar"
+          mv "$JAR_NAME" "$NEW_NAME"
+          echo "NEW_JAR_NAME=$NEW_NAME" >> $GITHUB_ENV
 
-      - name: Upload jar artifact
-        uses: actions/upload-artifact@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: backend-jar
-          path: backend/boot/build/libs/app.jar
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      - name: Upload jar to S3
+        run: |
+          aws s3 cp backend/boot/build/libs/${{ env.NEW_JAR_NAME }} \
+            s3://hearit-artifacts/prod/${{ env.NEW_JAR_NAME }}
 
   deploy:
     name: Deploy on EC2 for prod
     needs: build
-    runs-on: [ self-hosted, backend-prod, Linux, ARM64 ]
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Download jar artifact
-        uses: actions/download-artifact@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: backend-jar
-          path: ~/hearit
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ap-northeast-2
 
-      - name: Make deploy script executable
-        run: sudo chmod +x ~/hearit/deploy.sh
-
-      - name: Run deploy script with sudo
-        run: sudo bash ~/hearit/deploy.sh
+      - name: Deploy using SSM
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ secrets.PROD_EC2_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy hEARit backend" \
+            --parameters "commands=[
+              \"aws s3 cp s3://hearit-artifacts/prod/${{ env.NEW_JAR_NAME }} /home/ubuntu/hearit/app.jar\",
+              \"sudo bash /home/ubuntu/hearit/deploy.sh\"
+            ]" \
+            --region ap-northeast-2
