@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.setting
+package com.onair.hearit.presentation.setting.screen
 
 import android.content.Context
 import android.content.Intent
@@ -15,15 +15,17 @@ import androidx.core.net.toUri
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.presentation.setting.SettingViewModel
 import com.onair.hearit.presentation.setting.component.SettingContent
 import com.onair.hearit.presentation.setting.component.SettingTopBar
 import com.onair.hearit.presentation.theme.HearitBlack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(
-    onBackClick: () -> Unit,
+fun SettingScreen(
     viewModel: SettingViewModel,
+    onBackClick: () -> Unit,
+    onProfileClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val privacyPolicyUrl = stringResource(id = R.string.privacy_policy_url)
@@ -38,7 +40,7 @@ fun SettingsScreen(
     ) { padding ->
         SettingContent(
             userInfo = userInfo,
-            onProfileClick = { /* 내정보 화면으로 이동 */ },
+            onProfileClick = onProfileClick,
             onPrivacyPolicyClick = { openUrl(privacyPolicyUrl, context) },
             onTermsClick = { openUrl(termsUrl, context) },
             onOpenSourceClick = { navigateToLicense(context) },

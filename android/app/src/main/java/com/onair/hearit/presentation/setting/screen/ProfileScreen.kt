@@ -21,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -193,12 +192,10 @@ private fun NicknameCard(
                     width = 2.dp,
                     color = HearitPurple1,
                     shape = RoundedCornerShape(24.dp),
-                )
-                .background(
+                ).background(
                     color = HearitBlack,
                     shape = RoundedCornerShape(24.dp),
-                )
-                .padding(horizontal = 60.dp, vertical = 12.dp),
+                ).padding(horizontal = 60.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
