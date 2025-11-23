@@ -14,6 +14,9 @@ fun SettingNavHost(
     navController: NavHostController,
     viewModel: SettingViewModel,
     onExitSetting: () -> Unit,
+    onLogin: () -> Unit,
+    onLogout: () -> Unit,
+    onWithdraw: () -> Unit,
 ) {
     NavHost(
         navController,
@@ -28,6 +31,9 @@ fun SettingNavHost(
                 viewModel = viewModel,
                 onBackClick = onExitSetting,
                 onProfileClick = { navController.navigate("profile") },
+                onLogin = onLogin,
+                onLogout = onLogout,
+                onWithdraw = onWithdraw,
             )
         }
 

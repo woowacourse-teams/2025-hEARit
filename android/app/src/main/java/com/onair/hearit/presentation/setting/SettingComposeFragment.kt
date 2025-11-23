@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.setting
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,13 +8,16 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.compose.rememberNavController
+import com.onair.hearit.presentation.login.LoginActivity
+import com.onair.hearit.presentation.main.MainViewModel
 
 class SettingComposeFragment : Fragment() {
-    private val viewModel: SettingViewModel by viewModels {
-        SettingViewModelFactory()
-    }
+    private val viewModel: SettingViewModel by viewModels { SettingViewModelFactory() }
+
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,6 +34,16 @@ class SettingComposeFragment : Fragment() {
                     onExitSetting = {
                         parentFragmentManager.popBackStack()
                     },
+                    onLogin = {
+                        startActivity(
+                            Intent(
+                                requireContext(),
+                                LoginActivity::class.java,
+                            ),
+                        )
+                    },
+                    onLogout = { mainViewModel.performLogout() },
+                    onWithdraw = { mainViewModel.withdraw() },
                 )
             }
         }

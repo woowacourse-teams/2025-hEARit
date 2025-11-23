@@ -168,16 +168,14 @@ private fun ProfileImage(
 
 @Preview
 @Composable
+fun ProfileTopBarPreview() {
+    ProfileTopBar(onBackClick = {})
+}
+
+@Preview
+@Composable
 fun ProfileImagePreview() {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        ProfileImage(imageUrl = null)
-    }
+    ProfileImage(imageUrl = null)
 }
 
 @Composable
@@ -252,10 +250,4 @@ private fun ProfileContentPreview() {
             appVersion = "v1.3.4-DEBUG",
         )
     }
-}
-
-@Preview
-@Composable
-fun ProfileTopBarPreview() {
-    ProfileTopBar(onBackClick = {})
 }

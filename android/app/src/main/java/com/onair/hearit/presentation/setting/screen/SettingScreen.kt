@@ -26,6 +26,9 @@ fun SettingScreen(
     viewModel: SettingViewModel,
     onBackClick: () -> Unit,
     onProfileClick: () -> Unit,
+    onLogin: () -> Unit,
+    onLogout: () -> Unit,
+    onWithdraw: () -> Unit,
 ) {
     val context = LocalContext.current
     val privacyPolicyUrl = stringResource(id = R.string.privacy_policy_url)
@@ -44,9 +47,9 @@ fun SettingScreen(
             onPrivacyPolicyClick = { openUrl(privacyPolicyUrl, context) },
             onTermsClick = { openUrl(termsUrl, context) },
             onOpenSourceClick = { navigateToLicense(context) },
-            onLoginClick = { },
-            onLogoutClick = { },
-            onWithdrawalClick = { },
+            onLoginClick = onLogin,
+            onLogoutClick = onLogout,
+            onWithdrawalClick = onWithdraw,
             modifier = Modifier.padding(padding),
         )
     }
