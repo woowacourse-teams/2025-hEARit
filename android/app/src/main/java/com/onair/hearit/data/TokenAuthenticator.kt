@@ -29,7 +29,7 @@ class TokenAuthenticator(
         if (response.request.header("No-Auth") == "true") return null
 
         if (response.code == 401) {
-            val errorBody = response.peekBody(Long.MAX_VALUE).string()
+            val errorBody = response.peekBody(64 * 1024).string()
             val errorResponse = parseErrorResponse(errorBody)
 
             return when {
