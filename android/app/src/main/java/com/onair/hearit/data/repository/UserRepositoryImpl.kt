@@ -49,14 +49,14 @@ class UserRepositoryImpl(
             }
         }
 
-    override suspend fun getOrCreateUserId(): Result<String> =
+    override suspend fun getOrCreateDeviceId(): Result<String> =
         userLocalDataSource
-            .getUserId()
+            .getDeviceId()
             .recoverCatching {
                 // userId가 없으면 새로 생성
                 val newId = UUID.randomUUID().toString()
                 userLocalDataSource
-                    .saveUserId(newId)
+                    .saveDeviceId(newId)
                     .getOrThrow()
                 newId
             }

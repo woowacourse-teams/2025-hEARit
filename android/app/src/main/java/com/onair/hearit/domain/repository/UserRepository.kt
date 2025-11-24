@@ -5,7 +5,7 @@ import com.onair.hearit.domain.model.UserInfo
 interface UserRepository {
     suspend fun getUserInfo(): Result<UserInfo>
 
-    suspend fun getOrCreateUserId(): Result<String>
+    suspend fun getOrCreateDeviceId(): Result<String>
 
     suspend fun clearUserData(): Result<Boolean>
 }

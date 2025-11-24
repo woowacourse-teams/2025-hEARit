@@ -11,17 +11,17 @@ import kotlinx.coroutines.flow.first
 class UserLocalDataSourceImpl(
     private val dataStore: DataStore<Preferences>,
 ) : UserLocalDataSource {
-    override suspend fun getUserId(): Result<String> =
+    override suspend fun getDeviceId(): Result<String> =
         runCatching {
             val preferences = dataStore.data.first()
-            preferences[USER_ID_KEY]
+            preferences[DEVICE_ID_KEY]
                 ?: throw IllegalStateException("user id가 존재하지 않습니다.")
         }
 
-    override suspend fun saveUserId(userId: String): Result<Boolean> =
+    override suspend fun saveDeviceId(userId: String): Result<Boolean> =
         runCatching {
             dataStore.edit { preferences ->
-                preferences[USER_ID_KEY] = userId
+                preferences[DEVICE_ID_KEY] = userId
             }
             true
         }
@@ -61,7 +61,10 @@ class UserLocalDataSourceImpl(
         }
 
     companion object {
-        private val USER_ID_KEY = stringPreferencesKey("user_id")
+        // 디바이스 식별자 (앱 삭제 전까지 유지)
+        private val DEVICE_ID_KEY = stringPreferencesKey("device_id")
+
+        // 로그인 사용자 정보 (로그아웃 시 삭제)
         private val LOGGED_USER_ID_KEY = longPreferencesKey("logged_user_id")
         private val NICKNAME_KEY = stringPreferencesKey("nickname")
         private val PROFILE_URL_KEY = stringPreferencesKey("profile_url")
