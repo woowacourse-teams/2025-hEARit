@@ -14,6 +14,7 @@ class UserRepositoryImpl(
     private val userRemoteDataSource: UserRemoteDataSource,
 ) : UserRepository {
     private var cachedUserInfo: UserInfo? = null
+    private var cachedDeviceId: String? = null
     private val mutex = Mutex()
 
     override suspend fun getUserInfo(): Result<UserInfo> =
@@ -50,20 +51,29 @@ class UserRepositoryImpl(
         }
 
     override suspend fun getOrCreateDeviceId(): Result<String> =
-        userLocalDataSource
-            .getDeviceId()
-            .recoverCatching {
-                // userId가 없으면 새로 생성
-                val newId = UUID.randomUUID().toString()
-                userLocalDataSource
-                    .saveDeviceId(newId)
-                    .getOrThrow()
-                newId
-            }
-
-    override suspend fun clearUserData(): Result<Boolean> =
         runCatching {
-            cachedUserInfo = null
-            userLocalDataSource.clearData().getOrThrow()
+            mutex.withLock {
+                cachedDeviceId?.let { return@runCatching it }
+
+                val deviceId =
+                    userLocalDataSource
+                        .getDeviceId()
+                        .getOrElse {
+                            val newId = UUID.randomUUID().toString()
+                            userLocalDataSource.saveDeviceId(newId).getOrThrow()
+                            newId
+                        }
+
+                cachedDeviceId = deviceId
+                deviceId
+            }
+        }
+
+    override suspend fun clearUserData(): Result<Unit> =
+        runCatching {
+            mutex.withLock {
+                cachedUserInfo = null
+                userLocalDataSource.clearData().getOrThrow()
+            }
         }
 }
