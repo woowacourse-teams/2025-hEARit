@@ -142,31 +142,19 @@ class HomeViewModel(
                 .getUserInfo()
                 .onSuccess { userInfo ->
                     _uiState.update {
-                        it.copy(
-                            userInfo = userInfo,
-                            isLoggedIn = true,
-                        )
+                        it.copy(userInfo = userInfo)
                     }
                 }.onFailure { throwable ->
+                    _uiState.update { it.copy(userInfo = null) }
+
                     when (throwable) {
                         is UserNotRegistered -> {
-                            _uiState.update {
-                                it.copy(
-                                    userInfo = null,
-                                    isLoggedIn = false,
-                                )
-                            }
+                            Unit
                         }
 
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
-                            _uiState.update {
-                                it.copy(
-                                    userInfo = null,
-                                    isLoggedIn = false,
-                                )
-                            }
                         }
                     }
                 }

@@ -102,7 +102,6 @@ object DataSourceProvider {
         )
     }
 
-    // Local
     val hearitLocalDataSource: HearitLocalDataSource by lazy {
         HearitLocalDataSourceImpl(DatabaseProvider.hearitDao)
     }
