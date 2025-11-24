@@ -32,7 +32,7 @@ class UserRepositoryImpl(
 
                 if (local != null) {
                     cachedUserInfo = local
-                    return@runCatching local
+                    return@withLock local
                 }
 
                 // 3️⃣ 원격에서 가져오기 (예외 발생 가능)
@@ -45,7 +45,6 @@ class UserRepositoryImpl(
                 // 원격 정상 응답 → 로컬 반영 + 캐시 갱신
                 userLocalDataSource.saveUserInfo(remote).getOrThrow()
                 cachedUserInfo = remote
-
                 remote
             }
         }
@@ -73,6 +72,7 @@ class UserRepositoryImpl(
         runCatching {
             mutex.withLock {
                 cachedUserInfo = null
+                cachedDeviceId = null
                 userLocalDataSource.clearData().getOrThrow()
             }
         }

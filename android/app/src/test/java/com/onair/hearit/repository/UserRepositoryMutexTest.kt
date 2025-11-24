@@ -61,7 +61,7 @@ class UserRepositoryMutexTest {
 
             val results = awaitAll(job1, job2)
 
-            // Then: API는 단 1번만 호출 ✅
+            // Then: API는 단 1번만 호출
             coVerify(exactly = 1) { userRemoteDataSource.getUserInfo() }
             println("✅ API 호출 횟수: 1회 (Race Condition 방어 성공)")
 
@@ -87,7 +87,7 @@ class UserRepositoryMutexTest {
                     async { repository.getUserInfo() }
                 }.awaitAll()
 
-            // Then: API는 정확히 1번만 호출 ✅
+            // Then: API는 정확히 1번만 호출
             assertEquals(1, apiCallCount, "실제 API 호출 횟수: $apiCallCount")
             coVerify(exactly = 1) { userRemoteDataSource.getUserInfo() }
             println("✅ 10개 동시 요청 → API 호출 1회")
@@ -114,12 +114,13 @@ class UserRepositoryMutexTest {
                     async { repository.getUserInfo() }
                 }.awaitAll()
 
-            // Then: API는 정확히 1번만 호출 ✅
+            // Then: API는 정확히 1번만 호출
             assertEquals(1, apiCallCount, "실제 API 호출 횟수: $apiCallCount")
             coVerify(exactly = 1) { userRemoteDataSource.getUserInfo() }
             println("✅ 100개 동시 요청 → API 호출 1회")
 
-            // 모든 결과가 동일
+            // 모든 결과가 성공이고 동일
+            assertTrue(results.all { it.isSuccess })
             assertTrue(results.all { it.getOrNull() == results[0].getOrNull() })
         }
 

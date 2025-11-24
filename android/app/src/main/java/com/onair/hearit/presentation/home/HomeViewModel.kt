@@ -145,13 +145,15 @@ class HomeViewModel(
                         it.copy(userInfo = userInfo)
                     }
                 }.onFailure { throwable ->
-                    _uiState.update { it.copy(userInfo = null) }
+                    _uiState.update {
+                        when (throwable) {
+                            is UserNotRegistered -> it.copy(userInfo = null)
+                            else -> it // 일시적인 실패(네트워크, 서버 오류 등)에서는 이전 userInfo를 유지
+                        }
+                    }
 
                     when (throwable) {
-                        is UserNotRegistered -> {
-                            Unit
-                        }
-
+                        is UserNotRegistered -> Unit
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
