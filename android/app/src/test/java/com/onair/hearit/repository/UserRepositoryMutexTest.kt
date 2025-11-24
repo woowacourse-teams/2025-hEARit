@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.repository
 
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.local.UserLocalDataSource

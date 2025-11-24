@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.repository
 
 import com.onair.hearit.HearitFixtures.createFakeHearit
 import com.onair.hearit.HearitFixtures.createFakeRandomHearit

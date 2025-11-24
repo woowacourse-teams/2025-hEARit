@@ -1,4 +1,4 @@
-package com.onair.hearit
+package com.onair.hearit.repository
 
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.local.UserLocalDataSource
@@ -166,7 +166,7 @@ private class UserRepositoryWithoutMutex(
             remote
         }
 
-    override suspend fun getOrCreateUserId(): Result<String> = Result.success("")
+    override suspend fun getOrCreateDeviceId(): Result<String> = Result.success("")
 
     override suspend fun clearUserData(): Result<Boolean> = Result.success(true)
 }
