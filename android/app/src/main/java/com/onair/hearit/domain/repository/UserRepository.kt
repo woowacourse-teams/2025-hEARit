@@ -7,5 +7,5 @@ interface UserRepository {
 
     suspend fun getOrCreateDeviceId(): Result<String>
 
-    suspend fun clearUserData(): Result<Boolean>
+    suspend fun clearUserData(): Result<Unit>
 }

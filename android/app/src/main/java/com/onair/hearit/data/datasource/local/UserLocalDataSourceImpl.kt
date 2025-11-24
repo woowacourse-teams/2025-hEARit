@@ -18,12 +18,11 @@ class UserLocalDataSourceImpl(
                 ?: throw IllegalStateException("user id가 존재하지 않습니다.")
         }
 
-    override suspend fun saveDeviceId(userId: String): Result<Boolean> =
+    override suspend fun saveDeviceId(userId: String): Result<Unit> =
         runCatching {
             dataStore.edit { preferences ->
                 preferences[DEVICE_ID_KEY] = userId
             }
-            true
         }
 
     override suspend fun getUserInfo(): Result<UserInfo> =
@@ -42,22 +41,20 @@ class UserLocalDataSourceImpl(
             )
         }
 
-    override suspend fun saveUserInfo(userInfo: UserInfo): Result<Boolean> =
+    override suspend fun saveUserInfo(userInfo: UserInfo): Result<Unit> =
         runCatching {
             dataStore.edit { prefs ->
                 prefs[LOGGED_USER_ID_KEY] = userInfo.id
                 prefs[NICKNAME_KEY] = userInfo.nickname
                 prefs[PROFILE_URL_KEY] = userInfo.profileImage ?: ""
             }
-            true
         }
 
-    override suspend fun clearData(): Result<Boolean> =
+    override suspend fun clearData(): Result<Unit> =
         runCatching {
             dataStore.edit { preferences ->
                 preferences.clear()
             }
-            true
         }
 
     companion object {
