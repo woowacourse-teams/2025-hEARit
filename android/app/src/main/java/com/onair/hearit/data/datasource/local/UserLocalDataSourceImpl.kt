@@ -27,8 +27,8 @@ class UserLocalDataSourceImpl(
 
     override suspend fun getUserInfo(): Result<UserInfo> =
         runCatching {
-            val prefs = dataStore.data.first()
-            val userId = prefs[LOGGED_USER_ID_KEY]
+            val preferences = dataStore.data.first()
+            val userId = preferences[LOGGED_USER_ID_KEY]
 
             if (userId == null || userId == INVALID_USER_ID) {
                 throw IllegalStateException("저장된 유저 정보가 없습니다")
@@ -36,17 +36,17 @@ class UserLocalDataSourceImpl(
 
             UserInfo(
                 id = userId,
-                nickname = prefs[NICKNAME_KEY] ?: DEFAULT_NICKNAME,
-                profileImage = prefs[PROFILE_URL_KEY]?.takeIf { it.isNotEmpty() },
+                nickname = preferences[NICKNAME_KEY] ?: DEFAULT_NICKNAME,
+                profileImage = preferences[PROFILE_URL_KEY]?.takeIf { it.isNotEmpty() },
             )
         }
 
     override suspend fun saveUserInfo(userInfo: UserInfo): Result<Unit> =
         runCatching {
-            dataStore.edit { prefs ->
-                prefs[LOGGED_USER_ID_KEY] = userInfo.id
-                prefs[NICKNAME_KEY] = userInfo.nickname
-                prefs[PROFILE_URL_KEY] = userInfo.profileImage ?: EMPTY_PROFILE_IMAGE
+            dataStore.edit { preferences ->
+                preferences[LOGGED_USER_ID_KEY] = userInfo.id
+                preferences[NICKNAME_KEY] = userInfo.nickname
+                preferences[PROFILE_URL_KEY] = userInfo.profileImage ?: EMPTY_PROFILE_IMAGE
             }
         }
 

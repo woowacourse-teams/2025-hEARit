@@ -168,5 +168,5 @@ private class UserRepositoryWithoutMutex(
 
     override suspend fun getOrCreateDeviceId(): Result<String> = Result.success("")
 
-    override suspend fun clearUserData(): Result<Boolean> = Result.success(true)
+    override suspend fun clearUserData(): Result<Unit> = Result.success(Unit)
 }
