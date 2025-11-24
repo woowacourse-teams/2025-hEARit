@@ -159,6 +159,7 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.assertj.core)
+    testImplementation(kotlin("test"))
 
     // android test
     androidTestImplementation(libs.androidx.runner)
