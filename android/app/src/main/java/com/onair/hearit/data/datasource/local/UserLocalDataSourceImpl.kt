@@ -30,13 +30,13 @@ class UserLocalDataSourceImpl(
             val prefs = dataStore.data.first()
             val userId = prefs[LOGGED_USER_ID_KEY]
 
-            if (userId == null || userId == -1L) {
+            if (userId == null || userId == INVALID_USER_ID) {
                 throw IllegalStateException("저장된 유저 정보가 없습니다")
             }
 
             UserInfo(
                 id = userId,
-                nickname = prefs[NICKNAME_KEY] ?: "hEARit",
+                nickname = prefs[NICKNAME_KEY] ?: DEFAULT_NICKNAME,
                 profileImage = prefs[PROFILE_URL_KEY]?.takeIf { it.isNotEmpty() },
             )
         }
@@ -46,7 +46,7 @@ class UserLocalDataSourceImpl(
             dataStore.edit { prefs ->
                 prefs[LOGGED_USER_ID_KEY] = userInfo.id
                 prefs[NICKNAME_KEY] = userInfo.nickname
-                prefs[PROFILE_URL_KEY] = userInfo.profileImage ?: ""
+                prefs[PROFILE_URL_KEY] = userInfo.profileImage ?: EMPTY_PROFILE_IMAGE
             }
         }
 
@@ -65,5 +65,9 @@ class UserLocalDataSourceImpl(
         private val LOGGED_USER_ID_KEY = longPreferencesKey("logged_user_id")
         private val NICKNAME_KEY = stringPreferencesKey("nickname")
         private val PROFILE_URL_KEY = stringPreferencesKey("profile_url")
+
+        private const val INVALID_USER_ID = -1L
+        private const val DEFAULT_NICKNAME = "hEARit"
+        private const val EMPTY_PROFILE_IMAGE = ""
     }
 }
