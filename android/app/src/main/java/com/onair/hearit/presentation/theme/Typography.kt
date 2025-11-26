@@ -28,7 +28,7 @@ val PromptSplashLogo: TextStyle =
 
 val PretendardDrawer: TextStyle =
     TextStyle(
-        fontFamily = Pretendard,
+        fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.W500,
         fontSize = 16.sp,
         color = Gray4,
@@ -37,7 +37,7 @@ val PretendardDrawer: TextStyle =
 
 val PretendardNickname: TextStyle =
     TextStyle(
-        fontFamily = Pretendard,
+        fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.W700,
         fontSize = 24.sp,
         color = Gray4,
@@ -46,7 +46,7 @@ val PretendardNickname: TextStyle =
 
 val PretendardMainTitle: TextStyle =
     TextStyle(
-        fontFamily = Pretendard,
+        fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.W700,
         fontSize = 20.sp,
         color = Gray4,
@@ -55,7 +55,7 @@ val PretendardMainTitle: TextStyle =
 
 val PretendardSubTitle: TextStyle =
     TextStyle(
-        fontFamily = Pretendard,
+        fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.W700,
         fontSize = 16.sp,
         color = Gray4,
@@ -64,7 +64,7 @@ val PretendardSubTitle: TextStyle =
 
 val PretendardCategory: TextStyle =
     TextStyle(
-        fontFamily = Pretendard,
+        fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.W600,
         fontSize = 18.sp,
         color = Gray4,
@@ -73,7 +73,7 @@ val PretendardCategory: TextStyle =
 
 val PretendardBottomTitle: TextStyle =
     TextStyle(
-        fontFamily = Pretendard,
+        fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.W700,
         fontSize = 14.sp,
         color = Gray4,
@@ -82,7 +82,7 @@ val PretendardBottomTitle: TextStyle =
 
 val PretendardBody: TextStyle =
     TextStyle(
-        fontFamily = Pretendard,
+        fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.W500,
         fontSize = 14.sp,
         platformStyle = NoFontPadding,
@@ -90,7 +90,7 @@ val PretendardBody: TextStyle =
 
 val PretendardSettingBody: TextStyle =
     TextStyle(
-        fontFamily = Pretendard,
+        fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.W500,
         fontSize = 16.sp,
         color = Gray4,
