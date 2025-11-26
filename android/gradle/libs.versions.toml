@@ -4,6 +4,7 @@ appUpdateKtx = "2.1.0"
 assertjCore = "3.27.3"
 coil = "2.5.0"
 concurrentFuturesKtx = "1.3.0"
+coreTesting = "2.2.0"
 datastorePreferences = "1.1.7"
 firebaseBom = "33.16.0"
 flexbox = "3.0.0"
@@ -37,10 +38,12 @@ v2Share = "2.21.7"
 v2User = "2.21.7"
 room-runtime = "2.7.2"
 activityCompose = "1.10.1"
+runtimeLivedata = "1.9.4"
 
 [libraries]
 androidx-concurrent-futures-ktx = { module = "androidx.concurrent:concurrent-futures-ktx", version.ref = "concurrentFuturesKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentTesting" }
 androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragmentTesting" }
@@ -88,6 +91,7 @@ v2-share = { module = "com.kakao.sdk:v2-share", version.ref = "v2Share" }
 v2-user = { module = "com.kakao.sdk:v2-user", version.ref = "v2User" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

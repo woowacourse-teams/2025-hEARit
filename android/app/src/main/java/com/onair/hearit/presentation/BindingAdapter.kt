@@ -16,7 +16,7 @@ import coil.load
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.library.BookmarkUiState
-import com.onair.hearit.presentation.search.SearchUiState
+import com.onair.hearit.presentation.search.main.SearchUiState
 import java.text.SimpleDateFormat
 import java.util.Locale
 

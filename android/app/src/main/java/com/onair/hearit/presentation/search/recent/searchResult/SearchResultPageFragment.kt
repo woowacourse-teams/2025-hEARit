@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -25,6 +24,7 @@ import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
+import com.onair.hearit.presentation.showToast
 
 class SearchResultPageFragment :
     Fragment(),
@@ -109,12 +109,8 @@ class SearchResultPageFragment :
             searchedAdapter.submitList(searchedHearits)
         }
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
+            showToast(resId)
         }
-    }
-
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onClick(

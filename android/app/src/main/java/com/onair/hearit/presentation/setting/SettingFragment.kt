@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -13,6 +12,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SETTING
 import com.onair.hearit.databinding.FragmentSettingBinding
 import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.presentation.showToast
 
 class SettingFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -73,12 +73,8 @@ class SettingFragment : Fragment() {
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
+            showToast(resId)
         }
-    }
-
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
