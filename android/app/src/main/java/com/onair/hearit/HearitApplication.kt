@@ -31,6 +31,7 @@ class HearitApplication : Application() {
         RepositoryProvider.init(this)
 
         initUuid()
+        setAppVersion()
 
         AnalyticsProvider.init(this)
         TokenAuthenticatorProvider.init()
@@ -52,6 +53,17 @@ class HearitApplication : Application() {
                     Timber.e(throwable, "Failed to initialize UUID")
                 }
         }
+    }
+
+    private fun setAppVersion() {
+        val versionName =
+            try {
+                packageManager.getPackageInfo(packageName, 0).versionName
+            } catch (e: Exception) {
+                "unknown"
+            }
+
+        TokenInterceptorProvider.setAppVersion(versionName)
     }
 
     private fun initialTimber() {

@@ -7,12 +7,16 @@ object TokenInterceptorProvider {
     private const val AUTH_HEADER_NAME = "Authorization"
     private const val BEARER_PREFIX = "Bearer"
     private const val DEVICE_UUID_HEADER = "Device-Uuid"
+    private const val APP_VERSION_HEADER = "App-Version"
 
     @Volatile
     private var accessToken: String? = null
 
     @Volatile
     private var deviceUuid: String? = null
+
+    @Volatile
+    private var appVersion: String? = null
 
     fun provide(): Interceptor =
         Interceptor { chain ->
@@ -30,6 +34,7 @@ object TokenInterceptorProvider {
                 }
                 deviceUuid?.let { builder.header(DEVICE_UUID_HEADER, it) }
             }
+            appVersion?.let { builder.header(APP_VERSION_HEADER, it) }
 
             chain.proceed(builder.build())
         }
@@ -40,5 +45,9 @@ object TokenInterceptorProvider {
 
     fun setDeviceUuid(uuid: String?) {
         deviceUuid = uuid
+    }
+
+    fun setAppVersion(version: String?) {
+        appVersion = version
     }
 }
