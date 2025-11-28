@@ -16,6 +16,9 @@ jobs:
     name: Build and Upload Artifact
     runs-on: ubuntu-latest
 
+    outputs:
+      jar-name: ${{ steps.jar-rename.outputs.jar-name }}
+
     services:
       mysql:
         image: mysql:8.0
@@ -55,13 +58,14 @@ jobs:
         run: ./gradlew clean :boot:bootJar
 
       - name: Rename jar with timestamp
+        id: jar-rename
         working-directory: backend/boot/build/libs
         run: |
           TS=$(date +"%Y%m%d-%H%M%S")
           JAR_NAME=$(find . -name "*.jar" ! -name "*-plain.jar")
           NEW_NAME="app-${TS}.jar"
           mv "$JAR_NAME" "$NEW_NAME"
-          echo "NEW_JAR_NAME=$NEW_NAME" >> $GITHUB_ENV
+          echo "jar-name=$NEW_NAME" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -71,8 +75,8 @@ jobs:
 
       - name: Upload jar to S3
         run: |
-          aws s3 cp backend/boot/build/libs/${{ env.NEW_JAR_NAME }} \
-            s3://hearit-artifacts/prod/${{ env.NEW_JAR_NAME }}
+          aws s3 cp backend/boot/build/libs/${{ steps.jar-rename.outputs.jar-name }} \
+            s3://hearit-artifacts/prod/${{ steps.jar-rename.outputs.jar-name }}
 
   deploy:
     name: Deploy on EC2 for prod
@@ -86,14 +90,22 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ap-northeast-2
 
+      - name: Create SSM command JSON
+        run: |
+          cat <<EOF > ssm_command.json
+          {
+            "commands": [
+              "aws s3 cp s3://hearit-artifacts/prod/${{ needs.build.outputs.jar-name }} /home/ubuntu/hearit/app.jar",
+              "sudo bash /home/ubuntu/hearit/deploy.sh"
+            ]
+          }
+          EOF
+
       - name: Deploy using SSM
         run: |
           aws ssm send-command \
             --instance-ids "${{ secrets.PROD_EC2_ID }}" \
             --document-name "AWS-RunShellScript" \
             --comment "Deploy hEARit backend" \
-            --parameters "commands=[
-              \"aws s3 cp s3://hearit-artifacts/prod/${{ env.NEW_JAR_NAME }} /home/ubuntu/hearit/app.jar\",
-              \"sudo bash /home/ubuntu/hearit/deploy.sh\"
-            ]" \
+            --parameters file://ssm_command.json \
             --region ap-northeast-2
