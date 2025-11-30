@@ -46,10 +46,13 @@
                     objectMessageAsJsonObject="true"
                     charset="UTF-8">
                 <!-- log context-->
+                <KeyValuePair key="service" value="$${ctx:service}"/>
+                <KeyValuePair key="port" value="${spring:server.port}"/>
                 <KeyValuePair key="ip" value="$${ctx:ip}"/>
                 <KeyValuePair key="timestamp" value="$${ctx:timestamp}"/>
                 <KeyValuePair key="androidAppVersion" value="$${ctx:androidAppVersion}"/>
                 <KeyValuePair key="serverVersion" value="$${ctx:serverVersion}"/>
+                <KeyValuePair key="env" value="${env}"/>
 
                 <!-- user context -->
                 <KeyValuePair key="userType" value="$${ctx:userType}"/>
@@ -59,8 +62,6 @@
                 <!-- OpenTelemetry trace 정보 추가 -->
                 <KeyValuePair key="traceId" value="$${ctx:trace_id}"/>
                 <KeyValuePair key="spanId" value="$${ctx:span_id}"/>
-                <KeyValuePair key="port" value="${spring:server.port}"/>
-                <KeyValuePair key="env" value="${env}"/>
             </JsonLayout>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
