@@ -53,19 +53,18 @@ public class ApiLoggingAspect {
     public void patchMapping() {
     }
 
-    @Pointcut("(getMapping() || postMapping() || deleteMapping() || putMapping() || patchMapping())"
-            + "&& !within(com.onair.hearit.admin..*)")
+    @Pointcut("(getMapping() || postMapping() || deleteMapping() || putMapping() || patchMapping())")
     public void allMapping() {
     }
 
     @Pointcut("(@within(org.springframework.web.bind.annotation.RestControllerAdvice)" +
-            "|| @within(org.springframework.web.bind.annotation.ControllerAdvice))" +
-            "&& !within(com.onair.hearit.admin..*)")
+              "|| @within(org.springframework.web.bind.annotation.ControllerAdvice))")
     public void exceptionHandler() {
     }
 
     @Before("allMapping()")
     public void logRequest(JoinPoint joinPoint) {
+        setServiceLabel(joinPoint);
         MDC.put(LOGGED_BY_AOP, TRUE);
         HttpServletRequest httpServletRequest = getHttpServletRequest();
         RequestLogProperty requestLogProperty = RequestLogProperty.of(httpServletRequest, joinPoint);
@@ -92,6 +91,7 @@ public class ApiLoggingAspect {
 
     @AfterReturning(value = "exceptionHandler()", returning = "problemDetail")
     public void logExceptionHandler(JoinPoint joinPoint, ProblemDetail problemDetail) {
+        setServiceLabel(joinPoint);
         if (!TRUE.equals(MDC.get(LOGGED_BY_AOP))) {
             logRequest(joinPoint);
             MDC.put(LOGGED_BY_AOP, TRUE);
@@ -119,6 +119,15 @@ public class ApiLoggingAspect {
         } catch (Exception e) {
             jsonLogger.error("Error 로깅 중 예외가 발생했습니다.", e);
         }
+    }
+
+    private void setServiceLabel(JoinPoint joinPoint) {
+        String declaringTypeName = joinPoint.getSignature().getDeclaringTypeName();
+        if (declaringTypeName.startsWith("com.onair.hearit.admin")) {
+            MDC.put("service", "hearit-admin");
+            return;
+        }
+        MDC.put("service", "hearit-app");
     }
 
     private Optional<Throwable> extractThrowableFromArgs(Object[] args) {
