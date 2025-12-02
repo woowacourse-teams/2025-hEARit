@@ -1,10 +1,11 @@
-package com.onair.hearit.presentation.detail
+package com.onair.hearit.presentation.detail.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemKeywordBinding
 import com.onair.hearit.domain.model.Keyword
+import com.onair.hearit.presentation.detail.PlayerDetailClickListener
 
 class PlayerDetailKeywordViewHolder private constructor(
     private val binding: ItemKeywordBinding,

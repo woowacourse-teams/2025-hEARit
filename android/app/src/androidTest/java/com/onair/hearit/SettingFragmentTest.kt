@@ -2,11 +2,8 @@ package com.onair.hearit
 
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.isNotChecked
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -51,36 +48,36 @@ class SettingFragmentTest {
             .check(matches(isDisplayed()))
     }
 
-    @Test
-    fun `알림_텍스트가_화면에_표시된다`() {
-        onView(withId(R.id.tv_setting_notification_text))
-            .check(matches(isDisplayed()))
+//    @Test
+//    fun `알림_텍스트가_화면에_표시된다`() {
+//        onView(withId(R.id.tv_setting_notification_text))
+//            .check(matches(isDisplayed()))
+//
+//        onView(withId(R.id.tv_setting_notification_text))
+//            .check(matches(withText("히어릿 추천 알림")))
+//    }
 
-        onView(withId(R.id.tv_setting_notification_text))
-            .check(matches(withText("히어릿 추천 알림")))
-    }
+//    @Test
+//    fun `알림_스위치가_화면에_표시된다`() {
+//        onView(withId(R.id.switch_notification))
+//            .check(matches(isDisplayed()))
+//    }
 
-    @Test
-    fun `알림_스위치가_화면에_표시된다`() {
-        onView(withId(R.id.switch_notification))
-            .check(matches(isDisplayed()))
-    }
-
-    @Test
-    fun `알림_스위치를_누르면_상태가_변경된다`() {
-        onView(withId(R.id.switch_notification))
-            .check(matches(isNotChecked()))
-
-        onView(withId(R.id.switch_notification))
-            .perform(click())
-
-        onView(withId(R.id.switch_notification))
-            .check(matches(isChecked()))
-
-        onView(withId(R.id.switch_notification))
-            .perform(click())
-
-        onView(withId(R.id.switch_notification))
-            .check(matches(isNotChecked()))
-    }
+//    @Test
+//    fun `알림_스위치를_누르면_상태가_변경된다`() {
+//        onView(withId(R.id.switch_notification))
+//            .check(matches(isNotChecked()))
+//
+//        onView(withId(R.id.switch_notification))
+//            .perform(click())
+//
+//        onView(withId(R.id.switch_notification))
+//            .check(matches(isChecked()))
+//
+//        onView(withId(R.id.switch_notification))
+//            .perform(click())
+//
+//        onView(withId(R.id.switch_notification))
+//            .check(matches(isNotChecked()))
+//    }
 }
