@@ -7,13 +7,15 @@ import 'core/audio/audio_handler.dart';
 import 'core/audio/hearit_player_controller.dart';
 import 'core/presentation/main_navigation.dart';
 
+const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
+  statusBarColor: Colors.black,
+  statusBarIconBrightness: Brightness.light,
+  statusBarBrightness: Brightness.dark,
+);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.white,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(_lightStatusBar);
   final audioHandler = await AudioService.init(
     builder: () => LocalAudioHandler(),
     config: const AudioServiceConfig(
@@ -38,8 +40,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: _lightStatusBar,
+        child: child ?? const SizedBox.shrink(),
+      ),
       theme: ThemeData(
         fontFamily: 'Pretendard',
+        appBarTheme: const AppBarTheme(
+          systemOverlayStyle: _lightStatusBar,
+        ),
         // This is the theme of your application.
         //
         // TRY THIS: Try running your application with "flutter run". You'll see
