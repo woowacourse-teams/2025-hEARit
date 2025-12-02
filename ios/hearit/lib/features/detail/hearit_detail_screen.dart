@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/audio/hearit_player_controller.dart';
 import '../../core/presentation/widgets/script_view.dart';
+import '../../core/theme/app_colors.dart';
 import 'hearit_detail.dart';
 import 'hearit_detail_viewmodel.dart';
 import 'widgets/audio_controls.dart';
@@ -68,7 +69,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
     return WillPopScope(
       onWillPop: _handleWillPop,
       child: Scaffold(
-        backgroundColor: const Color(0xFF1F1F1F),
+        backgroundColor: AppColors.hearitBlack,
         body: SafeArea(
           top: true,
           bottom: false,
@@ -86,11 +87,9 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 12),
                     DetailHeader(
                       categoryName: detail.category.name,
                       onBack: _handleBackTap,
-                      onShare: () {},
                     ),
                     const SizedBox(height: 12),
                     Expanded(
@@ -119,11 +118,11 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                               height: 150,
                               child: AudioControls(
                                 controller: _viewModel.playerController,
-                                isBookmarked: _viewModel.isBookmarked,
-                                onBookmarkToggle: _viewModel.toggleBookmark,
                                 onSeekRelative: _viewModel.seekRelative,
                                 onTogglePlayback: _viewModel.togglePlayback,
-                                onSpeedTap: _viewModel.cycleSpeed,
+                                onSpeedSelected: _viewModel.setSpeed,
+                                speedOptions: _viewModel.speedOptions,
+                                currentSpeed: _viewModel.currentSpeed,
                                 speedLabel: _viewModel.speedLabel,
                                 formatDuration: _viewModel.formatDuration,
                               ),
@@ -165,7 +164,6 @@ class _Skeleton extends StatelessWidget {
         DetailHeader(
           categoryName: detail.category.name,
           onBack: () => Navigator.of(context).pop(),
-          onShare: () {},
         ),
         const SizedBox(height: 12),
         Expanded(

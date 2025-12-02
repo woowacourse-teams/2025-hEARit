@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/audio/hearit_player_controller.dart';
+import '../../core/theme/app_colors.dart';
 import '../detail/hearit_detail.dart';
 import '../detail/hearit_detail_screen.dart';
 import 'explore_viewmodel.dart';
@@ -130,19 +131,18 @@ class ExploreScreenState extends State<ExploreScreen> {
     );
 
     if (!mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => HearitDetailScreen(detail: stub),
-      ),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => HearitDetailScreen(detail: stub)));
   }
 
   @override
   Widget build(BuildContext context) {
     final active = _viewModel.activeItem;
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
+      backgroundColor: AppColors.hearitBlack,
       body: SafeArea(
+        bottom: false,
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -174,7 +174,7 @@ class ExploreScreenState extends State<ExploreScreen> {
               const double horizontalPadding = 22;
               return RefreshIndicator(
                 color: const Color(0xFFA86BFF),
-                backgroundColor: const Color(0xFF1F1F1F),
+                backgroundColor: AppColors.hearitBlack,
                 onRefresh: _refreshExplore,
                 child: PageView.builder(
                   controller: _pageController,
@@ -192,13 +192,17 @@ class ExploreScreenState extends State<ExploreScreen> {
                   },
                   itemBuilder: (context, index) {
                     final item = _viewModel.items[index];
+                    // Keep the continue card just above the slider/nav area.
+                    const bottomSpacing = 28.0;
                     return ExploreFeedPage(
                       item: item,
                       pitchLine: _viewModel.pitchLine,
                       position: _viewModel.position,
                       centerStatusIcon: _centerStatusIcon,
                       horizontalPadding: horizontalPadding,
+                      bottomSpacing: bottomSpacing,
                       onContinuePressed: () => _openDetailFromExplore(item),
+                      isPlaying: _viewModel.isPlaying && index == _currentIndex,
                     );
                   },
                 ),

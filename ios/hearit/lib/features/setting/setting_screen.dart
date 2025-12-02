@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hearit/oss_licenses.dart' as ossdata;
 
@@ -8,7 +9,7 @@ class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key, this.onBackToHome});
 
   final VoidCallback? onBackToHome;
-  static const Color _backgroundColor = Color(0xFF1F1F1F);
+  static const Color _backgroundColor = AppColors.hearitBlack;
   static const TextStyle _itemTextStyle = TextStyle(
     color: Colors.white70,
     fontSize: 16,

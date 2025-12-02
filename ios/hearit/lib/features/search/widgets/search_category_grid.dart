@@ -39,10 +39,10 @@ class SearchCategoryGrid extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                category.name.toUpperCase(),
+                category.name,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: Colors.white,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: 0.4,
                   fontSize: 18,
                 ),

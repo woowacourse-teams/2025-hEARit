@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
 import '../../../core/presentation/widgets/script_view.dart';
 import '../explore_models.dart';
@@ -12,8 +13,10 @@ class ExploreFeedPage extends StatelessWidget {
     required this.position,
     required this.onContinuePressed,
     required this.horizontalPadding,
+    required this.bottomSpacing,
     this.centerStatusIcon,
     this.coverAssetPath = 'assets/images/explore_LP.png',
+    this.isPlaying = false,
   });
 
   final ExploreFeedItem item;
@@ -21,8 +24,10 @@ class ExploreFeedPage extends StatelessWidget {
   final Duration position;
   final VoidCallback onContinuePressed;
   final double horizontalPadding;
+  final double bottomSpacing;
   final IconData? centerStatusIcon;
   final String coverAssetPath;
+  final bool isPlaying;
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +47,9 @@ class ExploreFeedPage extends StatelessWidget {
                 item.title,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
+                  color: AppColors.gray4,
                   fontWeight: FontWeight.w800,
-                  fontSize: 24,
+                  fontSize: 20,
                 ),
               ),
               const SizedBox(height: 10),
@@ -55,6 +60,7 @@ class ExploreFeedPage extends StatelessWidget {
                 child: ExploreCover(
                   categoryColor: item.categoryColor,
                   assetPath: coverAssetPath,
+                  isPlaying: isPlaying,
                 ),
               ),
             ],
@@ -63,7 +69,7 @@ class ExploreFeedPage extends StatelessWidget {
         Positioned(
           left: horizontalPadding,
           right: horizontalPadding,
-          bottom: 0,
+          bottom: bottomSpacing,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -76,7 +82,10 @@ class ExploreFeedPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              ExploreContinueButton(onPressed: onContinuePressed),
+              Transform.translate(
+                offset: const Offset(0, 6),
+                child: ExploreContinueButton(onPressed: onContinuePressed),
+              ),
             ],
           ),
         ),
@@ -105,11 +114,7 @@ class CenterStatusOverlay extends StatelessWidget {
                 color: const Color(0xFF9533F5).withOpacity(0.7),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                size: 40,
-                color: Colors.white,
-              ),
+              child: Icon(icon, size: 40, color: AppColors.gray4),
             ),
           ),
         ),

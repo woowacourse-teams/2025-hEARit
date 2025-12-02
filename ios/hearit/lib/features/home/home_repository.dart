@@ -126,6 +126,7 @@ class HomeRepository {
         .toList();
 
     return CategorySectionData(
+      categoryId: _asInt(json['categoryId'] ?? json['id']),
       categoryName: json['categoryName'] as String? ?? '카테고리',
       accentColor: accentColor,
       podcasts: podcasts,

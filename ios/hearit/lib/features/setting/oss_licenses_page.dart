@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../oss_licenses.dart' as ossdata;
@@ -41,9 +42,9 @@ class OssLicensesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
+      backgroundColor: AppColors.hearitBlack,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1F1F1F),
+        backgroundColor: AppColors.hearitBlack,
         elevation: 0,
         title: const Text(
           '오픈 라이선스',
@@ -124,9 +125,9 @@ class _LicenseDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
+      backgroundColor: AppColors.hearitBlack,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1F1F1F),
+        backgroundColor: AppColors.hearitBlack,
         elevation: 0,
         title: Text(package.name, style: const TextStyle(color: Colors.white)),
         actions: [

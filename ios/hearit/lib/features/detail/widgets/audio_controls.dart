@@ -3,26 +3,28 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/audio/hearit_player_controller.dart';
+import '../../../core/theme/app_colors.dart';
+import '../detail_font.dart';
 
 class AudioControls extends StatefulWidget {
   const AudioControls({
     super.key,
     required this.controller,
-    required this.isBookmarked,
-    required this.onBookmarkToggle,
     required this.onSeekRelative,
     required this.onTogglePlayback,
-    required this.onSpeedTap,
+    required this.onSpeedSelected,
+    required this.speedOptions,
+    required this.currentSpeed,
     required this.speedLabel,
     required this.formatDuration,
   });
 
   final HearitPlayerController controller;
-  final bool isBookmarked;
-  final VoidCallback onBookmarkToggle;
   final void Function(Duration offset) onSeekRelative;
   final VoidCallback onTogglePlayback;
-  final VoidCallback onSpeedTap;
+  final ValueChanged<double> onSpeedSelected;
+  final List<double> speedOptions;
+  final double currentSpeed;
   final String speedLabel;
   final String Function(Duration) formatDuration;
 
@@ -32,6 +34,14 @@ class AudioControls extends StatefulWidget {
 
 class _AudioControlsState extends State<AudioControls> {
   double? _dragPositionMillis;
+  String _formatSpeed(double speed) {
+    final int hundred = (speed * 100).round();
+    final int remainder = hundred % 100;
+    if (remainder == 0 || remainder == 50) {
+      return speed.toStringAsFixed(1);
+    }
+    return speed.toStringAsFixed(2);
+  }
 
   Duration _effectivePosition(Duration position, Duration duration) {
     if (_dragPositionMillis != null) {
@@ -49,9 +59,12 @@ class _AudioControlsState extends State<AudioControls> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, _) {
+        final double popupMaxHeight = 210;
         final duration = widget.controller.duration;
-        final currentPosition =
-            _effectivePosition(widget.controller.position, duration);
+        final currentPosition = _effectivePosition(
+          widget.controller.position,
+          duration,
+        );
         final totalMillis = math.max(duration.inMilliseconds, 1);
         final isBuffering = widget.controller.isBuffering;
         final playing = widget.controller.isPlaying;
@@ -64,10 +77,11 @@ class _AudioControlsState extends State<AudioControls> {
                 trackHeight: 3.5,
                 trackShape: const RectangularSliderTrackShape(),
                 thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-                activeTrackColor: const Color(0xFF9533F5),
-                inactiveTrackColor: Colors.white12,
-                thumbColor: const Color(0xFF9533F5),
-                overlayColor: const Color(0x33A86BFF),
+                overlayShape: SliderComponentShape.noOverlay,
+                activeTrackColor: AppColors.hearitPurple3,
+                inactiveTrackColor: AppColors.gray4,
+                thumbColor: AppColors.hearitPurple3,
+                overlayColor: AppColors.hearitPurple3.withOpacity(0.2),
               ),
               child: Slider(
                 value: currentPosition.inMilliseconds.toDouble(),
@@ -75,13 +89,13 @@ class _AudioControlsState extends State<AudioControls> {
                 onChangeStart: duration == Duration.zero
                     ? null
                     : (value) => setState(() {
-                          _dragPositionMillis = value;
-                        }),
+                        _dragPositionMillis = value;
+                      }),
                 onChanged: duration == Duration.zero
                     ? null
                     : (value) => setState(() {
-                          _dragPositionMillis = value;
-                        }),
+                        _dragPositionMillis = value;
+                      }),
                 onChangeEnd: duration == Duration.zero
                     ? null
                     : (value) async {
@@ -103,16 +117,18 @@ class _AudioControlsState extends State<AudioControls> {
                 Text(
                   widget.formatDuration(currentPosition),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    fontFamily: detailFontFamily,
+                    color: AppColors.gray4,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 Text(
                   widget.formatDuration(duration),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    fontFamily: detailFontFamily,
+                    color: AppColors.gray4,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -120,28 +136,18 @@ class _AudioControlsState extends State<AudioControls> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                const SizedBox(width: 40),
                 IconButton(
                   iconSize: 40,
-                  onPressed: widget.onBookmarkToggle,
-                  icon: Icon(
-                    widget.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                    color: widget.isBookmarked
-                        ? const Color(0xFF9533F5)
-                        : Colors.white,
-                  ),
-                ),
-                IconButton(
-                  iconSize: 40,
-                  onPressed: () => widget.onSeekRelative(
-                    const Duration(seconds: -10),
-                  ),
-                  icon: const Icon(Icons.replay_10, color: Colors.white),
+                  onPressed: () =>
+                      widget.onSeekRelative(const Duration(seconds: -10)),
+                  icon: const Icon(Icons.replay_10, color: AppColors.gray4),
                 ),
                 Container(
                   width: 58,
                   height: 58,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF9533F5),
+                    color: AppColors.hearitPurple3,
                     shape: BoxShape.circle,
                   ),
                   child: isBuffering
@@ -150,7 +156,7 @@ class _AudioControlsState extends State<AudioControls> {
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                              AppColors.gray4,
                             ),
                           ),
                         )
@@ -158,27 +164,69 @@ class _AudioControlsState extends State<AudioControls> {
                           onPressed: widget.onTogglePlayback,
                           icon: Icon(
                             playing ? Icons.pause : Icons.play_arrow,
-                            color: Colors.white,
+                            color: AppColors.gray4,
                             size: 30,
                           ),
                         ),
                 ),
                 IconButton(
                   iconSize: 40,
-                  onPressed: () => widget.onSeekRelative(
-                    const Duration(seconds: 10),
-                  ),
-                  icon: const Icon(Icons.forward_10, color: Colors.white),
+                  onPressed: () =>
+                      widget.onSeekRelative(const Duration(seconds: 10)),
+                  icon: const Icon(Icons.forward_10, color: AppColors.gray4),
                 ),
-                GestureDetector(
-                  onTap: widget.onSpeedTap,
+                PopupMenuButton<double>(
+                  onSelected: widget.onSpeedSelected,
+                  color: const Color(0xFF3A3A3A),
+                  elevation: 6,
+                  constraints: BoxConstraints(
+                    maxHeight: popupMaxHeight,
+                    minWidth: 140,
+                  ),
+                  itemBuilder: (context) {
+                    return widget.speedOptions
+                        .map(
+                          (speed) => PopupMenuItem<double>(
+                            value: speed,
+                            child: Row(
+                              children: [
+                                if (speed == widget.currentSpeed)
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 8),
+                                    child: Icon(
+                                      Icons.check,
+                                      size: 18,
+                                      color: AppColors.gray4,
+                                    ),
+                                  )
+                                else
+                                  const SizedBox(width: 26),
+                                Text(
+                                  '${_formatSpeed(speed)}x',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        fontFamily: detailFontFamily,
+                                        color: AppColors.gray4,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList();
+                  },
                   child: Text(
                     widget.speedLabel,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 24,
-                        ),
+                      fontFamily: detailFontFamily,
+                      color: AppColors.gray4,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 24,
+                    ),
                   ),
                 ),
               ],

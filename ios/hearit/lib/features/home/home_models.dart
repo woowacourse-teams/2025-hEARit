@@ -48,11 +48,13 @@ class CategoryPodcastData {
 
 class CategorySectionData {
   const CategorySectionData({
+    required this.categoryId,
     required this.categoryName,
     required this.accentColor,
     required this.podcasts,
   });
 
+  final int categoryId;
   final String categoryName;
   final Color accentColor;
   final List<CategoryPodcastData> podcasts;

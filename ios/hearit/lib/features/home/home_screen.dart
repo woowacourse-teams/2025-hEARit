@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
 import '../detail/hearit_detail.dart';
 import '../detail/hearit_detail_screen.dart';
@@ -9,6 +10,8 @@ import 'widgets/explore_shortcut_card.dart';
 import 'widgets/home_header.dart';
 import 'widgets/listening_section.dart';
 import 'widgets/recommend_widgets.dart';
+import '../search/category_hearit_screen.dart';
+import '../search/search_models.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.onExploreTap});
@@ -107,13 +110,27 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openCategory(CategorySectionData section) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CategoryHearitScreen(
+          category: SearchCategory(
+            id: section.categoryId,
+            name: section.categoryName,
+            color: section.accentColor,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double viewPortWidth = MediaQuery.of(context).size.width - 40;
     final double pageWidth = viewPortWidth * _pageController.viewportFraction;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
+      backgroundColor: AppColors.hearitBlack,
       body: SafeArea(
         bottom: false,
         child: Padding(
@@ -138,7 +155,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     '데이터를 불러오지 못했습니다. 다시 시도해 주세요.',
                     style: Theme.of(
                       context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.redAccent),
+                    ).textTheme.bodyMedium?.copyWith(
+                      color: Colors.redAccent,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 24),
@@ -146,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   '오늘 추천하는 팟캐스트',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.gray4,
                     fontSize: 22,
                   ),
                 ),
@@ -217,6 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 32),
                 CategorySection(
                   sections: _viewModel.curatedCategoryHearits,
+                  onCategoryTap: _openCategory,
                   onHearitTap: (section, podcast) => _openHearitDetail(
                     _viewModel.toHearitDetailFromCategory(section, podcast),
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
 import '../detail/hearit_detail.dart';
 import '../detail/hearit_detail_screen.dart';
@@ -42,11 +43,11 @@ class _SearchScreenState extends State<SearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
+      backgroundColor: AppColors.hearitBlack,
 
       // iOS 상단 노치 + status bar 침범 방지
       body: Container(
-        color: const Color(0xFF1F1F1F),
+        color: AppColors.hearitBlack,
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,68 +60,31 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: const EdgeInsets.only(
                 left: 8,
                 right: 8,
-                top: 20,
+                top: 0,
                 bottom: 20,
               ),
-              color: const Color(0xFF1F1F1F),
+              color: AppColors.hearitBlack,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    children: [
-                      Transform.translate(
-                        offset: const Offset(-8, 0),
-                        child: IconButton(
-                          padding: const EdgeInsets.only(left: 4),
-                          constraints: const BoxConstraints(
-                            minWidth: 36,
-                            minHeight: 36,
-                          ),
-                          icon: const Icon(
-                            Icons.chevron_left,
-                            color: Colors.white,
-                            size: 35,
-                          ),
-                          onPressed: () {
-                            if (_viewModel.canGoBack) {
-                              _viewModel.stepBack();
-                              return;
-                            } else if (_viewModel.hasSearched ||
-                                _viewModel.hasQuery ||
-                                _viewModel.isLoading) {
-                              _viewModel.clearQuery();
-                              return;
-                            }
-                            if (widget.onBackToHome != null) {
-                              widget.onBackToHome!();
-                              return;
-                            }
-                            Navigator.of(context).maybePop();
-                          },
-                        ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Text(
+                      '검색',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.gray4,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 28,
                       ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            '검색',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 48), // balance back button space
-                    ],
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 4),
 
                         // 검색 입력창
                         TextField(
@@ -128,16 +92,22 @@ class _SearchScreenState extends State<SearchScreen> {
                           onSubmitted: (_) => _viewModel.submitQuery(),
                           textInputAction: TextInputAction.search,
                           style: theme.textTheme.bodyLarge?.copyWith(
-                            color: Colors.white,
+                            color: AppColors.gray4,
                             fontSize: 16,
+                            fontWeight: FontWeight.w500,
                           ),
-                          cursorColor: Colors.white,
+                          cursorColor: AppColors.gray4,
                           decoration: InputDecoration(
                             isDense: true,
+                            contentPadding: const EdgeInsets.only(
+                              top: 14,
+                              bottom: 0,
+                            ),
                             hintText: '검색어를 입력해주세요.',
                             hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white70,
+                              color: AppColors.gray2,
                               fontSize: 16,
+                              fontWeight: FontWeight.w500,
                             ),
                             suffixIcon: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -152,7 +122,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                     splashRadius: 18,
                                   ),
                                 if (!_viewModel.hasQuery)
-                                  const SizedBox(width: 22, height: 22),
+                                  const SizedBox(width: 18, height: 22),
                                 const SizedBox(width: 8),
                                 IconButton(
                                   padding: EdgeInsets.zero,
@@ -160,7 +130,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                   icon: Icon(
                                     Icons.search,
                                     color: _viewModel.hasQuery
-                                        ? Colors.white
+                                        ? AppColors.gray4
                                         : Colors.white70,
                                     size: 30,
                                   ),
@@ -203,7 +173,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           Text(
                             '검색된 히어릿 목록',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
+                              color: AppColors.gray4,
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
@@ -220,8 +190,8 @@ class _SearchScreenState extends State<SearchScreen> {
             // ----------------------------------------
             Expanded(
               child: Container(
-                color: const Color(0xFF1F1F1F), // 스크롤 영역 전체 배경 고정
-                child: !_viewModel.hasSearched && !_viewModel.hasQuery
+                color: AppColors.hearitBlack, // 스크롤 영역 전체 배경 고정
+                child: !_viewModel.hasSearched
                     ? SingleChildScrollView(
                         padding: const EdgeInsets.only(
                           left: 20,
@@ -235,9 +205,9 @@ class _SearchScreenState extends State<SearchScreen> {
                             Text(
                               '카테고리',
                               style: theme.textTheme.titleMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 24,
+                                color: AppColors.gray4,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 20,
                                 height: 1.0,
                               ),
                               textHeightBehavior: const TextHeightBehavior(

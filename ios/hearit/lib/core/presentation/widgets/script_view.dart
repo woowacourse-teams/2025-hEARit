@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'package:hearit/core/theme/app_colors.dart';
 
+import 'package:hearit/features/detail/detail_font.dart';
 import 'package:hearit/features/detail/hearit_detail_viewmodel.dart';
 
 class ScriptView extends StatefulWidget {
@@ -15,10 +18,14 @@ class ScriptView extends StatefulWidget {
 class _ScriptViewState extends State<ScriptView>
     with SingleTickerProviderStateMixin {
   late int _currentIndex;
-  int? _incomingIndex;
   late final AnimationController _controller;
-  late final Animation<Offset> _currentOffset;
-  late final Animation<Offset> _incomingOffset;
+  bool _isAnimating = false;
+
+  static const double _lineHeight = 44;
+  static const double _lineSpacing = 10;
+
+  double get _slotExtent => _lineHeight + _lineSpacing;
+  double get _containerHeight => _lineHeight * 3 + _lineSpacing * 2;
 
   @override
   void initState() {
@@ -26,22 +33,16 @@ class _ScriptViewState extends State<ScriptView>
     _currentIndex = _findCurrentIndex(widget.position);
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 320),
+      duration: const Duration(milliseconds: 650),
     );
-    _currentOffset = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0, -1),
-    ).chain(CurveTween(curve: Curves.fastOutSlowIn)).animate(_controller);
-    _incomingOffset = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).chain(CurveTween(curve: Curves.fastOutSlowIn)).animate(_controller);
 
     _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed && _incomingIndex != null) {
+      if (status == AnimationStatus.completed) {
         setState(() {
-          _currentIndex = _incomingIndex!;
-          _incomingIndex = null;
+          _isAnimating = false;
+          if (_currentIndex < widget.scripts.length - 1) {
+            _currentIndex += 1;
+          }
           _controller.reset();
         });
       }
@@ -53,17 +54,35 @@ class _ScriptViewState extends State<ScriptView>
     super.didUpdateWidget(oldWidget);
     if (widget.scripts.isEmpty) return;
     final nextIndex = _findCurrentIndex(widget.position);
-    if (nextIndex != _currentIndex && !_controller.isAnimating) {
+
+    if (_isAnimating) {
+      // If user seeks far or backwards during animation, snap to target.
+      if (nextIndex <= _currentIndex || nextIndex - _currentIndex > 1) {
+        _controller.stop();
+        setState(() {
+          _isAnimating = false;
+          _currentIndex = nextIndex;
+          _controller.reset();
+        });
+      }
+      return;
+    }
+
+    if (nextIndex == _currentIndex + 1) {
+      _startForwardAnimation();
+    } else if (nextIndex != _currentIndex) {
       setState(() {
-        _incomingIndex = nextIndex;
-      });
-      _controller.forward();
-    } else if (nextIndex == _currentIndex && _incomingIndex != null) {
-      _controller.reset();
-      setState(() {
-        _incomingIndex = null;
+        _currentIndex = nextIndex;
       });
     }
+  }
+
+  void _startForwardAnimation() {
+    if (_currentIndex >= widget.scripts.length - 1) return;
+    setState(() {
+      _isAnimating = true;
+    });
+    _controller.forward(from: 0);
   }
 
   @override
@@ -80,32 +99,90 @@ class _ScriptViewState extends State<ScriptView>
 
     return ClipRect(
       child: SizedBox(
-        height: 160,
+        // Match the exact block height to avoid extra top/bottom space during slide
+        height: _containerHeight,
         width: double.infinity,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            SlideTransition(
-              position: _currentOffset,
-              child: _ScriptBlock(
-                key: ValueKey<int>(_currentIndex),
-                scripts: widget.scripts,
-                index: _currentIndex,
-              ),
-            ),
-            if (_incomingIndex != null)
-              SlideTransition(
-                position: _incomingOffset,
-                child: _ScriptBlock(
-                  key: ValueKey<int>(_incomingIndex!),
-                  scripts: widget.scripts,
-                  index: _incomingIndex!,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) {
+            final progress =
+                _isAnimating ? Curves.easeOutCubic.transform(_controller.value) : 0.0;
+            final highlightBlend = _highlightBlend(progress);
+
+            return Stack(
+              children: [
+                _buildLine(
+                  index: _currentIndex - 1,
+                  baseTop: 0,
+                  emphasis: _lineEmphasis(_currentIndex - 1, highlightBlend),
+                  progress: progress,
                 ),
-              ),
-          ],
+                _buildLine(
+                  index: _currentIndex,
+                  baseTop: _slotExtent,
+                  emphasis: _lineEmphasis(_currentIndex, highlightBlend),
+                  progress: progress,
+                ),
+                _buildLine(
+                  index: _currentIndex + 1,
+                  baseTop: _slotExtent * 2,
+                  emphasis: _lineEmphasis(_currentIndex + 1, highlightBlend),
+                  progress: progress,
+                ),
+                if (_currentIndex + 2 < widget.scripts.length || _isAnimating)
+                  _buildLine(
+                    index: _currentIndex + 2,
+                    baseTop: _slotExtent * 3,
+                    emphasis: _lineEmphasis(_currentIndex + 2, highlightBlend),
+                    progress: progress,
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
+  }
+
+  Widget _buildLine({
+    required int index,
+    required double baseTop,
+    required double emphasis,
+    required double progress,
+  }) {
+    final text = _textAt(index);
+    final dy = baseTop - (progress * _slotExtent);
+
+    return Positioned(
+      top: dy,
+      left: 0,
+      right: 0,
+      child: _ScriptLine(
+        text: text,
+        emphasis: emphasis,
+      ),
+    );
+  }
+
+  double _highlightBlend(double progress) {
+    if (!_isAnimating) return 0.0;
+    const double start = 0.35;
+    const double end = 0.65;
+    final t = ((progress - start) / (end - start)).clamp(0.0, 1.0);
+    return Curves.easeInOut.transform(t);
+  }
+
+  double _lineEmphasis(int index, double blend) {
+    if (!_isAnimating) return index == _currentIndex ? 1.0 : 0.0;
+    final nextIndex = _currentIndex + 1;
+    if (index == _currentIndex) return 1.0 - blend;
+    if (index == nextIndex) return (_currentIndex + 1 < widget.scripts.length) ? blend : 0.0;
+    return 0.0;
+  }
+
+  String _textAt(int index) {
+    if (index < 0 || index >= widget.scripts.length) return '';
+    return widget.scripts[index].text;
   }
 
   int _findCurrentIndex(Duration position) {
@@ -123,41 +200,20 @@ class _ScriptViewState extends State<ScriptView>
   }
 }
 
-class _ScriptBlock extends StatelessWidget {
-  const _ScriptBlock({super.key, required this.scripts, required this.index});
-
-  final List<ScriptLine> scripts;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    final prevText = index > 0 ? scripts[index - 1].text : '';
-    final currentText = scripts[index].text;
-    final nextText = index < scripts.length - 1 ? scripts[index + 1].text : '';
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _ScriptLine(text: prevText, isHighlight: false),
-        const SizedBox(height: 10),
-        _ScriptLine(text: currentText, isHighlight: true),
-        const SizedBox(height: 10),
-        _ScriptLine(text: nextText, isHighlight: false),
-      ],
-    );
-  }
-}
-
 class _ScriptLine extends StatelessWidget {
-  const _ScriptLine({required this.text, required this.isHighlight});
+  const _ScriptLine({required this.text, required this.emphasis});
 
   final String text;
-  final bool isHighlight;
+  final double emphasis;
 
   @override
   Widget build(BuildContext context) {
     const double lineBoxHeight = 44;
+    final clamped = emphasis.clamp(0.0, 1.0);
+    final Color baseColor =
+        text.isEmpty ? Colors.transparent : Color.lerp(AppColors.gray2, AppColors.gray4, clamped)!;
+    final double fontSize = lerpDouble(14, 15, clamped)!;
+
     return SizedBox(
       height: lineBoxHeight,
       child: Center(
@@ -167,11 +223,10 @@ class _ScriptLine extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: isHighlight
-                ? Colors.white
-                : (text.isEmpty ? Colors.transparent : Colors.white70),
-            fontWeight: isHighlight ? FontWeight.w700 : FontWeight.w500,
-            fontSize: isHighlight ? 16 : 15,
+            fontFamily: detailFontFamily,
+            color: baseColor,
+            fontWeight: FontWeight.w500,
+            fontSize: fontSize,
             height: 1.4,
           ),
         ),

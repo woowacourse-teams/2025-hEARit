@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../detail_font.dart';
 import '../hearit_detail.dart';
 
 class SourceCard extends StatelessWidget {
@@ -14,8 +16,8 @@ class SourceCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C),
-        borderRadius: BorderRadius.circular(10),
+        color: AppColors.gray1,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,7 +25,8 @@ class SourceCard extends StatelessWidget {
           Text(
             '출처',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Colors.white,
+              fontFamily: detailFontFamily,
+              color: AppColors.gray3,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -31,9 +34,11 @@ class SourceCard extends StatelessWidget {
           if (sources.isEmpty)
             Text(
               '출처 정보가 없어요.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontFamily: detailFontFamily,
+                color: AppColors.gray2,
+                fontWeight: FontWeight.w500,
+              ),
             )
           else
             ...sources.map(
@@ -53,7 +58,9 @@ class SourceCard extends StatelessWidget {
                               source.sourceName,
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                    color: Colors.white70,
+                                    fontFamily: detailFontFamily,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.gray2,
                                     decoration: TextDecoration.none,
                                   ),
                             )
@@ -63,9 +70,11 @@ class SourceCard extends StatelessWidget {
                                 source.sourceName,
                                 style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
-                                      color: const Color(0xFFB5C6FF),
+                                      fontFamily: detailFontFamily,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.gray2,
                                       decoration: TextDecoration.underline,
-                                      decorationColor: const Color(0xFFB5C6FF),
+                                      decorationColor: AppColors.gray2,
                                     ),
                               ),
                             ),

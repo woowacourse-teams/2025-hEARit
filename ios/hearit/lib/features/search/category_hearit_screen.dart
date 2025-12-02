@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
 import '../detail/hearit_detail.dart';
 import '../detail/hearit_detail_screen.dart';
@@ -34,7 +35,7 @@ class _CategoryHearitScreenState extends State<CategoryHearitScreen> {
     final Color accent = widget.category.color;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
+      backgroundColor: AppColors.hearitBlack,
       body: Column(
         children: [
           Container(

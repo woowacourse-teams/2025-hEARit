@@ -50,16 +50,26 @@ class HearitDetailViewModel extends ChangeNotifier {
   HearitPlayerController get playerController => _playerController;
   Duration? _resumePosition;
 
-  final List<double> _speedOptions = [0.75, 1.0, 1.25, 1.5];
-  int _speedIndex = 1;
+  final List<double> _speedOptions = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+  ];
+  int _speedIndex = 2;
   bool _bookmarked;
   List<ScriptLine> _scripts = [];
   bool _initialLoading = true;
   static Future<Uri>? _artworkUriFuture;
 
   bool get isBookmarked => _bookmarked;
-  String get speedLabel => '${_currentSpeed.toStringAsFixed(1)}x';
+  String get speedLabel => '${_formatSpeedLabel(_currentSpeed)}x';
   double get _currentSpeed => _speedOptions[_speedIndex];
+  double get currentSpeed => _currentSpeed;
+  List<double> get speedOptions => List.unmodifiable(_speedOptions);
   List<ScriptLine> get scripts => _scripts;
   bool get isInitialLoading => _initialLoading;
 
@@ -151,10 +161,21 @@ class HearitDetailViewModel extends ChangeNotifier {
 
   Future<void> togglePlayback() => _playerController.togglePlayback();
 
-  Future<void> cycleSpeed() async {
-    _speedIndex = (_speedIndex + 1) % _speedOptions.length;
+  Future<void> setSpeed(double speed) async {
+    final int index = _speedOptions.indexWhere((value) => value == speed);
+    if (index == -1) return;
+    _speedIndex = index;
     await _playerController.setSpeed(_currentSpeed);
     notifyListeners();
+  }
+
+  String _formatSpeedLabel(double speed) {
+    final int hundred = (speed * 100).round();
+    final int remainder = hundred % 100;
+    if (remainder == 0 || remainder == 50) {
+      return speed.toStringAsFixed(1);
+    }
+    return speed.toStringAsFixed(2);
   }
 
   String formatDuration(Duration duration) {

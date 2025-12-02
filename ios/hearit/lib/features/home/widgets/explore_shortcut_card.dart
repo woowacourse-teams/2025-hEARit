@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
 class ExploreShortcutCard extends StatelessWidget {
   const ExploreShortcutCard({super.key, this.onTap});
@@ -39,7 +40,7 @@ class ExploreShortcutCard extends StatelessWidget {
                     Text(
                       '숏캐스트를 구경하고',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
+                        color: AppColors.gray4,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -48,7 +49,7 @@ class ExploreShortcutCard extends StatelessWidget {
                     Text(
                       '더 많은 팟캐스트를 북마크해보세요!',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: AppColors.gray4.withOpacity(0.9),
                         fontSize: 16,
                         height: 1.2,
                       ),
@@ -60,12 +61,12 @@ class ExploreShortcutCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: AppColors.gray4.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.arrow_forward_rounded,
-                  color: Colors.white,
+                  color: AppColors.gray4,
                   size: 28,
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
 import '../home_models.dart';
 
@@ -7,11 +8,13 @@ class CategorySection extends StatelessWidget {
     super.key,
     required this.sections,
     required this.onHearitTap,
+    this.onCategoryTap,
   });
 
   final List<CategorySectionData> sections;
   final void Function(CategorySectionData section, CategoryPodcastData podcast)
       onHearitTap;
+  final void Function(CategorySectionData section)? onCategoryTap;
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +22,8 @@ class CategorySection extends StatelessWidget {
       return Text(
         '아직 추천 카테고리가 없습니다.',
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white70,
-            ),
+          color: AppColors.gray4.withOpacity(0.7),
+        ),
       );
     }
 
@@ -32,7 +35,11 @@ class CategorySection extends StatelessWidget {
           padding: EdgeInsets.only(
             bottom: index == sections.length - 1 ? 0 : 26,
           ),
-          child: CategoryBlock(data: data, onHearitTap: onHearitTap),
+          child: CategoryBlock(
+            data: data,
+            onHearitTap: onHearitTap,
+            onCategoryTap: onCategoryTap,
+          ),
         );
       }),
     );
@@ -44,11 +51,13 @@ class CategoryBlock extends StatelessWidget {
     super.key,
     required this.data,
     required this.onHearitTap,
+    required this.onCategoryTap,
   });
 
   final CategorySectionData data;
   final void Function(CategorySectionData section, CategoryPodcastData podcast)
       onHearitTap;
+  final void Function(CategorySectionData section)? onCategoryTap;
 
   @override
   Widget build(BuildContext context) {
@@ -57,20 +66,34 @@ class CategoryBlock extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(
-              child: Text(
-                '${data.categoryName} 카테고리',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontSize: 21,
-                      fontWeight: FontWeight.bold,
+            Flexible(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => onCategoryTap?.call(data),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        '${data.categoryName} 카테고리',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: AppColors.gray4,
+                              fontSize: 21,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
                     ),
+                    const SizedBox(width: 6),
+                    Icon(Icons.chevron_right, color: AppColors.gray4, size: 28),
+                  ],
+                ),
               ),
             ),
-            Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.9)),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         SizedBox(
           height: 142,
           child: ListView.separated(
@@ -113,15 +136,8 @@ class CategoryPodcastCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: const Color(0xFF2A2A33),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 14,
-                offset: const Offset(0, 10),
-              ),
-            ],
+            color: AppColors.gray1,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,11 +146,11 @@ class CategoryPodcastCard extends StatelessWidget {
                 child: Text(
                   podcast.title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        height: 1.3,
-                      ),
+                    color: AppColors.gray4,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    height: 1.3,
+                  ),
                 ),
               ),
               const SizedBox(height: 18),

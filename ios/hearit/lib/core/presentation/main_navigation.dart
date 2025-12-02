@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
-import '../../features/home/home_screen.dart';
 import '../../features/explore/explore_screen.dart';
+import '../../features/home/home_screen.dart';
 import '../../features/search/search_screen.dart';
 import '../../features/setting/setting_screen.dart';
 
@@ -30,7 +31,9 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-    _exploreRouteObserver = _TabRouteObserver(onStackChanged: _onExploreStackChanged);
+    _exploreRouteObserver = _TabRouteObserver(
+      onStackChanged: _onExploreStackChanged,
+    );
   }
 
   void _onExploreStackChanged() {
@@ -75,7 +78,7 @@ class _MainNavigationState extends State<MainNavigation> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: const Color(0xFF1F1F1F),
+        backgroundColor: AppColors.hearitBlack,
         body: Column(
           children: [
             Expanded(
@@ -120,8 +123,8 @@ class _MainNavigationState extends State<MainNavigation> {
                       enabledThumbRadius: 0,
                     ),
                     overlayShape: SliderComponentShape.noOverlay,
-                    activeTrackColor: const Color(0xFFA86BFF),
-                    inactiveTrackColor: const Color(0xFF555555),
+                    activeTrackColor: AppColors.hearitPurple2,
+                    inactiveTrackColor: AppColors.gray2,
                     thumbColor: Colors.transparent,
                   ),
                   child: Slider(
@@ -142,7 +145,7 @@ class _MainNavigationState extends State<MainNavigation> {
                 context: context,
                 removeBottom: true,
                 child: Container(
-                  color: const Color(0xFF2C2C2C),
+                  color: AppColors.gray1,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                     child: BottomNavigationBar(
@@ -159,13 +162,13 @@ class _MainNavigationState extends State<MainNavigation> {
                               icon: _NavVisual(
                                 icon: item.icon,
                                 label: item.label,
-                                color: const Color(0xFFBFBFBF),
+                                color: AppColors.gray4,
                                 iconSize: 34,
                               ),
                               activeIcon: _NavVisual(
                                 icon: item.icon,
                                 label: item.label,
-                                color: const Color(0xFFA86BFF),
+                                color: AppColors.hearitPurple1,
                                 iconSize: 34,
                               ),
                               label: item.label,
@@ -295,12 +298,12 @@ class _PlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1F1F1F),
+      color: AppColors.hearitBlack,
       alignment: Alignment.center,
       child: Text(
         '$label 화면 준비 중',
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: Colors.white70,
+          color: AppColors.gray4.withOpacity(0.7),
           fontWeight: FontWeight.w600,
         ),
       ),

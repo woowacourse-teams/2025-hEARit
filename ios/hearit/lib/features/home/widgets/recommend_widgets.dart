@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
 import '../home_models.dart';
 
@@ -31,10 +32,10 @@ class RecommendCard extends StatelessWidget {
             Text(
               data.categoryName,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                  ),
+                color: AppColors.gray4,
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -46,9 +47,9 @@ class RecommendCard extends StatelessWidget {
                   height: 200,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
+                    return Icon(
                       Icons.music_note,
-                      color: Colors.white54,
+                      color: AppColors.gray4.withOpacity(0.54),
                       size: 100,
                     );
                   },
@@ -59,10 +60,10 @@ class RecommendCard extends StatelessWidget {
             Text(
               data.title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
+                color: AppColors.gray4,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -94,7 +95,7 @@ class RecommendIndicator extends StatelessWidget {
 
         final double width = isActive ? 11.0 : 9.0;
         final Color color = isActive
-            ? const Color(0xFFA86BFF)
+            ? AppColors.hearitPurple1
             : const Color(0xFFB2B4B6);
 
         return AnimatedContainer(

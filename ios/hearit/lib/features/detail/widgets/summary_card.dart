@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
+import '../detail_font.dart';
 import '../hearit_detail.dart';
 
 class SummaryCard extends StatelessWidget {
@@ -14,8 +16,8 @@ class SummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C),
-        borderRadius: BorderRadius.circular(10),
+        color: AppColors.gray1,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,7 +25,8 @@ class SummaryCard extends StatelessWidget {
           Text(
             '요약',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Colors.white,
+              fontFamily: detailFontFamily,
+              color: AppColors.gray3,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -32,16 +35,20 @@ class SummaryCard extends StatelessWidget {
             Text(
               summary,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withOpacity(0.9),
+                fontFamily: detailFontFamily,
+                fontWeight: FontWeight.w500,
+                color: AppColors.gray2,
                 height: 1.45,
               ),
             )
           else
             Text(
               '요약이 없습니다.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontFamily: detailFontFamily,
+                fontWeight: FontWeight.w500,
+                color: Colors.white70,
+              ),
             ),
           if (keywords.isNotEmpty) ...[
             const SizedBox(height: 10),
@@ -56,14 +63,15 @@ class SummaryCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF3A3A3A),
+                        color: AppColors.darkGray,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '#${k.name}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                          fontFamily: detailFontFamily,
+                          color: AppColors.gray4,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),

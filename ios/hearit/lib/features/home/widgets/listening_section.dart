@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
 import '../home_models.dart';
+import '../home_font.dart';
 
 class ListeningSection extends StatelessWidget {
   const ListeningSection({
@@ -28,13 +30,17 @@ class ListeningSection extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontFamily: homeTitleFontFamily,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: AppColors.gray4,
                   fontSize: title.contains('북마크') ? 22 : 20,
                 ),
               ),
               if (showChevron)
-                Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.9)),
+                Icon(
+                  Icons.chevron_right,
+                  color: AppColors.gray4.withOpacity(0.9),
+                ),
             ],
           ),
           const SizedBox(height: 10),
@@ -42,7 +48,9 @@ class ListeningSection extends StatelessWidget {
             '아직 준비된 항목이 없습니다.',
             style: Theme.of(
               context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+            ).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.gray4.withOpacity(0.7),
+                ),
           ),
           const SizedBox(height: 16),
         ],
@@ -58,13 +66,17 @@ class ListeningSection extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontFamily: homeTitleFontFamily,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.gray4,
                 fontSize: title.contains('북마크') ? 22 : 20,
               ),
             ),
             if (showChevron)
-              Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.9)),
+              Icon(
+                Icons.chevron_right,
+                color: AppColors.gray4.withOpacity(0.9),
+              ),
           ],
         ),
         const SizedBox(height: 18),
@@ -115,13 +127,13 @@ class ListeningCard extends StatelessWidget {
                 ],
               ),
               child: Center(
-                child: Text(
-                  data.title,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 24,
+              child: Text(
+                data.title,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.gray4,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 24,
                     letterSpacing: 0.4,
                   ),
                 ),
@@ -131,7 +143,7 @@ class ListeningCard extends StatelessWidget {
             Text(
               data.description,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFFEFF1F2),
+                color: AppColors.gray4,
                 fontSize: 16,
                 height: 1.4,
                 fontWeight: FontWeight.bold,

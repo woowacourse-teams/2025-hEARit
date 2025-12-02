@@ -71,6 +71,22 @@ flutter:
     - assets/images/detail_LP.png
     - assets/images/explore_LP.png
 
+  fonts:
+    - family: PretendardBold
+      fonts:
+        - asset: assets/fonts/pretendardbold.ttf
+          weight: 700
+    - family: PromptExtraBold
+      fonts:
+        - asset: assets/fonts/promptextrabold.ttf
+          weight: 800
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/pretendardmedium.ttf
+          weight: 500
+        - asset: assets/fonts/pretendardbold.ttf
+          weight: 700
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

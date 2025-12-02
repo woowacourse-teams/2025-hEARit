@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
 class ExploreHighlightBanner extends StatelessWidget {
   const ExploreHighlightBanner({super.key, required this.text});
@@ -11,29 +12,29 @@ class ExploreHighlightBanner extends StatelessWidget {
     final parts = text.split(highlightPhrase);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.gray1,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Colors.white70,
-            fontSize: 15,
+            fontSize: 13,
             height: 1.4,
           ),
           children: [
             TextSpan(text: parts.first),
             TextSpan(
               text: highlightPhrase,
-              style: const TextStyle(color: Color(0xFFA86BFF)),
+              style: const TextStyle(color: AppColors.hearitPurple1),
             ),
             if (parts.length > 1)
               TextSpan(
                 text: parts.sublist(1).join(highlightPhrase),
-                style: TextStyle(color: Colors.white.withOpacity(0.85)),
+                style: TextStyle(color: AppColors.gray4),
               ),
           ],
         ),
@@ -57,7 +58,7 @@ class ExploreKeywords extends StatelessWidget {
             (keyword) => Text(
               '#$keyword',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
+                color: AppColors.gray2,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -68,15 +69,56 @@ class ExploreKeywords extends StatelessWidget {
   }
 }
 
-class ExploreCover extends StatelessWidget {
+class ExploreCover extends StatefulWidget {
   const ExploreCover({
     super.key,
     required this.categoryColor,
     required this.assetPath,
+    this.isPlaying = false,
   });
 
   final Color categoryColor;
   final String assetPath;
+  final bool isPlaying;
+
+  @override
+  State<ExploreCover> createState() => _ExploreCoverState();
+}
+
+class _ExploreCoverState extends State<ExploreCover>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 6),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _syncSpin();
+  }
+
+  @override
+  void didUpdateWidget(covariant ExploreCover oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isPlaying != widget.isPlaying) {
+      _syncSpin();
+    }
+  }
+
+  void _syncSpin() {
+    if (widget.isPlaying) {
+      _controller.repeat();
+    } else {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,22 +135,28 @@ class ExploreCover extends StatelessWidget {
               Align(
                 alignment: Alignment.center,
                 child: Transform.translate(
-                  offset: const Offset(0, 0),
+                  offset: const Offset(0, -40),
                   child: Container(
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: categoryColor,
+                      color: widget.categoryColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
               ),
-              Image.asset(
-                assetPath,
-                height: 400,
-                width: 400,
-                fit: BoxFit.contain,
+              Transform.translate(
+                offset: const Offset(0, -50),
+                child: RotationTransition(
+                  turns: _controller,
+                  child: Image.asset(
+                    widget.assetPath,
+                    height: 300,
+                    width: 300,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ],
           ),
@@ -134,13 +182,11 @@ class ExploreContinueButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF3A3A3F),
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.gray1,
+          foregroundColor: AppColors.gray4,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         onPressed: onPressed,
         child: Row(
@@ -149,7 +195,7 @@ class ExploreContinueButton extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white,
+                color: AppColors.gray4,
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
               ),

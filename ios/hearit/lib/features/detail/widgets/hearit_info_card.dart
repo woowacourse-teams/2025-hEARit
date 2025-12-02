@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/theme/app_colors.dart';
 
+import '../detail_font.dart';
 import '../hearit_detail.dart';
 
 class HearitInfoCard extends StatelessWidget {
@@ -18,7 +20,7 @@ class HearitInfoCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
+        padding: const EdgeInsets.fromLTRB(22, 4, 22, 8),
         decoration: BoxDecoration(
           color: detail.accentColor,
           borderRadius: BorderRadius.circular(8),
@@ -35,20 +37,23 @@ class HearitInfoCard extends StatelessWidget {
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
-                final double imageSize = constraints.maxWidth.clamp(0.0, 260.0);
+                final double imageSize = constraints.maxWidth.clamp(0.0, 240.0);
                 return Center(
-                  child: Image.asset(
-                    'assets/images/detail_LP.png',
-                    width: imageSize,
-                    height: imageSize,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.music_note_rounded,
-                        color: Colors.white70,
-                        size: 120,
-                      );
-                    },
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 15),
+                    child: Image.asset(
+                      'assets/images/detail_LP.png',
+                      width: imageSize,
+                      height: imageSize,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.music_note_rounded,
+                          color: Colors.white70,
+                          size: 120,
+                        );
+                      },
+                    ),
                   ),
                 );
               },
@@ -56,7 +61,8 @@ class HearitInfoCard extends StatelessWidget {
             Text(
               detail.title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white,
+                fontFamily: detailFontFamily,
+                color: AppColors.gray4,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 height: 1.35,
@@ -66,9 +72,10 @@ class HearitInfoCard extends StatelessWidget {
             Text(
               formatDate(detail.createdAt),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withOpacity(0.85),
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
+                fontFamily: detailFontFamily,
+                color: AppColors.gray4,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
