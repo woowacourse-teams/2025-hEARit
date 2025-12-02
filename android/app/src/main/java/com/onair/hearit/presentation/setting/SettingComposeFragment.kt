@@ -42,7 +42,7 @@ class SettingComposeFragment : Fragment() {
                             ),
                         )
                     },
-                    onLogout = { mainViewModel.performLogout() },
+                    onLogout = { mainViewModel.logout() },
                     onWithdraw = { mainViewModel.withdraw() },
                 )
             }
