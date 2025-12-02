@@ -37,9 +37,9 @@ class UserRepositoryImpl(
                     .mapOrThrowDomain { it.toDomain() }
                     .getOrThrow()
 
-            // 4️⃣ 캐시 업데이트 (락)
-            mutex.withLock { cachedUserInfo = remote }
+            // 4️⃣ 로컬 저장 후 캐시 업데이트
             userLocalDataSource.saveUserInfo(remote).getOrThrow()
+            mutex.withLock { cachedUserInfo = remote }
 
             remote
         }
