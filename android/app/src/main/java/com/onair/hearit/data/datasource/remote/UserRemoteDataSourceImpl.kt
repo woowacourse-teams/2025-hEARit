@@ -7,10 +7,10 @@ import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.UserInfoResponse
 
-class MemberRemoteDataSourceImpl(
+class UserRemoteDataSourceImpl(
     private val memberService: MemberService,
     private val errorResponseHandler: ErrorResponseHandler,
-) : MemberRemoteDataSource {
+) : UserRemoteDataSource {
     override suspend fun getUserInfo(): Result<NetworkResult<UserInfoResponse>> =
         handleApiCall(
             apiCall = { memberService.getUserInfo() },

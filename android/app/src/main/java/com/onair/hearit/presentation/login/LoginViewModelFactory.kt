@@ -2,14 +2,13 @@ package com.onair.hearit.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.onair.hearit.di.DataSourceProvider
-import com.onair.hearit.di.RepositoryProvider
+import com.onair.hearit.di.UseCaseProvider
 
 @Suppress("UNCHECKED_CAST")
 class LoginViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val preferencesLocalDataSource = DataSourceProvider.preferencesLocalDataSource
-        val authRepository = RepositoryProvider.authRepository
-        return LoginViewModel(preferencesLocalDataSource, authRepository) as T
+        val kakaoLoginUseCase = UseCaseProvider.kakaoLoginUseCase
+        val saveTokenUseCase = UseCaseProvider.saveTokenUseCase
+        return LoginViewModel(kakaoLoginUseCase, saveTokenUseCase) as T
     }
 }

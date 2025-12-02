@@ -5,11 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.DomainException.UserNotRegistered
+import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
-import com.onair.hearit.domain.repository.MemberRepository
+import com.onair.hearit.domain.repository.UserRepository
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.library.BookmarkUiState.LoggedIn
 import com.onair.hearit.presentation.library.BookmarkUiState.NoBookmarks
@@ -19,7 +19,7 @@ import timber.log.Timber
 
 class LibraryViewModel(
     private val bookmarkRepository: BookmarkRepository,
-    private val memberRepository: MemberRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     private val _bookmarks = MutableLiveData<List<Bookmark>>()
     val bookmarks: LiveData<List<Bookmark>> = _bookmarks
@@ -107,7 +107,7 @@ class LibraryViewModel(
 
     private fun getUserInfo() {
         viewModelScope.launch {
-            memberRepository
+            userRepository
                 .getUserInfo()
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo

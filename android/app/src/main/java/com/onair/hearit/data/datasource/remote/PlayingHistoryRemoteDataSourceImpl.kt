@@ -8,10 +8,10 @@ import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.PlayingHistoryRequest
 import com.onair.hearit.data.dto.PlayingHistoryResponse
 
-class PlayingHistoryDataSourceImpl(
+class PlayingHistoryRemoteDataSourceImpl(
     private val playingHistoryService: PlayingHistoryService,
     private val errorResponseHandler: ErrorResponseHandler,
-) : PlayingHistoryDataSource {
+) : PlayingHistoryRemoteDataSource {
     override suspend fun getPlayingHistories(): Result<NetworkResult<List<PlayingHistoryResponse>>> =
         handleApiCall(
             apiCall = { playingHistoryService.getPlayingHistories() },

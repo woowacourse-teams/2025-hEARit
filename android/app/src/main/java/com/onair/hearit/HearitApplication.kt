@@ -10,7 +10,7 @@ import com.onair.hearit.di.DatabaseProvider
 import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.TokenAuthenticatorProvider
 import com.onair.hearit.di.TokenInterceptorProvider
-import com.onair.hearit.presentation.UserIdManager
+import com.onair.hearit.di.UseCaseProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,10 +25,14 @@ class HearitApplication : Application() {
         super.onCreate()
 
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_KEY)
-        initUuid()
+
         DatabaseProvider.init(this)
         DataSourceProvider.init(this)
         RepositoryProvider.init(this)
+
+        initUuid()
+        setAppVersion()
+
         AnalyticsProvider.init(this)
         TokenAuthenticatorProvider.init()
         initialTimber()
@@ -41,9 +45,25 @@ class HearitApplication : Application() {
 
     private fun initUuid() {
         appScope.launch {
-            val uuid = UserIdManager.getOrCreateUserId(applicationContext)
-            TokenInterceptorProvider.setDeviceUuid(uuid)
+            UseCaseProvider
+                .initializeDeviceUuidUseCase()
+                .onSuccess { uuid ->
+                    TokenInterceptorProvider.setDeviceUuid(uuid)
+                }.onFailure { throwable ->
+                    Timber.e(throwable, "Failed to initialize UUID")
+                }
         }
+    }
+
+    private fun setAppVersion() {
+        val versionName =
+            try {
+                packageManager.getPackageInfo(packageName, 0).versionName
+            } catch (e: Exception) {
+                "unknown"
+            }
+
+        TokenInterceptorProvider.setAppVersion(versionName)
     }
 
     private fun initialTimber() {

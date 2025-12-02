@@ -1,6 +1,7 @@
 package com.onair.hearit.domain
 
 import com.onair.hearit.data.datasource.NetworkResult
+import com.onair.hearit.domain.exception.DomainException
 
 object DomainExceptionMapper {
     fun toDomainException(failure: NetworkResult.Failure): Throwable =

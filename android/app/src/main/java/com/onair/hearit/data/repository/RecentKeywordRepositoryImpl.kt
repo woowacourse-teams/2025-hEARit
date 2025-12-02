@@ -12,11 +12,7 @@ class RecentKeywordRepositoryImpl(
     override suspend fun getKeywords(): Result<List<RecentSearch>> =
         hearitLocalDataSource.getKeywords().mapCatching { list -> list.map { it.toDomain() } }
 
-    override suspend fun saveKeyword(keyword: String): Result<Unit> {
-        val timestamp = System.currentTimeMillis()
-        val recentSearch = RecentSearch(term = keyword, searchedAt = timestamp)
-        return hearitLocalDataSource.saveKeyword(recentSearch.toData())
-    }
+    override suspend fun saveKeyword(recentSearch: RecentSearch): Result<Unit> = hearitLocalDataSource.saveKeyword(recentSearch.toData())
 
     override suspend fun clearKeywords(): Result<Int> = hearitLocalDataSource.clearKeywords()
 }

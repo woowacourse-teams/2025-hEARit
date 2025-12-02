@@ -196,8 +196,9 @@ class HomeFragment :
                         !state.isLoading && state.showBookmark,
                     )
 
+                    updateUserInfo(state.userInfo, state.isLoggedIn)
+
                     if (!state.isLoading) {
-                        updateUserInfo(state.userInfo, state.isLoggedIn)
                         updateRecommendSection(state.recommendHearits)
                         updateCategoriesSection(state.recommendationCategories)
                     }
@@ -216,7 +217,7 @@ class HomeFragment :
     }
 
     private fun updateUserInfo(
-        userInfo: UserInfo,
+        userInfo: UserInfo?,
         isLoggedIn: Boolean,
     ) {
         mainViewModel.updateLoginState(isLoggedIn)
