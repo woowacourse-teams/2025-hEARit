@@ -19,34 +19,28 @@ class UserRepositoryImpl(
 
     override suspend fun getUserInfo(): Result<UserInfo> =
         runCatching {
-            // ✅ 한 번에 하나만 실행
-            mutex.withLock {
-                // 1️⃣ 메모리 캐시 확인
-                cachedUserInfo?.let { return@runCatching it }
+            val cached = mutex.withLock { cachedUserInfo }
+            if (cached != null) return@runCatching cached
 
-                // 2️⃣ 로컬에서 시도
-                val local =
-                    userLocalDataSource
-                        .getUserInfo()
-                        .getOrNull()
-
-                if (local != null) {
-                    cachedUserInfo = local
-                    return@withLock local
-                }
-
-                // 3️⃣ 원격에서 가져오기 (예외 발생 가능)
-                val remote =
-                    userRemoteDataSource
-                        .getUserInfo()
-                        .mapOrThrowDomain { it.toDomain() }
-                        .getOrThrow()
-
-                // 원격 정상 응답 → 로컬 반영 + 캐시 갱신
-                userLocalDataSource.saveUserInfo(remote).getOrThrow()
-                cachedUserInfo = remote
-                remote
+            // 2️⃣ 로컬 시도 (락 없음)
+            val local = userLocalDataSource.getUserInfo().getOrNull()
+            if (local != null) {
+                mutex.withLock { cachedUserInfo = local }
+                return@runCatching local
             }
+
+            // 3️⃣ 네트워크 호출 (락 없음)
+            val remote =
+                userRemoteDataSource
+                    .getUserInfo()
+                    .mapOrThrowDomain { it.toDomain() }
+                    .getOrThrow()
+
+            // 4️⃣ 캐시 업데이트 (락)
+            mutex.withLock { cachedUserInfo = remote }
+            userLocalDataSource.saveUserInfo(remote).getOrThrow()
+
+            remote
         }
 
     override suspend fun getOrCreateDeviceId(): Result<String> =
