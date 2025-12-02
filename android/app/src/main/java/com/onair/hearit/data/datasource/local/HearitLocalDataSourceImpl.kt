@@ -3,8 +3,9 @@ package com.onair.hearit.data.datasource.local
 import com.onair.hearit.data.database.HearitDao
 import com.onair.hearit.data.database.RecentHearitEntity
 import com.onair.hearit.data.database.SearchHistoryEntity
+import javax.inject.Inject
 
-class HearitLocalDataSourceImpl(
+class HearitLocalDataSourceImpl @Inject constructor(
     private val hearitDao: HearitDao,
 ) : HearitLocalDataSource {
     override suspend fun getRecentHearit(): Result<RecentHearitEntity?> = runCatching { hearitDao.getRecentHearit() }

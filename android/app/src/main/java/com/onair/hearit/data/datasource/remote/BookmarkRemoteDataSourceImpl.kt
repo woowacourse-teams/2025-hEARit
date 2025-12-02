@@ -7,8 +7,9 @@ import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.BookmarkIdResponse
 import com.onair.hearit.data.dto.BookmarkResponse
+import javax.inject.Inject
 
-class BookmarkRemoteDataSourceImpl(
+class BookmarkRemoteDataSourceImpl @Inject constructor(
     private val bookmarkService: BookmarkService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : BookmarkRemoteDataSource {

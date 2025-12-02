@@ -7,8 +7,9 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.onair.hearit.domain.model.UserInfo
 import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
-class UserLocalDataSourceImpl(
+class UserLocalDataSourceImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) : UserLocalDataSource {
     override suspend fun getDeviceId(): Result<String> =

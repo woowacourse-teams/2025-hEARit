@@ -11,6 +11,7 @@ import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.TokenAuthenticatorProvider
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.di.UseCaseProvider
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,6 +19,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+@HiltAndroidApp
 class HearitApplication : Application() {
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
