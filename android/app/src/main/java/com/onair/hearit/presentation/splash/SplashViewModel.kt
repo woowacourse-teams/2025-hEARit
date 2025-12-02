@@ -9,8 +9,8 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.TokenInterceptorProvider
-import com.onair.hearit.domain.DomainException.NetworkConnection
-import com.onair.hearit.domain.DomainException.UserNotRegistered
+import com.onair.hearit.domain.exception.DomainException.NetworkConnection
+import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.delay
@@ -50,7 +50,7 @@ class SplashViewModel(
         authRepository
             .checkAccessToken(accessToken)
             .onSuccess {
-                val saved = authRepository.saveToken(accessToken).isSuccess
+                val saved = authRepository.saveAccessToken(accessToken).isSuccess
                 if (!saved) {
                     Timber.w("accessToken 저장에 실패했습니다.")
                 }

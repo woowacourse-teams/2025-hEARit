@@ -5,13 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
-import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
-import com.onair.hearit.domain.repository.AuthRepository
-import com.onair.hearit.domain.repository.RecentHearitRepository
+import com.onair.hearit.domain.usecase.GetRecentHearitUseCase
+import com.onair.hearit.domain.usecase.auth.LogoutUseCase
+import com.onair.hearit.domain.usecase.auth.WithdrawUseCase
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.splash.SplashActivity
@@ -21,9 +20,9 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MainViewModel(
-    private val authRepository: AuthRepository,
-    private val preferencesLocalDataSource: PreferencesLocalDataSource,
-    private val recentHearitRepository: RecentHearitRepository,
+    private val getRecentHearitUseCase: GetRecentHearitUseCase,
+    private val logoutUseCase: LogoutUseCase,
+    private val withdrawUseCase: WithdrawUseCase,
 ) : ViewModel() {
     private val _recentHearit = MutableLiveData<RecentHearit?>()
     val recentHearit: LiveData<RecentHearit?> = _recentHearit
@@ -37,16 +36,16 @@ class MainViewModel(
     private val _withdrawState = MutableLiveData<Boolean>()
     val withdrawState: LiveData<Boolean> = _withdrawState
 
-    val hearitUpdated = MutableLiveData<Unit>()
-
     private val _categoryUpdated = MutableSharedFlow<Unit>(replay = 0, extraBufferCapacity = 1)
+
     val categoryUpdated: SharedFlow<Unit> = _categoryUpdated
-
     private val _toastMessage = SingleLiveData<Int>()
-    val toastMessage: LiveData<Int> = _toastMessage
 
+    val toastMessage: LiveData<Int> = _toastMessage
     private val _navigateToDetail = SingleLiveData<Long>()
+
     val navigateToDetail: LiveData<Long> = _navigateToDetail
+    val hearitUpdated = MutableLiveData<Unit>()
 
     init {
         fetchRecentHearit()
@@ -60,40 +59,30 @@ class MainViewModel(
         _isLoggedIn.value = isLoggedIn
     }
 
-    fun performLogout() {
-        _isLoggingOut.value = true
+    fun logout() {
+        viewModelScope.launch {
+            _isLoggingOut.value = true
 
-        UserApiClient.instance.logout { error ->
+            logoutUseCase()
+                .onSuccess {
+                    _toastMessage.value = R.string.logout_success
+                    TokenInterceptorProvider.setAccessToken(null)
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.logout_fail
+                }
+
             _isLoggingOut.value = false
-
-            if (error != null) {
-                Timber.w(error)
-                _toastMessage.value = R.string.logout_fail
-            } else {
-                clearData()
-                TokenInterceptorProvider.setAccessToken(null)
-                _toastMessage.value = R.string.logout_success
-            }
         }
     }
 
     fun withdraw() {
         viewModelScope.launch {
-            authRepository
-                .withdraw()
+            withdrawUseCase()
                 .onSuccess {
-                    UserApiClient.instance.unlink { error ->
-                        if (error != null) {
-                            Timber.w(error)
-                            _toastMessage.value = R.string.withdraw_fail
-                            _withdrawState.value = false
-                            return@unlink
-                        }
-
-                        clearData()
-                        _withdrawState.value = true
-                        _toastMessage.value = R.string.withdraw_success
-                    }
+                    TokenInterceptorProvider.setAccessToken(null)
+                    _withdrawState.value = true
+                    _toastMessage.value = R.string.withdraw_success
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _withdrawState.value = false
@@ -104,24 +93,12 @@ class MainViewModel(
 
     private fun fetchRecentHearit() {
         viewModelScope.launch {
-            recentHearitRepository
-                .getRecentHearit()
+            getRecentHearitUseCase()
                 .onSuccess { recent ->
                     _recentHearit.value = recent
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.main_toast_recent_load_fail
-                }
-        }
-    }
-
-    private fun clearData() {
-        viewModelScope.launch {
-            preferencesLocalDataSource
-                .clearData()
-                .onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.main_toast_clear_token_fail
                 }
         }
     }

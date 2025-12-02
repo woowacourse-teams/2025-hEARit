@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.detail
+package com.onair.hearit.presentation.detail.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

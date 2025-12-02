@@ -1,9 +1,10 @@
-package com.onair.hearit.presentation.detail
+package com.onair.hearit.presentation.detail.adapter
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.Keyword
+import com.onair.hearit.presentation.detail.PlayerDetailClickListener
 
 class PlayerDetailKeywordAdapter(
     private val clickListener: PlayerDetailClickListener,

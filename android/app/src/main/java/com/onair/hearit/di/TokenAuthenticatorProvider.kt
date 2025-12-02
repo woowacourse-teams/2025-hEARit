@@ -9,7 +9,7 @@ object TokenAuthenticatorProvider {
     fun init() {
         authenticator =
             TokenAuthenticator(
-                { DataSourceProvider.preferencesLocalDataSource },
+                { DataSourceProvider.authLocalDataSource },
                 { NetworkProvider.authServiceNoAuth },
             )
     }

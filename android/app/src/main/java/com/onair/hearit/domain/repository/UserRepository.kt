@@ -2,6 +2,10 @@ package com.onair.hearit.domain.repository
 
 import com.onair.hearit.domain.model.UserInfo
 
-interface MemberRepository {
+interface UserRepository {
     suspend fun getUserInfo(): Result<UserInfo>
+
+    suspend fun getOrCreateDeviceId(): Result<String>
+
+    suspend fun clearUserData(): Result<Unit>
 }

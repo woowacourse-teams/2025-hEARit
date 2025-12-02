@@ -9,13 +9,13 @@ class HomeViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val bookmarkRepository = RepositoryProvider.bookmarkRepository
         val hearitRepository = RepositoryProvider.hearitRepository
-        val memberRepository = RepositoryProvider.memberRepository
+        val userRepository = RepositoryProvider.userRepository
         val playingHistoryRepository = RepositoryProvider.playingHistoryRepository
         val recommendationRepository = RepositoryProvider.recommendationRepository
         return HomeViewModel(
             bookmarkRepository,
             hearitRepository,
-            memberRepository,
+            userRepository,
             playingHistoryRepository,
             recommendationRepository,
         ) as T

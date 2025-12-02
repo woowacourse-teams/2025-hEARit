@@ -1,7 +1,7 @@
 package com.onair.hearit.data
 
 import com.onair.hearit.data.api.AuthService
-import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
+import com.onair.hearit.data.datasource.local.AuthLocalDataSource
 import com.onair.hearit.data.dto.TokenReissueRequest
 import com.onair.hearit.di.TokenInterceptorProvider
 import kotlinx.coroutines.runBlocking
@@ -12,7 +12,7 @@ import okhttp3.Response
 import okhttp3.Route
 
 class TokenAuthenticator(
-    private val preferenceProvider: () -> PreferencesLocalDataSource,
+    private val authLocalDataSourceProvider: () -> AuthLocalDataSource,
     private val authServiceProvider: () -> AuthService,
 ) : Authenticator {
     private val json =
@@ -70,17 +70,21 @@ class TokenAuthenticator(
     }
 
     private suspend fun refreshToken(): String? {
-        val preferencesLocalDataSource = preferenceProvider()
+        val authLocalDataSource = authLocalDataSourceProvider()
         val authService = authServiceProvider()
         val refreshToken =
-            preferencesLocalDataSource.getRefreshToken().getOrNull() ?: return null
+            authLocalDataSource.getRefreshToken().getOrNull() ?: return null
         return try {
             val response = authService.postRefreshToken(TokenReissueRequest(refreshToken))
-            val tokenResponse = response.body() ?: return null
-            preferencesLocalDataSource.saveAccessToken(tokenResponse.accessToken)
+            val tokenResponse =
+                response.body() ?: run {
+                    authLocalDataSource.clearAuthData()
+                    return null
+                }
+            authLocalDataSource.saveAccessToken(tokenResponse.accessToken)
             tokenResponse.accessToken
         } catch (_: Exception) {
-            preferencesLocalDataSource.clearData()
+            authLocalDataSource.clearAuthData()
             null
         }
     }
