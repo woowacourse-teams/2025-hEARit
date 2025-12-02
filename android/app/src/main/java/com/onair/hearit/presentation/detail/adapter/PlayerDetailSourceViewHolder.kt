@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.detail
+package com.onair.hearit.presentation.detail.adapter
 
 import android.text.SpannableString
 import android.text.Spanned
@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemSourceBinding
 import com.onair.hearit.domain.model.Source
+import com.onair.hearit.presentation.detail.PlayerDetailClickListener
 
 class PlayerDetailSourceViewHolder(
     val binding: ItemSourceBinding,
@@ -21,7 +22,12 @@ class PlayerDetailSourceViewHolder(
         binding.source = source
         val underlined =
             SpannableString(source.name).apply {
-                setSpan(UnderlineSpan(), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                setSpan(
+                    UnderlineSpan(),
+                    0,
+                    this.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+                )
             }
         binding.tvDetailSource.text = underlined
     }

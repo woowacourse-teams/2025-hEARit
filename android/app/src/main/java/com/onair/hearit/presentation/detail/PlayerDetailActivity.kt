@@ -54,6 +54,9 @@ import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
+import com.onair.hearit.presentation.detail.adapter.PlayerDetailKeywordAdapter
+import com.onair.hearit.presentation.detail.adapter.PlayerDetailScriptAdapter
+import com.onair.hearit.presentation.detail.adapter.PlayerDetailSourceAdapter
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
