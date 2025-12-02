@@ -19,6 +19,7 @@ class UserRepositoryImpl(
 
     override suspend fun getUserInfo(): Result<UserInfo> =
         runCatching {
+            // 1️⃣ 캐시 확인 (락)
             val cached = mutex.withLock { cachedUserInfo }
             if (cached != null) return@runCatching cached
 
