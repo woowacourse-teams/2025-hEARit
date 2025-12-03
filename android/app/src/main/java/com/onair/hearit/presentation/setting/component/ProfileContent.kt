@@ -74,16 +74,18 @@ private fun NicknameCard(
     nickname: String,
     modifier: Modifier = Modifier,
 ) {
+    val shape = RoundedCornerShape(24.dp)
+
     Box(
         modifier =
             modifier
                 .border(
                     width = 2.dp,
                     color = HearitPurple1,
-                    shape = RoundedCornerShape(24.dp),
+                    shape = shape,
                 ).background(
                     color = HearitBlack,
-                    shape = RoundedCornerShape(24.dp),
+                    shape = shape,
                 ).padding(horizontal = 60.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -96,12 +98,6 @@ private fun NicknameCard(
     }
 }
 
-@Preview
-@Composable
-private fun NicknameCardPreview() {
-    NicknameCard(nickname = "hEARit")
-}
-
 @Composable
 private fun BottomInfo(
     appVersion: String,
@@ -112,7 +108,7 @@ private fun BottomInfo(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = formatAppVersion(appVersion),
+            text = stringResource(R.string.setting_app_version, appVersion),
             style = HearitTypoGraphy.bodyMedium,
             color = Gray4,
         )
@@ -127,8 +123,6 @@ private fun BottomInfo(
     }
 }
 
-private fun formatAppVersion(version: String): String = "앱 버전 $version"
-
 @Preview(showBackground = true)
 @Composable
 private fun ProfileContentPreview() {
@@ -140,7 +134,19 @@ private fun ProfileContentPreview() {
                     nickname = "hEARit",
                     profileImage = null,
                 ),
-            appVersion = "v1.3.4-DEBUG",
+            appVersion = "1.3.4-DEBUG",
         )
     }
+}
+
+@Preview
+@Composable
+private fun NicknameCardPreview() {
+    NicknameCard(nickname = "hEARit")
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BottomInfoPreview() {
+    BottomInfo(appVersion = "1.3.4")
 }

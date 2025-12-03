@@ -2,6 +2,7 @@
     <string name="app_name">hEARit</string>
     <string name="all_logo">hEARit</string>
     <string name="all_hearit_email">hearit2025@gmail.com</string>
+    <string name="all_app_version">앱 버전 %s</string>
     <string name="all_cancel">취소</string>
     <string name="all_setting">설정</string>
     <string name="all_login">로그인 하러가기</string>

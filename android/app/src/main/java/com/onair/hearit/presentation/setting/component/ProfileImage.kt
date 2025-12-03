@@ -32,17 +32,17 @@ fun ProfileImage(
             Image(
                 painter = painterResource(defaultImage),
                 contentDescription = "프로필 이미지",
-                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
             )
         } else {
             AsyncImage(
                 model = imageUrl,
                 contentDescription = "프로필 이미지",
+                modifier = Modifier.fillMaxSize(),
                 placeholder = painterResource(placeholderImage),
                 error = painterResource(errorImage),
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
             )
         }
     }

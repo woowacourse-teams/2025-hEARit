@@ -37,7 +37,10 @@ fun SettingScreen(
 
     Scaffold(
         topBar = {
-            SettingTopBar(onBackClick = onBackClick)
+            SettingTopBar(
+                title = stringResource(R.string.all_setting),
+                onBackClick = onBackClick,
+            )
         },
         containerColor = HearitBlack,
     ) { padding ->
