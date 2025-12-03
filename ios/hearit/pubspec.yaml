@@ -69,6 +69,7 @@ flutter:
 
   assets:
     - assets/images/LP.png
+    - assets/images/backgroud_LP.png
     - assets/images/detail_LP.png
     - assets/images/explore_LP.png
 

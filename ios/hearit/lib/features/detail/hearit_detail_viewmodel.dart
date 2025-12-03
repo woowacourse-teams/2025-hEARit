@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,7 @@ class HearitDetailViewModel extends ChangeNotifier {
   final DetailRepository _repository;
   HearitPlayerController get playerController => _playerController;
   Duration? _resumePosition;
+  static final Map<int, Future<Uri>> _artworkUriFutures = {};
 
   final List<double> _speedOptions = [
     0.5,
@@ -63,7 +65,6 @@ class HearitDetailViewModel extends ChangeNotifier {
   bool _bookmarked;
   List<ScriptLine> _scripts = [];
   bool _initialLoading = true;
-  static Future<Uri>? _artworkUriFuture;
 
   bool get isBookmarked => _bookmarked;
   String get speedLabel => '${_formatSpeedLabel(_currentSpeed)}x';
@@ -106,7 +107,7 @@ class HearitDetailViewModel extends ChangeNotifier {
     try {
       final url = await _repository.fetchOriginalAudioUrl(_detail.id);
       if (url != null && url.isNotEmpty) {
-        final artUri = await _resolveArtworkUri();
+        final artUri = await _resolveArtworkUri(_detail.category.color);
         await _playerController.loadSource(
           url,
           mediaItem: MediaItem(
@@ -137,13 +138,52 @@ class HearitDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Uri> _resolveArtworkUri() {
-    _artworkUriFuture ??= _loadArtworkUri();
-    return _artworkUriFuture!;
+  Future<Uri> _resolveArtworkUri(Color accentColor) {
+    return _artworkUriFutures.putIfAbsent(
+      accentColor.value,
+      () => _loadArtworkUri(accentColor),
+    );
   }
 
-  Future<Uri> _loadArtworkUri() async {
-    // Copy bundled asset to a temporary file so iOS Now Playing can read it.
+  Future<Uri> _loadArtworkUri(Color accentColor) async {
+    try {
+      final bytes = await rootBundle.load('assets/images/backgroud_LP.png');
+      final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
+      final frame = await codec.getNextFrame();
+      final baseImage = frame.image;
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      final size = Size(baseImage.width.toDouble(), baseImage.height.toDouble());
+      final rect = Offset.zero & size;
+
+      // Fill background with category color, then paint the LP graphic on top to keep its original colors.
+      canvas.drawRect(rect, Paint()..color = accentColor);
+      canvas.drawImageRect(
+        baseImage,
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        rect,
+        Paint(),
+      );
+
+      final picture = recorder.endRecording();
+      final tinted = await picture.toImage(baseImage.width, baseImage.height);
+      final byteData = await tinted.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        return _copyFallbackArtwork();
+      }
+
+      final dir = await getTemporaryDirectory();
+      final hexColor = accentColor.value.toRadixString(16).padLeft(8, '0');
+      final file = File('${dir.path}/detail_LP_$hexColor.png');
+      await file.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
+      return Uri.file(file.path);
+    } catch (_) {
+      return _copyFallbackArtwork();
+    }
+  }
+
+  Future<Uri> _copyFallbackArtwork() async {
     final bytes = await rootBundle.load('assets/images/detail_LP.png');
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/detail_LP.png');

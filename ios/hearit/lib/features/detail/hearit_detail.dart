@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
+
 class HearitSource {
   const HearitSource({required this.sourceName, required this.sourceUrl});
 
@@ -122,7 +124,7 @@ Color _parseColor(String code) {
   final cleaned = code.replaceAll('#', '');
   final value = int.tryParse(cleaned, radix: 16);
   if (value == null) {
-    return const Color(0xFF9533F5);
+    return AppColors.hearitPurple1;
   }
   return Color(0xFF000000 | value);
 }
