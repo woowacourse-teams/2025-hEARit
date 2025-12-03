@@ -81,12 +81,10 @@ private fun NicknameCard(
                     width = 2.dp,
                     color = HearitPurple1,
                     shape = RoundedCornerShape(24.dp),
-                )
-                .background(
+                ).background(
                     color = HearitBlack,
                     shape = RoundedCornerShape(24.dp),
-                )
-                .padding(horizontal = 60.dp, vertical = 12.dp),
+                ).padding(horizontal = 60.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -114,7 +112,7 @@ private fun BottomInfo(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "앱 버전 $appVersion",
+            text = formatAppVersion(appVersion),
             style = HearitTypoGraphy.bodyMedium,
             color = Gray4,
         )
@@ -128,6 +126,8 @@ private fun BottomInfo(
         )
     }
 }
+
+private fun formatAppVersion(version: String): String = "앱 버전 $version"
 
 @Preview(showBackground = true)
 @Composable

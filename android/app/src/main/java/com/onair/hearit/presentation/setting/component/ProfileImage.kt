@@ -20,17 +20,17 @@ import com.onair.hearit.R
 fun ProfileImage(
     imageUrl: String?,
     modifier: Modifier = Modifier,
+    defaultImage: Int = R.drawable.img_default_profile,
+    placeholderImage: Int = R.drawable.img_default_profile,
+    errorImage: Int = R.drawable.img_default_profile,
 ) {
     Box(
-        modifier =
-            modifier
-                .size(120.dp)
-                .clip(CircleShape),
+        modifier = modifier.clip(CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         if (imageUrl.isNullOrEmpty()) {
             Image(
-                painter = painterResource(R.drawable.img_default_profile),
+                painter = painterResource(defaultImage),
                 contentDescription = "프로필 이미지",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -39,8 +39,8 @@ fun ProfileImage(
             AsyncImage(
                 model = imageUrl,
                 contentDescription = "프로필 이미지",
-                placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                error = painterResource(R.drawable.ic_launcher_foreground),
+                placeholder = painterResource(placeholderImage),
+                error = painterResource(errorImage),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -51,5 +51,5 @@ fun ProfileImage(
 @Preview
 @Composable
 fun ProfileImagePreview() {
-    ProfileImage(imageUrl = null)
+    ProfileImage(imageUrl = null, modifier = Modifier.size(120.dp))
 }
