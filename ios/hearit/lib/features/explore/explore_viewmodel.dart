@@ -8,9 +8,11 @@ import 'explore_models.dart';
 import 'explore_repository.dart';
 
 class ExploreViewModel extends ChangeNotifier {
-  ExploreViewModel({ExploreRepository? repository, HearitPlayerController? controller})
-    : _repository = repository ?? ExploreRepository(),
-      playerController = controller! {
+  ExploreViewModel({
+    ExploreRepository? repository,
+    required HearitPlayerController controller,
+  })  : _repository = repository ?? ExploreRepository(),
+        playerController = controller {
     _playerListener = _playerListenerImpl;
     playerController.addListener(_playerListener);
   }
@@ -268,7 +270,6 @@ class ExploreViewModel extends ChangeNotifier {
   @override
   void dispose() {
     playerController.removeListener(_playerListener);
-    playerController.dispose();
     _progressNotifier.dispose();
     super.dispose();
   }

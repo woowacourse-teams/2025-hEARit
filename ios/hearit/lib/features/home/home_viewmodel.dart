@@ -33,13 +33,68 @@ class HomeViewModel extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
+    final List<String> failures = [];
+
+    // Fetch in parallel but isolate failures per section so partial data can render.
+    Future<List<RecommendCardData>> fetchRecommendations() async {
+      try {
+        return await _repository.fetchRecommendations();
+      } catch (error, stack) {
+        debugPrint('HomeViewModel.fetchRecommendations error: $error\n$stack');
+        failures.add('추천');
+        return const [];
+      }
+    }
+
+    Future<List<ListeningCardData>> fetchListeningNow() async {
+      try {
+        return await _repository.fetchListeningNow();
+      } catch (error, stack) {
+        debugPrint('HomeViewModel.fetchListeningNow error: $error\n$stack');
+        failures.add('듣는 중');
+        return const [];
+      }
+    }
+
+    Future<List<ListeningCardData>> fetchRecentlyAdded() async {
+      try {
+        return await _repository.fetchRecentlyAdded();
+      } catch (error, stack) {
+        debugPrint('HomeViewModel.fetchRecentlyAdded error: $error\n$stack');
+        failures.add('최근 추가');
+        return const [];
+      }
+    }
+
+    Future<List<ListeningCardData>> fetchBookmarked() async {
+      try {
+        return await _repository.fetchBookmarked();
+      } catch (error, stack) {
+        debugPrint('HomeViewModel.fetchBookmarked error: $error\n$stack');
+        failures.add('북마크');
+        return const [];
+      }
+    }
+
+    Future<List<CategorySectionData>> fetchCategoryRecommendations() async {
+      try {
+        return await _repository.fetchCategoryRecommendations();
+      } catch (error, stack) {
+        debugPrint(
+          'HomeViewModel.fetchCategoryRecommendations error: $error\n$stack',
+        );
+        failures.add('카테고리 추천');
+        return const [];
+      }
+    }
+
     try {
       final results = await Future.wait([
-        _repository.fetchRecommendations(),
-        _repository.fetchListeningNow(),
-        _repository.fetchRecentlyAdded(),
-        _repository.fetchBookmarked(),
-        _repository.fetchCategoryRecommendations(),
+        fetchRecommendations(),
+        fetchListeningNow(),
+        fetchRecentlyAdded(),
+        fetchBookmarked(),
+        fetchCategoryRecommendations(),
       ]);
 
       _todayRecommendedHearits = results[0] as List<RecommendCardData>;
@@ -47,9 +102,10 @@ class HomeViewModel extends ChangeNotifier {
       _recentlyAddedHearits = results[2] as List<ListeningCardData>;
       _bookmarkedHearits = results[3] as List<ListeningCardData>;
       _curatedCategoryHearits = results[4] as List<CategorySectionData>;
-    } catch (error, stack) {
-      debugPrint('HomeViewModel.loadHome error: $error\n$stack');
-      _error = error.toString();
+
+      if (failures.isNotEmpty) {
+        _error = '${failures.join(', ')} 데이터를 불러오지 못했습니다.';
+      }
     } finally {
       _loading = false;
       notifyListeners();
