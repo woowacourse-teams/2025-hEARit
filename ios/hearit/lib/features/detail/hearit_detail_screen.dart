@@ -113,7 +113,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                             const SizedBox(height: 24),
                             Center(
                               child: SizedBox(
-                                height: 160,
+                                height: ScriptView.preferredHeight,
                                 width: double.infinity,
                                 child: ScriptView(
                                   scripts: _viewModel.scripts,
@@ -182,7 +182,7 @@ class _Skeleton extends StatelessWidget {
               children: [
                 _shimmerBox(height: 360), // HearitInfoCard 영역
                 const SizedBox(height: 24),
-                _shimmerBox(height: 160), // ScriptView 영역
+                _shimmerBox(height: ScriptView.preferredHeight), // ScriptView 영역
                 const SizedBox(height: 12),
                 _shimmerBox(height: 200), // AudioControls 영역
                 const SizedBox(height: 16),

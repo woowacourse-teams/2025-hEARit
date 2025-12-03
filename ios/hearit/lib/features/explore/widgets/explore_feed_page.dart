@@ -74,7 +74,7 @@ class ExploreFeedPage extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
-                height: 170,
+                height: ScriptView.preferredHeight,
                 width: double.infinity,
                 child: ScriptView(
                   scripts: item.scripts ?? const [],

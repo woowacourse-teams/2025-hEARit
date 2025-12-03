@@ -10,6 +10,9 @@ class ScriptView extends StatefulWidget {
 
   final List<ScriptLine> scripts;
   final Duration position;
+  static const double lineHeight = 44;
+  static const double lineSpacing = 10;
+  static const double preferredHeight = lineHeight * 3 + lineSpacing * 2;
 
   @override
   State<ScriptView> createState() => _ScriptViewState();
@@ -21,11 +24,8 @@ class _ScriptViewState extends State<ScriptView>
   late final AnimationController _controller;
   bool _isAnimating = false;
 
-  static const double _lineHeight = 44;
-  static const double _lineSpacing = 10;
-
-  double get _slotExtent => _lineHeight + _lineSpacing;
-  double get _containerHeight => _lineHeight * 3 + _lineSpacing * 2;
+  double get _slotExtent => ScriptView.lineHeight + ScriptView.lineSpacing;
+  double get _containerHeight => ScriptView.preferredHeight;
 
   @override
   void initState() {

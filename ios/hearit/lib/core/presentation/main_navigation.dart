@@ -160,7 +160,41 @@ class _MainNavigationState extends State<MainNavigation> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _currentIndex == 2
-                          ? const SizedBox.shrink()
+                          ? ValueListenableBuilder<double>(
+                              valueListenable:
+                                  ExploreScreenState.progressListenable(),
+                              builder: (context, value, _) {
+                                final isExploreRoot =
+                                    !(_navigatorKeys[2]
+                                            .currentState
+                                            ?.canPop() ??
+                                        false);
+                                if (!isExploreRoot) {
+                                  return const SizedBox.shrink();
+                                }
+                                return SliderTheme(
+                                  data: SliderTheme.of(context).copyWith(
+                                    trackHeight: 5,
+                                    thumbShape: const RoundSliderThumbShape(
+                                      enabledThumbRadius: 0,
+                                    ),
+                                    overlayShape: SliderComponentShape.noOverlay,
+                                    activeTrackColor: AppColors.hearitPurple2,
+                                    inactiveTrackColor: AppColors.gray2,
+                                    thumbColor: Colors.transparent,
+                                  ),
+                                  child: Slider(
+                                    value: value.clamp(0.0, 1.0),
+                                    onChanged:
+                                        ExploreScreenState.updateTempProgress,
+                                    onChangeStart: (_) =>
+                                        ExploreScreenState.beginUserSeek(),
+                                    onChangeEnd: (v) =>
+                                        ExploreScreenState.endUserSeek(v),
+                                  ),
+                                );
+                              },
+                            )
                           : AnimatedBuilder(
                               animation: _playerController,
                               builder: (context, _) {
