@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.UserInfo
@@ -33,7 +34,7 @@ fun SettingScreen(
     val context = LocalContext.current
     val privacyPolicyUrl = stringResource(id = R.string.privacy_policy_url)
     val termsUrl = stringResource(id = R.string.terms_of_use_url)
-    val userInfo by viewModel.userInfo.observeAsState(UserInfo.default())
+    val userInfo by viewModel.userInfo.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {

@@ -35,6 +35,27 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmer_profile"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="40dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shimmer_auto_start="true"
+            app:shimmer_base_color="#1A1A1A"
+            app:shimmer_duration="1000"
+            app:shimmer_highlight_color="#2A2A2A"
+            app:shimmer_shape="radial">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_profile_skeleton" />
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
         <ImageView
             android:id="@+id/iv_library_profile"
             android:layout_width="48dp"
@@ -46,6 +67,7 @@
             app:imageUrl="@{userInfo.profileImage}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:shimmerContainer="@{shimmerProfile}"
             tools:src="@drawable/img_default_profile" />
 
         <TextView

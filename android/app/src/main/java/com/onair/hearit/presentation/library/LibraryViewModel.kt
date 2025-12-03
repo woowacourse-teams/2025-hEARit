@@ -14,6 +14,8 @@ import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.library.BookmarkUiState.LoggedIn
 import com.onair.hearit.presentation.library.BookmarkUiState.NoBookmarks
 import com.onair.hearit.presentation.library.BookmarkUiState.NotLoggedIn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -30,8 +32,11 @@ class LibraryViewModel(
     private val _uiState = MutableLiveData<BookmarkUiState>()
     val uiState: LiveData<BookmarkUiState> = _uiState
 
-    private val _userInfo = MutableLiveData(UserInfo.default())
-    val userInfo: LiveData<UserInfo> = _userInfo
+    private val _userInfo =
+        MutableStateFlow<UserInfo?>(
+            userRepository.getCachedUserInfo(),
+        )
+    val userInfo = _userInfo.asStateFlow()
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -116,6 +121,7 @@ class LibraryViewModel(
                     when (throwable) {
                         is UserNotRegistered -> {
                             _uiState.value = NotLoggedIn
+                            _userInfo.value = UserInfo.default()
                         }
 
                         else -> {
@@ -123,7 +129,6 @@ class LibraryViewModel(
                             _toastMessage.value = R.string.all_toast_user_info_load_fail
                         }
                     }
-                    _userInfo.value = UserInfo.default()
                 }
         }
     }

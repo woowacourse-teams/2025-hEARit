@@ -24,7 +24,7 @@ import com.onair.hearit.presentation.theme.Red
 
 @Composable
 fun SettingContent(
-    userInfo: UserInfo,
+    userInfo: UserInfo?,
     onProfileClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
     onTermsClick: () -> Unit,

@@ -21,8 +21,6 @@ fun ProfileImage(
     imageUrl: String?,
     modifier: Modifier = Modifier,
     defaultImage: Int = R.drawable.img_default_profile,
-    placeholderImage: Int = R.drawable.img_default_profile,
-    errorImage: Int = R.drawable.img_default_profile,
 ) {
     Box(
         modifier = modifier.clip(CircleShape),
@@ -40,8 +38,8 @@ fun ProfileImage(
                 model = imageUrl,
                 contentDescription = "프로필 이미지",
                 modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(placeholderImage),
-                error = painterResource(errorImage),
+                placeholder = painterResource(defaultImage),
+                error = painterResource(defaultImage),
                 contentScale = ContentScale.Crop,
             )
         }

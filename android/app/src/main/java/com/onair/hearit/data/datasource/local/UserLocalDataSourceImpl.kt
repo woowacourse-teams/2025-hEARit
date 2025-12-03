@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.onair.hearit.domain.model.UserInfo
 import kotlinx.coroutines.flow.first
+import timber.log.Timber
 
 class UserLocalDataSourceImpl(
     private val dataStore: DataStore<Preferences>,
@@ -43,11 +44,15 @@ class UserLocalDataSourceImpl(
 
     override suspend fun saveUserInfo(userInfo: UserInfo): Result<Unit> =
         runCatching {
+            Timber.d("💾 DataStore 저장 시도: $userInfo")
             dataStore.edit { preferences ->
                 preferences[LOGGED_USER_ID_KEY] = userInfo.id
                 preferences[NICKNAME_KEY] = userInfo.nickname
-                preferences[PROFILE_URL_KEY] = userInfo.profileImage ?: EMPTY_PROFILE_IMAGE
+                preferences[PROFILE_URL_KEY] = userInfo.profileImage ?: ""
             }
+            Timber.d("✅ DataStore 저장 완료")
+        }.onFailure {
+            Timber.e(it, "❌ DataStore 저장 실패")
         }
 
     override suspend fun clearData(): Result<Unit> =

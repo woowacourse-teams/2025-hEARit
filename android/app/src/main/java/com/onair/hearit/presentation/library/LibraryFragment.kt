@@ -14,7 +14,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -40,6 +42,7 @@ import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOO
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class LibraryFragment :
     Fragment(),
@@ -79,6 +82,7 @@ class LibraryFragment :
     ): View {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
+        binding.userInfo = viewModel.userInfo.value
         binding.rvBookmark.adapter = bookmarkAdapter
         binding.viewModel = viewModel
         return binding.root
@@ -176,8 +180,13 @@ class LibraryFragment :
             binding.uiState = uiState
         }
 
-        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
-            binding.userInfo = userInfo
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userInfo.collect { userInfo ->
+                    Timber.d("🖼️ [collect] $userInfo")
+                    binding.userInfo = userInfo
+                }
+            }
         }
     }
 

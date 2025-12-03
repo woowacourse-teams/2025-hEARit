@@ -13,7 +13,7 @@ data class UserInfo(
             UserInfo(
                 id = -1,
                 nickname = "hEARit",
-                profileImage = "",
+                profileImage = null,
             )
     }
 }

@@ -8,11 +8,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SETTING
 import com.onair.hearit.databinding.FragmentSettingBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.showToast
+import kotlinx.coroutines.launch
 
 class SettingFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -68,8 +72,12 @@ class SettingFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
-            binding.userInfo = userInfo
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userInfo.collect { userInfo ->
+                    binding.userInfo = userInfo
+                }
+            }
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->

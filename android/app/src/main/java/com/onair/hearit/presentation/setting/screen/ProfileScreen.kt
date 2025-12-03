@@ -5,9 +5,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.R
 import com.onair.hearit.presentation.setting.SettingViewModel
 import com.onair.hearit.presentation.setting.component.ProfileContent
@@ -20,7 +20,7 @@ fun ProfileScreen(
     viewModel: SettingViewModel,
     onBackClick: () -> Unit,
 ) {
-    val userInfo by viewModel.userInfo.observeAsState()
+    val userInfo by viewModel.userInfo.collectAsStateWithLifecycle()
     val appVersion = viewModel.appVersion
 
     Scaffold(
