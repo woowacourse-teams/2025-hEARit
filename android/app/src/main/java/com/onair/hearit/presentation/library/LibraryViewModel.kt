@@ -119,7 +119,7 @@ class LibraryViewModel(
                     when (throwable) {
                         is UserNotRegistered -> {
                             _uiState.value = NotLoggedIn
-                            _userInfo.value = UserInfo.default()
+                            _userInfo.value = DEFAULT_USER_INFO
                         }
 
                         else -> {

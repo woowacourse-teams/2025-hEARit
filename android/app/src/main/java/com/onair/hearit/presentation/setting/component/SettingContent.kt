@@ -145,7 +145,7 @@ private fun NotRegisteredSettingScreenPreview() {
 
 @Preview
 @Composable
-fun SettingItemPreview() {
+private fun SettingItemPreview() {
     SettingItem(
         text = "Sample Setting",
         onClick = {},
