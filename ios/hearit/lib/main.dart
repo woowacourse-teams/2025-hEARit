@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'core/audio/audio_handler.dart';
 import 'core/audio/hearit_player_controller.dart';
+import 'core/device/device_uuid_service.dart';
 import 'core/presentation/main_navigation.dart';
 
 const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
@@ -16,6 +17,8 @@ const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(_lightStatusBar);
+  // Warm up device UUID so network calls don't block on first launch.
+  await DeviceUUIDService.getUUID();
   final audioHandler = await AudioService.init(
     builder: () => LocalAudioHandler(),
     config: const AudioServiceConfig(

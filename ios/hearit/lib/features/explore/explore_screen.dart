@@ -22,8 +22,10 @@ class ExploreScreen extends StatefulWidget {
 class ExploreScreenState extends State<ExploreScreen> {
   static ExploreScreenState? _activeInstance;
   static final ValueNotifier<double> _idleProgress = ValueNotifier<double>(0);
+  static final ValueNotifier<String?> _idleTitle = ValueNotifier<String?>(null);
   late final ExploreViewModel _viewModel;
   late final PageController _pageController;
+  late final ValueNotifier<String?> _titleNotifier;
   int _currentIndex = 0;
   IconData? _centerStatusIcon;
   Timer? _overlayTimer;
@@ -31,6 +33,7 @@ class ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
+    _titleNotifier = ValueNotifier<String?>(null);
     _viewModel = ExploreViewModel(
       controller: context.read<HearitPlayerController>(),
     )..addListener(_onViewModelUpdated);
@@ -46,6 +49,7 @@ class ExploreScreenState extends State<ExploreScreen> {
     if (_activeInstance == this) {
       _activeInstance = null;
     }
+    _titleNotifier.dispose();
     _viewModel.removeListener(_onViewModelUpdated);
     _viewModel.dispose();
     _pageController.dispose();
@@ -62,6 +66,14 @@ class ExploreScreenState extends State<ExploreScreen> {
 
   static ValueListenable<double> progressListenable() {
     return _activeInstance?._viewModel.progressNotifier ?? _idleProgress;
+  }
+
+  static ValueListenable<String?> titleListenable() {
+    return _activeInstance?._titleNotifier ?? _idleTitle;
+  }
+
+  static bool isPlaybackEnabled() {
+    return _activeInstance?._viewModel.playbackEnabled ?? false;
   }
 
   static Future<void> seekToFraction(double fraction) async {
@@ -81,7 +93,15 @@ class ExploreScreenState extends State<ExploreScreen> {
   }
 
   void _onViewModelUpdated() {
+    _updateActiveTitle();
     if (mounted) setState(() {});
+  }
+
+  void _updateActiveTitle() {
+    final title = _viewModel.activeItem?.title;
+    if (_titleNotifier.value != title) {
+      _titleNotifier.value = title;
+    }
   }
 
   Future<void> _handleCompleted() async {
@@ -133,7 +153,11 @@ class ExploreScreenState extends State<ExploreScreen> {
     if (!mounted) return;
     await Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => HearitDetailScreen(detail: stub)));
+    ).push(MaterialPageRoute(
+        builder: (_) => HearitDetailScreen(
+              detail: stub,
+              pauseOnExit: true,
+            )));
   }
 
   @override
@@ -166,9 +190,40 @@ class ExploreScreenState extends State<ExploreScreen> {
           },
           child: LayoutBuilder(
             builder: (context, constraints) {
-              if (_viewModel.initialLoading || active == null) {
+              if (_viewModel.initialLoading) {
                 return const Center(
                   child: CircularProgressIndicator(color: Color(0xFFA86BFF)),
+                );
+              }
+
+              if (active == null) {
+                final errorText = _viewModel.initialError ??
+                    '탐색 피드를 불러오지 못했습니다. 다시 시도해 주세요.';
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          errorText,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.gray4,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton(
+                        onPressed: _refreshExplore,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.hearitPurple1,
+                          side: const BorderSide(color: AppColors.hearitPurple1),
+                        ),
+                        child: const Text('다시 시도'),
+                      ),
+                    ],
+                  ),
                 );
               }
               const double horizontalPadding = 22;

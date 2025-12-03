@@ -54,6 +54,7 @@ class HearitPlayerController extends ChangeNotifier {
   Duration get duration => _duration;
   Duration get position => _position;
   double get currentSpeed => _currentSpeed;
+  MediaItem? get currentMediaItem => _currentMediaItem;
 
   bool get isPlaying => _latestState?.playing ?? false;
 

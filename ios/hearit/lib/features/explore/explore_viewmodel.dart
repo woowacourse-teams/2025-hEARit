@@ -26,6 +26,7 @@ class ExploreViewModel extends ChangeNotifier {
   bool _isLoadingPage = false;
   bool _hasMore = true;
   bool _initialLoading = true;
+  String? _initialError;
   int _activeIndex = 0;
   bool _playbackEnabled = false;
   bool _completionHandled = false;
@@ -42,10 +43,12 @@ class ExploreViewModel extends ChangeNotifier {
       _items.isNotEmpty ? _items[_activeIndex] : null;
   int get activeIndex => _activeIndex;
   bool get initialLoading => _initialLoading;
+  String? get initialError => _initialError;
   bool get isLoadingMore => _isLoadingPage && _items.isNotEmpty;
   Duration get position => _position;
   bool get isPlaying => playerController.isPlaying;
   ValueNotifier<double> get progressNotifier => _progressNotifier;
+  bool get playbackEnabled => _playbackEnabled;
 
   final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0);
 
@@ -57,18 +60,29 @@ class ExploreViewModel extends ChangeNotifier {
     _position = Duration.zero;
     _progressNotifier.value = 0;
     _initialLoading = true;
+    _initialError = null;
     notifyListeners();
-    await _fetchPage();
-    _initialLoading = false;
-    notifyListeners();
-    if (_items.isNotEmpty) {
-      await ensureDetailsLoaded(0);
+    try {
+      await _fetchPage();
+      if (_items.isNotEmpty) {
+        await ensureDetailsLoaded(0);
+      }
+    } catch (error, stack) {
+      debugPrint('ExploreViewModel.loadInitial error: $error\n$stack');
+      _initialError = error.toString();
+    } finally {
+      _initialLoading = false;
+      notifyListeners();
     }
   }
 
   Future<void> loadMore() async {
     if (_isLoadingPage || !_hasMore) return;
-    await _fetchPage();
+    try {
+      await _fetchPage();
+    } catch (error, stack) {
+      debugPrint('ExploreViewModel.loadMore error: $error\n$stack');
+    }
   }
 
   Future<void> _fetchPage() async {

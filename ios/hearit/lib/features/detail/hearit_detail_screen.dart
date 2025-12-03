@@ -13,9 +13,14 @@ import 'widgets/source_card.dart';
 import 'widgets/summary_card.dart';
 
 class HearitDetailScreen extends StatefulWidget {
-  const HearitDetailScreen({super.key, required this.detail});
+  const HearitDetailScreen({
+    super.key,
+    required this.detail,
+    this.pauseOnExit = false,
+  });
 
   final HearitDetail detail;
+  final bool pauseOnExit;
 
   @override
   State<HearitDetailScreen> createState() => _HearitDetailScreenState();
@@ -36,8 +41,10 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
 
   @override
   void dispose() {
-    // Stop audio when leaving the detail screen so explore preview can resume cleanly.
-    _viewModel.playerController.pause();
+    if (widget.pauseOnExit) {
+      // Stop audio when leaving the detail screen so explore preview can resume cleanly.
+      _viewModel.playerController.pause();
+    }
     _viewModel.removeListener(_onViewModelUpdated);
     _viewModel.dispose();
     super.dispose();
@@ -48,7 +55,9 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
   }
 
   Future<void> _stopPlayback() async {
-    await _viewModel.playerController.pause();
+    if (widget.pauseOnExit) {
+      await _viewModel.playerController.pause();
+    }
   }
 
   Future<bool> _handleWillPop() async {
