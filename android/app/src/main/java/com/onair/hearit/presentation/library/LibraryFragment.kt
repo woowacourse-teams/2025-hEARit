@@ -42,7 +42,6 @@ import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOO
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class LibraryFragment :
     Fragment(),
@@ -183,7 +182,6 @@ class LibraryFragment :
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.userInfo.collect { userInfo ->
-                    Timber.d("🖼️ [collect] $userInfo")
                     binding.userInfo = userInfo
                 }
             }

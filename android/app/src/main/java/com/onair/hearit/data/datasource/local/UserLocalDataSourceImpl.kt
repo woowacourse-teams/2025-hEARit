@@ -46,7 +46,7 @@ class UserLocalDataSourceImpl(
             dataStore.edit { preferences ->
                 preferences[LOGGED_USER_ID_KEY] = userInfo.id
                 preferences[NICKNAME_KEY] = userInfo.nickname
-                preferences[PROFILE_URL_KEY] = userInfo.profileImage ?: ""
+                preferences[PROFILE_URL_KEY] = userInfo.profileImage ?: EMPTY_PROFILE_IMAGE
             }
         }
 
@@ -68,5 +68,6 @@ class UserLocalDataSourceImpl(
 
         private const val INVALID_USER_ID = -1L
         private const val DEFAULT_NICKNAME = "hEARit"
+        private const val EMPTY_PROFILE_IMAGE = ""
     }
 }

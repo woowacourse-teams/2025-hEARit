@@ -177,23 +177,11 @@ class MainActivity :
                     true
                 }
 
-                else -> false
+                else -> {
+                    false
+                }
             }
         }
-    }
-
-    private fun setupDrawer() {
-//        binding.layoutDrawer.tvDrawerLogout.setOnClickListener {
-//            val stopIntent = PlaybackService.stopIntent(this)
-//            stopService(stopIntent)
-//            mainViewModel.performLogout()
-//        }
-//        binding.layoutDrawer.tvDrawerWithdrawal.setOnClickListener { confirmAndWithdraw() }
-//
-//        binding.layoutDrawer.tvDrawerFeedback.setOnClickListener {
-//            val intent = Intent(Intent.ACTION_VIEW, FEEDBACK_URL.toUri())
-//            startActivity(intent)
-//        }
     }
 
     private fun attachController() {
@@ -262,16 +250,6 @@ class MainActivity :
                     ?.let { navigateToDetail(it) }
             }
         }
-    }
-
-    private fun confirmAndWithdraw() {
-        AlertDialog
-            .Builder(this)
-            .setTitle(R.string.dialog_withdraw_title)
-            .setMessage(R.string.dialog_withdraw_message)
-            .setPositiveButton(R.string.dialog_withdraw) { _, _ -> mainViewModel.withdraw() }
-            .setNegativeButton(R.string.all_cancel, null)
-            .show()
     }
 
     fun showFragment(
