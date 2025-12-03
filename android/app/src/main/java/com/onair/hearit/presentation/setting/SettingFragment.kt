@@ -16,7 +16,6 @@ import com.onair.hearit.presentation.main.MainViewModel
 
 class SettingFragment : Fragment() {
     private val viewModel: SettingViewModel by viewModels { SettingViewModelFactory() }
-
     private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -29,8 +28,8 @@ class SettingFragment : Fragment() {
             setContent {
                 val navController = rememberNavController()
                 SettingNavHost(
-                    navController,
-                    viewModel,
+                    navController = navController,
+                    viewModel = viewModel,
                     onExitSetting = {
                         parentFragmentManager.popBackStack()
                     },
@@ -42,8 +41,8 @@ class SettingFragment : Fragment() {
                             ),
                         )
                     },
-                    onLogout = { mainViewModel.logout() },
-                    onWithdraw = { mainViewModel.withdraw() },
+                    onLogout = mainViewModel::logout,
+                    onWithdraw = mainViewModel::withdraw,
                 )
             }
         }

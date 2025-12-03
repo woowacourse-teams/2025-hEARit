@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.onair.hearit.presentation.setting.SettingRoute.PROFILE
+import com.onair.hearit.presentation.setting.SettingRoute.SETTING
 import com.onair.hearit.presentation.setting.screen.ProfileScreen
 import com.onair.hearit.presentation.setting.screen.SettingScreen
 
@@ -19,29 +21,34 @@ fun SettingNavHost(
     onWithdraw: () -> Unit,
 ) {
     NavHost(
-        navController,
-        startDestination = "setting",
+        navController = navController,
+        startDestination = SETTING,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None },
         popEnterTransition = { EnterTransition.None },
         popExitTransition = { ExitTransition.None },
     ) {
-        composable("setting") {
+        composable(SETTING) {
             SettingScreen(
                 viewModel = viewModel,
                 onBackClick = onExitSetting,
-                onProfileClick = { navController.navigate("profile") },
+                onProfileClick = { navController.navigate(PROFILE) },
                 onLogin = onLogin,
                 onLogout = onLogout,
                 onWithdraw = onWithdraw,
             )
         }
 
-        composable("profile") {
+        composable(PROFILE) {
             ProfileScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
             )
         }
     }
+}
+
+object SettingRoute {
+    const val SETTING = "setting"
+    const val PROFILE = "profile"
 }

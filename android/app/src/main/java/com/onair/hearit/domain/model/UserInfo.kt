@@ -17,3 +17,5 @@ data class UserInfo(
             )
     }
 }
+
+fun UserInfo.isLoggedIn(): Boolean = this.id > 0

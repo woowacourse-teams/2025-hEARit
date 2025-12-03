@@ -14,6 +14,7 @@ class UserRepositoryImpl(
     private val userLocalDataSource: UserLocalDataSource,
     private val userRemoteDataSource: UserRemoteDataSource,
 ) : UserRepository {
+    @Volatile
     private var cachedUserInfo: UserInfo? = null
     private var cachedDeviceId: String? = null
     private val mutex = Mutex()

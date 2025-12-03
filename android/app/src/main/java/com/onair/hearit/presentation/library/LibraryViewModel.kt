@@ -50,7 +50,8 @@ class LibraryViewModel(
     fun refreshBookmarks() {
         nextPage = 0
         _bookmarks.value = emptyList()
-        if (userInfo.value != UserInfo.default()) {
+        val currentUserInfo = userInfo.value
+        if (currentUserInfo != null && currentUserInfo != DEFAULT_USER_INFO) {
             fetchData(page = 0)
         }
     }
@@ -128,5 +129,9 @@ class LibraryViewModel(
                     }
                 }
         }
+    }
+
+    companion object {
+        private val DEFAULT_USER_INFO = UserInfo.default()
     }
 }

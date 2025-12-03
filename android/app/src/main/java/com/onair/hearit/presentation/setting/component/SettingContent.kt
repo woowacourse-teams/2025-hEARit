@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.domain.model.isLoggedIn
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.Red
@@ -62,7 +63,7 @@ fun SettingContent(
             color = Gray4.copy(alpha = 0.5f),
         )
 
-        val isLoggedIn = userInfo != UserInfo.default()
+        val isLoggedIn = userInfo?.isLoggedIn() == true
         if (isLoggedIn) {
             SettingItem(
                 text = stringResource(R.string.setting_logout),
