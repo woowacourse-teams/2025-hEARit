@@ -4,11 +4,12 @@ import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.UserRepository
 import timber.log.Timber
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class LogoutUseCase(
+class LogoutUseCase @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val kakaoClient: UserApiClient = UserApiClient.instance,

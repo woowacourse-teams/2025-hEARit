@@ -5,12 +5,9 @@ import android.util.Log
 import com.kakao.sdk.common.KakaoSdk
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.di.DataSourceProvider
-import com.onair.hearit.di.DatabaseProvider
-import com.onair.hearit.di.RepositoryProvider
 import com.onair.hearit.di.TokenAuthenticatorProvider
 import com.onair.hearit.di.TokenInterceptorProvider
-import com.onair.hearit.di.UseCaseProvider
+import com.onair.hearit.domain.usecase.InitializeDeviceUuidUseCase
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,9 +15,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
 class HearitApplication : Application() {
+    @Inject
+    lateinit var initializeDeviceUuidUseCase: InitializeDeviceUuidUseCase
+
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
@@ -28,9 +29,9 @@ class HearitApplication : Application() {
 
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_KEY)
 
-        DatabaseProvider.init(this)
-        DataSourceProvider.init(this)
-        RepositoryProvider.init(this)
+//        DatabaseProvider.init(this)
+//        DataSourceProvider.init(this)
+//        RepositoryProvider.init(this)
 
         initUuid()
         setAppVersion()
@@ -47,8 +48,7 @@ class HearitApplication : Application() {
 
     private fun initUuid() {
         appScope.launch {
-            UseCaseProvider
-                .initializeDeviceUuidUseCase()
+            initializeDeviceUuidUseCase()
                 .onSuccess { uuid ->
                     TokenInterceptorProvider.setDeviceUuid(uuid)
                 }.onFailure { throwable ->

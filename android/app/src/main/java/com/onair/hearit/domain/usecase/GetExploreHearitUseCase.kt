@@ -2,8 +2,9 @@ package com.onair.hearit.domain.usecase
 
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.repository.MediaFileRepository
+import javax.inject.Inject
 
-class GetExploreHearitUseCase(
+class GetExploreHearitUseCase @Inject constructor(
     private val mediaFileRepository: MediaFileRepository,
 ) {
     suspend operator fun invoke(item: ExploreHearit): Result<ExploreHearit> =
