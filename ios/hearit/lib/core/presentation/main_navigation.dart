@@ -211,19 +211,29 @@ class _MainNavigationState extends State<MainNavigation> {
                                 if (media == null) {
                                   return const SizedBox.shrink();
                                 }
-                                final duration =
+                                final durationMs =
                                     _playerController.duration.inMilliseconds;
-                                final position =
+                                final positionMs =
                                     _playerController.position.inMilliseconds;
-                                final progress = duration > 0
-                                    ? (position / duration).clamp(0.0, 1.0)
+                                final progress = durationMs > 0
+                                    ? (positionMs / durationMs)
+                                        .clamp(0.0, 1.0)
                                     : 0.0;
                                 return _DetailMiniPlayerBar(
                                   title: media.title,
                                   progress: progress,
+                                  durationMs: durationMs,
                                   isPlaying: _playerController.isPlaying,
                                   onTogglePlay: () =>
                                       _playerController.togglePlayback(),
+                                  onSeekFraction: (fraction) {
+                                    if (durationMs <= 0) return;
+                                    final target = Duration(
+                                      milliseconds:
+                                          (durationMs * fraction).round(),
+                                    );
+                                    _playerController.seek(target);
+                                  },
                                   onTap: _openDetailFromMini,
                                 );
                               },
@@ -374,26 +384,40 @@ class _NavVisual extends StatelessWidget {
   }
 }
 
-class _DetailMiniPlayerBar extends StatelessWidget {
+class _DetailMiniPlayerBar extends StatefulWidget {
   const _DetailMiniPlayerBar({
     required this.title,
     required this.progress,
+    required this.durationMs,
     required this.isPlaying,
     required this.onTogglePlay,
     required this.onTap,
+    required this.onSeekFraction,
   });
 
   final String title;
   final double progress;
+  final int durationMs;
   final bool isPlaying;
   final VoidCallback onTogglePlay;
   final VoidCallback onTap;
+  final ValueChanged<double> onSeekFraction;
+
+  @override
+  State<_DetailMiniPlayerBar> createState() => _DetailMiniPlayerBarState();
+}
+
+class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
+  double? _dragValue;
 
   @override
   Widget build(BuildContext context) {
+    final displayProgress =
+        (_dragValue ?? widget.progress).clamp(0.0, 1.0);
+    final canSeek = widget.durationMs > 0;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 12, 0, 8),
         child: Column(
@@ -406,7 +430,7 @@ class _DetailMiniPlayerBar extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      title,
+                      widget.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -418,21 +442,39 @@ class _DetailMiniPlayerBar extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   _PlayPauseButton(
-                    isPlaying: isPlaying,
-                    onToggle: onTogglePlay,
+                    isPlaying: widget.isPlaying,
+                    onToggle: widget.onTogglePlay,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(
-                value: progress.clamp(0.0, 1.0),
-                minHeight: 5,
-                backgroundColor: AppColors.gray2,
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(AppColors.hearitPurple2),
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 5,
+                thumbShape: const RoundSliderThumbShape(
+                  enabledThumbRadius: 0,
+                ),
+                overlayShape: SliderComponentShape.noOverlay,
+                activeTrackColor: AppColors.hearitPurple2,
+                inactiveTrackColor: AppColors.gray2,
+                thumbColor: Colors.transparent,
+              ),
+              child: Slider(
+                value: displayProgress,
+                onChanged: canSeek
+                    ? (v) => setState(() {
+                          _dragValue = v;
+                        })
+                    : null,
+                onChangeEnd: canSeek
+                    ? (v) {
+                        setState(() {
+                          _dragValue = null;
+                        });
+                        widget.onSeekFraction(v);
+                      }
+                    : null,
               ),
             ),
           ],
