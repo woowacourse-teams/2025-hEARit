@@ -32,10 +32,7 @@ class LibraryViewModel(
     private val _uiState = MutableLiveData<BookmarkUiState>()
     val uiState: LiveData<BookmarkUiState> = _uiState
 
-    private val _userInfo =
-        MutableStateFlow<UserInfo?>(
-            userRepository.getCachedUserInfo(),
-        )
+    private val _userInfo = MutableStateFlow(userRepository.getCachedUserInfo())
     val userInfo = _userInfo.asStateFlow()
 
     private val _toastMessage = SingleLiveData<Int>()
@@ -47,7 +44,7 @@ class LibraryViewModel(
     private var nextPage: Int? = 0
 
     init {
-        getUserInfo()
+        fetchUserInfo()
     }
 
     fun refreshBookmarks() {
@@ -110,7 +107,7 @@ class LibraryViewModel(
         }
     }
 
-    private fun getUserInfo() {
+    private fun fetchUserInfo() {
         viewModelScope.launch {
             userRepository
                 .getUserInfo()
