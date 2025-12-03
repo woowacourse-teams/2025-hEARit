@@ -28,11 +28,8 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsEventNames
-import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.databinding.ActivityMainBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.PlaybackStarter
 import com.onair.hearit.presentation.PlayerControllerView
@@ -314,11 +311,6 @@ class MainActivity :
     }
 
     private fun navigateToLogin() {
-        AnalyticsProvider.get().logEvent(
-            AnalyticsEventNames.LOGIN_EVENT,
-            mapOf(AnalyticsParamKeys.SOURCE_NAME to "drawer_login"),
-        )
-
         val intent =
             Intent(this, LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

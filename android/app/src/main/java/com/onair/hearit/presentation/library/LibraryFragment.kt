@@ -35,7 +35,7 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.setting.SettingComposeFragment
+import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
@@ -156,7 +156,7 @@ class LibraryFragment :
         binding.ibSetting.setOnClickListener {
             parentFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container_view, SettingComposeFragment())
+                .replace(R.id.fragment_container_view, SettingFragment())
                 .addToBackStack(null)
                 .commit()
         }
