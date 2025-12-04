@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/analytics/analytics_event_names.dart';
+import 'package:hearit/core/analytics/analytics_param_keys.dart';
+import 'package:hearit/core/analytics/analytics_provider.dart';
 import 'package:hearit/core/theme/app_colors.dart';
 
 import '../detail/hearit_detail.dart';
@@ -34,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _viewModel = HomeViewModel()..addListener(_onViewModelUpdated);
     _viewModel.loadHome();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _logScreenView());
     _pageController = PageController(viewportFraction: 0.6, initialPage: 2);
     _page = _pageController.initialPage.toDouble();
     _pageController.addListener(() {
@@ -84,9 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 340,
                 child: RecommendCard(
                   data: hearit,
-                  onTap: () => _openHearitDetail(
-                    _viewModel.toHearitDetailFromRecommend(hearit),
-                  ),
+                  onTap: () => _onRecommendTap(hearit),
                 ),
               ),
             ),
@@ -122,6 +124,74 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void _logScreenView() {
+    AnalyticsProvider.logger.logEvent('screen_view', params: {
+      AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameHome,
+      AnalyticsParamKeys.screenClass: 'HomeScreen',
+    });
+  }
+
+  void _handleExploreTap() {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.homeExploreSelected,
+    );
+    widget.onExploreTap?.call();
+  }
+
+  void _onRecommendTap(RecommendCardData data) {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.homeRecommendSelected,
+      params: {AnalyticsParamKeys.itemId: data.id.toString()},
+    );
+    _openHearitDetail(_viewModel.toHearitDetailFromRecommend(data));
+  }
+
+  void _onRecentUploadTap(ListeningCardData data) {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.homeRecentUploadSelected,
+      params: {AnalyticsParamKeys.itemId: data.id.toString()},
+    );
+    _openHearitDetail(_viewModel.toHearitDetailFromListening(data));
+  }
+
+  void _onPlayingHistoryTap(ListeningCardData data) {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.homePlayingHistorySelected,
+      params: {AnalyticsParamKeys.itemId: data.id.toString()},
+    );
+    _openHearitDetail(_viewModel.toHearitDetailFromListening(data));
+  }
+
+  void _onPlayingBookmarkTap(ListeningCardData data) {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.homePlayingBookmarkSelected,
+      params: {AnalyticsParamKeys.itemId: data.id.toString()},
+    );
+    _openHearitDetail(_viewModel.toHearitDetailFromListening(data));
+  }
+
+  void _onCategoryTap(CategorySectionData section) {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.homeRecommendationCategorySelected,
+      params: {
+        AnalyticsParamKeys.itemId: section.categoryId.toString(),
+        AnalyticsParamKeys.categoryName: section.categoryName,
+      },
+    );
+    _openCategory(section);
+  }
+
+  void _onCategoryHearitTap(
+    CategorySectionData section,
+    CategoryPodcastData podcast,
+  ) {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.homeRecommendationCategoryHearitSelected,
+      params: {AnalyticsParamKeys.itemId: podcast.id.toString()},
+    );
+    _openHearitDetail(_viewModel.toHearitDetailFromCategory(section, podcast));
   }
 
   @override
@@ -181,11 +251,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemCount: _viewModel.todayRecommendedHearits.length,
                         itemBuilder: (context, index) {
                           final hearit = _viewModel.todayRecommendedHearits[index];
-                          final detail =
-                              _viewModel.toHearitDetailFromRecommend(hearit);
                           return GestureDetector(
                             behavior: HitTestBehavior.translucent,
-                            onTap: () => _openHearitDetail(detail),
+                            onTap: () => _onRecommendTap(hearit),
                             child: const SizedBox.expand(),
                           );
                         },
@@ -207,18 +275,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ListeningSection(
                     title: 'hEARit님이 듣고 있는 팟캐스트',
                     items: _viewModel.listeningNowHearits,
-                    onTap: (data) => _openHearitDetail(
-                      _viewModel.toHearitDetailFromListening(data),
-                    ),
+                    onTap: _onPlayingHistoryTap,
                   ),
                   // const SizedBox(height: 10),
                   ListeningSection(
                     title: '북마크한 팟캐스트를 들어보세요',
                     items: _viewModel.bookmarkedHearits,
                     showChevron: true,
-                    onTap: (data) => _openHearitDetail(
-                      _viewModel.toHearitDetailFromListening(data),
-                    ),
+                    onTap: _onPlayingBookmarkTap,
                   ),
                   // const SizedBox(height: 24),
                 ],
@@ -226,20 +290,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ListeningSection(
                     title: '최근 추가된 팟캐스트',
                     items: _viewModel.recentlyAddedHearits,
-                    onTap: (data) => _openHearitDetail(
-                      _viewModel.toHearitDetailFromListening(data),
-                    ),
+                    onTap: _onRecentUploadTap,
                   ),
                   // const SizedBox(height: 24),
                 ],
-                ExploreShortcutCard(onTap: widget.onExploreTap),
+                ExploreShortcutCard(onTap: _handleExploreTap),
                 const SizedBox(height: 32),
                 CategorySection(
                   sections: _viewModel.curatedCategoryHearits,
-                  onCategoryTap: _openCategory,
-                  onHearitTap: (section, podcast) => _openHearitDetail(
-                    _viewModel.toHearitDetailFromCategory(section, podcast),
-                  ),
+                  onCategoryTap: _onCategoryTap,
+                  onHearitTap: _onCategoryHearitTap,
                 ),
                 const SizedBox(height: 40),
               ],

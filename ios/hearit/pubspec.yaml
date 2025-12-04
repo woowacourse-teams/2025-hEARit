@@ -44,6 +44,8 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   uuid: ^4.4.0
   path_provider: ^2.1.5
+  firebase_core: ^2.27.2
+  firebase_analytics: ^10.10.1
 
 dev_dependencies:
   flutter_test:

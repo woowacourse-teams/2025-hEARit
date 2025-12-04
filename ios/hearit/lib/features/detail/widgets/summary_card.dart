@@ -5,10 +5,16 @@ import '../detail_font.dart';
 import '../hearit_detail.dart';
 
 class SummaryCard extends StatelessWidget {
-  const SummaryCard({super.key, required this.summary, required this.keywords});
+  const SummaryCard({
+    super.key,
+    required this.summary,
+    required this.keywords,
+    this.onKeywordTap,
+  });
 
   final String summary;
   final List<HearitKeyword> keywords;
+  final void Function(String keyword)? onKeywordTap;
 
   @override
   Widget build(BuildContext context) {
@@ -57,21 +63,26 @@ class SummaryCard extends StatelessWidget {
               runSpacing: 8,
               children: keywords
                   .map(
-                    (k) => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.darkGray,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '#${k.name}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontFamily: detailFontFamily,
-                          color: AppColors.gray4,
-                          fontWeight: FontWeight.w500,
+                    (k) => InkWell(
+                      onTap: () => onKeywordTap?.call(k.name),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.darkGray,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '#${k.name}',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontFamily: detailFontFamily,
+                                    color: AppColors.gray4,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
                       ),
                     ),

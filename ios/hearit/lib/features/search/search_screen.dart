@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hearit/core/analytics/analytics_event_names.dart';
+import 'package:hearit/core/analytics/analytics_param_keys.dart';
+import 'package:hearit/core/analytics/analytics_provider.dart';
 import 'package:hearit/core/theme/app_colors.dart';
 
 import '../detail/hearit_detail.dart';
@@ -25,6 +28,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
     _viewModel = SearchViewModel()..addListener(_onViewModelUpdated);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _logScreenView());
   }
 
   @override
@@ -36,6 +40,24 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _onViewModelUpdated() {
     if (mounted) setState(() {});
+  }
+
+  void _logScreenView() {
+    AnalyticsProvider.logger.logEvent('screen_view', params: {
+      AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameSearch,
+      AnalyticsParamKeys.screenClass: 'SearchScreen',
+    });
+  }
+
+  void _submitQuery() {
+    final term = _viewModel.query.trim();
+    if (term.isNotEmpty) {
+      AnalyticsProvider.logger.logEvent(
+        AnalyticsEventNames.searchKeywordEntered,
+        params: {AnalyticsParamKeys.searchKeyword: term},
+      );
+    }
+    _viewModel.submitQuery();
   }
 
   @override
@@ -89,7 +111,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         // 검색 입력창
                         TextField(
                           controller: _viewModel.searchController,
-                          onSubmitted: (_) => _viewModel.submitQuery(),
+                          onSubmitted: (_) => _submitQuery(),
                           textInputAction: TextInputAction.search,
                           style: theme.textTheme.bodyLarge?.copyWith(
                             color: AppColors.gray4,
@@ -134,7 +156,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                         : Colors.white70,
                                     size: 30,
                                   ),
-                                  onPressed: _viewModel.submitQuery,
+                                  onPressed: _submitQuery,
                                   splashRadius: 20,
                                 ),
                               ],
@@ -238,6 +260,13 @@ class _SearchScreenState extends State<SearchScreen> {
                                   child: SearchCategoryGrid(
                                     categories: _viewModel.categories,
                                     onTap: (category) {
+                                      AnalyticsProvider.logger.logEvent(
+                                        AnalyticsEventNames.searchCategorySelected,
+                                        params: {
+                                          AnalyticsParamKeys.categoryName:
+                                              category.name,
+                                        },
+                                      );
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (_) => CategoryHearitScreen(
@@ -292,6 +321,10 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _openDetail(SearchHearit data) {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.searchHearitSelected,
+      params: {AnalyticsParamKeys.itemId: data.id.toString()},
+    );
     final stub = HearitDetail.fromSummaryStub(
       id: data.id,
       title: data.title,

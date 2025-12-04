@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/analytics/analytics_event_names.dart';
+import '../../core/analytics/analytics_param_keys.dart';
+import '../../core/analytics/analytics_provider.dart';
+
 import '../../core/audio/hearit_player_controller.dart';
 import '../../core/presentation/widgets/script_view.dart';
 import '../../core/theme/app_colors.dart';
@@ -37,6 +41,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
       playerController: context.read<HearitPlayerController>(),
     )..addListener(_onViewModelUpdated);
     _viewModel.loadAll();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _logScreenView());
   }
 
   @override
@@ -52,6 +57,27 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
 
   void _onViewModelUpdated() {
     if (mounted) setState(() {});
+  }
+
+  void _logScreenView() {
+    AnalyticsProvider.logger.logEvent('screen_view', params: {
+      AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameDetail,
+      AnalyticsParamKeys.screenClass: 'HearitDetailScreen',
+    });
+  }
+
+  void _onKeywordTap(String keyword) {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.detailKeywordSelected,
+      params: {AnalyticsParamKeys.keywordName: keyword},
+    );
+  }
+
+  void _onSourceTap(String name) {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.detailSourceSelected,
+      params: {AnalyticsParamKeys.sourceName: name},
+    );
   }
 
   Future<void> _stopPlayback() async {
@@ -137,11 +163,15 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            SourceCard(sources: detail.sources),
+                            SourceCard(
+                              sources: detail.sources,
+                              onSourceTap: _onSourceTap,
+                            ),
                             const SizedBox(height: 12),
                             SummaryCard(
                               summary: detail.summary,
                               keywords: detail.keywords,
+                              onKeywordTap: _onKeywordTap,
                             ),
                             const SizedBox(height: 12),
                           ],

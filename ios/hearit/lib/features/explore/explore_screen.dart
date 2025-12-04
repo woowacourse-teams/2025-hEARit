@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/analytics/analytics_event_names.dart';
+import '../../core/analytics/analytics_param_keys.dart';
+import '../../core/analytics/analytics_provider.dart';
+
 import '../../core/audio/hearit_player_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../detail/hearit_detail.dart';
@@ -41,6 +45,7 @@ class ExploreScreenState extends State<ExploreScreen> {
     _viewModel.loadInitial();
     _pageController = PageController();
     _activeInstance = this;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _logScreenView());
   }
 
   @override
@@ -138,6 +143,13 @@ class ExploreScreenState extends State<ExploreScreen> {
   }
 
   Future<void> _openDetailFromExplore(ExploreFeedItem item) async {
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.exploreToDetail,
+      params: {
+        AnalyticsParamKeys.itemName: item.title,
+        AnalyticsParamKeys.itemIndex: _currentIndex.toString(),
+      },
+    );
     await _viewModel.pauseAudio();
     await _viewModel.setPlaybackEnabled(false);
 
@@ -158,6 +170,13 @@ class ExploreScreenState extends State<ExploreScreen> {
               detail: stub,
               pauseOnExit: true,
             )));
+  }
+
+  void _logScreenView() {
+    AnalyticsProvider.logger.logEvent('screen_view', params: {
+      AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameExplore,
+      AnalyticsParamKeys.screenClass: 'ExploreScreen',
+    });
   }
 
   @override
@@ -241,6 +260,9 @@ class ExploreScreenState extends State<ExploreScreen> {
                   onPageChanged: (index) {
                     _viewModel.setActiveIndex(index);
                     _currentIndex = index;
+                    AnalyticsProvider.logger.logEvent(
+                      AnalyticsEventNames.exploreSwipe,
+                    );
                     if (index >= _viewModel.items.length - 3) {
                       _viewModel.loadMore();
                     }

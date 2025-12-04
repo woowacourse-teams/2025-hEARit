@@ -1,8 +1,11 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'core/analytics/analytics_provider.dart';
 import 'core/audio/audio_handler.dart';
 import 'core/audio/hearit_player_controller.dart';
 import 'core/device/device_uuid_service.dart';
@@ -17,8 +20,12 @@ const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(_lightStatusBar);
+  await Firebase.initializeApp();
   // Warm up device UUID so network calls don't block on first launch.
   await DeviceUUIDService.getUUID();
+  AnalyticsProvider.configure(
+    FirebaseAnalyticsLogger(FirebaseAnalytics.instance),
+  );
   final audioHandler = await AudioService.init(
     builder: () => LocalAudioHandler(),
     config: const AudioServiceConfig(

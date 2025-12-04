@@ -6,9 +6,14 @@ import '../detail_font.dart';
 import '../hearit_detail.dart';
 
 class SourceCard extends StatelessWidget {
-  const SourceCard({super.key, required this.sources});
+  const SourceCard({
+    super.key,
+    required this.sources,
+    this.onSourceTap,
+  });
 
   final List<HearitSource> sources;
+  final void Function(HearitSource source)? onSourceTap;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +70,10 @@ class SourceCard extends StatelessWidget {
                                   ),
                             )
                           : InkWell(
-                              onTap: () => _launch(source.sourceUrl),
+                              onTap: () {
+                                onSourceTap?.call(source);
+                                _launch(source.sourceUrl);
+                              },
                               child: Text(
                                 source.sourceName,
                                 style: Theme.of(context).textTheme.bodyMedium
