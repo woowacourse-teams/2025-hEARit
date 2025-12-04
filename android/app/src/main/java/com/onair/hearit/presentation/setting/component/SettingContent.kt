@@ -102,9 +102,9 @@ private fun SettingItem(
     ) {
         Text(
             text = text,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
             color = textColor,
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
         )
     }
 }

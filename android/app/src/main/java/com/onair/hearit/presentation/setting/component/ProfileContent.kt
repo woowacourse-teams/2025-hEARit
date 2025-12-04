@@ -65,7 +65,7 @@ fun ProfileContent(
 
         BottomInfo(appVersion = appVersion)
 
-        Spacer(modifier = Modifier.height(160.dp))
+        Spacer(modifier = Modifier.height(68.dp))
     }
 }
 
@@ -91,9 +91,9 @@ private fun NicknameCard(
     ) {
         Text(
             text = nickname,
-            style = HearitTypoGraphy.titleMedium,
             color = Gray4,
             textAlign = TextAlign.Center,
+            style = HearitTypoGraphy.titleMedium,
         )
     }
 }
@@ -109,16 +109,16 @@ private fun BottomInfo(
     ) {
         Text(
             text = stringResource(R.string.setting_app_version, appVersion),
-            style = HearitTypoGraphy.bodyMedium,
             color = Gray4,
+            style = HearitTypoGraphy.bodyMedium,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
             text = stringResource(R.string.all_hearit_email),
-            style = HearitTypoGraphy.bodyMedium,
             color = Gray4,
+            style = HearitTypoGraphy.bodyMedium,
         )
     }
 }
