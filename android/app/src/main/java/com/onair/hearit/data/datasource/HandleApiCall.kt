@@ -3,17 +3,19 @@ package com.onair.hearit.data.datasource
 import retrofit2.HttpException
 import retrofit2.Response
 
-inline fun <T, R> handleApiCall(
-    apiCall: () -> Response<T>,
-    transform: (Response<T>) -> R,
+suspend fun <T> handleApiCall(
+    apiCall: suspend () -> Response<T>,
     errorHandler: ErrorResponseHandler,
-): Result<NetworkResult<R>> =
-    runCatching {
+): NetworkResult<T> =
+    try {
         val response = apiCall()
-        if (!response.isSuccessful) {
-            throw HttpException(response)
+        if (response.isSuccessful) {
+            response.body()?.let { body ->
+                NetworkResult.Success(body)
+            } ?: NetworkResult.Failure.Unknown
+        } else {
+            errorHandler.getError(HttpException(response))
         }
-        NetworkResult.Success(transform(response))
-    }.recoverCatching {
-        errorHandler.getError(it)
+    } catch (e: Exception) {
+        errorHandler.getError(e)
     }
