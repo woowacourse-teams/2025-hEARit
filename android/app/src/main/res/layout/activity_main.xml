@@ -13,7 +13,7 @@
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/fragment_container_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:background="@color/hearit_black1"
             app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
             app:layout_constraintEnd_toEndOf="parent"
