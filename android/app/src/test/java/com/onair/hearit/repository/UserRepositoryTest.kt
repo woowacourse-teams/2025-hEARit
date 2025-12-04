@@ -5,7 +5,7 @@ import com.onair.hearit.data.datasource.local.UserLocalDataSource
 import com.onair.hearit.data.datasource.remote.UserRemoteDataSource
 import com.onair.hearit.data.dto.UserInfoResponse
 import com.onair.hearit.data.mapper.toDomain
-import com.onair.hearit.data.repository.mapOrThrowDomain
+import com.onair.hearit.data.repository.toDomainResult
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.UserRepository
 import io.mockk.coEvery
@@ -53,7 +53,7 @@ class UserRepositoryTest {
             // Given
             coEvery { userRemoteDataSource.getUserInfo() } coAnswers {
                 delay(100)
-                Result.success(NetworkResult.Success(mockUserInfoResponse))
+                NetworkResult.Success(mockUserInfoResponse)
             }
 
             // When: 동시에 두 번 호출
@@ -74,7 +74,7 @@ class UserRepositoryTest {
             coEvery { userRemoteDataSource.getUserInfo() } coAnswers {
                 apiCallCount++
                 delay(50)
-                Result.success(NetworkResult.Success(mockUserInfoResponse))
+                NetworkResult.Success(mockUserInfoResponse)
             }
 
             // When: 10개의 코루틴이 동시에 호출
@@ -97,7 +97,7 @@ class UserRepositoryTest {
         runTest {
             // Given
             coEvery { userRemoteDataSource.getUserInfo() } returns
-                Result.success(NetworkResult.Success(mockUserInfoResponse))
+                NetworkResult.Success(mockUserInfoResponse)
 
             // 첫 호출로 캐시 생성
             val firstResult = repository.getUserInfo()
@@ -157,7 +157,7 @@ private class UserRepositoryWithoutMutex(
             val remote =
                 userRemoteDataSource
                     .getUserInfo()
-                    .mapOrThrowDomain { it.toDomain() }
+                    .toDomainResult { it.toDomain() }
                     .getOrThrow()
 
             userLocalDataSource.saveUserInfo(remote).getOrThrow()
