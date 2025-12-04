@@ -10,7 +10,7 @@ class PlayingHistoryRepositoryImpl(
     private val playingHistoryRemoteDataSource: PlayingHistoryRemoteDataSource,
 ) : PlayingHistoryRepository {
     override suspend fun getPlayingHistories(): Result<List<PlayingHistoryHearit>> =
-        playingHistoryRemoteDataSource.getPlayingHistories().mapListOrThrowDomain { it.toDomain() }
+        playingHistoryRemoteDataSource.getPlayingHistories().toDomainResultList { it.toDomain() }
 
     override suspend fun addPlayingHistory(
         hearitId: Long,

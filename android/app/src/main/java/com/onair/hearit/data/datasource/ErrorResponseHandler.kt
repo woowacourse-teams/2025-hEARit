@@ -8,25 +8,7 @@ class ErrorResponseHandler {
     fun getError(exception: Throwable): NetworkResult.Failure =
         when (exception) {
             is HttpException -> {
-                when (exception.code()) {
-                    401 -> {
-                        NetworkResult.Failure.UnAuthorized
-                    }
-
-                    in 500..599 -> {
-                        NetworkResult.Failure.InternalServer
-                    }
-
-                    in 400..499 -> {
-                        val code = exception.code()
-                        val message = extractErrorMessage(exception.response())
-                        NetworkResult.Failure.BadRequest(code, message)
-                    }
-
-                    else -> {
-                        NetworkResult.Failure.Unknown
-                    }
-                }
+                handleHttpException(exception)
             }
 
             is IOException -> {
@@ -38,5 +20,28 @@ class ErrorResponseHandler {
             }
         }
 
-    private fun extractErrorMessage(response: Response<*>?): String = response?.message().orEmpty()
+    private fun handleHttpException(exception: HttpException): NetworkResult.Failure =
+        when (exception.code()) {
+            401 -> {
+                NetworkResult.Failure.UnAuthorized
+            }
+
+            in 400..499 -> {
+                NetworkResult.Failure.BadRequest(
+                    code = exception.code(),
+                    message = extractErrorMessage(exception.response()),
+                )
+            }
+
+            in 500..599 -> {
+                NetworkResult.Failure.InternalServer
+            }
+
+            else -> {
+                NetworkResult.Failure.Unknown
+            }
+        }
+
+    private fun extractErrorMessage(response: Response<*>?): String =
+        response?.errorBody()?.string() ?: response?.message() ?: "Unknown error"
 }

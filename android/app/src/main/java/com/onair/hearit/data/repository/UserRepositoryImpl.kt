@@ -34,7 +34,7 @@ class UserRepositoryImpl(
             val remote =
                 userRemoteDataSource
                     .getUserInfo()
-                    .mapOrThrowDomain { it.toDomain() }
+                    .toDomainResult { it.toDomain() }
                     .getOrThrow()
 
             // 4️⃣ 로컬 저장 후 캐시 업데이트

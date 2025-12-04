@@ -9,8 +9,8 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.TokenInterceptorProvider
-import com.onair.hearit.domain.exception.DomainException.NetworkConnection
-import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
+import com.onair.hearit.domain.DomainException.NetworkConnection
+import com.onair.hearit.domain.DomainException.UserNotRegistered
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.delay
@@ -66,8 +66,14 @@ class SplashViewModel(
         refreshToken: String,
     ) {
         when (throwable) {
-            is NetworkConnection -> _toastMessage.value = R.string.splash_toast_network_check_fail
-            is UserNotRegistered -> reissueAccessToken(refreshToken)
+            is NetworkConnection -> {
+                _toastMessage.value = R.string.splash_toast_network_check_fail
+            }
+
+            is UserNotRegistered -> {
+                reissueAccessToken(refreshToken)
+            }
+
             else -> {
                 Timber.w(throwable)
                 _checkToken.value = false
@@ -91,7 +97,10 @@ class SplashViewModel(
 
     private fun handleReissueError(throwable: Throwable) {
         when (throwable) {
-            is UserNotRegistered -> _checkToken.value = false
+            is UserNotRegistered -> {
+                _checkToken.value = false
+            }
+
             else -> {
                 Timber.w(throwable)
                 _checkToken.value = false

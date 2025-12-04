@@ -11,5 +11,5 @@ class RecommendationRepositoryImpl(
     override suspend fun getRecommendationCategories(): Result<List<RecommendationCategories>> =
         recommendationDataSource
             .getRecommendationCategories()
-            .mapListOrThrowDomain { it.toDomain() }
+            .toDomainResultList { it.toDomain() }
 }

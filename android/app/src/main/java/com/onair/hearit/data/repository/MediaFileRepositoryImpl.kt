@@ -14,7 +14,7 @@ class MediaFileRepositoryImpl(
     override suspend fun getShortAudioUrl(hearitId: Long): Result<ShortAudioUrl> =
         mediaFileRemoteDataSource
             .getShortAudioUrl(hearitId)
-            .mapOrThrowDomain { response ->
+            .toDomainResult { response ->
                 ShortAudioUrl(
                     id = response.id,
                     url = response.url,
@@ -24,11 +24,11 @@ class MediaFileRepositoryImpl(
     override suspend fun getScriptLines(hearitId: Long): Result<List<ScriptLine>> =
         mediaFileRemoteDataSource
             .getScriptUrl(hearitId)
-            .mapOrThrowDomain { it.url }
+            .toDomainResult { it.url }
             .flatMap { scriptUrl ->
                 mediaFileRemoteDataSource
                     .getScriptJson(scriptUrl)
-                    .mapOrThrowDomain { responseBody ->
+                    .toDomainResult { responseBody ->
                         responseBody.use { body ->
                             val jsonString = body.string()
                             Json.decodeFromString(jsonString)
@@ -39,7 +39,7 @@ class MediaFileRepositoryImpl(
     override suspend fun getOriginalAudioUrl(hearitId: Long): Result<OriginalAudioUrl> =
         mediaFileRemoteDataSource
             .getOriginalAudioUrl(hearitId)
-            .mapOrThrowDomain { response -> OriginalAudioUrl(id = response.id, url = response.url) }
+            .toDomainResult { response -> OriginalAudioUrl(id = response.id, url = response.url) }
 
     override suspend fun getOriginalHearitItem(item: Hearit): Result<Hearit> = combineHearit(item)
 

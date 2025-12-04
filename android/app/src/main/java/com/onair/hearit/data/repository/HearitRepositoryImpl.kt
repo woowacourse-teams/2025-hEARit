@@ -19,10 +19,10 @@ class HearitRepositoryImpl(
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
     override suspend fun getHearit(hearitId: Long): Result<Hearit> =
-        hearitRemoteDataSource.getHearit(hearitId).mapOrThrowDomain { it.toDomain() }
+        hearitRemoteDataSource.getHearit(hearitId).toDomainResult { it.toDomain() }
 
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =
-        hearitRemoteDataSource.getRecommendHearits().mapListOrThrowDomain { it.toDomain() }
+        hearitRemoteDataSource.getRecommendHearits().toDomainResultList { it.toDomain() }
 
     override suspend fun getExploreHearits(
         cursorId: Long?,
@@ -30,7 +30,7 @@ class HearitRepositoryImpl(
     ): Result<CursorResult<ExploreHearit>> =
         hearitRemoteDataSource
             .getExploreHearits(cursorId, size)
-            .mapOrThrowDomain { it.toDomain() }
+            .toDomainResult { it.toDomain() }
 
     override suspend fun getKeywordHearits(
         searchTerm: String,
@@ -39,7 +39,7 @@ class HearitRepositoryImpl(
     ): Result<PageResult<SearchedHearit>> =
         hearitRemoteDataSource
             .getSearchHearits(searchTerm, page, size)
-            .mapOrThrowDomain { it.toSearchedHearit() }
+            .toDomainResult { it.toSearchedHearit() }
 
     override suspend fun getCategoryHearits(
         categoryId: Long,
@@ -48,7 +48,7 @@ class HearitRepositoryImpl(
     ): Result<PageResult<SearchedCategoryHearit>> =
         hearitRemoteDataSource
             .getHearits(categoryId, page, size)
-            .mapOrThrowDomain { it.toSearchedCategoryHearit() }
+            .toDomainResult { it.toSearchedCategoryHearit() }
 
     override suspend fun getRecentUploadHearits(
         page: Int?,
@@ -56,5 +56,5 @@ class HearitRepositoryImpl(
     ): Result<PageResult<RecentUploadHearit>> =
         hearitRemoteDataSource
             .getHearits(null, page, size)
-            .mapOrThrowDomain { it.toRecentUploadHearit() }
+            .toDomainResult { it.toRecentUploadHearit() }
 }

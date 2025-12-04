@@ -13,11 +13,11 @@ class BookmarkRepositoryImpl(
         page: Int?,
         size: Int?,
         filter: String,
-    ): Result<PageResult<Bookmark>> = bookmarkDataSource.getBookmarks(page, size, filter).mapOrThrowDomain { it.toDomain() }
+    ): Result<PageResult<Bookmark>> = bookmarkDataSource.getBookmarks(page, size, filter).toDomainResult { it.toDomain() }
 
-    override suspend fun addBookmark(hearitId: Long): Result<Long> = bookmarkDataSource.addBookmark(hearitId).mapOrThrowDomain { it.id }
+    override suspend fun addBookmark(hearitId: Long): Result<Long> = bookmarkDataSource.addBookmark(hearitId).toDomainResult { it.id }
 
-    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> = bookmarkDataSource.deleteBookmark(bookmarkId).mapOrThrowDomain { }
+    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> = bookmarkDataSource.deleteBookmark(bookmarkId).toDomainResult()
 
     override suspend fun getNextBookmark(currentId: Long): Result<Bookmark?> =
         getBookmarks(page = null, size = null, filter = "all").map { pageResult ->

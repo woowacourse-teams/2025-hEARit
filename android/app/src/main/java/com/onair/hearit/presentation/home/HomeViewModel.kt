@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
+import com.onair.hearit.domain.DomainException.UserNotRegistered
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
@@ -153,7 +153,10 @@ class HomeViewModel(
                     }
 
                     when (throwable) {
-                        is UserNotRegistered -> Unit
+                        is UserNotRegistered -> {
+                            Unit
+                        }
+
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail

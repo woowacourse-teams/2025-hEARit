@@ -12,5 +12,5 @@ class CategoryRepositoryImpl(
     override suspend fun getCategories(
         page: Int?,
         size: Int?,
-    ): Result<PageResult<Category>> = categoryDataSource.getCategories(page, size).mapOrThrowDomain { it.toDomain() }
+    ): Result<PageResult<Category>> = categoryDataSource.getCategories(page, size).toDomainResult { it.toDomain() }
 }
