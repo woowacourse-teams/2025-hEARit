@@ -42,6 +42,5 @@ class ErrorResponseHandler {
             }
         }
 
-    private fun extractErrorMessage(response: Response<*>?): String =
-        response?.errorBody()?.string() ?: response?.message() ?: "Unknown error"
+    private fun extractErrorMessage(response: Response<*>?): String = response?.errorBody()?.string() ?: response?.message() ?: "알 수 없는 에러"
 }
