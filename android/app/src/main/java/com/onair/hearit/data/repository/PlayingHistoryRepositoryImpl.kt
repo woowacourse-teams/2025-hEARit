@@ -16,8 +16,7 @@ class PlayingHistoryRepositoryImpl(
         hearitId: Long,
         lastPlayTime: Long,
     ): Result<Unit> =
-        runCatching {
-            playingHistoryRemoteDataSource
-                .addPlayingHistory(PlayingHistoryRequest(hearitId, lastPlayTime))
-        }
+        playingHistoryRemoteDataSource
+            .addPlayingHistory(PlayingHistoryRequest(hearitId, lastPlayTime))
+            .toDomainResult()
 }
