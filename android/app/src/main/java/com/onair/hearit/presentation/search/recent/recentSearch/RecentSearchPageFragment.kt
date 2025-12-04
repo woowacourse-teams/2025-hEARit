@@ -7,14 +7,15 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import com.onair.hearit.databinding.FragmentRecentSearchPageBinding
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import com.onair.hearit.presentation.showToast
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class RecentSearchPageFragment :
     Fragment(),
     RecentSearchClickListener {
@@ -24,9 +25,7 @@ class RecentSearchPageFragment :
 
     private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
-    private val viewModel: SearchViewModel by viewModels({ requireActivity() }) {
-        SearchViewModelFactory(null)
-    }
+    private val viewModel: SearchViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,7 +76,10 @@ class RecentSearchPageFragment :
     }
 
     override fun onRecentSearchClick(term: String) {
-        (parentFragment as? SearchRecentFragment)?.showSearchResultPage(SearchInput.Keyword(term))
+        val input: SearchInput = SearchInput.Keyword(term)
+        viewModel.setSearchInput(input)
+        (parentFragment as? SearchRecentFragment)
+            ?.showSearchResultPage(input)
     }
 
     override fun onDestroyView() {

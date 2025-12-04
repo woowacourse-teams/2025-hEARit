@@ -30,33 +30,27 @@ import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SCRIPT
 import com.onair.hearit.databinding.FragmentScriptBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.ScriptLine
-import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.detail.PlayerDetailViewModel
-import com.onair.hearit.presentation.detail.PlayerDetailViewModelFactory
 import com.onair.hearit.presentation.detail.script.component.Scripts
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class ScriptFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentScriptBinding? = null
     private val binding get() = _binding!!
 
     private var mediaController: MediaController? = null
+    private val viewModel: PlayerDetailViewModel by activityViewModels()
 
-    private val hearitId: Long by lazy {
-        requireArguments().getLong(HEARIT_ID_KEY)
-    }
-    private val viewModel: PlayerDetailViewModel by activityViewModels {
-        PlayerDetailViewModelFactory(hearitId)
-    }
-
-    private val scriptViewModel: ScriptViewModel by viewModels { ScriptViewModelFactory() }
+    private val scriptViewModel: ScriptViewModel by viewModels()
 
     private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
 
@@ -257,9 +251,6 @@ class ScriptFragment : Fragment() {
     companion object {
         private const val SCRIPT_SYNC_INTERVAL_MS = 300L
 
-        fun newInstance(hearitId: Long) =
-            ScriptFragment().apply {
-                arguments = Bundle().apply { putLong(HEARIT_ID_KEY, hearitId) }
-            }
+        fun newInstance() = ScriptFragment()
     }
 }

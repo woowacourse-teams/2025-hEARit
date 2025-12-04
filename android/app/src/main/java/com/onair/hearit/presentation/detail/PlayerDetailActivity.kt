@@ -65,11 +65,13 @@ import com.onair.hearit.service.PlaybackSessionCallback
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.abs
 
+@AndroidEntryPoint
 @OptIn(UnstableApi::class)
 class PlayerDetailActivity :
     AppCompatActivity(),
@@ -95,10 +97,7 @@ class PlayerDetailActivity :
     private val currentHearitId: Long
         get() = viewModel.hearit.value?.id ?: hearitId
 
-    private val viewModel: PlayerDetailViewModel by viewModels {
-        PlayerDetailViewModelFactory(hearitId)
-    }
-
+    private val viewModel: PlayerDetailViewModel by viewModels()
     private val playerListener =
         object : Player.Listener {
             override fun onMediaItemTransition(
@@ -226,7 +225,7 @@ class PlayerDetailActivity :
                             .setCustomAnimations(R.anim.slide_up, 0)
                             .replace(
                                 R.id.fragment_container_view,
-                                ScriptFragment.newInstance(currentHearitId),
+                                ScriptFragment.newInstance(),
                             ).addToBackStack(null)
                             .commit()
                         return true

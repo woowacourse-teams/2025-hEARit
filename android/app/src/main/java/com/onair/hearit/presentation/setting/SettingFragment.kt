@@ -13,12 +13,14 @@ import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SETTING
 import com.onair.hearit.databinding.FragmentSettingBinding
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.showToast
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SettingFragment : Fragment() {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SettingViewModel by viewModels { SettingViewModelFactory() }
+    private val viewModel: SettingViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

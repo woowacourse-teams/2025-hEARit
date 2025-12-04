@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsParamKeys
@@ -16,17 +16,16 @@ import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys
 import com.onair.hearit.presentation.search.CategoryClickListener
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
 import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SearchComposeFragment :
     Fragment(),
     CategoryClickListener {
-    private val viewModel: SearchViewModel by viewModels {
-        SearchViewModelFactory(null)
-    }
+    private val viewModel: SearchViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

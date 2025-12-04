@@ -52,9 +52,11 @@ import com.onair.hearit.presentation.splash.SplashActivity
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @OptIn(UnstableApi::class)
+@AndroidEntryPoint
 class MainActivity :
     AppCompatActivity(),
     DrawerClickListener,
@@ -70,7 +72,7 @@ class MainActivity :
     private var hasSentPreload = false
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
 
-    private val mainViewModel: MainViewModel by viewModels { MainViewModelFactory() }
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

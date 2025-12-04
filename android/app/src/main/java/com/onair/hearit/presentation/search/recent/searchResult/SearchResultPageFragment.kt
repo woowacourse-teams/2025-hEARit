@@ -9,7 +9,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.analytics.AnalyticsEventNames
@@ -17,15 +16,15 @@ import com.onair.hearit.analytics.AnalyticsParamKeys.ITEM_ID
 import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.FragmentSearchResultPageBinding
 import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.showToast
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SearchResultPageFragment :
     Fragment(),
     HearitClickListener {
@@ -35,10 +34,8 @@ class SearchResultPageFragment :
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private val viewModel: SearchViewModel by viewModels {
-        val input = requireArguments().let { SearchInput.from(it) }
-        SearchViewModelFactory(input)
-    }
+    private val viewModel: SearchViewModel by activityViewModels()
+
     private val searchedAdapter: SearchedHearitAdapter by lazy { SearchedHearitAdapter(this) }
 
     override fun onCreateView(
@@ -133,10 +130,5 @@ class SearchResultPageFragment :
 
     companion object {
         private const val REFRESH_THRESHOLD = 3
-
-        fun newInstance(input: SearchInput): SearchResultPageFragment =
-            SearchResultPageFragment().apply {
-                arguments = input.toBundle()
-            }
     }
 }
