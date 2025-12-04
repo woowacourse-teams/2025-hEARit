@@ -10,9 +10,9 @@ suspend fun <T> handleApiCall(
     try {
         val response = apiCall()
         if (response.isSuccessful) {
-            response.body()?.let { body ->
-                NetworkResult.Success(body)
-            } ?: NetworkResult.Failure.Unknown
+            // body가 null이면 Unit으로 처리 (Response<Unit>인 경우 대응)
+            @Suppress("UNCHECKED_CAST")
+            NetworkResult.Success(response.body() ?: Unit as T)
         } else {
             errorHandler.getError(HttpException(response))
         }

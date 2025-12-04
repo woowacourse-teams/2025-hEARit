@@ -5,13 +5,9 @@ import com.onair.hearit.data.datasource.NetworkResult
 sealed class DomainException(
     message: String,
 ) : Throwable(message) {
-    data object NetworkConnection : DomainException(ERROR_CHECK_NETWORK_MESSAGE) {
-        private fun readResolve(): Any = NetworkConnection
-    }
+    data object NetworkConnection : DomainException(ERROR_CHECK_NETWORK_MESSAGE)
 
-    data object UserNotRegistered : DomainException(ERROR_UNAUTHORIZED_MESSAGE) {
-        private fun readResolve(): Any = UserNotRegistered
-    }
+    data object UserNotRegistered : DomainException(ERROR_UNAUTHORIZED_MESSAGE)
 }
 
 object DomainExceptionMapper {
