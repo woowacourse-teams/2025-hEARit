@@ -5,6 +5,7 @@ import com.onair.hearit.data.datasource.remote.AuthRemoteDataSource
 import com.onair.hearit.data.dto.KakaoLoginRequest
 import com.onair.hearit.data.dto.TokenReissueRequest
 import com.onair.hearit.data.mapper.toDomain
+import com.onair.hearit.data.toDomainResult
 import com.onair.hearit.domain.model.LoginToken
 import com.onair.hearit.domain.repository.AuthRepository
 

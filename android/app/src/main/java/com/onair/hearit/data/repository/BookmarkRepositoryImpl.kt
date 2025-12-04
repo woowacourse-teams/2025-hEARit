@@ -2,6 +2,7 @@ package com.onair.hearit.data.repository
 
 import com.onair.hearit.data.datasource.remote.BookmarkRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
+import com.onair.hearit.data.toDomainResult
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.repository.BookmarkRepository

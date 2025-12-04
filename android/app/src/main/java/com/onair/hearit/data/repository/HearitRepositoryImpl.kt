@@ -5,6 +5,8 @@ import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.data.mapper.toRecentUploadHearit
 import com.onair.hearit.data.mapper.toSearchedCategoryHearit
 import com.onair.hearit.data.mapper.toSearchedHearit
+import com.onair.hearit.data.toDomainResult
+import com.onair.hearit.data.toDomainResultList
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.Hearit
