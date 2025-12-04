@@ -12,6 +12,7 @@ import 'hearit_detail.dart';
 import 'hearit_detail_viewmodel.dart';
 import 'widgets/audio_controls.dart';
 import 'widgets/detail_header.dart';
+import 'widgets/full_script_view.dart';
 import 'widgets/hearit_info_card.dart';
 import 'widgets/source_card.dart';
 import 'widgets/summary_card.dart';
@@ -73,10 +74,10 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
     );
   }
 
-  void _onSourceTap(String name) {
+  void _onSourceTap(HearitSource source) {
     AnalyticsProvider.logger.logEvent(
       AnalyticsEventNames.detailSourceSelected,
-      params: {AnalyticsParamKeys.sourceName: name},
+      params: {AnalyticsParamKeys.sourceName: source.sourceName},
     );
   }
 
@@ -84,6 +85,29 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
     if (widget.pauseOnExit) {
       await _viewModel.playerController.pause();
     }
+  }
+
+  Future<void> _showFullScript() async {
+    if (_viewModel.scripts.isEmpty) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: AppColors.hearitBlack,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 1,
+          child: FullScriptView(
+            detail: _viewModel.detail,
+            scripts: _viewModel.scripts,
+            controller: _viewModel.playerController,
+            viewModel: _viewModel,
+          ),
+        );
+      },
+    );
   }
 
   Future<bool> _handleWillPop() async {
@@ -138,13 +162,20 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                             ),
                             const SizedBox(height: 24),
                             Center(
-                              child: SizedBox(
-                                height: ScriptView.preferredHeight,
-                                width: double.infinity,
-                                child: ScriptView(
-                                  scripts: _viewModel.scripts,
-                                  position:
-                                      _viewModel.playerController.position,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: _showFullScript,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: SizedBox(
+                                    height: ScriptView.preferredHeight,
+                                    width: double.infinity,
+                                    child: ScriptView(
+                                      scripts: _viewModel.scripts,
+                                      position:
+                                          _viewModel.playerController.position,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -178,6 +209,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 4),
                   ],
                 );
               },

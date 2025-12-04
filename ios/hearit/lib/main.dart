@@ -10,9 +10,11 @@ import 'core/audio/audio_handler.dart';
 import 'core/audio/hearit_player_controller.dart';
 import 'core/device/device_uuid_service.dart';
 import 'core/presentation/main_navigation.dart';
+import 'firebase_options.dart';
+import 'core/theme/app_colors.dart';
 
 const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
-  statusBarColor: Colors.black,
+  statusBarColor: AppColors.hearitBlack,
   statusBarIconBrightness: Brightness.light,
   statusBarBrightness: Brightness.dark,
 );
@@ -20,7 +22,9 @@ const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(_lightStatusBar);
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   // Warm up device UUID so network calls don't block on first launch.
   await DeviceUUIDService.getUUID();
   AnalyticsProvider.configure(
