@@ -41,12 +41,12 @@ object RepositoryProvider {
 
     val bookmarkRepository: BookmarkRepository by lazy {
         BookmarkRepositoryImpl(
-            bookmarkDataSource = DataSourceProvider.bookmarkRemoteDataSource,
+            bookmarkRemoteDataSource = DataSourceProvider.bookmarkRemoteDataSource,
         )
     }
 
     val categoryRepository: CategoryRepository by lazy {
-        CategoryRepositoryImpl(categoryDataSource = DataSourceProvider.categoryRemoteDataSource)
+        CategoryRepositoryImpl(categoryRemoteDataSource = DataSourceProvider.categoryRemoteDataSource)
     }
 
     val exploreDataStoreRepository: ExploreDataStoreRepository by lazy {
@@ -81,6 +81,6 @@ object RepositoryProvider {
     }
 
     val recommendationRepository: RecommendationRepository by lazy {
-        RecommendationRepositoryImpl(recommendationDataSource = DataSourceProvider.recommendationRemoteDataSource)
+        RecommendationRepositoryImpl(recommendationRemoteDataSource = DataSourceProvider.recommendationRemoteDataSource)
     }
 }
