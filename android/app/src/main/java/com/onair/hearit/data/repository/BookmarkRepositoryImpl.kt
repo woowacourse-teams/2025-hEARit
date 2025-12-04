@@ -7,17 +7,18 @@ import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.repository.BookmarkRepository
 
 class BookmarkRepositoryImpl(
-    private val bookmarkDataSource: BookmarkRemoteDataSource,
+    private val bookmarkRemoteDataSource: BookmarkRemoteDataSource,
 ) : BookmarkRepository {
     override suspend fun getBookmarks(
         page: Int?,
         size: Int?,
         filter: String,
-    ): Result<PageResult<Bookmark>> = bookmarkDataSource.getBookmarks(page, size, filter).toDomainResult { it.toDomain() }
+    ): Result<PageResult<Bookmark>> = bookmarkRemoteDataSource.getBookmarks(page, size, filter).toDomainResult { it.toDomain() }
 
-    override suspend fun addBookmark(hearitId: Long): Result<Long> = bookmarkDataSource.addBookmark(hearitId).toDomainResult { it.id }
+    override suspend fun addBookmark(hearitId: Long): Result<Long> = bookmarkRemoteDataSource.addBookmark(hearitId).toDomainResult { it.id }
 
-    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> = bookmarkDataSource.deleteBookmark(bookmarkId).toDomainResult()
+    override suspend fun deleteBookmark(bookmarkId: Long): Result<Unit> =
+        bookmarkRemoteDataSource.deleteBookmark(bookmarkId).toDomainResult()
 
     override suspend fun getNextBookmark(currentId: Long): Result<Bookmark?> =
         getBookmarks(page = null, size = null, filter = "all").map { pageResult ->

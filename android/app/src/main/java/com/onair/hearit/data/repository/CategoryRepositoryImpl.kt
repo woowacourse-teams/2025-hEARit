@@ -7,10 +7,10 @@ import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.repository.CategoryRepository
 
 class CategoryRepositoryImpl(
-    private val categoryDataSource: CategoryRemoteDataSource,
+    private val categoryRemoteDataSource: CategoryRemoteDataSource,
 ) : CategoryRepository {
     override suspend fun getCategories(
         page: Int?,
         size: Int?,
-    ): Result<PageResult<Category>> = categoryDataSource.getCategories(page, size).toDomainResult { it.toDomain() }
+    ): Result<PageResult<Category>> = categoryRemoteDataSource.getCategories(page, size).toDomainResult { it.toDomain() }
 }

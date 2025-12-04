@@ -6,10 +6,10 @@ import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.repository.RecommendationRepository
 
 class RecommendationRepositoryImpl(
-    private val recommendationDataSource: RecommendationRemoteDataSource,
+    private val recommendationRemoteDataSource: RecommendationRemoteDataSource,
 ) : RecommendationRepository {
     override suspend fun getRecommendationCategories(): Result<List<RecommendationCategories>> =
-        recommendationDataSource
+        recommendationRemoteDataSource
             .getRecommendationCategories()
             .toDomainResultList { it.toDomain() }
 }
