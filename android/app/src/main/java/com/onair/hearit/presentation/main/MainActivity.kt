@@ -33,10 +33,10 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.databinding.ActivityMainBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.PlaybackStarter
 import com.onair.hearit.presentation.PlayerControllerView
@@ -54,6 +54,7 @@ import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @OptIn(UnstableApi::class)
 @AndroidEntryPoint
@@ -73,6 +74,9 @@ class MainActivity :
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
 
     private val mainViewModel: MainViewModel by viewModels()
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,7 +128,7 @@ class MainActivity :
                 if (result.resultCode == RESULT_OK) {
                     val detailResult =
                         result.data.toDetailResult() ?: return@registerForActivityResult
-                    detailResult.navigate(this)
+                    detailResult.navigate(this, analyticsLogger)
                 }
                 mainViewModel.notifyCategoryUpdated()
                 mainViewModel.hearitUpdated.value = Unit
@@ -364,7 +368,7 @@ class MainActivity :
     }
 
     private fun navigateToLogin() {
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.LOGIN_EVENT,
             mapOf(AnalyticsParamKeys.SOURCE_NAME to "drawer_login"),
         )

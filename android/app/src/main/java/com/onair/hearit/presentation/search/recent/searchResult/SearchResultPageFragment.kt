@@ -12,10 +12,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys.ITEM_ID
 import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.FragmentSearchResultPageBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.main.MainActivity
@@ -23,6 +23,7 @@ import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.showToast
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SearchResultPageFragment :
@@ -37,6 +38,9 @@ class SearchResultPageFragment :
     private val viewModel: SearchViewModel by activityViewModels()
 
     private val searchedAdapter: SearchedHearitAdapter by lazy { SearchedHearitAdapter(this) }
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -114,7 +118,7 @@ class SearchResultPageFragment :
         hearitId: Long,
         source: HearitSource,
     ) {
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.SEARCH_HEARIT_SELECTED,
             mapOf(ITEM_ID to hearitId.toString()),
         )

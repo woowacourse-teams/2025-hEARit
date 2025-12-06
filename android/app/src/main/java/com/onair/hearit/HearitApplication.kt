@@ -3,7 +3,6 @@ package com.onair.hearit
 import android.app.Application
 import android.util.Log
 import com.kakao.sdk.common.KakaoSdk
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.usecase.InitializeDeviceUuidUseCase
@@ -30,8 +29,6 @@ class HearitApplication : Application() {
 
         initUuid()
         setAppVersion()
-
-        AnalyticsProvider.init(this)
         initialTimber()
     }
 

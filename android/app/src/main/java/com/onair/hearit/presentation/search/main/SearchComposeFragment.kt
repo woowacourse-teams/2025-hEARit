@@ -11,8 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys
 import com.onair.hearit.presentation.search.CategoryClickListener
 import com.onair.hearit.presentation.search.SearchViewModel
@@ -20,12 +21,16 @@ import com.onair.hearit.presentation.search.category.CategoryComposeFragment
 import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SearchComposeFragment :
     Fragment(),
     CategoryClickListener {
     private val viewModel: SearchViewModel by activityViewModels()
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,14 +43,20 @@ class SearchComposeFragment :
                 SearchMainScreen(
                     viewModel,
                     onSearchBarClick = { navigateToRecent() },
-                    onCategoryClick = ::onCategoryClick,
+                    onCategoryClick = { id: Long, name: String, colorCode: String ->
+                        analyticsLogger.logEvent(
+                            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
+                            mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
+                        )
+                        onCategoryClick(id, name, colorCode)
+                    },
                 )
             }
         }
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
                 FirebaseAnalytics.Param.SCREEN_NAME to AnalyticsParamKeys.SCREEN_NAME_SEARCH,

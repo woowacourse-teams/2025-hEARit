@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
-import com.onair.hearit.di.AnalyticsProvider
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.exception.DomainException.NetworkConnection
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
@@ -22,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val analyticsLogger: AnalyticsLogger,
 ) : ViewModel() {
     private val _checkToken: MutableLiveData<Boolean> = MutableLiveData()
     val checkToken: LiveData<Boolean> = _checkToken
@@ -113,7 +114,7 @@ class SplashViewModel @Inject constructor(
 
         if (id != null) {
             _navigateToMain.value = id
-            AnalyticsProvider.get().logEvent(AnalyticsEventNames.SHARE_EVENT)
+            analyticsLogger.logEvent(AnalyticsEventNames.SHARE_EVENT)
         } else if (uri != null) {
             _navigateToMain.value = null
         } else {

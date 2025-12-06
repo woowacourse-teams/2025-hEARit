@@ -9,11 +9,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SETTING
 import com.onair.hearit.databinding.FragmentSettingBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.showToast
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingFragment : Fragment() {
@@ -21,6 +22,9 @@ class SettingFragment : Fragment() {
     private var _binding: FragmentSettingBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SettingViewModel by viewModels()
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,7 +50,7 @@ class SettingFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
                 FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_SETTING,

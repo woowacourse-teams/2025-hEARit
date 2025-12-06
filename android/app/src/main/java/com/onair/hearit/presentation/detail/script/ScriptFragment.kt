@@ -25,10 +25,10 @@ import androidx.media3.session.SessionToken
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_SCRIPT
 import com.onair.hearit.databinding.FragmentScriptBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
@@ -40,6 +40,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ScriptFragment : Fragment() {
@@ -51,6 +52,9 @@ class ScriptFragment : Fragment() {
     private val viewModel: PlayerDetailViewModel by activityViewModels()
 
     private val scriptViewModel: ScriptViewModel by viewModels()
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     private val updateInterval = SCRIPT_SYNC_INTERVAL_MS
 
@@ -81,7 +85,7 @@ class ScriptFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
                 FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_SCRIPT,
@@ -224,7 +228,7 @@ class ScriptFragment : Fragment() {
     }
 
     private fun navigateToLogin() {
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.LOGIN_EVENT,
             mapOf(AnalyticsParamKeys.SOURCE_NAME to "script_login"),
         )

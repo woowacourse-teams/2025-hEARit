@@ -24,10 +24,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_LIBRARY
 import com.onair.hearit.databinding.FragmentLibraryBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
@@ -40,6 +40,7 @@ import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEA
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class LibraryFragment :
@@ -52,6 +53,9 @@ class LibraryFragment :
     private val mainViewModel: MainViewModel by activityViewModels()
     private val viewModel: LibraryViewModel by viewModels()
     private val bookmarkAdapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     private var mediaController: MediaController? = null
 
@@ -121,7 +125,7 @@ class LibraryFragment :
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
                 FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_LIBRARY,
@@ -138,7 +142,7 @@ class LibraryFragment :
         }
 
         binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
-            AnalyticsProvider.get().logEvent(
+            analyticsLogger.logEvent(
                 AnalyticsEventNames.LOGIN_EVENT,
                 mapOf(AnalyticsParamKeys.SOURCE_NAME to "library_login"),
             )
@@ -265,7 +269,7 @@ class LibraryFragment :
             }
         (activity as? MainActivity)?.launchDetailActivity(intent)
 
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.LIBRARY_TO_DETAIL,
             mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
         )
