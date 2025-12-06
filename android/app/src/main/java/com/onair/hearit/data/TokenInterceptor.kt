@@ -20,8 +20,8 @@ class TokenInterceptor @Inject constructor(
             tokenHeaderStore.getAccessToken()?.let { token ->
                 builder.header(AUTH_HEADER_NAME, "$BEARER_PREFIX $token")
             }
-            tokenHeaderStore.getDeviceUuid()?.let { deviveUuid ->
-                builder.header(DEVICE_UUID_HEADER, deviveUuid)
+            tokenHeaderStore.getDeviceUuid()?.let { deviceUuid ->
+                builder.header(DEVICE_UUID_HEADER, deviceUuid)
             }
         }
         tokenHeaderStore.getAppVersion()?.let { version ->
