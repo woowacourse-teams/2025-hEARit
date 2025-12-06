@@ -8,8 +8,10 @@ import com.onair.hearit.domain.usecase.GetBookmarksUseCase
 import com.onair.hearit.service.model.LibraryLoadResult
 import com.onair.hearit.service.model.LibraryPlayParams
 import com.onair.hearit.service.model.PrefetchResult
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 /**
  * 라이브러리(북마크 목록) 기반 재생을 위한 핸들러.
@@ -20,7 +22,8 @@ import kotlinx.coroutines.withContext
  * - 다음 페이지를 미리 불러(prefetch) 재생 중 끊김을 줄인다.
  */
 @UnstableApi
-class LibraryPlaybackHandler(
+@ServiceScoped
+class LibraryPlaybackHandler @Inject constructor(
     private val getBookmarksUseCase: GetBookmarksUseCase,
     private val mediaItemManager: PlaybackMediaItemManager,
 ) {

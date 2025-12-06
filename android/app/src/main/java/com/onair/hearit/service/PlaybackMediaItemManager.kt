@@ -8,11 +8,14 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @UnstableApi
-class PlaybackMediaItemManager(
+@ServiceScoped
+class PlaybackMediaItemManager @Inject constructor(
     private val getPlaybackInfoUseCase: GetPlaybackInfoUseCase,
 ) {
     fun buildMediaItem(
