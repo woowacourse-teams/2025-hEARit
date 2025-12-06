@@ -1,6 +1,5 @@
 package com.onair.hearit
 
-import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
@@ -8,17 +7,23 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.onair.hearit.presentation.setting.SettingFragment
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class SettingFragmentTest {
+    @get:Rule
+    val hiltRule: HiltAndroidRule = HiltAndroidRule(this)
+
     @Before
     fun setup() {
-        launchFragmentInContainer<SettingFragment>(
-            themeResId = R.style.Theme_HEARit,
-        )
+        hiltRule.inject()
+        launchFragmentInHiltContainer<SettingFragment>()
     }
 
     @Test

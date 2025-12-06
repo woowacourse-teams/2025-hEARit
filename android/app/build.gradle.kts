@@ -28,6 +28,7 @@ android {
         versionCode = 10304
         versionName = "1.3.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.onair.hearit.HearitTestRunner"
 
         manifestPlaceholders += mapOf()
         val kakaoNativeKey =
@@ -223,4 +224,8 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+
+    // hilt test
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.hilt.android.compiler)
 }
