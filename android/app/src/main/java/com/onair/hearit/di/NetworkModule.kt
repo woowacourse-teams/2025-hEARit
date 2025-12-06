@@ -3,6 +3,7 @@ package com.onair.hearit.di
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.onair.hearit.BuildConfig
 import com.onair.hearit.data.TokenAuthenticator
+import com.onair.hearit.data.TokenInterceptor
 import com.onair.hearit.data.api.AuthService
 import com.onair.hearit.data.api.BookmarkService
 import com.onair.hearit.data.api.CategoryService
@@ -16,9 +17,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
-import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.create
 import javax.inject.Named
@@ -38,27 +39,20 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    @Named("logging")
-    fun provideLoggingInterceptor(): Interceptor = LoggingInterceptorProvider.provide()
-
-    @Provides
-    @Singleton
-    @Named("token")
-    fun provideTokenInterceptor(): Interceptor = TokenInterceptorProvider.provide()
+    fun provideLoggingInterceptor(): HttpLoggingInterceptor = LoggingInterceptorProvider.provide()
 
     @Provides
     @Singleton
     @Named("noAuth")
-    fun provideOkHttpClientWithoutAuth(
-        @Named("logging") loggingInterceptor: Interceptor,
-    ): OkHttpClient = OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
+    fun provideOkHttpClientWithoutAuth(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
+        OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
 
     @Provides
     @Singleton
     @Named("auth")
     fun provideOkHttpClientWithAuth(
-        @Named("token") tokenInterceptor: Interceptor,
-        @Named("logging") loggingInterceptor: Interceptor,
+        tokenInterceptor: TokenInterceptor,
+        loggingInterceptor: HttpLoggingInterceptor,
         tokenAuthenticator: TokenAuthenticator,
     ): OkHttpClient =
         OkHttpClient
