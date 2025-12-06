@@ -5,7 +5,6 @@ import android.util.Log
 import com.kakao.sdk.common.KakaoSdk
 import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.di.TokenAuthenticatorProvider
 import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.usecase.InitializeDeviceUuidUseCase
 import dagger.hilt.android.HiltAndroidApp
@@ -29,15 +28,10 @@ class HearitApplication : Application() {
 
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_KEY)
 
-//        DatabaseProvider.init(this)
-//        DataSourceProvider.init(this)
-//        RepositoryProvider.init(this)
-
         initUuid()
         setAppVersion()
 
         AnalyticsProvider.init(this)
-        TokenAuthenticatorProvider.init()
         initialTimber()
     }
 
