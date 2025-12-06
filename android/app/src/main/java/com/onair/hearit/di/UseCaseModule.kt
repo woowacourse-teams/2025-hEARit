@@ -11,7 +11,6 @@ import com.onair.hearit.domain.usecase.GetExploreHearitUseCase
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 import com.onair.hearit.domain.usecase.GetRecentHearitUseCase
-import com.onair.hearit.domain.usecase.InitializeDeviceUuidUseCase
 import com.onair.hearit.domain.usecase.auth.KakaoLoginUseCase
 import com.onair.hearit.domain.usecase.auth.LogoutUseCase
 import com.onair.hearit.domain.usecase.auth.SaveTokenUseCase
@@ -65,11 +64,6 @@ object UseCaseModule {
     @Singleton
     fun provideGetRecentHearitUseCase(recentHearitRepository: RecentHearitRepository): GetRecentHearitUseCase =
         GetRecentHearitUseCase(recentHearitRepository)
-
-    @Provides
-    @Singleton
-    fun provideInitializeDeviceUuidUseCase(userRepository: UserRepository): InitializeDeviceUuidUseCase =
-        InitializeDeviceUuidUseCase(userRepository)
 
     @Provides
     @Singleton
