@@ -17,11 +17,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.create
+import timber.log.Timber
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -39,7 +41,29 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideLoggingInterceptor(): HttpLoggingInterceptor = LoggingInterceptorProvider.provide()
+    fun provideLoggingInterceptor(json: Json): HttpLoggingInterceptor =
+        HttpLoggingInterceptor(
+            object : HttpLoggingInterceptor.Logger {
+                override fun log(message: String) {
+                    if (message.startsWith("{") || message.startsWith("[")) {
+                        runCatching {
+                            val parsed: JsonElement = json.parseToJsonElement(message)
+                            val pretty: String =
+                                json.encodeToString(JsonElement.serializer(), parsed)
+                            Timber.i(pretty)
+                        }.onFailure {
+                            Timber.i(message)
+                        }
+                        return
+                    }
+                    Timber.i(message)
+                }
+            },
+        ).apply {
+            if (BuildConfig.DEBUG) {
+                level = HttpLoggingInterceptor.Level.BODY
+            }
+        }
 
     @Provides
     @Singleton
