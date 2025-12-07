@@ -34,13 +34,17 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryBuffer.class,
         PlayingHistoryCommandRepository.class, PlayingHistoryService.class, UserInfoService.class})
 class PlayingHistoryServiceTest {
@@ -53,6 +57,9 @@ class PlayingHistoryServiceTest {
 
     @Autowired
     PlayingHistoryBuffer playingHistoryBuffer;
+
+    @Autowired
+    PlayingHistoryCommandRepository playingHistoryCommandRepository;
 
     @Autowired
     HearitRepository hearitRepository;
@@ -176,6 +183,7 @@ class PlayingHistoryServiceTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
             dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), hearit, 10_000));
+            playingHistoryBuffer.flush();
             PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
 
             // when
@@ -187,11 +195,13 @@ class PlayingHistoryServiceTest {
             assertAll(
                     () -> assertThat(playingHistories.size()).isEqualTo(1),
                     () -> assertThat(playingHistories.getFirst().getUserUuid()).isEqualTo(member.getUuid()),
-                    () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId())
+                    () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId()),
+                    () -> assertThat(playingHistories.getFirst().getLastPlayTime()).isEqualTo(50_000L)
             );
         }
 
         @Test
+        @Commit
         @DisplayName("비회원은 재생기록을 수정할 수 있다.")
         void modifyPlayHistory_Guest() {
             // given
@@ -199,6 +209,7 @@ class PlayingHistoryServiceTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
             dbHelper.insertPlayingHistory(new PlayingHistory(guestUserInfo.getGuestId(), hearit, 10_000));
+            playingHistoryBuffer.flush();
             PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
 
             // when
@@ -210,10 +221,10 @@ class PlayingHistoryServiceTest {
             assertAll(
                     () -> assertThat(playingHistories.size()).isEqualTo(1),
                     () -> assertThat(playingHistories.getFirst().getUserUuid()).isEqualTo(guestUserInfo.getGuestId()),
-                    () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId())
+                    () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId()),
+                    () -> assertThat(playingHistories.getFirst().getLastPlayTime()).isEqualTo(50_000L)
             );
         }
-
     }
 
     @Test

@@ -122,7 +122,7 @@ class HearitRepositoryTest {
     @Test
     @Disabled
     @DisplayName("최근 업로드된 히어릿을 마지막 재생시간과 함께 조회한다.")
-    void findTopNHearitWithPlayTimeTest() throws InterruptedException {
+    void findTopNHearitWithPlayTimeTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());

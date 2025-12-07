@@ -285,7 +285,7 @@ class HearitServiceTest {
 
         @Test
         @DisplayName("모든 카테고리 히어릿을 생성 날짜 오름차순으로 조회한다.")
-        void getHearitsAllCategory() throws InterruptedException {
+        void getHearitsAllCategory() {
             // given
             Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());

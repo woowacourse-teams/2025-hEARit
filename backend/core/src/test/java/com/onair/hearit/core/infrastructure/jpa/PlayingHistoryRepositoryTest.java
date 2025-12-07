@@ -32,7 +32,7 @@ class PlayingHistoryRepositoryTest {
 
     @Test
     @DisplayName("회원의 재생 기록을 업데이트 날짜를 기준으로 내림차순 정렬하여 10개 조회한다.")
-    void findByMemberIdOrderByUpdatedAtDesc() throws InterruptedException {
+    void findByMemberIdOrderByUpdatedAtDesc() {
         // given
         Member member1 = dbHelper.insertMember(TestFixture.createFixedMember());
         Member member2 = dbHelper.insertMember(TestFixture.createFixedMember());
