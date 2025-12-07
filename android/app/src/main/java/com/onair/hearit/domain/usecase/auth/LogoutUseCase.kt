@@ -12,8 +12,10 @@ import kotlin.coroutines.suspendCoroutine
 class LogoutUseCase @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val kakaoClient: UserApiClient = UserApiClient.instance,
 ) {
+    private val kakaoClient: UserApiClient
+        get() = UserApiClient.instance
+
     suspend operator fun invoke(): Result<Unit> =
         runCatching {
             runCatching {
