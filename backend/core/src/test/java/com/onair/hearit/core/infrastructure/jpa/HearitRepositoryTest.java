@@ -142,7 +142,7 @@ class HearitRepositoryTest {
 
         // when
         Page<HearitWithPlayTimeProjection> result =
-                hearitRepository.findWithPlayTimeBy(null, member.getId(), pageable);
+                hearitRepository.findWithPlayTimeBy(null, member.getUuid(), pageable);
 
         HearitWithPlayTimeProjection projection3 = result.getContent().get(0);
         HearitWithPlayTimeProjection projection2 = result.getContent().get(1);
