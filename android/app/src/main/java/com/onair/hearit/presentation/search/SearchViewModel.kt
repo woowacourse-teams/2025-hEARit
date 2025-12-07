@@ -2,7 +2,6 @@ package com.onair.hearit.presentation.search
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
@@ -29,7 +28,6 @@ class SearchViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val hearitRepository: HearitRepository,
     private val recentKeywordRepository: RecentKeywordRepository,
-    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _searchUiState = MutableLiveData<SearchUiState>()
     val searchUiState: LiveData<SearchUiState> = _searchUiState
@@ -49,8 +47,7 @@ class SearchViewModel @Inject constructor(
     private val _toastMessage = SingleLiveData<Int?>()
     val toastMessage: LiveData<Int?> = _toastMessage
 
-    private var currentInput: SearchInput? =
-        savedStateHandle.get<SearchInput>(INITIAL_INPUT_KEY)
+    private var currentInput: SearchInput? = null
 
     val currentCategory: Category? =
         (currentInput as? SearchInput.Category)?.let {

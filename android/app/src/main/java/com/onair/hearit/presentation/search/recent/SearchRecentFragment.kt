@@ -69,6 +69,8 @@ class SearchRecentFragment :
             binding.etSearch.setText(term)
             binding.etSearch.setSelection(term.length)
             viewLifecycleOwner.lifecycleScope.launch {
+                val input: SearchInput = SearchInput.Keyword(term)
+                viewModel.setSearchInput(input)
                 navigateToSearchResult()
             }
         }
@@ -76,6 +78,7 @@ class SearchRecentFragment :
 
     fun showSearchResultPage(input: SearchInput) {
         updateSearchInput(input.term())
+        viewModel.setSearchInput(input)
         showSearchResultFragment()
         viewModel.saveRecentKeyword(input.term())
         hideKeyboard()
@@ -146,6 +149,8 @@ class SearchRecentFragment :
         if (searchTerm == lastSearchTerm) return
 
         lastSearchTerm = searchTerm
+        val input: SearchInput = SearchInput.Keyword(searchTerm)
+        viewModel.setSearchInput(input)
         viewModel.saveRecentKeyword(searchTerm)
         navigateToSearchResult()
         hideKeyboard()
@@ -207,6 +212,8 @@ class SearchRecentFragment :
     }
 
     override fun onRecentSearchClick(term: String) {
+        val input: SearchInput = SearchInput.Keyword(term)
+        viewModel.setSearchInput(input)
         navigateToSearchResult()
     }
 
