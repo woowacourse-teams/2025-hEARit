@@ -184,7 +184,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category1.getId(),
-                    sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -210,7 +210,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
-                    sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -234,7 +234,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
-                    sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -300,7 +300,7 @@ class HearitServiceTest {
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(
                     null,
                     sortRequest,
-                    TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()),
+                    TestFixture.createGuestUserInfo(UUID.randomUUID().toString()),
                     pagingRequest
             );
 

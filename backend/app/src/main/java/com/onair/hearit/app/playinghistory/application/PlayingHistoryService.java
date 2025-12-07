@@ -65,9 +65,6 @@ public class PlayingHistoryService {
     }
 
     public void addPlayingHistory(UserInfo userInfo, PlayingHistoryRequest request) {
-        if (userInfo == null || userInfo.isGuest()) {
-            return;
-        }
         Hearit hearit = getHearitById(request.hearitId());
         String userUuid = userInfoService.getUuid(userInfo);
         PlayingHistory history = new PlayingHistory(userUuid, hearit, request.lastPlayTime());
