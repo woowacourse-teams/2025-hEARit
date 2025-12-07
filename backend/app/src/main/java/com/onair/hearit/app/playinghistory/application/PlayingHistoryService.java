@@ -37,7 +37,7 @@ public class PlayingHistoryService {
     }
 
     private List<RecentlyPlayedHearitResponse> toPlayingHistoryResponse(String userUuid) {
-        List<PlayingHistory> histories = playingHistoryRepository.findByMemberIdOrderByUpdatedAtDesc(
+        List<PlayingHistory> histories = playingHistoryRepository.findByUserUuidOrderByUpdatedAtDesc(
                 userUuid, PLAYING_HISTORY_MAX_COUNT);
         Map<Long, Long> lastPlayTimeByHearitId = mapHearitIdToLastPlayTime(histories);
         Map<Long, Hearit> hearitMap = mapHearitIdToHearit(lastPlayTimeByHearitId.keySet());

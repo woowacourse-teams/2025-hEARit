@@ -45,7 +45,7 @@ class PlayingHistoryRepositoryTest {
         dbHelper.insertPlayingHistoryAt(new PlayingHistory(member2.getUuid(), hearit2, 20), LocalDateTime.now()); // 업데이트
 
         // when
-        List<PlayingHistory> result = playingHistoryRepository.findByMemberIdOrderByUpdatedAtDesc(member1.getUuid(), 10);
+        List<PlayingHistory> result = playingHistoryRepository.findByUserUuidOrderByUpdatedAtDesc(member1.getUuid(), 10);
 
         // then
         assertAll(() -> {
