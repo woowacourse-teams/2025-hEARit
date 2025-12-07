@@ -91,7 +91,7 @@ class BookmarkServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit, 1));
+        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), hearit, 1));
 
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
@@ -120,7 +120,7 @@ class BookmarkServiceTest {
         Hearit finished = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark1 = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished));
         PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
-                new PlayingHistory(member.getId(), finished, 500_000L));
+                new PlayingHistory(member.getUuid(), finished, 500_000L));
 
         Hearit unfinished = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark2 = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished));

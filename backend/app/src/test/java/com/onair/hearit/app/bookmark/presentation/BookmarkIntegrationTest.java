@@ -125,7 +125,7 @@ class BookmarkIntegrationTest extends IntegrationTest {
         Hearit finished = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark1 = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished));
         PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
-                new PlayingHistory(member.getId(), finished, 500_000L));
+                new PlayingHistory(member.getUuid(), finished, 500_000L));
 
         Hearit unfinished = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark2 = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished));

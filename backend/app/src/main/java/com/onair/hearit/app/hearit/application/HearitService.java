@@ -7,6 +7,7 @@ import com.onair.hearit.app.exception.custom.UnauthenticatedException;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
+import com.onair.hearit.app.userInfo.application.UserInfoService;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -43,6 +44,7 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
+    private final UserInfoService userInfoService;
 
     @Transactional(readOnly = true)
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
@@ -73,8 +75,8 @@ public class HearitService {
     }
 
     private Long calculateLastPlayTime(Hearit hearit, Member member) {
-        Optional<Long> optionalLastPlayTime = playingHistoryRepository.findByHearitIdAndMemberId(hearit.getId(),
-                        member.getId())
+        Optional<Long> optionalLastPlayTime = playingHistoryRepository.findByHearitIdAndUserUuid(hearit.getId(),
+                        member.getUuid())
                 .map(PlayingHistory::getLastPlayTime);
         if (optionalLastPlayTime.isEmpty()) {
             return null;
@@ -95,11 +97,11 @@ public class HearitService {
     @Transactional(readOnly = true)
     public PagedResponse<HearitOverviewResponse> getFilteredHearits(
             Long categoryId, HearitSortRequest sortRequest, UserInfo userInfo, PagingRequest pagingRequest) {
-        Long memberId = (userInfo == null || userInfo.isGuest()) ? null : userInfo.getMemberId();
+        String userUuid = userInfoService.getUuid(userInfo);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sortRequest.toSort());
         Page<HearitWithPlayTimeProjection> hearitsWithPlayTime = hearitRepository.findWithPlayTimeBy(
                 categoryId,
-                memberId,
+                userUuid,
                 pageable
         );
         List<Long> hearitIds = hearitsWithPlayTime.stream()

@@ -75,13 +75,13 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("""
             SELECT h AS hearit, ph.lastPlayTime AS lastPlayTime
             FROM Hearit h
-            LEFT JOIN PlayingHistory ph ON h.id = ph.hearitId AND ph.memberId = :memberId
+            LEFT JOIN PlayingHistory ph ON h.id = ph.hearitId AND ph.userUuid = :userUuid
             JOIN FETCH h.category
             WHERE (:categoryId IS NULL OR h.category.id = :categoryId)
             """)
     Page<HearitWithPlayTimeProjection> findWithPlayTimeBy(
             @Param("categoryId") Long categoryId,
-            @Param("memberId") Long memberId,
+            @Param("userUuid") String userUuid,
             Pageable pageable
     );
 }

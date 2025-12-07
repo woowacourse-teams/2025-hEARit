@@ -10,6 +10,7 @@ import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.fixture.DbHelper;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,14 +40,12 @@ class PlayingHistoryRepositoryTest {
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        dbHelper.insertPlayingHistory(new PlayingHistory(member1.getId(), hearit1, 10));
-        Thread.sleep(10);
-        dbHelper.insertPlayingHistory(new PlayingHistory(member1.getId(), hearit2, 20));
-        Thread.sleep(10);
-        dbHelper.insertPlayingHistory(new PlayingHistory(member2.getId(), hearit2, 20));
+        dbHelper.insertPlayingHistoryAt(new PlayingHistory(member1.getUuid(), hearit1, 10), LocalDateTime.now().minusMinutes(10));
+        dbHelper.insertPlayingHistoryAt(new PlayingHistory(member1.getUuid(), hearit2, 20), LocalDateTime.now().minusMinutes(1));
+        dbHelper.insertPlayingHistoryAt(new PlayingHistory(member2.getUuid(), hearit2, 20), LocalDateTime.now()); // 업데이트
 
         // when
-        List<PlayingHistory> result = playingHistoryRepository.findByMemberIdOrderByUpdatedAtDesc(member1.getId(), 10);
+        List<PlayingHistory> result = playingHistoryRepository.findByMemberIdOrderByUpdatedAtDesc(member1.getUuid(), 10);
 
         // then
         assertAll(() -> {

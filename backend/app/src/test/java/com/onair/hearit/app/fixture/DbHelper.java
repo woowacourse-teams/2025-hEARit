@@ -85,4 +85,13 @@ public class DbHelper {
         em.flush();
         return playingHistory;
     }
+
+    public PlayingHistory insertPlayingHistoryAt(PlayingHistory playingHistory, LocalDateTime updatedTime) {
+        try {
+            TestClock.freezeAt(updatedTime);
+            return insertPlayingHistory(playingHistory);
+        } finally {
+            TestClock.unfreeze();
+        }
+    }
 }

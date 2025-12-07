@@ -9,16 +9,16 @@ import org.springframework.data.repository.query.Param;
 
 public interface PlayingHistoryRepository extends JpaRepository<PlayingHistory, Long> {
 
-    Optional<PlayingHistory> findByHearitIdAndMemberId(Long hearitId, Long memberId);
+    Optional<PlayingHistory> findByHearitIdAndUserUuid(Long hearitId, String userUuid);
 
     @Query("""
             SELECT ph
             FROM PlayingHistory ph
-            WHERE ph.memberId = :memberId
+            WHERE ph.userUuid = :userUuid
             ORDER BY ph.updatedAt DESC
             LIMIT :size
             """)
-    List<PlayingHistory> findByMemberIdOrderByUpdatedAtDesc(@Param("memberId") Long memberId, @Param("size") int size);
+    List<PlayingHistory> findByMemberIdOrderByUpdatedAtDesc(@Param("userUuid") String userUuid, @Param("size") int size);
 
-    List<PlayingHistory> findByMemberIdAndHearitIdIn(Long memberId, List<Long> hearitIds);
+    List<PlayingHistory> findByUserUuidAndHearitIdIn(String userUuid, List<Long> hearitIds);
 }

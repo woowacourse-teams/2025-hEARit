@@ -18,7 +18,7 @@ public class PlayingHistoryCommandRepository {
     public void bulkInsert(List<PlayingHistory> histories) {
         LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         String sql = """
-                INSERT INTO playing_history (member_id, hearit_id, last_play_time, is_finished, updated_at)
+                INSERT INTO playing_history (user_uuid, hearit_id, last_play_time, is_finished, updated_at)
                 VALUES (?, ?, ?, ?, ?) AS new_history
                 ON DUPLICATE KEY UPDATE
                     last_play_time = new_history.last_play_time,
@@ -27,7 +27,7 @@ public class PlayingHistoryCommandRepository {
                 """;
 
         jdbcTemplate.batchUpdate(sql, histories, histories.size(), (ps, history) -> {
-            ps.setLong(1, history.getMemberId());
+            ps.setString(1, history.getUserUuid());
             ps.setLong(2, history.getHearitId());
             ps.setLong(3, history.getLastPlayTime());
             ps.setBoolean(4, history.isFinished());

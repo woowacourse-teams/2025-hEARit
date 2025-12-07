@@ -38,7 +38,7 @@ class HearitIntegrationTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
-                new PlayingHistory(member.getId(), hearit, 1_000));
+                new PlayingHistory(member.getUuid(), hearit, 1_000));
         Keyword keyword1 = dbHelper.insertKeyword(new Keyword("Java"));
         Keyword keyword2 = dbHelper.insertKeyword(new Keyword("Spring"));
         dbHelper.insertHearitKeyword(new HearitKeyword(hearit, keyword1));
