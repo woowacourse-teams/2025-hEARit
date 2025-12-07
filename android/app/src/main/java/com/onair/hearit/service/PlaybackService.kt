@@ -39,15 +39,21 @@ class PlaybackService : MediaSessionService() {
     @Inject
     lateinit var playingHistoryRepository: PlayingHistoryRepository
 
+    @Inject
+    lateinit var mediaItemManager: PlaybackMediaItemManager
+
+    @Inject
+    lateinit var libraryPlaybackHandler: LibraryPlaybackHandler
+
+    @Inject
+    lateinit var recentPlaybackHandler: RecentPlaybackHandler
+
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
     private lateinit var stateSaver: PlaybackStateSaver
-    private lateinit var mediaItemManager: PlaybackMediaItemManager
     private lateinit var playbackPositionListener: PlaybackPositionListener
 
     private var notificationController: PlayerNotificationController? = null
-    private lateinit var libraryPlaybackHandler: LibraryPlaybackHandler
-    private lateinit var recentPlaybackHandler: RecentPlaybackHandler
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -55,19 +61,6 @@ class PlaybackService : MediaSessionService() {
         super.onCreate()
 
         initializePlayer()
-
-        mediaItemManager = PlaybackMediaItemManager(getPlaybackInfoUseCase)
-        libraryPlaybackHandler =
-            LibraryPlaybackHandler(
-                getBookmarksUseCase,
-                mediaItemManager,
-            )
-        recentPlaybackHandler =
-            RecentPlaybackHandler(
-                recentHearitRepository,
-                getPlaybackInfoUseCase,
-                mediaItemManager,
-            )
 
         playbackPositionListener = PlaybackPositionListener(player)
         stateSaver =
