@@ -10,7 +10,7 @@ import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
 import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
-import com.onair.hearit.app.userInfo.application.UserInfoService;
+import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;

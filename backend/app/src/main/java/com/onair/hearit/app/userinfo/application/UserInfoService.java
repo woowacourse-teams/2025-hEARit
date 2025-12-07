@@ -1,4 +1,4 @@
-package com.onair.hearit.app.userInfo.application;
+package com.onair.hearit.app.userinfo.application;
 
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.core.domain.UserInfo;

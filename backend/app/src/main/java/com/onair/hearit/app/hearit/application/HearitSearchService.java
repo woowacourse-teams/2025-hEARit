@@ -3,7 +3,7 @@ package com.onair.hearit.app.hearit.application;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.hearit.dto.HearitSearchResponse;
-import com.onair.hearit.app.userInfo.application.UserInfoService;
+import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;

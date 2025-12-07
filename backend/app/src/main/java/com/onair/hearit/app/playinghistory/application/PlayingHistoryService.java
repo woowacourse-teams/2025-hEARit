@@ -4,7 +4,7 @@ import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
 import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
-import com.onair.hearit.app.userInfo.application.UserInfoService;
+import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.UserInfo;
