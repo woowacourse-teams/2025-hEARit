@@ -148,14 +148,19 @@ class PlayingHistoryServiceTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
             PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+            String guestUuid = UUID.randomUUID().toString();
 
             // when
-            playingHistoryService.addPlayingHistory(TestFixture.createGuestUserInfo(UUID.randomUUID().toString()),
-                    request);
+            playingHistoryService.addPlayingHistory(TestFixture.createGuestUserInfo(guestUuid), request);
             playingHistoryBuffer.flush();
 
             // then
-            assertThat(playingHistoryRepository.findAll()).hasSize(1);
+            List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
+            assertAll(
+                    () -> assertThat(playingHistories.size()).isEqualTo(1),
+                    () -> assertThat(playingHistories.getFirst().getUserUuid()).isEqualTo(guestUuid),
+                    () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId())
+            );
         }
     }
 
