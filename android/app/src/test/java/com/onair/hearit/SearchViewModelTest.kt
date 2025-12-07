@@ -51,7 +51,6 @@ class SearchViewModelTest {
                 categoryRepository = categoryRepository,
                 hearitRepository = hearitRepository,
                 recentKeywordRepository = recentKeywordRepository,
-                savedStateHandle = savedStateHandle,
             )
     }
 
