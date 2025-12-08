@@ -36,7 +36,10 @@ fun SettingContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(HearitBlack),
     ) {
         SettingItem(
             text = stringResource(R.string.setting_profile),
@@ -97,7 +100,6 @@ private fun SettingItem(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(HearitBlack)
                 .clickable(onClick = onClick),
     ) {
         Text(
