@@ -42,7 +42,12 @@ class PlayerDetailViewModel @Inject constructor(
     val showLoginDialog: LiveData<Unit> = _showLoginDialog
 
     init {
-        fetchData()
+        if (hearitId > INVALID_HEARIT_ID) {
+            fetchData()
+        } else {
+            Timber.w("PlayerDetailViewModel initialized with invalid hearitId: $hearitId")
+            _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
+        }
     }
 
     fun toggleBookmark() {
@@ -118,5 +123,9 @@ class PlayerDetailViewModel @Inject constructor(
                     _toastMessage.value = R.string.player_detail_toast_recent_save_fail
                 }
         }
+    }
+
+    companion object {
+        private const val INVALID_HEARIT_ID: Long = -1L
     }
 }
