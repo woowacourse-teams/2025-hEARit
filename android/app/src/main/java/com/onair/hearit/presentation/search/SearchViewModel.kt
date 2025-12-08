@@ -49,14 +49,15 @@ class SearchViewModel @Inject constructor(
 
     private var currentInput: SearchInput? = null
 
-    val currentCategory: Category? =
-        (currentInput as? SearchInput.Category)?.let {
-            Category(
-                id = it.id,
-                name = it.name,
-                colorCode = it.colorCode,
-            )
-        }
+    val currentCategory: Category?
+        get() =
+            (currentInput as? SearchInput.Category)?.let {
+                Category(
+                    id = it.id,
+                    name = it.name,
+                    colorCode = it.colorCode,
+                )
+            }
 
     private var paging: Paging? = null
     private var currentPage = 0
