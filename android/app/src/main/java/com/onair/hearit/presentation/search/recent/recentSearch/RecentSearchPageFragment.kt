@@ -77,7 +77,6 @@ class RecentSearchPageFragment :
 
     override fun onRecentSearchClick(term: String) {
         val input: SearchInput = SearchInput.Keyword(term)
-        viewModel.setSearchInput(input)
         (parentFragment as? SearchRecentFragment)
             ?.showSearchResultPage(input)
     }

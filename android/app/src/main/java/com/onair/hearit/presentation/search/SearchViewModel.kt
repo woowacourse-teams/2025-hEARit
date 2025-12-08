@@ -63,10 +63,7 @@ class SearchViewModel @Inject constructor(
     private var isLastPage = false
     private var isLoading = false
 
-    fun setSearchInput(
-        input: SearchInput,
-        refreshImmediately: Boolean = true,
-    ) {
+    fun setSearchInput(input: SearchInput) {
         if (currentInput == input) return
 
         currentInput = input
@@ -74,9 +71,7 @@ class SearchViewModel @Inject constructor(
         _searchedHearits.value = emptyList()
         _categoryHearits.value = emptyList()
 
-        if (refreshImmediately) {
-            fetchResultData(isInitial = true)
-        }
+        fetchResultData(isInitial = true)
     }
 
     fun refreshSearchResults() {

@@ -37,7 +37,7 @@ class CategoryComposeFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.setSearchInput(category, refreshImmediately = true)
+        viewModel.setSearchInput(category)
     }
 
     override fun onCreateView(
