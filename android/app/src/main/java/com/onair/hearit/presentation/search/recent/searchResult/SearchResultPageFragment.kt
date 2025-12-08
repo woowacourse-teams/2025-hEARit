@@ -9,6 +9,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.analytics.AnalyticsEventNames
@@ -35,7 +36,7 @@ class SearchResultPageFragment :
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private val viewModel: SearchViewModel by activityViewModels()
+    private val viewModel: SearchViewModel by viewModels({ requireParentFragment() })
 
     private val searchedAdapter: SearchedHearitAdapter by lazy { SearchedHearitAdapter(this) }
 

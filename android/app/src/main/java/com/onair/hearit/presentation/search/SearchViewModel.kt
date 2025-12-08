@@ -244,8 +244,4 @@ class SearchViewModel @Inject constructor(
         currentPage = 0
         isLastPage = false
     }
-
-    companion object {
-        const val INITIAL_INPUT_KEY: String = "initialInput"
-    }
 }

@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.onair.hearit.databinding.FragmentRecentSearchPageBinding
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.search.SearchViewModel
@@ -25,7 +25,7 @@ class RecentSearchPageFragment :
 
     private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
-    private val viewModel: SearchViewModel by activityViewModels()
+    private val viewModel: SearchViewModel by viewModels({ requireParentFragment() })
 
     override fun onCreateView(
         inflater: LayoutInflater,

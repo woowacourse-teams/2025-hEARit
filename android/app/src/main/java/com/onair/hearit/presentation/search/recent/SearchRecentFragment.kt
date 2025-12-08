@@ -13,7 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.onair.hearit.R
 import com.onair.hearit.databinding.FragmentSearchRecentBinding
@@ -39,7 +39,7 @@ class SearchRecentFragment :
 
     private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
-    private val viewModel: SearchViewModel by activityViewModels()
+    private val viewModel: SearchViewModel by viewModels()
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private var lastSearchTerm: String? = null
     private val initialKeyword: String?
@@ -79,7 +79,7 @@ class SearchRecentFragment :
     fun showSearchResultPage(input: SearchInput) {
         updateSearchInput(input.term())
         viewModel.setSearchInput(input)
-        showSearchResultFragment()
+        navigateToSearchResult()
         viewModel.saveRecentKeyword(input.term())
         hideKeyboard()
     }
@@ -169,15 +169,6 @@ class SearchRecentFragment :
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
             showToast(resId)
         }
-    }
-
-    private fun showSearchResultFragment() {
-        childFragmentManager
-            .beginTransaction()
-            .replace(
-                R.id.fragment_search_container_view,
-                SearchResultPageFragment(),
-            ).commit()
     }
 
     private fun navigateToRecent() {
