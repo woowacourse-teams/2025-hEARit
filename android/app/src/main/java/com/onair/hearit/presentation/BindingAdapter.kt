@@ -12,7 +12,12 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
+import coil.imageLoader
 import coil.load
+import coil.memory.MemoryCache
+import coil.request.CachePolicy
+import coil.transform.RoundedCornersTransformation
+import com.facebook.shimmer.ShimmerFrameLayout
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.library.BookmarkUiState
@@ -27,7 +32,7 @@ fun setFormattedPlayTime(
 ) {
     val minutes = timeInSeconds / 60
     val seconds = timeInSeconds % 60
-    textView.text = String.format("%02d:%02d", minutes, seconds)
+    textView.text = String.format(Locale.ROOT, "%02d:%02d", minutes, seconds)
 }
 
 @BindingAdapter("exploreHighlightedStyle")
@@ -89,17 +94,53 @@ fun setFormattedDate(
     }
 }
 
-@BindingAdapter("imageUrl")
-fun setImageUrl(
+@BindingAdapter("imageUrl", "shimmerContainer", requireAll = false)
+fun loadProfileImage(
     view: ImageView,
     url: String?,
+    shimmerContainer: ShimmerFrameLayout?,
 ) {
-    view
-        .load(url) {
-            crossfade(true)
-            error(R.drawable.img_default_profile)
-            placeholder(R.drawable.img_default_profile)
-        }
+    // url 없으면 기본 이미지
+    if (url.isNullOrEmpty()) {
+        shimmerContainer?.visibility = View.GONE
+        view.setImageResource(R.drawable.img_default_profile)
+        return
+    }
+
+    // 캐시 확인
+    val hasCached =
+        view.context.imageLoader.memoryCache
+            ?.get(MemoryCache.Key(url)) != null
+
+    // 캐시 있으면 shimmer 숨김
+    if (hasCached || view.drawable != null) {
+        shimmerContainer?.visibility = View.GONE
+    }
+
+    view.load(url) {
+        crossfade(false)
+        placeholder(view.drawable)
+        error(R.drawable.img_default_profile)
+        memoryCachePolicy(CachePolicy.ENABLED)
+        diskCachePolicy(CachePolicy.ENABLED)
+        listener(
+            onStart = {
+                if (view.drawable == null) {
+                    shimmerContainer?.visibility = View.VISIBLE
+                    view.visibility = View.INVISIBLE
+                }
+            },
+            onSuccess = { _, _ ->
+                shimmerContainer?.visibility = View.GONE
+                view.visibility = View.VISIBLE
+            },
+            onError = { _, _ ->
+                shimmerContainer?.visibility = View.GONE
+                view.visibility = View.VISIBLE
+            },
+        )
+        transformations(RoundedCornersTransformation(320f))
+    }
 }
 
 @BindingAdapter("visibleIfCondition")

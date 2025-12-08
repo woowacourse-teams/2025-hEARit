@@ -38,7 +38,9 @@ class TokenAuthenticator(
                     refreshTokenAndRetry(response.request)
                 }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
         }
         return null
