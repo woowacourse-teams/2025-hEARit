@@ -14,8 +14,6 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
-import com.onair.hearit.domain.usecase.GetBookmarksUseCase
-import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
 import com.onair.hearit.presentation.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -27,12 +25,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 @OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
-    @Inject
-    lateinit var getPlaybackInfoUseCase: GetPlaybackInfoUseCase
-
-    @Inject
-    lateinit var getBookmarksUseCase: GetBookmarksUseCase
-
     @Inject
     lateinit var recentHearitRepository: RecentHearitRepository
 
