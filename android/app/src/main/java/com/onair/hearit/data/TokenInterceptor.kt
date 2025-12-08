@@ -5,7 +5,7 @@ import okhttp3.Response
 import javax.inject.Inject
 
 class TokenInterceptor @Inject constructor(
-    private val tokenHeaderStore: TokenHeaderStore,
+    private val authHeaderProvider: AuthHeaderProvider,
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
@@ -17,14 +17,14 @@ class TokenInterceptor @Inject constructor(
                 .removeHeader(NO_AUTH_KEY)
 
         if (!noAuth) {
-            tokenHeaderStore.getAccessToken()?.let { token ->
+            authHeaderProvider.getAccessToken()?.let { token ->
                 builder.header(AUTH_HEADER_NAME, "$BEARER_PREFIX $token")
             }
-            tokenHeaderStore.getDeviceUuid()?.let { deviceUuid ->
+            authHeaderProvider.getDeviceUuid()?.let { deviceUuid ->
                 builder.header(DEVICE_UUID_HEADER, deviceUuid)
             }
         }
-        tokenHeaderStore.getAppVersion()?.let { version ->
+        authHeaderProvider.getAppVersion()?.let { version ->
             builder.header(APP_VERSION_HEADER, version)
         }
         return chain.proceed(builder.build())

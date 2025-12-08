@@ -4,7 +4,7 @@ import android.app.Application
 import android.util.Log
 import com.kakao.sdk.common.KakaoSdk
 import com.onair.hearit.analytics.CrashlyticsLogger
-import com.onair.hearit.data.TokenHeaderStore
+import com.onair.hearit.data.AuthHeaderProvider
 import com.onair.hearit.domain.usecase.InitializeDeviceUuidUseCase
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -21,7 +21,7 @@ class HearitApplication : Application() {
     lateinit var initializeDeviceUuidUseCase: InitializeDeviceUuidUseCase
 
     @Inject
-    lateinit var tokenHeaderStore: TokenHeaderStore
+    lateinit var authHeaderProvider: AuthHeaderProvider
 
     @Inject
     lateinit var crashlyticsLogger: CrashlyticsLogger
@@ -47,7 +47,7 @@ class HearitApplication : Application() {
         appScope.launch {
             initializeDeviceUuidUseCase()
                 .onSuccess { uuid ->
-                    tokenHeaderStore.updateDeviceUuid(uuid)
+                    authHeaderProvider.updateDeviceUuid(uuid)
                 }.onFailure { throwable ->
                     Timber.e(throwable, "Failed to initialize UUID")
                 }
@@ -62,7 +62,7 @@ class HearitApplication : Application() {
                 "unknown"
             }
 
-        tokenHeaderStore.updateAppVersion(versionName)
+        authHeaderProvider.updateAppVersion(versionName)
     }
 
     private fun initialTimber() {

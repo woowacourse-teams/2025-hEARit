@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.data.TokenHeaderStore
+import com.onair.hearit.data.AuthHeaderProvider
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.usecase.GetRecentHearitUseCase
 import com.onair.hearit.domain.usecase.auth.LogoutUseCase
@@ -26,7 +26,7 @@ class MainViewModel @Inject constructor(
     private val getRecentHearitUseCase: GetRecentHearitUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val withdrawUseCase: WithdrawUseCase,
-    private val tokenHeaderStore: TokenHeaderStore,
+    private val authHeaderProvider: AuthHeaderProvider,
 ) : ViewModel() {
     private val _recentHearit = MutableLiveData<RecentHearit?>()
     val recentHearit: LiveData<RecentHearit?> = _recentHearit
@@ -70,7 +70,7 @@ class MainViewModel @Inject constructor(
             logoutUseCase()
                 .onSuccess {
                     _toastMessage.value = R.string.logout_success
-                    tokenHeaderStore.updateAccessToken(null)
+                    authHeaderProvider.updateAccessToken(null)
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.logout_fail
@@ -84,7 +84,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             withdrawUseCase()
                 .onSuccess {
-                    tokenHeaderStore.updateAccessToken(null)
+                    authHeaderProvider.updateAccessToken(null)
                     _withdrawState.value = true
                     _toastMessage.value = R.string.withdraw_success
                 }.onFailure { throwable ->

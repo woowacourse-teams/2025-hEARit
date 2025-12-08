@@ -15,7 +15,7 @@ import javax.inject.Named
 class TokenAuthenticator @Inject constructor(
     private val authLocalDataSource: AuthLocalDataSource,
     @Named("noAuth") private val authService: AuthService,
-    private val tokenHeaderStore: TokenHeaderStore,
+    private val authHeaderProvider: AuthHeaderProvider,
 ) : Authenticator {
     private val json =
         Json {
@@ -50,7 +50,7 @@ class TokenAuthenticator @Inject constructor(
         try {
             val newToken = runBlocking { refreshToken() }
             if (newToken != null) {
-                tokenHeaderStore.updateAccessToken(newToken)
+                authHeaderProvider.updateAccessToken(newToken)
                 originalRequest
                     .newBuilder()
                     .header("Authorization", "Bearer $newToken")
@@ -67,7 +67,7 @@ class TokenAuthenticator @Inject constructor(
 
     private fun handleRefreshFailed() {
         // 리프레시 실패시 로그아웃 처리
-        tokenHeaderStore.updateAccessToken(null)
+        authHeaderProvider.updateAccessToken(null)
         AuthEventManager.sendLogoutEvent()
     }
 

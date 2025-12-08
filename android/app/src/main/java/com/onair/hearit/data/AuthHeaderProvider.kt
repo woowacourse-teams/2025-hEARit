@@ -4,7 +4,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TokenHeaderStore @Inject constructor() {
+class AuthHeaderProvider @Inject constructor() {
     @Volatile
     private var accessToken: String? = null
 
