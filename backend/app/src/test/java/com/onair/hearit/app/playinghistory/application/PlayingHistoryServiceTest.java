@@ -81,9 +81,10 @@ class PlayingHistoryServiceTest {
             Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
+            LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
             dbHelper.insertPlayingHistoryAt(new PlayingHistory(member.getUuid(), hearit1, 10),
-                    LocalDateTime.now().minusMinutes(10));
-            dbHelper.insertPlayingHistoryAt(new PlayingHistory(member.getUuid(), hearit2, 20), LocalDateTime.now());
+                    baseTime.minusMinutes(10));
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(member.getUuid(), hearit2, 20), baseTime);
 
             // when
             List<RecentlyPlayedHearitResponse> result = playingHistoryService.getRecentPlayingHistory(memberInfo);
@@ -105,10 +106,11 @@ class PlayingHistoryServiceTest {
             Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
+            LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
             dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestInfo.getGuestId(), hearit1, 10),
-                    LocalDateTime.now().minusMinutes(10));
+                    baseTime.minusMinutes(10));
             dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestInfo.getGuestId(), hearit2, 20),
-                    LocalDateTime.now());
+                    baseTime);
 
             // when
             List<RecentlyPlayedHearitResponse> result = playingHistoryService.getRecentPlayingHistory(guestInfo);
@@ -183,7 +185,6 @@ class PlayingHistoryServiceTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
             dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), hearit, 10_000));
-            playingHistoryBuffer.flush();
             PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
 
             // when
@@ -209,7 +210,6 @@ class PlayingHistoryServiceTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
             dbHelper.insertPlayingHistory(new PlayingHistory(guestUserInfo.getGuestId(), hearit, 10_000));
-            playingHistoryBuffer.flush();
             PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
 
             // when

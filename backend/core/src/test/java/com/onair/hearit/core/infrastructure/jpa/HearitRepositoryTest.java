@@ -127,11 +127,12 @@ class HearitRepositoryTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
+        LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
         Hearit hearit1 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category),
-                LocalDateTime.now().minusMinutes(2));
+                baseTime.minusMinutes(2));
         Hearit hearit2 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category),
-                LocalDateTime.now().minusMinutes(1));
-        Hearit hearit3 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), LocalDateTime.now());
+                baseTime.minusMinutes(1));
+        Hearit hearit3 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), baseTime);
 
         PlayingHistory playingHistory1 = dbHelper.insertPlayingHistory(
                 new PlayingHistory(member.getUuid(), hearit1, 14));

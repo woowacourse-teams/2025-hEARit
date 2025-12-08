@@ -289,9 +289,10 @@ class HearitServiceTest {
             // given
             Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Hearit hearit1 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), LocalDateTime.now().minusMinutes(2));
-            Hearit hearit2 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1),  LocalDateTime.now().minusMinutes(1));
-            Hearit hearit3 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2),  LocalDateTime.now());
+            LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
+            Hearit hearit1 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), baseTime.minusMinutes(2));
+            Hearit hearit2 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1),  baseTime.minusMinutes(1));
+            Hearit hearit3 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2), baseTime);
 
             HearitSortRequest sortRequest = new HearitSortRequest(HearitSortField.CREATED_AT, SortDirection.ASC);
             PagingRequest pagingRequest = new PagingRequest(0, 10);
@@ -308,6 +309,7 @@ class HearitServiceTest {
             assertAll(
                     () -> assertThat(result.content()).hasSize(3),
                     () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId()),
+                    () -> assertThat(result.content().get(1).id()).isEqualTo(hearit2.getId()),
                     () -> assertThat(result.content().get(2).id()).isEqualTo(hearit3.getId())
             );
         }

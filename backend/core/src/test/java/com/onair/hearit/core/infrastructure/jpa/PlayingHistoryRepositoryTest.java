@@ -46,12 +46,13 @@ class PlayingHistoryRepositoryTest {
             Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
+            LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
             dbHelper.insertPlayingHistoryAt(new PlayingHistory(member1.getUuid(), hearit1, 10),
-                    LocalDateTime.now().minusMinutes(10));
+                    baseTime.minusMinutes(10));
             dbHelper.insertPlayingHistoryAt(new PlayingHistory(member1.getUuid(), hearit2, 20),
-                    LocalDateTime.now().minusMinutes(1));
+                    baseTime.minusMinutes(1));
             dbHelper.insertPlayingHistoryAt(new PlayingHistory(member2.getUuid(), hearit2, 20),
-                    LocalDateTime.now()); // 다른 멤버
+                    baseTime); // 다른 멤버
 
             // when
             List<PlayingHistory> result = playingHistoryRepository.findByUserUuidOrderByUpdatedAtDesc(member1.getUuid(),
@@ -66,7 +67,7 @@ class PlayingHistoryRepositoryTest {
         }
 
         @Test
-        @DisplayName("회원의 재생 기록을 업데이트 날짜를 기준으로 내림차순 정렬하여 10개 조회한다.")
+        @DisplayName("비회원의 재생 기록을 업데이트 날짜를 기준으로 내림차순 정렬하여 10개 조회한다.")
         void findByUserUuidOrderByUpdatedAtDesc_Guest() {
             // given
             String guestUuid1 = UUID.randomUUID().toString();
@@ -75,12 +76,13 @@ class PlayingHistoryRepositoryTest {
             Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
+            LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
             dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestUuid1, hearit1, 10),
-                    LocalDateTime.now().minusMinutes(10));
+                    baseTime.minusMinutes(10));
             dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestUuid1, hearit2, 20),
-                    LocalDateTime.now().minusMinutes(1));
+                    baseTime.minusMinutes(1));
             dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestUuid2, hearit2, 20),
-                    LocalDateTime.now()); // 다른 게스트
+                    baseTime); // 다른 게스트
 
             // when
             List<PlayingHistory> result = playingHistoryRepository.findByUserUuidOrderByUpdatedAtDesc(guestUuid1, 10);
