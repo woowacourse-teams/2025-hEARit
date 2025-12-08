@@ -95,10 +95,7 @@ class _MainNavigationState extends State<MainNavigation> {
     if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => HearitDetailScreen(
-          detail: detail,
-          pauseOnExit: false,
-        ),
+        builder: (_) => HearitDetailScreen(detail: detail, pauseOnExit: false),
       ),
     );
   }
@@ -165,8 +162,7 @@ class _MainNavigationState extends State<MainNavigation> {
                                   ExploreScreenState.progressListenable(),
                               builder: (context, value, _) {
                                 final isExploreRoot =
-                                    !(_navigatorKeys[2]
-                                            .currentState
+                                    !(_navigatorKeys[2].currentState
                                             ?.canPop() ??
                                         false);
                                 if (!isExploreRoot) {
@@ -178,7 +174,8 @@ class _MainNavigationState extends State<MainNavigation> {
                                     thumbShape: const RoundSliderThumbShape(
                                       enabledThumbRadius: 0,
                                     ),
-                                    overlayShape: SliderComponentShape.noOverlay,
+                                    overlayShape:
+                                        SliderComponentShape.noOverlay,
                                     activeTrackColor: AppColors.hearitPurple2,
                                     inactiveTrackColor: AppColors.gray2,
                                     thumbColor: Colors.transparent,
@@ -199,10 +196,9 @@ class _MainNavigationState extends State<MainNavigation> {
                               animation: _playerController,
                               builder: (context, _) {
                                 final canPopCurrent =
-                                    _navigatorKeys[_currentIndex]
-                                            .currentState
-                                            ?.canPop() ??
-                                        false;
+                                    _navigatorKeys[_currentIndex].currentState
+                                        ?.canPop() ??
+                                    false;
                                 if (canPopCurrent) {
                                   return const SizedBox.shrink();
                                 }
@@ -216,8 +212,7 @@ class _MainNavigationState extends State<MainNavigation> {
                                 final positionMs =
                                     _playerController.position.inMilliseconds;
                                 final progress = durationMs > 0
-                                    ? (positionMs / durationMs)
-                                        .clamp(0.0, 1.0)
+                                    ? (positionMs / durationMs).clamp(0.0, 1.0)
                                     : 0.0;
                                 return _DetailMiniPlayerBar(
                                   title: media.title,
@@ -229,8 +224,8 @@ class _MainNavigationState extends State<MainNavigation> {
                                   onSeekFraction: (fraction) {
                                     if (durationMs <= 0) return;
                                     final target = Duration(
-                                      milliseconds:
-                                          (durationMs * fraction).round(),
+                                      milliseconds: (durationMs * fraction)
+                                          .round(),
                                     );
                                     _playerController.seek(target);
                                   },
@@ -412,8 +407,7 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
 
   @override
   Widget build(BuildContext context) {
-    final displayProgress =
-        (_dragValue ?? widget.progress).clamp(0.0, 1.0);
+    final displayProgress = (_dragValue ?? widget.progress).clamp(0.0, 1.0);
     final canSeek = widget.durationMs > 0;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -452,9 +446,7 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 trackHeight: 5,
-                thumbShape: const RoundSliderThumbShape(
-                  enabledThumbRadius: 0,
-                ),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 0),
                 overlayShape: SliderComponentShape.noOverlay,
                 activeTrackColor: AppColors.hearitPurple2,
                 inactiveTrackColor: AppColors.gray2,
@@ -464,8 +456,8 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
                 value: displayProgress,
                 onChanged: canSeek
                     ? (v) => setState(() {
-                          _dragValue = v;
-                        })
+                        _dragValue = v;
+                      })
                     : null,
                 onChangeEnd: canSeek
                     ? (v) {
@@ -485,10 +477,7 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
 }
 
 class _PlayPauseButton extends StatelessWidget {
-  const _PlayPauseButton({
-    required this.isPlaying,
-    required this.onToggle,
-  });
+  const _PlayPauseButton({required this.isPlaying, required this.onToggle});
 
   final bool isPlaying;
   final VoidCallback onToggle;
@@ -515,27 +504,6 @@ class _PlayPauseButton extends StatelessWidget {
           isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
           color: AppColors.gray4,
           size: 28,
-        ),
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.hearitBlack,
-      alignment: Alignment.center,
-      child: Text(
-        '$label 화면 준비 중',
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: AppColors.gray4.withOpacity(0.7),
-          fontWeight: FontWeight.w600,
         ),
       ),
     );

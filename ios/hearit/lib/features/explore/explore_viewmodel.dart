@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/audio/hearit_player_controller.dart';
-import '../detail/hearit_detail_viewmodel.dart';
 import 'explore_models.dart';
 import 'explore_repository.dart';
 
@@ -11,8 +10,8 @@ class ExploreViewModel extends ChangeNotifier {
   ExploreViewModel({
     ExploreRepository? repository,
     required HearitPlayerController controller,
-  })  : _repository = repository ?? ExploreRepository(),
-        playerController = controller {
+  }) : _repository = repository ?? ExploreRepository(),
+       playerController = controller {
     _playerListener = _playerListenerImpl;
     playerController.addListener(_playerListener);
   }
@@ -130,7 +129,9 @@ class ExploreViewModel extends ChangeNotifier {
       item.shortAudioUrl = assets.shortAudioUrl;
       item.scriptFileUrl = assets.scriptUrl;
       if (item.scriptFileUrl != null && item.scriptFileUrl!.isNotEmpty) {
-        item.scripts = await _repository.fetchScriptsFromUrl(item.scriptFileUrl!);
+        item.scripts = await _repository.fetchScriptsFromUrl(
+          item.scriptFileUrl!,
+        );
         if (item.scripts != null && item.scripts!.isNotEmpty) {
           _totalDuration = item.scripts!.last.end;
           playerController.setExternalDuration(_totalDuration);
@@ -144,8 +145,10 @@ class ExploreViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _maybePlayItem(ExploreFeedItem item,
-      {Duration? startPosition}) async {
+  Future<void> _maybePlayItem(
+    ExploreFeedItem item, {
+    Duration? startPosition,
+  }) async {
     if (item.shortAudioUrl == null || item.shortAudioUrl!.isEmpty) return;
     _currentSourceUrl = item.shortAudioUrl;
     await playerController.loadSource(item.shortAudioUrl!);
@@ -153,10 +156,9 @@ class ExploreViewModel extends ChangeNotifier {
     await playerController.seek(start);
     _position = start;
     final durationMs = _totalDuration.inMilliseconds;
-    _progressNotifier.value =
-        durationMs > 0 && start > Duration.zero
-            ? (start.inMilliseconds / durationMs).clamp(0.0, 1.0)
-            : 0;
+    _progressNotifier.value = durationMs > 0 && start > Duration.zero
+        ? (start.inMilliseconds / durationMs).clamp(0.0, 1.0)
+        : 0;
     _completionHandled = false; // allow completion for this source
     if (!playerController.isPlaying) {
       await playerController.togglePlayback();

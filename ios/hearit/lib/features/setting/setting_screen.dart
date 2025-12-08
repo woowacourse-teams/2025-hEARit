@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hearit/core/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:hearit/oss_licenses.dart' as ossdata;
-
 import 'oss_licenses_page.dart';
 
 class SettingScreen extends StatelessWidget {
