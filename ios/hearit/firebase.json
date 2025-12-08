@@ -1,0 +1,22 @@
+{
+  "flutter": {
+    "platforms": {
+      "ios": {
+        "default": {
+          "projectId": "hearit-f5ad5",
+          "appId": "1:209216553948:ios:3d78ed4bf2aca5f07c0519",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "hearit-f5ad5",
+          "configurations": {
+            "ios": "1:209216553948:ios:3d78ed4bf2aca5f07c0519"
+          }
+        }
+      }
+    }
+  }
+}
