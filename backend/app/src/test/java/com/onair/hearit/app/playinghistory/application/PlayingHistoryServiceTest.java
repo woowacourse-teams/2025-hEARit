@@ -172,7 +172,7 @@ class PlayingHistoryServiceTest {
     }
 
     @Nested
-    @DisplayName("재생 기록 저장")
+    @DisplayName("재생 기록 수정")
     class ModifyPlayingHistoryTest {
 
         @Test
