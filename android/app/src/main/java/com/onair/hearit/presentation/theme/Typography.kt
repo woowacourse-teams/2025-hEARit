@@ -26,15 +26,6 @@ val PromptSplashLogo: TextStyle =
         platformStyle = NoFontPadding,
     )
 
-val PretendardDrawer: TextStyle =
-    TextStyle(
-        fontFamily = PretendardFontFamily,
-        fontWeight = FontWeight.W500,
-        fontSize = 16.sp,
-        color = Gray4,
-        platformStyle = NoFontPadding,
-    )
-
 val PretendardNickname: TextStyle =
     TextStyle(
         fontFamily = PretendardFontFamily,

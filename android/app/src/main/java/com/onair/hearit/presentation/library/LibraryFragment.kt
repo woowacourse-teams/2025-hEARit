@@ -14,7 +14,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -33,6 +35,7 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
+import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
@@ -84,6 +87,7 @@ class LibraryFragment :
     ): View {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
+        binding.userInfo = viewModel.userInfo.value
         binding.rvBookmark.adapter = bookmarkAdapter
         binding.viewModel = viewModel
         return binding.root
@@ -96,9 +100,10 @@ class LibraryFragment :
         super.onViewCreated(view, savedInstanceState)
 
         setupWindowInsets()
-        observeViewModel()
+        setupListeners()
         setupInfiniteScroll()
         setupPlayAllButton()
+        observeViewModel()
     }
 
     override fun onStart() {
@@ -153,6 +158,16 @@ class LibraryFragment :
         }
     }
 
+    private fun setupListeners() {
+        binding.ibSetting.setOnClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container_view, SettingFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
     private fun observeViewModel() {
         mainViewModel.hearitUpdated.observe(viewLifecycleOwner) {
             viewModel.refreshBookmarks()
@@ -170,8 +185,12 @@ class LibraryFragment :
             binding.uiState = uiState
         }
 
-        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
-            binding.userInfo = userInfo
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userInfo.collect { userInfo ->
+                    binding.userInfo = userInfo
+                }
+            }
         }
     }
 

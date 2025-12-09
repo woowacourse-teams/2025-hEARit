@@ -89,7 +89,7 @@ fun CategoryGridItem(
         Text(
             text = category.name,
             color = Gray4,
-            style = HearitTypoGraphy.titleLarge,
+            style = HearitTypoGraphy.titleMedium,
         )
     }
 }

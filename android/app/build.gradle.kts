@@ -208,6 +208,7 @@ dependencies {
 
     // coil
     implementation(libs.coil)
+    implementation(libs.coil.compose)
 
     // timber
     implementation(libs.timber)
@@ -220,6 +221,11 @@ dependencies {
 
     // open license
     implementation(libs.play.services.oss.licenses)
+
+    // compose navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.compose)
 
     // hilt
     implementation(libs.hilt.android)

@@ -40,7 +40,9 @@ class TokenAuthenticator @Inject constructor(
                     refreshTokenAndRetry(response.request)
                 }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
         }
         return null

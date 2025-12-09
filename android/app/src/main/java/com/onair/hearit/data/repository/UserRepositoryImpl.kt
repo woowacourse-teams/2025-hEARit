@@ -7,6 +7,7 @@ import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.UserRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 
@@ -14,9 +15,12 @@ class UserRepositoryImpl @Inject constructor(
     private val userLocalDataSource: UserLocalDataSource,
     private val userRemoteDataSource: UserRemoteDataSource,
 ) : UserRepository {
+    @Volatile
     private var cachedUserInfo: UserInfo? = null
     private var cachedDeviceId: String? = null
     private val mutex = Mutex()
+
+    override fun getCachedUserInfo(): UserInfo? = cachedUserInfo
 
     override suspend fun getUserInfo(): Result<UserInfo> =
         runCatching {
@@ -38,9 +42,13 @@ class UserRepositoryImpl @Inject constructor(
                     .mapOrThrowDomain { it.toDomain() }
                     .getOrThrow()
 
-            // 4️⃣ 로컬 저장 후 캐시 업데이트
-            userLocalDataSource.saveUserInfo(remote).getOrThrow()
+            // 4️⃣ 캐시 업데이트 후 로컬 저장
             mutex.withLock { cachedUserInfo = remote }
+            userLocalDataSource
+                .saveUserInfo(remote)
+                .onFailure {
+                    Timber.e(it, "❌ DataStore 저장 실패 (메모리 캐시는 유지)")
+                }
 
             remote
         }
