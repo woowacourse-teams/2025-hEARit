@@ -62,7 +62,7 @@ class PlayingHistoryControllerTest extends ControllerTest {
                                         fieldWithPath("[].title").description("히어릿 제목"),
                                         fieldWithPath("[].playTime").description("히어릿 전체 재생 시간(s)"),
                                         fieldWithPath("[].lastPlayTime").description("사용자가 마지막으로 재생한 시간(ms)"),
-                                        fieldWithPath("[].createdAt").description("히어릿 생성일").optional(),
+                                        fieldWithPath("[].createdAt").description("히어릿 생성일"),
                                         fieldWithPath("[].category.id").description("카테고리 ID"),
                                         fieldWithPath("[].category.name").description("카테고리 이름"),
                                         fieldWithPath("[].category.colorCode").description("카테고리 색상 코드")
@@ -72,22 +72,36 @@ class PlayingHistoryControllerTest extends ControllerTest {
     }
 
     @Test
-    @DisplayName("최근 재생 기록 조회 V1 - 게스트 사용자 200 OK 빈 리스트")
+    @DisplayName("최근 재생 기록 조회 V1 - 게스트 사용자 200 OK")
     void getRecentPlayingHistoriesWhenGuestV1_OK() throws Exception {
         // given
+        var responses = List.of(
+                new RecentlyPlayedHearitResponse(1L, "title1", 120, 30L, null,
+                        new RecentlyPlayedHearitResponse.CategoryResponse(1L, "카테고리1", "#000000")),
+                new RecentlyPlayedHearitResponse(2L, "title2", 150, 60L, null,
+                        new RecentlyPlayedHearitResponse.CategoryResponse(2L, "카테고리2", "#111111"))
+        );
         given(jwtTokenProvider.getTokenStatus(isNull())).willReturn(TokenStatus.NOT_EXIST);
-        given(playingHistoryService.getRecentPlayingHistory(any())).willReturn(List.of());
+        given(playingHistoryService.getRecentPlayingHistory(any())).willReturn(responses);
 
         // when & then
-        mockMvc.perform(get("/api/v1/playing-histories/hearits"))
+        mockMvc.perform(get("/api/v1/playing-histories/hearits")
+                        .header("Device-UUID", "00000000-0000-0000-0000-000000000000"))
                 .andExpect(status().isOk())
                 .andDo(document("v1-get-playing-histories-guest-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Playing History API")
                                 .summary("최근 재생 기록 조회 V1")
-                                .description("로그인하지 않은 사용자는 빈 리스트를 반환합니다.")
+                                .description("게스트 사용자는 최근 재생 기록을 최대 10개까지 조회합니다.")
                                 .responseFields(
-                                        fieldWithPath("[]").description("빈 리스트")
+                                        fieldWithPath("[].id").description("히어릿 ID"),
+                                        fieldWithPath("[].title").description("히어릿 제목"),
+                                        fieldWithPath("[].playTime").description("히어릿 전체 재생 시간(s)"),
+                                        fieldWithPath("[].lastPlayTime").description("사용자가 마지막으로 재생한 시간(ms)"),
+                                        fieldWithPath("[].createdAt").description("히어릿 생성일"),
+                                        fieldWithPath("[].category.id").description("카테고리 ID"),
+                                        fieldWithPath("[].category.name").description("카테고리 이름"),
+                                        fieldWithPath("[].category.colorCode").description("카테고리 색상 코드")
                                 )
                                 .build())
                 ));
@@ -133,13 +147,14 @@ class PlayingHistoryControllerTest extends ControllerTest {
         // when & then
         mockMvc.perform(post("/api/v1/playing-histories")
                         .contentType("application/json")
+                        .header("Device-UUID", "00000000-0000-0000-0000-000000000000")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(document("v1-post-playing-history-guest-ok",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Playing History API")
                                 .summary("재생기록 생성/수정 V1")
-                                .description("로그인하지 않은 사용자는 재생 기록을 저장하지 않습니다.")
+                                .description("로그인하지 않은 사용자는 재생 기록을 생성하거나 업데이트합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
                                         fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
