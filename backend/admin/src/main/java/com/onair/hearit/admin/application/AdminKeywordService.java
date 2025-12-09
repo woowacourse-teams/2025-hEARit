@@ -1,10 +1,10 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.dto.request.AdminKeywordResponse;
-import com.onair.hearit.admin.dto.request.AdminPagedResponse;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
 import com.onair.hearit.admin.dto.request.KeywordUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminKeywordResponse;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.infrastructure.jpa.KeywordRepository;

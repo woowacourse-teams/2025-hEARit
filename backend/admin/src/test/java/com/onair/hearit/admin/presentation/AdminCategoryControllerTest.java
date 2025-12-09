@@ -3,14 +3,14 @@ package com.onair.hearit.admin.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.admin.dto.request.AdminCategoryResponse;
-import com.onair.hearit.admin.dto.request.AdminPagedResponse;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
-import com.onair.hearit.core.domain.Category;
-import com.onair.hearit.core.infrastructure.jpa.CategoryRepository;
+import com.onair.hearit.admin.dto.response.AdminCategoryResponse;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.fixture.IntegrationTest;
 import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.infrastructure.jpa.CategoryRepository;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import java.util.List;
@@ -45,7 +45,7 @@ class AdminCategoryControllerTest extends IntegrationTest {
 
         // then
         assertAll(() -> {
-            assertThat(response.page()).isEqualTo(0);
+            assertThat(response.page()).isZero();
             assertThat(response.size()).isEqualTo(10);
             assertThat(response.totalElements()).isEqualTo(20);
         });
