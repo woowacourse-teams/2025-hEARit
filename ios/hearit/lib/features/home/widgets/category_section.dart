@@ -19,10 +19,13 @@ class CategorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (sections.isEmpty) {
-      return Text(
-        '아직 추천 카테고리가 없습니다.',
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppColors.gray4.withOpacity(0.7),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Text(
+          '아직 추천 카테고리가 없습니다.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.gray4.withOpacity(0.7),
+              ),
         ),
       );
     }
@@ -64,40 +67,44 @@ class CategoryBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Flexible(
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () => onCategoryTap?.call(data),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        '${data.categoryName} 카테고리',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: AppColors.gray4,
-                              fontSize: 21,
-                              fontWeight: FontWeight.bold,
-                            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Flexible(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => onCategoryTap?.call(data),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          '${data.categoryName} 카테고리',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: AppColors.gray4,
+                                fontSize: 21,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Icon(Icons.chevron_right, color: AppColors.gray4, size: 28),
-                  ],
+                      const SizedBox(width: 6),
+                      Icon(Icons.chevron_right, color: AppColors.gray4, size: 28),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         SizedBox(
           height: 142,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: 20),
             itemCount: data.podcasts.length,
             separatorBuilder: (_, __) => const SizedBox(width: 14),
             itemBuilder: (context, index) {

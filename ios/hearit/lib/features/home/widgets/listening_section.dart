@@ -24,7 +24,49 @@ class ListeningSection extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontFamily: homeTitleFontFamily,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.gray4,
+                    fontSize: title.contains('북마크') ? 22 : 20,
+                  ),
+                ),
+                if (showChevron)
+                  Icon(
+                    Icons.chevron_right,
+                    color: AppColors.gray4.withOpacity(0.9),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              '아직 준비된 항목이 없습니다.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.gray4.withOpacity(0.7),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
@@ -43,47 +85,13 @@ class ListeningSection extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            '아직 준비된 항목이 없습니다.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.gray4.withOpacity(0.7),
-                ),
-          ),
-          const SizedBox(height: 16),
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontFamily: homeTitleFontFamily,
-                fontWeight: FontWeight.bold,
-                color: AppColors.gray4,
-                fontSize: title.contains('북마크') ? 22 : 20,
-              ),
-            ),
-            if (showChevron)
-              Icon(
-                Icons.chevron_right,
-                color: AppColors.gray4.withOpacity(0.9),
-              ),
-          ],
         ),
         const SizedBox(height: 18),
         SizedBox(
           height: 190,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: 20),
             itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox(width: 20),
             itemBuilder: (context, index) {
@@ -108,12 +116,12 @@ class ListeningCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
-        width: 162,
+        width: 150,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 96,
+              height: 88,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
                 color: data.backgroundColor,
@@ -127,13 +135,13 @@ class ListeningCard extends StatelessWidget {
                 ],
               ),
               child: Center(
-              child: Text(
-                data.title,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.gray4,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 24,
+                child: Text(
+                  data.title,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppColors.gray4,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 22,
                     letterSpacing: 0.4,
                   ),
                 ),

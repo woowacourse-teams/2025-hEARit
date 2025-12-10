@@ -203,25 +203,31 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.hearitBlack,
       body: SafeArea(
         bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: HomeHeader(),
+              ),
+              if (_viewModel.isLoading) ...[
                 const SizedBox(height: 12),
-                const HomeHeader(),
-                if (_viewModel.isLoading) ...[
-                  const SizedBox(height: 12),
-                  const LinearProgressIndicator(
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: LinearProgressIndicator(
                     minHeight: 2,
                     color: Color(0xFFA86BFF),
                     backgroundColor: Color(0xFF3B3B46),
                   ),
-                ],
-                if (_viewModel.error != null && !_viewModel.isLoading) ...[
-                  const SizedBox(height: 12),
-                  Text(
+                ),
+              ],
+              if (_viewModel.error != null && !_viewModel.isLoading) ...[
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
                     '데이터를 불러오지 못했습니다. 다시 시도해 주세요.',
                     style: Theme.of(
                       context,
@@ -229,81 +235,89 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.redAccent,
                     ),
                   ),
-                ],
-                const SizedBox(height: 24),
-                Text(
-                  '오늘 추천하는 팟캐스트',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.gray4,
-                    fontSize: 22,
-                  ),
                 ),
-                SizedBox(
-                  height: 380,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      ..._buildCards(pageWidth),
-                      PageView.builder(
-                        controller: _pageController,
-                        clipBehavior: Clip.none,
-                        itemCount: _viewModel.todayRecommendedHearits.length,
-                        itemBuilder: (context, index) {
-                          final hearit = _viewModel.todayRecommendedHearits[index];
-                          return GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onTap: () => _onRecommendTap(hearit),
-                            child: const SizedBox.expand(),
-                          );
-                        },
-                      ),
-                      Positioned(
-                        bottom: -12,
-                        left: 0,
-                        right: 0,
-                        child: RecommendIndicator(
-                          currentPage: _page,
-                          itemCount: _viewModel.todayRecommendedHearits.length,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 36),
-                if (_showListeningAndBookmarks) ...[
-                  ListeningSection(
-                    title: 'hEARit님이 듣고 있는 팟캐스트',
-                    items: _viewModel.listeningNowHearits,
-                    onTap: _onPlayingHistoryTap,
-                  ),
-                  // const SizedBox(height: 10),
-                  ListeningSection(
-                    title: '북마크한 팟캐스트를 들어보세요',
-                    items: _viewModel.bookmarkedHearits,
-                    showChevron: true,
-                    onTap: _onPlayingBookmarkTap,
-                  ),
-                  // const SizedBox(height: 24),
-                ],
-                if (_showRecentlyAdded) ...[
-                  ListeningSection(
-                    title: '최근 추가된 팟캐스트',
-                    items: _viewModel.recentlyAddedHearits,
-                    onTap: _onRecentUploadTap,
-                  ),
-                  // const SizedBox(height: 24),
-                ],
-                ExploreShortcutCard(onTap: _handleExploreTap),
-                const SizedBox(height: 32),
-                CategorySection(
-                  sections: _viewModel.curatedCategoryHearits,
-                  onCategoryTap: _onCategoryTap,
-                  onHearitTap: _onCategoryHearitTap,
-                ),
-                const SizedBox(height: 40),
               ],
-            ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    Text(
+                      '오늘 추천하는 팟캐스트',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.gray4,
+                        fontSize: 22,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 380,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          ..._buildCards(pageWidth),
+                          PageView.builder(
+                            controller: _pageController,
+                            clipBehavior: Clip.none,
+                            itemCount: _viewModel.todayRecommendedHearits.length,
+                            itemBuilder: (context, index) {
+                              final hearit = _viewModel.todayRecommendedHearits[index];
+                              return GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onTap: () => _onRecommendTap(hearit),
+                                child: const SizedBox.expand(),
+                              );
+                            },
+                          ),
+                          Positioned(
+                            bottom: -12,
+                            left: 0,
+                            right: 0,
+                            child: RecommendIndicator(
+                              currentPage: _page,
+                              itemCount: _viewModel.todayRecommendedHearits.length,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 36),
+              if (_showListeningAndBookmarks) ...[
+                ListeningSection(
+                  title: 'hEARit님이 듣고 있는 팟캐스트',
+                  items: _viewModel.listeningNowHearits,
+                  onTap: _onPlayingHistoryTap,
+                ),
+                ListeningSection(
+                  title: '북마크한 팟캐스트를 들어보세요',
+                  items: _viewModel.bookmarkedHearits,
+                  showChevron: true,
+                  onTap: _onPlayingBookmarkTap,
+                ),
+              ],
+              if (_showRecentlyAdded) ...[
+                ListeningSection(
+                  title: '최근 추가된 팟캐스트',
+                  items: _viewModel.recentlyAddedHearits,
+                  onTap: _onRecentUploadTap,
+                ),
+              ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ExploreShortcutCard(onTap: _handleExploreTap),
+              ),
+              const SizedBox(height: 32),
+              CategorySection(
+                sections: _viewModel.curatedCategoryHearits,
+                onCategoryTap: _onCategoryTap,
+                onHearitTap: _onCategoryHearitTap,
+              ),
+              const SizedBox(height: 40),
+            ],
           ),
         ),
       ),
