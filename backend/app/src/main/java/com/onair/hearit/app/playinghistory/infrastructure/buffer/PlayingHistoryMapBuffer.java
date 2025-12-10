@@ -111,4 +111,8 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
             return other != null && this.clientEventTime > other.clientEventTime();
         }
     }
+
+    public Map<PlayKey, PlayValue> getCache() {
+        return cache;
+    }
 }
