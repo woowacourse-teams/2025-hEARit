@@ -4,7 +4,8 @@ import com.onair.hearit.app.exception.custom.InvalidInputException;
 
 public record PlayingHistoryRequest(
         Long hearitId,
-        Long lastPlayTime
+        Long lastPlayTime,
+        Long clientEventTime
 ) {
     public PlayingHistoryRequest {
         if (hearitId == null) {
@@ -12,6 +13,9 @@ public record PlayingHistoryRequest(
         }
         if (lastPlayTime == null || lastPlayTime < 0) {
             throw new InvalidInputException("마지막 재생 기록은 0 이상이어야 합니다.");
+        }
+        if (clientEventTime != null && clientEventTime < 0) {
+            throw new InvalidInputException("요청 시간은 0 이상이어야 합니다.");
         }
     }
 }

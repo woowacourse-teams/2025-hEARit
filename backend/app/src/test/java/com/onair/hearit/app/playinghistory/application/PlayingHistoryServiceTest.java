@@ -5,23 +5,23 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.auth.domain.RequestUser;
+import com.onair.hearit.app.exception.custom.NotFoundException;
+import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
+import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryQueueBuffer;
 import com.onair.hearit.core.config.DataSourceConfig;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.domain.UserInfo;
-import com.onair.hearit.app.exception.custom.NotFoundException;
-import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.fixture.TestFixture;
+import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
-import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
-import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryQueueBuffer;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -110,7 +110,7 @@ class PlayingHistoryServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
         Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
 
         // when
         playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
@@ -134,7 +134,7 @@ class PlayingHistoryServiceTest {
         Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
         PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
                 new PlayingHistory(member.getId(), hearit, 10_000));
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L, 200L);
 
         // when
         playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
@@ -155,7 +155,7 @@ class PlayingHistoryServiceTest {
         // given
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
         Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
 
         // when
         playingHistoryService.addPlayingHistory(TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()),
@@ -170,7 +170,7 @@ class PlayingHistoryServiceTest {
     void checkHearit() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        PlayingHistoryRequest request = new PlayingHistoryRequest(1L, 100L);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(1L, 100L, 200L);
 
         // when
         assertThatThrownBy(

@@ -22,7 +22,7 @@ public class PlayingHistoryQueueBuffer implements PlayingHistoryBuffer {
     private final BlockingQueue<PlayingHistory> queue = new LinkedBlockingQueue<>(BUFFER_SIZE);
 
     @Override
-    public void add(PlayingHistory playingHistory) {
+    public void add(PlayingHistory playingHistory, long clientEventTime) {
         if (!queue.offer(playingHistory)) {
             throw new BufferRequestException("큐가 가득 차서 요청을 처리할 수 없습니다.");
         }

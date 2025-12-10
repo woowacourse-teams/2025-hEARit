@@ -4,7 +4,7 @@ import com.onair.hearit.core.domain.PlayingHistory;
 
 public interface PlayingHistoryBuffer {
 
-    void add(PlayingHistory playingHistory);
+    void add(PlayingHistory playingHistory, long clientEventTime);
 
     void flush();
 }

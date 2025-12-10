@@ -84,7 +84,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
 
         // when & then
         RestAssured.given(this.spec)
@@ -108,7 +108,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
         PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
                 new PlayingHistory(member.getId(), hearit, 20_000));
 
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L, 200L);
 
         // when & then
         RestAssured.given(this.spec)
@@ -128,7 +128,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
         Category category = dbHelper.insertCategory(new Category("name", "#000000"));
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
 
         // when & then
         RestAssured.given(this.spec)

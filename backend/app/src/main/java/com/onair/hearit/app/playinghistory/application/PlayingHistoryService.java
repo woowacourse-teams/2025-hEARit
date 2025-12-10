@@ -69,9 +69,19 @@ public class PlayingHistoryService {
         if (userInfo == null || userInfo.isGuest()) {
             return;
         }
+        long clientEventTime = extractClientEventTime(request.clientEventTime());
         Hearit hearit = getHearitById(request.hearitId());
         PlayingHistory history = new PlayingHistory(userInfo.getMemberId(), hearit, request.lastPlayTime());
-        playingHistoryQueueBuffer.add(history);
+        playingHistoryQueueBuffer.add(history, clientEventTime);
+    }
+
+    private long extractClientEventTime(Long clientEventTime) {
+        // LocalDateTime으로 받으면 timezone 보정 이슈를 추가 고려해야 하므로
+        // 연산 비용이 적은 long 사용
+        if (clientEventTime == null) {
+            return System.currentTimeMillis();
+        }
+        return clientEventTime;
     }
 
     private Hearit getHearitById(Long hearitId) {
