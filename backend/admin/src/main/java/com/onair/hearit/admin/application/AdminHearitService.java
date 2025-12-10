@@ -1,16 +1,20 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.dto.request.AdminHearitResponse;
-import com.onair.hearit.admin.dto.request.AdminHearitResponse.KeywordInHearit;
-import com.onair.hearit.admin.dto.request.AdminPagedResponse;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
-import com.onair.hearit.admin.dto.request.HearitCreateRequest;
-import com.onair.hearit.admin.dto.request.HearitCreateRequest.SourceCreateRequest;
 import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest.SourceUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitMetaDataRequest;
+import com.onair.hearit.admin.dto.request.HearitMetaDataRequest.SourceCreateRequest;
+import com.onair.hearit.admin.dto.request.PresignedUrlRequest;
+import com.onair.hearit.admin.dto.response.AdminHearitResponse;
+import com.onair.hearit.admin.dto.response.AdminHearitResponse.KeywordInHearit;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
+import com.onair.hearit.admin.dto.response.FilesPresignedUrlResponse;
+import com.onair.hearit.admin.dto.response.PresignedUrlResponse;
 import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
+import com.onair.hearit.admin.infrastructure.s3.PresignedUrlService;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.FileType;
 import com.onair.hearit.core.domain.Hearit;
@@ -21,6 +25,7 @@ import com.onair.hearit.core.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.KeywordRepository;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,6 +46,7 @@ public class AdminHearitService {
     private final KeywordRepository keywordRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final FileStorage fileStorage;
+    private final PresignedUrlService presignedUrlService;
 
     public AdminPagedResponse<AdminHearitResponse> getHearits(AdminPagingRequest pagingRequest) {
         Pageable pageable = getHearitOrderByIdDesc(pagingRequest);
@@ -72,21 +78,27 @@ public class AdminHearitService {
                                 Collectors.toList())));
     }
 
+    public FilesPresignedUrlResponse getFilesPresignedUrl(PresignedUrlRequest request) {
+        PresignedUrlResponse originalAudioPresignedUrl = createPutUrl(FileType.ORIGINAL,
+                request.originalAudioFileName());
+        PresignedUrlResponse shortAudiosPresignedUrl = createPutUrl(FileType.SHORT, request.shortAudioFileName());
+        PresignedUrlResponse scriptPresignedUrl = createPutUrl(FileType.SCRIPT, request.scriptFileName());
+        return new FilesPresignedUrlResponse(originalAudioPresignedUrl, shortAudiosPresignedUrl, scriptPresignedUrl);
+    }
+
+    private PresignedUrlResponse createPutUrl(FileType fileType, String fileName) {
+        fileType.validateFileName(fileName);
+        String key = fileType.generateKey(fileName);
+        URL presignedUrl = presignedUrlService.createPutUrl(key);
+        return new PresignedUrlResponse(key, presignedUrl);
+    }
+
     @Transactional
-    public void addHearit(HearitCreateRequest request) {
+    public void addHearitMetaData(HearitMetaDataRequest request) {
         Category category = getCategoryById(request.categoryId());
         List<Source> sources = mapSourceCreateRequestToSource(request.sources());
-        String originalAudioUrl = FileType.ORIGINAL.getUploadPath() + request.originalAudio().getOriginalFilename();
-        String shortAudioUrl = FileType.SHORT.getUploadPath() + request.shortAudio().getOriginalFilename();
-        String scriptUrl = FileType.SCRIPT.getUploadPath() + request.scriptFile().getOriginalFilename();
-
-        Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), originalAudioUrl,
-                shortAudioUrl, scriptUrl, sources, category);
-
-        fileStorage.uploadFile(request.originalAudio(), FileType.ORIGINAL);
-        fileStorage.uploadFile(request.shortAudio(), FileType.SHORT);
-        fileStorage.uploadFile(request.scriptFile(), FileType.SCRIPT);
-
+        Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), request.originalAudioKey(),
+                request.shortAudioKey(), request.scriptFileKey(), sources, category);
         Hearit savedHearit = hearitRepository.save(hearit);
         saveHearitKeywords(request.keywordIds(), savedHearit);
     }
