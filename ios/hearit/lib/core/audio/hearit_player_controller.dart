@@ -73,6 +73,8 @@ class HearitPlayerController extends ChangeNotifier {
   // ──────────────────────────────
   // Controls
   // ──────────────────────────────
+  Future<void> play() async => _audioHandler.play();
+
   Future<void> togglePlayback() async {
     if (isPlaying) {
       await _audioHandler.pause();

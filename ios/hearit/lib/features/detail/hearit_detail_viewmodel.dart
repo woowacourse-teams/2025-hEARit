@@ -123,6 +123,7 @@ class HearitDetailViewModel extends ChangeNotifier {
         if (resumePosition != null && resumePosition > Duration.zero) {
           await _playerController.seek(resumePosition);
         }
+        await _playerController.play();
       }
     } catch (_) {
       // ignore audio load errors for now
