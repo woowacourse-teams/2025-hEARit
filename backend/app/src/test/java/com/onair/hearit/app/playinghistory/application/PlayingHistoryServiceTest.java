@@ -21,7 +21,7 @@ import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
-import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryQueueBuffer;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ import org.springframework.test.context.jdbc.Sql;
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class,
-        PlayingHistoryBuffer.class, PlayingHistoryCommandRepository.class})
+        PlayingHistoryQueueBuffer.class, PlayingHistoryCommandRepository.class})
 class PlayingHistoryServiceTest {
 
     @Autowired
@@ -50,7 +50,7 @@ class PlayingHistoryServiceTest {
     private PlayingHistoryRepository playingHistoryRepository;
 
     @Autowired
-    private PlayingHistoryBuffer playingHistoryBuffer;
+    private PlayingHistoryQueueBuffer playingHistoryQueueBuffer;
 
     @Autowired
     private HearitRepository hearitRepository;
@@ -62,7 +62,7 @@ class PlayingHistoryServiceTest {
         playingHistoryService = new PlayingHistoryService(
                 hearitRepository,
                 playingHistoryRepository,
-                playingHistoryBuffer);
+                playingHistoryQueueBuffer);
     }
 
     @Test
@@ -114,7 +114,7 @@ class PlayingHistoryServiceTest {
 
         // when
         playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
-        playingHistoryBuffer.flush();
+        playingHistoryQueueBuffer.flush();
 
         // then
         List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
@@ -138,7 +138,7 @@ class PlayingHistoryServiceTest {
 
         // when
         playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
-        playingHistoryBuffer.flush();
+        playingHistoryQueueBuffer.flush();
 
         // then
         List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();

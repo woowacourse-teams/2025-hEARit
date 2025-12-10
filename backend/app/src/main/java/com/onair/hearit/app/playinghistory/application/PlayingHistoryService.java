@@ -3,7 +3,7 @@ package com.onair.hearit.app.playinghistory.application;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
-import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryQueueBuffer;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.UserInfo;
@@ -27,7 +27,7 @@ public class PlayingHistoryService {
 
     private final HearitRepository hearitRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
-    private final PlayingHistoryBuffer playingHistoryBuffer;
+    private final PlayingHistoryQueueBuffer playingHistoryQueueBuffer;
 
     @Transactional(readOnly = true)
     public List<RecentlyPlayedHearitResponse> getRecentPlayingHistory(UserInfo userInfo) {
@@ -71,7 +71,7 @@ public class PlayingHistoryService {
         }
         Hearit hearit = getHearitById(request.hearitId());
         PlayingHistory history = new PlayingHistory(userInfo.getMemberId(), hearit, request.lastPlayTime());
-        playingHistoryBuffer.add(history);
+        playingHistoryQueueBuffer.add(history);
     }
 
     private Hearit getHearitById(Long hearitId) {
