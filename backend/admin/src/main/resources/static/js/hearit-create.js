@@ -1,4 +1,58 @@
 // ============================================================================
+// 유틸 함수
+// ============================================================================
+// 출처 파싱
+function extractSources(formData) {
+    const sources = {};
+
+    for (const [key, value] of formData.entries()) {
+        const match = key.match(/^sources\[(\d+)\]\.(sourceName|sourceUrl)$/);
+        if (!match) continue;
+
+        const index = parseInt(match[1], 10);
+        const field = match[2];
+
+        if (!sources[index]) {
+            sources[index] = {};
+        }
+
+        sources[index][field] = value;
+    }
+
+    return Object.values(sources);
+}
+
+// 프로그래스 바 업데이트
+function updateProgress(msg, percent) {
+    const container = document.getElementById('progress-container');
+    const bar = document.getElementById('progress-bar');
+    const text = document.getElementById('progress-text');
+
+    container.classList.remove('d-none');
+    bar.style.width = percent + '%';
+    text.textContent = msg;
+
+    // 100% 완료시 애니메이션 제거
+    if (percent >= 100) {
+        bar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+        bar.classList.add('bg-success');
+    }
+}
+
+function showCompleteButton() {
+    const buttonContainer = document.getElementById('button-container');
+    buttonContainer.innerHTML = `
+        <button type="button" class="btn btn-primary" onclick="location.reload()">
+            <i class="bi bi-plus-circle me-1"></i>더 등록하기
+        </button>
+    `;
+}
+
+function hideButtons() {
+    document.getElementById('button-container').classList.add('d-none');
+}
+
+// ============================================================================
 // SourceManager - 출처 관리
 // ============================================================================
 class SourceManager {
@@ -417,13 +471,30 @@ class FormSubmitHandler {
         const formData = new FormData(this.form);
         this.removeEmptySourceUrls(formData);
 
-        const originalAudio = document.getElementById('originalAudio').files[0];
-        const shortAudio = document.getElementById('shortAudio').files[0];
-        const scriptFile = document.getElementById('scriptFile').files[0];
+        const files = document.getElementById("audioFiles").files;
 
-        if (originalAudio) formData.set("originalAudio", originalAudio);
-        if (shortAudio) formData.set("shortAudio", shortAudio);
-        if (scriptFile) formData.set("scriptFile", scriptFile);
+        let originalAudio = null;
+        let shortAudio = null;
+        let script = null;
+
+        for (const file of files) {
+            if (file.name.startsWith("ORG")) {
+                originalAudio = file;
+            } else if (file.name.startsWith("SHR")) {
+                shortAudio = file;
+            } else if (file.name.startsWith("SCR")) {
+                script = file;
+            }
+        }
+
+        if (!originalAudio || !shortAudio || !script) {
+            console.error("ORG / SHR / SCR prefix 기준으로 필요한 파일을 찾지 못했습니다.");
+            return null;
+        }
+
+        formData.set("originalAudio", originalAudio);
+        formData.set("shortAudio", shortAudio);
+        formData.set("script", script);
 
         return formData;
     }
@@ -446,30 +517,119 @@ class FormSubmitHandler {
 
     async submit(e) {
         e.preventDefault();
+
+        hideButtons(); // 버튼 숨기기
+
+        updateProgress("Presigned URL 발급 중...", 10);
         const formData = this.prepareFormData();
         const headers = this.getCsrfHeaders();
 
+        // 1. presigned URL 요청
+        const originalAudio = formData.get("originalAudio");
+        const shortAudio = formData.get("shortAudio");
+        const script = formData.get("script");
+
+        const presignedRequestBody = JSON.stringify({
+            originalAudioFileName: originalAudio?.name,
+            shortAudioFileName: shortAudio?.name,
+            scriptFileName: script?.name
+        });
+
+        const presignedUrlResponse = await fetch('/api/v1/admin/hearits/presigned-url', {
+            method: 'POST',
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json'
+            },
+            body: presignedRequestBody
+        });
+
+        if (!presignedUrlResponse.ok) {
+            updateProgress("Presigned URL 발급 실패", 10);
+            alert('파일 업로드 URL 발급에 실패했습니다.');
+            location.reload();
+            return;
+        }
+
+        updateProgress("파일 업로드 중...", 40);
+        const presigned = await presignedUrlResponse.json();
+
+        // 2. 파일 업로드
+        const uploadToS3 = (url, file) => fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': file.type || 'application/octet-stream'
+            },
+            body: file
+        });
+
+        const [origRes, shortRes, scriptRes] = await Promise.all([
+            uploadToS3(presigned.originalAudio.url, originalAudio),
+            uploadToS3(presigned.shortAudio.url, shortAudio),
+            uploadToS3(presigned.script.url, script)
+        ]);
+
+        if (!origRes.ok || !shortRes.ok || !scriptRes.ok) {
+            updateProgress("파일 업로드 실패", 40);
+            alert('파일 업로드 중 오류가 발생했습니다.');
+            location.reload();
+            return;
+        }
+
+        updateProgress("메타데이터 저장 중...", 70);
+
+        // 3. 메타데이터 업로드
+        formData.delete('originalAudio');
+        formData.delete('shortAudio');
+        formData.delete('script');
+
+        formData.append('originalAudioKey', presigned.originalAudio.key);
+        formData.append('shortAudioKey', presigned.shortAudio.key);
+        formData.append('scriptFileKey', presigned.script.key);
+
+        const json = {
+            title: formData.get("title"),
+            summary: formData.get("summary"),
+            playTime: formData.get("playTime"),
+            categoryId: formData.get("categoryId"),
+            keywordIds: [...formData.getAll("keywordIds")],
+            sources: extractSources(formData),
+            originalAudioKey: presigned.originalAudio.key,
+            shortAudioKey: presigned.shortAudio.key,
+            scriptFileKey: presigned.script.key
+        };
+
         try {
-            const response = await fetch('/api/v1/admin/hearits', {
+            const createResponse = await fetch('/api/v1/admin/hearits', {
                 method: 'POST',
-                headers: headers,
-                body: formData
+                headers: {
+                    ...headers,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(json)
             });
 
-            if (response.ok) {
-                this.handleSuccess();
+            if (createResponse.ok) {
+                updateProgress("등록 완료!", 100);
+                setTimeout(() => {
+                    this.handleSuccess();
+                }, 500);
             } else {
-                await this.handleError(response);
+                updateProgress("메타데이터 저장 실패", 70);
+                await this.handleError(createResponse);
             }
         } catch (error) {
+            updateProgress("에러 발생", 70);
             console.error('Error uploading hearit:', error);
             alert('추가 중 오류가 발생했습니다.');
+            location.reload();
         }
     }
 
     handleSuccess() {
         alert('히어릿이 성공적으로 추가되었습니다.');
-        window.app.reset();
+        showCompleteButton(); // 더 등록하기 버튼 표시
+        window.app.reset(); // 폼 초기화
     }
 
     async handleError(response) {

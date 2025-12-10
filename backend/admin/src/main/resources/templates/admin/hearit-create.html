@@ -75,8 +75,18 @@
                     <div id="keyword-pagination" class="btn-group btn-group-sm"></div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-success" id="submit-btn">등록</button>
-            <button type="button" class="btn btn-secondary" id="cancel-upload">취소</button>
+            <div id="button-container" class="d-flex gap-2">
+                <button type="submit" class="btn btn-success" id="submit-btn">등록</button>
+                <button type="button" class="btn btn-secondary" id="cancel-upload">취소</button>
+            </div>
+            <div id="progress-container" class="d-none mt-3">
+                <div class="progress" style="height: 30px;">
+                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                         role="progressbar" style="width: 0%">
+                        <span id="progress-text" class="fw-bold">준비 중...</span>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 </div>
