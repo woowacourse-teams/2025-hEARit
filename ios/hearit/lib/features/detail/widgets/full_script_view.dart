@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/audio/hearit_player_controller.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/presentation/widgets/script_view.dart';
 import '../detail_font.dart';
 import '../hearit_detail.dart';
 import '../hearit_detail_viewmodel.dart';
@@ -14,12 +15,14 @@ class FullScriptView extends StatefulWidget {
     required this.scripts,
     required this.controller,
     required this.viewModel,
+    this.isTablet = false,
   });
 
   final HearitDetail detail;
   final List<ScriptLine> scripts;
   final HearitPlayerController controller;
   final HearitDetailViewModel viewModel;
+  final bool isTablet;
 
   @override
   State<FullScriptView> createState() => _FullScriptViewState();
@@ -33,6 +36,7 @@ class _FullScriptViewState extends State<FullScriptView> {
     }
 
     final theme = Theme.of(context);
+    final double fontDelta = widget.isTablet ? 5 : 0;
     return Material(
       color: AppColors.hearitBlack,
       child: SafeArea(
@@ -81,7 +85,7 @@ class _FullScriptViewState extends State<FullScriptView> {
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontFamily: detailFontFamily,
                             color: AppColors.gray4,
-                            fontSize: 19,
+                            fontSize: 19 + fontDelta,
                             fontWeight: FontWeight.w800,
                             height: 1.35,
                           ),
@@ -94,7 +98,7 @@ class _FullScriptViewState extends State<FullScriptView> {
                             fontFamily: detailFontFamily,
                             color: AppColors.darkGray,
                             fontWeight: FontWeight.w700,
-                            fontSize: 15,
+                            fontSize: 15 + fontDelta,
                           ),
                         ),
                       ],
@@ -108,6 +112,7 @@ class _FullScriptViewState extends State<FullScriptView> {
                 child: ScriptScrollView(
                   scripts: widget.scripts,
                   controller: widget.controller,
+                  isTablet: widget.isTablet,
                 ),
               ),
               const SizedBox(height: 12),
@@ -122,6 +127,7 @@ class _FullScriptViewState extends State<FullScriptView> {
                   currentSpeed: widget.viewModel.currentSpeed,
                   speedLabel: widget.viewModel.speedLabel,
                   formatDuration: widget.viewModel.formatDuration,
+                  isTablet: widget.isTablet,
                 ),
               ),
             ],
@@ -137,21 +143,26 @@ class ScriptScrollView extends StatefulWidget {
     super.key,
     required this.scripts,
     required this.controller,
+    this.isTablet = false,
   });
 
   final List<ScriptLine> scripts;
   final HearitPlayerController controller;
+  final bool isTablet;
 
   @override
   State<ScriptScrollView> createState() => _ScriptScrollViewState();
 }
 
 class _ScriptScrollViewState extends State<ScriptScrollView> {
-  static const double _lineExtent = 44;
   final ScrollController _scrollController = ScrollController();
   int _currentIndex = 0;
   double _viewportHeight = 0;
   bool _autoFollow = true;
+  double get _lineExtent => (widget.isTablet
+          ? ScriptView.tabletLineHeight
+          : ScriptView.lineHeight) +
+      ScriptView.lineSpacing;
 
   @override
   void initState() {
@@ -294,6 +305,7 @@ class _ScriptScrollViewState extends State<ScriptScrollView> {
                 final bool isRead = index <= _currentIndex;
                 final Color textColor =
                     isRead ? AppColors.gray4 : AppColors.darkGray;
+                final double fontDelta = widget.isTablet ? 5 : 0;
 
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
@@ -308,7 +320,7 @@ class _ScriptScrollViewState extends State<ScriptScrollView> {
                         fontFamily: detailFontFamily,
                         color: textColor,
                         fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontSize: 15 + fontDelta,
                         height: 1.35,
                       ),
                     ),

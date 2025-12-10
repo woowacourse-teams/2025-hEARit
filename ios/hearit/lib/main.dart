@@ -22,9 +22,7 @@ const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(_lightStatusBar);
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Warm up device UUID so network calls don't block on first launch.
   await DeviceUUIDService.getUUID();
   AnalyticsProvider.configure(
@@ -54,15 +52,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: _lightStatusBar,
         child: child ?? const SizedBox.shrink(),
       ),
       theme: ThemeData(
         fontFamily: 'Pretendard',
-        appBarTheme: const AppBarTheme(
-          systemOverlayStyle: _lightStatusBar,
-        ),
+        appBarTheme: const AppBarTheme(systemOverlayStyle: _lightStatusBar),
         // This is the theme of your application.
         //
         // TRY THIS: Try running your application with "flutter run". You'll see

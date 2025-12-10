@@ -32,62 +32,85 @@ class ExploreFeedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
     return Stack(
       children: [
-        Positioned(
-          top: 16,
-          left: horizontalPadding,
-          right: horizontalPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ExploreHighlightBanner(text: pitchLine),
-              const SizedBox(height: 26),
-              Text(
-                item.title,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: AppColors.gray4,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20,
-                ),
+        Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(
+                left: horizontalPadding,
+                right: horizontalPadding,
+                top: 16,
               ),
-              const SizedBox(height: 10),
-              ExploreKeywords(keywords: item.keywords),
-              const SizedBox(height: 8),
-              Transform.translate(
-                offset: const Offset(0, -30),
-                child: ExploreCover(
-                  categoryColor: item.categoryColor,
-                  assetPath: coverAssetPath,
-                  isPlaying: isPlaying,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ExploreHighlightBanner(text: pitchLine),
+                  const SizedBox(height: 26),
+                  Text(
+                    item.title,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: AppColors.gray4,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ExploreKeywords(keywords: item.keywords),
+                ],
               ),
-            ],
-          ),
-        ),
-        Positioned(
-          left: horizontalPadding,
-          right: horizontalPadding,
-          bottom: bottomSpacing,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: ScriptView.preferredHeight,
-                width: double.infinity,
-                child: ScriptView(
-                  scripts: item.scripts ?? const [],
-                  position: position,
-                ),
+            ),
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double side = constraints.biggest.shortestSide;
+                  return Center(
+                    child: SizedBox(
+                      width: side,
+                      height: side,
+                      child: ExploreCover(
+                        categoryColor: item.categoryColor,
+                        assetPath: coverAssetPath,
+                        isPlaying: isPlaying,
+                        containerSide: side,
+                      ),
+                    ),
+                  );
+                },
               ),
-              const SizedBox(height: 8),
-              Transform.translate(
-                offset: const Offset(0, 6),
-                child: ExploreContinueButton(onPressed: onContinuePressed),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                0,
+                horizontalPadding,
+                bottomSpacing,
               ),
-            ],
-          ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: isTablet
+                        ? ScriptView.tabletPreferredHeight
+                        : ScriptView.preferredHeight,
+                    width: double.infinity,
+                    child: ScriptView(
+                      scripts: item.scripts ?? const [],
+                      position: position,
+                      isTablet: isTablet,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Transform.translate(
+                    offset: const Offset(0, 6),
+                    child: ExploreContinueButton(onPressed: onContinuePressed),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         if (centerStatusIcon != null)
           CenterStatusOverlay(icon: centerStatusIcon!),

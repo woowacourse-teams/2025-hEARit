@@ -7,14 +7,17 @@ class DetailHeader extends StatelessWidget {
     super.key,
     required this.categoryName,
     required this.onBack,
+    this.isTablet = false,
   });
 
   final String categoryName;
   final VoidCallback onBack;
+  final bool isTablet;
 
   @override
   Widget build(BuildContext context) {
     const double sideSize = 40;
+    final double titleSize = isTablet ? 25 : 20;
     return Row(
       children: [
         IconButton(
@@ -35,7 +38,7 @@ class DetailHeader extends StatelessWidget {
               fontFamily: detailFontFamily,
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 20,
+              fontSize: titleSize,
             ),
           ),
         ),

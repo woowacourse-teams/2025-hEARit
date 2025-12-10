@@ -10,14 +10,17 @@ class SummaryCard extends StatelessWidget {
     required this.summary,
     required this.keywords,
     this.onKeywordTap,
+    this.isTablet = false,
   });
 
   final String summary;
   final List<HearitKeyword> keywords;
   final void Function(String keyword)? onKeywordTap;
+  final bool isTablet;
 
   @override
   Widget build(BuildContext context) {
+    final double fontDelta = isTablet ? 5 : 0;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -34,6 +37,9 @@ class SummaryCard extends StatelessWidget {
               fontFamily: detailFontFamily,
               color: AppColors.gray3,
               fontWeight: FontWeight.w700,
+              fontSize:
+                  (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) +
+                      fontDelta,
             ),
           ),
           const SizedBox(height: 8),
@@ -45,6 +51,9 @@ class SummaryCard extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 color: AppColors.gray2,
                 height: 1.45,
+                fontSize:
+                    (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) +
+                        fontDelta,
               ),
             )
           else
@@ -54,6 +63,9 @@ class SummaryCard extends StatelessWidget {
                 fontFamily: detailFontFamily,
                 fontWeight: FontWeight.w500,
                 color: Colors.white70,
+                fontSize:
+                    (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) +
+                        fontDelta,
               ),
             ),
           if (keywords.isNotEmpty) ...[
@@ -82,6 +94,13 @@ class SummaryCard extends StatelessWidget {
                                     fontFamily: detailFontFamily,
                                     color: AppColors.gray4,
                                     fontWeight: FontWeight.w500,
+                                    fontSize:
+                                        (Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.fontSize ??
+                                                12) +
+                                            fontDelta,
                                   ),
                         ),
                       ),

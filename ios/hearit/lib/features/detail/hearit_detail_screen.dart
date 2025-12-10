@@ -89,6 +89,8 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
 
   Future<void> _showFullScript() async {
     if (_viewModel.scripts.isEmpty) return;
+    final bool isTablet =
+        MediaQuery.of(context).size.shortestSide >= 600;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -104,6 +106,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
             scripts: _viewModel.scripts,
             controller: _viewModel.playerController,
             viewModel: _viewModel,
+            isTablet: isTablet,
           ),
         );
       },
@@ -125,6 +128,11 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final detail = _viewModel.detail;
+    final size = MediaQuery.of(context).size;
+    final bool isTablet = size.shortestSide >= 600;
+    final double scriptHeight = isTablet
+        ? ScriptView.tabletPreferredHeight
+        : ScriptView.preferredHeight;
     return WillPopScope(
       onWillPop: _handleWillPop,
       child: Scaffold(
@@ -149,6 +157,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                     DetailHeader(
                       categoryName: detail.category.name,
                       onBack: _handleBackTap,
+                      isTablet: isTablet,
                     ),
                     const SizedBox(height: 12),
                     Expanded(
@@ -159,21 +168,23 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                             HearitInfoCard(
                               detail: detail,
                               formatDate: _viewModel.formatDate,
+                              isTablet: isTablet,
                             ),
                             const SizedBox(height: 24),
                             Center(
                               child: Material(
                                 color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: _showFullScript,
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: SizedBox(
-                                    height: ScriptView.preferredHeight,
-                                    width: double.infinity,
-                                    child: ScriptView(
-                                      scripts: _viewModel.scripts,
-                                      position:
-                                          _viewModel.playerController.position,
+                                  child: InkWell(
+                                    onTap: _showFullScript,
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: SizedBox(
+                                    height: scriptHeight,
+                                      width: double.infinity,
+                                      child: ScriptView(
+                                        scripts: _viewModel.scripts,
+                                        position:
+                                            _viewModel.playerController.position,
+                                      isTablet: isTablet,
                                     ),
                                   ),
                                 ),
@@ -191,18 +202,21 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                                 currentSpeed: _viewModel.currentSpeed,
                                 speedLabel: _viewModel.speedLabel,
                                 formatDuration: _viewModel.formatDuration,
+                                isTablet: isTablet,
                               ),
                             ),
                             const SizedBox(height: 12),
                             SourceCard(
                               sources: detail.sources,
                               onSourceTap: _onSourceTap,
+                              isTablet: isTablet,
                             ),
                             const SizedBox(height: 12),
                             SummaryCard(
                               summary: detail.summary,
                               keywords: detail.keywords,
                               onKeywordTap: _onKeywordTap,
+                              isTablet: isTablet,
                             ),
                             const SizedBox(height: 12),
                           ],
@@ -228,6 +242,11 @@ class _Skeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final bool isTablet = size.shortestSide >= 600;
+    final double scriptHeight = isTablet
+        ? ScriptView.tabletPreferredHeight
+        : ScriptView.preferredHeight;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -244,7 +263,7 @@ class _Skeleton extends StatelessWidget {
               children: [
                 _shimmerBox(height: 360), // HearitInfoCard 영역
                 const SizedBox(height: 24),
-                _shimmerBox(height: ScriptView.preferredHeight), // ScriptView 영역
+                _shimmerBox(height: scriptHeight), // ScriptView 영역
                 const SizedBox(height: 12),
                 _shimmerBox(height: 200), // AudioControls 영역
                 const SizedBox(height: 16),

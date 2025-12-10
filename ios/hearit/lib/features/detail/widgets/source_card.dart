@@ -10,13 +10,16 @@ class SourceCard extends StatelessWidget {
     super.key,
     required this.sources,
     this.onSourceTap,
+    this.isTablet = false,
   });
 
   final List<HearitSource> sources;
   final void Function(HearitSource source)? onSourceTap;
+  final bool isTablet;
 
   @override
   Widget build(BuildContext context) {
+    final double fontDelta = isTablet ? 5 : 0;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -33,6 +36,9 @@ class SourceCard extends StatelessWidget {
               fontFamily: detailFontFamily,
               color: AppColors.gray3,
               fontWeight: FontWeight.w700,
+              fontSize:
+                  (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) +
+                      fontDelta,
             ),
           ),
           const SizedBox(height: 8),
@@ -43,6 +49,9 @@ class SourceCard extends StatelessWidget {
                 fontFamily: detailFontFamily,
                 color: AppColors.gray2,
                 fontWeight: FontWeight.w500,
+                fontSize:
+                    (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) +
+                        fontDelta,
               ),
             )
           else
@@ -66,6 +75,13 @@ class SourceCard extends StatelessWidget {
                                     fontFamily: detailFontFamily,
                                     fontWeight: FontWeight.w500,
                                     color: AppColors.gray2,
+                                    fontSize:
+                                        (Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.fontSize ??
+                                                14) +
+                                            fontDelta,
                                     decoration: TextDecoration.none,
                                   ),
                             )
@@ -81,6 +97,13 @@ class SourceCard extends StatelessWidget {
                                       fontFamily: detailFontFamily,
                                       fontWeight: FontWeight.w500,
                                       color: AppColors.gray2,
+                                      fontSize:
+                                          (Theme.of(context)
+                                                      .textTheme
+                                                      .bodyMedium
+                                                      ?.fontSize ??
+                                                  14) +
+                                              fontDelta,
                                       decoration: TextDecoration.underline,
                                       decorationColor: AppColors.gray2,
                                     ),

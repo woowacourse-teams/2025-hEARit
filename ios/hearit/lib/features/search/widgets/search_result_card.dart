@@ -12,6 +12,8 @@ class SearchResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+    final double fontDelta = isTablet ? 5 : 0;
     final durationText = data.formattedPlayTime;
     final keywords = data.keywords
         .where((k) => k.isNotEmpty)
@@ -19,6 +21,7 @@ class SearchResultCard extends StatelessWidget {
         .map((k) => '# $k')
         .toList();
     final progress = data.progress;
+    final double titleHeight = isTablet ? 64 : 52;
 
     return Material(
       color: Colors.transparent,
@@ -35,7 +38,7 @@ class SearchResultCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: 52, // reserve space for up to 2 lines of title
+                height: titleHeight, // reserve space for up to 2 lines of title
                 child: Row(
                   children: [
                     Expanded(
@@ -44,6 +47,9 @@ class SearchResultCard extends StatelessWidget {
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: AppColors.gray4,
                           fontWeight: FontWeight.w700,
+                          fontSize:
+                              (theme.textTheme.titleMedium?.fontSize ?? 16) +
+                              fontDelta,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -66,6 +72,10 @@ class SearchResultCard extends StatelessWidget {
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: Colors.white70,
                                 fontWeight: FontWeight.w600,
+                                fontSize:
+                                    (theme.textTheme.bodySmall?.fontSize ??
+                                        12) +
+                                    fontDelta,
                               ),
                             ),
                           )
@@ -78,6 +88,9 @@ class SearchResultCard extends StatelessWidget {
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.white70,
                       fontWeight: FontWeight.w600,
+                      fontSize:
+                          (theme.textTheme.bodySmall?.fontSize ?? 12) +
+                          fontDelta,
                     ),
                   ),
                 ],

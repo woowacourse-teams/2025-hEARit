@@ -11,6 +11,8 @@ class SearchCategoryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (categories.isEmpty) return const SizedBox.shrink();
+    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+    final double fontDelta = isTablet ? 10 : 0;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -44,7 +46,9 @@ class SearchCategoryGrid extends StatelessWidget {
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.4,
-                  fontSize: 18,
+                  fontSize:
+                      (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) +
+                      fontDelta,
                 ),
               ),
             ),

@@ -75,11 +75,13 @@ class ExploreCover extends StatefulWidget {
     required this.categoryColor,
     required this.assetPath,
     this.isPlaying = false,
+    this.containerSide,
   });
 
   final Color categoryColor;
   final String assetPath;
   final bool isPlaying;
+  final double? containerSide;
 
   @override
   State<ExploreCover> createState() => _ExploreCoverState();
@@ -122,43 +124,38 @@ class _ExploreCoverState extends State<ExploreCover>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    final double containerSide = widget.containerSide ?? 300;
+    final double lpSize = (containerSide).clamp(80.0, 500.0);
+    final double boxSize = (containerSide * 0.33).clamp(30.0, lpSize * 0.3);
+
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
       children: [
-        SizedBox(
-          height: 400,
-          width: 400,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: Transform.translate(
-                  offset: const Offset(0, -40),
-                  child: Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: widget.categoryColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
+        Align(
+          alignment: Alignment.center,
+          child: Transform.translate(
+            offset: const Offset(0, -10),
+            child: Container(
+              width: boxSize,
+              height: boxSize,
+              decoration: BoxDecoration(
+                color: widget.categoryColor,
+                borderRadius: BorderRadius.circular(12),
               ),
-              Transform.translate(
-                offset: const Offset(0, -50),
-                child: RotationTransition(
-                  turns: _controller,
-                  child: Image.asset(
-                    widget.assetPath,
-                    height: 300,
-                    width: 300,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ],
+            ),
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -10),
+          child: RotationTransition(
+            turns: _controller,
+            child: Image.asset(
+              widget.assetPath,
+              height: lpSize,
+              width: lpSize,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
       ],

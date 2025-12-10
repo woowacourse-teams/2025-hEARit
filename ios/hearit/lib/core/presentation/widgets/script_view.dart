@@ -6,13 +6,23 @@ import 'package:hearit/features/detail/detail_font.dart';
 import 'package:hearit/features/detail/hearit_detail_viewmodel.dart';
 
 class ScriptView extends StatefulWidget {
-  const ScriptView({super.key, required this.scripts, required this.position});
+  const ScriptView({
+    super.key,
+    required this.scripts,
+    required this.position,
+    this.isTablet = false,
+  });
 
   final List<ScriptLine> scripts;
   final Duration position;
+  final bool isTablet;
   static const double lineHeight = 44;
   static const double lineSpacing = 10;
+  static const double tabletLineHeight = lineHeight + 8;
   static const double preferredHeight = lineHeight * 3 + lineSpacing * 2;
+
+  static const double tabletPreferredHeight =
+      tabletLineHeight * 3 + lineSpacing * 3;
 
   @override
   State<ScriptView> createState() => _ScriptViewState();
@@ -24,8 +34,12 @@ class _ScriptViewState extends State<ScriptView>
   late final AnimationController _controller;
   bool _isAnimating = false;
 
-  double get _slotExtent => ScriptView.lineHeight + ScriptView.lineSpacing;
-  double get _containerHeight => ScriptView.preferredHeight;
+  double get _lineHeight =>
+      widget.isTablet ? ScriptView.tabletLineHeight : ScriptView.lineHeight;
+  double get _slotExtent => _lineHeight + ScriptView.lineSpacing;
+  double get _containerHeight => widget.isTablet
+      ? ScriptView.tabletPreferredHeight
+      : ScriptView.preferredHeight;
 
   @override
   void initState() {
@@ -105,8 +119,9 @@ class _ScriptViewState extends State<ScriptView>
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, _) {
-            final progress =
-                _isAnimating ? Curves.easeOutCubic.transform(_controller.value) : 0.0;
+            final progress = _isAnimating
+                ? Curves.easeOutCubic.transform(_controller.value)
+                : 0.0;
             final highlightBlend = _highlightBlend(progress);
 
             return Stack(
@@ -160,6 +175,8 @@ class _ScriptViewState extends State<ScriptView>
       child: _ScriptLine(
         text: text,
         emphasis: emphasis,
+        lineHeight: _lineHeight,
+        isTablet: widget.isTablet,
       ),
     );
   }
@@ -176,7 +193,8 @@ class _ScriptViewState extends State<ScriptView>
     if (!_isAnimating) return index == _currentIndex ? 1.0 : 0.0;
     final nextIndex = _currentIndex + 1;
     if (index == _currentIndex) return 1.0 - blend;
-    if (index == nextIndex) return (_currentIndex + 1 < widget.scripts.length) ? blend : 0.0;
+    if (index == nextIndex)
+      return (_currentIndex + 1 < widget.scripts.length) ? blend : 0.0;
     return 0.0;
   }
 
@@ -201,18 +219,30 @@ class _ScriptViewState extends State<ScriptView>
 }
 
 class _ScriptLine extends StatelessWidget {
-  const _ScriptLine({required this.text, required this.emphasis});
+  const _ScriptLine({
+    required this.text,
+    required this.emphasis,
+    required this.lineHeight,
+    required this.isTablet,
+  });
 
   final String text;
   final double emphasis;
+  final double lineHeight;
+  final bool isTablet;
 
   @override
   Widget build(BuildContext context) {
-    const double lineBoxHeight = 44;
+    final double lineBoxHeight = lineHeight;
     final clamped = emphasis.clamp(0.0, 1.0);
-    final Color baseColor =
-        text.isEmpty ? Colors.transparent : Color.lerp(AppColors.gray2, AppColors.gray4, clamped)!;
-    final double fontSize = lerpDouble(14, 15, clamped)!;
+    final Color baseColor = text.isEmpty
+        ? Colors.transparent
+        : Color.lerp(AppColors.gray2, AppColors.gray4, clamped)!;
+    final double fontSize = lerpDouble(
+      14 + (isTablet ? 5 : 0),
+      15 + (isTablet ? 5 : 0),
+      clamped,
+    )!;
 
     return SizedBox(
       height: lineBoxHeight,

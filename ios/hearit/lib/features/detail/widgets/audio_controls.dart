@@ -17,6 +17,7 @@ class AudioControls extends StatefulWidget {
     required this.currentSpeed,
     required this.speedLabel,
     required this.formatDuration,
+    this.isTablet = false,
   });
 
   final HearitPlayerController controller;
@@ -27,6 +28,7 @@ class AudioControls extends StatefulWidget {
   final double currentSpeed;
   final String speedLabel;
   final String Function(Duration) formatDuration;
+  final bool isTablet;
 
   @override
   State<AudioControls> createState() => _AudioControlsState();
@@ -56,6 +58,7 @@ class _AudioControlsState extends State<AudioControls> {
 
   @override
   Widget build(BuildContext context) {
+    final double fontDelta = widget.isTablet ? 5 : 0;
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, _) {
@@ -120,6 +123,9 @@ class _AudioControlsState extends State<AudioControls> {
                     fontFamily: detailFontFamily,
                     color: AppColors.gray4,
                     fontWeight: FontWeight.w500,
+                    fontSize:
+                        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 12) +
+                            fontDelta,
                   ),
                 ),
                 Text(
@@ -128,6 +134,9 @@ class _AudioControlsState extends State<AudioControls> {
                     fontFamily: detailFontFamily,
                     color: AppColors.gray4,
                     fontWeight: FontWeight.w500,
+                    fontSize:
+                        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 12) +
+                            fontDelta,
                   ),
                 ),
               ],
@@ -210,7 +219,7 @@ class _AudioControlsState extends State<AudioControls> {
                                         fontFamily: detailFontFamily,
                                         color: AppColors.gray4,
                                         fontWeight: FontWeight.w500,
-                                        fontSize: 16,
+                                        fontSize: 16 + fontDelta,
                                       ),
                                 ),
                               ],
@@ -225,7 +234,7 @@ class _AudioControlsState extends State<AudioControls> {
                       fontFamily: detailFontFamily,
                       color: AppColors.gray4,
                       fontWeight: FontWeight.w700,
-                      fontSize: 24,
+                      fontSize: 24 + fontDelta,
                     ),
                   ),
                 ),
