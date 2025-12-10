@@ -15,7 +15,8 @@ public class S3Config {
     private final String accessKey;
     private final String secretKey;
 
-    public S3Config(@Value("${aws.s3.bucket}") String bucket, @Value("${aws.credentials.accessKey}") String accessKey,
+    public S3Config(@Value("${aws.s3.bucket}") String bucket,
+                    @Value("${aws.credentials.accessKey}") String accessKey,
                     @Value("${aws.credentials.secretKey}") String secretKey) {
         this.bucket = bucket;
         this.accessKey = accessKey;

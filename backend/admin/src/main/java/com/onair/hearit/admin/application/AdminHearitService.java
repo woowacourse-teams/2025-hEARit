@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminHearitService {
@@ -95,12 +97,38 @@ public class AdminHearitService {
 
     @Transactional
     public void addHearitMetaData(HearitMetaDataRequest request) {
-        Category category = getCategoryById(request.categoryId());
-        List<Source> sources = mapSourceCreateRequestToSource(request.sources());
-        Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), request.originalAudioKey(),
-                request.shortAudioKey(), request.scriptFileKey(), sources, category);
-        Hearit savedHearit = hearitRepository.save(hearit);
-        saveHearitKeywords(request.keywordIds(), savedHearit);
+        try {
+            Category category = getCategoryById(request.categoryId());
+            List<Source> sources = mapSourceCreateRequestToSource(request.sources());
+            Hearit hearit = new Hearit(
+                    request.title(),
+                    request.summary(),
+                    request.playTime(),
+                    request.originalAudioKey(),
+                    request.shortAudioKey(),
+                    request.scriptFileKey(),
+                    sources,
+                    category);
+
+            Hearit savedHearit = hearitRepository.save(hearit);
+            saveHearitKeywords(request.keywordIds(), savedHearit);
+
+        } catch (RuntimeException e) {
+            deleteFile(FileType.ORIGINAL, request.originalAudioKey());
+            deleteFile(FileType.SHORT, request.shortAudioKey());
+            deleteFile(FileType.SCRIPT, request.scriptFileKey());
+            log.warn("히어릿 메타 데이터 저장 중 예외 발생, S3 파일을 삭제합니다. request: {}, cause: {}",
+                    request, e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    private void deleteFile(FileType type, String key) {
+        try {
+            fileStorage.deleteFile(key);
+        } catch (Exception ex) {
+            log.warn("S3 정리 중 추가 예외 발생. type: {}, key: {}, cause: {}", type, key, ex.getMessage(), ex);
+        }
     }
 
     private List<Source> mapSourceCreateRequestToSource(List<SourceCreateRequest> sources) {

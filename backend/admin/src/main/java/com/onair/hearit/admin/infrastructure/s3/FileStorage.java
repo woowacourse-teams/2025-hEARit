@@ -1,6 +1,7 @@
 package com.onair.hearit.admin.infrastructure.s3;
 
 import com.onair.hearit.admin.exception.custom.AdminFileException;
+import com.onair.hearit.admin.exception.custom.AdminInvalidInputException;
 import com.onair.hearit.core.domain.FileType;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +24,7 @@ public class FileStorage {
     }
 
     private String uploadToS3(MultipartFile multipartFile, String filePath) {
-        String key = extractKey(filePath);
+        String key = validateKey(filePath);
         try (InputStream inputStream = multipartFile.getInputStream()) {
             s3Client.putObject(PutObjectRequest.builder()
                     .bucket(bucket)
@@ -39,23 +40,26 @@ public class FileStorage {
         }
     }
 
-    public void deleteFile(String filePath) {
-        String key = extractKey(filePath);
+    public void deleteFile(String key) {
         try {
+            String validateKey = validateKey(key);
             s3Client.deleteObject(builder -> builder
                     .bucket(bucket)
-                    .key(key)
+                    .key(validateKey)
                     .build()
             );
-        } catch (S3Exception e) {
-            throw new AdminFileException("S3 파일 삭제 실패");
+        } catch (RuntimeException e) {
+            throw new AdminFileException("S3 파일 삭제 실패, key: " + key);
         }
     }
 
-    private String extractKey(String filePath) {
-        if (filePath.startsWith("/")) {
-            return filePath.substring(1);
+    private String validateKey(String key) {
+        if (key == null || key.isBlank()) {
+            throw new AdminInvalidInputException("key는 빈 값일 수 없습니다.");
         }
-        return filePath;
+        if (key.startsWith("/")) {
+            return key.substring(1);
+        }
+        return key;
     }
 }
