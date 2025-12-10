@@ -144,6 +144,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.kotlinx.collections.immutable)
 
     // Preview
     implementation(libs.androidx.ui.tooling.preview)

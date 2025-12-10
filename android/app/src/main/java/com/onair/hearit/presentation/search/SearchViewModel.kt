@@ -16,8 +16,12 @@ import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.search.main.SearchUiState
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -30,8 +34,8 @@ class SearchViewModel(
     private val _searchUiState = MutableLiveData<SearchUiState>()
     val searchUiState: LiveData<SearchUiState> = _searchUiState
 
-    private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
-    val categories: LiveData<List<Category>> = _categories
+    private val _categories = MutableStateFlow<ImmutableList<Category>>(persistentListOf())
+    val categories: StateFlow<ImmutableList<Category>> = _categories.asStateFlow()
 
     private val _recentKeywords: MutableLiveData<List<RecentSearch>> = MutableLiveData()
     val recentKeywords: LiveData<List<RecentSearch>> = _recentKeywords
@@ -73,7 +77,7 @@ class SearchViewModel(
                 .getCategories(page = 0)
                 .onSuccess { pageCategories ->
                     paging = pageCategories.paging
-                    _categories.value = pageCategories.items
+                    _categories.value = pageCategories.items.toImmutableList()
                     isLastPage = pageCategories.paging.isLast
                 }.onFailure { throwable ->
                     Timber.w(throwable)

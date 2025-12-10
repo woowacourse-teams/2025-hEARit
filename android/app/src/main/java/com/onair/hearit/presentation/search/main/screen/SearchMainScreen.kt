@@ -14,6 +14,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.di.AnalyticsProvider
@@ -29,7 +30,7 @@ fun SearchMainScreen(
     onSearchBarClick: () -> Unit,
     onCategoryClick: (Long, String, String) -> Unit,
 ) {
-    val categories by viewModel.categories.observeAsState(initial = emptyList())
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
     val toastMessage by viewModel.toastMessage.observeAsState()
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
