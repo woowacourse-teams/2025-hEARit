@@ -36,8 +36,11 @@ public class PlayingHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "member_id", nullable = false)
+    @Column(name = "member_id", nullable = true)
     private Long memberId;
+
+    @Column(name = "user_uuid", nullable = false, columnDefinition = "CHAR(36)")
+    private String userUuid;
 
     @Column(name = "hearit_id", nullable = false)
     private Long hearitId;
@@ -52,9 +55,9 @@ public class PlayingHistory {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public PlayingHistory(Long memberId, Hearit hearit, long lastPlayTime) {
+    public PlayingHistory(String userUuid, Hearit hearit, long lastPlayTime) {
         validateHearitPlayTime(hearit, lastPlayTime);
-        this.memberId = memberId;
+        this.userUuid = userUuid;
         this.hearitId = hearit.getId();
         this.lastPlayTime = lastPlayTime;
         this.isFinished = checkIsFinished(hearit, lastPlayTime);

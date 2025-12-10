@@ -10,6 +10,7 @@ import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
@@ -57,9 +58,10 @@ class PlayingHistoryMapBufferTest {
     @DisplayName("버퍼에 데이터 추가 후 flush 시 데이터가 저장된다")
     void testAddAndFlush() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        PlayingHistory history = new PlayingHistory(1L, hearit, 50L);
+        PlayingHistory history = new PlayingHistory(member.getUuid(), hearit, 50L);
 
         // when
         buffer.add(history, 1_000L);
@@ -73,13 +75,14 @@ class PlayingHistoryMapBufferTest {
     @DisplayName("과거 데이터라도 clientEventTime이 최신이면 덮어써진다")
     void testRecentClientEventTimeWins() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // lastPlayTime 100이지만 clientEventTime 1_000 (과거 이벤트)
-        PlayingHistory oldHistory = new PlayingHistory(1L, hearit, 100L);
+        PlayingHistory oldHistory = new PlayingHistory(member.getUuid(), hearit, 100L);
         // lastPlayTime 50이지만 clientEventTime 2_000 (최근 이벤트)
-        PlayingHistory newHistory = new PlayingHistory(1L, hearit, 50L);
+        PlayingHistory newHistory = new PlayingHistory(member.getUuid(), hearit, 50L);
 
         buffer.add(newHistory, 2_000L);  // 최근 데이터 추가
         buffer.add(oldHistory, 1_000L);  // 네트워크 지연으로 과거 데이터 도착
@@ -96,10 +99,12 @@ class PlayingHistoryMapBufferTest {
     @DisplayName("flush 중 예외 발생 시 rollback으로 Map에 값이 남아 있어야 하고 DB에는 저장되지 않는다.")
     void testFlushRollbackMapAndDb() {
         // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        PlayingHistory history1 = new PlayingHistory(1L, hearit, 50L);
-        PlayingHistory history2 = new PlayingHistory(2L, hearit, 60L);
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        PlayingHistory history1 = new PlayingHistory(member.getUuid(), hearit1, 50L);
+        PlayingHistory history2 = new PlayingHistory(member.getUuid(), hearit2, 60L);
 
         buffer.add(history1, 1_000L);
         buffer.add(history2, 2_000L);
@@ -118,7 +123,7 @@ class PlayingHistoryMapBufferTest {
         // then
         assertAll(
                 () -> assertThat(playingHistoryRepository.findAll()).isEmpty(),
-                () -> assertThat(buffer.getCache().size()).isEqualTo(2)
+                () -> assertThat(failingBuffer.getCache().size()).isEqualTo(2)
         );
     }
 }

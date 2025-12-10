@@ -23,6 +23,7 @@ public class PlayingHistoryController {
     private final PlayingHistoryService playingHistoryService;
 
     @GetMapping("/hearits")
+    //TODO: 재생기록 개수 파라미터로 받기
     public ResponseEntity<List<RecentlyPlayedHearitResponse>> readPlayingHistories(
             @AuthenticationPrincipal RequestUser requestUser) {
         List<RecentlyPlayedHearitResponse> responses =

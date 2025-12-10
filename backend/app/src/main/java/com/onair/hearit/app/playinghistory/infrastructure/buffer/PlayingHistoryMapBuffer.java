@@ -27,7 +27,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
 
     @Override
     public void add(PlayingHistory playingHistory, long clientEventTime) {
-        PlayKey key = new PlayKey(playingHistory.getMemberId(), playingHistory.getHearitId());
+        PlayKey key = new PlayKey(playingHistory.getUserUuid(), playingHistory.getHearitId());
         validateBufferSize(key);
 
         cache.compute(key, (k, existing) -> {
@@ -76,7 +76,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
                 .stream()
                 .collect(Collectors.toMap(Hearit::getId, h -> h));
         return snapshot.values().stream().map(v -> new PlayingHistory(
-                        v.memberId(),
+                        v.userUuid(),
                         hearitMap.get(v.hearitId()),
                         v.lastPlayTime()
                 ))
@@ -94,14 +94,14 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
         );
     }
 
-    private record PlayKey(long memberId, long hearitId) {
+    private record PlayKey(String userUuid, long hearitId) {
     }
 
-    private record PlayValue(long memberId, long hearitId, long lastPlayTime, long clientEventTime) {
+    private record PlayValue(String userUuid, long hearitId, long lastPlayTime, long clientEventTime) {
 
         static PlayValue from(PlayingHistory history, long clientEventTime) {
             return new PlayValue(
-                    history.getMemberId(),
+                    history.getUserUuid(),
                     history.getHearitId(),
                     history.getLastPlayTime(),
                     clientEventTime

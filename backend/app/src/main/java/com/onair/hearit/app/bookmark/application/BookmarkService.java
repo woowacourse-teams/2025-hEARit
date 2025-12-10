@@ -45,7 +45,8 @@ public class BookmarkService {
         }
         Member member = getMemberByUserInfo(userInfo);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sort.toSort());
-        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(member.getId(),
+        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(
+                member.getUuid(),
                 filter.isFinished(), pageable);
         return PagedResponse.from(toBookmarkHearitResponse(projections));
     }
@@ -58,7 +59,8 @@ public class BookmarkService {
         Member member = getMemberByUserInfo(userInfo);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(),
                 Sort.by(Direction.DESC, "createdAt"));
-        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(member.getId(),
+        Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(
+                member.getUuid(),
                 filter.isFinished(), pageable);
         return PagedResponse.from(toBookmarkHearitResponse(projections));
     }
