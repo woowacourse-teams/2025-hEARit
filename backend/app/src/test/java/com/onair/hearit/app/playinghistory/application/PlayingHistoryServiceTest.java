@@ -5,164 +5,226 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.auth.domain.RequestUser;
+import com.onair.hearit.app.exception.custom.NotFoundException;
+import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
+import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
+import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
+import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.config.DataSourceConfig;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.domain.UserInfo;
-import com.onair.hearit.app.exception.custom.NotFoundException;
-import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.fixture.TestFixture;
+import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
-import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
-import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
-import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class,
-        PlayingHistoryBuffer.class, PlayingHistoryCommandRepository.class})
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryBuffer.class,
+        PlayingHistoryCommandRepository.class, PlayingHistoryService.class, UserInfoService.class})
 class PlayingHistoryServiceTest {
 
     @Autowired
-    private DbHelper dbHelper;
+    DbHelper dbHelper;
 
     @Autowired
-    private PlayingHistoryRepository playingHistoryRepository;
+    PlayingHistoryRepository playingHistoryRepository;
 
     @Autowired
-    private PlayingHistoryBuffer playingHistoryBuffer;
+    PlayingHistoryBuffer playingHistoryBuffer;
 
     @Autowired
-    private HearitRepository hearitRepository;
+    PlayingHistoryCommandRepository playingHistoryCommandRepository;
 
-    private PlayingHistoryService playingHistoryService;
+    @Autowired
+    HearitRepository hearitRepository;
 
-    @BeforeEach
-    void setup() {
-        playingHistoryService = new PlayingHistoryService(
-                hearitRepository,
-                playingHistoryRepository,
-                playingHistoryBuffer);
+    @Autowired
+    PlayingHistoryService playingHistoryService;
+
+    @Nested
+    @DisplayName("최근 재생 기록 조회")
+    class GetRecentPlayingHistoryTest {
+
+        @Test
+        @DisplayName("회원은 최근 재생 기록을 조회할 수 있다.")
+        void getRecentPlayingHistory_whenMember() {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            UserInfo memberInfo = RequestUser.member(member.getId()).getUserInfo();
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+            Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+            LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(member.getUuid(), hearit1, 10),
+                    baseTime.minusMinutes(10));
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(member.getUuid(), hearit2, 20), baseTime);
+
+            // when
+            List<RecentlyPlayedHearitResponse> result = playingHistoryService.getRecentPlayingHistory(memberInfo);
+
+            // then
+            assertAll(
+                    () -> assertThat(result).hasSize(2),
+                    () -> assertThat(result.get(0).id()).isEqualTo(hearit2.getId()),
+                    () -> assertThat(result.get(1).id()).isEqualTo(hearit1.getId())
+            );
+        }
+
+        @Test
+        @DisplayName("비회원은 최근 재생 기록을 조회할 수 있다.")
+        void getRecentPlayingHistory_whenGuest() {
+            // given
+            UserInfo guestInfo = new UserInfo(null, UUID.randomUUID().toString());
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+            Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+            LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestInfo.getGuestId(), hearit1, 10),
+                    baseTime.minusMinutes(10));
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestInfo.getGuestId(), hearit2, 20),
+                    baseTime);
+
+            // when
+            List<RecentlyPlayedHearitResponse> result = playingHistoryService.getRecentPlayingHistory(guestInfo);
+
+            // then
+            assertAll(
+                    () -> assertThat(result).hasSize(2),
+                    () -> assertThat(result.get(0).id()).isEqualTo(hearit2.getId()),
+                    () -> assertThat(result.get(1).id()).isEqualTo(hearit1.getId())
+            );
+        }
     }
 
-    @Test
-    @DisplayName("회원은 최근 재생 기록을 조회할 수 있다.")
-    void getRecentPlayingHistoryOfMember_whenMember() throws InterruptedException {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserInfo memberInfo = RequestUser.member(member.getId()).getUserInfo();
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+    @Nested
+    @DisplayName("재생 기록 저장")
+    class AddPlayingHistoryTest {
 
-        dbHelper.insertPlayingHistory(new PlayingHistory(memberInfo.getMemberId(), hearit1, 10));
-        Thread.sleep(1000);
-        dbHelper.insertPlayingHistory(new PlayingHistory(memberInfo.getMemberId(), hearit2, 20));
+        @Test
+        @DisplayName("로그인한 회원은 재생기록을 저장할 수 있다.")
+        void addPlayHistory_Member() {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            Category category = dbHelper.insertCategory(new Category("name", "#000000"));
+            Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
 
-        // when
-        List<RecentlyPlayedHearitResponse> result = playingHistoryService.getRecentPlayingHistory(memberInfo);
+            // when
+            playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
+            playingHistoryBuffer.flush();
 
-        // then
-        assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result.get(0).id()).isEqualTo(hearit2.getId()),
-                () -> assertThat(result.get(1).id()).isEqualTo(hearit1.getId())
-        );
+            // then
+            List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
+            assertAll(
+                    () -> assertThat(playingHistories.size()).isEqualTo(1),
+                    () -> assertThat(playingHistories.getFirst().getUserUuid()).isEqualTo(member.getUuid()),
+                    () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId())
+            );
+        }
+
+        @Test
+        @DisplayName("비회원은 재생기록을 저장할 수 있다.")
+        void addPlayHistory_Guest() {
+            // given
+            Category category = dbHelper.insertCategory(new Category("name", "#000000"));
+            Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+            String guestUuid = UUID.randomUUID().toString();
+
+            // when
+            playingHistoryService.addPlayingHistory(TestFixture.createGuestUserInfo(guestUuid), request);
+            playingHistoryBuffer.flush();
+
+            // then
+            List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
+            assertAll(
+                    () -> assertThat(playingHistories.size()).isEqualTo(1),
+                    () -> assertThat(playingHistories.getFirst().getUserUuid()).isEqualTo(guestUuid),
+                    () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId())
+            );
+        }
     }
 
-    @Test
-    @DisplayName("회원이 아닌 유저는 빈 재생 기록을 반환한다.")
-    void getRecentPlayingHistoryOfMember_whenGuestOrNull_thenReturnEmpty() {
-        // given
-        UserInfo guestInfo = RequestUser.guest(UUID.randomUUID().toString()).getUserInfo();
+    @Nested
+    @DisplayName("재생 기록 수정")
+    class ModifyPlayingHistoryTest {
 
-        // when
-        List<RecentlyPlayedHearitResponse> guestResult = playingHistoryService.getRecentPlayingHistory(guestInfo);
+        @Test
+        @DisplayName("로그인한 회원은 재생기록을 수정할 수 있다.")
+        void modifyPlayHistory_Member() {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            Category category = dbHelper.insertCategory(new Category("name", "#000000"));
+            Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+            dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), hearit, 10_000));
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
 
-        // then
-        assertThat(guestResult).isEmpty();
-    }
+            // when
+            playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
+            playingHistoryBuffer.flush();
 
-    @Test
-    @DisplayName("로그인한 회원은 재생기록을 저장할 수 있다.")
-    void addPlayHistory() throws InterruptedException {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        Category category = dbHelper.insertCategory(new Category("name", "#000000"));
-        Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+            // then
+            List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
+            assertAll(
+                    () -> assertThat(playingHistories.size()).isEqualTo(1),
+                    () -> assertThat(playingHistories.getFirst().getUserUuid()).isEqualTo(member.getUuid()),
+                    () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId()),
+                    () -> assertThat(playingHistories.getFirst().getLastPlayTime()).isEqualTo(50_000L)
+            );
+        }
 
-        // when
-        playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
-        playingHistoryBuffer.flush();
+        @Test
+        @Commit
+        @DisplayName("비회원은 재생기록을 수정할 수 있다.")
+        void modifyPlayHistory_Guest() {
+            // given
+            UserInfo guestUserInfo = TestFixture.createGuestUserInfo(UUID.randomUUID().toString());
+            Category category = dbHelper.insertCategory(new Category("name", "#000000"));
+            Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
+            dbHelper.insertPlayingHistory(new PlayingHistory(guestUserInfo.getGuestId(), hearit, 10_000));
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
 
-        // then
-        List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
-        assertAll(() -> {
-            assertThat(playingHistories.size()).isEqualTo(1);
-            assertThat(playingHistories.getFirst().getMemberId()).isEqualTo(member.getId());
-            assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId());
-        });
-    }
+            // when
+            playingHistoryService.addPlayingHistory(guestUserInfo, request);
+            playingHistoryBuffer.flush();
 
-    @Test
-    @DisplayName("로그인한 회원은 재생기록을 수정할 수 있다.")
-    void modifyPlayHistory() throws InterruptedException {
-        // given
-        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        Category category = dbHelper.insertCategory(new Category("name", "#000000"));
-        Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-        PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
-                new PlayingHistory(member.getId(), hearit, 10_000));
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
-
-        // when
-        playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
-        playingHistoryBuffer.flush();
-
-        // then
-        List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
-        assertAll(() -> {
-            assertThat(playingHistories.size()).isEqualTo(1);
-            assertThat(playingHistories.getFirst().getMemberId()).isEqualTo(member.getId());
-            assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId());
-        });
-    }
-
-    @Test
-    @DisplayName("로그인하지 않은 회원은 재생기록을 저장할 수 없다.")
-    void checkMember() {
-        // given
-        Category category = dbHelper.insertCategory(new Category("name", "#000000"));
-        Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-        PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
-
-        // when
-        playingHistoryService.addPlayingHistory(TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()),
-                request);
-
-        // then
-        assertThat(playingHistoryRepository.findAll()).hasSize(0);
+            // then
+            List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
+            assertAll(
+                    () -> assertThat(playingHistories.size()).isEqualTo(1),
+                    () -> assertThat(playingHistories.getFirst().getUserUuid()).isEqualTo(guestUserInfo.getGuestId()),
+                    () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId()),
+                    () -> assertThat(playingHistories.getFirst().getLastPlayTime()).isEqualTo(50_000L)
+            );
+        }
     }
 
     @Test

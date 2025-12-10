@@ -5,6 +5,7 @@ import com.onair.hearit.core.domain.OAuthProvider;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -19,4 +20,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m FROM Member m WHERE m.uuid = :uuid AND m.deletedAt IS NULL")
     Optional<Member> findByUuid(String uuid);
+
+    @Query("SELECT m.uuid FROM Member m WHERE m.id = :memberId AND m.deletedAt IS NULL")
+    Optional<String> findUuidById(@Param("memberId") Long memberId);
 }

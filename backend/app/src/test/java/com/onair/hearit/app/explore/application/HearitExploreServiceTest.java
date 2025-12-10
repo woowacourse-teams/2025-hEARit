@@ -160,7 +160,7 @@ class HearitExploreServiceTest {
         given(randomNumberGenerator.getDouble()).willReturn(0.1d);
 
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
-        UserInfo guestInfo = TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString());
+        UserInfo guestInfo = TestFixture.createGuestUserInfo(UUID.randomUUID().toString());
         LocalDateTime now = LocalDateTime.now();
 
         Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);

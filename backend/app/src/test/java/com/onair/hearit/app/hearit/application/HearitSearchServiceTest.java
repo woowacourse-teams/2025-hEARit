@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.app.hearit.dto.HearitSearchResponse;
+import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.config.DataSourceConfig;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -16,13 +16,10 @@ import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
-import com.onair.hearit.app.hearit.dto.HearitSearchResponse;
-import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
-import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
-import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
+import com.onair.hearit.core.fixture.TestFixture;
+import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,31 +35,18 @@ import org.springframework.test.context.transaction.TestTransaction;
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class,
+        HearitSearchService.class, UserInfoService.class})
 class HearitSearchServiceTest {
 
     @Autowired
     private DbHelper dbHelper;
 
     @Autowired
-    private HearitRepository hearitRepository;
-
-    @Autowired
-    private HearitKeywordRepository hearitKeywordRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
     private PlayingHistoryRepository playingHistoryRepository;
 
+    @Autowired
     private HearitSearchService hearitSearchService;
-
-    @BeforeEach
-    void setup() {
-        hearitSearchService = new HearitSearchService(hearitRepository, hearitKeywordRepository, memberRepository,
-                playingHistoryRepository);
-    }
 
     @Test
     @DisplayName("검색 시 제목에 검색어가 포함된 히어릿을 반환한다.")
@@ -239,7 +223,7 @@ class HearitSearchServiceTest {
         Hearit hearit = saveHearitWithTitleAndKeyword("spring test title", saveKeyword("keyword"));
 
         PlayingHistory playingHistory = playingHistoryRepository.save(
-                new PlayingHistory(member.getId(), hearit, 10L));
+                new PlayingHistory(member.getUuid(), hearit, 10L));
 
         TestTransaction.flagForCommit();
         TestTransaction.end();
