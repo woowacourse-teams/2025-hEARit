@@ -28,9 +28,10 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
     @Override
     public void add(PlayingHistory playingHistory, long clientEventTime) {
         PlayKey key = new PlayKey(playingHistory.getUserUuid(), playingHistory.getHearitId());
-        validateBufferSize(key);
-
         cache.compute(key, (k, existing) -> {
+            if (existing == null) {
+                validateBufferSize(k);
+            }
             PlayValue incoming = PlayValue.from(playingHistory, clientEventTime);
             if (existing != null && existing.isMoreRecentThan(incoming)) {
                 return existing;
