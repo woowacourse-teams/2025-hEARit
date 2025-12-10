@@ -9,7 +9,7 @@ function extractSources(formData) {
         const match = key.match(/^sources\[(\d+)\]\.(sourceName|sourceUrl)$/);
         if (!match) continue;
 
-        const index = parseInt(match[1], 10);
+        const index = Number.parseInt(match[1], 10);
         const field = match[2];
 
         if (!sources[index]) {
@@ -46,6 +46,36 @@ function showCompleteButton() {
             <i class="bi bi-plus-circle me-1"></i>더 등록하기
         </button>
     `;
+}
+
+function showButtons() {
+    const buttonContainer = document.getElementById('button-container');
+    buttonContainer.classList.remove('d-none');
+    buttonContainer.innerHTML = `
+        <button type="submit" class="btn btn-success" id="submit-btn">등록</button>
+        <button type="button" class="btn btn-secondary" id="cancel-upload">취소</button>
+    `;
+    // 취소 버튼 이벤트 다시 연결
+    document.getElementById('cancel-upload').addEventListener('click', () => window.app.reset());
+}
+
+function updateProgressError(msg) {
+    const container = document.getElementById('progress-container');
+    const bar = document.getElementById('progress-bar');
+    const text = document.getElementById('progress-text');
+
+    container.classList.remove('d-none');
+    bar.style.width = '100%';
+
+    bar.classList.remove('progress-bar-animated', 'progress-bar-striped', 'bg-success', 'bg-primary');
+    bar.classList.add('bg-danger');
+
+    text.textContent = msg;
+}
+
+function hideProgress() {
+    const container = document.getElementById('progress-container');
+    container.classList.add('d-none');
 }
 
 function hideButtons() {
@@ -518,9 +548,9 @@ class FormSubmitHandler {
     async submit(e) {
         e.preventDefault();
 
-        hideButtons(); // 버튼 숨기기
-
+        hideButtons();
         updateProgress("Presigned URL 발급 중...", 10);
+
         const formData = this.prepareFormData();
         const headers = this.getCsrfHeaders();
 
@@ -537,17 +567,16 @@ class FormSubmitHandler {
 
         const presignedUrlResponse = await fetch('/api/v1/admin/hearits/presigned-url', {
             method: 'POST',
-            headers: {
-                ...headers,
-                'Content-Type': 'application/json'
-            },
+            headers: {...headers, 'Content-Type': 'application/json'},
             body: presignedRequestBody
         });
 
         if (!presignedUrlResponse.ok) {
-            updateProgress("Presigned URL 발급 실패", 10);
+            updateProgressError("Presigned URL 발급 실패");
+            await new Promise(r => setTimeout(r, 1200));
             alert('파일 업로드 URL 발급에 실패했습니다.');
-            location.reload();
+            hideProgress();
+            showButtons();
             return;
         }
 
@@ -557,9 +586,7 @@ class FormSubmitHandler {
         // 2. 파일 업로드
         const uploadToS3 = (url, file) => fetch(url, {
             method: 'PUT',
-            headers: {
-                'Content-Type': file.type || 'application/octet-stream'
-            },
+            headers: {'Content-Type': file.type || 'application/octet-stream'},
             body: file
         });
 
@@ -570,22 +597,20 @@ class FormSubmitHandler {
         ]);
 
         if (!origRes.ok || !shortRes.ok || !scriptRes.ok) {
-            updateProgress("파일 업로드 실패", 40);
+            updateProgressError("파일 업로드 실패");
+            await new Promise(r => setTimeout(r, 1200));
             alert('파일 업로드 중 오류가 발생했습니다.');
-            location.reload();
+            hideProgress();
+            showButtons();
             return;
         }
 
         updateProgress("메타데이터 저장 중...", 70);
 
-        // 3. 메타데이터 업로드
+        // 메타데이터 JSON 생성
         formData.delete('originalAudio');
         formData.delete('shortAudio');
         formData.delete('script');
-
-        formData.append('originalAudioKey', presigned.originalAudio.key);
-        formData.append('shortAudioKey', presigned.shortAudio.key);
-        formData.append('scriptFileKey', presigned.script.key);
 
         const json = {
             title: formData.get("title"),
@@ -602,54 +627,49 @@ class FormSubmitHandler {
         try {
             const createResponse = await fetch('/api/v1/admin/hearits', {
                 method: 'POST',
-                headers: {
-                    ...headers,
-                    'Content-Type': 'application/json'
-                },
+                headers: {...headers, 'Content-Type': 'application/json'},
                 body: JSON.stringify(json)
             });
 
-            if (createResponse.ok) {
-                updateProgress("등록 완료!", 100);
-                setTimeout(() => {
-                    this.handleSuccess();
-                }, 500);
-            } else {
-                updateProgress("메타데이터 저장 실패", 70);
-                await this.handleError(createResponse);
+            if (!createResponse.ok) {
+                updateProgressError("메타데이터 저장 실패");
+                await new Promise(r => setTimeout(r, 1200));
+
+                const responseText = await createResponse.text();
+                let message = '서버 오류';
+
+
+                const data = JSON.parse(responseText);
+                const detail = data.detail || data.message;
+                if (detail) {
+                    message = detail
+                        .split(';')
+                        .map(m => m.trim())
+                        .filter(m => m.length > 0)
+                        .join('\n');
+                }
+
+                alert(message);
+                hideProgress();
+                showButtons();
+                return;
             }
-        } catch (error) {
-            updateProgress("에러 발생", 70);
-            console.error('Error uploading hearit:', error);
-            alert('추가 중 오류가 발생했습니다.');
-            location.reload();
+
+            updateProgress("등록 완료!", 100);
+
+            setTimeout(() => {
+                alert('히어릿이 성공적으로 추가되었습니다.');
+                showCompleteButton();
+                window.app.reset();
+            }, 500);
+
+        } catch (err) {
+            updateProgressError("에러 발생");
+            await new Promise(r => setTimeout(r, 5000));
+            alert('추가 중 오류가 발생했습니다.' + err.message);
+            hideProgress();
+            showButtons();
         }
-    }
-
-    handleSuccess() {
-        alert('히어릿이 성공적으로 추가되었습니다.');
-        showCompleteButton(); // 더 등록하기 버튼 표시
-        window.app.reset(); // 폼 초기화
-    }
-
-    async handleError(response) {
-        const responseText = await response.text();
-        let errorMessage = '서버 오류';
-
-        try {
-            const errorData = JSON.parse(responseText);
-            const detail = errorData.detail || errorData.message;
-            if (detail) {
-                errorMessage = detail
-                    .split(';')
-                    .map(msg => msg.trim())
-                    .filter(msg => msg.length > 0)
-                    .join('\n');
-            }
-        } catch (_) {
-        }
-
-        alert('추가 실패:\n' + errorMessage);
     }
 
     init() {
