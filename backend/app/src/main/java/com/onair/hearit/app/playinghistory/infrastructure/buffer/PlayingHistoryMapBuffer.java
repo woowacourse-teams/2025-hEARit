@@ -5,6 +5,7 @@ import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
+import jakarta.annotation.PreDestroy;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,6 +94,11 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
                     return incomingValue;
                 })
         );
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        flush();
     }
 
     private record PlayKey(String userUuid, long hearitId) {
