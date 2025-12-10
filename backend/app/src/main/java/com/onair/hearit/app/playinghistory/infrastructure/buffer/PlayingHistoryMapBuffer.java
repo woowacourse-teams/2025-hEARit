@@ -64,7 +64,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
 
     private Map<PlayKey, PlayValue> createSnapshotAndRemoveFromCache() {
         Map<PlayKey, PlayValue> snapshot = Map.copyOf(cache);
-        snapshot.keySet().forEach(cache::remove);
+        snapshot.forEach(cache::remove);
         return snapshot;
     }
 
