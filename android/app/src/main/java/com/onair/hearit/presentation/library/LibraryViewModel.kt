@@ -32,7 +32,7 @@ class LibraryViewModel(
     private val _uiState = MutableLiveData<BookmarkUiState>()
     val uiState: LiveData<BookmarkUiState> = _uiState
 
-    private val _userInfo = MutableStateFlow(userRepository.getCachedUserInfo())
+    private val _userInfo = MutableStateFlow(DEFAULT_USER_INFO)
     val userInfo = _userInfo.asStateFlow()
 
     private val _toastMessage = SingleLiveData<Int>()
