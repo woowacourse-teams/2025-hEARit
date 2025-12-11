@@ -57,11 +57,10 @@ val HearitTypoGraphy =
                 fontFamily = PretendardFontFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
-                lineHeight = 24.sp,
+                lineHeight = 22.sp,
             ),
         bodyMedium =
             TextStyle(
-                // 이걸 Body로 사용
                 fontFamily = PretendardFontFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,

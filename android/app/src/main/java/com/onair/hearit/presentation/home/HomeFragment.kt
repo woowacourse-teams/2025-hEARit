@@ -4,12 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.compose.material3.MaterialTheme
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.doOnPreDraw
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -17,8 +16,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
@@ -43,11 +40,12 @@ import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.home.adapter.PlayingBookmarkHearitAdapter
 import com.onair.hearit.presentation.home.adapter.PlayingHistoryHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecentUploadHearitAdapter
-import com.onair.hearit.presentation.home.adapter.RecommendHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
+import com.onair.hearit.presentation.home.component.CarouselSection
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 class HomeFragment :
@@ -61,10 +59,6 @@ class HomeFragment :
 
     private val playingHistoryAdapter: PlayingHistoryHearitAdapter by lazy {
         PlayingHistoryHearitAdapter(this)
-    }
-
-    private val recommendAdapter: RecommendHearitAdapter by lazy {
-        RecommendHearitAdapter(this)
     }
 
     private val recentUploadAdapter: RecentUploadHearitAdapter by lazy {
@@ -81,8 +75,6 @@ class HomeFragment :
             navigateClickListener = ::navigateToSearch,
         )
     }
-    private val snapHelper = PagerSnapHelper()
-    private var centerScrollListener: CenterScrollListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -141,18 +133,6 @@ class HomeFragment :
     }
 
     private fun setupRecyclerView() {
-        centerScrollListener =
-            CenterScrollListener(snapHelper) { position ->
-                updateIndicator(position)
-            }
-
-        binding.rvHomeRecommend.apply {
-            doOnPreDraw { scrollToMiddlePosition() }
-            adapter = recommendAdapter
-            snapHelper.attachToRecyclerView(this)
-            centerScrollListener?.let { addOnScrollListener(it) }
-        }
-
         binding.rvHomePlayingHistoryHearit.apply {
             adapter = playingHistoryAdapter
             addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
@@ -220,10 +200,14 @@ class HomeFragment :
     }
 
     private fun updateRecommendSection(recommendHearits: List<RecommendHearit>) {
-        recommendAdapter.submitList(recommendHearits) {
-            if (view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                scrollToMiddlePosition()
-                setupIndicator()
+        binding.composeCarousel.setContent {
+            MaterialTheme {
+                CarouselSection(
+                    items = recommendHearits.toImmutableList(),
+                    onItemClick = { item ->
+                        // 클릭 이벤트 처리
+                    },
+                )
             }
         }
     }
@@ -261,64 +245,6 @@ class HomeFragment :
     private fun updateAdSections(isLoading: Boolean) {
         binding.tvHomeShortcast.isVisible = !isLoading
         binding.tvHomeWootaeco.isVisible = !isLoading
-    }
-
-    private fun setupIndicator(size: Int = 5) {
-        val container = binding.indicatorContainer
-        container.removeAllViews()
-        val density = resources.displayMetrics.density
-
-        repeat(size) {
-            val dot =
-                View(requireContext()).apply {
-                    val sizeInPx = (INDICATOR_SIZE_DP * density).toInt()
-                    val marginPx = (INDICATOR_MARGIN_DP * density).toInt()
-                    layoutParams =
-                        LinearLayout.LayoutParams(sizeInPx, sizeInPx).apply {
-                            marginStart = marginPx
-                            marginEnd = marginPx
-                        }
-                }
-            container.addView(dot)
-        }
-        setCurrentIndicator(INITIAL_INDICATOR_POSITION)
-    }
-
-    private fun updateIndicator(position: Int) {
-        val container = binding.indicatorContainer
-        val count = container.childCount
-        if (count == 0) return
-
-        val indicatorIndex = position
-        if (indicatorIndex in 0 until count) {
-            setCurrentIndicator(indicatorIndex)
-        }
-    }
-
-    private fun setCurrentIndicator(selectedIndex: Int) {
-        val container = binding.indicatorContainer
-        for (i in 0 until container.childCount) {
-            val drawableRes =
-                if (i == selectedIndex) {
-                    R.drawable.indicator_selected
-                } else {
-                    R.drawable.indicator_unselected
-                }
-            container.getChildAt(i).setBackgroundResource(drawableRes)
-        }
-    }
-
-    private fun scrollToMiddlePosition() {
-        if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            val middlePosition = recommendAdapter.currentList.size / 2
-            val layoutManager = binding.rvHomeRecommend.layoutManager as LinearLayoutManager
-            val recyclerViewCenter = binding.rvHomeRecommend.width / 2
-            val itemWidth = (ITEM_WIDTH_DP * resources.displayMetrics.density).toInt()
-            layoutManager.scrollToPositionWithOffset(
-                middlePosition,
-                recyclerViewCenter - itemWidth / 2,
-            )
-        }
     }
 
     private fun showToast(messageResId: Int) {
@@ -381,22 +307,12 @@ class HomeFragment :
     }
 
     override fun onDestroyView() {
-        centerScrollListener?.let {
-            binding.rvHomeRecommend.removeOnScrollListener(it)
-        }
-        centerScrollListener = null
-        snapHelper.attachToRecyclerView(null)
-        binding.rvHomeRecommend.adapter = null
         binding.rvHomeRecommendationCategories.adapter = null
         _binding = null
         super.onDestroyView()
     }
 
     private companion object {
-        private const val ITEM_WIDTH_DP = 260
-        private const val INDICATOR_SIZE_DP = 8
-        private const val INDICATOR_MARGIN_DP = 4
-        private const val INITIAL_INDICATOR_POSITION = 2
         private const val SIDE_MARGIN = 16
     }
 }
