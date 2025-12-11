@@ -11,11 +11,13 @@ data class UserInfo(
     companion object {
         fun default() =
             UserInfo(
-                id = -1,
+                id = -1L,
                 nickname = "hEARit",
                 profileImage = null,
             )
     }
 }
 
-fun UserInfo.isLoggedIn(): Boolean = this.id > 0
+fun UserInfo.isGuest(): Boolean = this.id <= 0
+
+fun UserInfo.isLoggedIn(): Boolean = !isGuest()

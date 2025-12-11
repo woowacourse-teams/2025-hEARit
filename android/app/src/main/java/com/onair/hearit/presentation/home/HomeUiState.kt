@@ -6,6 +6,7 @@ import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.domain.model.isLoggedIn
 
 data class HomeUiState(
     val userInfo: UserInfo = UserInfo.default(),
@@ -17,7 +18,7 @@ data class HomeUiState(
     val loadingKeys: Set<HomeLoadKey> = emptySet(),
 ) {
     val isLoggedIn: Boolean
-        get() = userInfo.id != 0L
+        get() = userInfo.isLoggedIn()
 
     val showRecentUpload: Boolean
         get() = !isLoading && recentUploadHearits.isNotEmpty()

@@ -148,7 +148,7 @@ class HomeViewModel(
                 }.onFailure { throwable ->
                     _uiState.update {
                         when (throwable) {
-                            is UserNotRegistered -> it.copy(userInfo = DEFAULT_USER_INFO)
+                            is UserNotRegistered -> it.copy(userInfo = UserInfo.default())
                             else -> it // 일시적인 실패(네트워크, 서버 오류 등)에서는 이전 userInfo를 유지
                         }
                     }
@@ -171,9 +171,5 @@ class HomeViewModel(
         } finally {
             withContext(NonCancellable) { finishLoading(jobKey) }
         }
-    }
-
-    companion object {
-        private val DEFAULT_USER_INFO = UserInfo.default()
     }
 }
