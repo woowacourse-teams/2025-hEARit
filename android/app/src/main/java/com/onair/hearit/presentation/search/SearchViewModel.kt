@@ -15,6 +15,7 @@ import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.search.main.SearchUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -41,8 +42,8 @@ class SearchViewModel(
     private val _categoryHearits = MutableStateFlow<List<SearchedCategoryHearit>>(emptyList())
     val categoryHearits: StateFlow<List<SearchedCategoryHearit>> = _categoryHearits
 
-    private val _toastMessage = SingleLiveData<Int>()
-    val toastMessage: LiveData<Int> = _toastMessage
+    private val _toastMessage = SingleLiveData<Int?>()
+    val toastMessage: LiveData<Int?> = _toastMessage
 
     private val currentInput = initialInput
 
@@ -193,13 +194,22 @@ class SearchViewModel(
 
     fun saveRecentKeyword(recentKeyword: String) {
         viewModelScope.launch {
+            val recentSearch =
+                RecentSearch(
+                    term = recentKeyword,
+                    searchedAt = System.currentTimeMillis(),
+                )
             recentKeywordRepository
-                .saveKeyword(recentKeyword)
+                .saveKeyword(recentSearch)
                 .onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
                 }
         }
+    }
+
+    fun clearToastMessage() {
+        _toastMessage.value = null
     }
 
     private fun updateUiState(hearits: List<SearchedHearit>) {

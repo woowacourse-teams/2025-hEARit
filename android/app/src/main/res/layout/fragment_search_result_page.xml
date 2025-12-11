@@ -7,7 +7,7 @@
 
         <variable
             name="uiState"
-            type="com.onair.hearit.presentation.search.SearchUiState" />
+            type="com.onair.hearit.presentation.search.main.SearchUiState" />
 
     </data>
 

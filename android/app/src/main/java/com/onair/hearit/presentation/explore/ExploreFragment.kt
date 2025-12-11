@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -37,6 +36,7 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.navigate
+import com.onair.hearit.presentation.showToast
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
 import timber.log.Timber
@@ -218,7 +218,7 @@ class ExploreFragment :
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(getString(resId))
+            showToast(resId)
         }
 
         viewModel.showLoginDialog.observe(viewLifecycleOwner) {
@@ -379,9 +379,5 @@ class ExploreFragment :
             ),
         )
         navigateToDetail(hearitId, lastPosition)
-    }
-
-    private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }

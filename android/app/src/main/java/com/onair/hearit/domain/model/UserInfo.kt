@@ -13,7 +13,9 @@ data class UserInfo(
             UserInfo(
                 id = -1,
                 nickname = "hEARit",
-                profileImage = "",
+                profileImage = null,
             )
     }
 }
+
+fun UserInfo.isLoggedIn(): Boolean = this.id > 0

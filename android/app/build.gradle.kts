@@ -23,8 +23,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 10303
-        versionName = "1.3.3"
+        versionCode = 10304
+        versionName = "1.3.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders += mapOf()
@@ -132,6 +132,7 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.junit.ktx)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -140,6 +141,7 @@ dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2025.08.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.activity.compose)
 
@@ -152,11 +154,13 @@ dependencies {
 
     // LiveData
     implementation(libs.androidx.lifecycle.livedata.ktx)
+    testImplementation(libs.androidx.core.testing)
 
     // test
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.assertj.core)
+    testImplementation(kotlin("test"))
 
     // android test
     androidTestImplementation(libs.androidx.runner)
@@ -201,6 +205,7 @@ dependencies {
 
     // coil
     implementation(libs.coil)
+    implementation(libs.coil.compose)
 
     // timber
     implementation(libs.timber)
@@ -214,6 +219,8 @@ dependencies {
     // open license
     implementation(libs.play.services.oss.licenses)
 
-    // swipe Refresh Layout
-    implementation(libs.androidx.swiperefreshlayout)
+    // compose navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.compose)
 }

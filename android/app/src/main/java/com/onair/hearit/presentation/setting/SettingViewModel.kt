@@ -1,36 +1,39 @@
 package com.onair.hearit.presentation.setting
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.BuildConfig
 import com.onair.hearit.R
-import com.onair.hearit.domain.DomainException.UserNotRegistered
+import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.UserInfo
-import com.onair.hearit.domain.repository.MemberRepository
+import com.onair.hearit.domain.repository.UserRepository
 import com.onair.hearit.presentation.SingleLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class SettingViewModel(
-    private val memberRepository: MemberRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
     val appVersion = BuildConfig.VERSION_NAME
 
-    private val _userInfo: MutableLiveData<UserInfo> = MutableLiveData()
-    val userInfo: LiveData<UserInfo> = _userInfo
+    private val _userInfo = MutableStateFlow(userRepository.getCachedUserInfo())
+    val userInfo = _userInfo.asStateFlow()
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
-        fetchUserInfo()
+        if (_userInfo.value == null) {
+            fetchUserInfo()
+        }
     }
 
     private fun fetchUserInfo() {
         viewModelScope.launch {
-            memberRepository
+            userRepository
                 .getUserInfo()
                 .onSuccess { userInfo ->
                     _userInfo.value = userInfo

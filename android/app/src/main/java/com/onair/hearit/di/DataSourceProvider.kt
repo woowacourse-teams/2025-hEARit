@@ -6,10 +6,12 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.onair.hearit.data.datasource.ErrorResponseHandler
+import com.onair.hearit.data.datasource.local.AuthLocalDataSource
+import com.onair.hearit.data.datasource.local.AuthLocalDataSourceImpl
 import com.onair.hearit.data.datasource.local.HearitLocalDataSource
 import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
-import com.onair.hearit.data.datasource.local.PreferencesLocalDataSource
-import com.onair.hearit.data.datasource.local.PreferencesLocalDataSourceImpl
+import com.onair.hearit.data.datasource.local.UserLocalDataSource
+import com.onair.hearit.data.datasource.local.UserLocalDataSourceImpl
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSource
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.BookmarkRemoteDataSource
@@ -20,21 +22,28 @@ import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSource
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSourceImpl
-import com.onair.hearit.data.datasource.remote.MemberRemoteDataSource
-import com.onair.hearit.data.datasource.remote.MemberRemoteDataSourceImpl
-import com.onair.hearit.data.datasource.remote.PlayingHistoryDataSource
-import com.onair.hearit.data.datasource.remote.PlayingHistoryDataSourceImpl
+import com.onair.hearit.data.datasource.remote.PlayingHistoryRemoteDataSource
+import com.onair.hearit.data.datasource.remote.PlayingHistoryRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.RecommendationRemoteDataSource
 import com.onair.hearit.data.datasource.remote.RecommendationRemoteDataSourceImpl
+import com.onair.hearit.data.datasource.remote.UserRemoteDataSource
+import com.onair.hearit.data.datasource.remote.UserRemoteDataSourceImpl
 
 object DataSourceProvider {
-    private lateinit var dataStore: DataStore<Preferences>
+    private lateinit var authDataStore: DataStore<Preferences>
+    private lateinit var userDataStore: DataStore<Preferences>
     private val errorHandler = ErrorResponseHandler()
 
     fun init(context: Context) {
         val appContext = context.applicationContext
-        dataStore =
-            PreferenceDataStoreFactory.create { appContext.preferencesDataStoreFile("user_prefs") }
+        authDataStore =
+            PreferenceDataStoreFactory.create {
+                appContext.preferencesDataStoreFile("auth_prefs")
+            }
+        userDataStore =
+            PreferenceDataStoreFactory.create {
+                appContext.preferencesDataStoreFile("user_prefs")
+            }
     }
 
     val authRemoteDataSource: AuthRemoteDataSource by lazy {
@@ -72,24 +81,15 @@ object DataSourceProvider {
         )
     }
 
-    val memberRemoteDataSource: MemberRemoteDataSource by lazy {
-        MemberRemoteDataSourceImpl(
+    val userRemoteDataSource: UserRemoteDataSource by lazy {
+        UserRemoteDataSourceImpl(
             memberService = NetworkProvider.memberService,
             errorResponseHandler = errorHandler,
         )
     }
 
-    val hearitLocalDataSource: HearitLocalDataSource by lazy {
-        HearitLocalDataSourceImpl(DatabaseProvider.hearitDao)
-    }
-
-    val preferencesLocalDataSource: PreferencesLocalDataSource by lazy {
-        check(::dataStore.isInitialized) { "DataSourceProvider.init() 먼저 호출 필요" }
-        PreferencesLocalDataSourceImpl(dataStore)
-    }
-
-    val playingHistoryDataSource: PlayingHistoryDataSource by lazy {
-        PlayingHistoryDataSourceImpl(
+    val playingHistoryRemoteDataSource: PlayingHistoryRemoteDataSource by lazy {
+        PlayingHistoryRemoteDataSourceImpl(
             playingHistoryService = NetworkProvider.playingHistoryService,
             errorResponseHandler = errorHandler,
         )
@@ -100,5 +100,19 @@ object DataSourceProvider {
             recommendationService = NetworkProvider.recommendationService,
             errorResponseHandler = errorHandler,
         )
+    }
+
+    val hearitLocalDataSource: HearitLocalDataSource by lazy {
+        HearitLocalDataSourceImpl(DatabaseProvider.hearitDao)
+    }
+
+    val authLocalDataSource: AuthLocalDataSource by lazy {
+        check(::authDataStore.isInitialized) { "DataSourceProvider.init() 먼저 호출 필요" }
+        AuthLocalDataSourceImpl(authDataStore)
+    }
+
+    val userLocalDataSource: UserLocalDataSource by lazy {
+        check(::userDataStore.isInitialized) { "DataSourceProvider.init() 먼저 호출 필요" }
+        UserLocalDataSourceImpl(userDataStore)
     }
 }

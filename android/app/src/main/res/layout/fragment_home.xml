@@ -83,6 +83,16 @@
                     android:textColor="@color/hearit_gray4"
                     app:layout_constraintStart_toStartOf="@id/tv_home_description"
                     app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
+            <TextView
+                android:id="@+id/tv_home_recommend"
+                style="@style/pretendard_main_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/home_recommend_hearit_text"
+                android:textColor="@color/hearit_gray4"
+                app:layout_constraintStart_toStartOf="@id/tv_home_description"
+                app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_home_recommend"

@@ -6,70 +6,47 @@
 
     </data>
 
-    <androidx.drawerlayout.widget.DrawerLayout
-        android:id="@+id/drawer_layout"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="false">
+        android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragment_container_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="0dp"
+            android:background="@color/hearit_black1"
+            app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/fragment_container_view"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:background="@color/hearit_black1"
-                app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <com.onair.hearit.presentation.BottomPlayerView
+            android:id="@+id/layout_bottom_player_controller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
+            app:show_timeout="0" />
 
-            <com.onair.hearit.presentation.BottomPlayerView
-                android:id="@+id/layout_bottom_player_controller"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                app:layout_constraintBottom_toTopOf="@id/layout_bottom_navigation"
-                app:show_timeout="0" />
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/layout_bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/hearit_gray1"
+            android:paddingVertical="6dp"
+            app:itemActiveIndicatorStyle="@null"
+            app:itemBackground="@color/hearit_gray1"
+            app:itemIconSize="20dp"
+            app:itemIconTint="@color/nav_item_color"
+            app:itemPaddingBottom="6dp"
+            app:itemTextAppearanceActive="@style/BottomNavText"
+            app:itemTextAppearanceInactive="@style/BottomNavText"
+            app:itemTextColor="@color/nav_item_color"
+            app:labelVisibilityMode="labeled"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:menu="@menu/menu_navigation_item" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <com.google.android.material.bottomnavigation.BottomNavigationView
-                android:id="@+id/layout_bottom_navigation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/hearit_gray1"
-                android:paddingVertical="6dp"
-                app:itemActiveIndicatorStyle="@null"
-                app:itemBackground="@color/hearit_gray1"
-                app:itemIconSize="20dp"
-                app:itemIconTint="@color/nav_item_color"
-                app:itemPaddingBottom="6dp"
-                app:itemTextAppearanceActive="@style/BottomNavText"
-                app:itemTextAppearanceInactive="@style/BottomNavText"
-                app:itemTextColor="@color/nav_item_color"
-                app:labelVisibilityMode="labeled"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:menu="@menu/menu_navigation_item" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/custom_drawer"
-            android:layout_width="320dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:background="@color/hearit_gray1">
-
-            <include
-                android:id="@+id/layout_drawer"
-                layout="@layout/layout_drawer"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.drawerlayout.widget.DrawerLayout>
 </layout>
 

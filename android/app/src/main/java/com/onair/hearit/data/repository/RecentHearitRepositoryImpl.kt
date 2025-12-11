@@ -12,15 +12,10 @@ class RecentHearitRepositoryImpl(
     override suspend fun getRecentHearit(): Result<RecentHearit?> = hearitLocalDataSource.getRecentHearit().mapCatching { it?.toDomain() }
 
     override suspend fun saveRecentHearit(recentHearit: RecentHearit): Result<Unit> =
-        runCatching {
-            hearitLocalDataSource.saveRecentHearit(recentHearit.toData())
-        }
+        hearitLocalDataSource.saveRecentHearit(recentHearit.toData())
 
     override suspend fun updateRecentHearitPosition(
         hearitId: Long,
         position: Long,
-    ): Result<Unit> =
-        runCatching {
-            hearitLocalDataSource.updateRecentHearitPosition(hearitId, position)
-        }
+    ): Result<Unit> = hearitLocalDataSource.updateRecentHearitPosition(hearitId, position)
 }

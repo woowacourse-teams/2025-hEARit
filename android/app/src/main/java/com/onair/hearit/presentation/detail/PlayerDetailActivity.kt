@@ -54,6 +54,9 @@ import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
+import com.onair.hearit.presentation.detail.adapter.PlayerDetailKeywordAdapter
+import com.onair.hearit.presentation.detail.adapter.PlayerDetailScriptAdapter
+import com.onair.hearit.presentation.detail.adapter.PlayerDetailSourceAdapter
 import com.onair.hearit.presentation.detail.script.ScriptFragment
 import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
@@ -522,13 +525,13 @@ class PlayerDetailActivity :
             AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
-        val input = SearchInput.Category(id, name, colorCode)
-        val resultIntent =
-            Intent().apply {
-                putExtras(input.toBundle())
-            }
-        setResult(RESULT_OK, resultIntent)
-        finish()
+//        val input = SearchInput.Category(id, name, colorCode)
+//        val resultIntent =
+//            Intent().apply {
+//                putExtras(input.toBundle())
+//            }
+//        setResult(RESULT_OK, resultIntent)
+//        finish()
     }
 
     override fun onClickSource(
