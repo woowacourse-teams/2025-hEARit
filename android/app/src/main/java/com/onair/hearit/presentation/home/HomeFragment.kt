@@ -190,45 +190,33 @@ class HomeFragment :
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    updateLoadingState(state.isLoading)
-                    updateAdSections(state.isLoading)
-
-                    updateUserInfo(state.userInfo, state.isLoggedIn)
-
-                    updateRecommendSection(
-                        state.recommendHearits,
-                        state.showRecommendHearits,
-                    )
-                    updatePlayingHistorySection(
-                        state.playingHistoryHearits,
-                        state.showPlayingHistory,
-                    )
-                    updateRecentUploadSection(
-                        state.recentUploadHearits,
-                        state.showRecentUpload,
-                    )
-                    updateBookmarkSection(
-                        state.playingBookmarkHearits,
-                        state.showBookmark,
-                    )
-                    updateCategoriesSection(
-                        state.recommendationCategories,
-                        state.showCategories,
-                    )
+                launch {
+                    viewModel.isRefreshing.collect { refreshing ->
+                        binding.swipeRefreshLayout.isRefreshing = refreshing
+                    }
                 }
+
+                launch {
+                    viewModel.uiState.collect { state ->
+                        updateUI(state)
+                    }
+                }
+
+                viewModel.toastMessage.observe(viewLifecycleOwner, ::showToast)
             }
         }
+    }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isRefreshing.collect { refreshing ->
-                    binding.swipeRefreshLayout.isRefreshing = refreshing
-                }
-            }
-        }
+    private fun updateUI(state: HomeUiState) {
+        updateLoadingState(state.isLoading)
+        updateAdSections(state.isLoading)
+        updateUserInfo(state.userInfo, state.isLoggedIn)
 
-        viewModel.toastMessage.observe(viewLifecycleOwner) { resId -> showToast(resId) }
+        updateRecommendSection(state.recommendHearits, state.showRecommendHearits)
+        updatePlayingHistorySection(state.playingHistoryHearits, state.showPlayingHistory)
+        updateRecentUploadSection(state.recentUploadHearits, state.showRecentUpload)
+        updateBookmarkSection(state.playingBookmarkHearits, state.showBookmark)
+        updateCategoriesSection(state.recommendationCategories, state.showCategories)
     }
 
     private fun updateLoadingState(isLoading: Boolean) {
