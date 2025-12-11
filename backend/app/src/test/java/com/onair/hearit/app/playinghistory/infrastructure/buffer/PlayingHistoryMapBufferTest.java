@@ -68,7 +68,10 @@ class PlayingHistoryMapBufferTest {
         buffer.flush();
 
         // then
-        assertThat(playingHistoryRepository.findAll().size()).isEqualTo(1);
+        assertAll(
+                () -> assertThat(playingHistoryRepository.findAll().size()).isEqualTo(1),
+                () -> assertThat(buffer.getCache()).isEmpty()
+        );
     }
 
     @Test
@@ -82,7 +85,8 @@ class PlayingHistoryMapBufferTest {
         // lastPlayTime 100이지만 clientEventTime 1_000 (과거 이벤트)
         PlayingHistory oldHistory = new PlayingHistory(member.getUuid(), hearit, 100L);
         // lastPlayTime 50이지만 clientEventTime 2_000 (최근 이벤트)
-        PlayingHistory newHistory = new PlayingHistory(member.getUuid(), hearit, 50L);
+        long recentLastPlayTime = 50L; // ← 최근 데이터임을 명시
+        PlayingHistory newHistory = new PlayingHistory(member.getUuid(), hearit, recentLastPlayTime);
 
         buffer.add(newHistory, 2_000L);  // 최근 데이터 추가
         buffer.add(oldHistory, 1_000L);  // 네트워크 지연으로 과거 데이터 도착
@@ -92,7 +96,7 @@ class PlayingHistoryMapBufferTest {
 
         // then
         PlayingHistory saved = playingHistoryRepository.findAll().get(0);
-        assertThat(saved.getLastPlayTime()).isEqualTo(50L); // clientEventTime 기준 최신이 적용
+        assertThat(saved.getLastPlayTime()).isEqualTo(recentLastPlayTime); // clientEventTime 기준 최신이 적용
     }
 
     @Test
