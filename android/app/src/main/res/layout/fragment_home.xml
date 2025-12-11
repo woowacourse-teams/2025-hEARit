@@ -68,7 +68,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_recommend"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="320dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginTop="16dp"
                 android:orientation="horizontal"
