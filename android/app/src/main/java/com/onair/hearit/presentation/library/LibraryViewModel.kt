@@ -51,7 +51,7 @@ class LibraryViewModel(
         nextPage = 0
         _bookmarks.value = emptyList()
         val currentUserInfo = userInfo.value
-        if (currentUserInfo != null && currentUserInfo != DEFAULT_USER_INFO) {
+        if (currentUserInfo != DEFAULT_USER_INFO) {
             fetchData(page = 0)
         }
     }
