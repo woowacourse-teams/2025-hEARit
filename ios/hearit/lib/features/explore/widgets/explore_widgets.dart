@@ -126,7 +126,10 @@ class _ExploreCoverState extends State<ExploreCover>
   Widget build(BuildContext context) {
     final double containerSide = widget.containerSide ?? 300;
     final double lpSize = (containerSide).clamp(80.0, 500.0);
-    final double boxSize = (containerSide * 0.33).clamp(30.0, lpSize * 0.3);
+    // Avoid invalid clamp ranges when lpSize is small (e.g., lpSize * 0.3 < 30).
+    final double minBox = 30.0;
+    final double maxBox = (lpSize * 0.3).clamp(minBox, double.infinity);
+    final double boxSize = (containerSide * 0.33).clamp(minBox, maxBox);
 
     return Stack(
       clipBehavior: Clip.none,
