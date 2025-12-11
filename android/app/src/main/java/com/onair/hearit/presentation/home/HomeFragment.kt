@@ -224,13 +224,6 @@ class HomeFragment :
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.isRefreshing.collect { refreshing ->
                     binding.swipeRefreshLayout.isRefreshing = refreshing
-
-                    updateUserInfo(state.userInfo, state.isLoggedIn)
-
-                    if (!state.isLoading) {
-                        updateRecommendSection(state.recommendHearits)
-                        updateCategoriesSection(state.recommendationCategories)
-                    }
                 }
             }
         }

@@ -27,9 +27,6 @@ data class HomeUiState(
     val showPlayingHistory: Boolean
         get() = !isLoading && playingHistoryHearits.isNotEmpty()
 
-    val showRecentUpload: Boolean
-        get() = !isLoading && recentUploadHearits.isNotEmpty()
-
     val showBookmark: Boolean
         get() = !isLoading && playingBookmarkHearits.isNotEmpty()
 

@@ -174,7 +174,10 @@ class HomeViewModel(
                     }
 
                     when (throwable) {
-                        is UserNotRegistered -> Unit
+                        is UserNotRegistered -> {
+                            Unit
+                        }
+
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_user_info_load_fail

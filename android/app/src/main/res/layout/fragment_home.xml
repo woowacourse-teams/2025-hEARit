@@ -58,21 +58,7 @@
 
                     <include layout="@layout/item_home_skeleton" />
                 </com.facebook.shimmer.ShimmerFrameLayout>
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/iv_profile"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:contentDescription="@null"
-                    android:scaleType="centerCrop"
-                    app:imageUrl="@{userInfo.profileImage}"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage"
-                    tools:src="@drawable/img_default_profile" />
-
+                
                 <TextView
                     android:id="@+id/tv_home_recommend"
                     style="@style/pretendard_main_title"
@@ -83,16 +69,6 @@
                     android:textColor="@color/hearit_gray4"
                     app:layout_constraintStart_toStartOf="@id/tv_home_description"
                     app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
-            <TextView
-                android:id="@+id/tv_home_recommend"
-                style="@style/pretendard_main_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/home_recommend_hearit_text"
-                android:textColor="@color/hearit_gray4"
-                app:layout_constraintStart_toStartOf="@id/tv_home_description"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_home_recommend"
