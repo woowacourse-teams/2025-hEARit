@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.serialization)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
     id("kotlin-kapt")
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
@@ -204,7 +205,7 @@ dependencies {
 
     // room
     implementation(libs.androidx.room.runtime)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     // coil
     implementation(libs.coil)
