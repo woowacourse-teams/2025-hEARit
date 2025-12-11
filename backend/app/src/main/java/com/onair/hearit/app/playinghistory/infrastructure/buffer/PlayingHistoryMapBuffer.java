@@ -6,16 +6,19 @@ import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import jakarta.annotation.PreDestroy;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
@@ -61,6 +64,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
             playingHistoryCommandRepository.bulkInsert(histories);
         } catch (Exception e) {
             rollbackSnapshot(snapshot);
+            log.error("재생 기록 flush 실패, 롤백 수행. snapshot size: {}", snapshot.size(), e);
         }
     }
 
@@ -121,6 +125,6 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
     }
 
     public Map<PlayKey, PlayValue> getCache() {
-        return cache;
+        return Collections.unmodifiableMap(cache);
     }
 }
