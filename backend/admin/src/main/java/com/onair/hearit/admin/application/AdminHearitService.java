@@ -1,20 +1,15 @@
 package com.onair.hearit.admin.application;
 
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
-import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest.SourceUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitMetaDataRequest;
 import com.onair.hearit.admin.dto.request.HearitMetaDataRequest.SourceCreateRequest;
-import com.onair.hearit.admin.dto.request.PresignedUrlRequest;
 import com.onair.hearit.admin.dto.response.AdminHearitResponse;
 import com.onair.hearit.admin.dto.response.AdminHearitResponse.KeywordInHearit;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
-import com.onair.hearit.admin.dto.response.FilesPresignedUrlResponse;
-import com.onair.hearit.admin.dto.response.PresignedUrlResponse;
 import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
-import com.onair.hearit.admin.infrastructure.s3.PresignedUrlService;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.FileType;
 import com.onair.hearit.core.domain.Hearit;
@@ -25,7 +20,6 @@ import com.onair.hearit.core.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.KeywordRepository;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,14 +42,12 @@ public class AdminHearitService {
     private final KeywordRepository keywordRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final FileStorage fileStorage;
-    private final PresignedUrlService presignedUrlService;
 
     public AdminPagedResponse<AdminHearitResponse> getHearits(AdminPagingRequest pagingRequest) {
         Pageable pageable = getHearitOrderByIdDesc(pagingRequest);
         Page<Hearit> hearits = hearitRepository.findAll(pageable);
         List<Long> hearitIds = extractHearitIds(hearits);
         List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
-
         Map<Long, List<KeywordInHearit>> keywordMap = mapKeywordsByHearitId(hearitKeywords);
         Page<AdminHearitResponse> hearitDtos = hearits.map(
                 hearit -> AdminHearitResponse.from(hearit, keywordMap.getOrDefault(hearit.getId(), List.of())));
@@ -78,21 +70,6 @@ public class AdminHearitService {
                 Collectors.groupingBy(hk -> hk.getHearit().getId(),
                         Collectors.mapping(hk -> new KeywordInHearit(hk.getKeyword().getName()),
                                 Collectors.toList())));
-    }
-
-    public FilesPresignedUrlResponse getFilesPresignedUrl(PresignedUrlRequest request) {
-        PresignedUrlResponse originalAudioPresignedUrl = createPutUrl(FileType.ORIGINAL,
-                request.originalAudioFileName());
-        PresignedUrlResponse shortAudiosPresignedUrl = createPutUrl(FileType.SHORT, request.shortAudioFileName());
-        PresignedUrlResponse scriptPresignedUrl = createPutUrl(FileType.SCRIPT, request.scriptFileName());
-        return new FilesPresignedUrlResponse(originalAudioPresignedUrl, shortAudiosPresignedUrl, scriptPresignedUrl);
-    }
-
-    private PresignedUrlResponse createPutUrl(FileType fileType, String fileName) {
-        fileType.validateFileName(fileName);
-        String key = fileType.generateKey(fileName);
-        URL presignedUrl = presignedUrlService.createPutUrl(key);
-        return new PresignedUrlResponse(key, presignedUrl);
     }
 
     @Transactional
@@ -170,14 +147,6 @@ public class AdminHearitService {
         return sources.stream()
                 .map(s -> new Source(s.sourceName(), s.sourceUrl()))
                 .toList();
-    }
-
-    @Transactional
-    public void modifyHearitFile(Long hearitId, HearitFileUpdateRequest request, FileType fileType) {
-        Hearit hearit = getHearitById(hearitId);
-        fileStorage.deleteFile(hearit.getFileUrl(fileType));
-        String uploadFilePath = fileStorage.uploadFile(request.file(), fileType);
-        hearit.updateFileUrl(uploadFilePath, fileType);
     }
 
     private Category getCategoryById(Long categoryId) {

@@ -32,11 +32,6 @@ public class S3Config {
     }
 
     @Bean
-    public FileStorage s3FileProvider(S3Client s3Client) {
-        return new FileStorage(s3Client, bucket);
-    }
-
-    @Bean
     public S3Presigner s3Presigner() {
         return S3Presigner.builder()
                 .credentialsProvider(() -> AwsBasicCredentials.create(accessKey, secretKey))
@@ -45,7 +40,7 @@ public class S3Config {
     }
 
     @Bean
-    public PresignedUrlService presignedUrlService(S3Presigner s3Presigner) {
-        return new PresignedUrlService(s3Presigner, bucket);
+    public FileStorage fileStorage(S3Client s3Client, S3Presigner s3Presigner) {
+        return new FileStorage(s3Client, s3Presigner, bucket);
     }
 }
