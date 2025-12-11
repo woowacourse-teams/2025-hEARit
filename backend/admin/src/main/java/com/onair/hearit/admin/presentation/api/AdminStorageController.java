@@ -2,8 +2,8 @@ package com.onair.hearit.admin.presentation.api;
 
 import com.onair.hearit.admin.application.AdminStorageService;
 import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
-import com.onair.hearit.admin.dto.request.PresignedUrlRequest;
-import com.onair.hearit.admin.dto.response.FilesPresignedUrlResponse;
+import com.onair.hearit.admin.dto.request.UploadUrlRequest;
+import com.onair.hearit.admin.dto.response.FilesUploadUrlResponse;
 import com.onair.hearit.core.domain.FileType;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +24,9 @@ public class AdminStorageController {
     private final AdminStorageService adminStorageService;
 
     @PostMapping("/storage/upload-urls")
-    public ResponseEntity<FilesPresignedUrlResponse> createPresignedUrl(
-            @RequestBody @Valid PresignedUrlRequest request) {
-        FilesPresignedUrlResponse response = adminStorageService.getFilesPresignedUrl(request);
+    public ResponseEntity<FilesUploadUrlResponse> createFilesUploadUrl(
+            @RequestBody @Valid UploadUrlRequest request) {
+        FilesUploadUrlResponse response = adminStorageService.getFilesUploadUrl(request);
         return ResponseEntity.ok(response);
     }
 

@@ -1,9 +1,9 @@
 package com.onair.hearit.admin.application;
 
 import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
-import com.onair.hearit.admin.dto.request.PresignedUrlRequest;
-import com.onair.hearit.admin.dto.response.FilesPresignedUrlResponse;
-import com.onair.hearit.admin.dto.response.PresignedUrlResponse;
+import com.onair.hearit.admin.dto.request.UploadUrlRequest;
+import com.onair.hearit.admin.dto.response.FilesUploadUrlResponse;
+import com.onair.hearit.admin.dto.response.UploadUrlResponse;
 import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import com.onair.hearit.core.domain.FileType;
@@ -21,19 +21,18 @@ public class AdminStorageService {
     private final HearitRepository hearitRepository;
     private final FileStorage fileStorage;
 
-    public FilesPresignedUrlResponse getFilesPresignedUrl(PresignedUrlRequest request) {
-        PresignedUrlResponse originalAudioPresignedUrl = createPutUrl(FileType.ORIGINAL,
-                request.originalAudioFileName());
-        PresignedUrlResponse shortAudiosPresignedUrl = createPutUrl(FileType.SHORT, request.shortAudioFileName());
-        PresignedUrlResponse scriptPresignedUrl = createPutUrl(FileType.SCRIPT, request.scriptFileName());
-        return new FilesPresignedUrlResponse(originalAudioPresignedUrl, shortAudiosPresignedUrl, scriptPresignedUrl);
+    public FilesUploadUrlResponse getFilesUploadUrl(UploadUrlRequest request) {
+        UploadUrlResponse originalAudioUploadUrl = getUploadUrl(FileType.ORIGINAL, request.originalAudioFileName());
+        UploadUrlResponse shortAudiosUploadUrl = getUploadUrl(FileType.SHORT, request.shortAudioFileName());
+        UploadUrlResponse scriptUploadUrl = getUploadUrl(FileType.SCRIPT, request.scriptFileName());
+        return new FilesUploadUrlResponse(originalAudioUploadUrl, shortAudiosUploadUrl, scriptUploadUrl);
     }
 
-    private PresignedUrlResponse createPutUrl(FileType fileType, String fileName) {
+    private UploadUrlResponse getUploadUrl(FileType fileType, String fileName) {
         fileType.validateFileName(fileName);
         String key = fileType.generateKey(fileName);
-        URL presignedUrl = fileStorage.createPutUrl(key);
-        return new PresignedUrlResponse(key, presignedUrl);
+        URL uploadUrl = fileStorage.createPutUrl(key);
+        return new UploadUrlResponse(key, uploadUrl);
     }
 
     @Transactional
