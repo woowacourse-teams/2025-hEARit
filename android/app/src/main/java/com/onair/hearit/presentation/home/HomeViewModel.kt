@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
+import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
@@ -12,14 +13,15 @@ import com.onair.hearit.domain.repository.RecommendationRepository
 import com.onair.hearit.domain.repository.UserRepository
 import com.onair.hearit.presentation.SingleLiveData
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import kotlin.coroutines.cancellation.CancellationException
 
 class HomeViewModel(
     private val bookmarkRepository: BookmarkRepository,
@@ -46,13 +48,20 @@ class HomeViewModel(
         viewModelScope.launch {
             _isRefreshing.value = true
             try {
-                coroutineScope {
+                // supervisorScope: 각 작업이 독립적으로 실행
+                // 하나가 실패해도 다른 작업은 계속 진행
+                supervisorScope {
                     launch { fetchRecommendHearits() }
                     launch { fetchPlayingHistory() }
                     launch { fetchRecentUpload() }
                     launch { fetchBookmarks() }
                     launch { fetchCategories() }
                 }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e(e, "데이터 새로고침 중 예상치 못한 오류 발생")
+                _toastMessage.value = R.string.home_toast_refresh_fail
             } finally {
                 _isRefreshing.value = false
             }
@@ -168,20 +177,14 @@ class HomeViewModel(
                 }.onFailure { throwable ->
                     _uiState.update {
                         when (throwable) {
-                            is UserNotRegistered -> it.copy(userInfo = null)
+                            is UserNotRegistered -> it.copy(userInfo = UserInfo.default())
                             else -> it // 일시적인 실패(네트워크, 서버 오류 등)에서는 이전 userInfo를 유지
                         }
                     }
 
-                    when (throwable) {
-                        is UserNotRegistered -> {
-                            Unit
-                        }
-
-                        else -> {
-                            Timber.w(throwable)
-                            _toastMessage.value = R.string.all_toast_user_info_load_fail
-                        }
+                    if (throwable !is UserNotRegistered) {
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.all_toast_user_info_load_fail
                     }
                 }
         }
@@ -194,6 +197,10 @@ class HomeViewModel(
         startLoading(jobKey)
         try {
             block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.e(e, "safeLoad에서 예상치 못한 오류 발생: $jobKey")
         } finally {
             withContext(NonCancellable) { finishLoading(jobKey) }
         }
