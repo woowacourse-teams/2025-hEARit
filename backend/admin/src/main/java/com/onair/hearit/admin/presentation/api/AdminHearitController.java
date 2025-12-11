@@ -36,7 +36,7 @@ public class AdminHearitController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createHearit(@RequestBody @Valid HearitMetaDataRequest request) {
+    public ResponseEntity<Void> createHearitMetadata(@RequestBody @Valid HearitMetaDataRequest request) {
         adminHearitService.addHearitMetaData(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
