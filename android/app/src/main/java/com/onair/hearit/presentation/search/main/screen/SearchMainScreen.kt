@@ -14,9 +14,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import com.onair.hearit.analytics.AnalyticsEventNames
-import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.main.component.CategoryGridList
 import com.onair.hearit.presentation.search.main.component.SearchMainTopBar
@@ -62,10 +59,6 @@ fun SearchMainScreen(
         CategoryGridList(
             categories = categories,
             onCategoryClick = { category ->
-                AnalyticsProvider.get().logEvent(
-                    AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
-                    mapOf(AnalyticsParamKeys.CATEGORY_NAME to category.name),
-                )
                 onCategoryClick(category.id, category.name, category.colorCode)
             },
             modifier = Modifier.padding(paddingValues),

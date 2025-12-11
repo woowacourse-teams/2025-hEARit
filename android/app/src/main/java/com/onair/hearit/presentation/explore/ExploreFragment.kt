@@ -21,10 +21,10 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_EXPLORE
 import com.onair.hearit.databinding.FragmentExploreBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.presentation.DetailResult
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
@@ -39,8 +39,11 @@ import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.showToast
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ExploreFragment :
     Fragment(),
     ShortsClickListener {
@@ -51,7 +54,10 @@ class ExploreFragment :
     private val isViewValid: Boolean
         get() = _binding != null
 
-    private val viewModel: ExploreViewModel by activityViewModels { ExploreViewModelFactory() }
+    private val viewModel: ExploreViewModel by activityViewModels()
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     private val playerManager by lazy {
         ExplorePlayerManager(
@@ -83,7 +89,7 @@ class ExploreFragment :
 
                 when (val detailResult = result.data.toDetailResult()) {
                     is DetailResult.Category, is DetailResult.Keyword ->
-                        detailResult.navigate(requireActivity() as MainActivity)
+                        detailResult.navigate(requireActivity() as MainActivity, analyticsLogger)
 
                     null -> Timber.w("Invalid detail result")
                 }
@@ -122,7 +128,7 @@ class ExploreFragment :
             player.playWhenReady = true
         }
 
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
                 FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_EXPLORE,
@@ -197,7 +203,7 @@ class ExploreFragment :
                         }
 
                         viewModel.maybeLoadMore(index, adapter.itemCount)
-                        AnalyticsProvider.get().logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
+                        analyticsLogger.logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
                     }
                 }
             },
@@ -353,7 +359,7 @@ class ExploreFragment :
     }
 
     private fun navigateToLogin() {
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.LOGIN_EVENT,
             mapOf(AnalyticsParamKeys.SOURCE_NAME to "explore_login"),
         )
@@ -371,7 +377,7 @@ class ExploreFragment :
         title: String,
     ) {
         val lastPosition = playerManager.getCurrentPosition()
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.EXPLORE_TO_DETAIL,
             mapOf(
                 AnalyticsParamKeys.ITEM_NAME to title,

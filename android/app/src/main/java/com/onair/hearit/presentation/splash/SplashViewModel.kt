@@ -7,18 +7,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
-import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.TokenInterceptorProvider
+import com.onair.hearit.analytics.AnalyticsLogger
+import com.onair.hearit.data.AuthHeaderProvider
 import com.onair.hearit.domain.exception.DomainException.NetworkConnection
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.presentation.SingleLiveData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class SplashViewModel(
+@HiltViewModel
+class SplashViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val analyticsLogger: AnalyticsLogger,
+    private val authHeaderProvider: AuthHeaderProvider,
 ) : ViewModel() {
     private val _checkToken: MutableLiveData<Boolean> = MutableLiveData()
     val checkToken: LiveData<Boolean> = _checkToken
@@ -54,7 +59,7 @@ class SplashViewModel(
                 if (!saved) {
                     Timber.w("accessToken 저장에 실패했습니다.")
                 }
-                TokenInterceptorProvider.setAccessToken(accessToken)
+                authHeaderProvider.updateAccessToken(accessToken)
                 _checkToken.value = true
             }.onFailure { throwable ->
                 handleAccessTokenError(throwable, refreshToken)
@@ -82,7 +87,7 @@ class SplashViewModel(
                 .reissue(refreshToken)
                 .onSuccess { newToken ->
                     _checkToken.value = true
-                    TokenInterceptorProvider.setAccessToken(newToken)
+                    authHeaderProvider.updateAccessToken(newToken)
                 }.onFailure { throwable ->
                     handleReissueError(throwable)
                 }
@@ -110,7 +115,7 @@ class SplashViewModel(
 
         if (id != null) {
             _navigateToMain.value = id
-            AnalyticsProvider.get().logEvent(AnalyticsEventNames.SHARE_EVENT)
+            analyticsLogger.logEvent(AnalyticsEventNames.SHARE_EVENT)
         } else if (uri != null) {
             _navigateToMain.value = null
         } else {

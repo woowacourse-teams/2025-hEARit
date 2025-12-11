@@ -3,7 +3,8 @@ package com.onair.hearit.service
 import androidx.annotation.OptIn
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import com.onair.hearit.di.RepositoryProvider
+import com.onair.hearit.domain.repository.PlayingHistoryRepository
+import com.onair.hearit.domain.repository.RecentHearitRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,6 +17,8 @@ class PlaybackStateSaver(
     private val player: Player,
     private val serviceScope: CoroutineScope,
     private var service: PlaybackService?,
+    private val recentHearitRepository: RecentHearitRepository,
+    private val playingHistoryRepository: PlayingHistoryRepository,
 ) {
     private var saveJob: Job? = null
 
@@ -38,9 +41,9 @@ class PlaybackStateSaver(
         // IO에서 저장 (완료까지 대기)
         withContext(Dispatchers.IO) {
             runCatching {
-                RepositoryProvider.recentHearitRepository.updateRecentHearitPosition(id, lastPos)
+                recentHearitRepository.updateRecentHearitPosition(id, lastPos)
                 if (lastPos >= 1_000L) {
-                    RepositoryProvider.playingHistoryRepository.addPlayingHistory(id, lastPos)
+                    playingHistoryRepository.addPlayingHistory(id, lastPos)
                 }
             }
         }
@@ -140,7 +143,7 @@ class PlaybackStateSaver(
             }
             mediaId?.let { id ->
                 runCatching {
-                    RepositoryProvider.recentHearitRepository.updateRecentHearitPosition(
+                    recentHearitRepository.updateRecentHearitPosition(
                         id,
                         lastPosition,
                     )
@@ -155,7 +158,7 @@ class PlaybackStateSaver(
     ) {
         serviceScope.launch(Dispatchers.IO) {
             runCatching {
-                RepositoryProvider.playingHistoryRepository.addPlayingHistory(
+                playingHistoryRepository.addPlayingHistory(
                     hearitId,
                     lastPlayTime,
                 )

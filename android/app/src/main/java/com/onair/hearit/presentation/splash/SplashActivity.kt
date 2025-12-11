@@ -25,14 +25,16 @@ import com.onair.hearit.databinding.ActivitySplashBinding
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("CustomSplashScreen")
+@AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
     private lateinit var updateResultLauncher: ActivityResultLauncher<IntentSenderRequest>
-    private val viewModel: SplashViewModel by viewModels { SplashViewModelFactory() }
+    private val viewModel: SplashViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

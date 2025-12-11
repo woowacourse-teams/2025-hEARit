@@ -9,8 +9,9 @@ import com.onair.hearit.data.dto.KakaoLoginRequest
 import com.onair.hearit.data.dto.KakaoLoginResponse
 import com.onair.hearit.data.dto.TokenReissueRequest
 import com.onair.hearit.data.dto.TokenReissueResponse
+import javax.inject.Inject
 
-class AuthRemoteDataSourceImpl(
+class AuthRemoteDataSourceImpl @Inject constructor(
     private val authService: AuthService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : AuthRemoteDataSource {

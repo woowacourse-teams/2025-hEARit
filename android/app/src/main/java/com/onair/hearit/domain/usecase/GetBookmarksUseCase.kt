@@ -7,8 +7,9 @@ import com.onair.hearit.domain.repository.MediaFileRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import javax.inject.Inject
 
-class GetBookmarksUseCase(
+class GetBookmarksUseCase @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val mediaFileRepository: MediaFileRepository,
 ) {
