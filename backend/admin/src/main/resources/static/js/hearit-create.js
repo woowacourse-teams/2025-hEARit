@@ -565,7 +565,7 @@ class FormSubmitHandler {
             scriptFileName: script?.name
         });
 
-        const presignedUrlResponse = await fetch('/api/v1/admin/hearits/presigned-url', {
+        const presignedUrlResponse = await fetch('/api/v1/admin/storage/upload-urls', {
             method: 'POST',
             headers: {...headers, 'Content-Type': 'application/json'},
             body: presignedRequestBody
