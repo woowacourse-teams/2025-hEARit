@@ -40,7 +40,7 @@ class AdminHearitControllerTest extends IntegrationTest {
     @DisplayName("히어릿 목록을 페이징 조회할 수 있다")
     void getPagedHearits() {
         // given
-        insertTestHearits(20); // 테스트용 더미 hearit 20개 삽입
+        insertTestHearits(); // 테스트용 더미 hearit 20개 삽입
         CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
 
         // when & then
@@ -167,11 +167,11 @@ class AdminHearitControllerTest extends IntegrationTest {
         });
     }
 
-    private void insertTestHearits(int count) {
+    private void insertTestHearits() {
         Category category = TestFixture.createFixedCategory();
         dbHelper.insertCategory(category);
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < 20; i++) {
             Hearit hearit = new Hearit("title" + i,
                     "summary" + i,
                     100,
