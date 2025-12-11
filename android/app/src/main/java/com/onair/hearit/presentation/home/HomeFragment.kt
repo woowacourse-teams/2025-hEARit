@@ -187,7 +187,7 @@ class HomeFragment :
             )
 
             setOnRefreshListener {
-                viewModel.refresh()
+                viewModel.refreshData()
             }
         }
     }

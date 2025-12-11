@@ -43,13 +43,9 @@ class HomeViewModel(
         fetchData()
     }
 
-    fun refresh() {
-        _isRefreshing.value = true
-        fetchData()
-    }
-
-    private fun fetchData() {
+    fun refreshData() {
         viewModelScope.launch {
+            _isRefreshing.value = true
             try {
                 coroutineScope {
                     launch { fetchRecommendHearits() }
@@ -62,6 +58,14 @@ class HomeViewModel(
                 _isRefreshing.value = false
             }
         }
+    }
+
+    private fun fetchData() {
+        fetchRecommendHearits()
+        fetchPlayingHistory()
+        fetchRecentUpload()
+        fetchBookmarks()
+        fetchCategories()
     }
 
     private fun startLoading(jobKey: HomeLoadKey) {
