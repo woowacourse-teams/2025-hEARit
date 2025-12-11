@@ -9,13 +9,20 @@
  
 **개발자를 위한 오디오 학습 플랫폼**, 히어릿(hEARit)이 여러분의 귀를 채워드립니다.
 
-<p align="left">
+<div style="display: flex;">
   <a href="https://play.google.com/store/apps/details?id=com.onair.hearit&hl=ko">
-  <img alt="Get it on Google Play"
-       src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-       height="60"/>
+   <img 
+      src="https://github.com/user-attachments/assets/e478564c-1f03-4c8c-9fbc-3fddf67e6b31"
+      alt="Get it on Google Play"
+      style="height: 75px; display: block;"/>
+  </a><a href="https://apps.apple.com/kr/app/%ED%9E%88%EC%96%B4%EB%A6%BF-hearit-%EC%BD%94%EB%94%A9-%EA%B3%B5%EB%B6%80%EB%A5%BC-%EC%9C%84%ED%95%9C-it-%ED%8C%9F%EC%BA%90%EC%8A%A4%ED%8A%B8/id6756041112">
+    <img
+      src="https://github.com/user-attachments/assets/293cbdef-eef2-4072-b990-c5e25619ae30"
+      alt="Download on the App Store"
+      style="height: 75px; display: block;"
+    />
   </a>
-</p>
+</div>
 
 ## 서비스 소개
 
