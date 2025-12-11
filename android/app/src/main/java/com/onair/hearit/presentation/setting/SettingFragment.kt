@@ -11,19 +11,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.compose.rememberNavController
-import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
     private val viewModel: SettingViewModel by viewModels()
-
-    @Inject
-    lateinit var analyticsLogger: AnalyticsLogger
 
     override fun onCreateView(
         inflater: LayoutInflater,
