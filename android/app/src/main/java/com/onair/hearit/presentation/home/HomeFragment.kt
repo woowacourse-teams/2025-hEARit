@@ -22,12 +22,12 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys.CATEGORY_NAME
 import com.onair.hearit.analytics.AnalyticsParamKeys.ITEM_ID
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_HOME
 import com.onair.hearit.analytics.HearitSource
 import com.onair.hearit.databinding.FragmentHomeBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.PlayingHistoryHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
@@ -48,15 +48,18 @@ import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class HomeFragment :
     Fragment(),
     HearitClickListener {
     @Suppress("ktlint:standard:backing-property-naming")
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomeViewModel by viewModels { HomeViewModelFactory() }
+    private val viewModel: HomeViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val playingHistoryAdapter: PlayingHistoryHearitAdapter by lazy {
@@ -81,6 +84,10 @@ class HomeFragment :
             navigateClickListener = ::navigateToSearch,
         )
     }
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
+
     private val snapHelper = PagerSnapHelper()
     private var centerScrollListener: CenterScrollListener? = null
 
@@ -106,7 +113,7 @@ class HomeFragment :
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
                 FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_HOME,
@@ -125,12 +132,12 @@ class HomeFragment :
 
     private fun setupListeners() {
         binding.tvHomePlayingBookmarkTitle.setOnClickListener {
-            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
+            analyticsLogger.logEvent(AnalyticsEventNames.HOME_BOOKMARK_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_library)
         }
 
         binding.tvHomeShortcast.setOnClickListener {
-            AnalyticsProvider.get().logEvent(AnalyticsEventNames.HOME_EXPLORE_SELECTED)
+            analyticsLogger.logEvent(AnalyticsEventNames.HOME_EXPLORE_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_explore)
         }
     }
@@ -324,7 +331,7 @@ class HomeFragment :
         name: String,
         colorCode: String,
     ) {
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_SELECTED,
             mapOf(ITEM_ID to id.toString(), CATEGORY_NAME to name),
         )
@@ -363,7 +370,7 @@ class HomeFragment :
                 HearitSource.RECOMMENDATION_CATEGORY -> AnalyticsEventNames.HOME_RECOMMENDATION_CATEGORY_HEARIT_SELECTED
                 HearitSource.SEARCH_KEYWORD -> AnalyticsEventNames.SEARCH_KEYWORD_SELECTED
             }
-        AnalyticsProvider.get().logEvent(event, mapOf(ITEM_ID to hearitId.toString()))
+        analyticsLogger.logEvent(event, mapOf(ITEM_ID to hearitId.toString()))
     }
 
     override fun onClick(

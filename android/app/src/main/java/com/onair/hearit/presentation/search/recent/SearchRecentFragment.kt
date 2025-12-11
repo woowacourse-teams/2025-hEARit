@@ -21,14 +21,15 @@ import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.term
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchAdapter
 import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchClickListener
 import com.onair.hearit.presentation.search.recent.recentSearch.RecentSearchPageFragment
 import com.onair.hearit.presentation.search.recent.searchResult.SearchResultPageFragment
 import com.onair.hearit.presentation.showToast
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class SearchRecentFragment :
     Fragment(),
     RecentSearchClickListener {
@@ -38,9 +39,7 @@ class SearchRecentFragment :
 
     private val recentSearchAdapter: RecentSearchAdapter by lazy { RecentSearchAdapter(this) }
 
-    private val viewModel: SearchViewModel by viewModels({ requireActivity() }) {
-        SearchViewModelFactory(null)
-    }
+    private val viewModel: SearchViewModel by viewModels()
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private var lastSearchTerm: String? = null
     private val initialKeyword: String?
@@ -70,14 +69,17 @@ class SearchRecentFragment :
             binding.etSearch.setText(term)
             binding.etSearch.setSelection(term.length)
             viewLifecycleOwner.lifecycleScope.launch {
-                navigateToSearchResult(SearchInput.Keyword(term))
+                val input: SearchInput = SearchInput.Keyword(term)
+                viewModel.setSearchInput(input)
+                navigateToSearchResult()
             }
         }
     }
 
     fun showSearchResultPage(input: SearchInput) {
         updateSearchInput(input.term())
-        showSearchResultFragment(input)
+        viewModel.setSearchInput(input)
+        navigateToSearchResult()
         viewModel.saveRecentKeyword(input.term())
         hideKeyboard()
     }
@@ -147,8 +149,10 @@ class SearchRecentFragment :
         if (searchTerm == lastSearchTerm) return
 
         lastSearchTerm = searchTerm
+        val input: SearchInput = SearchInput.Keyword(searchTerm)
+        viewModel.setSearchInput(input)
         viewModel.saveRecentKeyword(searchTerm)
-        navigateToSearchResult(SearchInput.Keyword(searchTerm))
+        navigateToSearchResult()
         hideKeyboard()
     }
 
@@ -167,15 +171,6 @@ class SearchRecentFragment :
         }
     }
 
-    private fun showSearchResultFragment(input: SearchInput) {
-        childFragmentManager
-            .beginTransaction()
-            .replace(
-                R.id.fragment_search_container_view,
-                SearchResultPageFragment.newInstance(input),
-            ).commit()
-    }
-
     private fun navigateToRecent() {
         childFragmentManager
             .beginTransaction()
@@ -185,12 +180,12 @@ class SearchRecentFragment :
             ).commit()
     }
 
-    private fun navigateToSearchResult(input: SearchInput) {
+    private fun navigateToSearchResult() {
         childFragmentManager
             .beginTransaction()
             .replace(
                 R.id.fragment_search_container_view,
-                SearchResultPageFragment.newInstance(input),
+                SearchResultPageFragment(),
             ).commit()
     }
 
@@ -208,7 +203,9 @@ class SearchRecentFragment :
     }
 
     override fun onRecentSearchClick(term: String) {
-        navigateToSearchResult(SearchInput.Keyword(term))
+        val input: SearchInput = SearchInput.Keyword(term)
+        viewModel.setSearchInput(input)
+        navigateToSearchResult()
     }
 
     override fun onDestroyView() {

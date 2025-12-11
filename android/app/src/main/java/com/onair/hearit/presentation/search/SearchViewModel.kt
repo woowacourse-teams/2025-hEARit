@@ -16,16 +16,18 @@ import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.search.main.SearchUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class SearchViewModel(
+@HiltViewModel
+class SearchViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val hearitRepository: HearitRepository,
     private val recentKeywordRepository: RecentKeywordRepository,
-    initialInput: SearchInput?,
 ) : ViewModel() {
     private val _searchUiState = MutableLiveData<SearchUiState>()
     val searchUiState: LiveData<SearchUiState> = _searchUiState
@@ -45,21 +47,33 @@ class SearchViewModel(
     private val _toastMessage = SingleLiveData<Int?>()
     val toastMessage: LiveData<Int?> = _toastMessage
 
-    private val currentInput = initialInput
+    private var currentInput: SearchInput? = null
 
-    val currentCategory: Category? =
-        (currentInput as? SearchInput.Category)?.let {
-            Category(
-                id = it.id,
-                name = it.name,
-                colorCode = it.colorCode,
-            )
-        }
+    val currentCategory: Category?
+        get() =
+            (currentInput as? SearchInput.Category)?.let {
+                Category(
+                    id = it.id,
+                    name = it.name,
+                    colorCode = it.colorCode,
+                )
+            }
 
     private var paging: Paging? = null
     private var currentPage = 0
     private var isLastPage = false
     private var isLoading = false
+
+    fun setSearchInput(input: SearchInput) {
+        if (currentInput == input) return
+
+        currentInput = input
+        resetPaging()
+        _searchedHearits.value = emptyList()
+        _categoryHearits.value = emptyList()
+
+        fetchResultData(isInitial = true)
+    }
 
     fun refreshSearchResults() {
         resetPaging()

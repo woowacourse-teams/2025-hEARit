@@ -7,10 +7,12 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import com.onair.hearit.data.exploreDataStore
 import com.onair.hearit.domain.repository.ExploreDataStoreRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
-class ExploreDataStoreRepositoryImpl(
-    context: Context,
+class ExploreDataStoreRepositoryImpl @Inject constructor(
+    @ApplicationContext context: Context,
 ) : ExploreDataStoreRepository {
     private val exploreDataStore: DataStore<Preferences> = context.exploreDataStore
 
