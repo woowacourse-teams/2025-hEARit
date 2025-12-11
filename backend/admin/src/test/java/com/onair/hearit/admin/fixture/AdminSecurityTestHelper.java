@@ -1,7 +1,6 @@
-package com.onair.hearit.admin.presentation;
+package com.onair.hearit.admin.fixture;
 
 import com.onair.hearit.admin.domain.Admin;
-import com.onair.hearit.admin.fixture.DbHelper;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.jsoup.Jsoup;

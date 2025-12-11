@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.presentation;
+package com.onair.hearit.admin.presentation.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -10,9 +10,10 @@ import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest.SourceUpdateRequest;
 import com.onair.hearit.admin.dto.response.AdminHearitResponse;
 import com.onair.hearit.admin.dto.response.AdminPagedResponse;
+import com.onair.hearit.admin.fixture.AdminSecurityTestHelper;
+import com.onair.hearit.admin.fixture.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.admin.fixture.IntegrationTest;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
-import com.onair.hearit.admin.presentation.AdminSecurityTestHelper.CsrfSession;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.FileType;
 import com.onair.hearit.core.domain.Hearit;
@@ -59,7 +60,7 @@ class AdminHearitControllerTest extends IntegrationTest {
                         });
 
         assertAll(
-                () -> assertThat(response.page()).isEqualTo(0),
+                () -> assertThat(response.page()).isZero(),
                 () -> assertThat(response.size()).isEqualTo(10),
                 () -> assertThat(response.totalElements()).isEqualTo(20)
         );
