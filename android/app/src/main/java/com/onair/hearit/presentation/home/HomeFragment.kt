@@ -201,10 +201,10 @@ class HomeFragment :
                         updateUI(state)
                     }
                 }
-
-                viewModel.toastMessage.observe(viewLifecycleOwner, ::showToast)
             }
         }
+
+        viewModel.toastMessage.observe(viewLifecycleOwner, ::showToast)
     }
 
     private fun updateUI(state: HomeUiState) {
