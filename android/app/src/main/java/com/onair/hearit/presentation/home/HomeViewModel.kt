@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
+import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
@@ -150,17 +151,14 @@ class HomeViewModel @Inject constructor(
                 }.onFailure { throwable ->
                     _uiState.update {
                         when (throwable) {
-                            is UserNotRegistered -> it.copy(userInfo = null)
+                            is UserNotRegistered -> it.copy(userInfo = UserInfo.default())
                             else -> it // 일시적인 실패(네트워크, 서버 오류 등)에서는 이전 userInfo를 유지
                         }
                     }
 
-                    when (throwable) {
-                        is UserNotRegistered -> Unit
-                        else -> {
-                            Timber.w(throwable)
-                            _toastMessage.value = R.string.all_toast_user_info_load_fail
-                        }
+                    if (throwable !is UserNotRegistered) {
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.all_toast_user_info_load_fail
                     }
                 }
         }

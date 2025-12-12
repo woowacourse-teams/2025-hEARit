@@ -140,11 +140,6 @@ class HomeFragment :
             analyticsLogger.logEvent(AnalyticsEventNames.HOME_EXPLORE_SELECTED)
             (activity as MainActivity).selectTab(R.id.nav_explore)
         }
-
-        binding.tvHomeWootaeco.setOnClickListener {
-            analyticsLogger.logEvent(AnalyticsEventNames.HOME_WOOTAECO_SELECTED)
-            navigateToSearch(id = 13, name = "우아한테크코스", colorCode = "#12C6B0")
-        }
     }
 
     private fun setupRecyclerView() {
@@ -267,7 +262,6 @@ class HomeFragment :
 
     private fun updateAdSections(isLoading: Boolean) {
         binding.tvHomeShortcast.isVisible = !isLoading
-        binding.tvHomeWootaeco.isVisible = !isLoading
     }
 
     private fun setupIndicator(size: Int = 5) {
