@@ -9,7 +9,8 @@ import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
-import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryBuffer;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryMapBuffer;
 import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
@@ -45,7 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryBuffer.class,
+@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryMapBuffer.class,
         PlayingHistoryCommandRepository.class, PlayingHistoryService.class, UserInfoService.class})
 class PlayingHistoryServiceTest {
 
@@ -135,7 +136,7 @@ class PlayingHistoryServiceTest {
             Member member = dbHelper.insertMember(TestFixture.createFixedMember());
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
 
             // when
             playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
@@ -156,7 +157,7 @@ class PlayingHistoryServiceTest {
             // given
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
             String guestUuid = UUID.randomUUID().toString();
 
             // when
@@ -185,7 +186,7 @@ class PlayingHistoryServiceTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
             dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), hearit, 10_000));
-            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L, 200L);
 
             // when
             playingHistoryService.addPlayingHistory(TestFixture.createFixedMemberUserInfo(member), request);
@@ -210,7 +211,7 @@ class PlayingHistoryServiceTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
             dbHelper.insertPlayingHistory(new PlayingHistory(guestUserInfo.getGuestId(), hearit, 10_000));
-            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L, 200L);
 
             // when
             playingHistoryService.addPlayingHistory(guestUserInfo, request);
@@ -232,7 +233,7 @@ class PlayingHistoryServiceTest {
     void checkHearit() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        PlayingHistoryRequest request = new PlayingHistoryRequest(1L, 100L);
+        PlayingHistoryRequest request = new PlayingHistoryRequest(1L, 100L, 200L);
 
         // when
         assertThatThrownBy(

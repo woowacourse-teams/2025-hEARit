@@ -111,7 +111,7 @@ class PlayingHistoryControllerTest extends ControllerTest {
     @DisplayName("재생기록 생성/수정 V1 - 사용자 200 OK")
     void createPlayingHistoryWhenMemberV1_OK() throws Exception {
         // given
-        var request = new PlayingHistoryRequest(1L, 100L);
+        var request = new PlayingHistoryRequest(1L, 100L, 200L);
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
         willDoNothing().given(playingHistoryService).addPlayingHistory(any(), any());
@@ -129,7 +129,8 @@ class PlayingHistoryControllerTest extends ControllerTest {
                                 .description("사용자의 재생 기록을 생성하거나 업데이트합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
-                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
+                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)"),
+                                        fieldWithPath("clientEventTime").description("사용자가 재생을 발생시킨 시점(epoch millis)")
                                 )
                                 .build())
                 ));
@@ -139,7 +140,7 @@ class PlayingHistoryControllerTest extends ControllerTest {
     @DisplayName("재생기록 생성/수정 V1 - 게스트 200 OK")
     void createPlayingHistoryWhenGuestV1_OK() throws Exception {
         // given
-        var request = new PlayingHistoryRequest(1L, 100L);
+        var request = new PlayingHistoryRequest(1L, 100L, 200L);
 
         given(jwtTokenProvider.getTokenStatus(isNull())).willReturn(TokenStatus.NOT_EXIST);
         willDoNothing().given(playingHistoryService).addPlayingHistory(any(), any());
@@ -157,7 +158,8 @@ class PlayingHistoryControllerTest extends ControllerTest {
                                 .description("로그인하지 않은 사용자는 재생 기록을 생성하거나 업데이트합니다.")
                                 .requestFields(
                                         fieldWithPath("hearitId").description("히어릿 ID"),
-                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)")
+                                        fieldWithPath("lastPlayTime").description("마지막 재생 시간(ms)"),
+                                        fieldWithPath("clientEventTime").description("사용자가 재생을 발생시킨 시점(epoch millis)")
                                 )
                                 .build())
                 ));

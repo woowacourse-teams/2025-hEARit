@@ -7,7 +7,7 @@ import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.app.fixture.IntegrationTest;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
-import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryBuffer;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryBuffer;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
@@ -125,7 +125,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
 
             // when
             RestAssured.given(PlayingHistoryIntegrationTest.this.spec)
@@ -156,7 +156,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
 
             // when
             RestAssured.given(PlayingHistoryIntegrationTest.this.spec)
@@ -189,7 +189,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), hearit, 20_000));
 
-            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L);
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L, 200L);
 
             // when
             RestAssured.given(PlayingHistoryIntegrationTest.this.spec)
@@ -219,7 +219,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             dbHelper.insertPlayingHistory(new PlayingHistory(guestUuid, hearit, 20_000));
 
-            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L);
+            PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
 
             // when
             RestAssured.given(PlayingHistoryIntegrationTest.this.spec)
