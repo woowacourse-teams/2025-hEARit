@@ -38,7 +38,6 @@ public class AdminStorageService {
     @Transactional
     public void modifyHearitFile(Long hearitId, HearitFileUpdateRequest request, FileType fileType) {
         Hearit hearit = getHearitById(hearitId);
-        fileStorage.deleteFile(hearit.getFileUrl(fileType));
         String uploadFilePath = fileStorage.uploadFile(request.file(), fileType);
         hearit.updateFileUrl(uploadFilePath, fileType);
     }

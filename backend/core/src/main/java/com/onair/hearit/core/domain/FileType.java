@@ -52,7 +52,7 @@ public enum FileType {
 
     public void validateFileName(String fileName) {
         if (!fileName.startsWith(prefix) || !fileName.endsWith(extension)) {
-            throw new HearitDomainException("파일명은 '" + prefix + "로 시작하고, " + extension + "확장자여야합니다.");
+            throw new HearitDomainException("파일명은 '" + prefix + "로 시작하고, " + extension + " 확장자여야 합니다.");
         }
     }
 

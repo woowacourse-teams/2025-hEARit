@@ -153,7 +153,7 @@ class AdminStorageControllerTest extends IntegrationTest {
                         10, originalPath,
                         shortPath, scriptPath,
                         List.of(new Source("출처", "url")), category));
-        given(fileStorage.uploadFile(any(), eq(FileType.SCRIPT))).willReturn("/hearit/script/SCR_test.json");
+        given(fileStorage.uploadFile(any(), eq(FileType.SCRIPT))).willReturn(scriptPath);
 
         // when & then
         RestAssured.given().log().all()

@@ -665,7 +665,7 @@ class FormSubmitHandler {
 
         } catch (err) {
             updateProgressError("에러 발생");
-            await new Promise(r => setTimeout(r, 5000));
+            await new Promise(r => setTimeout(r, 1200));
             alert('추가 중 오류가 발생했습니다.' + err.message);
             hideProgress();
             showButtons();
