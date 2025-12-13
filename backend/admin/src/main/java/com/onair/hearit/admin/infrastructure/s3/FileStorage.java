@@ -70,7 +70,7 @@ public class FileStorage {
                     .key(validateKey)
                     .build()
             );
-        } catch (RuntimeException e) {
+        } catch (AdminInvalidInputException | S3Exception e) {
             throw new AdminFileException("S3 파일 삭제 실패, key: " + key);
         }
     }
