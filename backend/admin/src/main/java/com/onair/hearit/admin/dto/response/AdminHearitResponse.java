@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.dto.request;
+package com.onair.hearit.admin.dto.response;
 
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Source;
@@ -15,7 +15,7 @@ public record AdminHearitResponse(
         List<SourceInHearit> sources,
         Integer playTime,
         LocalDateTime createdAt,
-        com.onair.hearit.admin.dto.request.AdminCategoryResponse category,
+        AdminCategoryResponse category,
         List<KeywordInHearit> keywords
 ) {
     public static AdminHearitResponse from(Hearit hearit, List<KeywordInHearit> keywords) {
@@ -30,7 +30,7 @@ public record AdminHearitResponse(
                 sources,
                 hearit.getPlayTime(),
                 hearit.getCreatedAt(),
-                com.onair.hearit.admin.dto.request.AdminCategoryResponse.from(hearit.getCategory()),
+                AdminCategoryResponse.from(hearit.getCategory()),
                 keywords
         );
     }

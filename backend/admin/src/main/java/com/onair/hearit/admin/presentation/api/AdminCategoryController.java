@@ -1,11 +1,11 @@
 package com.onair.hearit.admin.presentation.api;
 
 import com.onair.hearit.admin.application.AdminCategoryService;
-import com.onair.hearit.admin.dto.request.AdminCategoryResponse;
-import com.onair.hearit.admin.dto.request.AdminPagedResponse;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminCategoryResponse;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

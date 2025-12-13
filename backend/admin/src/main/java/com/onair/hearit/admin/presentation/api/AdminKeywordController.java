@@ -1,11 +1,11 @@
 package com.onair.hearit.admin.presentation.api;
 
 import com.onair.hearit.admin.application.AdminKeywordService;
-import com.onair.hearit.admin.dto.request.AdminKeywordResponse;
-import com.onair.hearit.admin.dto.request.AdminPagedResponse;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.KeywordCreateRequest;
 import com.onair.hearit.admin.dto.request.KeywordUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminKeywordResponse;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

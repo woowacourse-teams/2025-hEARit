@@ -1,14 +1,13 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.dto.request.AdminHearitResponse;
-import com.onair.hearit.admin.dto.request.AdminHearitResponse.KeywordInHearit;
-import com.onair.hearit.admin.dto.request.AdminPagedResponse;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
-import com.onair.hearit.admin.dto.request.HearitCreateRequest;
-import com.onair.hearit.admin.dto.request.HearitCreateRequest.SourceCreateRequest;
-import com.onair.hearit.admin.dto.request.HearitFileUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest;
 import com.onair.hearit.admin.dto.request.HearitInfoUpdateRequest.SourceUpdateRequest;
+import com.onair.hearit.admin.dto.request.HearitMetaDataRequest;
+import com.onair.hearit.admin.dto.request.HearitMetaDataRequest.SourceCreateRequest;
+import com.onair.hearit.admin.dto.response.AdminHearitResponse;
+import com.onair.hearit.admin.dto.response.AdminHearitResponse.KeywordInHearit;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import com.onair.hearit.core.domain.Category;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +32,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminHearitService {
@@ -47,7 +48,6 @@ public class AdminHearitService {
         Page<Hearit> hearits = hearitRepository.findAll(pageable);
         List<Long> hearitIds = extractHearitIds(hearits);
         List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
-
         Map<Long, List<KeywordInHearit>> keywordMap = mapKeywordsByHearitId(hearitKeywords);
         Page<AdminHearitResponse> hearitDtos = hearits.map(
                 hearit -> AdminHearitResponse.from(hearit, keywordMap.getOrDefault(hearit.getId(), List.of())));
@@ -73,22 +73,39 @@ public class AdminHearitService {
     }
 
     @Transactional
-    public void addHearit(HearitCreateRequest request) {
-        Category category = getCategoryById(request.categoryId());
-        List<Source> sources = mapSourceCreateRequestToSource(request.sources());
-        String originalAudioUrl = FileType.ORIGINAL.getUploadPath() + request.originalAudio().getOriginalFilename();
-        String shortAudioUrl = FileType.SHORT.getUploadPath() + request.shortAudio().getOriginalFilename();
-        String scriptUrl = FileType.SCRIPT.getUploadPath() + request.scriptFile().getOriginalFilename();
+    public void addHearitMetaData(HearitMetaDataRequest request) {
+        try {
+            Category category = getCategoryById(request.categoryId());
+            List<Source> sources = mapSourceCreateRequestToSource(request.sources());
+            Hearit hearit = new Hearit(
+                    request.title(),
+                    request.summary(),
+                    request.playTime(),
+                    request.originalAudioKey(),
+                    request.shortAudioKey(),
+                    request.scriptFileKey(),
+                    sources,
+                    category);
 
-        Hearit hearit = new Hearit(request.title(), request.summary(), request.playTime(), originalAudioUrl,
-                shortAudioUrl, scriptUrl, sources, category);
+            Hearit savedHearit = hearitRepository.save(hearit);
+            saveHearitKeywords(request.keywordIds(), savedHearit);
 
-        fileStorage.uploadFile(request.originalAudio(), FileType.ORIGINAL);
-        fileStorage.uploadFile(request.shortAudio(), FileType.SHORT);
-        fileStorage.uploadFile(request.scriptFile(), FileType.SCRIPT);
+        } catch (RuntimeException e) {
+            deleteFile(FileType.ORIGINAL, request.originalAudioKey());
+            deleteFile(FileType.SHORT, request.shortAudioKey());
+            deleteFile(FileType.SCRIPT, request.scriptFileKey());
+            log.warn("히어릿 메타 데이터 저장 중 예외 발생, S3 파일을 삭제합니다. request: {}, cause: {}",
+                    request, e.getMessage(), e);
+            throw e;
+        }
+    }
 
-        Hearit savedHearit = hearitRepository.save(hearit);
-        saveHearitKeywords(request.keywordIds(), savedHearit);
+    private void deleteFile(FileType type, String key) {
+        try {
+            fileStorage.deleteFile(key);
+        } catch (Exception ex) {
+            log.warn("S3 정리 중 추가 예외 발생. type: {}, key: {}, cause: {}", type, key, ex.getMessage(), ex);
+        }
     }
 
     private List<Source> mapSourceCreateRequestToSource(List<SourceCreateRequest> sources) {
@@ -130,14 +147,6 @@ public class AdminHearitService {
         return sources.stream()
                 .map(s -> new Source(s.sourceName(), s.sourceUrl()))
                 .toList();
-    }
-
-    @Transactional
-    public void modifyHearitFile(Long hearitId, HearitFileUpdateRequest request, FileType fileType) {
-        Hearit hearit = getHearitById(hearitId);
-        fileStorage.deleteFile(hearit.getFileUrl(fileType));
-        String uploadFilePath = fileStorage.uploadFile(request.file(), fileType);
-        hearit.updateFileUrl(uploadFilePath, fileType);
     }
 
     private Category getCategoryById(Long categoryId) {

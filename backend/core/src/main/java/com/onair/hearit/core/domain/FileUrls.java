@@ -31,9 +31,9 @@ public class FileUrls {
     }
 
     private void validateAllFilePath(String originalAudioPath, String shortAudioPath, String scriptFilePath) {
-        FileType.ORIGINAL.validUrlName(originalAudioPath);
-        FileType.SHORT.validUrlName(shortAudioPath);
-        FileType.SCRIPT.validUrlName(scriptFilePath);
+        FileType.ORIGINAL.validateKey(originalAudioPath);
+        FileType.SHORT.validateKey(shortAudioPath);
+        FileType.SCRIPT.validateKey(scriptFilePath);
         validateSameUuid(List.of(originalAudioPath, shortAudioPath, scriptFilePath));
     }
 

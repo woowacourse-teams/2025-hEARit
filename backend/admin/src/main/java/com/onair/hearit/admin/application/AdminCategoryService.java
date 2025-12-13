@@ -1,10 +1,10 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.dto.request.AdminCategoryResponse;
-import com.onair.hearit.admin.dto.request.AdminPagedResponse;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
 import com.onair.hearit.admin.dto.request.CategoryCreateRequest;
 import com.onair.hearit.admin.dto.request.CategoryUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminCategoryResponse;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
 import com.onair.hearit.admin.exception.custom.AdminNotFoundException;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.infrastructure.jpa.CategoryRepository;

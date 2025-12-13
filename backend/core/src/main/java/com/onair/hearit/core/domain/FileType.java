@@ -50,12 +50,22 @@ public enum FileType {
 
     public abstract String getFileUrls(FileUrls urls);
 
-    public void validUrlName(String filename) {
-        if (!filename.startsWith(uploadPath)) {
+    public void validateFileName(String fileName) {
+        if (!fileName.startsWith(prefix) || !fileName.endsWith(extension)) {
+            throw new HearitDomainException("파일명은 '" + prefix + "로 시작하고, " + extension + " 확장자여야 합니다.");
+        }
+    }
+
+    public void validateKey(String key) {
+        if (!key.startsWith(uploadPath)) {
             throw new HearitDomainException(this.name() + "의 파일명은 '" + uploadPath + "'로 시작해야 합니다.");
         }
-        if (!filename.endsWith(extension)) {
+        if (!key.endsWith(extension)) {
             throw new HearitDomainException(this.name() + "의 파일 확장자는 '" + extension + "' 이어야 합니다.");
         }
+    }
+
+    public String generateKey(String fileName) {
+        return uploadPath + fileName;
     }
 }

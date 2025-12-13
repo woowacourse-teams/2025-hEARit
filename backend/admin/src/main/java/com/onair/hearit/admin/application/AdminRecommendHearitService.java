@@ -1,11 +1,11 @@
 package com.onair.hearit.admin.application;
 
-import com.onair.hearit.admin.dto.request.AdminPagedResponse;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
-import com.onair.hearit.admin.dto.request.AdminRecommendHearitResponse;
-import com.onair.hearit.admin.dto.request.MonthlyRecommendHearitResponse;
 import com.onair.hearit.admin.dto.request.RecommendHearitCreateRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
+import com.onair.hearit.admin.dto.response.AdminRecommendHearitResponse;
+import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
 import com.onair.hearit.admin.exception.custom.AdminInvalidInputException;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.RecommendHearit;
