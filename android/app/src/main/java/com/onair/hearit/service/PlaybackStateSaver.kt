@@ -21,12 +21,14 @@ class PlaybackStateSaver(
     private val playingHistoryRepository: PlayingHistoryRepository,
 ) {
     private var saveJob: Job? = null
+    private val eventTimeMs: Long
+        get() = System.currentTimeMillis()
 
     /** 지금 재생 중인 아이템을 ‘minRecordMs 이상’ 들었으면 히스토리 기록 */
     fun recordCurrent(minRecordMs: Long = 1_000L) {
         val currentId = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return
         val playedMs = player.currentPosition.coerceAtLeast(0L)
-        if (playedMs >= minRecordMs) recordHistory(currentId, playedMs)
+        if (playedMs >= minRecordMs) recordHistory(currentId, playedMs, eventTimeMs)
     }
 
     suspend fun flushNowBlocking() {
@@ -43,7 +45,7 @@ class PlaybackStateSaver(
             runCatching {
                 recentHearitRepository.updateRecentHearitPosition(id, lastPos)
                 if (lastPos >= 1_000L) {
-                    playingHistoryRepository.addPlayingHistory(id, lastPos)
+                    playingHistoryRepository.addPlayingHistory(id, lastPos, eventTimeMs)
                 }
             }
         }
@@ -84,7 +86,7 @@ class PlaybackStateSaver(
 
                 if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION) {
                     val playedMs = oldPosition.positionMs.coerceAtLeast(0L)
-                    recordHistory(oldId, playedMs)
+                    recordHistory(oldId, playedMs, eventTimeMs)
                     savePlaybackPosition()
                     return
                 }
@@ -93,7 +95,7 @@ class PlaybackStateSaver(
                     reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
                 ) {
                     val playedMs = oldPosition.positionMs.coerceAtLeast(0L)
-                    if (playedMs >= 1_000L) recordHistory(oldId, playedMs)
+                    if (playedMs >= 1_000L) recordHistory(oldId, playedMs, eventTimeMs)
                     savePlaybackPosition()
                 }
 
@@ -155,12 +157,14 @@ class PlaybackStateSaver(
     private fun recordHistory(
         hearitId: Long,
         lastPlayTime: Long,
+        clientEventTime: Long,
     ) {
         serviceScope.launch(Dispatchers.IO) {
             runCatching {
                 playingHistoryRepository.addPlayingHistory(
                     hearitId,
                     lastPlayTime,
+                    clientEventTime,
                 )
             }
         }
