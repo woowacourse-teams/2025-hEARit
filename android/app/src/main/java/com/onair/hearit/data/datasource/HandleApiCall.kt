@@ -2,20 +2,58 @@ package com.onair.hearit.data.datasource
 
 import retrofit2.HttpException
 import retrofit2.Response
+import kotlin.coroutines.cancellation.CancellationException
 
-suspend fun <T> handleApiCall(
+/**
+ * Response body가 있는 API 호출을 처리합니다.
+ * @param T Response body 타입 (Non-null)
+ */
+suspend fun <T : Any> handleApiCall(
     apiCall: suspend () -> Response<T>,
     errorHandler: ErrorResponseHandler,
 ): NetworkResult<T> =
-    try {
-        val response = apiCall()
-        if (response.isSuccessful) {
-            // body가 null이면 Unit으로 처리 (Response<Unit>인 경우 대응)
-            @Suppress("UNCHECKED_CAST")
-            NetworkResult.Success(response.body() ?: Unit as T)
-        } else {
-            errorHandler.getError(HttpException(response))
-        }
-    } catch (e: Exception) {
-        errorHandler.getError(e)
-    }
+    runCatching { apiCall() }
+        .fold(
+            onSuccess = { response ->
+                when {
+                    !response.isSuccessful -> {
+                        errorHandler.getError(HttpException(response))
+                    }
+
+                    response.body() != null -> {
+                        NetworkResult.Success(response.body()!!)
+                    }
+
+                    else -> {
+                        errorHandler.getError(
+                            IllegalStateException("response body가 null입니다"),
+                        )
+                    }
+                }
+            },
+            onFailure = { e ->
+                if (e is CancellationException) throw e
+                errorHandler.getError(e)
+            },
+        )
+
+/**
+ * Response body가 없는 API 호출을 처리합니다.
+ */
+suspend fun handleApiCallUnit(
+    apiCall: suspend () -> Response<Unit>,
+    errorHandler: ErrorResponseHandler,
+): NetworkResult<Unit> =
+    runCatching { apiCall() }
+        .fold(
+            onSuccess = { response ->
+                when {
+                    response.isSuccessful -> NetworkResult.Success(Unit)
+                    else -> errorHandler.getError(HttpException(response))
+                }
+            },
+            onFailure = { e ->
+                if (e is CancellationException) throw e
+                errorHandler.getError(e)
+            },
+        )

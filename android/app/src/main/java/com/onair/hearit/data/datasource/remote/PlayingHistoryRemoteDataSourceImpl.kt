@@ -4,6 +4,7 @@ import com.onair.hearit.data.api.PlayingHistoryService
 import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
+import com.onair.hearit.data.datasource.handleApiCallUnit
 import com.onair.hearit.data.dto.PlayingHistoryRequest
 import com.onair.hearit.data.dto.PlayingHistoryResponse
 import javax.inject.Inject
@@ -19,7 +20,7 @@ class PlayingHistoryRemoteDataSourceImpl @Inject constructor(
         )
 
     override suspend fun addPlayingHistory(playingHistoryRequest: PlayingHistoryRequest): NetworkResult<Unit> =
-        handleApiCall(
+        handleApiCallUnit(
             apiCall = { playingHistoryService.postPlayingHistory(playingHistoryRequest) },
             errorHandler = errorResponseHandler,
         )

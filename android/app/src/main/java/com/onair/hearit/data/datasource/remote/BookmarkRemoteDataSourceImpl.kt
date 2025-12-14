@@ -4,6 +4,7 @@ import com.onair.hearit.data.api.BookmarkService
 import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
+import com.onair.hearit.data.datasource.handleApiCallUnit
 import com.onair.hearit.data.dto.BookmarkIdResponse
 import com.onair.hearit.data.dto.BookmarkResponse
 import javax.inject.Inject
@@ -30,7 +31,7 @@ class BookmarkRemoteDataSourceImpl @Inject constructor(
         )
 
     override suspend fun deleteBookmark(bookmarkId: Long): NetworkResult<Unit> =
-        handleApiCall(
+        handleApiCallUnit(
             apiCall = { bookmarkService.deleteBookmark(bookmarkId) },
             errorHandler = errorResponseHandler,
         )
