@@ -6,8 +6,9 @@ import com.onair.hearit.data.toDomainResult
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.repository.CategoryRepository
+import javax.inject.Inject
 
-class CategoryRepositoryImpl(
+class CategoryRepositoryImpl @Inject constructor(
     private val categoryRemoteDataSource: CategoryRemoteDataSource,
 ) : CategoryRepository {
     override suspend fun getCategories(

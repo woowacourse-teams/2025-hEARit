@@ -14,7 +14,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
@@ -24,22 +26,26 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_LIBRARY
 import com.onair.hearit.databinding.FragmentLibraryBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
+import com.onair.hearit.presentation.setting.SettingFragment
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LibraryFragment :
     Fragment(),
     BookmarkClickListener {
@@ -48,8 +54,11 @@ class LibraryFragment :
     private val binding get() = _binding!!
 
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val viewModel: LibraryViewModel by viewModels { LibraryViewModelFactory() }
+    private val viewModel: LibraryViewModel by viewModels()
     private val bookmarkAdapter: BookmarkAdapter by lazy { BookmarkAdapter(this) }
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     private var mediaController: MediaController? = null
 
@@ -78,6 +87,7 @@ class LibraryFragment :
     ): View {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
+        binding.userInfo = viewModel.userInfo.value
         binding.rvBookmark.adapter = bookmarkAdapter
         binding.viewModel = viewModel
         return binding.root
@@ -90,9 +100,10 @@ class LibraryFragment :
         super.onViewCreated(view, savedInstanceState)
 
         setupWindowInsets()
-        observeViewModel()
+        setupListeners()
         setupInfiniteScroll()
         setupPlayAllButton()
+        observeViewModel()
     }
 
     override fun onStart() {
@@ -119,7 +130,7 @@ class LibraryFragment :
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
                 FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_LIBRARY,
@@ -136,7 +147,7 @@ class LibraryFragment :
         }
 
         binding.layoutLibraryWhenNoLogin.btnLibraryLogin.setOnClickListener {
-            AnalyticsProvider.get().logEvent(
+            analyticsLogger.logEvent(
                 AnalyticsEventNames.LOGIN_EVENT,
                 mapOf(AnalyticsParamKeys.SOURCE_NAME to "library_login"),
             )
@@ -144,6 +155,16 @@ class LibraryFragment :
             val intent = Intent(requireContext(), LoginActivity::class.java)
             startActivity(intent)
             requireActivity().finish()
+        }
+    }
+
+    private fun setupListeners() {
+        binding.ibSetting.setOnClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container_view, SettingFragment())
+                .addToBackStack(null)
+                .commit()
         }
     }
 
@@ -164,8 +185,12 @@ class LibraryFragment :
             binding.uiState = uiState
         }
 
-        viewModel.userInfo.observe(viewLifecycleOwner) { userInfo ->
-            binding.userInfo = userInfo
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userInfo.collect { userInfo ->
+                    binding.userInfo = userInfo
+                }
+            }
         }
     }
 
@@ -263,7 +288,7 @@ class LibraryFragment :
             }
         (activity as? MainActivity)?.launchDetailActivity(intent)
 
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.LIBRARY_TO_DETAIL,
             mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
         )

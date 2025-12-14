@@ -10,8 +10,9 @@ import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.SearchHearitsResponse
+import javax.inject.Inject
 
-class HearitRemoteDataSourceImpl(
+class HearitRemoteDataSourceImpl @Inject constructor(
     private val hearitService: HearitService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : HearitRemoteDataSource {

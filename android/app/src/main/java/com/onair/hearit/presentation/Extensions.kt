@@ -13,8 +13,8 @@ import androidx.fragment.app.FragmentManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -61,7 +61,10 @@ fun Intent?.toDetailResult(): DetailResult? {
     }
 }
 
-fun DetailResult.navigate(mainActivity: MainActivity) {
+fun DetailResult.navigate(
+    mainActivity: MainActivity,
+    analyticsLogger: AnalyticsLogger,
+) {
     when (this) {
         is DetailResult.Category -> {
             val fragmentManager = mainActivity.supportFragmentManager
@@ -85,7 +88,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                 ).addToBackStack(backStackTag)
                 .commit()
 
-            AnalyticsProvider.get().logEvent(
+            analyticsLogger.logEvent(
                 AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
                 mapOf(AnalyticsParamKeys.ITEM_NAME to name),
             )
@@ -106,7 +109,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                 ).addToBackStack(backStackTag)
                 .commit()
 
-            AnalyticsProvider.get().logEvent(
+            analyticsLogger.logEvent(
                 AnalyticsEventNames.SEARCH_KEYWORD_ENTERED,
                 mapOf(AnalyticsParamKeys.ITEM_NAME to term),
             )

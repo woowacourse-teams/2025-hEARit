@@ -8,11 +8,14 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.serialization)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
     id("kotlin-kapt")
+    id("kotlin-parcelize")
     id("com.google.gms.google-services")
     id("org.jlleitschuh.gradle.ktlint")
     id("com.google.firebase.crashlytics")
     id("com.google.android.gms.oss-licenses-plugin")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -23,9 +26,10 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 10304
-        versionName = "1.3.4"
+        versionCode = 10400
+        versionName = "1.4.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.onair.hearit.HearitTestRunner"
 
         manifestPlaceholders += mapOf()
         val kakaoNativeKey =
@@ -201,10 +205,11 @@ dependencies {
 
     // room
     implementation(libs.androidx.room.runtime)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     // coil
     implementation(libs.coil)
+    implementation(libs.coil.compose)
 
     // timber
     implementation(libs.timber)
@@ -217,4 +222,17 @@ dependencies {
 
     // open license
     implementation(libs.play.services.oss.licenses)
+
+    // compose navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.compose)
+
+    // hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+
+    // hilt test
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.hilt.android.compiler)
 }

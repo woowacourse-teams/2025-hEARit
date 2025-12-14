@@ -16,8 +16,9 @@ import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.HearitRepository
+import javax.inject.Inject
 
-class HearitRepositoryImpl(
+class HearitRepositoryImpl @Inject constructor(
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
     override suspend fun getHearit(hearitId: Long): Result<Hearit> =

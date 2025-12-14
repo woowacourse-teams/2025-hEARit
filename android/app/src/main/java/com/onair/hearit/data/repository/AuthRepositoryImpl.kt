@@ -8,8 +8,9 @@ import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.data.toDomainResult
 import com.onair.hearit.domain.model.LoginToken
 import com.onair.hearit.domain.repository.AuthRepository
+import javax.inject.Inject
 
-class AuthRepositoryImpl(
+class AuthRepositoryImpl @Inject constructor(
     private val authLocalDataSource: AuthLocalDataSource,
     private val authRemoteDataSource: AuthRemoteDataSource,
 ) : AuthRepository {

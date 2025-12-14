@@ -5,8 +5,9 @@ import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.CategoryResponse
+import javax.inject.Inject
 
-class CategoryRemoteDataSourceImpl(
+class CategoryRemoteDataSourceImpl @Inject constructor(
     private val categoryService: CategoryService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : CategoryRemoteDataSource {

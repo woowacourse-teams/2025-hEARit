@@ -2,6 +2,7 @@ package com.onair.hearit.presentation.detail
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
@@ -11,16 +12,23 @@ import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
+import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.SingleLiveData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class PlayerDetailViewModel(
-    private var hearitId: Long,
+@HiltViewModel
+class PlayerDetailViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val recentHearitRepository: RecentHearitRepository,
     private val getHearitUseCase: GetHearitUseCase,
     private val bookmarkRepository: BookmarkRepository,
 ) : ViewModel() {
+    private var hearitId: Long =
+        savedStateHandle.get<Long>(HEARIT_ID_KEY) ?: -1L
+
     private val _hearit: MutableLiveData<Hearit?> = MutableLiveData()
     val hearit: LiveData<Hearit?> = _hearit
 
@@ -34,7 +42,12 @@ class PlayerDetailViewModel(
     val showLoginDialog: LiveData<Unit> = _showLoginDialog
 
     init {
-        fetchData()
+        if (hearitId > INVALID_HEARIT_ID) {
+            fetchData()
+        } else {
+            Timber.w("PlayerDetailViewModel initialized with invalid hearitId: $hearitId")
+            _toastMessage.value = R.string.player_detail_toast_hearit_load_fail
+        }
     }
 
     fun toggleBookmark() {
@@ -113,5 +126,9 @@ class PlayerDetailViewModel(
                     _toastMessage.value = R.string.player_detail_toast_recent_save_fail
                 }
         }
+    }
+
+    companion object {
+        private const val INVALID_HEARIT_ID: Long = -1L
     }
 }

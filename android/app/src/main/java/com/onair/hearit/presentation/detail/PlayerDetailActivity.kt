@@ -40,11 +40,11 @@ import com.kakao.sdk.share.ShareClient
 import com.kakao.sdk.share.WebSharerClient
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.KEYWORD_NAME
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_DETAIL
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
@@ -65,11 +65,14 @@ import com.onair.hearit.service.PlaybackSessionCallback
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 import kotlin.math.abs
 
+@AndroidEntryPoint
 @OptIn(UnstableApi::class)
 class PlayerDetailActivity :
     AppCompatActivity(),
@@ -79,6 +82,9 @@ class PlayerDetailActivity :
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
     private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
 
     private var mediaController: MediaController? = null
 
@@ -95,10 +101,7 @@ class PlayerDetailActivity :
     private val currentHearitId: Long
         get() = viewModel.hearit.value?.id ?: hearitId
 
-    private val viewModel: PlayerDetailViewModel by viewModels {
-        PlayerDetailViewModelFactory(hearitId)
-    }
-
+    private val viewModel: PlayerDetailViewModel by viewModels()
     private val playerListener =
         object : Player.Listener {
             override fun onMediaItemTransition(
@@ -142,7 +145,7 @@ class PlayerDetailActivity :
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
                 FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_DETAIL,
@@ -226,7 +229,7 @@ class PlayerDetailActivity :
                             .setCustomAnimations(R.anim.slide_up, 0)
                             .replace(
                                 R.id.fragment_container_view,
-                                ScriptFragment.newInstance(currentHearitId),
+                                ScriptFragment.newInstance(),
                             ).addToBackStack(null)
                             .commit()
                         return true
@@ -442,7 +445,7 @@ class PlayerDetailActivity :
     }
 
     private fun navigateToLogin() {
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.LOGIN_EVENT,
             mapOf(AnalyticsParamKeys.SOURCE_NAME to "detail_login"),
         )
@@ -473,7 +476,7 @@ class PlayerDetailActivity :
                     Timber.e(error, getString(R.string.player_detail_invite_error_kakao))
                     showToast(getString(R.string.player_detail_invite_error_kakao))
                 } else if (sharingResult != null) {
-                    AnalyticsProvider.get().logEvent(
+                    analyticsLogger.logEvent(
                         AnalyticsEventNames.DETAIL_KAKAO_SHARE,
                         mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
                     )
@@ -488,7 +491,7 @@ class PlayerDetailActivity :
             // ex) Chrome, 삼성 인터넷, FireFox, 웨일 등
             try {
                 KakaoCustomTabsClient.openWithDefault(context, sharerUrl)
-                AnalyticsProvider.get().logEvent(
+                analyticsLogger.logEvent(
                     AnalyticsEventNames.DETAIL_KAKAO_SHARE,
                     mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
                 )
@@ -503,7 +506,7 @@ class PlayerDetailActivity :
             // ex) 다음, 네이버 등
             try {
                 KakaoCustomTabsClient.open(context, sharerUrl)
-                AnalyticsProvider.get().logEvent(
+                analyticsLogger.logEvent(
                     AnalyticsEventNames.DETAIL_KAKAO_SHARE,
                     mapOf(AnalyticsParamKeys.ITEM_ID to hearitId.toString()),
                 )
@@ -521,17 +524,10 @@ class PlayerDetailActivity :
         name: String,
         colorCode: String,
     ) {
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
             mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
         )
-//        val input = SearchInput.Category(id, name, colorCode)
-//        val resultIntent =
-//            Intent().apply {
-//                putExtras(input.toBundle())
-//            }
-//        setResult(RESULT_OK, resultIntent)
-//        finish()
     }
 
     override fun onClickSource(
@@ -546,7 +542,7 @@ class PlayerDetailActivity :
                 return
             }
 
-            AnalyticsProvider.get().logEvent(
+            analyticsLogger.logEvent(
                 AnalyticsEventNames.DETAIL_SOURCE_SELECTED,
                 mapOf(AnalyticsParamKeys.SOURCE_NAME to name),
             )
@@ -558,7 +554,7 @@ class PlayerDetailActivity :
     }
 
     override fun onClickKeyword(term: String) {
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             AnalyticsEventNames.DETAIL_KEYWORD_SELECTED,
             mapOf(KEYWORD_NAME to term),
         )

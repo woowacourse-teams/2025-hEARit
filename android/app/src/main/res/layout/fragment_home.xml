@@ -54,20 +54,6 @@
                 <include layout="@layout/item_home_skeleton" />
             </com.facebook.shimmer.ShimmerFrameLayout>
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/iv_profile"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="20dp"
-                android:contentDescription="@null"
-                android:scaleType="centerCrop"
-                app:imageUrl="@{userInfo.profileImage}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircleImage"
-                tools:src="@drawable/img_default_profile" />
-
             <TextView
                 android:id="@+id/tv_home_recommend"
                 style="@style/pretendard_main_title"
@@ -82,7 +68,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_home_recommend"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="320dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginTop="16dp"
                 android:orientation="horizontal"
@@ -208,6 +194,7 @@
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
                 android:text="@string/home_navigate_wootaeco_text"
+                android:visibility="gone"
                 app:drawableEndCompat="@drawable/ic_home_arrow"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

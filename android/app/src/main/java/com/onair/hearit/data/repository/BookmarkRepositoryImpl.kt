@@ -6,8 +6,9 @@ import com.onair.hearit.data.toDomainResult
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.repository.BookmarkRepository
+import javax.inject.Inject
 
-class BookmarkRepositoryImpl(
+class BookmarkRepositoryImpl @Inject constructor(
     private val bookmarkRemoteDataSource: BookmarkRemoteDataSource,
 ) : BookmarkRepository {
     override suspend fun getBookmarks(

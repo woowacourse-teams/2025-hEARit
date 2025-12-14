@@ -8,8 +8,9 @@ import com.onair.hearit.data.dto.OriginalAudioUrlResponse
 import com.onair.hearit.data.dto.ScriptUrlResponse
 import com.onair.hearit.data.dto.ShortAudioUrlResponse
 import okhttp3.ResponseBody
+import javax.inject.Inject
 
-class MediaFileRemoteDataSourceImpl(
+class MediaFileRemoteDataSourceImpl @Inject constructor(
     private val mediaFileService: MediaFileService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : MediaFileRemoteDataSource {

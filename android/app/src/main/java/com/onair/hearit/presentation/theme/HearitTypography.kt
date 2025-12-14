@@ -40,22 +40,22 @@ val HearitTypoGraphy =
         titleMedium =
             TextStyle(
                 fontFamily = PretendardFontFamily,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
-                lineHeight = 22.sp,
+                lineHeight = 24.sp,
             ),
         titleSmall =
             TextStyle(
                 fontFamily = PretendardFontFamily,
                 fontWeight = FontWeight.Medium,
-                fontSize = 15.sp,
+                fontSize = 14.sp,
                 lineHeight = 20.sp,
             ),
         // Body: 본문
         bodyLarge =
             TextStyle(
                 fontFamily = PretendardFontFamily,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
             ),
@@ -63,14 +63,14 @@ val HearitTypoGraphy =
             TextStyle(
                 // 이걸 Body로 사용
                 fontFamily = PretendardFontFamily,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
             ),
         bodySmall =
             TextStyle(
                 fontFamily = PretendardFontFamily,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.Medium,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
             ),
@@ -78,14 +78,14 @@ val HearitTypoGraphy =
         labelLarge =
             TextStyle(
                 fontFamily = PretendardFontFamily,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
             ),
         labelMedium =
             TextStyle(
                 fontFamily = PretendardFontFamily,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
             ),

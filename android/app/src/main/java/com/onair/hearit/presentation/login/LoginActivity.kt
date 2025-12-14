@@ -17,18 +17,27 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.onair.hearit.R
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_LOGIN
+import com.onair.hearit.analytics.CrashlyticsLogger
 import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.databinding.ActivityLoginBinding
-import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
 import com.onair.hearit.presentation.main.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
-    private val viewModel: LoginViewModel by viewModels { LoginViewModelFactory() }
+    private val viewModel: LoginViewModel by viewModels()
+
+    @Inject
+    lateinit var analyticsLogger: AnalyticsLogger
+
+    @Inject
+    lateinit var crashlyticsLogger: CrashlyticsLogger
 
     private lateinit var kakaoLoginHelper: KakaoLoginHelper
 
@@ -45,7 +54,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        AnalyticsProvider.get().logEvent(
+        analyticsLogger.logEvent(
             FirebaseAnalytics.Event.SCREEN_VIEW,
             mapOf(
                 FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_LOGIN,
@@ -125,8 +134,8 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setUserId(kakaoId: Long?) {
         val userId = kakaoId?.toString() ?: return
-        AnalyticsProvider.get().setUserId(userId)
-        CrashlyticsProvider.get().setUserId(userId)
+        analyticsLogger.setUserId(userId)
+        crashlyticsLogger.setUserId(userId)
     }
 
     companion object {

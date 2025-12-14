@@ -12,26 +12,40 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import com.onair.hearit.di.RepositoryProvider.recentHearitRepository
-import com.onair.hearit.di.UseCaseProvider.getBookmarksUseCase
-import com.onair.hearit.di.UseCaseProvider.getPlaybackInfoUseCase
+import com.onair.hearit.domain.repository.PlayingHistoryRepository
+import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.presentation.main.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import javax.inject.Inject
 
+@AndroidEntryPoint
 @OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
+    @Inject
+    lateinit var recentHearitRepository: RecentHearitRepository
+
+    @Inject
+    lateinit var playingHistoryRepository: PlayingHistoryRepository
+
+    @Inject
+    lateinit var mediaItemManager: PlaybackMediaItemManager
+
+    @Inject
+    lateinit var libraryPlaybackHandler: LibraryPlaybackHandler
+
+    @Inject
+    lateinit var recentPlaybackHandler: RecentPlaybackHandler
+
     private lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaSession
     private lateinit var stateSaver: PlaybackStateSaver
-    private lateinit var mediaItemManager: PlaybackMediaItemManager
     private lateinit var playbackPositionListener: PlaybackPositionListener
 
     private var notificationController: PlayerNotificationController? = null
-    private lateinit var libraryPlaybackHandler: LibraryPlaybackHandler
-    private lateinit var recentPlaybackHandler: RecentPlaybackHandler
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -40,13 +54,15 @@ class PlaybackService : MediaSessionService() {
 
         initializePlayer()
 
-        mediaItemManager = PlaybackMediaItemManager(getPlaybackInfoUseCase)
-        libraryPlaybackHandler = LibraryPlaybackHandler(getBookmarksUseCase, mediaItemManager)
-        recentPlaybackHandler =
-            RecentPlaybackHandler(recentHearitRepository, getPlaybackInfoUseCase, mediaItemManager)
-
         playbackPositionListener = PlaybackPositionListener(player)
-        stateSaver = PlaybackStateSaver(player, serviceScope, this)
+        stateSaver =
+            PlaybackStateSaver(
+                player,
+                serviceScope,
+                this,
+                recentHearitRepository,
+                playingHistoryRepository,
+            )
         player.addListener(stateSaver.listener)
 
         initializeMediaSession()

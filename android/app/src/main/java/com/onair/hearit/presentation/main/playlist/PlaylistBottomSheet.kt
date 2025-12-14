@@ -30,7 +30,9 @@ import com.onair.hearit.service.PlaybackSessionCallback
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_BOOKMARK_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_SEED_HEARIT_ID
 import com.onair.hearit.service.model.LibraryPlayParams.Companion.EXTRA_START_POSITION_MS
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class PlaylistBottomSheet :
     BottomSheetDialogFragment(),
     PlaylistClickListener {
@@ -38,7 +40,7 @@ class PlaylistBottomSheet :
     private var _binding: BottomSheetPlaylistBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: PlaylistViewModel by viewModels { PlaylistViewModelFactory() }
+    private val viewModel: PlaylistViewModel by viewModels()
     private val playlistAdapter: PlaylistAdapter by lazy { PlaylistAdapter(this) }
 
     private var mediaController: MediaController? = null

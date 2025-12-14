@@ -140,6 +140,8 @@ private class UserRepositoryWithoutMutex(
 ) : UserRepository {
     private var cachedUserInfo: UserInfo? = null
 
+    override fun getCachedUserInfo(): UserInfo? = null
+
     override suspend fun getUserInfo(): Result<UserInfo> =
         runCatching {
             cachedUserInfo?.let { return@runCatching it }

@@ -4,9 +4,12 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.onair.hearit.di.AuthPreferencesDataStore
 import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
-class AuthLocalDataSourceImpl(
+class AuthLocalDataSourceImpl @Inject constructor(
+    @AuthPreferencesDataStore
     private val dataStore: DataStore<Preferences>,
 ) : AuthLocalDataSource {
     override suspend fun getAccessToken(): Result<String> =

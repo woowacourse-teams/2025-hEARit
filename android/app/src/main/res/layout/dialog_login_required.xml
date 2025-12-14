@@ -29,7 +29,7 @@
             android:background="@drawable/bg_gray2_radius_8dp"
             android:clickable="true"
             android:gravity="center"
-            android:text="@string/all_dialog_cancel"
+            android:text="@string/all_cancel"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/tv_dialog_login_positive"
             app:layout_constraintStart_toStartOf="parent"

@@ -11,13 +11,16 @@ import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetExploreHearitUseCase
 import com.onair.hearit.presentation.SingleLiveData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class ExploreViewModel(
+@HiltViewModel
+class ExploreViewModel @Inject constructor(
     private val hearitRepository: HearitRepository,
     private val exploreDataStoreRepository: ExploreDataStoreRepository,
     private val getExploreHearitUseCase: GetExploreHearitUseCase,

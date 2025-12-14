@@ -3,22 +3,29 @@ package com.onair.hearit
 import android.app.Application
 import android.util.Log
 import com.kakao.sdk.common.KakaoSdk
-import com.onair.hearit.di.AnalyticsProvider
-import com.onair.hearit.di.CrashlyticsProvider
-import com.onair.hearit.di.DataSourceProvider
-import com.onair.hearit.di.DatabaseProvider
-import com.onair.hearit.di.RepositoryProvider
-import com.onair.hearit.di.TokenAuthenticatorProvider
-import com.onair.hearit.di.TokenInterceptorProvider
-import com.onair.hearit.di.UseCaseProvider
+import com.onair.hearit.analytics.CrashlyticsLogger
+import com.onair.hearit.data.AuthHeaderProvider
+import com.onair.hearit.domain.usecase.InitializeDeviceUuidUseCase
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
+@HiltAndroidApp
 class HearitApplication : Application() {
+    @Inject
+    lateinit var initializeDeviceUuidUseCase: InitializeDeviceUuidUseCase
+
+    @Inject
+    lateinit var authHeaderProvider: AuthHeaderProvider
+
+    @Inject
+    lateinit var crashlyticsLogger: CrashlyticsLogger
+
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
@@ -26,15 +33,8 @@ class HearitApplication : Application() {
 
         KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_KEY)
 
-        DatabaseProvider.init(this)
-        DataSourceProvider.init(this)
-        RepositoryProvider.init(this)
-
         initUuid()
         setAppVersion()
-
-        AnalyticsProvider.init(this)
-        TokenAuthenticatorProvider.init()
         initialTimber()
     }
 
@@ -45,10 +45,9 @@ class HearitApplication : Application() {
 
     private fun initUuid() {
         appScope.launch {
-            UseCaseProvider
-                .initializeDeviceUuidUseCase()
+            initializeDeviceUuidUseCase()
                 .onSuccess { uuid ->
-                    TokenInterceptorProvider.setDeviceUuid(uuid)
+                    authHeaderProvider.updateDeviceUuid(uuid)
                 }.onFailure { throwable ->
                     Timber.e(throwable, "Failed to initialize UUID")
                 }
@@ -63,7 +62,7 @@ class HearitApplication : Application() {
                 "unknown"
             }
 
-        TokenInterceptorProvider.setAppVersion(versionName)
+        authHeaderProvider.updateAppVersion(versionName)
     }
 
     private fun initialTimber() {
@@ -84,10 +83,12 @@ class HearitApplication : Application() {
     }
 
     private fun plantReleaseTimberTree() {
-        Timber.plant(ReleaseTree())
+        Timber.plant(ReleaseTree(crashlyticsLogger))
     }
 
-    class ReleaseTree : Timber.Tree() {
+    class ReleaseTree(
+        private val crashlyticsLogger: CrashlyticsLogger,
+    ) : Timber.Tree() {
         override fun log(
             priority: Int,
             tag: String?,
@@ -100,10 +101,10 @@ class HearitApplication : Application() {
 
             if (t != null) {
                 if (priority == Log.ERROR) {
-                    CrashlyticsProvider.get().recordException(t)
+                    crashlyticsLogger.recordException(t)
                 } else if (priority == Log.WARN) {
                     val warningMessage = t.message ?: ERROR_UNKNOWN_MESSAGE
-                    CrashlyticsProvider.get().recordException(
+                    crashlyticsLogger.recordException(
                         RuntimeException(warningMessage, t),
                     )
                 }

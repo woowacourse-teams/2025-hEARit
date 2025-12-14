@@ -3,17 +3,19 @@ package com.onair.hearit.data
 import com.onair.hearit.data.api.AuthService
 import com.onair.hearit.data.datasource.local.AuthLocalDataSource
 import com.onair.hearit.data.dto.TokenReissueRequest
-import com.onair.hearit.di.TokenInterceptorProvider
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
+import javax.inject.Inject
+import javax.inject.Named
 
-class TokenAuthenticator(
-    private val authLocalDataSourceProvider: () -> AuthLocalDataSource,
-    private val authServiceProvider: () -> AuthService,
+class TokenAuthenticator @Inject constructor(
+    private val authLocalDataSource: AuthLocalDataSource,
+    @Named("noAuth") private val authService: AuthService,
+    private val authHeaderProvider: AuthHeaderProvider,
 ) : Authenticator {
     private val json =
         Json {
@@ -38,7 +40,9 @@ class TokenAuthenticator(
                     refreshTokenAndRetry(response.request)
                 }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
         }
         return null
@@ -48,7 +52,7 @@ class TokenAuthenticator(
         try {
             val newToken = runBlocking { refreshToken() }
             if (newToken != null) {
-                TokenInterceptorProvider.setAccessToken(newToken)
+                authHeaderProvider.updateAccessToken(newToken)
                 originalRequest
                     .newBuilder()
                     .header("Authorization", "Bearer $newToken")
@@ -65,13 +69,11 @@ class TokenAuthenticator(
 
     private fun handleRefreshFailed() {
         // 리프레시 실패시 로그아웃 처리
-        TokenInterceptorProvider.setAccessToken(null)
+        authHeaderProvider.updateAccessToken(null)
         AuthEventManager.sendLogoutEvent()
     }
 
     private suspend fun refreshToken(): String? {
-        val authLocalDataSource = authLocalDataSourceProvider()
-        val authService = authServiceProvider()
         val refreshToken =
             authLocalDataSource.getRefreshToken().getOrNull() ?: return null
         return try {
