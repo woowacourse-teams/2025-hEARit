@@ -3,13 +3,16 @@ package com.onair.hearit.presentation.detail.script
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.domain.model.ScriptLine
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class ScriptViewModel : ViewModel() {
+@HiltViewModel
+class ScriptViewModel @Inject constructor() : ViewModel() {
     private val _highlightedId: MutableStateFlow<Long?> = MutableStateFlow(null)
     val highlightedId: StateFlow<Long?> = _highlightedId
 

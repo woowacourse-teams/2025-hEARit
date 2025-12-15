@@ -9,6 +9,8 @@ datastorePreferences = "1.1.7"
 firebaseBom = "33.16.0"
 flexbox = "3.0.0"
 fragmentTesting = "1.8.8"
+hiltAndroid = "2.57.2"
+hiltAndroidCompiler = "2.57.2"
 kotlin = "2.0.21"
 androidx-core = "1.16.0"
 junit = "4.13.2"
@@ -88,6 +90,11 @@ androidx-rules = { module = "androidx.test:rules", version.ref = "androidx-test"
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidx-test-ext" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
+# Hilt
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hiltAndroid" }
 
 # Network
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }

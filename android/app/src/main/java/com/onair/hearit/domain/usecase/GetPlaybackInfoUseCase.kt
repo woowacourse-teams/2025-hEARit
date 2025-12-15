@@ -5,8 +5,9 @@ import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.toPlaybackInfo
+import javax.inject.Inject
 
-class GetPlaybackInfoUseCase(
+class GetPlaybackInfoUseCase @Inject constructor(
     private val hearitRepository: HearitRepository,
     private val mediaFileRepository: MediaFileRepository,
     private val recentHearitRepository: RecentHearitRepository,
