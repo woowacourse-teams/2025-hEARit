@@ -45,6 +45,10 @@ class AuthRepositoryImpl @Inject constructor(
         authRemoteDataSource
             .refreshAccessToken(TokenReissueRequest(refreshToken))
             .mapOrThrowDomain { it.accessToken }
+            .onSuccess { newAccessToken ->
+                authLocalDataSource.saveAccessToken(newAccessToken)
+                authHeaderProvider.updateAccessToken(newAccessToken)
+            }
 
     override suspend fun withdraw(): Result<Unit> = authRemoteDataSource.withdraw().mapOrThrowDomain { }
 
