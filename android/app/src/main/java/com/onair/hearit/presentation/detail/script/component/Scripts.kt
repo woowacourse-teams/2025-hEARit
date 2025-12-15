@@ -10,6 +10,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import com.onair.hearit.domain.model.ScriptLine
+import com.onair.hearit.presentation.detail.component.rememberScriptScrollState
 
 @Composable
 fun Scripts(

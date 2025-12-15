@@ -41,6 +41,9 @@ class PlayerDetailViewModel @Inject constructor(
     private val _showLoginDialog = SingleLiveData<Unit>()
     val showLoginDialog: LiveData<Unit> = _showLoginDialog
 
+    private val _highlightedId: MutableLiveData<Long?> = MutableLiveData(null)
+    val highlightedId: LiveData<Long?> = _highlightedId
+
     init {
         if (hearitId > INVALID_HEARIT_ID) {
             fetchData()
@@ -64,6 +67,10 @@ class PlayerDetailViewModel @Inject constructor(
         _hearit.value = null
         hearitId = newHearitId
         fetchData()
+    }
+
+    fun setHighlightedId(scriptId: Long?) {
+        _highlightedId.value = scriptId
     }
 
     private fun deleteBookmark() {

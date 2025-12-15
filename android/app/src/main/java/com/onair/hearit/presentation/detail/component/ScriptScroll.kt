@@ -1,15 +1,17 @@
-package com.onair.hearit.presentation.detail.script.component
+package com.onair.hearit.presentation.detail.component
 
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import com.onair.hearit.domain.model.ScriptLine
@@ -18,7 +20,7 @@ import kotlinx.coroutines.flow.first
 import kotlin.math.abs
 
 @Stable
-class ScriptScrollState(
+class ScrollState(
     val listState: LazyListState,
     private val scriptLinesProvider: () -> List<ScriptLine>,
 ) {
@@ -82,7 +84,28 @@ class ScriptScrollState(
 }
 
 @Composable
-fun rememberScriptScrollState(scriptLinesProvider: () -> List<ScriptLine>): ScriptScrollState {
+fun rememberScriptScrollState(scriptLinesProvider: () -> List<ScriptLine>): ScrollState {
     val listState: LazyListState = rememberLazyListState()
-    return remember { ScriptScrollState(listState, scriptLinesProvider) }
+    return remember { ScrollState(listState, scriptLinesProvider) }
+}
+
+@Composable
+fun rememberDetailScriptScrollState(scriptLines: List<ScriptLine>): ScrollState {
+    val latestLines: List<ScriptLine> by rememberUpdatedState(scriptLines)
+    return rememberScriptScrollState(scriptLinesProvider = { latestLines })
+}
+
+@Composable
+fun AutoCenterOnHighlight(
+    scrollState: ScrollState,
+    highlightedIndex: Int,
+    totalCount: Int,
+) {
+    LaunchedEffect(highlightedIndex, totalCount) {
+        if (highlightedIndex !in 0 until totalCount) return@LaunchedEffect
+        if (scrollState.isAuto) return@LaunchedEffect
+        if (scrollState.lastCentered == highlightedIndex) return@LaunchedEffect
+
+        scrollState.centerVariableHeight(highlightedIndex)
+    }
 }
