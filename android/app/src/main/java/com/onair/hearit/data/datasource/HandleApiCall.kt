@@ -16,15 +16,15 @@ suspend fun <T : Any> handleApiCall(
         .fold(
             onSuccess = { response ->
                 when {
-                    !response.isSuccessful -> {
-                        errorHandler.getError(HttpException(response))
-                    }
-
-                    else -> {
+                    response.isSuccessful -> {
                         response.body()?.let { NetworkResult.Success(it) }
                             ?: errorHandler.getError(
                                 IllegalStateException("response body가 null입니다"),
                             )
+                    }
+
+                    else -> {
+                        errorHandler.getError(HttpException(response))
                     }
                 }
             },
