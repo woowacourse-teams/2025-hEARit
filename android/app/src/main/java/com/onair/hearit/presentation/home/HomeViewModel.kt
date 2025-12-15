@@ -19,9 +19,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -34,12 +36,37 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
         fetchUserInfo()
         fetchData()
+    }
+
+    fun refreshData() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                supervisorScope {
+                    launch { fetchRecommendHearits() }
+                    launch { fetchPlayingHistory() }
+                    launch { fetchRecentUpload() }
+                    launch { fetchBookmarks() }
+                    launch { fetchCategories() }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e(e, "데이터 새로고침 중 예상치 못한 오류 발생")
+                _toastMessage.value = R.string.home_toast_refresh_fail
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
     }
 
     private fun fetchData() {
@@ -171,6 +198,10 @@ class HomeViewModel @Inject constructor(
         startLoading(jobKey)
         try {
             block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.e(e, "safeLoad에서 예상치 못한 오류 발생: $jobKey")
         } finally {
             withContext(NonCancellable) { finishLoading(jobKey) }
         }
