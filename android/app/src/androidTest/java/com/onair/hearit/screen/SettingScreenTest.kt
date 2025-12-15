@@ -34,7 +34,7 @@ class SettingScreenTest {
     }
 
     @Test
-    fun 로그인_안된_경우_로그인_하러가기가_표시된다() {
+    fun `로그인_안된_경우_로그인_하러가기가_표시된다`() {
         // given
         every { mockViewModel.userInfo } returns MutableStateFlow<UserInfo?>(null).asStateFlow()
 
