@@ -17,6 +17,8 @@ data class HomeUiState(
     val recommendationCategories: List<RecommendationCategories> = emptyList(),
     val loadingKeys: Set<HomeLoadKey> = emptySet(),
 ) {
+    val showRecommendHearits: Boolean
+        get() = !isLoading && recommendHearits.isNotEmpty()
     val isLoggedIn: Boolean
         get() = userInfo.isLoggedIn()
 
@@ -28,6 +30,9 @@ data class HomeUiState(
 
     val showBookmark: Boolean
         get() = !isLoading && playingBookmarkHearits.isNotEmpty()
+
+    val showCategories: Boolean
+        get() = !isLoading && recommendationCategories.isNotEmpty()
 
     val isLoading: Boolean
         get() = loadingKeys.isNotEmpty()
