@@ -20,14 +20,11 @@ suspend fun <T : Any> handleApiCall(
                         errorHandler.getError(HttpException(response))
                     }
 
-                    response.body() != null -> {
-                        NetworkResult.Success(response.body()!!)
-                    }
-
                     else -> {
-                        errorHandler.getError(
-                            IllegalStateException("response body가 null입니다"),
-                        )
+                        response.body()?.let { NetworkResult.Success(it) }
+                            ?: errorHandler.getError(
+                                IllegalStateException("response body가 null입니다"),
+                            )
                     }
                 }
             },
