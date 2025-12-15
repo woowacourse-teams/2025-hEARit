@@ -239,4 +239,7 @@ dependencies {
     // hilt test
     androidTestImplementation(libs.hilt.android.testing)
     kaptAndroidTest(libs.hilt.android.compiler)
+
+    // swipe Refresh Layout
+    implementation(libs.androidx.swiperefreshlayout)
 }
