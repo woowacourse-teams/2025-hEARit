@@ -21,7 +21,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="280dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@drawable/bg_gray1_radius_8dp"
         android:onClick="@{() -> recommendClickListener.onClick(item.id, source)}"
         app:backgroundColor="@{item.categoryColor}">
