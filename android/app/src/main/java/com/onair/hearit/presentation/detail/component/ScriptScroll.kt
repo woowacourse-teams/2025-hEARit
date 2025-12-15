@@ -1,5 +1,7 @@
 package com.onair.hearit.presentation.detail.component
 
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
@@ -70,16 +72,28 @@ class ScrollState(
 
             val viewportCenter: Int = viewportCenter(layoutInfo)
             val itemCenter: Int = itemCenter(layoutInfo, targetIndex) ?: return
-            val distance: Int = itemCenter - viewportCenter
+            val distancePx: Int = itemCenter - viewportCenter
 
-            if (abs(distance) > 2) {
-                listState.animateScrollBy(distance.toFloat())
+            if (abs(distancePx) > SCROLL_DISTANCE_THRESHOLD_PX) {
+                val animationSpec: AnimationSpec<Float> =
+                    tween(
+                        durationMillis = AUTO_CENTER_ANIMATION_DURATION_MILLIS,
+                    )
+                listState.animateScrollBy(
+                    value = distancePx.toFloat(),
+                    animationSpec = animationSpec,
+                )
             }
 
             lastCentered = targetIndex
         } finally {
             isAuto = false
         }
+    }
+
+    companion object {
+        private const val SCROLL_DISTANCE_THRESHOLD_PX: Int = 2
+        private const val AUTO_CENTER_ANIMATION_DURATION_MILLIS: Int = 650
     }
 }
 
