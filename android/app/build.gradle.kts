@@ -165,11 +165,15 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.assertj.core)
     testImplementation(kotlin("test"))
+    implementation(libs.androidx.ui.test.junit4)
 
     // android test
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.turbine)
     debugImplementation(libs.androidx.fragment.testing)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
     // remote
     implementation(libs.retrofit)
