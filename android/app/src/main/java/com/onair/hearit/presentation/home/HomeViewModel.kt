@@ -51,8 +51,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _isRefreshing.value = true
             try {
-                // supervisorScope: 각 작업이 독립적으로 실행
-                // 하나가 실패해도 다른 작업은 계속 진행
                 supervisorScope {
                     launch { fetchRecommendHearits() }
                     launch { fetchPlayingHistory() }
