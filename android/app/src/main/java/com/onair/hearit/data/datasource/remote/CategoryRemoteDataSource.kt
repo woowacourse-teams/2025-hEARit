@@ -7,5 +7,5 @@ interface CategoryRemoteDataSource {
     suspend fun getCategories(
         page: Int?,
         size: Int?,
-    ): Result<NetworkResult<CategoryResponse>>
+    ): NetworkResult<CategoryResponse>
 }
