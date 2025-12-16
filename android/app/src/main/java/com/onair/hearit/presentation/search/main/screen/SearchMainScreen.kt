@@ -22,6 +22,7 @@ import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.main.component.CategoryGridList
 import com.onair.hearit.presentation.search.main.component.SearchMainTopBar
 import com.onair.hearit.presentation.theme.HearitBlack
+import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +62,7 @@ fun SearchMainScreen(
         containerColor = HearitBlack,
     ) { paddingValues ->
         CategoryGridList(
-            categories = categories,
+            categories = categories.toImmutableList(),
             onCategoryClick = { category ->
                 AnalyticsProvider.get().logEvent(
                     AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,

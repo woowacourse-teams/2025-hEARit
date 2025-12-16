@@ -39,12 +39,14 @@ import com.onair.hearit.presentation.search.category.component.SearchedHearitIte
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun CategorySearchScreen(
     colorCode: String,
     categoryName: String,
-    hearits: List<SearchedCategoryHearit>,
+    hearits: ImmutableList<SearchedCategoryHearit>,
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -65,7 +67,7 @@ fun CategorySearchScreen(
 fun GradientBackgroundScreen(
     colorCode: String,
     categoryName: String,
-    hearits: List<SearchedCategoryHearit>,
+    hearits: ImmutableList<SearchedCategoryHearit>,
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -154,7 +156,7 @@ fun GradientBackgroundScreen(
 @Composable
 fun GradientBackgroundScreenPreview() {
     val dummyHearits =
-        listOf(
+        persistentListOf(
             SearchedCategoryHearit(
                 0,
                 "이건 첫 번째 레슨, 좋은 건 너만 알기",

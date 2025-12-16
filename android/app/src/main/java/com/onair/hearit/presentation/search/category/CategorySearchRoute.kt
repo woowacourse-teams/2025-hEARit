@@ -8,6 +8,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.category.screen.CategorySearchScreen
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun CategorySearchRoute(
@@ -17,7 +18,7 @@ fun CategorySearchRoute(
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
+    val categoryHearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
     val category = viewModel.currentCategory
 
     LaunchedEffect(Unit) {
@@ -31,7 +32,7 @@ fun CategorySearchRoute(
     CategorySearchScreen(
         colorCode = category?.colorCode ?: "#000000",
         categoryName = category?.name ?: "카테고리",
-        hearits = hearits,
+        hearits = categoryHearits.toImmutableList(),
         onBack = onBack,
         onHearitClick = onHearitClick,
         modifier = modifier,
