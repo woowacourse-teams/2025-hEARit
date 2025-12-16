@@ -18,7 +18,6 @@ import com.onair.hearit.presentation.search.CategoryClickListener
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.category.CategoryFragment
-import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 
 class SearchFragment :
@@ -36,8 +35,8 @@ class SearchFragment :
         ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                SearchMainScreen(
-                    viewModel,
+                SearchMainRoute(
+                    viewModel = viewModel,
                     onSearchBarClick = { navigateToRecent() },
                     onCategoryClick = ::onCategoryClick,
                 )
