@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,12 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
  * - Redis 실패 시 로컬 메모리 맵으로 Fallback
  */
 @Slf4j
+@Primary
 @Component
 @RequiredArgsConstructor
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-        name = "hearit.playing-history.buffer-type",
-        havingValue = "redis"
-)
 public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
     private static final String REDIS_HASH_KEY = "playing_history";

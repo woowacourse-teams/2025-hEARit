@@ -15,17 +15,10 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-        name = "hearit.playing-history.buffer-type",
-        havingValue = "memory",
-        matchIfMissing = false
-)
 public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
 
     private static final int BUFFER_SIZE = 100_000;
