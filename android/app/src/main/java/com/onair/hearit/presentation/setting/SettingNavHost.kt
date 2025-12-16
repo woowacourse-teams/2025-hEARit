@@ -50,7 +50,10 @@ fun SettingNavHost(
         }
 
         composable(ALARM) {
-            AlarmScreen(onBackClick = { navController.popBackStack() })
+            AlarmScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() },
+            )
         }
     }
 }

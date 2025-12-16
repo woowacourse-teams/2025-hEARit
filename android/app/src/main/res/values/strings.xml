@@ -11,6 +11,7 @@
     <string name="all_toast_save_user_info_fail">유저 정보 저장에 실패했습니다</string>
     <string name="all_toast_add_bookmark_fail">북마크 저장에 실패했습니다</string>
     <string name="all_toast_delete_bookmark_fail">북마크 삭제에 실패했습니다</string>
+    <string name="all_toast_notification_permission_denied">푸시 알람을 허용하지 않습니다.</string>
     <string name="all_keyword_name"># %s</string>
     <string name="all_login_dialog_message_body"><font color="#B677F3">북마크 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
     <string name="all_dialog_login_positive">로그인</string>

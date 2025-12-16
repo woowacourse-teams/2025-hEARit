@@ -25,6 +25,12 @@ class SettingViewModel @Inject constructor(
     private val _userInfo = MutableStateFlow(userRepository.getCachedUserInfo())
     val userInfo = _userInfo.asStateFlow()
 
+    private val _isPushNotificationEnabled = MutableStateFlow(false)
+    val isPushNotificationEnabled = _isPushNotificationEnabled.asStateFlow()
+
+    private val _shouldRequestNotificationPermission = MutableStateFlow(false)
+    val shouldRequestNotificationPermission = _shouldRequestNotificationPermission.asStateFlow()
+
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
@@ -32,6 +38,27 @@ class SettingViewModel @Inject constructor(
         if (_userInfo.value == null) {
             fetchUserInfo()
         }
+    }
+
+    fun onPushNotificationToggleRequested(isEnabled: Boolean) {
+        if (!isEnabled) {
+            _isPushNotificationEnabled.value = false
+            return
+        }
+        _shouldRequestNotificationPermission.value = true
+    }
+
+    fun onPostNotificationPermissionResult(isGranted: Boolean) {
+        _isPushNotificationEnabled.value = isGranted
+        _shouldRequestNotificationPermission.value = false
+
+        if (!isGranted) {
+            _toastMessage.value = R.string.all_toast_notification_permission_denied
+        }
+    }
+
+    fun onNotificationPermissionRequestHandled() {
+        _shouldRequestNotificationPermission.value = false
     }
 
     private fun fetchUserInfo() {
