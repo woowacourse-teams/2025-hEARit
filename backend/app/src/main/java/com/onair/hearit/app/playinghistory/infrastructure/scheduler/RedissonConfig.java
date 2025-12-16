@@ -1,4 +1,4 @@
-package com.onair.hearit.app.common.config;
+package com.onair.hearit.app.playinghistory.infrastructure.scheduler;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
