@@ -21,6 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+        name = "hearit.playing-history.buffer-type",
+        havingValue = "memory",
+        matchIfMissing = false
+)
 public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
 
     private static final int BUFFER_SIZE = 100_000;
