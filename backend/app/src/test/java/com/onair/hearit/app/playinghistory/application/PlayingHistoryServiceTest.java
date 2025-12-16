@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
+@org.springframework.test.context.TestPropertySource(properties = "hearit.playing-history.buffer-type=memory")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryMapBuffer.class,
         PlayingHistoryCommandRepository.class, PlayingHistoryService.class, UserInfoService.class})
 class PlayingHistoryServiceTest {
