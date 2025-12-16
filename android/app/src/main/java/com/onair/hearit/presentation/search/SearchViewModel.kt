@@ -15,7 +15,6 @@ import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.search.main.SearchUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
