@@ -17,9 +17,6 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.presentation.IntentKeys
 import com.onair.hearit.presentation.search.CategoryClickListener
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.category.CategoryComposeFragment
-import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
-import com.onair.hearit.presentation.search.SearchViewModelFactory
 import com.onair.hearit.presentation.search.category.CategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import dagger.hilt.android.AndroidEntryPoint

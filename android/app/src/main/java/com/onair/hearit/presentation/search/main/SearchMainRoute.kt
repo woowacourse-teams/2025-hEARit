@@ -8,9 +8,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.onair.hearit.analytics.AnalyticsEventNames
-import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
 import kotlinx.collections.immutable.toImmutableList
@@ -41,11 +38,11 @@ fun SearchMainRoute(
         categories = categories.toImmutableList(),
         onSearchBarClick = onSearchBarClick,
         onCategoryClick = { category ->
-            AnalyticsProvider.get().logEvent(
-                AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
-                mapOf(AnalyticsParamKeys.CATEGORY_NAME to category.name),
+            onCategoryClick(
+                category.id,
+                category.name,
+                category.colorCode,
             )
-            onCategoryClick(category.id, category.name, category.colorCode)
         },
         modifier = modifier,
     )

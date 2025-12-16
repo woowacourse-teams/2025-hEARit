@@ -10,8 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.onair.hearit.domain.model.Category
-import androidx.compose.ui.platform.LocalContext
-import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.main.component.CategoryGridList
 import com.onair.hearit.presentation.search.main.component.SearchMainTopBar
 import com.onair.hearit.presentation.theme.HearitBlack
