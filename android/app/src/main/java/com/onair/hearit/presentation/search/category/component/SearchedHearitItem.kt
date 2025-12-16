@@ -35,6 +35,7 @@ import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import com.onair.hearit.presentation.toHashtagName
 import com.onair.hearit.presentation.toTimeString
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun SearchedHearitItem(
@@ -50,7 +51,8 @@ fun SearchedHearitItem(
                 .background(
                     Gray1,
                     shape = RoundedCornerShape(8.dp),
-                ).clickable { onClick(item.id) }
+                )
+                .clickable { onClick(item.id) }
                 .padding(vertical = 16.dp),
     ) {
         Column(
@@ -135,7 +137,7 @@ private fun SearchedHearitItemPreview() {
             playTime = 350,
             lastPlayTime = 99999,
             createdAt = "1234",
-            keywords = listOf(Keyword(1, "유노윤호"), Keyword(2, "U-KNOW")),
+            keywords = persistentListOf(Keyword(1, "유노윤호"), Keyword(2, "U-KNOW")),
             category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
         )
 

@@ -163,7 +163,7 @@ fun GradientBackgroundScreenPreview() {
                 playTime = 123,
                 lastPlayTime = 83782,
                 createdAt = "1234",
-                keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
                 category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
             SearchedCategoryHearit(
@@ -172,7 +172,7 @@ fun GradientBackgroundScreenPreview() {
                 playTime = 1234,
                 lastPlayTime = 192013,
                 createdAt = "1234",
-                keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
                 category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
             SearchedCategoryHearit(
@@ -181,7 +181,7 @@ fun GradientBackgroundScreenPreview() {
                 playTime = 1234,
                 lastPlayTime = 99999,
                 createdAt = "1234",
-                keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
                 category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
         )

@@ -28,6 +28,7 @@ import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.Source
 import com.onair.hearit.domain.model.UserInfo
+import kotlinx.collections.immutable.toImmutableList
 
 fun RecentHearit.toData(): RecentHearitEntity =
     RecentHearitEntity(
@@ -51,7 +52,7 @@ private fun HearitsResponse.Content.toSearchedCategoryHearit(): SearchedCategory
         playTime = this.playTime,
         lastPlayTime = this.lastPlayTime,
         createdAt = this.createdAt,
-        keywords = this.keywords.map { it.toDomain() },
+        keywords = this.keywords.map { it.toDomain() }.toImmutableList(),
         category = this.category.toDomain(),
     )
 
