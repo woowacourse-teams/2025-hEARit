@@ -71,8 +71,14 @@ class SplashViewModel @Inject constructor(
         refreshToken: String,
     ) {
         when (throwable) {
-            is NetworkConnection -> _toastMessage.value = R.string.splash_toast_network_check_fail
-            is UserNotRegistered -> reissueAccessToken(refreshToken)
+            is NetworkConnection -> {
+                _toastMessage.value = R.string.splash_toast_network_check_fail
+            }
+
+            is UserNotRegistered -> {
+                reissueAccessToken(refreshToken)
+            }
+
             else -> {
                 Timber.w(throwable)
                 _checkToken.value = false
@@ -96,7 +102,10 @@ class SplashViewModel @Inject constructor(
 
     private fun handleReissueError(throwable: Throwable) {
         when (throwable) {
-            is UserNotRegistered -> _checkToken.value = false
+            is UserNotRegistered -> {
+                _checkToken.value = false
+            }
+
             else -> {
                 Timber.w(throwable)
                 _checkToken.value = false

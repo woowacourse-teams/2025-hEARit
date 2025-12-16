@@ -109,7 +109,10 @@ class PlayerDetailViewModel @Inject constructor(
                     _bookmarkId.value = bookmarkId
                 }.onFailure { throwable ->
                     when (throwable) {
-                        is UserNotRegistered -> _showLoginDialog.call()
+                        is UserNotRegistered -> {
+                            _showLoginDialog.call()
+                        }
+
                         else -> {
                             Timber.w(throwable)
                             _toastMessage.value = R.string.all_toast_add_bookmark_fail

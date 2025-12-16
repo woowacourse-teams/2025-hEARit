@@ -10,9 +10,9 @@ interface BookmarkRemoteDataSource {
         size: Int? = 10,
         filter: String,
         sort: String? = "createdAt,desc",
-    ): Result<NetworkResult<BookmarkResponse>>
+    ): NetworkResult<BookmarkResponse>
 
-    suspend fun addBookmark(hearitId: Long): Result<NetworkResult<BookmarkIdResponse>>
+    suspend fun addBookmark(hearitId: Long): NetworkResult<BookmarkIdResponse>
 
-    suspend fun deleteBookmark(bookmarkId: Long): Result<NetworkResult<Unit>>
+    suspend fun deleteBookmark(bookmarkId: Long): NetworkResult<Unit>
 }
