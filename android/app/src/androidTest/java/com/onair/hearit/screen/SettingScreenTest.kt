@@ -21,7 +21,6 @@ class SettingScreenTest {
     val composeTestRule = createComposeRule()
 
     private lateinit var mockViewModel: SettingViewModel
-    private val userInfo = MutableStateFlow<UserInfo?>(null)
 
     @Before
     fun setup() {
@@ -53,11 +52,53 @@ class SettingScreenTest {
 
         // then
         composeTestRule
-            .onNodeWithText("설정")
+            .onNodeWithText("로그인 하러가기")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("로그아웃")
+            .assertDoesNotExist()
+
+        composeTestRule
+            .onNodeWithText("회원탈퇴")
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun `로그인한_경우_로그아웃과_회원탈퇴가_표시된다`() {
+        // given
+        val testUser =
+            UserInfo(
+                id = 1L,
+                nickname = "테스트유저",
+                profileImage = null,
+            )
+        every { mockViewModel.userInfo } returns MutableStateFlow(testUser).asStateFlow()
+
+        composeTestRule.setContent {
+            SettingScreen(
+                viewModel = mockViewModel,
+                onBackClick = {},
+                onProfileClick = {},
+                onLogin = {},
+                onLogout = {},
+                onWithdraw = {},
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // then
+        composeTestRule
+            .onNodeWithText("로그아웃")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("회원탈퇴")
             .assertIsDisplayed()
 
         composeTestRule
             .onNodeWithText("로그인 하러가기")
-            .assertIsDisplayed()
+            .assertDoesNotExist()
     }
 }
