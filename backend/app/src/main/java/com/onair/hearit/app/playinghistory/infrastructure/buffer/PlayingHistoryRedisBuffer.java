@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.context.annotation.Primary;
@@ -120,6 +121,11 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
     @Override
     @Transactional
     @Scheduled(fixedDelay = 3000) // 3초마다 실행
+    @SchedulerLock(
+            name = "PlayingHistoryRedisBuffer_flush",
+            lockAtMostFor = "10s",
+            lockAtLeastFor = "1s"
+    )
     public void flush() {
         // Redis flush 시도
         flushRedis();
