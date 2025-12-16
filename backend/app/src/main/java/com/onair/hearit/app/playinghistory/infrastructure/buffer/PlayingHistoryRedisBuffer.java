@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  * - 재생 기록을 Redis Hash에 임시 저장
  * - 3초마다 일괄 DB 동기화
  * - Redisson 분산 락으로 동시성 제어
+ * - Redis 실패 시 로컬 메모리 맵으로 Fallback
  */
 @Slf4j
 @Component
@@ -49,8 +51,22 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
     private final HearitRepository hearitRepository;
     private final ObjectMapper objectMapper;
 
+    // Fallback용 로컬 메모리 맵
+    private final Map<PlayKey, PlayValue> fallbackCache = new ConcurrentHashMap<>();
+
     @Override
     public void add(PlayingHistory playingHistory, long clientEventTime) {
+        try {
+            addToRedis(playingHistory, clientEventTime);
+        } catch (Exception e) {
+            // Redis 실패 시 로컬 메모리 맵으로 Fallback
+            log.warn("Redis 저장 실패, 로컬 메모리 맵으로 전환. userUuid={}, hearitId={}",
+                    playingHistory.getUserUuid(), playingHistory.getHearitId(), e);
+            addToFallbackCache(playingHistory, clientEventTime);
+        }
+    }
+
+    private void addToRedis(PlayingHistory playingHistory, long clientEventTime) {
         String field = buildHashField(playingHistory.getUserUuid(), playingHistory.getHearitId());
         String lockKey = LOCK_PREFIX + field;
         RLock lock = redissonClient.getLock(lockKey);
@@ -86,18 +102,35 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.error("재생 기록 저장 중 인터럽트 발생: {}", field, e);
+            throw new RuntimeException("재생 기록 저장 중 인터럽트 발생: " + field, e);
         } catch (JsonProcessingException e) {
-            log.error("재생 기록 JSON 변환 실패: {}", field, e);
-        } catch (Exception e) {
-            log.error("재생 기록 저장 실패: {}", field, e);
+            throw new RuntimeException("재생 기록 JSON 변환 실패: " + field, e);
         }
+    }
+
+    private void addToFallbackCache(PlayingHistory playingHistory, long clientEventTime) {
+        PlayKey key = new PlayKey(playingHistory.getUserUuid(), playingHistory.getHearitId());
+        fallbackCache.compute(key, (k, existing) -> {
+            PlayValue incoming = PlayValue.from(playingHistory, clientEventTime);
+            if (existing != null && existing.isMoreRecentThan(incoming)) {
+                return existing;
+            }
+            return incoming;
+        });
     }
 
     @Override
     @Transactional
     @Scheduled(fixedDelay = 3000) // 3초마다 실행
     public void flush() {
+        // Redis flush 시도
+        flushRedis();
+
+        // Fallback 캐시 flush
+        flushFallbackCache();
+    }
+
+    private void flushRedis() {
         try {
             HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
             Map<String, String> snapshot = hashOps.entries(REDIS_HASH_KEY);
@@ -106,7 +139,7 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
                 return;
             }
 
-            log.info("재생 기록 flush 시작: {} 건", snapshot.size());
+            log.info("Redis 재생 기록 flush 시작: {} 건", snapshot.size());
 
             // Redis 데이터 → PlayValue 변환
             List<PlayValue> playValues = new ArrayList<>();
@@ -132,11 +165,65 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             // Redis에서 저장 완료된 항목 제거
             hashOps.delete(REDIS_HASH_KEY, snapshot.keySet().toArray());
 
-            log.info("재생 기록 flush 완료: {} 건", histories.size());
+            log.info("Redis 재생 기록 flush 완료: {} 건", histories.size());
 
         } catch (Exception e) {
-            log.error("재생 기록 flush 실패 (데이터는 Redis에 유지됨)", e);
+            log.error("Redis 재생 기록 flush 실패 (데이터는 Redis에 유지됨)", e);
         }
+    }
+
+    private void flushFallbackCache() {
+        Map<PlayKey, PlayValue> snapshot = createSnapshotAndRemoveFromCache();
+        if (snapshot.isEmpty()) {
+            return;
+        }
+
+        log.info("Fallback 캐시 재생 기록 flush 시작: {} 건", snapshot.size());
+
+        try {
+            List<PlayingHistory> histories = buildHistoriesFromSnapshot(snapshot);
+            playingHistoryCommandRepository.bulkInsert(histories);
+            log.info("Fallback 캐시 재생 기록 flush 완료: {} 건", histories.size());
+        } catch (Exception e) {
+            rollbackSnapshot(snapshot);
+            log.error("Fallback 캐시 재생 기록 flush 실패, 롤백 수행. snapshot size: {}", snapshot.size(), e);
+        }
+    }
+
+    private Map<PlayKey, PlayValue> createSnapshotAndRemoveFromCache() {
+        Map<PlayKey, PlayValue> snapshot = new ConcurrentHashMap<>();
+        fallbackCache.forEach((key, value) -> {
+            if (fallbackCache.remove(key, value)) {
+                snapshot.put(key, value);
+            }
+        });
+        return snapshot;
+    }
+
+    private List<PlayingHistory> buildHistoriesFromSnapshot(Map<PlayKey, PlayValue> snapshot) {
+        Set<Long> hearitIds = snapshot.values().stream()
+                .map(PlayValue::hearitId)
+                .collect(Collectors.toSet());
+        Map<Long, Hearit> hearitMap = hearitRepository.findAllById(hearitIds)
+                .stream()
+                .collect(Collectors.toMap(Hearit::getId, h -> h));
+        return snapshot.values().stream().map(v -> new PlayingHistory(
+                        v.userUuid(),
+                        hearitMap.get(v.hearitId()),
+                        v.lastPlayTime()
+                ))
+                .toList();
+    }
+
+    private void rollbackSnapshot(Map<PlayKey, PlayValue> snapshot) {
+        snapshot.forEach((key, newValue) ->
+                fallbackCache.merge(key, newValue, (oldValue, incomingValue) -> {
+                    if (oldValue.isMoreRecentThan(incomingValue)) {
+                        return oldValue;
+                    }
+                    return incomingValue;
+                })
+        );
     }
 
     private List<PlayingHistory> buildHistoriesFromPlayValues(List<PlayValue> playValues) {
@@ -165,6 +252,10 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
     public void shutdown() {
         log.info("애플리케이션 종료 시 재생 기록 flush 시작");
         flush();
+    }
+
+    // Fallback 캐시용 키 객체
+    private record PlayKey(String userUuid, long hearitId) {
     }
 
     // Redis에 저장되는 재생 기록 값 객체

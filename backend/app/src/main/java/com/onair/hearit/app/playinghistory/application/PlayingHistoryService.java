@@ -17,8 +17,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,32 +71,7 @@ public class PlayingHistoryService {
         String userUuid = userInfoService.getUuid(userInfo);
         PlayingHistory history = new PlayingHistory(userUuid, hearit, request.lastPlayTime());
         long clientEventTime = extractClientEventTime(request.clientEventTime());
-
-        try {
-            // Redis 버퍼에 저장 시도
-            playingHistoryBuffer.add(history, clientEventTime);
-        } catch (RedisConnectionFailureException e) {
-            // Redis 연결 실패 시 DB 직접 저장 (Fallback)
-            log.warn("Redis 연결 실패, DB 직접 저장으로 전환. userUuid={}, hearitId={}", userUuid, request.hearitId(), e);
-            fallbackToDirectDbSave(history);
-        } catch (DataAccessException e) {
-            // Redis 관련 기타 예외 시 Fallback
-            log.warn("Redis 작업 실패, DB 직접 저장으로 전환. userUuid={}, hearitId={}", userUuid, request.hearitId(), e);
-            fallbackToDirectDbSave(history);
-        } catch (Exception e) {
-            // 기타 예외는 로깅만 하고 무시 (재생 기록 저장 실패가 서비스 전체를 중단시키면 안 됨)
-            log.error("재생 기록 저장 실패. userUuid={}, hearitId={}", userUuid, request.hearitId(), e);
-        }
-    }
-
-    @Transactional
-    private void fallbackToDirectDbSave(PlayingHistory history) {
-        try {
-            playingHistoryRepository.save(history);
-            log.info("Fallback DB 저장 성공. userUuid={}, hearitId={}", history.getUserUuid(), history.getHearitId());
-        } catch (Exception e) {
-            log.error("Fallback DB 저장도 실패. userUuid={}, hearitId={}", history.getUserUuid(), history.getHearitId(), e);
-        }
+        playingHistoryBuffer.add(history, clientEventTime);
     }
 
     private long extractClientEventTime(Long clientEventTime) {
