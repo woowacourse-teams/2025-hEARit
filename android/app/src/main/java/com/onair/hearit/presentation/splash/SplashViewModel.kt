@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsLogger
-import com.onair.hearit.data.AuthHeaderProvider
 import com.onair.hearit.domain.exception.DomainException.NetworkConnection
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
 import com.onair.hearit.domain.repository.AuthRepository
@@ -23,7 +22,6 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val analyticsLogger: AnalyticsLogger,
-    private val authHeaderProvider: AuthHeaderProvider,
 ) : ViewModel() {
     private val _checkToken: MutableLiveData<Boolean> = MutableLiveData()
     val checkToken: LiveData<Boolean> = _checkToken
@@ -59,7 +57,6 @@ class SplashViewModel @Inject constructor(
                 if (!saved) {
                     Timber.w("accessToken 저장에 실패했습니다.")
                 }
-                authHeaderProvider.updateAccessToken(accessToken)
                 _checkToken.value = true
             }.onFailure { throwable ->
                 handleAccessTokenError(throwable, refreshToken)
@@ -93,7 +90,6 @@ class SplashViewModel @Inject constructor(
                 .reissue(refreshToken)
                 .onSuccess { newToken ->
                     _checkToken.value = true
-                    authHeaderProvider.updateAccessToken(newToken)
                 }.onFailure { throwable ->
                     handleReissueError(throwable)
                 }

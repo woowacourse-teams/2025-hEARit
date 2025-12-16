@@ -1,5 +1,6 @@
 package com.onair.hearit.data.repository
 
+import com.onair.hearit.data.AuthHeaderProvider
 import com.onair.hearit.data.datasource.local.AuthLocalDataSource
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSource
 import com.onair.hearit.data.dto.KakaoLoginRequest
@@ -13,6 +14,7 @@ import javax.inject.Inject
 class AuthRepositoryImpl @Inject constructor(
     private val authLocalDataSource: AuthLocalDataSource,
     private val authRemoteDataSource: AuthRemoteDataSource,
+    private val authHeaderProvider: AuthHeaderProvider,
 ) : AuthRepository {
     override suspend fun checkAccessToken(accessToken: String): Result<Unit> =
         authRemoteDataSource.checkAccessToken(accessToken).toDomainResult()
@@ -28,7 +30,10 @@ class AuthRepositoryImpl @Inject constructor(
             accessToken to refreshToken
         }
 
-    override suspend fun saveAccessToken(accessToken: String): Result<Unit> = authLocalDataSource.saveAccessToken(accessToken)
+    override suspend fun saveAccessToken(accessToken: String): Result<Unit> =
+        authLocalDataSource
+            .saveAccessToken(accessToken)
+            .onSuccess { authHeaderProvider.updateAccessToken(accessToken) }
 
     override suspend fun saveRefreshToken(refreshToken: String): Result<Unit> = authLocalDataSource.saveRefreshToken(refreshToken)
 
@@ -41,8 +46,13 @@ class AuthRepositoryImpl @Inject constructor(
         authRemoteDataSource
             .refreshAccessToken(TokenReissueRequest(refreshToken))
             .toDomainResult { it.accessToken }
+            .onSuccess { newAccessToken ->
+                authLocalDataSource.saveAccessToken(newAccessToken)
+                authHeaderProvider.updateAccessToken(newAccessToken)
+            }
 
     override suspend fun withdraw(): Result<Unit> = authRemoteDataSource.withdraw().toDomainResult()
 
-    override suspend fun clearAuthData(): Result<Unit> = authLocalDataSource.clearAuthData()
+    override suspend fun clearAuthData(): Result<Unit> =
+        authLocalDataSource.clearAuthData().onSuccess { authHeaderProvider.updateAccessToken(null) }
 }
