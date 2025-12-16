@@ -23,7 +23,7 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
-import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import com.onair.hearit.presentation.search.category.CategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,7 +65,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
     when (this) {
         is DetailResult.Category -> {
             val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = CategoryComposeFragment::class.java.simpleName
+            val backStackTag = CategoryFragment::class.java.simpleName
 
             // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
             fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
@@ -73,7 +73,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                 .beginTransaction()
                 .replace(
                     R.id.fragment_container_view,
-                    CategoryComposeFragment().apply {
+                    CategoryFragment().apply {
                         arguments =
                             bundleOf(
                                 CATEGORY_ID_KEY to categoryId,

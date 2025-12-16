@@ -20,8 +20,9 @@ import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
+import com.onair.hearit.presentation.search.category.component.CategorySearchRoute
 
-class CategoryComposeFragment : Fragment() {
+class CategoryFragment : Fragment() {
     private val category by lazy {
         SearchInput.Category(
             arguments?.getLong(CATEGORY_ID_KEY) ?: -1L,
@@ -44,7 +45,7 @@ class CategoryComposeFragment : Fragment() {
         ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                CategorySearchScreen(
+                CategorySearchRoute(
                     viewModel = viewModel,
                     mainViewModel = mainViewModel,
                     onBack = { parentFragmentManager.popBackStack() },
