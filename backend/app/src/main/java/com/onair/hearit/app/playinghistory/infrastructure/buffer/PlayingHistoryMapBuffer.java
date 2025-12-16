@@ -49,6 +49,11 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
     }
 
     @Override
+    public int size() {
+        return cache.size();
+    }
+
+    @Override
     @Transactional
     @Scheduled(fixedDelay = 1_000)
     public void flush() {
