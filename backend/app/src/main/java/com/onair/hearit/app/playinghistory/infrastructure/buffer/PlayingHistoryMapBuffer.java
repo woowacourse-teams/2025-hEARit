@@ -2,8 +2,6 @@ package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
 import com.onair.hearit.app.exception.custom.BufferRequestException;
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter.PlayKey;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter.PlayValue;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import java.util.List;
@@ -24,32 +22,13 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
     private final PlayingHistoryCommandRepository playingHistoryCommandRepository;
     private final PlayingHistoryConverter converter;
 
-//    @Override
-//    public void add(PlayingHistory playingHistory, long clientEventTime) {
-//        PlayKey key = new PlayKey(playingHistory.getUserUuid(), playingHistory.getHearitId());
-//        cache.compute(key, (k, existing) -> {
-//            if (existing == null) {
-//                validateBufferSize(k);
-//            }
-//            PlayValue incoming = PlayValue.from(playingHistory, clientEventTime);
-//            if (existing != null && existing.isMoreRecentThan(incoming)) {
-//                return existing;
-//            }
-//            return incoming;
-//        });
-//    }
-
     @Override
     public void add(PlayingHistory playingHistory, long clientEventTime) {
-        validateClientEventTime(clientEventTime);
         PlayKey key = new PlayKey(playingHistory.getUserUuid(), playingHistory.getHearitId());
-
-        if (!cache.containsKey(key) && cache.size() >= BUFFER_SIZE) {
-            log.error("Fallback 캐시 용량 초과: {}", cache.size());
-            throw new BufferRequestException("버퍼 용량 초과로 인해 재생 기록 저장할 수 없습니다.");
-        }
-
         cache.compute(key, (k, existing) -> {
+            if (existing == null) {
+                validateBufferSize(k);
+            }
             PlayValue incoming = PlayValue.from(playingHistory, clientEventTime);
             if (existing != null && existing.isMoreRecentThan(incoming)) {
                 return existing;

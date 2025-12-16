@@ -1,5 +1,6 @@
 package com.onair.hearit.app.playinghistory.infrastructure.buffer.converter;
 
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayValue;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
@@ -11,11 +12,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * PlayingHistory 변환 담당
- * - PlayValue → PlayingHistory 변환
- * - Hearit 엔티티 일괄 조회
- */
 @Component
 @RequiredArgsConstructor
 public class PlayingHistoryConverter {
@@ -43,28 +39,5 @@ public class PlayingHistoryConverter {
                         playValue.lastPlayTime()
                 ))
                 .toList();
-    }
-
-    public record PlayValue(
-            String userUuid,
-            long hearitId,
-            long lastPlayTime,
-            long clientEventTime
-    ) {
-        public static PlayValue from(PlayingHistory history, long clientEventTime) {
-            return new PlayValue(
-                    history.getUserUuid(),
-                    history.getHearitId(),
-                    history.getLastPlayTime(),
-                    clientEventTime
-            );
-        }
-
-        public boolean isMoreRecentThan(PlayValue other) {
-            return other != null && this.clientEventTime > other.clientEventTime();
-        }
-    }
-
-    public record PlayKey(String userUuid, long hearitId) {
     }
 }
