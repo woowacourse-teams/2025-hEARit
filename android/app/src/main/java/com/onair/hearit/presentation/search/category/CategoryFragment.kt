@@ -20,7 +20,6 @@ import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.SearchViewModelFactory
-import com.onair.hearit.presentation.search.category.component.CategorySearchRoute
 
 class CategoryFragment : Fragment() {
     private val category by lazy {
