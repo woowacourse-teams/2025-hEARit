@@ -3,14 +3,16 @@ package com.onair.hearit.data.repository
 import com.onair.hearit.data.datasource.local.UserLocalDataSource
 import com.onair.hearit.data.datasource.remote.UserRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
+import com.onair.hearit.data.toDomainResult
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.repository.UserRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 import java.util.UUID
+import javax.inject.Inject
 
-class UserRepositoryImpl(
+class UserRepositoryImpl @Inject constructor(
     private val userLocalDataSource: UserLocalDataSource,
     private val userRemoteDataSource: UserRemoteDataSource,
 ) : UserRepository {
@@ -38,7 +40,7 @@ class UserRepositoryImpl(
             val remote =
                 userRemoteDataSource
                     .getUserInfo()
-                    .mapOrThrowDomain { it.toDomain() }
+                    .toDomainResult { it.toDomain() }
                     .getOrThrow()
 
             // 4️⃣ 캐시 업데이트 후 로컬 저장

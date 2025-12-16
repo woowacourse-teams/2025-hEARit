@@ -13,10 +13,12 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.compose.rememberNavController
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SettingFragment : Fragment() {
-    private val viewModel: SettingViewModel by viewModels { SettingViewModelFactory() }
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val viewModel: SettingViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

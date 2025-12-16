@@ -5,6 +5,8 @@ import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.data.mapper.toRecentUploadHearit
 import com.onair.hearit.data.mapper.toSearchedCategoryHearit
 import com.onair.hearit.data.mapper.toSearchedHearit
+import com.onair.hearit.data.toDomainResult
+import com.onair.hearit.data.toDomainResultList
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.Hearit
@@ -14,15 +16,16 @@ import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.HearitRepository
+import javax.inject.Inject
 
-class HearitRepositoryImpl(
+class HearitRepositoryImpl @Inject constructor(
     private val hearitRemoteDataSource: HearitRemoteDataSource,
 ) : HearitRepository {
     override suspend fun getHearit(hearitId: Long): Result<Hearit> =
-        hearitRemoteDataSource.getHearit(hearitId).mapOrThrowDomain { it.toDomain() }
+        hearitRemoteDataSource.getHearit(hearitId).toDomainResult { it.toDomain() }
 
     override suspend fun getRecommendHearits(): Result<List<RecommendHearit>> =
-        hearitRemoteDataSource.getRecommendHearits().mapListOrThrowDomain { it.toDomain() }
+        hearitRemoteDataSource.getRecommendHearits().toDomainResultList { it.toDomain() }
 
     override suspend fun getExploreHearits(
         cursorId: Long?,
@@ -30,7 +33,7 @@ class HearitRepositoryImpl(
     ): Result<CursorResult<ExploreHearit>> =
         hearitRemoteDataSource
             .getExploreHearits(cursorId, size)
-            .mapOrThrowDomain { it.toDomain() }
+            .toDomainResult { it.toDomain() }
 
     override suspend fun getKeywordHearits(
         searchTerm: String,
@@ -39,7 +42,7 @@ class HearitRepositoryImpl(
     ): Result<PageResult<SearchedHearit>> =
         hearitRemoteDataSource
             .getSearchHearits(searchTerm, page, size)
-            .mapOrThrowDomain { it.toSearchedHearit() }
+            .toDomainResult { it.toSearchedHearit() }
 
     override suspend fun getCategoryHearits(
         categoryId: Long,
@@ -48,7 +51,7 @@ class HearitRepositoryImpl(
     ): Result<PageResult<SearchedCategoryHearit>> =
         hearitRemoteDataSource
             .getHearits(categoryId, page, size)
-            .mapOrThrowDomain { it.toSearchedCategoryHearit() }
+            .toDomainResult { it.toSearchedCategoryHearit() }
 
     override suspend fun getRecentUploadHearits(
         page: Int?,
@@ -56,5 +59,5 @@ class HearitRepositoryImpl(
     ): Result<PageResult<RecentUploadHearit>> =
         hearitRemoteDataSource
             .getHearits(null, page, size)
-            .mapOrThrowDomain { it.toRecentUploadHearit() }
+            .toDomainResult { it.toRecentUploadHearit() }
 }

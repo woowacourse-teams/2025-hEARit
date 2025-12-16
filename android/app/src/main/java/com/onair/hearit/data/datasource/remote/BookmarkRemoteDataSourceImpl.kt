@@ -1,14 +1,15 @@
 package com.onair.hearit.data.datasource.remote
 
 import com.onair.hearit.data.api.BookmarkService
-import com.onair.hearit.data.datasource.ApiErrorMessages.ERROR_RESPONSE_BODY_NULL_MESSAGE
 import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
+import com.onair.hearit.data.datasource.handleApiCallUnit
 import com.onair.hearit.data.dto.BookmarkIdResponse
 import com.onair.hearit.data.dto.BookmarkResponse
+import javax.inject.Inject
 
-class BookmarkRemoteDataSourceImpl(
+class BookmarkRemoteDataSourceImpl @Inject constructor(
     private val bookmarkService: BookmarkService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : BookmarkRemoteDataSource {
@@ -17,28 +18,21 @@ class BookmarkRemoteDataSourceImpl(
         size: Int?,
         filter: String,
         sort: String?,
-    ): Result<NetworkResult<BookmarkResponse>> =
+    ): NetworkResult<BookmarkResponse> =
         handleApiCall(
             apiCall = { bookmarkService.getBookmarks(page, size, filter) },
-            transform = { response ->
-                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
-            },
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun addBookmark(hearitId: Long): Result<NetworkResult<BookmarkIdResponse>> =
+    override suspend fun addBookmark(hearitId: Long): NetworkResult<BookmarkIdResponse> =
         handleApiCall(
             apiCall = { bookmarkService.postBookmark(hearitId) },
-            transform = { response ->
-                response.body() ?: throw IllegalStateException(ERROR_RESPONSE_BODY_NULL_MESSAGE)
-            },
             errorHandler = errorResponseHandler,
         )
 
-    override suspend fun deleteBookmark(bookmarkId: Long): Result<NetworkResult<Unit>> =
-        handleApiCall(
+    override suspend fun deleteBookmark(bookmarkId: Long): NetworkResult<Unit> =
+        handleApiCallUnit(
             apiCall = { bookmarkService.deleteBookmark(bookmarkId) },
-            transform = { },
             errorHandler = errorResponseHandler,
         )
 }

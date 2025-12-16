@@ -48,7 +48,6 @@ class SearchViewModelTest {
                 categoryRepository = categoryRepository,
                 hearitRepository = hearitRepository,
                 recentKeywordRepository = recentKeywordRepository,
-                initialInput = null,
             )
     }
 

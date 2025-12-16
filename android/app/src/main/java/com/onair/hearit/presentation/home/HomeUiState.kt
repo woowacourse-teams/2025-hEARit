@@ -6,9 +6,10 @@ import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.domain.model.isLoggedIn
 
 data class HomeUiState(
-    val userInfo: UserInfo? = null,
+    val userInfo: UserInfo = UserInfo.default(),
     val recommendHearits: List<RecommendHearit> = emptyList(),
     val playingHistoryHearits: List<PlayingHistoryHearit> = emptyList(),
     val recentUploadHearits: List<RecentUploadHearit> = emptyList(),
@@ -16,8 +17,10 @@ data class HomeUiState(
     val recommendationCategories: List<RecommendationCategories> = emptyList(),
     val loadingKeys: Set<HomeLoadKey> = emptySet(),
 ) {
+    val showRecommendHearits: Boolean
+        get() = !isLoading && recommendHearits.isNotEmpty()
     val isLoggedIn: Boolean
-        get() = userInfo != null
+        get() = userInfo.isLoggedIn()
 
     val showRecentUpload: Boolean
         get() = !isLoading && recentUploadHearits.isNotEmpty()
@@ -27,6 +30,9 @@ data class HomeUiState(
 
     val showBookmark: Boolean
         get() = !isLoading && playingBookmarkHearits.isNotEmpty()
+
+    val showCategories: Boolean
+        get() = !isLoading && recommendationCategories.isNotEmpty()
 
     val isLoading: Boolean
         get() = loadingKeys.isNotEmpty()

@@ -5,15 +5,17 @@ import com.onair.hearit.data.datasource.remote.AuthRemoteDataSource
 import com.onair.hearit.data.dto.KakaoLoginRequest
 import com.onair.hearit.data.dto.TokenReissueRequest
 import com.onair.hearit.data.mapper.toDomain
+import com.onair.hearit.data.toDomainResult
 import com.onair.hearit.domain.model.LoginToken
 import com.onair.hearit.domain.repository.AuthRepository
+import javax.inject.Inject
 
-class AuthRepositoryImpl(
+class AuthRepositoryImpl @Inject constructor(
     private val authLocalDataSource: AuthLocalDataSource,
     private val authRemoteDataSource: AuthRemoteDataSource,
 ) : AuthRepository {
     override suspend fun checkAccessToken(accessToken: String): Result<Unit> =
-        authRemoteDataSource.checkAccessToken(accessToken).mapOrThrowDomain { }
+        authRemoteDataSource.checkAccessToken(accessToken).toDomainResult()
 
     override suspend fun getAccessToken(): Result<String> = authLocalDataSource.getAccessToken()
 
@@ -33,14 +35,14 @@ class AuthRepositoryImpl(
     override suspend fun kakaoLogin(accessToken: String): Result<LoginToken> =
         authRemoteDataSource
             .kakaoLogin(KakaoLoginRequest(accessToken))
-            .mapOrThrowDomain { it.toDomain() }
+            .toDomainResult { it.toDomain() }
 
     override suspend fun reissue(refreshToken: String): Result<String> =
         authRemoteDataSource
             .refreshAccessToken(TokenReissueRequest(refreshToken))
-            .mapOrThrowDomain { it.accessToken }
+            .toDomainResult { it.accessToken }
 
-    override suspend fun withdraw(): Result<Unit> = authRemoteDataSource.withdraw().mapOrThrowDomain { }
+    override suspend fun withdraw(): Result<Unit> = authRemoteDataSource.withdraw().toDomainResult()
 
     override suspend fun clearAuthData(): Result<Unit> = authLocalDataSource.clearAuthData()
 }
