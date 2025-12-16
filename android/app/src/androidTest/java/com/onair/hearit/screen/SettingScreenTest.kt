@@ -33,6 +33,46 @@ class SettingScreenTest {
     }
 
     @Test
+    fun `화면에_설정_메뉴_항목들이_표시된다`() {
+        // given
+        every { mockViewModel.userInfo } returns MutableStateFlow<UserInfo?>(null).asStateFlow()
+
+        composeTestRule.setContent {
+            SettingScreen(
+                viewModel = mockViewModel,
+                onBackClick = {},
+                onProfileClick = {},
+                onLogin = {},
+                onLogout = {},
+                onWithdraw = {},
+            )
+        }
+
+        composeTestRule.waitForIdle()
+
+        // then
+        composeTestRule
+            .onNodeWithText("설정")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("내 정보")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("개인정보처리방침")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("이용 약관")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("오픈 라이선스")
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun `로그인_안된_경우_로그인_하러가기가_표시된다`() {
         // given
         every { mockViewModel.userInfo } returns MutableStateFlow<UserInfo?>(null).asStateFlow()
