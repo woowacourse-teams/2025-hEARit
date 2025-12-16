@@ -7,8 +7,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: ${MYSQL_MIGRATION_USER}
+      MYSQL_PASSWORD: ${MYSQL_MIGRATION_PASSWORD}
       TZ: Asia/Seoul
     volumes:
       - mysql-prod-data:/var/lib/mysql
@@ -23,13 +23,26 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_TEST_USER_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: ${MYSQL_MIGRATION_USER}
+      MYSQL_PASSWORD: ${MYSQL_MIGRATION_PASSWORD}
       TZ: Asia/Seoul
     volumes:
       - mysql-test-data:/var/lib/mysql
     restart: unless-stopped
+  hearit-redis:
+    image: redis:alpine
+    container_name: hearit-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: >
+      redis-server
+      --requirepass "${REDIS_PASSWORD}"
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: always
 
 volumes:
   mysql-prod-data:
   mysql-test-data:
+  redis-data:
