@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,6 +22,7 @@ fun SearchMainRoute(
 ) {
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val toastMessage by viewModel.toastMessage.observeAsState()
+    val immutableCategories = remember(categories) { categories.toImmutableList() }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -35,7 +37,7 @@ fun SearchMainRoute(
     }
 
     SearchMainScreen(
-        categories = categories.toImmutableList(),
+        categories = immutableCategories,
         onSearchBarClick = onSearchBarClick,
         onCategoryClick = { category ->
             onCategoryClick(

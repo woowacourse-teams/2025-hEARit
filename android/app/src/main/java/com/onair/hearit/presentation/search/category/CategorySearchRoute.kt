@@ -23,7 +23,9 @@ fun CategorySearchRoute(
 
     LaunchedEffect(Unit) {
         viewModel.fetchResultData(isInitial = true)
+    }
 
+    LaunchedEffect(mainViewModel.categoryUpdated) {
         mainViewModel.categoryUpdated.collect {
             viewModel.fetchResultData(isInitial = true)
         }
