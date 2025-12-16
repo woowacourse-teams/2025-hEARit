@@ -6,12 +6,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-
 @Configuration
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-        name = "hearit.playing-history.buffer-type",
-        havingValue = "redis"
-)
 public class RedisConfig {
 
     @Bean

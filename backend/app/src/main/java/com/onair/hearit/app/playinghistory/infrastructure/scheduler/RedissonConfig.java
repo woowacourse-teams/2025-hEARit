@@ -12,10 +12,6 @@ import org.springframework.context.annotation.Configuration;
  * - Playing History Redis Write-Back 패턴에서 동시성 제어를 위해 사용
  */
 @Configuration
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-        name = "hearit.playing-history.buffer-type",
-        havingValue = "redis"
-)
 public class RedissonConfig {
 
     @Value("${spring.data.redis.host}")
