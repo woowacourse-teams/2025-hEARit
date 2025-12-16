@@ -1,6 +1,5 @@
 package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.storage.LocalPlayingHistoryStorage;
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.storage.RedisPlayingHistoryStorage;
 import com.onair.hearit.core.domain.PlayingHistory;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class PlayingHistoryBufferFacade implements PlayingHistoryBuffer {
 
     private final RedisPlayingHistoryStorage primaryStorage;
-    private final LocalPlayingHistoryStorage fallbackStorage;
+    private final PlayingHistoryMapBuffer fallbackStorage;
 
     @Override
     public void add(PlayingHistory playingHistory, long clientEventTime) {
