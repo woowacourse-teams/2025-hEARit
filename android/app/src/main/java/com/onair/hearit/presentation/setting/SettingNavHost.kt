@@ -6,8 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.onair.hearit.presentation.setting.SettingRoute.ALARM
 import com.onair.hearit.presentation.setting.SettingRoute.PROFILE
 import com.onair.hearit.presentation.setting.SettingRoute.SETTING
+import com.onair.hearit.presentation.setting.screen.AlarmScreen
 import com.onair.hearit.presentation.setting.screen.ProfileScreen
 import com.onair.hearit.presentation.setting.screen.SettingScreen
 
@@ -33,6 +35,7 @@ fun SettingNavHost(
                 viewModel = viewModel,
                 onBackClick = onExitSetting,
                 onProfileClick = { navController.navigate(PROFILE) },
+                onAlarmClick = { navController.navigate(ALARM) },
                 onLogin = onLogin,
                 onLogout = onLogout,
                 onWithdraw = onWithdraw,
@@ -45,10 +48,15 @@ fun SettingNavHost(
                 onBackClick = { navController.popBackStack() },
             )
         }
+
+        composable(ALARM) {
+            AlarmScreen(onBackClick = { navController.popBackStack() })
+        }
     }
 }
 
 object SettingRoute {
     const val SETTING = "setting"
     const val PROFILE = "profile"
+    const val ALARM = "alarm"
 }

@@ -85,6 +85,7 @@
     <string name="setting_withdrawal">회원탈퇴</string>
     <string name="setting_logout">로그아웃</string>
     <string name="setting_profile">내 정보</string>
+    <string name="setting_alarm">푸시 알림</string>
     <string name="privacy_policy">개인정보처리방침</string>
     <string name="terms_of_use">이용 약관</string>
     <string name="open_license">오픈 라이선스</string>
