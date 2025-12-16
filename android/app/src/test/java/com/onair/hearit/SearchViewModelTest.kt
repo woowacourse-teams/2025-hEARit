@@ -1,7 +1,6 @@
 package com.onair.hearit
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.SavedStateHandle
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
@@ -43,8 +42,6 @@ class SearchViewModelTest {
         categoryRepository = mockk()
         hearitRepository = mockk()
         recentKeywordRepository = mockk()
-
-        val savedStateHandle = SavedStateHandle()
 
         viewModel =
             SearchViewModel(

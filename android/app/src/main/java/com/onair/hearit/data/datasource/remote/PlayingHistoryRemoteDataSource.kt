@@ -5,7 +5,7 @@ import com.onair.hearit.data.dto.PlayingHistoryRequest
 import com.onair.hearit.data.dto.PlayingHistoryResponse
 
 interface PlayingHistoryRemoteDataSource {
-    suspend fun getPlayingHistories(): Result<NetworkResult<List<PlayingHistoryResponse>>>
+    suspend fun getPlayingHistories(): NetworkResult<List<PlayingHistoryResponse>>
 
-    suspend fun addPlayingHistory(playingHistoryRequest: PlayingHistoryRequest): Result<NetworkResult<Unit>>
+    suspend fun addPlayingHistory(playingHistoryRequest: PlayingHistoryRequest): NetworkResult<Unit>
 }

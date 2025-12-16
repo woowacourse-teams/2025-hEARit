@@ -1,6 +1,7 @@
 package com.onair.hearit.data.repository
 
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSource
+import com.onair.hearit.data.toDomainResult
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.OriginalAudioUrl
 import com.onair.hearit.domain.model.ScriptLine
@@ -15,7 +16,7 @@ class MediaFileRepositoryImpl @Inject constructor(
     override suspend fun getShortAudioUrl(hearitId: Long): Result<ShortAudioUrl> =
         mediaFileRemoteDataSource
             .getShortAudioUrl(hearitId)
-            .mapOrThrowDomain { response ->
+            .toDomainResult { response ->
                 ShortAudioUrl(
                     id = response.id,
                     url = response.url,
@@ -25,11 +26,11 @@ class MediaFileRepositoryImpl @Inject constructor(
     override suspend fun getScriptLines(hearitId: Long): Result<List<ScriptLine>> =
         mediaFileRemoteDataSource
             .getScriptUrl(hearitId)
-            .mapOrThrowDomain { it.url }
+            .toDomainResult { it.url }
             .flatMap { scriptUrl ->
                 mediaFileRemoteDataSource
                     .getScriptJson(scriptUrl)
-                    .mapOrThrowDomain { responseBody ->
+                    .toDomainResult { responseBody ->
                         responseBody.use { body ->
                             val jsonString = body.string()
                             Json.decodeFromString(jsonString)
@@ -40,7 +41,7 @@ class MediaFileRepositoryImpl @Inject constructor(
     override suspend fun getOriginalAudioUrl(hearitId: Long): Result<OriginalAudioUrl> =
         mediaFileRemoteDataSource
             .getOriginalAudioUrl(hearitId)
-            .mapOrThrowDomain { response -> OriginalAudioUrl(id = response.id, url = response.url) }
+            .toDomainResult { response -> OriginalAudioUrl(id = response.id, url = response.url) }
 
     override suspend fun getOriginalHearitItem(item: Hearit): Result<Hearit> = combineHearit(item)
 
