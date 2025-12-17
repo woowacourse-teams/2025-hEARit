@@ -1,4 +1,4 @@
-package com.onair.hearit.app.playinghistory.infrastructure.buffer.storage;
+package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RedisPlayingHistoryStorage implements PlayingHistoryBuffer {
+public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
     private static final String REDIS_HASH_KEY = "playing_history";
     private static final String LOCK_PREFIX = "lock:playing_history:";

@@ -1,4 +1,4 @@
-package com.onair.hearit.app.playinghistory.infrastructure.buffer.storage;
+package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryRedisBuffer;
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
@@ -49,7 +50,7 @@ import org.testcontainers.utility.DockerImageName;
         PlayingHistoryCommandRepository.class,
         PlayingHistoryConverter.class
 })
-class RedisPlayingHistoryStorageTest {
+class PlayingHistoryRedisBufferTest {
 
     static GenericContainer<?> redisContainer;
     static RedisTemplate<String, String> redisTemplate;
@@ -71,7 +72,7 @@ class RedisPlayingHistoryStorageTest {
     PlayingHistoryConverter converter;
 
     ObjectMapper objectMapper = new ObjectMapper();
-    RedisPlayingHistoryStorage storage;
+    PlayingHistoryRedisBuffer storage;
 
     @BeforeAll
     static void startRedis() {
@@ -118,7 +119,7 @@ class RedisPlayingHistoryStorageTest {
         // Redis 데이터 초기화
         redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
 
-        storage = new RedisPlayingHistoryStorage(
+        storage = new PlayingHistoryRedisBuffer(
                 redisTemplate,
                 redissonClient,
                 commandRepository,
