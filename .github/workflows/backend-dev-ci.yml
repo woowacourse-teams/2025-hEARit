@@ -35,6 +35,9 @@ jobs:
       DB_MYSQL_HOST: ${{ secrets.DB_MYSQL_HOST }}
       MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
       MYSQL_WRITER_ENDPOINT: ${{ secrets.MYSQL_WRITER_ENDPOINT }}
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
 
     steps:
       - name: Checkout
