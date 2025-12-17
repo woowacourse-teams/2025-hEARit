@@ -43,7 +43,6 @@ public class PlayingHistoryBufferFacade implements PlayingHistoryBuffer {
     public void flush() {
         // Primary flush
         flushStorage("Primary (Redis)", primaryStorage);
-
         // Fallback flush
         flushStorage("Fallback (Local)", fallbackStorage);
     }
@@ -57,12 +56,11 @@ public class PlayingHistoryBufferFacade implements PlayingHistoryBuffer {
         try {
             int size = storage.size();
             if (size > 0) {
-                log.debug("{} flush 시작: {} 건", storageName, size);
+                log.debug("{}flush 시작: {} 건", storageName, size);
                 storage.flush();
             }
         } catch (Exception e) {
-            log.error("{} flush 실패 (데이터는 유지됨)", storageName, e);
-
+            log.error("{} flush 실패 ", storageName, e);
         }
     }
 
