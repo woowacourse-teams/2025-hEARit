@@ -54,6 +54,10 @@ dependencies {
     testRuntimeOnly 'com.mysql:mysql-connector-j'
     testRuntimeOnly 'com.h2database:h2'
 
+    // Testcontainers for Redis
+    testImplementation 'org.testcontainers:testcontainers:1.19.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+
     // REST Docs & restdocs-api-spec
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation "com.epages:restdocs-api-spec-mockmvc:0.18.2"
