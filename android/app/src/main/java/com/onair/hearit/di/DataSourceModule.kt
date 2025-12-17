@@ -5,6 +5,8 @@ import com.onair.hearit.data.datasource.local.AuthLocalDataSource
 import com.onair.hearit.data.datasource.local.AuthLocalDataSourceImpl
 import com.onair.hearit.data.datasource.local.HearitLocalDataSource
 import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
+import com.onair.hearit.data.datasource.local.NotificationLocalDataSource
+import com.onair.hearit.data.datasource.local.NotificationLocalDataSourceImpl
 import com.onair.hearit.data.datasource.local.UserLocalDataSource
 import com.onair.hearit.data.datasource.local.UserLocalDataSourceImpl
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSource
@@ -76,6 +78,10 @@ abstract class DataSourceModule {
     @Binds
     @Singleton
     abstract fun bindUserLocalDataSource(impl: UserLocalDataSourceImpl): UserLocalDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationLocalDataSource(impl: NotificationLocalDataSourceImpl): NotificationLocalDataSource
 
     companion object {
         @Provides

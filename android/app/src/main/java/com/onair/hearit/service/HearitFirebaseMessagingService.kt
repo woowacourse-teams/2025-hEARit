@@ -63,7 +63,7 @@ class HearitFirebaseMessagingService : FirebaseMessagingService() {
         val notification =
             NotificationCompat
                 .Builder(this, HearitNotificationChannels.COMMUTE_PUSH_CHANNEL_ID)
-                .setSmallIcon(R.drawable.img_notification)
+                .setSmallIcon(R.drawable.ic_mini_notification)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setContentIntent(pendingIntent)

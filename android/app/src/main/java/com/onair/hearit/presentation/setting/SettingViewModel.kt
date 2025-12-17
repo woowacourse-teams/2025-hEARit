@@ -7,6 +7,7 @@ import com.onair.hearit.BuildConfig
 import com.onair.hearit.R
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.domain.repository.NotificationPreferenceRepository
 import com.onair.hearit.domain.repository.UserRepository
 import com.onair.hearit.presentation.SingleLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val notificationPreferenceRepository: NotificationPreferenceRepository,
 ) : ViewModel() {
     val appVersion = BuildConfig.VERSION_NAME
 
@@ -35,9 +37,8 @@ class SettingViewModel @Inject constructor(
     val toastMessage: LiveData<Int> = _toastMessage
 
     init {
-        if (_userInfo.value == null) {
-            fetchUserInfo()
-        }
+        loadUserInfo()
+        loadPushNotificationSetting()
     }
 
     fun onPushNotificationToggleRequested(isEnabled: Boolean) {
@@ -52,13 +53,47 @@ class SettingViewModel @Inject constructor(
         _isPushNotificationEnabled.value = isGranted
         _shouldRequestNotificationPermission.value = false
 
+        persistPushNotificationSetting(isGranted)
+
         if (!isGranted) {
             _toastMessage.value = R.string.all_toast_notification_permission_denied
         }
     }
 
-    fun onNotificationPermissionRequestHandled() {
+    fun onSystemNotificationAvailabilityChecked(isNotificationAvailable: Boolean) {
+        if (isNotificationAvailable) return
+        if (!_isPushNotificationEnabled.value && !_shouldRequestNotificationPermission.value) return
+
+        _isPushNotificationEnabled.value = false
         _shouldRequestNotificationPermission.value = false
+        persistPushNotificationSetting(false)
+    }
+
+    private fun loadUserInfo() {
+        if (_userInfo.value != null) return
+        fetchUserInfo()
+    }
+
+    private fun loadPushNotificationSetting() {
+        viewModelScope.launch {
+            notificationPreferenceRepository
+                .getIsCommutePushEnabled()
+                .onSuccess { isEnabled ->
+                    _isPushNotificationEnabled.value = isEnabled
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                }
+        }
+    }
+
+    private fun persistPushNotificationSetting(isEnabled: Boolean) {
+        viewModelScope.launch {
+            notificationPreferenceRepository
+                .saveIsCommutePushEnabled(isEnabled)
+                .onFailure { throwable ->
+                    Timber.e(throwable)
+                }
+        }
     }
 
     private fun fetchUserInfo() {
