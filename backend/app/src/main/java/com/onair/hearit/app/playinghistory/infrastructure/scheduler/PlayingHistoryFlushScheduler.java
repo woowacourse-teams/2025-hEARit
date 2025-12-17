@@ -1,4 +1,4 @@
-package com.onair.hearit.app.playinghistory.infrastructure.buffer.scheduler;
+package com.onair.hearit.app.playinghistory.infrastructure.scheduler;
 
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryBuffer;
 import jakarta.annotation.PreDestroy;

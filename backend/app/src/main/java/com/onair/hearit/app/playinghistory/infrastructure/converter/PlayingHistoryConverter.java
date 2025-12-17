@@ -1,4 +1,4 @@
-package com.onair.hearit.app.playinghistory.infrastructure.buffer.converter;
+package com.onair.hearit.app.playinghistory.infrastructure.converter;
 
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayValue;
 import com.onair.hearit.core.domain.Hearit;

@@ -1,7 +1,7 @@
 package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
 import com.onair.hearit.app.exception.custom.BufferRequestException;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter;
+import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import java.util.List;

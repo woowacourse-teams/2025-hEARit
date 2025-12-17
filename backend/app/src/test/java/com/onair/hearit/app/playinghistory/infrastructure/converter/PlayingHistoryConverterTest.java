@@ -1,4 +1,4 @@
-package com.onair.hearit.app.playinghistory.infrastructure.buffer.converter;
+package com.onair.hearit.app.playinghistory.infrastructure.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayValue;
+import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;

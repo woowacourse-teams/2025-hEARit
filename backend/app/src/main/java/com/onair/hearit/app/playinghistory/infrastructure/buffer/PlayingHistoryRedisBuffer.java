@@ -2,9 +2,7 @@ package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryBuffer;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayValue;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter;
+import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import java.util.ArrayList;

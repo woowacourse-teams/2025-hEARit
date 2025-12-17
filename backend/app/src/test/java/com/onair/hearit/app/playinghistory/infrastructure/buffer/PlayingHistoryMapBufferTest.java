@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -48,11 +49,11 @@ class PlayingHistoryMapBufferTest {
     PlayingHistoryRepository playingHistoryRepository;
 
     PlayingHistoryMapBuffer buffer;
-    com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter converter;
+    PlayingHistoryConverter converter;
 
     @BeforeEach
     void setup() {
-        converter = new com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter(hearitRepository);
+        converter = new PlayingHistoryConverter(hearitRepository);
         buffer = new PlayingHistoryMapBuffer(commandRepository, converter);
     }
 

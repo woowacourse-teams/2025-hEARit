@@ -6,8 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.fixture.DbHelper;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryRedisBuffer;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter;
+import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;

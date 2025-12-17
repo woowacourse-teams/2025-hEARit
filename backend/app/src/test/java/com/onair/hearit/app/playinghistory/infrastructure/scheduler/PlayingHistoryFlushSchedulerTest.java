@@ -1,11 +1,12 @@
-package com.onair.hearit.app.playinghistory.infrastructure.buffer.scheduler;
+package com.onair.hearit.app.playinghistory.infrastructure.scheduler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryMapBuffer;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter;
+import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
+import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryFlushScheduler;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
