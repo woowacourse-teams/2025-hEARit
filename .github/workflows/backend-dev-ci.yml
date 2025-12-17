@@ -33,11 +33,10 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --health-cmd="redis-cli -a ${{ secrets.REDIS_PASSWORD }} ping"
+          --health-cmd="redis-cli ping"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-          --requirepass "${{ secrets.REDIS_PASSWORD }}"
 
     env:
       MYSQL_TEST_USER_PASSWORD: ${{ secrets.MYSQL_TEST_USER_PASSWORD }}
