@@ -29,6 +29,14 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".service.HearitFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".presentation.login.LoginActivity"
             android:exported="false" />

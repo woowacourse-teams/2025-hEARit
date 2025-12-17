@@ -180,7 +180,7 @@ class PlaybackService : MediaSessionService() {
     companion object {
         private const val NOTIFICATION_ID = 1001
         private const val SESSION_ID = "hearit_session"
-        private const val CHANNEL_ID = "hearit_channel"
+        private const val CHANNEL_ID = "hearit_playback_channel"
         private const val REWIND_INTERVAL_MILLIS = 10_000L
         private const val FAST_FORWARD_INTERVAL_MILLIS = 10_000L
 
