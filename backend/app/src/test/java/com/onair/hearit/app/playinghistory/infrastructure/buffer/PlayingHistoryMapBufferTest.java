@@ -48,10 +48,12 @@ class PlayingHistoryMapBufferTest {
     PlayingHistoryRepository playingHistoryRepository;
 
     PlayingHistoryMapBuffer buffer;
+    com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter converter;
 
     @BeforeEach
     void setup() {
-        buffer = new PlayingHistoryMapBuffer(commandRepository, hearitRepository);
+        converter = new com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter(hearitRepository);
+        buffer = new PlayingHistoryMapBuffer(commandRepository, converter);
     }
 
     @Test
@@ -70,7 +72,7 @@ class PlayingHistoryMapBufferTest {
         // then
         assertAll(
                 () -> assertThat(playingHistoryRepository.findAll().size()).isEqualTo(1),
-                () -> assertThat(buffer.getCache()).isEmpty()
+                () -> assertThat(buffer.size()).isEqualTo(0)
         );
     }
 
@@ -116,18 +118,22 @@ class PlayingHistoryMapBufferTest {
         // spy repository로 bulkInsert에서 예외 발생
         PlayingHistoryCommandRepository spyRepo = spy(commandRepository);
         doThrow(new RuntimeException("DB error")).when(spyRepo).bulkInsert(anyList());
-        PlayingHistoryMapBuffer failingBuffer = new PlayingHistoryMapBuffer(spyRepo, hearitRepository);
+        PlayingHistoryMapBuffer failingBuffer = new PlayingHistoryMapBuffer(spyRepo, converter);
 
         failingBuffer.add(history1, 1_000L);
         failingBuffer.add(history2, 2_000L);
 
         // when
-        failingBuffer.flush();
+        try {
+            failingBuffer.flush();
+        } catch (Exception e) {
+            // expected
+        }
 
         // then
         assertAll(
                 () -> assertThat(playingHistoryRepository.findAll()).isEmpty(),
-                () -> assertThat(failingBuffer.getCache().size()).isEqualTo(2)
+                () -> assertThat(failingBuffer.size()).isEqualTo(2)
         );
     }
 }

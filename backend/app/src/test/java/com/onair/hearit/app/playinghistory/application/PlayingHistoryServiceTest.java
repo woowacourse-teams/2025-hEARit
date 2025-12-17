@@ -47,7 +47,8 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryMapBuffer.class,
-        PlayingHistoryCommandRepository.class, PlayingHistoryService.class, UserInfoService.class})
+        PlayingHistoryCommandRepository.class, PlayingHistoryService.class, UserInfoService.class,
+        com.onair.hearit.app.playinghistory.infrastructure.buffer.converter.PlayingHistoryConverter.class})
 class PlayingHistoryServiceTest {
 
     @Autowired

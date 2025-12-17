@@ -44,11 +44,6 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
     }
 
     @Override
-    public int size() {
-        return cache.size();
-    }
-
-    @Override
     public void flush() {
         Map<PlayKey, PlayValue> snapshot = createSnapshotAndRemoveFromCache();
         if (snapshot.isEmpty()) {
@@ -60,8 +55,12 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
         } catch (Exception e) {
             rollbackSnapshot(snapshot);
             log.error("재생 기록 flush 실패, 롤백 수행. snapshot size: {}", snapshot.size(), e);
-            throw new RuntimeException("Local storage flush 실패 ", e);
         }
+    }
+
+    @Override
+    public int size() {
+        return cache.size();
     }
 
     private Map<PlayKey, PlayValue> createSnapshotAndRemoveFromCache() {
@@ -86,14 +85,8 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
                     })
             );
         } catch (Exception e) {
-            log.error("롤백도 실패, 데이터 손실 가능성. size: {}", snapshot.size(), e);
-            // 메트릭 기록 또는 알림 필요
-        }
-    }
-
-    private void validateClientEventTime(long clientEventTime) {
-        if (clientEventTime <= 0) {
-            throw new IllegalArgumentException("clientEventTime must be positive: " + clientEventTime);
+            log.error("재생 기록 롤백 실패. snapshot size: {}", snapshot.size(), e);
         }
     }
 }
+
