@@ -16,11 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import com.google.firebase.messaging.FirebaseMessaging
 import com.onair.hearit.R
 import com.onair.hearit.presentation.setting.SettingViewModel
 import com.onair.hearit.presentation.setting.component.AlarmContent
 import com.onair.hearit.presentation.setting.component.SettingTopBar
 import com.onair.hearit.presentation.theme.HearitBlack
+
+private const val COMMUTE_NOTIFICATION_TOPIC: String = "commute_1900"
 
 @Composable
 fun AlarmScreen(
@@ -38,6 +41,14 @@ fun AlarmScreen(
                 viewModel.onPostNotificationPermissionResult(isGranted)
             },
         )
+
+    LaunchedEffect(isPushNotificationEnabled) {
+        if (isPushNotificationEnabled) {
+            FirebaseMessaging.getInstance().subscribeToTopic(COMMUTE_NOTIFICATION_TOPIC)
+        } else {
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(COMMUTE_NOTIFICATION_TOPIC)
+        }
+    }
 
     LaunchedEffect(shouldRequestPermission) {
         if (!shouldRequestPermission) return@LaunchedEffect
