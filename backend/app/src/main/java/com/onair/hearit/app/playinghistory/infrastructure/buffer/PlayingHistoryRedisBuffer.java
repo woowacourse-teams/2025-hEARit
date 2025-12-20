@@ -55,13 +55,13 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             }
 
             try {
-                PlayValue incoming = PlayValue.from(playingHistory, clientEventTime);
+                PlayHistoryValue incoming = PlayHistoryValue.from(playingHistory, clientEventTime);
                 HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
 
                 // 기존 데이터 조회
                 String existingJson = hashOps.get(REDIS_HASH_KEY, field);
                 if (existingJson != null) {
-                    PlayValue existing = objectMapper.readValue(existingJson, PlayValue.class);
+                    PlayHistoryValue existing = objectMapper.readValue(existingJson, PlayHistoryValue.class);
                     // clientEventTime이 더 최신인 경우에만 업데이트
                     if (existing.isMoreRecentThan(incoming)) {
                         return;
@@ -96,22 +96,22 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             log.info("Redis 재생 기록 flush 시작: {} 건", snapshot.size());
 
             // Redis 데이터 → PlayValue 변환
-            List<PlayValue> playValues = new ArrayList<>();
+            List<PlayHistoryValue> playHistoryValues = new ArrayList<>();
             for (Map.Entry<String, String> entry : snapshot.entrySet()) {
                 try {
-                    PlayValue value = objectMapper.readValue(entry.getValue(), PlayValue.class);
-                    playValues.add(value);
+                    PlayHistoryValue value = objectMapper.readValue(entry.getValue(), PlayHistoryValue.class);
+                    playHistoryValues.add(value);
                 } catch (JsonProcessingException e) {
                     log.error("재생 기록 역직렬화 실패: field={}", entry.getKey(), e);
                 }
             }
 
-            if (playValues.isEmpty()) {
+            if (playHistoryValues.isEmpty()) {
                 return;
             }
 
             // PlayValue → PlayingHistory 변환
-            List<PlayingHistory> histories = converter.toPlayingHistories(playValues);
+            List<PlayingHistory> histories = converter.toPlayingHistories(playHistoryValues);
 
             // DB 일괄 저장
             commandRepository.bulkInsert(histories);

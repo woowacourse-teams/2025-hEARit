@@ -5,8 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayValue;
-import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayHistoryValue;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;
@@ -37,7 +36,7 @@ class PlayingHistoryConverterTest {
     @DisplayName("빈 컬렉션을 변환하면 빈 리스트를 반환한다")
     void toPlayingHistories_emptyCollection() {
         // given
-        List<PlayValue> emptyList = List.of();
+        List<PlayHistoryValue> emptyList = List.of();
 
         // when
         List<PlayingHistory> result = converter.toPlayingHistories(emptyList);
@@ -56,8 +55,8 @@ class PlayingHistoryConverterTest {
 
         when(hearitRepository.findAllById(anySet())).thenReturn(List.of(hearit1, hearit2));
 
-        PlayValue value1 = new PlayValue("user-uuid-1", 1L, 5000L, 1000L);
-        PlayValue value2 = new PlayValue("user-uuid-2", 2L, 10000L, 2000L);
+        PlayHistoryValue value1 = new PlayHistoryValue("user-uuid-1", 1L, 5000L, 1000L);
+        PlayHistoryValue value2 = new PlayHistoryValue("user-uuid-2", 2L, 10000L, 2000L);
 
         // when
         List<PlayingHistory> result = converter.toPlayingHistories(List.of(value1, value2));
@@ -84,14 +83,14 @@ class PlayingHistoryConverterTest {
         long clientEventTime = 1000L;
 
         // when
-        PlayValue playValue = PlayValue.from(history, clientEventTime);
+        PlayHistoryValue playHistoryValue = PlayHistoryValue.from(history, clientEventTime);
 
         // then
         assertAll(
-                () -> assertThat(playValue.userUuid()).isEqualTo("user-uuid"),
-                () -> assertThat(playValue.hearitId()).isEqualTo(1L),
-                () -> assertThat(playValue.lastPlayTime()).isEqualTo(5000L),
-                () -> assertThat(playValue.clientEventTime()).isEqualTo(1000L)
+                () -> assertThat(playHistoryValue.userUuid()).isEqualTo("user-uuid"),
+                () -> assertThat(playHistoryValue.hearitId()).isEqualTo(1L),
+                () -> assertThat(playHistoryValue.lastPlayTime()).isEqualTo(5000L),
+                () -> assertThat(playHistoryValue.clientEventTime()).isEqualTo(1000L)
         );
     }
 
@@ -99,8 +98,8 @@ class PlayingHistoryConverterTest {
     @DisplayName("isMoreRecentThan()으로 최신 데이터를 판별한다")
     void playValue_isMoreRecentThan() {
         // given
-        PlayValue older = new PlayValue("user", 1L, 5000L, 1000L);
-        PlayValue newer = new PlayValue("user", 1L, 3000L, 2000L);
+        PlayHistoryValue older = new PlayHistoryValue("user", 1L, 5000L, 1000L);
+        PlayHistoryValue newer = new PlayHistoryValue("user", 1L, 3000L, 2000L);
 
         // when & then
         assertAll(

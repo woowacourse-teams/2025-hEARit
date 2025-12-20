@@ -18,7 +18,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
 
     private static final int BUFFER_SIZE = 100_000;
 
-    private final Map<PlayKey, PlayValue> cache = new ConcurrentHashMap<>();
+    private final Map<PlayKey, PlayHistoryValue> cache = new ConcurrentHashMap<>();
     private final PlayingHistoryCommandRepository playingHistoryCommandRepository;
     private final PlayingHistoryConverter converter;
 
@@ -29,7 +29,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
             if (existing == null) {
                 validateBufferSize(k);
             }
-            PlayValue incoming = PlayValue.from(playingHistory, clientEventTime);
+            PlayHistoryValue incoming = PlayHistoryValue.from(playingHistory, clientEventTime);
             if (existing != null && existing.isMoreRecentThan(incoming)) {
                 return existing;
             }
@@ -45,7 +45,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
 
     @Override
     public void flush() {
-        Map<PlayKey, PlayValue> snapshot = createSnapshotAndRemoveFromCache();
+        Map<PlayKey, PlayHistoryValue> snapshot = createSnapshotAndRemoveFromCache();
         if (snapshot.isEmpty()) {
             return;
         }
@@ -63,8 +63,8 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
         return cache.size();
     }
 
-    private Map<PlayKey, PlayValue> createSnapshotAndRemoveFromCache() {
-        Map<PlayKey, PlayValue> snapshot = new ConcurrentHashMap<>();
+    private Map<PlayKey, PlayHistoryValue> createSnapshotAndRemoveFromCache() {
+        Map<PlayKey, PlayHistoryValue> snapshot = new ConcurrentHashMap<>();
         cache.forEach((key, value) -> {
             if (cache.remove(key, value)) {
                 snapshot.put(key, value);
@@ -73,7 +73,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
         return snapshot;
     }
 
-    private void rollbackSnapshot(Map<PlayKey, PlayValue> snapshot) {
+    private void rollbackSnapshot(Map<PlayKey, PlayHistoryValue> snapshot) {
         try {
             snapshot.forEach((key, newValue) ->
                     cache.merge(key, newValue, (oldValue, incomingValue) -> {
