@@ -41,9 +41,7 @@ public class PlayingHistoryBufferFacade implements PlayingHistoryBuffer {
 
     @Override
     public void flush() {
-        // Primary flush
         flushStorage("Primary (Redis)", primaryStorage);
-        // Fallback flush
         flushStorage("Fallback (Local)", fallbackStorage);
     }
 
