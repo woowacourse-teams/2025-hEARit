@@ -29,7 +29,7 @@ dependencies {
 
     // Redis & Redisson
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.redisson:redisson-spring-boot-starter:3.35.0'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.52.0'
 
     // ShedLock (분산 스케줄러 락)
     implementation 'net.javacrumbs.shedlock:shedlock-spring:5.10.2'
