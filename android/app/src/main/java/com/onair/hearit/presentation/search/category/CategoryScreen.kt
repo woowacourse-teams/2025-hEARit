@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -59,7 +60,10 @@ import com.onair.hearit.presentation.toHashtagName
 import com.onair.hearit.presentation.toTimeString
 
 @Composable
-fun CategorySearchScreen(
+fun CategoryScreen(
+    categoryId: Long,
+    categoryName: String,
+    categoryColor: String,
     viewModel: SearchViewModel,
     mainViewModel: MainViewModel,
     onBack: () -> Unit,
@@ -67,28 +71,30 @@ fun CategorySearchScreen(
     modifier: Modifier = Modifier,
 ) {
     val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
-    val category = viewModel.currentCategory
 
     BackHandler(enabled = true) { onBack() }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchResultData(isInitial = true)
-
-        // 외부에서 카테고리 업데이트 신호가 올 때마다 데이터를 다시 가져옵니다.
-        // collect는 코루틴이 취소될 때까지 계속 실행됩니다.
+    LaunchedEffect(categoryId) {
+        viewModel.setCurrentCategory(categoryId, categoryName, categoryColor)
         mainViewModel.categoryUpdated.collect {
-            viewModel.fetchResultData(isInitial = true)
+            viewModel.fetchCategoryHearits(isInitial = true)
         }
     }
 
     GradientBackgroundScreen(
-        colorCode = category?.colorCode ?: "#000000",
-        categoryName = category?.name ?: "카테고리",
+        colorCode = categoryColor,
+        categoryName = categoryName,
         hearits = hearits,
         onBack = onBack,
         onHearitClick = onHearitClick,
         modifier = modifier,
     )
+
+    DisposableEffect(categoryId) {
+        onDispose {
+            viewModel.clearCategoryHearits()
+        }
+    }
 }
 
 @Composable
