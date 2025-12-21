@@ -19,6 +19,7 @@ import com.onair.hearit.presentation.search.main.SearchUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -35,8 +36,11 @@ class SearchViewModel @Inject constructor(
     private val _categories: MutableLiveData<List<Category>> = MutableLiveData()
     val categories: LiveData<List<Category>> = _categories
 
-    private val _recentKeywords: MutableLiveData<List<RecentSearch>> = MutableLiveData()
-    val recentKeywords: LiveData<List<RecentSearch>> = _recentKeywords
+    private val _recentKeywords = MutableStateFlow<List<RecentSearch>?>(null)
+    val recentKeywords: StateFlow<List<RecentSearch>?> = _recentKeywords.asStateFlow()
+
+    private val _currentCategory = MutableStateFlow<Category?>(null)
+    val currentCategory: StateFlow<Category?> = _currentCategory.asStateFlow()
 
     private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
     val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
@@ -49,30 +53,42 @@ class SearchViewModel @Inject constructor(
 
     private var currentInput: SearchInput? = null
 
-    val currentCategory: Category?
-        get() =
-            (currentInput as? SearchInput.Category)?.let {
-                Category(
-                    id = it.id,
-                    name = it.name,
-                    colorCode = it.colorCode,
-                )
-            }
+    private val _searchInput = MutableStateFlow<SearchInput?>(null)
+    val searchInput: StateFlow<SearchInput?> = _searchInput.asStateFlow()
 
     private var paging: Paging? = null
     private var currentPage = 0
     private var isLastPage = false
     private var isLoading = false
 
-    fun setSearchInput(input: SearchInput) {
+    fun setSearchInput(input: SearchInput.Keyword) {
         if (currentInput == input) return
-
-        currentInput = input
+        _searchInput.value = input
         resetPaging()
         _searchedHearits.value = emptyList()
         _categoryHearits.value = emptyList()
 
-        fetchResultData(isInitial = true)
+        fetchKeywordHearits(input.term, true)
+    }
+
+    fun setCurrentCategory(
+        id: Long,
+        name: String,
+        colorCode: String,
+    ) {
+        if (_currentCategory.value?.id == id) return
+
+        resetPaging()
+        _categoryHearits.value = emptyList()
+
+        _currentCategory.value =
+            Category(
+                id = id,
+                name = name,
+                colorCode = colorCode,
+            )
+
+        fetchCategoryHearits(isInitial = true)
     }
 
     fun refreshSearchResults() {
@@ -131,52 +147,54 @@ class SearchViewModel @Inject constructor(
     }
 
     fun fetchResultData(isInitial: Boolean) {
-        if (isLoading) return
         val input = currentInput ?: return
-        isLoading = true
 
         when (input) {
-            is SearchInput.Category -> fetchCategoryResultData(input.id, isInitial)
-            is SearchInput.Keyword -> fetchKeywordResultData(input.term, isInitial)
+            is SearchInput.Category -> fetchCategoryHearits(isInitial)
+            is SearchInput.Keyword -> fetchKeywordHearits(input.term, isInitial)
         }
     }
 
-    fun fetchCategoryResultData(
-        categoryId: Long,
-        isInitial: Boolean,
-    ) {
+    fun fetchCategoryHearits(isInitial: Boolean) {
+        val category = currentCategory.value ?: return
+
+        if (isLoading) return
+        if (!isInitial && isLastPage) return
+
+        isLoading = true
+
         viewModelScope.launch {
-            try {
-                val page = if (isInitial) 0 else currentPage + 1
-                val result = hearitRepository.getCategoryHearits(categoryId, page)
+            hearitRepository
+                .getCategoryHearits(category.id, if (isInitial) 0 else currentPage)
+                .onSuccess { response ->
+                    _categoryHearits.value =
+                        if (isInitial) {
+                            currentPage = 0
+                            response.items
+                        } else {
+                            _categoryHearits.value + response.items
+                        }
 
-                result
-                    .onSuccess { pageResult ->
-                        paging = pageResult.paging
-                        currentPage = pageResult.paging.page
-
-                        val updatedList =
-                            if (isInitial) {
-                                pageResult.items
-                            } else {
-                                _categoryHearits.value + pageResult.items
-                            }
-
-                        _categoryHearits.value = updatedList
-                    }.onFailure { throwable ->
-                        Timber.w(throwable)
-                        _toastMessage.value = R.string.category_toast_searched_hearits_load_fail
-                    }
-            } finally {
-                isLoading = false
-            }
+                    paging = response.paging
+                    isLastPage = response.paging.isLast
+                    currentPage++
+                    isLoading = false
+                }.onFailure {
+                    isLoading = false
+                    _toastMessage.value = R.string.category_toast_searched_hearits_load_fail
+                }
         }
     }
 
-    fun fetchKeywordResultData(
+    fun fetchKeywordHearits(
         term: String,
         isInitial: Boolean,
     ) {
+        if (isLoading) return
+        if (!isInitial && isLastPage) return
+
+        isLoading = true
+
         viewModelScope.launch {
             try {
                 val page = if (isInitial) 0 else currentPage + 1
@@ -220,6 +238,11 @@ class SearchViewModel @Inject constructor(
                     _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
                 }
         }
+    }
+
+    fun clearCategoryHearits() {
+        _categoryHearits.value = emptyList()
+        _currentCategory.value = null
     }
 
     fun clearToastMessage() {
