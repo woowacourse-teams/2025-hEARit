@@ -13,11 +13,11 @@ import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun CategorySearchRoute(
-    mainViewModel: MainViewModel,
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel(),
 ) {
     val categoryHearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
     val category = viewModel.currentCategory
