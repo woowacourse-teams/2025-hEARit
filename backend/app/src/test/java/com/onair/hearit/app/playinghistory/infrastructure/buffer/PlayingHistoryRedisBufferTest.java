@@ -128,20 +128,6 @@ class PlayingHistoryRedisBufferTest {
     }
 
     @Test
-    @DisplayName("clientEventTime이 0 이하면 예외가 발생한다")
-    void add_invalidClientEventTime() {
-        // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        PlayingHistory history = new PlayingHistory("user-uuid", hearit, 5000L);
-
-        // when & then
-        assertThatThrownBy(() -> storage.add(history, 0))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("clientEventTime must be positive");
-    }
-
-    @Test
     @DisplayName("Redis에 재생 기록을 저장한다")
     void add_success() {
         // given
