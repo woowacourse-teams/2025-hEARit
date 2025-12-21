@@ -4,33 +4,30 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.onair.hearit.R
-import com.onair.hearit.analytics.AnalyticsEventNames
+import androidx.navigation.compose.rememberNavController
 import com.onair.hearit.analytics.AnalyticsLogger
-import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.presentation.IntentKeys
-import com.onair.hearit.presentation.search.CategoryClickListener
+import com.onair.hearit.presentation.main.MainViewModel
+import com.onair.hearit.presentation.search.SearchNavHost
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.category.CategoryComposeFragment
-import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
-import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SearchComposeFragment :
-    Fragment(),
-    CategoryClickListener {
-    private val viewModel: SearchViewModel by activityViewModels()
+class SearchComposeFragment : Fragment() {
+    private val searchViewModel: SearchViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     @Inject
     lateinit var analyticsLogger: AnalyticsLogger
+
+    // 카테고리로 직접 들어왔는지 플래그
+    private val isDirectCategoryEntry: Boolean
+        get() = arguments?.getBoolean(IS_DIRECT_CATEGORY_ENTRY, false) ?: false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,58 +37,64 @@ class SearchComposeFragment :
         ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                SearchMainScreen(
-                    viewModel,
-                    onSearchBarClick = { navigateToRecent() },
-                    onCategoryClick = { id: Long, name: String, colorCode: String ->
-                        analyticsLogger.logEvent(
-                            AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
-                            mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
-                        )
-                        onCategoryClick(id, name, colorCode)
+                val navController = rememberNavController()
+
+                SearchNavHost(
+                    navController = navController,
+                    analyticsLogger = analyticsLogger,
+                    searchViewModel = searchViewModel,
+                    mainViewModel = mainViewModel,
+                    onHearitClick = { hearitId ->
+                        // Hearit 클릭 처리 (기존 방식 유지 또는 Navigation으로 전환)
+                        // 예: 기존 Fragment로 이동하거나 Compose 화면으로 이동
+                    },
+                    onCategoryBack = {
+                        if (isDirectCategoryEntry) {
+                            // 홈으로 돌아가기 (Fragment 종료)
+                            parentFragmentManager.popBackStack()
+                        } else {
+                            // 검색 메인으로 돌아가기
+                            navController.navigateUp()
+                        }
                     },
                 )
+
+                // HomeFragment에서 카테고리 정보가 넘어왔다면 자동 이동
+                LaunchedEffect(Unit) {
+                    arguments?.let { args ->
+                        val categoryId = args.getLong(CATEGORY_ID_KEY, -1L)
+                        if (categoryId != -1L) {
+                            val categoryName = args.getString(CATEGORY_NAME_KEY, "")
+                            val categoryColor = args.getString(CATEGORY_COLOR_KEY, "")
+                            val encodedColor = categoryColor.removePrefix("#")
+
+                            navController.navigate("category/$categoryId/$categoryName/$encodedColor")
+                        }
+                    }
+                }
             }
         }
 
-    override fun onResume() {
-        super.onResume()
-        analyticsLogger.logEvent(
-            FirebaseAnalytics.Event.SCREEN_VIEW,
-            mapOf(
-                FirebaseAnalytics.Param.SCREEN_NAME to AnalyticsParamKeys.SCREEN_NAME_SEARCH,
-                FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
-            ),
-        )
-    }
+    companion object {
+        private const val CATEGORY_ID_KEY = "categoryId"
+        private const val CATEGORY_NAME_KEY = "categoryName"
+        private const val CATEGORY_COLOR_KEY = "categoryColor"
+        private const val IS_DIRECT_CATEGORY_ENTRY = "isDirectCategoryEntry"
 
-    private fun navigateToRecent() {
-        parentFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment_container_view, SearchRecentFragment())
-            .addToBackStack(null)
-            .commit()
-    }
+        fun newInstance() = SearchComposeFragment()
 
-    override fun onCategoryClick(
-        id: Long,
-        name: String,
-        colorCode: String,
-    ) {
-        val fragment =
-            CategoryComposeFragment().apply {
-                arguments =
-                    bundleOf(
-                        IntentKeys.CATEGORY_ID_KEY to id,
-                        IntentKeys.CATEGORY_NAME_KEY to name,
-                        IntentKeys.CATEGORY_COLOR_KEY to colorCode,
-                    )
-            }
-
-        parentFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment_container_view, fragment)
-            .addToBackStack(null)
-            .commit()
+        fun newInstanceWithCategory(
+            categoryId: Long,
+            categoryName: String,
+            categoryColor: String,
+        ) = SearchComposeFragment().apply {
+            arguments =
+                Bundle().apply {
+                    putLong(CATEGORY_ID_KEY, categoryId)
+                    putString(CATEGORY_NAME_KEY, categoryName)
+                    putString(CATEGORY_COLOR_KEY, categoryColor)
+                    putBoolean(IS_DIRECT_CATEGORY_ENTRY, true)
+                }
+        }
     }
 }
