@@ -25,7 +25,7 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
     private static final String REDIS_HASH_KEY = "playing_history";
     private static final String LOCK_PREFIX = "lock:playing_history:";
-    private static final long LOCK_WAIT_TIME = 100; // ms
+    private static final long LOCK_WAIT_TIME = 1000; // ms
     private static final long LOCK_LEASE_TIME = 3000; // ms
 
     private final RedisTemplate<String, String> redisTemplate;
@@ -101,7 +101,7 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.MILLISECONDS);
             if (!acquired) {
                 log.warn("재생 기록 락 획득 실패: {}", field);
-                throw new BufferRequestException("동시 요청이 많아 재생 기록을 저장할 수 없습니다.");
+                throw new BufferRequestException("락 획득 실패.");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
