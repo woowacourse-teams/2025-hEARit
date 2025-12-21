@@ -117,6 +117,9 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         try {
             HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
             String existingJson = hashOps.get(REDIS_HASH_KEY, field);
+            if (existingJson == null) {
+                return true;
+            }
             PlayHistoryValue existing = objectMapper.readValue(existingJson, PlayHistoryValue.class);
             return !existing.isMoreRecentThan(incoming);
         } catch (JsonProcessingException e) {
