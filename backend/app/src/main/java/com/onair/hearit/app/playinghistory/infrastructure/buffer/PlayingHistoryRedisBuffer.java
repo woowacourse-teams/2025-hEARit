@@ -85,14 +85,22 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
     @Override
     public void flush() {
+        String snapshotKey = null;
         try {
-            HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
-            Map<String, String> snapshot = hashOps.entries(REDIS_HASH_KEY);
-
-            if (snapshot.isEmpty()) {
+            // 1. 원본 키가 존재하지 않으면 스킵
+            if (Boolean.FALSE.equals(redisTemplate.hasKey(REDIS_HASH_KEY))) {
                 return;
             }
-
+            // 2. 스냅샷 키로 RENAME (
+            snapshotKey = REDIS_HASH_KEY + ":snapshot:" + System.currentTimeMillis();
+            redisTemplate.rename(REDIS_HASH_KEY, snapshotKey);
+            // 3. 스냅샷 키에서 데이터 읽기
+            HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+            Map<String, String> snapshot = hashOps.entries(snapshotKey);
+            if (snapshot.isEmpty()) {
+                redisTemplate.delete(snapshotKey);
+                return;
+            }
             log.info("Redis 재생 기록 flush 시작: {} 건", snapshot.size());
 
             // Redis 데이터 → PlayValue 변환
@@ -116,13 +124,13 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             // DB 일괄 저장
             commandRepository.bulkInsert(histories);
 
-            // Redis에서 저장 완료된 항목 제거
-            hashOps.delete(REDIS_HASH_KEY, snapshot.keySet().toArray());
+            // 성공 시 스냅샷 키 삭제
+            redisTemplate.delete(snapshotKey);
 
             log.info("Redis 재생 기록 flush 완료: {} 건", histories.size());
 
         } catch (Exception e) {
-            log.error("Redis 재생 기록 flush 실패 (데이터는 Redis에 유지됨)", e);
+            log.error("Redis 재생 기록 flush 실패", e);
             throw new RuntimeException("Redis flush failed", e);
         }
     }
