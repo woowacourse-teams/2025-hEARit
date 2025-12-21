@@ -18,11 +18,6 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * Redis 기반 재생 기록 저장소
- * - Redisson 분산 락으로 동시성 제어
- * - Redis Hash 사용
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -42,13 +37,10 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
     @Override
     public void add(PlayingHistory playingHistory, long clientEventTime) {
         validateClientEventTime(clientEventTime);
-
         String field = buildHashField(playingHistory.getUserUuid(), playingHistory.getHearitId());
         PlayHistoryValue incoming = PlayHistoryValue.from(playingHistory, clientEventTime);
-
         RLock lock = redissonClient.getLock(LOCK_PREFIX + field);
         acquireLockOrThrow(lock, field);
-
         try {
             if (shouldUpdatePlayHistory(field, incoming)) {
                 savePlayHistoryToRedis(field, incoming);
@@ -63,25 +55,20 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         if (Boolean.FALSE.equals(redisTemplate.hasKey(REDIS_HASH_KEY))) {
             return;
         }
-
         String snapshotKey = createSnapshotKey();
         try {
             moveToSnapshot(snapshotKey);
             Map<String, String> snapshotData = readSnapshotData(snapshotKey);
-
             if (snapshotData.isEmpty()) {
                 deleteSnapshot(snapshotKey);
                 return;
             }
-
             List<PlayHistoryValue> playValues = parseToPlayValues(snapshotData);
             if (playValues.isEmpty()) {
                 return;
             }
-
             saveHistoriesToDatabase(playValues);
             deleteSnapshot(snapshotKey);
-
         } catch (Exception e) {
             log.error("Redis 재생 기록 flush 실패", e);
             throw new BufferRequestException("재생 기록 저장 중 오류가 발생했습니다.");
