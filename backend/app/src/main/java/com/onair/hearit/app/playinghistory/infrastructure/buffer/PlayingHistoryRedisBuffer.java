@@ -101,7 +101,6 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
                 redisTemplate.delete(snapshotKey);
                 return;
             }
-            log.info("Redis 재생 기록 flush 시작: {} 건", snapshot.size());
 
             // Redis 데이터 → PlayValue 변환
             List<PlayHistoryValue> playHistoryValues = new ArrayList<>();
@@ -126,8 +125,6 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
             // 성공 시 스냅샷 키 삭제
             redisTemplate.delete(snapshotKey);
-
-            log.info("Redis 재생 기록 flush 완료: {} 건", histories.size());
 
         } catch (Exception e) {
             log.error("Redis 재생 기록 flush 실패", e);
