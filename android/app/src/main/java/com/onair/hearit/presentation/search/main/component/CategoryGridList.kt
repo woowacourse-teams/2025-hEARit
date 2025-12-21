@@ -27,10 +27,12 @@ import com.onair.hearit.domain.model.Category
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun CategoryGridList(
-    categories: List<Category>,
+    categories: ImmutableList<Category>,
     onCategoryClick: (Category) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -96,22 +98,25 @@ fun CategoryGridItem(
 
 @Composable
 @Preview(showBackground = true)
-fun CategoryGridListPreview() {
-    val dummyCategories =
-        listOf(
+private fun CategoryGridListPreview() {
+    val categories =
+        persistentListOf(
             Category(id = 0L, name = "카테고리1", colorCode = "#73A01A"),
             Category(id = 1L, name = "카테고리2", colorCode = "#1883B5"),
             Category(id = 2L, name = "카테고리3", colorCode = "#B5A168"),
         )
 
     MaterialTheme {
-        CategoryGridList(dummyCategories, {})
+        CategoryGridList(
+            categories = categories,
+            onCategoryClick = {},
+        )
     }
 }
 
 @Composable
 @Preview(showBackground = true)
-fun CategoryItemPreview() {
+private fun CategoryItemPreview() {
     val dummyCategory =
         Category(id = 0L, name = "카테고리이름", colorCode = "#73A01A")
 

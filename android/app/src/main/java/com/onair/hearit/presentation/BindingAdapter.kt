@@ -21,7 +21,7 @@ import com.facebook.shimmer.ShimmerFrameLayout
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.library.BookmarkUiState
-import com.onair.hearit.presentation.search.main.SearchUiState
+import com.onair.hearit.presentation.search.SearchUiState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
