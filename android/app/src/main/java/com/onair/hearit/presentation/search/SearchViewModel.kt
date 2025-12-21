@@ -2,6 +2,7 @@ package com.onair.hearit.presentation.search
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
@@ -14,6 +15,9 @@ import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
+import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.SingleLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val categoryRepository: CategoryRepository,
     private val hearitRepository: HearitRepository,
     private val recentKeywordRepository: RecentKeywordRepository,
@@ -49,20 +54,22 @@ class SearchViewModel @Inject constructor(
 
     private var currentInput: SearchInput? = null
 
-    val currentCategory: Category?
-        get() =
-            (currentInput as? SearchInput.Category)?.let {
-                Category(
-                    id = it.id,
-                    name = it.name,
-                    colorCode = it.colorCode,
-                )
-            }
+    private val categoryId: Long = savedStateHandle[CATEGORY_ID_KEY] ?: -1L
+    private val categoryName: String = savedStateHandle[CATEGORY_NAME_KEY] ?: "카테고리"
+    private val categoryColor: String = savedStateHandle[CATEGORY_COLOR_KEY] ?: "#000000"
+
+    val currentCategory = SearchInput.Category(categoryId, categoryName, categoryColor)
 
     private var paging: Paging? = null
     private var currentPage = 0
     private var isLastPage = false
     private var isLoading = false
+
+    init {
+        if (categoryId != -1L) {
+            currentInput = currentCategory
+        }
+    }
 
     fun setSearchInput(input: SearchInput) {
         if (currentInput == input) return

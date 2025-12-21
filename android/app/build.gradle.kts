@@ -236,6 +236,7 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // hilt test
     androidTestImplementation(libs.hilt.android.testing)
