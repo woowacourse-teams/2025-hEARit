@@ -8,7 +8,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
@@ -16,7 +15,6 @@ import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.presentation.IntentKeys
 import com.onair.hearit.presentation.search.CategoryClickListener
-import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.category.CategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,8 +24,6 @@ import javax.inject.Inject
 class SearchFragment :
     Fragment(),
     CategoryClickListener {
-    private val viewModel: SearchViewModel by activityViewModels()
-
     @Inject
     lateinit var analyticsLogger: AnalyticsLogger
 
@@ -40,7 +36,6 @@ class SearchFragment :
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 SearchMainRoute(
-                    viewModel = viewModel,
                     onSearchBarClick = { navigateToRecent() },
                     onCategoryClick = { id: Long, name: String, colorCode: String ->
                         analyticsLogger.logEvent(

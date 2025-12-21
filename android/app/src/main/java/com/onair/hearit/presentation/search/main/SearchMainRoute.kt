@@ -8,6 +8,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
@@ -15,10 +16,10 @@ import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun SearchMainRoute(
-    viewModel: SearchViewModel,
     onSearchBarClick: () -> Unit,
     onCategoryClick: (Long, String, String) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val toastMessage by viewModel.toastMessage.observeAsState()
