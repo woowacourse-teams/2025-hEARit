@@ -8,22 +8,28 @@ import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.ListenableFuture
+import com.onair.hearit.di.ServiceCoroutineScope
 import com.onair.hearit.presentation.executeAsync
 import com.onair.hearit.service.model.LibraryPlayParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @UnstableApi
-class PlaybackSessionCallback(
-    private val serviceScope: CoroutineScope,
+class PlaybackSessionCallback @Inject constructor(
+    @ServiceCoroutineScope private val serviceScope: CoroutineScope,
     private val mediaItemManager: PlaybackMediaItemManager,
     private val libraryPlaybackHandler: LibraryPlaybackHandler,
     private val recentPlaybackHandler: RecentPlaybackHandler,
-    private val playbackPositionListener: PlaybackPositionListener,
     private val stateSaver: PlaybackStateSaver,
 ) : MediaSession.Callback {
     private var prefetchController: AutoPrefetchController? = null
+    private var playbackPositionListener: PlaybackPositionListener? = null
+
+    fun setPlaybackPositionListener(listener: PlaybackPositionListener) {
+        this.playbackPositionListener = listener
+    }
 
     // 컨트롤러가 세션에 연결될 때 호출됨
     // 기본 세션 명령어 + 커스텀 명령어(PRELOAD, START_LIBRARY_PLAY, PREFETCH_NEXT)를 등록
@@ -174,8 +180,8 @@ class PlaybackSessionCallback(
 
             prefetchController?.setLibraryMode(true)
 
-            playbackPositionListener.attach()
-            playbackPositionListener.reset()
+            playbackPositionListener?.attach()
+            playbackPositionListener?.reset()
         }
         return SessionResult(SessionResult.RESULT_SUCCESS)
     }
