@@ -43,88 +43,43 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         validateClientEventTime(clientEventTime);
 
         String field = buildHashField(playingHistory.getUserUuid(), playingHistory.getHearitId());
-        String lockKey = LOCK_PREFIX + field;
-        RLock lock = redissonClient.getLock(lockKey);
+        PlayHistoryValue incoming = PlayHistoryValue.from(playingHistory, clientEventTime);
+
+        RLock lock = redissonClient.getLock(LOCK_PREFIX + field);
+        acquireLockOrThrow(lock, field);
 
         try {
-            // 분산 락 획득
-            boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.MILLISECONDS);
-            if (!acquired) {
-                log.warn("재생 기록 락 획득 실패: {}", field);
-                throw new RuntimeException("Failed to acquire lock: " + field);
+            if (shouldUpdatePlayHistory(field, incoming)) {
+                savePlayHistoryToRedis(field, incoming);
             }
-
-            try {
-                PlayHistoryValue incoming = PlayHistoryValue.from(playingHistory, clientEventTime);
-                HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
-
-                // 기존 데이터 조회
-                String existingJson = hashOps.get(REDIS_HASH_KEY, field);
-                if (existingJson != null) {
-                    PlayHistoryValue existing = objectMapper.readValue(existingJson, PlayHistoryValue.class);
-                    // clientEventTime이 더 최신인 경우에만 업데이트
-                    if (existing.isMoreRecentThan(incoming)) {
-                        return;
-                    }
-                }
-
-                // Redis에 저장
-                String valueJson = objectMapper.writeValueAsString(incoming);
-                hashOps.put(REDIS_HASH_KEY, field, valueJson);
-
-            } finally {
-                lock.unlock();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("재생 기록 저장 중 인터럽트: " + field, e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("재생 기록 JSON 변환 실패: " + field, e);
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
     public void flush() {
-        String snapshotKey = null;
+        if (Boolean.FALSE.equals(redisTemplate.hasKey(REDIS_HASH_KEY))) {
+            return;
+        }
+
+        String snapshotKey = createSnapshotKey();
         try {
-            // 1. 원본 키가 존재하지 않으면 스킵
-            if (Boolean.FALSE.equals(redisTemplate.hasKey(REDIS_HASH_KEY))) {
-                return;
-            }
-            // 2. 스냅샷 키로 RENAME (
-            snapshotKey = REDIS_HASH_KEY + ":snapshot:" + System.currentTimeMillis();
-            redisTemplate.rename(REDIS_HASH_KEY, snapshotKey);
-            // 3. 스냅샷 키에서 데이터 읽기
-            HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
-            Map<String, String> snapshot = hashOps.entries(snapshotKey);
-            if (snapshot.isEmpty()) {
-                redisTemplate.delete(snapshotKey);
+            moveToSnapshot(snapshotKey);
+            Map<String, String> snapshotData = readSnapshotData(snapshotKey);
+
+            if (snapshotData.isEmpty()) {
+                deleteSnapshot(snapshotKey);
                 return;
             }
 
-            // Redis 데이터 → PlayValue 변환
-            List<PlayHistoryValue> playHistoryValues = new ArrayList<>();
-            for (Map.Entry<String, String> entry : snapshot.entrySet()) {
-                try {
-                    PlayHistoryValue value = objectMapper.readValue(entry.getValue(), PlayHistoryValue.class);
-                    playHistoryValues.add(value);
-                } catch (JsonProcessingException e) {
-                    log.error("재생 기록 역직렬화 실패: field={}", entry.getKey(), e);
-                }
-            }
-
-            if (playHistoryValues.isEmpty()) {
+            List<PlayHistoryValue> playValues = parseToPlayValues(snapshotData);
+            if (playValues.isEmpty()) {
                 return;
             }
 
-            // PlayValue → PlayingHistory 변환
-            List<PlayingHistory> histories = converter.toPlayingHistories(playHistoryValues);
-
-            // DB 일괄 저장
-            commandRepository.bulkInsert(histories);
-
-            // 성공 시 스냅샷 키 삭제
-            redisTemplate.delete(snapshotKey);
+            saveHistoriesToDatabase(playValues);
+            deleteSnapshot(snapshotKey);
 
         } catch (Exception e) {
             log.error("Redis 재생 기록 flush 실패", e);
@@ -151,5 +106,74 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
     private String buildHashField(String userUuid, long hearitId) {
         return userUuid + ":" + hearitId;
+    }
+
+    private void acquireLockOrThrow(RLock lock, String field) {
+        try {
+            boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.MILLISECONDS);
+            if (!acquired) {
+                log.warn("재생 기록 락 획득 실패: {}", field);
+                throw new RuntimeException("Failed to acquire lock: " + field);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("재생 기록 저장 중 인터럽트: " + field, e);
+        }
+    }
+
+    private boolean shouldUpdatePlayHistory(String field, PlayHistoryValue incoming) {
+        try {
+            HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+            String existingJson = hashOps.get(REDIS_HASH_KEY, field);
+            PlayHistoryValue existing = objectMapper.readValue(existingJson, PlayHistoryValue.class);
+            return !existing.isMoreRecentThan(incoming);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("재생 기록 JSON 변환 실패: " + field, e);
+        }
+    }
+
+    private void savePlayHistoryToRedis(String field, PlayHistoryValue value) {
+        try {
+            HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+            String valueJson = objectMapper.writeValueAsString(value);
+            hashOps.put(REDIS_HASH_KEY, field, valueJson);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("재생 기록 JSON 변환 실패: " + field, e);
+        }
+    }
+
+    private String createSnapshotKey() {
+        return REDIS_HASH_KEY + ":snapshot:" + System.currentTimeMillis();
+    }
+
+    private void moveToSnapshot(String snapshotKey) {
+        redisTemplate.rename(REDIS_HASH_KEY, snapshotKey);
+    }
+
+    private Map<String, String> readSnapshotData(String snapshotKey) {
+        HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+        return hashOps.entries(snapshotKey);
+    }
+
+    private List<PlayHistoryValue> parseToPlayValues(Map<String, String> snapshotData) {
+        List<PlayHistoryValue> playValues = new ArrayList<>();
+        for (Map.Entry<String, String> entry : snapshotData.entrySet()) {
+            try {
+                PlayHistoryValue value = objectMapper.readValue(entry.getValue(), PlayHistoryValue.class);
+                playValues.add(value);
+            } catch (JsonProcessingException e) {
+                log.error("재생 기록 역직렬화 실패: field={}", entry.getKey(), e);
+            }
+        }
+        return playValues;
+    }
+
+    private void saveHistoriesToDatabase(List<PlayHistoryValue> playValues) {
+        List<PlayingHistory> histories = converter.toPlayingHistories(playValues);
+        commandRepository.bulkInsert(histories);
+    }
+
+    private void deleteSnapshot(String snapshotKey) {
+        redisTemplate.delete(snapshotKey);
     }
 }
