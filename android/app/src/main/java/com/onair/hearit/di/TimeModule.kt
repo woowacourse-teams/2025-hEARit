@@ -9,7 +9,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class UseCaseModule {
+class TimeModule {
     @Provides
     @Singleton
     fun provideClock(): Clock = Clock.systemDefaultZone()
