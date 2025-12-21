@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 재생 기록 Flush 스케줄러
@@ -21,7 +20,6 @@ public class PlayingHistoryFlushScheduler {
 
     private final PlayingHistoryBuffer buffer;
 
-    @Transactional
     @Scheduled(fixedDelay = 3000)
     @SchedulerLock(
             name = "PlayingHistoryFlushScheduler",
