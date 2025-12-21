@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.exception.custom.BufferRequestException;
 import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.domain.PlayingHistory;
+import com.onair.hearit.core.domain.exception.PlayingHistoryDomainException;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,6 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
     @Override
     public void add(PlayingHistory playingHistory, long clientEventTime) {
-        validateClientEventTime(clientEventTime);
         String field = buildHashField(playingHistory.getUserUuid(), playingHistory.getHearitId());
         PlayHistoryValue incoming = PlayHistoryValue.from(playingHistory, clientEventTime);
         RLock lock = redissonClient.getLock(LOCK_PREFIX + field);
@@ -46,7 +46,7 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
                 savePlayHistoryToRedis(field, incoming);
             }
         } finally {
-            lock.unlock();
+            releaseLock(lock);
         }
     }
 
@@ -86,9 +86,13 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         }
     }
 
-    private void validateClientEventTime(long clientEventTime) {
-        if (clientEventTime <= 0) {
-            throw new IllegalArgumentException("clientEventTime must be positive: " + clientEventTime);
+    private void releaseLock(RLock lock) {
+        try {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        } catch (Exception e) {
+            log.error("락 해제 실패", e);
         }
     }
 
