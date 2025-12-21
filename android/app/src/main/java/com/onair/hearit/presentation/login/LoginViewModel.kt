@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.data.AuthEventManager
-import com.onair.hearit.data.AuthHeaderProvider
 import com.onair.hearit.domain.usecase.auth.KakaoLoginUseCase
 import com.onair.hearit.domain.usecase.auth.SaveTokenUseCase
 import com.onair.hearit.presentation.SingleLiveData
@@ -19,7 +18,6 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val kakaoLoginUseCase: KakaoLoginUseCase,
     private val saveTokenUseCase: SaveTokenUseCase,
-    private val authHeaderProvider: AuthHeaderProvider,
 ) : ViewModel() {
     private val _loginState = MutableLiveData<Boolean>()
     val loginState: LiveData<Boolean> = _loginState
@@ -47,7 +45,6 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             saveTokenUseCase(accessToken, refreshToken)
                 .onSuccess {
-                    authHeaderProvider.updateAccessToken(accessToken)
                     AuthEventManager.onLoginSuccess()
                     _loginState.value = true
                 }.onFailure { throwable ->

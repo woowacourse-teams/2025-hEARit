@@ -160,6 +160,7 @@ class MainActivity :
         binding.layoutBottomNavigation.setOnItemSelectedListener { item ->
             if (item.itemId == currentSelectedItemId) return@setOnItemSelectedListener true
             currentSelectedItemId = item.itemId
+
             when (item.itemId) {
                 R.id.nav_home -> {
                     setPlayerControlViewVisibility()
