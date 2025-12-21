@@ -46,7 +46,6 @@ import com.onair.hearit.analytics.AnalyticsParamKeys.KEYWORD_NAME
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_DETAIL
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.domain.model.Hearit
-import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.LAST_POSITION_KEY
@@ -558,13 +557,13 @@ class PlayerDetailActivity :
             AnalyticsEventNames.DETAIL_KEYWORD_SELECTED,
             mapOf(KEYWORD_NAME to term),
         )
-        val input = SearchInput.Keyword(term)
-        val resultIntent =
-            Intent().apply {
-                putExtras(input.toBundle())
-            }
-        setResult(RESULT_OK, resultIntent)
-        finish()
+//        val input = SearchInput.Keyword(term)
+//        val resultIntent =
+//            Intent().apply {
+//                putExtras(input.toBundle())
+//            }]
+//        setResult(RESULT_OK, resultIntent)
+//        finish()
     }
 
     override fun onDestroy() {
