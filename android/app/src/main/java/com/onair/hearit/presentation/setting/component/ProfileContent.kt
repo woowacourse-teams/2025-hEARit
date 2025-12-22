@@ -65,7 +65,7 @@ fun ProfileContent(
 
         BottomInfo(appVersion = appVersion)
 
-        Spacer(modifier = Modifier.height(68.dp))
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }
 
@@ -113,7 +113,7 @@ private fun BottomInfo(
             style = HearitTypoGraphy.bodyMedium,
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = stringResource(R.string.all_hearit_email),
