@@ -12,14 +12,14 @@ import com.onair.hearit.presentation.home.HorizontalMarginItemDecoration
 class RecommendationCategoryViewHolder(
     private val binding: ItemRecommendationCategoryBinding,
     hearitClickListener: HearitClickListener,
-    sharedPool: RecyclerView.RecycledViewPool?,
+    sharedPool: RecyclerView.RecycledViewPool,
 ) : RecyclerView.ViewHolder(binding.root) {
     private val itemAdapter = CategoryItemAdapter(hearitClickListener, DEFAULT_COLOR)
     private var decorationAdded = false
 
     init {
         binding.rvCategoryItems.apply {
-            sharedPool?.let { setRecycledViewPool(it) }
+            setRecycledViewPool(sharedPool)
             adapter = itemAdapter
             if (!decorationAdded) {
                 addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(itemView.context)))
@@ -42,7 +42,7 @@ class RecommendationCategoryViewHolder(
         fun create(
             parent: ViewGroup,
             hearitClickListener: HearitClickListener,
-            sharedPool: RecyclerView.RecycledViewPool?,
+            sharedPool: RecyclerView.RecycledViewPool,
         ): RecommendationCategoryViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemRecommendationCategoryBinding.inflate(inflater, parent, false)

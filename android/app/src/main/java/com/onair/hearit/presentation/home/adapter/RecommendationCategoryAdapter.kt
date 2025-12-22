@@ -11,7 +11,7 @@ class RecommendationCategoryAdapter(
     private val hearitClickListener: HearitClickListener,
     private val navigateClickListener: (Long, String, String) -> Unit,
 ) : ListAdapter<RecommendationCategories, RecommendationCategoryViewHolder>(DiffCallback) {
-    private val sharedPool: RecyclerView.RecycledViewPool? =
+    private val sharedPool: RecyclerView.RecycledViewPool =
         RecyclerView.RecycledViewPool().apply {
             setMaxRecycledViews(0, 15)
         }
