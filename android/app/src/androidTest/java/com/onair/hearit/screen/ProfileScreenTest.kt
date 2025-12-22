@@ -1,10 +1,12 @@
 package com.onair.hearit.screen
 
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.onair.hearit.R
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.presentation.setting.SettingViewModel
 import com.onair.hearit.presentation.setting.screen.ProfileScreen
@@ -21,7 +23,7 @@ import org.junit.Test
 
 class ProfileScreenTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private lateinit var mockViewModel: SettingViewModel
 
@@ -37,6 +39,8 @@ class ProfileScreenTest {
 
     @Test
     fun `프로필_화면_항목들이_정상적으로_표시된다`() {
+        val myInfoTitle = composeTestRule.activity.getString(R.string.setting_profile)
+
         // given
         val testUser =
             UserInfo(
@@ -56,7 +60,7 @@ class ProfileScreenTest {
 
         // then
         composeTestRule
-            .onNodeWithText("내 정보")
+            .onNodeWithText(myInfoTitle)
             .assertIsDisplayed()
 
         composeTestRule
