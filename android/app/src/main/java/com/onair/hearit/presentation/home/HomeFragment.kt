@@ -47,7 +47,7 @@ import com.onair.hearit.presentation.home.adapter.RecommendHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import com.onair.hearit.presentation.search.category.CategoryFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -371,7 +371,7 @@ class HomeFragment :
             .beginTransaction()
             .replace(
                 R.id.fragment_container_view,
-                CategoryComposeFragment().apply {
+                CategoryFragment().apply {
                     arguments =
                         bundleOf(
                             CATEGORY_ID_KEY to id,

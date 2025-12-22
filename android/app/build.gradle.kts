@@ -148,6 +148,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.kotlinx.collections.immutable)
 
     // Preview
     implementation(libs.androidx.ui.tooling.preview)
@@ -235,6 +236,7 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // hilt test
     androidTestImplementation(libs.hilt.android.testing)

@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.main
+package com.onair.hearit.presentation.search
 
 import com.onair.hearit.domain.model.SearchedHearit
 
