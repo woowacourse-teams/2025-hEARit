@@ -43,7 +43,7 @@ import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.navigate
-import com.onair.hearit.presentation.search.main.SearchComposeFragment
+import com.onair.hearit.presentation.search.main.SearchFragment
 import com.onair.hearit.presentation.splash.SplashActivity
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
@@ -170,7 +170,7 @@ class MainActivity :
 
                 R.id.nav_search -> {
                     setPlayerControlViewVisibility()
-                    showFragment(SearchComposeFragment())
+                    showFragment(SearchFragment())
                     true
                 }
 
