@@ -15,16 +15,12 @@ class RecommendationCategoryViewHolder(
     sharedPool: RecyclerView.RecycledViewPool,
 ) : RecyclerView.ViewHolder(binding.root) {
     private val itemAdapter = CategoryItemAdapter(hearitClickListener, DEFAULT_COLOR)
-    private var decorationAdded = false
 
     init {
         binding.rvCategoryItems.apply {
             setRecycledViewPool(sharedPool)
             adapter = itemAdapter
-            if (!decorationAdded) {
-                addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(itemView.context)))
-                decorationAdded = true
-            }
+            addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(itemView.context)))
         }
     }
 
