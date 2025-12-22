@@ -51,8 +51,6 @@ class SettingScreenTest {
             )
         }
 
-        composeTestRule.waitForIdle()
-
         // then
         composeTestRule
             .onNodeWithText("설정")
@@ -91,8 +89,6 @@ class SettingScreenTest {
             )
         }
 
-        composeTestRule.waitForIdle()
-
         // then
         composeTestRule
             .onNodeWithText("로그인 하러가기")
@@ -129,8 +125,6 @@ class SettingScreenTest {
             )
         }
 
-        composeTestRule.waitForIdle()
-
         // then
         composeTestRule
             .onNodeWithText("로그아웃")
@@ -162,8 +156,6 @@ class SettingScreenTest {
             )
         }
 
-        composeTestRule.waitForIdle()
-
         // when
         composeTestRule
             .onNodeWithContentDescription("뒤로가기")
@@ -189,8 +181,6 @@ class SettingScreenTest {
                 onWithdraw = {},
             )
         }
-
-        composeTestRule.waitForIdle()
 
         // when
         composeTestRule
@@ -219,8 +209,6 @@ class SettingScreenTest {
             )
         }
 
-        composeTestRule.waitForIdle()
-
         // when
         composeTestRule
             .onNodeWithText("로그아웃")
@@ -248,8 +236,6 @@ class SettingScreenTest {
             )
         }
 
-        composeTestRule.waitForIdle()
-
         // when
         composeTestRule
             .onNodeWithText("회원탈퇴")
@@ -276,8 +262,6 @@ class SettingScreenTest {
                 onWithdraw = {},
             )
         }
-
-        composeTestRule.waitForIdle()
 
         // when - 프로필 영역 클릭 (이름 또는 전체 영역)
         composeTestRule

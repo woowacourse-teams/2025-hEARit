@@ -54,8 +54,6 @@ class ProfileScreenTest {
             )
         }
 
-        composeTestRule.waitForIdle()
-
         // then
         composeTestRule
             .onNodeWithText("내 정보")
@@ -86,8 +84,6 @@ class ProfileScreenTest {
             )
         }
 
-        composeTestRule.waitForIdle()
-
         // then
         composeTestRule
             .onNodeWithText("hearit", substring = true)
@@ -107,8 +103,6 @@ class ProfileScreenTest {
                 onBackClick = { backClicked = true },
             )
         }
-
-        composeTestRule.waitForIdle()
 
         // when
         composeTestRule
