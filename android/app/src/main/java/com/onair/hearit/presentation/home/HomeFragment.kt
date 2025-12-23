@@ -46,7 +46,6 @@ import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.category.CategoryFragment
 import dagger.hilt.android.AndroidEntryPoint
-import com.onair.hearit.presentation.search.category.CategoryComposeFragment
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -137,18 +136,6 @@ class HomeFragment :
     }
 
     private fun setupRecyclerView() {
-        centerScrollListener =
-            CenterScrollListener(snapHelper) { position ->
-                updateIndicator(position)
-            }
-
-        binding.rvHomeRecommend.apply {
-            adapter = recommendAdapter
-            snapHelper.attachToRecyclerView(this)
-            centerScrollListener?.let { addOnScrollListener(it) }
-            isVisible = false
-        }
-
         binding.rvHomePlayingHistoryHearit.apply {
             adapter = playingHistoryAdapter
             addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(requireContext())))
@@ -228,13 +215,20 @@ class HomeFragment :
         binding.userInfo = userInfo
     }
 
-    private fun updateRecommendSection(recommendHearits: List<RecommendHearit>) {
+    private fun updateRecommendSection(
+        recommendHearits: List<RecommendHearit>,
+        shouldShow: Boolean,
+    ) {
+        binding.composeCarousel.isVisible = shouldShow
+        if (!shouldShow) return
+
         binding.composeCarousel.setContent {
             MaterialTheme {
                 CarouselSection(
                     items = recommendHearits.toImmutableList(),
                     onItemClick = { item ->
-                        // 클릭 이벤트 처리
+                        logHomeHearitClick(HearitSource.RECOMMEND, item.id)
+                        navigateToPlayerDetail(item.id)
                     },
                 )
             }
