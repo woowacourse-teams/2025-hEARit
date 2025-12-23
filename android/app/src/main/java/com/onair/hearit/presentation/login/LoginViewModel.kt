@@ -6,14 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.data.AuthEventManager
-import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.usecase.auth.KakaoLoginUseCase
 import com.onair.hearit.domain.usecase.auth.SaveTokenUseCase
 import com.onair.hearit.presentation.SingleLiveData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class LoginViewModel(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val kakaoLoginUseCase: KakaoLoginUseCase,
     private val saveTokenUseCase: SaveTokenUseCase,
 ) : ViewModel() {
@@ -43,7 +45,6 @@ class LoginViewModel(
         viewModelScope.launch {
             saveTokenUseCase(accessToken, refreshToken)
                 .onSuccess {
-                    TokenInterceptorProvider.setAccessToken(accessToken)
                     AuthEventManager.onLoginSuccess()
                     _loginState.value = true
                 }.onFailure { throwable ->

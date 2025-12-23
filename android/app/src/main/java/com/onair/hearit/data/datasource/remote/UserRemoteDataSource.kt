@@ -4,5 +4,5 @@ import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.dto.UserInfoResponse
 
 interface UserRemoteDataSource {
-    suspend fun getUserInfo(): Result<NetworkResult<UserInfoResponse>>
+    suspend fun getUserInfo(): NetworkResult<UserInfoResponse>
 }

@@ -29,6 +29,7 @@
     <string name="home_toast_recent_upload_load_fail">최근 업로드된 히어릿 조회에 실패했습니다</string>
     <string name="home_toast_playing_bookmark_load_fail">듣고 있는 북마크 조회에 실패했습니다</string>
     <string name="home_toast_recommendation_category_load_fail">카테고리별 히어릿 조회에 실패했습니다</string>
+    <string name="home_toast_refresh_fail">새로고침 중 오류가 발생했습니다</string>
 
     <!--CategoryFragment-->
     <string name="category_text">전체 카테고리 목록</string>

@@ -13,8 +13,8 @@ import androidx.fragment.app.FragmentManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
+import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.di.AnalyticsProvider
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
@@ -23,7 +23,7 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
-import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import com.onair.hearit.presentation.search.category.CategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -61,11 +61,14 @@ fun Intent?.toDetailResult(): DetailResult? {
     }
 }
 
-fun DetailResult.navigate(mainActivity: MainActivity) {
+fun DetailResult.navigate(
+    mainActivity: MainActivity,
+    analyticsLogger: AnalyticsLogger,
+) {
     when (this) {
         is DetailResult.Category -> {
             val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = CategoryComposeFragment::class.java.simpleName
+            val backStackTag = CategoryFragment::class.java.simpleName
 
             // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
             fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
@@ -73,7 +76,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                 .beginTransaction()
                 .replace(
                     R.id.fragment_container_view,
-                    CategoryComposeFragment().apply {
+                    CategoryFragment().apply {
                         arguments =
                             bundleOf(
                                 CATEGORY_ID_KEY to categoryId,
@@ -85,7 +88,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                 ).addToBackStack(backStackTag)
                 .commit()
 
-            AnalyticsProvider.get().logEvent(
+            analyticsLogger.logEvent(
                 AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
                 mapOf(AnalyticsParamKeys.ITEM_NAME to name),
             )
@@ -106,7 +109,7 @@ fun DetailResult.navigate(mainActivity: MainActivity) {
                 ).addToBackStack(backStackTag)
                 .commit()
 
-            AnalyticsProvider.get().logEvent(
+            analyticsLogger.logEvent(
                 AnalyticsEventNames.SEARCH_KEYWORD_ENTERED,
                 mapOf(AnalyticsParamKeys.ITEM_NAME to term),
             )

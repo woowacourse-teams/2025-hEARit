@@ -6,11 +6,14 @@ import androidx.media3.session.MediaSession
 import com.onair.hearit.domain.model.PlaybackInfo
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetPlaybackInfoUseCase
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @OptIn(UnstableApi::class)
-class RecentPlaybackHandler(
+@ServiceScoped
+class RecentPlaybackHandler @Inject constructor(
     private val recentHearitRepository: RecentHearitRepository,
     private val getPlaybackInfoUseCase: GetPlaybackInfoUseCase,
     private val mediaItemManager: PlaybackMediaItemManager,

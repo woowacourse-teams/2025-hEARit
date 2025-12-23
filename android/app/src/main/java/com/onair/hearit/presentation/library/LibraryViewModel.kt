@@ -14,12 +14,15 @@ import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.library.BookmarkUiState.LoggedIn
 import com.onair.hearit.presentation.library.BookmarkUiState.NoBookmarks
 import com.onair.hearit.presentation.library.BookmarkUiState.NotLoggedIn
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class LibraryViewModel(
+@HiltViewModel
+class LibraryViewModel @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
@@ -32,7 +35,7 @@ class LibraryViewModel(
     private val _uiState = MutableLiveData<BookmarkUiState>()
     val uiState: LiveData<BookmarkUiState> = _uiState
 
-    private val _userInfo = MutableStateFlow(userRepository.getCachedUserInfo())
+    private val _userInfo = MutableStateFlow(DEFAULT_USER_INFO)
     val userInfo = _userInfo.asStateFlow()
 
     private val _toastMessage = SingleLiveData<Int>()
@@ -51,7 +54,7 @@ class LibraryViewModel(
         nextPage = 0
         _bookmarks.value = emptyList()
         val currentUserInfo = userInfo.value
-        if (currentUserInfo != null && currentUserInfo != DEFAULT_USER_INFO) {
+        if (currentUserInfo != DEFAULT_USER_INFO) {
             fetchData(page = 0)
         }
     }

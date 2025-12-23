@@ -37,15 +37,18 @@ class HearitRepositoryImplTest {
     @Test
     fun `getHearit 성공 시 SingleHearit 도메인 모델 반환`() =
         runTest {
+            // Given
             val hearitId = 1L
             val mockDto = createFakeHearit(hearitId)
             val expectedDomainModel = mockDto.toDomain()
+            coEvery {
+                mockHearitRemoteDataSource.getHearit(hearitId)
+            } returns NetworkResult.Success(mockDto)
 
-            coEvery { mockHearitRemoteDataSource.getHearit(hearitId) } returns
-                Result.success(NetworkResult.Success(mockDto))
-
+            // When
             val result = hearitRepository.getHearit(hearitId)
 
+            // Then
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrNull()).isEqualTo(expectedDomainModel)
         }
@@ -53,29 +56,34 @@ class HearitRepositoryImplTest {
     @Test
     fun `getHearit 실패 시 Result failure 반환`() =
         runTest {
-            val hearitId = 1L
-            val expectedException = RuntimeException("네트워크 오류")
+            // Given
+            val networkFailure = NetworkResult.Failure.Unknown
+            coEvery {
+                mockHearitRemoteDataSource.getHearit(1)
+            } returns networkFailure
 
-            coEvery { mockHearitRemoteDataSource.getHearit(hearitId) } returns
-                Result.failure(expectedException)
+            // When
+            val result = hearitRepository.getHearit(1)
 
-            val result = hearitRepository.getHearit(hearitId)
-
+            // Then
             assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isEqualTo(expectedException)
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
         }
 
     @Test
     fun `getRecommendHearits 성공 시 RecommendHearit 도메인 모델 반환`() =
         runTest {
+            // Given
             val mockDtoList = listOf(createFakeRecommendHearit())
             val expectedDomainList = mockDtoList.map { it.toDomain() }
+            coEvery {
+                mockHearitRemoteDataSource.getRecommendHearits()
+            } returns NetworkResult.Success(mockDtoList)
 
-            coEvery { mockHearitRemoteDataSource.getRecommendHearits() } returns
-                Result.success(NetworkResult.Success(mockDtoList))
-
+            // When
             val result = hearitRepository.getRecommendHearits()
 
+            // Then
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrNull()).isEqualTo(expectedDomainList)
         }
@@ -83,28 +91,34 @@ class HearitRepositoryImplTest {
     @Test
     fun `getRecommendHearits 실패 시 Result failure 반환`() =
         runTest {
-            val expectedException = RuntimeException("네트워크 오류")
+            // Given
+            val networkFailure = NetworkResult.Failure.Unknown
+            coEvery {
+                mockHearitRemoteDataSource.getRecommendHearits()
+            } returns networkFailure
 
-            coEvery { mockHearitRemoteDataSource.getRecommendHearits() } returns
-                Result.failure(expectedException)
-
+            // When
             val result = hearitRepository.getRecommendHearits()
 
+            // Then
             assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isEqualTo(expectedException)
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
         }
 
     @Test
     fun `getExploreHearits 성공 시 PageResult 도메인 모델 반환`() =
         runTest {
+            // Given
             val mockPageResultDto = createFakeRandomHearit()
             val expectedDomainResult = mockPageResultDto.toDomain()
+            coEvery {
+                mockHearitRemoteDataSource.getExploreHearits(1, 10)
+            } returns NetworkResult.Success(mockPageResultDto)
 
-            coEvery { mockHearitRemoteDataSource.getExploreHearits(1, 10) } returns
-                Result.success(NetworkResult.Success(mockPageResultDto))
-
+            // When
             val result = hearitRepository.getExploreHearits(1, 10)
 
+            // Then
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrNull()).isEqualTo(expectedDomainResult)
         }
@@ -112,29 +126,34 @@ class HearitRepositoryImplTest {
     @Test
     fun `getExploreHearits 실패 시 Result failure 반환`() =
         runTest {
-            val expectedException = RuntimeException("랜덤 데이터 오류")
+            // Given
+            val networkFailure = NetworkResult.Failure.Unknown
+            coEvery {
+                mockHearitRemoteDataSource.getExploreHearits(1, 10)
+            } returns networkFailure
 
-            coEvery { mockHearitRemoteDataSource.getExploreHearits(1, 10) } returns
-                Result.failure(expectedException)
-
+            // When
             val result = hearitRepository.getExploreHearits(1, 10)
 
+            // Then
             assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isEqualTo(expectedException)
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
         }
 
     @Test
     fun `getKeywordHearits 성공 시 PageResult 도메인 모델 반환`() =
         runTest {
+            // Given
             val mockPageResultDto = createSearchHearit()
             val expectedDomainResult = mockPageResultDto.toSearchedHearit()
-
             coEvery {
                 mockHearitRemoteDataSource.getSearchHearits("test", 1, 10)
-            } returns Result.success(NetworkResult.Success(mockPageResultDto))
+            } returns NetworkResult.Success(mockPageResultDto)
 
+            // When
             val result = hearitRepository.getKeywordHearits("test", 1, 10)
 
+            // Then
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrNull()).isEqualTo(expectedDomainResult)
         }
@@ -142,15 +161,17 @@ class HearitRepositoryImplTest {
     @Test
     fun `getKeywordHearits 실패 시 Result failure 반환`() =
         runTest {
-            val expectedException = RuntimeException("검색 오류")
-
+            // Given
+            val networkFailure = NetworkResult.Failure.Unknown
             coEvery {
                 mockHearitRemoteDataSource.getSearchHearits("test", 1, 10)
-            } returns Result.failure(expectedException)
+            } returns networkFailure
 
+            // When
             val result = hearitRepository.getKeywordHearits("test", 1, 10)
 
+            // Then
             assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isEqualTo(expectedException)
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
         }
 }

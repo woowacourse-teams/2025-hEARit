@@ -15,11 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.onair.hearit.domain.model.ScriptLine
 import com.onair.hearit.presentation.theme.DarkGray
 import com.onair.hearit.presentation.theme.Gray4
-import com.onair.hearit.presentation.theme.PretendardSubTitle
+import com.onair.hearit.presentation.theme.HearitTypoGraphy
 
 @Composable
 fun ScriptRow(
@@ -55,12 +54,9 @@ fun ScriptRow(
     ) {
         Text(
             text = item.text,
-            style =
-                PretendardSubTitle.copy(
-                    color = animatedTextColor,
-                    lineHeight = 20.8.sp,
-                ),
+            color = animatedTextColor,
             overflow = TextOverflow.Ellipsis,
+            style = HearitTypoGraphy.titleMedium,
         )
     }
 }

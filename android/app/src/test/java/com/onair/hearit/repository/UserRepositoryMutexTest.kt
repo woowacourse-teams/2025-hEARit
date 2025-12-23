@@ -51,7 +51,7 @@ class UserRepositoryMutexTest {
             // Given
             coEvery { userRemoteDataSource.getUserInfo() } coAnswers {
                 delay(100)
-                Result.success(NetworkResult.Success(mockUserInfoResponse))
+                NetworkResult.Success(mockUserInfoResponse)
             }
 
             // When: 100개 동시 호출
@@ -71,8 +71,9 @@ class UserRepositoryMutexTest {
     fun `캐시가 있을 때는 네트워크 호출 없음`() =
         runTest {
             // Given: 캐시 생성
-            coEvery { userRemoteDataSource.getUserInfo() } returns
-                Result.success(NetworkResult.Success(mockUserInfoResponse))
+            coEvery {
+                userRemoteDataSource.getUserInfo()
+            } returns NetworkResult.Success(mockUserInfoResponse)
 
             repository.getUserInfo() // 첫 호출로 캐시 생성
 
@@ -89,8 +90,9 @@ class UserRepositoryMutexTest {
     fun `캐시 클리어 후에는 다시 네트워크 호출`() =
         runTest {
             // Given
-            coEvery { userRemoteDataSource.getUserInfo() } returns
-                Result.success(NetworkResult.Success(mockUserInfoResponse))
+            coEvery {
+                userRemoteDataSource.getUserInfo()
+            } returns NetworkResult.Success(mockUserInfoResponse)
 
             repository.getUserInfo()
             repository.clearUserData()
@@ -107,8 +109,9 @@ class UserRepositoryMutexTest {
     fun `API 실패는 캐시하지 않음`() =
         runTest {
             // Given: API 실패
-            coEvery { userRemoteDataSource.getUserInfo() } returns
-                Result.success(NetworkResult.Failure.Unknown)
+            coEvery {
+                userRemoteDataSource.getUserInfo()
+            } returns NetworkResult.Failure.Unknown
 
             // When: 3번 호출
             repository.getUserInfo()

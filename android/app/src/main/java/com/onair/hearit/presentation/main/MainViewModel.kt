@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.di.TokenInterceptorProvider
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.usecase.GetRecentHearitUseCase
 import com.onair.hearit.domain.usecase.auth.LogoutUseCase
@@ -14,12 +13,15 @@ import com.onair.hearit.domain.usecase.auth.WithdrawUseCase
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.splash.SplashActivity
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class MainViewModel(
+@HiltViewModel
+class MainViewModel @Inject constructor(
     private val getRecentHearitUseCase: GetRecentHearitUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val withdrawUseCase: WithdrawUseCase,
@@ -66,7 +68,6 @@ class MainViewModel(
             logoutUseCase()
                 .onSuccess {
                     _toastMessage.value = R.string.logout_success
-                    TokenInterceptorProvider.setAccessToken(null)
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.logout_fail
@@ -80,7 +81,6 @@ class MainViewModel(
         viewModelScope.launch {
             withdrawUseCase()
                 .onSuccess {
-                    TokenInterceptorProvider.setAccessToken(null)
                     _withdrawState.value = true
                     _toastMessage.value = R.string.withdraw_success
                 }.onFailure { throwable ->

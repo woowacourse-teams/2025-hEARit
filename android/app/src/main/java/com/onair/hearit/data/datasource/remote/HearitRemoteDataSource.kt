@@ -9,26 +9,26 @@ import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.SearchHearitsResponse
 
 interface HearitRemoteDataSource {
-    suspend fun getHearit(hearitId: Long): Result<NetworkResult<HearitResponse>>
+    suspend fun getHearit(hearitId: Long): NetworkResult<HearitResponse>
 
-    suspend fun getRecommendHearits(): Result<NetworkResult<List<RecommendHearitResponse>>>
+    suspend fun getRecommendHearits(): NetworkResult<List<RecommendHearitResponse>>
 
     suspend fun getExploreHearits(
         cursorId: Long?,
         size: Int?,
-    ): Result<NetworkResult<ExploreHearitResponse>>
+    ): NetworkResult<ExploreHearitResponse>
 
     suspend fun getSearchHearits(
         searchTerm: String,
         page: Int?,
         size: Int?,
-    ): Result<NetworkResult<SearchHearitsResponse>>
+    ): NetworkResult<SearchHearitsResponse>
 
     suspend fun getHearits(
         categoryId: Long?,
         page: Int?,
         size: Int?,
-    ): Result<NetworkResult<HearitsResponse>>
+    ): NetworkResult<HearitsResponse>
 
-    suspend fun getRecommendationCategoryHearits(): Result<NetworkResult<List<RecommendationCategoriesResponse>>>
+    suspend fun getRecommendationCategoryHearits(): NetworkResult<List<RecommendationCategoriesResponse>>
 }
