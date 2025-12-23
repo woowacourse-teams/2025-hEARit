@@ -55,6 +55,8 @@ fun CarouselSection(
     onItemClick: (RecommendHearit) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (items.isEmpty()) return
+
     val pagerState =
         rememberPagerState(
             initialPage = items.size / 2,
@@ -143,7 +145,10 @@ private fun CarouselCard(
                     scaleX = scale
                     scaleY = scale
                     this.alpha = alpha
-                }.clickable(onClick = onClick),
+                }.clickable(
+                    onClick = onClick,
+                    onClickLabel = item.title,
+                ),
         shape = RoundedCornerShape(8.dp),
         colors =
             CardDefaults.cardColors(
@@ -204,8 +209,8 @@ private fun String.toComposeColor(): Color =
     try {
         val colorString = if (this.startsWith("#")) this else "#$this"
         Color(colorString.toColorInt())
-    } catch (e: IllegalArgumentException) {
-        Color(0xFF1A1A1A) // 기본 색상
+    } catch (_: IllegalArgumentException) {
+        Color(0xFF1A1A1A)
     }
 
 @Preview(showBackground = true)

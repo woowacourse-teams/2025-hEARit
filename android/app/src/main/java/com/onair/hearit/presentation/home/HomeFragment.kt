@@ -334,6 +334,7 @@ class HomeFragment :
     }
 
     override fun onDestroyView() {
+        binding.composeCarousel.disposeComposition()
         binding.rvHomeRecommendationCategories.adapter = null
         _binding = null
         super.onDestroyView()
