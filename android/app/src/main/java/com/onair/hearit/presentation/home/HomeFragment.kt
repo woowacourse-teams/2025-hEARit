@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -14,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -28,7 +30,6 @@ import com.onair.hearit.databinding.FragmentHomeBinding
 import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.PlayingHistoryHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
-import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.presentation.HearitClickListener
@@ -100,6 +101,7 @@ class HomeFragment :
         setupWindowInsets()
         setupListeners()
         setupRecyclerView()
+        setupComposeCarousel()
         setupSwipeRefresh()
         observeViewModel()
     }
@@ -154,6 +156,24 @@ class HomeFragment :
         binding.rvHomeRecommendationCategories.adapter = recommendationCategoryAdapter
     }
 
+    private fun setupComposeCarousel() {
+        binding.composeCarousel.setContent {
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+            if (uiState.showRecommendHearits) {
+                MaterialTheme {
+                    CarouselSection(
+                        items = uiState.recommendHearits.toImmutableList(),
+                        onItemClick = { item ->
+                            logHomeHearitClick(HearitSource.RECOMMEND, item.id)
+                            navigateToPlayerDetail(item.id)
+                        },
+                    )
+                }
+            }
+        }
+    }
+
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.apply {
             setColorSchemeResources(
@@ -193,7 +213,7 @@ class HomeFragment :
         updateAdSections(state.isLoading)
         updateUserInfo(state.userInfo, state.isLoggedIn)
 
-        updateRecommendSection(state.recommendHearits, state.showRecommendHearits)
+        binding.composeCarousel.isVisible = state.showRecommendHearits
         updatePlayingHistorySection(state.playingHistoryHearits, state.showPlayingHistory)
         updateRecentUploadSection(state.recentUploadHearits, state.showRecentUpload)
         updateBookmarkSection(state.playingBookmarkHearits, state.showBookmark)
@@ -213,26 +233,6 @@ class HomeFragment :
     ) {
         mainViewModel.updateLoginState(isLoggedIn)
         binding.userInfo = userInfo
-    }
-
-    private fun updateRecommendSection(
-        recommendHearits: List<RecommendHearit>,
-        shouldShow: Boolean,
-    ) {
-        binding.composeCarousel.isVisible = shouldShow
-        if (!shouldShow) return
-
-        binding.composeCarousel.setContent {
-            MaterialTheme {
-                CarouselSection(
-                    items = recommendHearits.toImmutableList(),
-                    onItemClick = { item ->
-                        logHomeHearitClick(HearitSource.RECOMMEND, item.id)
-                        navigateToPlayerDetail(item.id)
-                    },
-                )
-            }
-        }
     }
 
     private fun updatePlayingHistorySection(
@@ -336,6 +336,9 @@ class HomeFragment :
     override fun onDestroyView() {
         binding.composeCarousel.disposeComposition()
         binding.rvHomeRecommendationCategories.adapter = null
+        binding.rvHomePlayingHistoryHearit.adapter = null
+        binding.rvHomeRecentUpload.adapter = null
+        binding.rvHomePlayingBookmark.adapter = null
         _binding = null
         super.onDestroyView()
     }
