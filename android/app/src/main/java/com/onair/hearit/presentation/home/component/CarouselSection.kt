@@ -40,7 +40,9 @@ import androidx.compose.ui.zIndex
 import androidx.core.graphics.toColorInt
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.RecommendHearit
+import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.Gray4
+import com.onair.hearit.presentation.theme.HearitPurple1
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -90,9 +92,9 @@ fun CarouselSection(
             repeat(items.size) { iteration ->
                 val color =
                     if (pagerState.currentPage == iteration) {
-                        Color.White
+                        HearitPurple1
                     } else {
-                        Color.Gray
+                        Gray2
                     }
 
                 Box(
