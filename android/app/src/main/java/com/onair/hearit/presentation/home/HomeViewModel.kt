@@ -13,6 +13,7 @@ import com.onair.hearit.domain.repository.RecommendationRepository
 import com.onair.hearit.domain.repository.UserRepository
 import com.onair.hearit.presentation.SingleLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -95,7 +96,7 @@ class HomeViewModel @Inject constructor(
                 hearitRepository
                     .getRecommendHearits()
                     .onSuccess { hearits ->
-                        _uiState.update { it.copy(recommendHearits = hearits) }
+                        _uiState.update { it.copy(recommendHearits = hearits.toImmutableList()) }
                     }.onFailure { throwable ->
                         Timber.w(throwable)
                         _toastMessage.value = R.string.home_toast_recommend_load_fail
