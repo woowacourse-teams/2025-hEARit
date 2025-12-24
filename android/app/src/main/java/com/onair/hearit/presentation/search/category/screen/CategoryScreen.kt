@@ -1,6 +1,5 @@
 package com.onair.hearit.presentation.search.category.screen
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,28 +26,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedCategoryHearit
-import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.SearchViewModel
+import com.onair.hearit.presentation.search.category.component.CustomLinearProgressBar
 import com.onair.hearit.presentation.theme.DarkGray
 import com.onair.hearit.presentation.theme.Gray1
 import com.onair.hearit.presentation.theme.Gray2
@@ -58,56 +51,22 @@ import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import com.onair.hearit.presentation.toHashtagName
 import com.onair.hearit.presentation.toTimeString
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun CategoryScreen(
-    categoryId: Long,
     categoryName: String,
     categoryColor: String,
-    viewModel: SearchViewModel,
-    mainViewModel: MainViewModel,
+    hearits: ImmutableList<SearchedCategoryHearit>,
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val hearits by viewModel.categoryHearits.collectAsStateWithLifecycle()
-
-    BackHandler(enabled = true) { onBack() }
-
-    LaunchedEffect(categoryId) {
-        viewModel.setCurrentCategory(categoryId, categoryName, categoryColor)
-        mainViewModel.categoryUpdated.collect {
-            viewModel.fetchCategoryHearits(isInitial = true)
+    val safeColor =
+        remember(categoryColor) {
+            runCatching { Color(categoryColor.toColorInt()) }.getOrElse { HearitBlack }
         }
-    }
-
-    GradientBackgroundScreen(
-        colorCode = categoryColor,
-        categoryName = categoryName,
-        hearits = hearits,
-        onBack = onBack,
-        onHearitClick = onHearitClick,
-        modifier = modifier,
-    )
-
-    DisposableEffect(categoryId) {
-        onDispose {
-            viewModel.clearCategoryHearits()
-        }
-    }
-}
-
-@Composable
-fun GradientBackgroundScreen(
-    colorCode: String,
-    categoryName: String,
-    hearits: List<SearchedCategoryHearit>,
-    onBack: () -> Unit,
-    onHearitClick: (Long) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val safeColor = runCatching { Color(colorCode.toColorInt()) }.getOrElse { HearitBlack }
 
     Box(
         modifier =
@@ -124,65 +83,77 @@ fun GradientBackgroundScreen(
                         ),
                 ),
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_back),
-                    contentDescription = "뒤로가기",
-                    tint = Gray4,
-                )
-            }
-        }
+        CategoryTopBar(
+            categoryName = categoryName,
+            onBack = onBack,
+        )
 
-        Row(
-            modifier =
-                Modifier
-                    .align(Alignment.TopCenter)
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(top = 20.dp, start = 24.dp),
-        ) {
-            Text(
-                text = categoryName,
-                color = Gray4,
-                style = HearitTypoGraphy.headlineMedium,
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
-
-            Icon(
-                painter = painterResource(R.drawable.ic_down),
-                contentDescription = "categoryList",
-                modifier =
-                    Modifier
-                        .size(20.dp)
-                        .alpha(0f),
-                tint = Gray4,
-            )
-        }
-
-        LazyColumn(
+        CategoryHearitList(
+            hearits = hearits,
+            color = safeColor,
+            onHearitClick = onHearitClick,
             modifier =
                 Modifier
                     .fillMaxSize()
                     .padding(top = 152.dp, bottom = 60.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+        )
+    }
+}
+
+@Composable
+private fun CategoryTopBar(
+    categoryName: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(vertical = 12.dp),
+    ) {
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier.align(Alignment.CenterStart),
         ) {
-            items(items = hearits, key = { it.id }) { item ->
-                SearchedHearitItem(
-                    item = item,
-                    color = safeColor,
-                    onClick = onHearitClick,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            Icon(
+                painter = painterResource(id = R.drawable.ic_back),
+                contentDescription = "뒤로가기",
+                tint = Gray4,
+            )
+        }
+
+        Text(
+            text = categoryName,
+            modifier = Modifier.align(Alignment.Center),
+            color = Gray4,
+            style = HearitTypoGraphy.headlineMedium,
+        )
+    }
+}
+
+@Composable
+private fun CategoryHearitList(
+    hearits: ImmutableList<SearchedCategoryHearit>,
+    color: Color,
+    onHearitClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(
+            items = hearits,
+            key = { it.id },
+        ) { item ->
+            SearchedHearitItem(
+                item = item,
+                color = color,
+                onClick = { onHearitClick(item.id) },
+            )
         }
     }
 }
@@ -276,71 +247,48 @@ fun SearchedHearitItem(
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun CustomLinearProgressBar(
-    progress: Float,
-    backgroundColor: Color,
-    progressColor: Color,
-    cornerRadius: Dp,
-    modifier: Modifier = Modifier,
-) {
-    val clamped = progress.coerceIn(0f, 1f)
-
-    Box(
-        modifier =
-            modifier
-                .clip(RoundedCornerShape(cornerRadius))
-                .background(backgroundColor),
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(clamped)
-                    .background(progressColor),
+private fun CategoryScreenPreview() {
+    MaterialTheme {
+        CategoryScreen(
+            categoryName = "Android",
+            categoryColor = "#73A01A",
+            hearits =
+                persistentListOf(
+                    SearchedCategoryHearit(
+                        id = 0,
+                        title = "이건 첫 번째 레슨, 좋은 건 너만 알기",
+                        playTime = 123,
+                        lastPlayTime = 83782,
+                        createdAt = "1234",
+                        keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                        category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
+                    ),
+                    SearchedCategoryHearit(
+                        id = 1,
+                        title = "이제 두 번째 레슨, 슬픔도 너만 갖기",
+                        playTime = 1234,
+                        lastPlayTime = 192013,
+                        createdAt = "1234",
+                        keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                        category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
+                    ),
+                ),
+            onBack = {},
+            onHearitClick = {},
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GradientBackgroundScreenPreview() {
-    val dummyHearits =
-        listOf(
-            SearchedCategoryHearit(
-                0,
-                "이건 첫 번째 레슨, 좋은 건 너만 알기",
-                playTime = 123,
-                lastPlayTime = 83782,
-                createdAt = "1234",
-                keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
-                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
-            ),
-            SearchedCategoryHearit(
-                1,
-                "이제 두 번째 레슨, 슬픔도 너만 갖기",
-                playTime = 1234,
-                lastPlayTime = 192013,
-                createdAt = "1234",
-                keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
-                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
-            ),
-            SearchedCategoryHearit(
-                2,
-                "드디어 세 번째 레슨, 일희일비 않기",
-                playTime = 1234,
-                lastPlayTime = 99999,
-                createdAt = "1234",
-                keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
-                category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
-            ),
-        )
-
+private fun CategoryScreenEmptyPreview() {
     MaterialTheme {
-        GradientBackgroundScreen(
-            colorCode = "#73A01A",
-            categoryName = "Android",
-            hearits = dummyHearits,
+        CategoryScreen(
+            categoryName = "Kotlin",
+            categoryColor = "#7C4DFF",
+            hearits = persistentListOf(),
             onBack = {},
             onHearitClick = {},
         )

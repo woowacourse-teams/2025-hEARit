@@ -18,7 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SearchComposeFragment : Fragment() {
+class SearchFragment : Fragment() {
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
 
@@ -81,13 +81,13 @@ class SearchComposeFragment : Fragment() {
         private const val CATEGORY_COLOR_KEY = "categoryColor"
         private const val IS_DIRECT_CATEGORY_ENTRY = "isDirectCategoryEntry"
 
-        fun newInstance() = SearchComposeFragment()
+        fun newInstance() = SearchFragment()
 
         fun newInstanceWithCategory(
             categoryId: Long,
             categoryName: String,
             categoryColor: String,
-        ) = SearchComposeFragment().apply {
+        ) = SearchFragment().apply {
             arguments =
                 Bundle().apply {
                     putLong(CATEGORY_ID_KEY, categoryId)

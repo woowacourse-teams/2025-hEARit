@@ -43,8 +43,7 @@ import com.onair.hearit.presentation.home.adapter.RecommendHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.category.CategoryFragment
-import com.onair.hearit.presentation.search.main.SearchComposeFragment
+import com.onair.hearit.presentation.search.main.SearchFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -365,7 +364,7 @@ class HomeFragment :
         )
 
         val fragment =
-            SearchComposeFragment.newInstanceWithCategory(
+            SearchFragment.newInstanceWithCategory(
                 categoryId = id,
                 categoryName = name,
                 categoryColor = colorCode,
