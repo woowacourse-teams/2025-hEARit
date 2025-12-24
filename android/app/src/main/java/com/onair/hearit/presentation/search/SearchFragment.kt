@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.main
+package com.onair.hearit.presentation.search
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,8 +14,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.compose.rememberNavController
 import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.SearchNavHost
-import com.onair.hearit.presentation.search.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

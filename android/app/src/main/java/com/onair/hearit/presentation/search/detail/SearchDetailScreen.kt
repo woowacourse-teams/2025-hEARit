@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.recent.screen
+package com.onair.hearit.presentation.search.detail
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,14 +18,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.recent.component.SearchDetailTopBar
+import com.onair.hearit.presentation.search.detail.component.SearchDetailTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchDetailScreen(
-    viewModel: SearchViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val searchInput by viewModel.searchInput.collectAsState()
     val recentKeywords by viewModel.recentKeywords.collectAsState()

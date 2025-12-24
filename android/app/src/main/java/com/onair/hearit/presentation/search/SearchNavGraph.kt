@@ -12,9 +12,8 @@ import androidx.navigation.navArgument
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.presentation.search.category.CategoryRoute
-import com.onair.hearit.presentation.search.main.LocalAnalyticsLogger
+import com.onair.hearit.presentation.search.detail.SearchDetailScreen
 import com.onair.hearit.presentation.search.main.SearchMainRoute
-import com.onair.hearit.presentation.search.recent.screen.SearchDetailScreen
 
 // Routes
 const val SEARCH_MAIN_ROUTE = "search_main"
@@ -44,7 +43,6 @@ fun SearchNavHost(
         popEnterTransition = { EnterTransition.None },
         popExitTransition = { ExitTransition.None },
     ) {
-        // 검색 메인 화면
         composable(SEARCH_MAIN_ROUTE) {
             LaunchedEffect(Unit) {
                 analyticsLogger.logEvent(

@@ -10,7 +10,6 @@ object AnalyticsParamKeys {
 
     const val SCREEN_NAME_LOGIN = "로그인 화면"
     const val SCREEN_NAME_HOME = "홈 화면"
-    const val SCREEN_NAME_SETTING = "설정 화면"
     const val SCREEN_NAME_SEARCH = "검색 화면"
     const val SCREEN_NAME_EXPLORE = "탐색 화면"
     const val SCREEN_NAME_LIBRARY = "라이브러리 화면"

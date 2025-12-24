@@ -9,7 +9,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.search.category.screen.CategoryScreen
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable

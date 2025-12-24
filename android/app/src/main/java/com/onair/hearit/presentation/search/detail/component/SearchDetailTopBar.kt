@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.recent.component
+package com.onair.hearit.presentation.search.detail.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

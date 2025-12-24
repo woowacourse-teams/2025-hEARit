@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.main.screen
+package com.onair.hearit.presentation.search.main
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
