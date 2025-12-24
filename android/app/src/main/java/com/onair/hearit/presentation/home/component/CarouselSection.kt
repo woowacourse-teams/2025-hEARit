@@ -88,31 +88,40 @@ fun CarouselSection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            repeat(items.size) { iteration ->
-                val color =
-                    if (pagerState.currentPage == iteration) {
-                        HearitPurple1
-                    } else {
-                        Gray2
-                    }
+        PagerIndicator(
+            pageCount = items.size,
+            currentPage = pagerState.currentPage,
+            onPageClick = { page ->
+                coroutineScope.launch {
+                    pagerState.animateScrollToPage(page)
+                }
+            },
+        )
+    }
+}
 
-                Box(
-                    modifier =
-                        Modifier
-                            .padding(4.dp)
-                            .size(8.dp)
-                            .background(color, CircleShape)
-                            .clickable {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(iteration)
-                                }
-                            },
-                )
-            }
+@Composable
+private fun PagerIndicator(
+    pageCount: Int,
+    currentPage: Int,
+    onPageClick: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        repeat(pageCount) { index ->
+            Box(
+                modifier =
+                    Modifier
+                        .padding(4.dp)
+                        .size(8.dp)
+                        .background(
+                            color = if (currentPage == index) HearitPurple1 else Gray2,
+                            shape = CircleShape,
+                        ).clickable { onPageClick(index) },
+            )
         }
     }
 }
