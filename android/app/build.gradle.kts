@@ -26,8 +26,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 10400
-        versionName = "1.4.0"
+        versionCode = 10401
+        versionName = "1.4.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner = "com.onair.hearit.HearitTestRunner"
 
@@ -137,6 +137,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -148,6 +149,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.kotlinx.collections.immutable)
 
     // Preview
     implementation(libs.androidx.ui.tooling.preview)

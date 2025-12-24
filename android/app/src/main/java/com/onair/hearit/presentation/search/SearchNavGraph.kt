@@ -14,7 +14,7 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.category.CategoryScreen
+import com.onair.hearit.presentation.search.category.screen.CategoryScreen
 import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
 import com.onair.hearit.presentation.search.recent.screen.SearchDetailScreen
 

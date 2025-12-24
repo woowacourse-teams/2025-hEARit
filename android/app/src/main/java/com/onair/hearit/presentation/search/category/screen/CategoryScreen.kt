@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.category
+package com.onair.hearit.presentation.search.category.screen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -58,6 +58,7 @@ import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import com.onair.hearit.presentation.toHashtagName
 import com.onair.hearit.presentation.toTimeString
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun CategoryScreen(
@@ -312,7 +313,7 @@ fun GradientBackgroundScreenPreview() {
                 playTime = 123,
                 lastPlayTime = 83782,
                 createdAt = "1234",
-                keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
                 category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
             SearchedCategoryHearit(
@@ -321,7 +322,7 @@ fun GradientBackgroundScreenPreview() {
                 playTime = 1234,
                 lastPlayTime = 192013,
                 createdAt = "1234",
-                keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
                 category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
             SearchedCategoryHearit(
@@ -330,7 +331,7 @@ fun GradientBackgroundScreenPreview() {
                 playTime = 1234,
                 lastPlayTime = 99999,
                 createdAt = "1234",
-                keywords = listOf(Keyword(1, "aa"), Keyword(2, "bb")),
+                keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
                 category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
             ),
         )
@@ -356,7 +357,7 @@ fun SearchedHearitItemPreview() {
             playTime = 350,
             lastPlayTime = 99999,
             createdAt = "1234",
-            keywords = listOf(Keyword(1, "유노윤호"), Keyword(2, "U-KNOW")),
+            keywords = persistentListOf(Keyword(1, "유노윤호"), Keyword(2, "U-KNOW")),
             category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
         )
 
