@@ -1,5 +1,7 @@
 package com.onair.hearit.presentation.search.main
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -9,10 +11,11 @@ import com.onair.hearit.presentation.search.SearchViewModel
 
 @Composable
 fun SearchMainRoute(
-    viewModel: SearchViewModel = hiltViewModel(),
     onSearchBarClick: () -> Unit,
     onCategoryClick: (Long, String, String) -> Unit,
 ) {
+    val activity = LocalActivity.current as? ComponentActivity ?: return
+    val viewModel: SearchViewModel = hiltViewModel(viewModelStoreOwner = activity)
     val uiState by viewModel.searchMainUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

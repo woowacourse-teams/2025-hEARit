@@ -10,10 +10,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.compose.rememberNavController
 import com.onair.hearit.analytics.AnalyticsLogger
-import com.onair.hearit.presentation.main.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -24,9 +22,6 @@ val LocalAnalyticsLogger =
 
 @AndroidEntryPoint
 class SearchFragment : Fragment() {
-    private val searchViewModel: SearchViewModel by activityViewModels()
-    private val mainViewModel: MainViewModel by activityViewModels()
-
     @Inject
     lateinit var analyticsLogger: AnalyticsLogger
 

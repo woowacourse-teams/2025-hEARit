@@ -82,7 +82,10 @@ class SearchViewModel @Inject constructor(
         name: String,
         colorCode: String,
     ) {
-        if (_categoryUiState.value.category?.id == id) return
+        if (_categoryUiState.value.category?.id == id) {
+            Timber.d("Same category - SKIPPING")
+            return
+        }
 
         resetPaging()
         _categoryHearits.value = emptyList()
@@ -168,8 +171,16 @@ class SearchViewModel @Inject constructor(
     }
 
     fun fetchCategoryHearits(isInitial: Boolean) {
-        val category = _categoryUiState.value.category ?: return
-        if (isLoading || (!isInitial && isLastPage)) return
+        val category = currentCategory.value
+        if (category == null) {
+            return
+        }
+        if (isLoading) {
+            return
+        }
+        if (!isInitial && isLastPage) {
+            return
+        }
 
         isLoading = true
 
