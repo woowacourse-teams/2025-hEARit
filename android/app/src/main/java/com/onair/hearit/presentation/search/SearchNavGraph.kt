@@ -10,12 +10,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.onair.hearit.analytics.AnalyticsEventNames
-import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.category.screen.CategoryScreen
-import com.onair.hearit.presentation.search.main.screen.SearchMainScreen
+import com.onair.hearit.presentation.search.category.CategoryRoute
+import com.onair.hearit.presentation.search.main.LocalAnalyticsLogger
+import com.onair.hearit.presentation.search.main.SearchMainRoute
 import com.onair.hearit.presentation.search.recent.screen.SearchDetailScreen
 
 // Routes
@@ -33,12 +31,11 @@ object CategoryArgs {
 @Composable
 fun SearchNavHost(
     navController: NavHostController,
-    analyticsLogger: AnalyticsLogger,
-    searchViewModel: SearchViewModel,
-    mainViewModel: MainViewModel,
     onHearitClick: (Long) -> Unit,
     onCategoryBack: () -> Unit,
 ) {
+    val analyticsLogger = LocalAnalyticsLogger.current
+
     NavHost(
         navController = navController,
         startDestination = SEARCH_MAIN_ROUTE,
@@ -59,16 +56,11 @@ fun SearchNavHost(
                 )
             }
 
-            SearchMainScreen(
-                viewModel = searchViewModel,
+            SearchMainRoute(
                 onSearchBarClick = {
                     navController.navigate(SEARCH_DETAIL_ROUTE)
                 },
                 onCategoryClick = { id, name, colorCode ->
-                    analyticsLogger.logEvent(
-                        AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
-                        mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
-                    )
                     val encodedColor = colorCode.removePrefix("#")
                     navController.navigate("category/$id/$name/$encodedColor")
                 },
@@ -77,7 +69,6 @@ fun SearchNavHost(
 
         composable(SEARCH_DETAIL_ROUTE) {
             SearchDetailScreen(
-                viewModel = searchViewModel,
                 onBackClick = {
                     navController.navigateUp()
                 },
@@ -105,12 +96,10 @@ fun SearchNavHost(
                     "#$categoryColorRaw"
                 }
 
-            CategoryScreen(
+            CategoryRoute(
                 categoryId = categoryId,
                 categoryName = categoryName,
                 categoryColor = categoryColor,
-                viewModel = searchViewModel,
-                mainViewModel = mainViewModel,
                 onBack = onCategoryBack,
                 onHearitClick = onHearitClick,
             )

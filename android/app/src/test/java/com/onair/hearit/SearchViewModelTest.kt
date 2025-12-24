@@ -55,7 +55,6 @@ class SearchViewModelTest {
 
         viewModel =
             SearchViewModel(
-                savedStateHandle,
                 categoryRepository = categoryRepository,
                 hearitRepository = hearitRepository,
                 recentKeywordRepository = recentKeywordRepository,
@@ -88,11 +87,11 @@ class SearchViewModelTest {
             } returns Result.success(mockPageCategories)
 
             // When
-            viewModel.getCategories()
+            viewModel.loadCategories()
             advanceUntilIdle()
 
             // Then
-            assertEquals(mockCategories, viewModel.categories.value)
+            assertEquals(mockCategories, viewModel.categoryUiState.value)
             coVerify(exactly = 1) { categoryRepository.getCategories(page = 0) }
         }
 
@@ -106,7 +105,7 @@ class SearchViewModelTest {
             } returns Result.failure(exception)
 
             // When
-            viewModel.getCategories()
+            viewModel.loadCategories()
             advanceUntilIdle()
 
             // Then

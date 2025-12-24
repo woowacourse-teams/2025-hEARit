@@ -2,7 +2,6 @@ package com.onair.hearit.presentation.search
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
@@ -15,14 +14,15 @@ import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.presentation.search.category.CategoryUiState
+import com.onair.hearit.presentation.search.main.SearchMainUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -36,8 +36,11 @@ class SearchViewModel @Inject constructor(
     private val _searchUiState = MutableLiveData<SearchUiState>()
     val searchUiState: LiveData<SearchUiState> = _searchUiState
 
-    private val _categories = MutableStateFlow<List<Category>>(emptyList())
-    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
+    private val _searchMainUiState = MutableStateFlow(SearchMainUiState())
+    val searchMainUiState: StateFlow<SearchMainUiState> = _searchMainUiState.asStateFlow()
+
+    private val _categoryUiState = MutableStateFlow(CategoryUiState())
+    val categoryUiState: StateFlow<CategoryUiState> = _categoryUiState.asStateFlow()
 
     private val _recentKeywords = MutableStateFlow<List<RecentSearch>?>(null)
     val recentKeywords: StateFlow<List<RecentSearch>?> = _recentKeywords.asStateFlow()
@@ -79,7 +82,7 @@ class SearchViewModel @Inject constructor(
         name: String,
         colorCode: String,
     ) {
-        if (_currentCategory.value?.id == id) return
+        if (_categoryUiState.value.category?.id == id) return
 
         resetPaging()
         _categoryHearits.value = emptyList()
@@ -100,16 +103,22 @@ class SearchViewModel @Inject constructor(
         fetchResultData(isInitial = true)
     }
 
-    fun getCategories() {
+    fun loadCategories() {
         viewModelScope.launch {
+            _searchMainUiState.update { it.copy(isLoading = true) }
+
             categoryRepository
                 .getCategories(page = 0)
                 .onSuccess { pageCategories ->
-                    paging = pageCategories.paging
-                    _categories.value = pageCategories.items
-                    isLastPage = pageCategories.paging.isLast
+                    _searchMainUiState.update {
+                        it.copy(
+                            categories = pageCategories.items.toImmutableList(),
+                            isLoading = false,
+                        )
+                    }
                 }.onFailure { throwable ->
                     Timber.w(throwable)
+                    _searchMainUiState.update { it.copy(isLoading = false) }
                     _toastMessage.value = R.string.all_toast_categories_load_fail
                 }
         }
@@ -159,33 +168,37 @@ class SearchViewModel @Inject constructor(
     }
 
     fun fetchCategoryHearits(isInitial: Boolean) {
-        val category = currentCategory.value ?: return
-
-        if (isLoading) return
-        if (!isInitial && isLastPage) return
+        val category = _categoryUiState.value.category ?: return
+        if (isLoading || (!isInitial && isLastPage)) return
 
         isLoading = true
 
         viewModelScope.launch {
+            _categoryUiState.update { it.copy(isLoading = true) }
+
             hearitRepository
                 .getCategoryHearits(category.id, if (isInitial) 0 else currentPage)
                 .onSuccess { response ->
-                    _categoryHearits.value =
-                        if (isInitial) {
-                            currentPage = 0
-                            response.items
-                        } else {
-                            _categoryHearits.value + response.items
-                        }
-
-                    paging = response.paging
+                    _categoryUiState.update { state ->
+                        state.copy(
+                            hearits =
+                                if (isInitial) {
+                                    response.items.toImmutableList()
+                                } else {
+                                    (state.hearits + response.items).toImmutableList()
+                                },
+                            isLoading = false,
+                            isLastPage = response.paging.isLast,
+                        )
+                    }
+                    currentPage = if (isInitial) 1 else currentPage + 1
                     isLastPage = response.paging.isLast
-                    currentPage++
-                    isLoading = false
                 }.onFailure {
-                    isLoading = false
+                    _categoryUiState.update { it.copy(isLoading = false) }
                     _toastMessage.value = R.string.category_toast_searched_hearits_load_fail
                 }
+
+            isLoading = false
         }
     }
 
@@ -246,10 +259,6 @@ class SearchViewModel @Inject constructor(
     fun clearCategoryHearits() {
         _categoryHearits.value = emptyList()
         _currentCategory.value = null
-    }
-
-    fun clearToastMessage() {
-        _toastMessage.value = null
     }
 
     private fun updateUiState(hearits: List<SearchedHearit>) {

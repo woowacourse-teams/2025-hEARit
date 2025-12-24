@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
@@ -16,8 +17,8 @@ fun CategoryRoute(
     categoryId: Long,
     categoryName: String,
     categoryColor: String,
-    viewModel: SearchViewModel,
-    mainViewModel: MainViewModel,
+    viewModel: SearchViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel(),
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
 ) {

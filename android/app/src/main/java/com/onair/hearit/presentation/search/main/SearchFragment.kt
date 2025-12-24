@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -16,6 +18,11 @@ import com.onair.hearit.presentation.search.SearchNavHost
 import com.onair.hearit.presentation.search.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
+val LocalAnalyticsLogger =
+    staticCompositionLocalOf<AnalyticsLogger> {
+        error("AnalyticsLogger not provided")
+    }
 
 @AndroidEntryPoint
 class SearchFragment : Fragment() {
@@ -37,38 +44,39 @@ class SearchFragment : Fragment() {
         ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val navController = rememberNavController()
+                CompositionLocalProvider(
+                    LocalAnalyticsLogger provides analyticsLogger,
+                ) {
+                    val navController = rememberNavController()
 
-                SearchNavHost(
-                    navController = navController,
-                    analyticsLogger = analyticsLogger,
-                    searchViewModel = searchViewModel,
-                    mainViewModel = mainViewModel,
-                    onHearitClick = { hearitId ->
-                        // Hearit 클릭 처리 (기존 방식 유지 또는 Navigation으로 전환)
-                        // 예: 기존 Fragment로 이동하거나 Compose 화면으로 이동
-                    },
-                    onCategoryBack = {
-                        if (isDirectCategoryEntry) {
-                            // 홈으로 돌아가기 (Fragment 종료)
-                            parentFragmentManager.popBackStack()
-                        } else {
-                            // 검색 메인으로 돌아가기
-                            navController.navigateUp()
-                        }
-                    },
-                )
+                    SearchNavHost(
+                        navController = navController,
+                        onHearitClick = { hearitId ->
+                            // Hearit 클릭 처리 (기존 방식 유지 또는 Navigation으로 전환)
+                            // 예: 기존 Fragment로 이동하거나 Compose 화면으로 이동
+                        },
+                        onCategoryBack = {
+                            if (isDirectCategoryEntry) {
+                                // 홈으로 돌아가기 (Fragment 종료)
+                                parentFragmentManager.popBackStack()
+                            } else {
+                                // 검색 메인으로 돌아가기
+                                navController.navigateUp()
+                            }
+                        },
+                    )
 
-                // HomeFragment에서 카테고리 정보가 넘어왔다면 자동 이동
-                LaunchedEffect(Unit) {
-                    arguments?.let { args ->
-                        val categoryId = args.getLong(CATEGORY_ID_KEY, -1L)
-                        if (categoryId != -1L) {
-                            val categoryName = args.getString(CATEGORY_NAME_KEY, "")
-                            val categoryColor = args.getString(CATEGORY_COLOR_KEY, "")
-                            val encodedColor = categoryColor.removePrefix("#")
+                    // HomeFragment에서 카테고리 정보가 넘어왔다면 자동 이동
+                    LaunchedEffect(Unit) {
+                        arguments?.let { args ->
+                            val categoryId = args.getLong(CATEGORY_ID_KEY, -1L)
+                            if (categoryId != -1L) {
+                                val categoryName = args.getString(CATEGORY_NAME_KEY, "")
+                                val categoryColor = args.getString(CATEGORY_COLOR_KEY, "")
+                                val encodedColor = categoryColor.removePrefix("#")
 
-                            navController.navigate("category/$categoryId/$categoryName/$encodedColor")
+                                navController.navigate("category/$categoryId/$categoryName/$encodedColor")
+                            }
                         }
                     }
                 }

@@ -15,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.recent.component.SearchDetailTopBar
@@ -22,7 +23,7 @@ import com.onair.hearit.presentation.search.recent.component.SearchDetailTopBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchDetailScreen(
-    viewModel: SearchViewModel,
+    viewModel: SearchViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
