@@ -24,6 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,12 +75,12 @@ fun CarouselSection(
                     .fillMaxWidth()
                     .height(340.dp),
         ) { page ->
-            val pageOffset =
-                (pagerState.currentPage - page).toFloat() + pagerState.currentPageOffsetFraction
-
             CarouselCard(
                 item = items[page],
-                pageOffset = pageOffset,
+                pageOffset = {
+                    (pagerState.currentPage - page).toFloat() +
+                        pagerState.currentPageOffsetFraction
+                },
                 onClick = { onItemClick(items[page]) },
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -119,44 +120,35 @@ fun CarouselSection(
 @Composable
 private fun CarouselCard(
     item: RecommendHearit,
-    pageOffset: Float,
+    pageOffset: () -> Float,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val scale =
-        lerp(
-            start = 0.88f,
-            stop = 1f,
-            fraction = 1f - pageOffset.absoluteValue.coerceIn(0f, 1f),
-        )
-
-    val alpha =
-        lerp(
-            start = 0.6f,
-            stop = 1f,
-            fraction = 1f - pageOffset.absoluteValue.coerceIn(0f, 1f),
-        )
+    val cardColor =
+        remember(item.categoryColor) {
+            item.categoryColor.toComposeColor()
+        }
 
     Card(
         modifier =
             modifier
-                .zIndex(1f - pageOffset.absoluteValue)
+                .zIndex(1f - pageOffset().absoluteValue)
                 .graphicsLayer {
+                    val offset = pageOffset()
+                    val scale = lerp(0.88f, 1f, 1f - offset.absoluteValue.coerceIn(0f, 1f))
+                    val alphaValue = lerp(0.6f, 1f, 1f - offset.absoluteValue.coerceIn(0f, 1f))
                     scaleX = scale
                     scaleY = scale
-                    this.alpha = alpha
+                    alpha = alphaValue
                 }.clickable(
                     onClick = onClick,
                     onClickLabel = item.title,
                 ),
         shape = RoundedCornerShape(8.dp),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = item.categoryColor.toComposeColor(),
-            ),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation =
             CardDefaults.cardElevation(
-                defaultElevation = if (pageOffset.absoluteValue < 0.5f) 8.dp else 2.dp,
+                defaultElevation = if (pageOffset().absoluteValue < 0.5f) 8.dp else 2.dp,
             ),
     ) {
         Column(
@@ -256,7 +248,7 @@ private fun CarouselCardPreview() {
                     categoryName = "우테코",
                     categoryColor = "#12C6B0",
                 ),
-            pageOffset = 0f,
+            pageOffset = { 0f },
             onClick = {},
             modifier = Modifier.height(320.dp),
         )
@@ -275,7 +267,7 @@ private fun CarouselCardSidePreview() {
                     categoryName = "Kotlin",
                     categoryColor = "#7C4DFF",
                 ),
-            pageOffset = 1f,
+            pageOffset = { 1f },
             onClick = {},
             modifier = Modifier.height(320.dp),
         )
