@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -157,6 +158,9 @@ class HomeFragment :
     }
 
     private fun setupComposeCarousel() {
+        binding.composeCarousel.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed,
+        )
         binding.composeCarousel.setContent {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -334,7 +338,6 @@ class HomeFragment :
     }
 
     override fun onDestroyView() {
-        binding.composeCarousel.disposeComposition()
         binding.rvHomeRecommendationCategories.adapter = null
         binding.rvHomePlayingHistoryHearit.adapter = null
         binding.rvHomeRecentUpload.adapter = null
