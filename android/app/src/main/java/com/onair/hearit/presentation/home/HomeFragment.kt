@@ -48,7 +48,6 @@ import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.category.CategoryFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -167,7 +166,7 @@ class HomeFragment :
             if (uiState.showRecommendHearits) {
                 MaterialTheme {
                     CarouselSection(
-                        items = uiState.recommendHearits.toImmutableList(),
+                        items = uiState.recommendHearits,
                         onItemClick = { item ->
                             logHomeHearitClick(HearitSource.RECOMMEND, item.id)
                             navigateToPlayerDetail(item.id)
