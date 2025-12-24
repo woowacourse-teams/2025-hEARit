@@ -9,7 +9,6 @@ import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RecentSearch
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.HearitRepository
@@ -18,6 +17,7 @@ import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.search.category.CategoryUiState
 import com.onair.hearit.presentation.search.main.SearchMainUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,14 +45,8 @@ class SearchViewModel @Inject constructor(
     private val _recentKeywords = MutableStateFlow<List<RecentSearch>?>(null)
     val recentKeywords: StateFlow<List<RecentSearch>?> = _recentKeywords.asStateFlow()
 
-    private val _currentCategory = MutableStateFlow<Category?>(null)
-    val currentCategory: StateFlow<Category?> = _currentCategory.asStateFlow()
-
     private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
     val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
-
-    private val _categoryHearits = MutableStateFlow<List<SearchedCategoryHearit>>(emptyList())
-    val categoryHearits: StateFlow<List<SearchedCategoryHearit>> = _categoryHearits
 
     private val _toastMessage = SingleLiveData<Int?>()
     val toastMessage: LiveData<Int?> = _toastMessage
@@ -72,7 +66,6 @@ class SearchViewModel @Inject constructor(
         _searchInput.value = input
         resetPaging()
         _searchedHearits.value = emptyList()
-        _categoryHearits.value = emptyList()
 
         fetchKeywordHearits(input.term, true)
     }
@@ -82,20 +75,18 @@ class SearchViewModel @Inject constructor(
         name: String,
         colorCode: String,
     ) {
-        if (_categoryUiState.value.category?.id == id) {
-            Timber.d("Same category - SKIPPING")
-            return
-        }
+        if (_categoryUiState.value.category?.id == id) return
 
         resetPaging()
-        _categoryHearits.value = emptyList()
 
-        _currentCategory.value =
-            Category(
-                id = id,
-                name = name,
-                colorCode = colorCode,
+        val category = Category(id, name, colorCode)
+        _categoryUiState.update {
+            CategoryUiState(
+                category = category,
+                hearits = persistentListOf(),
+                isLoading = true,
             )
+        }
 
         fetchCategoryHearits(isInitial = true)
     }
@@ -171,7 +162,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun fetchCategoryHearits(isInitial: Boolean) {
-        val category = currentCategory.value
+        val category = _categoryUiState.value.category
         if (category == null) {
             return
         }
@@ -268,8 +259,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun clearCategoryHearits() {
-        _categoryHearits.value = emptyList()
-        _currentCategory.value = null
+        _categoryUiState.update { CategoryUiState() }
     }
 
     private fun updateUiState(hearits: List<SearchedHearit>) {
