@@ -158,10 +158,10 @@ class HomeFragment :
     }
 
     private fun setupComposeCarousel() {
-        binding.composeCarousel.setViewCompositionStrategy(
+        binding.recommendCarousel.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed,
         )
-        binding.composeCarousel.setContent {
+        binding.recommendCarousel.setContent {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             if (uiState.showRecommendHearits) {
@@ -217,7 +217,7 @@ class HomeFragment :
         updateAdSections(state.isLoading)
         updateUserInfo(state.userInfo, state.isLoggedIn)
 
-        binding.composeCarousel.isVisible = state.showRecommendHearits
+        binding.recommendCarousel.isVisible = state.showRecommendHearits
         updatePlayingHistorySection(state.playingHistoryHearits, state.showPlayingHistory)
         updateRecentUploadSection(state.recentUploadHearits, state.showRecentUpload)
         updateBookmarkSection(state.playingBookmarkHearits, state.showBookmark)

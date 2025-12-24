@@ -70,23 +70,23 @@
                     app:layout_constraintStart_toStartOf="@id/tv_home_description"
                     app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
 
-            <androidx.compose.ui.platform.ComposeView
-                android:id="@+id/compose_carousel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_recommend" />
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/recommend_Carousel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_recommend" />
 
-            <TextView
-                android:id="@+id/tv_home_playing_history_hearit_title"
-                style="@style/pretendard_main_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@{@string/home_playing_history_hearit_title(userInfo.nickname)}"
-                app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
-                app:layout_constraintTop_toBottomOf="@id/compose_carousel"
-                tools:text="hEARit님이 듣고 있는 팟캐스트" />
+                <TextView
+                    android:id="@+id/tv_home_playing_history_hearit_title"
+                    style="@style/pretendard_main_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@{@string/home_playing_history_hearit_title(userInfo.nickname)}"
+                    app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
+                    app:layout_constraintTop_toBottomOf="@id/recommend_Carousel"
+                    tools:text="hEARit님이 듣고 있는 팟캐스트" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_home_playing_history_hearit"
@@ -170,22 +170,22 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/rv_home_playing_bookmark" />
 
-            <TextView
-                android:id="@+id/tv_home_wootaeco"
-                style="@style/pretendard_category"
-                android:layout_width="0dp"
-                android:layout_height="92dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/bg_gradient_home_wootaeco"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:text="@string/home_navigate_wootaeco_text"
-                android:visibility="gone"
-                app:drawableEndCompat="@drawable/ic_home_arrow"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast" />
+                <TextView
+                    android:id="@+id/tv_home_wootaeco"
+                    style="@style/pretendard_category"
+                    android:layout_width="0dp"
+                    android:layout_height="92dp"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_gradient_home_wootaeco"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/home_navigate_wootaeco_text"
+                    android:visibility="gone"
+                    app:drawableEndCompat="@drawable/ic_home_arrow"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_home_recommendation_categories"
