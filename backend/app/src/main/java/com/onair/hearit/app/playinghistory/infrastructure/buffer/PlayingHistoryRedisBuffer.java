@@ -85,7 +85,10 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         try {
             HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
             Long size = hashOps.size(REDIS_HASH_KEY);
-            return size != null ? size.intValue() : 0;
+            if (size == null) {
+                return 0;
+            }
+            return size.intValue();
         } catch (Exception e) {
             log.error("Redis 크기 조회 실패", e);
             return 0;
@@ -117,11 +120,9 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
     private boolean tryAcquireLock(RLock lock, String field) throws InterruptedException {
         boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.MILLISECONDS);
-
         if (!acquired) {
             log.debug("재생 기록 락 획득 실패, 요청 무시: {}", field);
         }
-
         return acquired;
     }
 
