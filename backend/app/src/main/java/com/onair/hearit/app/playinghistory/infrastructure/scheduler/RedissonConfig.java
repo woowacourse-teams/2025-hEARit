@@ -8,10 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
-/**
- * Redisson 분산 락 설정
- * - Playing History Redis Write-Back 패턴에서 동시성 제어를 위해 사용
- */
 @Configuration
 public class RedissonConfig {
 

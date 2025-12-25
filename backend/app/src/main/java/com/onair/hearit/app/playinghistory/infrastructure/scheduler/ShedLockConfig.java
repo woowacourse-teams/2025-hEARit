@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "10m")
+@EnableSchedulerLock(defaultLockAtMostFor = "10s")
 public class ShedLockConfig {
 
     @Bean
