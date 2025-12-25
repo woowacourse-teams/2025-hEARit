@@ -1,4 +1,4 @@
-package com.onair.hearit.app.playinghistory.infrastructure.scheduler;
+package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
