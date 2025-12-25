@@ -3,8 +3,9 @@ package com.onair.hearit.service
 import androidx.annotation.OptIn
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import com.onair.hearit.domain.repository.PlayingHistoryRepository
-import com.onair.hearit.domain.repository.RecentHearitRepository
+import com.onair.hearit.di.ServiceCoroutineScope
+import com.onair.hearit.domain.usecase.AddPlayingHistoryUseCase
+import com.onair.hearit.domain.usecase.UpdateRecentPositionUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -12,39 +13,45 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class PlaybackStateSaver(
+class PlaybackStateSaver @Inject constructor(
     private val player: Player,
-    private val serviceScope: CoroutineScope,
-    private var service: PlaybackService?,
-    private val recentHearitRepository: RecentHearitRepository,
-    private val playingHistoryRepository: PlayingHistoryRepository,
+    @ServiceCoroutineScope private val serviceScope: CoroutineScope,
+    private val updateRecentPositionUseCase: UpdateRecentPositionUseCase,
+    private val addPlayingHistoryUseCase: AddPlayingHistoryUseCase,
 ) {
+    var service: PlaybackService? = null
     private var saveJob: Job? = null
 
     /** 지금 재생 중인 아이템을 ‘minRecordMs 이상’ 들었으면 히스토리 기록 */
     fun recordCurrent(minRecordMs: Long = 1_000L) {
         val currentId = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return
         val playedMs = player.currentPosition.coerceAtLeast(0L)
-        if (playedMs >= minRecordMs) recordHistory(currentId, playedMs)
+        recordHistory(currentId, playedMs)
     }
 
     suspend fun flushNowBlocking() {
-        val (id, lastPos) =
+        val (id, lastPos, duration) =
             withContext(Dispatchers.Main) {
                 val currentId =
                     player.currentMediaItem?.mediaId?.toLongOrNull() ?: return@withContext null
-                val pos = player.currentPosition.coerceAtLeast(0L)
-                currentId to pos
+                val position = player.currentPosition.coerceAtLeast(0L)
+                val duration = player.duration
+                Triple(currentId, position, duration)
             } ?: return
 
-        // IO에서 저장 (완료까지 대기)
         withContext(Dispatchers.IO) {
             runCatching {
-                recentHearitRepository.updateRecentHearitPosition(id, lastPos)
-                if (lastPos >= 1_000L) {
-                    playingHistoryRepository.addPlayingHistory(id, lastPos)
-                }
+                updateRecentPositionUseCase(
+                    hearitId = id,
+                    currentPosition = lastPos,
+                    duration = duration,
+                )
+                addPlayingHistoryUseCase(
+                    hearitId = id,
+                    playedMs = lastPos,
+                )
             }
         }
     }
@@ -93,7 +100,7 @@ class PlaybackStateSaver(
                     reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
                 ) {
                     val playedMs = oldPosition.positionMs.coerceAtLeast(0L)
-                    if (playedMs >= 1_000L) recordHistory(oldId, playedMs)
+                    recordHistory(oldId, playedMs)
                     savePlaybackPosition()
                 }
 
@@ -108,7 +115,9 @@ class PlaybackStateSaver(
             serviceScope.launch(Dispatchers.IO) {
                 while (isActive) {
                     delay(30_000L)
-                    savePlaybackPosition()
+                    withContext(Dispatchers.Main) {
+                        savePlaybackPosition()
+                    }
                 }
             }
     }
@@ -131,21 +140,22 @@ class PlaybackStateSaver(
     private fun savePlaybackPosition(finished: Boolean = false) {
         serviceScope.launch(Dispatchers.IO) {
             var mediaId: Long? = null
-            var lastPosition = 0L
-            var completed = finished
+            var currentPosition = 0L
+            var duration = 0L
 
             withContext(Dispatchers.Main) {
                 mediaId = player.currentMediaItem?.mediaId?.toLongOrNull() ?: return@withContext
-                val duration = player.duration
-                val position = player.currentPosition
-                completed = completed || (duration > 0 && position >= duration - 1_000)
-                lastPosition = if (completed) 0L else position
+                currentPosition = player.currentPosition
+                duration = player.duration
             }
+
             mediaId?.let { id ->
                 runCatching {
-                    recentHearitRepository.updateRecentHearitPosition(
-                        id,
-                        lastPosition,
+                    updateRecentPositionUseCase(
+                        hearitId = id,
+                        currentPosition = currentPosition,
+                        duration = duration,
+                        isFinishedFromEvent = finished,
                     )
                 }
             }
@@ -158,9 +168,9 @@ class PlaybackStateSaver(
     ) {
         serviceScope.launch(Dispatchers.IO) {
             runCatching {
-                playingHistoryRepository.addPlayingHistory(
-                    hearitId,
-                    lastPlayTime,
+                addPlayingHistoryUseCase(
+                    hearitId = hearitId,
+                    playedMs = lastPlayTime,
                 )
             }
         }

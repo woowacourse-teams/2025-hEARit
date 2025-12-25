@@ -47,7 +47,7 @@ import com.onair.hearit.presentation.home.adapter.RecommendHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.category.CategoryComposeFragment
+import com.onair.hearit.presentation.search.category.CategoryFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -244,7 +244,10 @@ class HomeFragment :
         binding.rvHomeRecommend.isVisible = shouldShow
 
         recommendAdapter.submitList(recommendHearits) {
+            val binding = _binding ?: return@submitList
+
             binding.rvHomeRecommend.doOnPreDraw {
+                if (_binding == null) return@doOnPreDraw
                 scrollToMiddlePosition()
                 setupIndicator()
             }
@@ -291,6 +294,7 @@ class HomeFragment :
     }
 
     private fun setupIndicator(size: Int = 5) {
+        val binding = _binding ?: return
         val container = binding.indicatorContainer
         container.removeAllViews()
         val density = resources.displayMetrics.density
@@ -336,6 +340,7 @@ class HomeFragment :
     }
 
     private fun scrollToMiddlePosition() {
+        val binding = _binding ?: return
         if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             val middlePosition = recommendAdapter.currentList.size / 2
             val layoutManager = binding.rvHomeRecommend.layoutManager as LinearLayoutManager
@@ -366,7 +371,7 @@ class HomeFragment :
             .beginTransaction()
             .replace(
                 R.id.fragment_container_view,
-                CategoryComposeFragment().apply {
+                CategoryFragment().apply {
                     arguments =
                         bundleOf(
                             CATEGORY_ID_KEY to id,
