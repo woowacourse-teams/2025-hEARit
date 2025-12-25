@@ -18,8 +18,9 @@ class PlayingHistoryRepositoryImpl @Inject constructor(
     override suspend fun addPlayingHistory(
         hearitId: Long,
         lastPlayTime: Long,
+        clientEventTime: Long,
     ): Result<Unit> =
         playingHistoryRemoteDataSource
-            .addPlayingHistory(PlayingHistoryRequest(hearitId, lastPlayTime))
+            .addPlayingHistory(PlayingHistoryRequest(hearitId, lastPlayTime, clientEventTime))
             .toDomainResult()
 }

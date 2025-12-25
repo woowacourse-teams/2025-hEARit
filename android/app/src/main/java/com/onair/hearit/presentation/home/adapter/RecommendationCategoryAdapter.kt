@@ -3,6 +3,7 @@ package com.onair.hearit.presentation.home.adapter
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.presentation.HearitClickListener
 
@@ -10,10 +11,15 @@ class RecommendationCategoryAdapter(
     private val hearitClickListener: HearitClickListener,
     private val navigateClickListener: (Long, String, String) -> Unit,
 ) : ListAdapter<RecommendationCategories, RecommendationCategoryViewHolder>(DiffCallback) {
+    private val sharedPool: RecyclerView.RecycledViewPool =
+        RecyclerView.RecycledViewPool().apply {
+            setMaxRecycledViews(0, 15)
+        }
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): RecommendationCategoryViewHolder = RecommendationCategoryViewHolder.create(parent, hearitClickListener)
+    ): RecommendationCategoryViewHolder = RecommendationCategoryViewHolder.create(parent, hearitClickListener, sharedPool)
 
     override fun onBindViewHolder(
         holder: RecommendationCategoryViewHolder,
