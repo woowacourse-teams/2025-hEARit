@@ -20,6 +20,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
@@ -213,7 +214,7 @@ class PlayerDetailActivity :
     private fun setupDetailScript() {
         binding.cvScript.setContent {
             val hearit by viewModel.hearit.observeAsState()
-            val highlightedId by viewModel.highlightedId.observeAsState()
+            val highlightedId by viewModel.highlightedId.collectAsStateWithLifecycle()
 
             DetailScripts(
                 scriptLines = hearit?.script.orEmpty(),
