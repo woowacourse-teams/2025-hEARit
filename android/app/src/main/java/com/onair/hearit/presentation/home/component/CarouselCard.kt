@@ -41,6 +41,7 @@ fun CarouselCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val offset = pageOffset()
     val cardColor =
         remember(item.categoryColor) {
             item.categoryColor.toComposeColor()
@@ -49,16 +50,15 @@ fun CarouselCard(
     Card(
         modifier =
             modifier
-                .zIndex(1f - pageOffset().absoluteValue)
+                .zIndex(1f - offset.absoluteValue)
                 .graphicsLayer {
-                    val offset = pageOffset()
-                    val scale = lerp(0.88f, 1f, 1f - offset.absoluteValue.coerceIn(0f, 1f))
-                    val alphaValue = lerp(0.6f, 1f, 1f - offset.absoluteValue.coerceIn(0f, 1f))
+                    val clamped = offset.absoluteValue.coerceIn(0f, 1f)
+                    val scale = lerp(0.88f, 1f, 1f - clamped)
+                    val alphaValue = lerp(0.6f, 1f, 1f - clamped)
                     scaleX = scale
                     scaleY = scale
                     alpha = alphaValue
-                }
-                .clickable(
+                }.clickable(
                     onClick = onClick,
                     onClickLabel = item.title,
                 ),
@@ -66,7 +66,7 @@ fun CarouselCard(
         colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation =
             CardDefaults.cardElevation(
-                defaultElevation = if (pageOffset().absoluteValue < 0.5f) 8.dp else 2.dp,
+                defaultElevation = if (offset.absoluteValue < 0.5f) 8.dp else 2.dp,
             ),
     ) {
         Column(
