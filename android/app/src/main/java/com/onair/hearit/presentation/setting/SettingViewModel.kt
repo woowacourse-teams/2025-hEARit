@@ -44,6 +44,8 @@ class SettingViewModel @Inject constructor(
     fun onPushNotificationToggleRequested(isEnabled: Boolean) {
         if (!isEnabled) {
             _isPushNotificationEnabled.value = false
+            _shouldRequestNotificationPermission.value = false
+            persistPushNotificationSetting(false)
             return
         }
         _shouldRequestNotificationPermission.value = true
