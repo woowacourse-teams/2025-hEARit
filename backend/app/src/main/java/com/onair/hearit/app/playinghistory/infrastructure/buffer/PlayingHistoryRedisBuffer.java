@@ -121,7 +121,7 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
     private boolean tryAcquireLock(RLock lock, String field) throws InterruptedException {
         boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.MILLISECONDS);
         if (!acquired) {
-            log.debug("재생 기록 락 획득 실패, 요청 무시: {}", field);
+            log.warn("재생 기록 락 획득 실패, 요청 무시: {}", field);
         }
         return acquired;
     }
