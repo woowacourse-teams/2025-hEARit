@@ -2,27 +2,40 @@ package com.onair.hearit.presentation.setting.screen
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.firebase.messaging.FirebaseMessaging
 import com.onair.hearit.R
 import com.onair.hearit.presentation.setting.SettingViewModel
 import com.onair.hearit.presentation.setting.component.AlarmContent
 import com.onair.hearit.presentation.setting.component.SettingTopBar
+import com.onair.hearit.presentation.setting.component.SystemNotificationSettingDialog
 import com.onair.hearit.presentation.theme.HearitBlack
+import timber.log.Timber
 
 private const val COMMUTE_NOTIFICATION_TOPIC: String = "commute_1900"
 
@@ -35,6 +48,8 @@ fun AlarmScreen(
     val isPushNotificationEnabled: Boolean by viewModel.isPushNotificationEnabled.collectAsState()
     val shouldRequestPermission: Boolean by viewModel.shouldRequestNotificationPermission.collectAsState()
 
+    var shouldShowSystemNotificationDialog: Boolean by remember { mutableStateOf(false) }
+
     val permissionLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
@@ -43,46 +58,26 @@ fun AlarmScreen(
             },
         )
 
-    // 1. 화면 진입 시 OS 알림 가능 여부 체크
-    LaunchedEffect(Unit) {
-        viewModel.onSystemNotificationAvailabilityChecked(
-            isNotificationAvailable = isNotificationAvailable(context),
-        )
-    }
+    SyncSystemNotificationEffect(
+        context = context,
+        viewModel = viewModel,
+    )
 
-    // 2. 토글 상태가 바뀌면 topic 구독/해지
-    LaunchedEffect(isPushNotificationEnabled) {
-        if (isPushNotificationEnabled) {
-            FirebaseMessaging.getInstance().subscribeToTopic(COMMUTE_NOTIFICATION_TOPIC)
-        } else {
-            FirebaseMessaging.getInstance().unsubscribeFromTopic(COMMUTE_NOTIFICATION_TOPIC)
-        }
-    }
+    TopicSubscriptionEffect(isPushNotificationEnabled = isPushNotificationEnabled)
 
-    // 3. 권한 요청 트리거가 오면, OS 알림 상태 먼저 확인 후 진행
-    LaunchedEffect(shouldRequestPermission) {
-        if (!shouldRequestPermission) return@LaunchedEffect
-        if (!isNotificationAvailable(context)) {
-            viewModel.onSystemNotificationAvailabilityChecked(isNotificationAvailable = false)
-            return@LaunchedEffect
-        }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            viewModel.onPostNotificationPermissionResult(true)
-            return@LaunchedEffect
-        }
+    PermissionRequestEffect(
+        context = context,
+        shouldRequestPermission = shouldRequestPermission,
+        permissionLauncher = permissionLauncher,
+        viewModel = viewModel,
+        onNeedOpenSystemSettings = { shouldShowSystemNotificationDialog = true },
+    )
 
-        val permissionState: Int =
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS,
-            )
-
-        if (permissionState == PackageManager.PERMISSION_GRANTED) {
-            viewModel.onPostNotificationPermissionResult(true)
-        } else {
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
+    SystemNotificationDialog(
+        context = context,
+        shouldShow = shouldShowSystemNotificationDialog,
+        onDismiss = { shouldShowSystemNotificationDialog = false },
+    )
 
     Scaffold(
         topBar = {
@@ -96,26 +91,120 @@ fun AlarmScreen(
         AlarmContent(
             modifier = Modifier.padding(padding),
             isPushNotificationEnabled = isPushNotificationEnabled,
-            onPushNotificationToggleRequested = { newValue: Boolean ->
-                viewModel.onPushNotificationToggleRequested(newValue)
-            },
+            onPushNotificationToggleRequested = viewModel::onPushNotificationToggleRequested,
         )
     }
 }
 
-private fun isNotificationAvailable(context: Context): Boolean {
-    val notificationManagerCompat: NotificationManagerCompat =
-        NotificationManagerCompat.from(context)
+@Composable
+private fun SyncSystemNotificationEffect(
+    context: Context,
+    viewModel: SettingViewModel,
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    if (!notificationManagerCompat.areNotificationsEnabled()) return false
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        val permissionState: Int =
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS,
-            )
-        return permissionState == PackageManager.PERMISSION_GRANTED
+    DisposableEffect(lifecycleOwner, context) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    val isNotificationAvailable: Boolean =
+                        !isAppNotificationBlockedBySystem(context) &&
+                            isPostNotificationPermissionGranted(
+                                context,
+                            )
+                    viewModel.onSystemNotificationAvailabilityChecked(isNotificationAvailable)
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    return true
+}
+
+@Composable
+private fun TopicSubscriptionEffect(isPushNotificationEnabled: Boolean) {
+    LaunchedEffect(isPushNotificationEnabled) {
+        val task =
+            if (isPushNotificationEnabled) {
+                FirebaseMessaging.getInstance().subscribeToTopic(COMMUTE_NOTIFICATION_TOPIC)
+            } else {
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(COMMUTE_NOTIFICATION_TOPIC)
+            }
+
+        task.addOnFailureListener { throwable ->
+            Timber.w(
+                throwable,
+                "❌ 출퇴근 푸시 토픽 ${if (isPushNotificationEnabled) "구독" else "해지"}에 실패했습니다.",
+            )
+        }
+    }
+}
+
+@Composable
+private fun PermissionRequestEffect(
+    context: Context,
+    shouldRequestPermission: Boolean,
+    permissionLauncher: ActivityResultLauncher<String>,
+    viewModel: SettingViewModel,
+    onNeedOpenSystemSettings: () -> Unit,
+) {
+    LaunchedEffect(shouldRequestPermission) {
+        if (!shouldRequestPermission) return@LaunchedEffect
+
+        if (isAppNotificationBlockedBySystem(context)) {
+            viewModel.onSystemNotificationAvailabilityChecked(isNotificationAvailable = false)
+            onNeedOpenSystemSettings()
+            return@LaunchedEffect
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            viewModel.onPostNotificationPermissionResult(true)
+            return@LaunchedEffect
+        }
+
+        if (isPostNotificationPermissionGranted(context)) {
+            viewModel.onPostNotificationPermissionResult(true)
+        } else {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+}
+
+@Composable
+private fun SystemNotificationDialog(
+    context: Context,
+    shouldShow: Boolean,
+    onDismiss: () -> Unit,
+) {
+    if (!shouldShow) return
+
+    SystemNotificationSettingDialog(
+        onDismiss = onDismiss,
+        onGoToSettings = {
+            onDismiss()
+            openAppNotificationSettings(context)
+        },
+    )
+}
+
+private fun isAppNotificationBlockedBySystem(context: Context): Boolean = !NotificationManagerCompat.from(context).areNotificationsEnabled()
+
+private fun isPostNotificationPermissionGranted(context: Context): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
+    val permissionState: Int =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+    return permissionState == PackageManager.PERMISSION_GRANTED
+}
+
+private fun openAppNotificationSettings(context: Context) {
+    val intent =
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+
+    val fallbackIntent =
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", context.packageName, null)
+        }
+
+    runCatching { context.startActivity(intent) }.onFailure { context.startActivity(fallbackIntent) }
 }
