@@ -21,7 +21,7 @@ public class PlayingHistoryBufferFacade implements PlayingHistoryBuffer {
             primaryStorage.add(playingHistory, clientEventTime);
         } catch (Exception e) {
             log.warn("Primary storage 실패, Fallback으로 전환. userUuid={}, hearitId={}",
-                    playingHistory.getUserUuid(), playingHistory.getHearitId(), e);
+                    playingHistory.getUserUuid(), playingHistory.getHearitId());
             try {
                 fallbackStorage.add(playingHistory, clientEventTime);
             } catch (Exception fallbackException) {
