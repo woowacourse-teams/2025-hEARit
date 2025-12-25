@@ -89,6 +89,9 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
                 return 0;
             }
             return size.intValue();
+        } catch (DataAccessException e) {
+            log.error("Redis 크기 조회 실패 - Redis 오류", e);
+            return 0;
         } catch (Exception e) {
             log.error("Redis 크기 조회 실패", e);
             return 0;
@@ -99,7 +102,7 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         RLock lock = redissonClient.getLock(LOCK_PREFIX + field);
         try {
             if (!tryAcquireLock(lock, field)) {
-                return;  // 락 획득 실패 시 조용히 종료
+                return;
             }
             try {
                 saveIfNewer(field, incoming);
