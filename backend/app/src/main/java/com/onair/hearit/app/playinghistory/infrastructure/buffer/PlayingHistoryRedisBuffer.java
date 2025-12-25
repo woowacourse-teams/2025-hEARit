@@ -2,7 +2,8 @@ package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.app.exception.custom.BufferRequestException;
+import com.onair.hearit.app.exception.custom.BufferOverflowException;
+import com.onair.hearit.app.exception.custom.BufferException;
 import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
@@ -46,7 +47,6 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
     @Override
     public void flush() {
         if (!Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_HASH_KEY))) {
-            log.debug("Redis flush: 키 없음");
             return;
         }
         try {
@@ -59,7 +59,6 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             Map<String, String> snapshotData = hashOps.entries(REDIS_TEMP_KEY);
             if (snapshotData.isEmpty()) {
                 redisTemplate.delete(REDIS_TEMP_KEY);
-                log.debug("Redis flush: 스냅샷 비어있음, 키 삭제");
                 return;
             }
             List<PlayHistoryValue> playValues = parseToPlayValues(snapshotData);
@@ -70,7 +69,6 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             }
             saveHistoriesToDatabase(playValues);
             redisTemplate.delete(REDIS_TEMP_KEY);
-            log.info("Redis 재생 기록 flush 완료: {} 건", playValues.size());
         } catch (DataAccessException e) {
             log.error("Redis 재생 기록 flush 실패 - Redis 오류", e);
             restoreSnapshot();
@@ -112,12 +110,10 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("재생 기록 저장 중 인터럽트: {}", field, e);
-            throw new BufferRequestException("재생 기록 저장 중 오류가 발생했습니다.");
-        } catch (BufferRequestException e) {
-            throw e;
+            throw new BufferException("재생 기록 저장 중 오류가 발생했습니다.");
         } catch (Exception e) {
             log.error("재생 기록 저장 실패: {}", field, e);
-            throw new BufferRequestException("재생 기록 저장 중 오류가 발생했습니다.");
+            throw new BufferException("재생 기록 저장 중 오류가 발생했습니다.");
         }
     }
 
@@ -171,7 +167,7 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             hashOps.put(REDIS_HASH_KEY, field, valueJson);
         } catch (JsonProcessingException e) {
             log.error("재생 기록 직렬화 실패: field={}", field, e);
-            throw new BufferRequestException("재생 기록 데이터 저장 중 오류가 발생했습니다.");
+            throw new BufferException("재생 기록 데이터 저장 중 오류가 발생했습니다.");
         }
     }
 

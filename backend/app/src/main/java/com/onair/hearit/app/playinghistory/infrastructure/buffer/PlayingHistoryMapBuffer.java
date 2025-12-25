@@ -1,6 +1,6 @@
 package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
-import com.onair.hearit.app.exception.custom.BufferRequestException;
+import com.onair.hearit.app.exception.custom.BufferOverflowException;
 import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
@@ -39,7 +39,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
 
     private void validateBufferSize(PlayKey key) {
         if (!cache.containsKey(key) && cache.size() >= BUFFER_SIZE) {
-            throw new BufferRequestException("버퍼 용량 초과로 인해 재생 기록 저장할 수 없습니다.");
+            throw new BufferOverflowException("버퍼 용량 초과로 인해 재생 기록 저장할 수 없습니다.");
         }
     }
 
