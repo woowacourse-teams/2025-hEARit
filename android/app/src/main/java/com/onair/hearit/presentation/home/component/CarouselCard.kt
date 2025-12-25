@@ -29,7 +29,7 @@ import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.RecommendHearit
-import com.onair.hearit.presentation.home.toComposeColor
+import com.onair.hearit.presentation.home.util.toComposeColor
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import kotlin.math.absoluteValue
@@ -57,7 +57,8 @@ fun CarouselCard(
                     scaleX = scale
                     scaleY = scale
                     alpha = alphaValue
-                }.clickable(
+                }
+                .clickable(
                     onClick = onClick,
                     onClickLabel = item.title,
                 ),

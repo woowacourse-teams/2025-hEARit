@@ -44,6 +44,7 @@ import com.onair.hearit.presentation.home.adapter.PlayingHistoryHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecentUploadHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
 import com.onair.hearit.presentation.home.component.CarouselSection
+import com.onair.hearit.presentation.home.util.HorizontalMarginItemDecoration
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.category.CategoryFragment
