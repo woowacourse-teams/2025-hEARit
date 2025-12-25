@@ -2,7 +2,6 @@ package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.app.exception.custom.BufferOverflowException;
 import com.onair.hearit.app.exception.custom.BufferException;
 import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.domain.PlayingHistory;
@@ -15,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,11 +25,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
+    @Value("${playing-history.lock.wait-time:1000}")
+    private long lockWaitTime;
+
+    @Value("${playing-history.lock.lease-time:3000}")
+    private long lockLeaseTime;
+
     private static final String REDIS_HASH_KEY = "playing_history";
     private static final String REDIS_TEMP_KEY = "playing_history:flushing";
     private static final String LOCK_PREFIX = "lock:playing_history:";
-    private static final long LOCK_WAIT_TIME = 1000; // ms
-    private static final long LOCK_LEASE_TIME = 3000; // ms
 
     private final RedisTemplate<String, String> redisTemplate;
     private final RedissonClient redissonClient;
@@ -118,7 +122,7 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
     }
 
     private boolean tryAcquireLock(RLock lock, String field) throws InterruptedException {
-        boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.MILLISECONDS);
+        boolean acquired = lock.tryLock(lockWaitTime, lockLeaseTime, TimeUnit.MILLISECONDS);
         if (!acquired) {
             log.warn("재생 기록 락 획득 실패, 요청 무시: {}", field);
         }
