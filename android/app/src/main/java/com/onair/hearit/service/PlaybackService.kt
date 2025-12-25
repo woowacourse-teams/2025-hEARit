@@ -4,33 +4,22 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.OptIn
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import com.onair.hearit.domain.repository.PlayingHistoryRepository
-import com.onair.hearit.domain.repository.RecentHearitRepository
+import com.onair.hearit.di.ServiceCoroutineScope
+import com.onair.hearit.domain.usecase.AddPlayingHistoryUseCase
+import com.onair.hearit.domain.usecase.UpdateRecentPositionUseCase
 import com.onair.hearit.presentation.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
 @AndroidEntryPoint
 @OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
-    @Inject
-    lateinit var recentHearitRepository: RecentHearitRepository
-
-    @Inject
-    lateinit var playingHistoryRepository: PlayingHistoryRepository
-
     @Inject
     lateinit var mediaItemManager: PlaybackMediaItemManager
 
@@ -40,30 +29,41 @@ class PlaybackService : MediaSessionService() {
     @Inject
     lateinit var recentPlaybackHandler: RecentPlaybackHandler
 
-    private lateinit var player: ExoPlayer
-    private lateinit var mediaSession: MediaSession
-    private lateinit var stateSaver: PlaybackStateSaver
+    @Inject
+    lateinit var addPlayingHistoryUseCase: AddPlayingHistoryUseCase
+
+    @Inject
+    lateinit var updateRecentPositionUseCase: UpdateRecentPositionUseCase
+
+    @Inject
+    @ServiceCoroutineScope
+    lateinit var serviceScope: CoroutineScope
+
+    @Inject
+    lateinit var player: Player
+
+    @Inject
+    lateinit var stateSaver: PlaybackStateSaver
+
+    @Inject
+    lateinit var sessionCallback: PlaybackSessionCallback
+
     private lateinit var playbackPositionListener: PlaybackPositionListener
 
-    private var notificationController: PlayerNotificationController? = null
+    private lateinit var mediaSession: MediaSession
 
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var notificationController: PlayerNotificationController? = null
 
     override fun onCreate() {
         super.onCreate()
 
-        initializePlayer()
-
         playbackPositionListener = PlaybackPositionListener(player)
-        stateSaver =
-            PlaybackStateSaver(
-                player,
-                serviceScope,
-                this,
-                recentHearitRepository,
-                playingHistoryRepository,
-            )
+
+        stateSaver.service = this
         player.addListener(stateSaver.listener)
+
+        playbackPositionListener.attach()
+        sessionCallback.setPlaybackPositionListener(playbackPositionListener)
 
         initializeMediaSession()
 
@@ -105,27 +105,6 @@ class PlaybackService : MediaSessionService() {
         return START_STICKY
     }
 
-    private fun initializePlayer() {
-        val audioAttributes =
-            AudioAttributes
-                .Builder()
-                .setUsage(C.USAGE_MEDIA)
-                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-                .build()
-
-        player =
-            ExoPlayer
-                .Builder(this)
-                .setAudioAttributes(audioAttributes, true)
-                .setSeekBackIncrementMs(REWIND_INTERVAL_MILLIS)
-                .setSeekForwardIncrementMs(FAST_FORWARD_INTERVAL_MILLIS)
-                .build()
-                .apply {
-                    playWhenReady = false
-                    setHandleAudioBecomingNoisy(true)
-                }
-    }
-
     private fun initializeMediaSession() {
         val mainActivityIntent =
             Intent(this, MainActivity::class.java).apply {
@@ -145,14 +124,7 @@ class PlaybackService : MediaSessionService() {
                 .setId(SESSION_ID)
                 .setSessionActivity(pendingIntent)
                 .setCallback(
-                    PlaybackSessionCallback(
-                        serviceScope,
-                        mediaItemManager,
-                        libraryPlaybackHandler,
-                        recentPlaybackHandler,
-                        playbackPositionListener,
-                        stateSaver,
-                    ),
+                    sessionCallback,
                 ).build()
     }
 
@@ -168,7 +140,6 @@ class PlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        serviceScope.cancel()
         notificationController?.detach()
         stateSaver.release()
         mediaSession.release()
@@ -181,8 +152,6 @@ class PlaybackService : MediaSessionService() {
         private const val NOTIFICATION_ID = 1001
         private const val SESSION_ID = "hearit_session"
         private const val CHANNEL_ID = "hearit_playback_channel"
-        private const val REWIND_INTERVAL_MILLIS = 10_000L
-        private const val FAST_FORWARD_INTERVAL_MILLIS = 10_000L
 
         const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
 
