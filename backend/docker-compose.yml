@@ -38,6 +38,7 @@ services:
       redis-server
       --requirepass "${REDIS_PASSWORD}"
       --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
       --appendonly yes
     volumes:
       - redis-data:/data
