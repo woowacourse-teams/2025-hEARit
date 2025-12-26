@@ -9,10 +9,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import java.time.Clock
 import javax.inject.Inject
 
 @HiltViewModel
-class ScriptViewModel @Inject constructor() : ViewModel() {
+class ScriptViewModel @Inject constructor(
+    private val clock: Clock,
+) : ViewModel() {
     private val _highlightedId: MutableStateFlow<Long?> = MutableStateFlow(null)
     val highlightedId: StateFlow<Long?> = _highlightedId
 
@@ -71,7 +74,7 @@ class ScriptViewModel @Inject constructor() : ViewModel() {
         _highlightedId.value = currentItem?.id
     }
 
-    private fun currentTimeMillis(): Long = System.currentTimeMillis()
+    private fun currentTimeMillis(): Long = clock.millis()
 
     companion object {
         const val USER_SCROLL_IDLE_THRESHOLD_MS: Long = 3_000L
