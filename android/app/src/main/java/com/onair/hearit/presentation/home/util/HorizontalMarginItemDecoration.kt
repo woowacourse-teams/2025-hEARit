@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.home
+package com.onair.hearit.presentation.home.util
 
 import android.graphics.Rect
 import android.view.View

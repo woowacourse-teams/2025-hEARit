@@ -70,30 +70,12 @@
                     app:layout_constraintStart_toStartOf="@id/tv_home_description"
                     app:layout_constraintTop_toBottomOf="@id/tv_home_description" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_home_recommend"
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/recommend_Carousel"
                     android:layout_width="match_parent"
-                    android:layout_height="340dp"
-                    android:layout_gravity="center_vertical"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:orientation="horizontal"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:layout_constraintTop_toBottomOf="@id/tv_home_recommend"
-                    tools:itemCount="5"
-                    tools:listitem="@layout/item_recommend_hearit" />
-
-                <LinearLayout
-                    android:id="@+id/indicator_container"
-                    android:layout_width="160dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/rv_home_recommend"
-                    tools:background="@color/black" />
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_recommend" />
 
                 <TextView
                     android:id="@+id/tv_home_playing_history_hearit_title"
@@ -103,7 +85,7 @@
                     android:layout_marginTop="16dp"
                     android:text="@{@string/home_playing_history_hearit_title(userInfo.nickname)}"
                     app:layout_constraintStart_toStartOf="@id/tv_home_recommend"
-                    app:layout_constraintTop_toBottomOf="@id/indicator_container"
+                    app:layout_constraintTop_toBottomOf="@id/recommend_Carousel"
                     tools:text="hEARit님이 듣고 있는 팟캐스트" />
 
                 <androidx.recyclerview.widget.RecyclerView
