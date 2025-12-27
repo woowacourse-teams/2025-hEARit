@@ -8,5 +8,6 @@ interface PlayingHistoryRepository {
     suspend fun addPlayingHistory(
         hearitId: Long,
         lastPlayTime: Long,
+        clientEventTime: Long,
     ): Result<Unit>
 }

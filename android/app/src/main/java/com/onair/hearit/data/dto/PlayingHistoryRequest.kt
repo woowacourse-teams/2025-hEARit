@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 data class PlayingHistoryRequest(
     val hearitId: Long,
     val lastPlayTime: Long,
+    val clientEventTime: Long,
 )

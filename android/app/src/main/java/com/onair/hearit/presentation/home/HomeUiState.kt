@@ -7,10 +7,12 @@ import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.domain.model.isLoggedIn
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 data class HomeUiState(
     val userInfo: UserInfo = UserInfo.default(),
-    val recommendHearits: List<RecommendHearit> = emptyList(),
+    val recommendHearits: ImmutableList<RecommendHearit> = persistentListOf(),
     val playingHistoryHearits: List<PlayingHistoryHearit> = emptyList(),
     val recentUploadHearits: List<RecentUploadHearit> = emptyList(),
     val playingBookmarkHearits: List<Bookmark> = emptyList(),
@@ -19,6 +21,7 @@ data class HomeUiState(
 ) {
     val showRecommendHearits: Boolean
         get() = !isLoading && recommendHearits.isNotEmpty()
+
     val isLoggedIn: Boolean
         get() = userInfo.isLoggedIn()
 
