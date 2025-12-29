@@ -38,12 +38,12 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
         if (userInfo == null || userInfo.isGuest()) {
             return false;
         }
-        return userInfo.isMember() && memberRepository.findByUuid(userInfo.getMemberUuid()).isPresent();
+        return userInfo.isMember() && memberRepository.findByUuid(userInfo.getUuid()).isPresent();
     }
 
     @Override
     protected String getUserUuid(UserInfo userInfo) {
-        return userInfo.getMemberUuid().toString();
+        return userInfo.getUuid().toString();
     }
 
     @Override
@@ -67,7 +67,7 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     private Map<Long, Bookmark> prepareBookmarksMap(List<Hearit> hearits, UserInfo userInfo) {
-        UUID memberUuid = userInfo.getMemberUuid();
+        UUID memberUuid = userInfo.getUuid();
         return bookmarkRepository
                 .findAllByHearitInAndMemberUuid(hearits, memberUuid).stream()
                 .collect(Collectors.toMap(bookmark -> bookmark.getHearit().getId(), bookmark -> bookmark));

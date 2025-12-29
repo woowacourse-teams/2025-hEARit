@@ -7,7 +7,6 @@ import com.onair.hearit.app.exception.custom.UnauthenticatedException;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
-import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -42,7 +41,6 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
-    private final UserInfoService userInfoService;
 
     @Transactional(readOnly = true)
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
@@ -69,7 +67,7 @@ public class HearitService {
         if (userInfo == null || userInfo.isGuest()) {
             throw new UnauthenticatedException();
         }
-        return userInfo.getMemberUuid();
+        return userInfo.getUuid();
     }
 
     private Long calculateLastPlayTime(Hearit hearit, UUID memberUuid) {

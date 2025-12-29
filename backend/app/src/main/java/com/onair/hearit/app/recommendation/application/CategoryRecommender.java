@@ -49,7 +49,7 @@ public class CategoryRecommender {
     }
 
     private List<Category> getUserBasedRecommendations(UserInfo userInfo, int userBasedCount, List<Category> alreadyRecommended) {
-        Member member = getMemberByUuid(userInfo.getMemberUuid());
+        Member member = getMemberByUuid(userInfo.getUuid());
         List<Long> excludedIds = alreadyRecommended.stream()
                 .map(Category::getId)
                 .toList();

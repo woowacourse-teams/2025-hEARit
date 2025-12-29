@@ -28,7 +28,7 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
 
     @Override
     protected String getUserUuid(UserInfo userInfo) {
-        return userInfo.getGuestUuid().toString();
+        return userInfo.getUuid().toString();
     }
 
     @Override

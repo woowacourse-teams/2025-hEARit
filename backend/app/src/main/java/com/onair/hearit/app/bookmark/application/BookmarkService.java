@@ -101,7 +101,7 @@ public class BookmarkService {
         if (userInfo == null || userInfo.isGuest()) {
             throw new UnauthenticatedException();
         }
-        return userInfo.getMemberUuid();
+        return userInfo.getUuid();
     }
 
     private Bookmark getBookmarkById(Long bookmarkId) {

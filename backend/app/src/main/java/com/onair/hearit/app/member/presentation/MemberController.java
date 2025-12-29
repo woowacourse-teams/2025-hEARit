@@ -21,7 +21,7 @@ public class MemberController {
     @GetMapping("/me")
     public ResponseEntity<MemberInfoResponse> readCurrentMemberInfo(@AuthenticationPrincipal RequestUser requestUser) {
         UserInfo userInfo = requestUser.getUserInfo();
-        MemberInfoResponse response = memberService.getMember(userInfo.getMemberUuid());
+        MemberInfoResponse response = memberService.getMember(userInfo.getUuid());
         return ResponseEntity.ok(response);
     }
 }
