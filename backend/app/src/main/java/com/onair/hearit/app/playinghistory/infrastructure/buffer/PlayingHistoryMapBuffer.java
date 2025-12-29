@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -109,10 +110,10 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
         flush();
     }
 
-    private record PlayKey(String userUuid, long hearitId) {
+    private record PlayKey(UUID userUuid, long hearitId) {
     }
 
-    private record PlayValue(String userUuid, long hearitId, long lastPlayTime, long clientEventTime) {
+    private record PlayValue(UUID userUuid, long hearitId, long lastPlayTime, long clientEventTime) {
 
         static PlayValue from(PlayingHistory history, long clientEventTime) {
             return new PlayValue(
