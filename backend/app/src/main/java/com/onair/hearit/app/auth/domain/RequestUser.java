@@ -2,6 +2,7 @@ package com.onair.hearit.app.auth.domain;
 
 import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.domain.UserType;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -9,57 +10,55 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class RequestUser {
 
-    private static final String FALLBACK_GUEST_ID = "00000000-0000-0000-0000-000000000000";
+    private static final UUID FALLBACK_GUEST_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    private final Long memberId;
-    private final String guestId;
+    private final UUID memberUuid;
+    private final UUID guestUuid;
 
-    private RequestUser(Long memberId, String guestId) {
-        validate(memberId, guestId);
-        this.memberId = memberId;
-        this.guestId = guestId;
+    private RequestUser(UUID memberUuid, UUID guestUuid) {
+        validate(memberUuid, guestUuid);
+        this.memberUuid = memberUuid;
+        this.guestUuid = guestUuid;
     }
 
     public static RequestUser guest(String guestId) {
         if (guestId == null || guestId.isBlank()) {
             log.warn("현재 Device-Uuid Header가 비어있습니다.");
-            return new RequestUser(null, FALLBACK_GUEST_ID);
+            return new RequestUser(null, FALLBACK_GUEST_UUID);
         }
-        return new RequestUser(null, guestId);
+        return new RequestUser(null, UUID.fromString(guestId));
     }
 
-    public static RequestUser member(Long memberId) {
-        if (memberId == null) {
-            throw new IllegalStateException("memberId는 null일 수 없습니다.");
+    public static RequestUser member(UUID memberUuid) {
+        if (memberUuid == null) {
+            throw new IllegalStateException("memberUuid는 null일 수 없습니다.");
         }
-        return new RequestUser(memberId, null);
+        return new RequestUser(memberUuid, null);
     }
 
     public String getUserType() {
-        if (memberId == null) {
+        if (memberUuid == null) {
             return UserType.GUEST.getName();
         }
         return UserType.MEMBER.getName();
     }
 
-    private void validate(Long memberId, String guestId) {
-        if (memberId == null && guestId == null) {
-            //FIXME: 커스텀 예외
-            throw new IllegalStateException("RequestUser를 생성할 수 없습니다.");
-        }
-        if (guestId != null) {
-            validateGuestId(guestId);
-        }
+    public String getMemberId() {
+        return memberUuid != null ? memberUuid.toString() : null;
     }
 
-    private void validateGuestId(String guestId) {
-        if (guestId == null || guestId.length() != 36) {
-            //FIXME: 커스텀 예외
-            throw new IllegalStateException("유효하지 않은 guestId입니다.");
-        }
+    public String getGuestId() {
+        return guestUuid != null ? guestUuid.toString() : null;
     }
 
     public UserInfo getUserInfo() {
-        return new UserInfo(memberId, guestId);
+        return new UserInfo(memberUuid, guestUuid);
+    }
+
+    private void validate(UUID memberUuid, UUID guestUuid) {
+        if (memberUuid == null && guestUuid == null) {
+            //FIXME: 커스텀 예외
+            throw new IllegalStateException("RequestUser를 생성할 수 없습니다.");
+        }
     }
 }
