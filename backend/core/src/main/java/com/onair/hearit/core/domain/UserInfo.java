@@ -1,36 +1,28 @@
 package com.onair.hearit.core.domain;
 
 import com.onair.hearit.core.domain.exception.UserInfoDomainException;
+import java.util.UUID;
 
 public class UserInfo {
 
-    private final Long memberId;
-    private final String guestId;
+    private final UUID memberUuid;
+    private final UUID guestUuid;
     private final UserType userType;
 
-    public UserInfo(Long memberId, String guestId) {
-        validate(memberId, guestId);
-        this.memberId = memberId;
-        this.guestId = guestId;
-        this.userType = (memberId != null) ? UserType.MEMBER : UserType.GUEST;
+    public UserInfo(UUID memberUuid, UUID guestUuid) {
+        validate(memberUuid, guestUuid);
+        this.memberUuid = memberUuid;
+        this.guestUuid = guestUuid;
+        this.userType = (memberUuid != null) ? UserType.MEMBER : UserType.GUEST;
     }
 
-    private void validate(Long memberId, String guestId) {
-        if (memberId == null && guestId == null) {
+    private void validate(UUID memberUuid, UUID guestUuid) {
+        if (memberUuid == null && guestUuid == null) {
             throw new UserInfoDomainException("UserInfo를 생성할 수 없습니다.");
         }
 
-        if (memberId != null && guestId != null) {
-            throw new UserInfoDomainException("memberId와 guestId는 동시에 지정할 수 없습니다.");
-        }
-        if (guestId != null) {
-            validateGuestId(guestId);
-        }
-    }
-
-    private void validateGuestId(String guestId) {
-        if (guestId == null || guestId.length() != 36) {
-            throw new UserInfoDomainException("유효하지 않은 guestId입니다.");
+        if (memberUuid != null && guestUuid != null) {
+            throw new UserInfoDomainException("memberUuid와 guestUuid는 동시에 지정할 수 없습니다.");
         }
     }
 
@@ -42,18 +34,22 @@ public class UserInfo {
         return this.userType == UserType.GUEST;
     }
 
-    public Long getMemberId() {
+    public UUID getMemberUuid() {
         if (isGuest()) {
-            throw new IllegalStateException("비회원 컨텍스트에서는 memberId를 가져올 수 없습니다.");
+            throw new IllegalStateException("비회원 컨텍스트에서는 memberUuid를 가져올 수 없습니다.");
         }
-        return this.memberId;
+        return this.memberUuid;
     }
 
-    public String getGuestId() {
+    public UUID getGuestUuid() {
         if (isMember()) {
-            throw new IllegalStateException("회원 컨텍스트에서는 guestId를 가져올 수 없습니다.");
+            throw new IllegalStateException("회원 컨텍스트에서는 guestUuid를 가져올 수 없습니다.");
         }
-        return this.guestId;
+        return this.guestUuid;
+    }
+
+    public UUID getUuid() {
+        return isMember() ? memberUuid : guestUuid;
     }
 
     public UserType getUserType() {
