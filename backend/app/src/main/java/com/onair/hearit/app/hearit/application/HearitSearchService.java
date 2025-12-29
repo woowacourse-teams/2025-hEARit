@@ -15,6 +15,7 @@ import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,7 +38,7 @@ public class HearitSearchService {
                                                       UserInfo userInfo) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
         Page<Hearit> hearits = hearitRepository.searchByTerm(toBooleanModeQuery(searchTerm), pageable);
-        String userUuid = userInfoService.getUuid(userInfo);
+        UUID userUuid = userInfo.getUuid();
         return PagedResponse.from(toHearitSearchResponse(hearits, userUuid));
     }
 
@@ -53,7 +54,7 @@ public class HearitSearchService {
         return token.replaceAll("[+\\-~<>()\"*@]", "");
     }
 
-    private Page<HearitSearchResponse> toHearitSearchResponse(Page<Hearit> hearits, String userUuid) {
+    private Page<HearitSearchResponse> toHearitSearchResponse(Page<Hearit> hearits, UUID userUuid) {
         List<Long> hearitIds = hearits.getContent().stream().map(Hearit::getId).toList();
         Map<Long, List<Keyword>> hearitKeywords = getHearitKeywords(hearitIds);
         Map<Long, PlayingHistory> playingHistories =
