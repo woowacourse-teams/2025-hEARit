@@ -17,6 +17,7 @@ import com.onair.hearit.core.domain.ExploreScore;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
@@ -83,15 +84,15 @@ class MemberExploreScoreProcessorTest {
     @Test
     void isSupportedForMember() {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserInfo memberInfo = new UserInfo(member.getId(), null);
+        UserInfo memberInfo = new UserInfo(member.getUuid(), UserType.MEMBER);
         assertThat(memberExploreScoreProcessor.isSupported(memberInfo)).isTrue();
     }
 
     @DisplayName("회원이 아니면 지원하지 않는다")
     @Test
     void isSupportedForNonMember() {
-        UserInfo guestInfo = new UserInfo(null, UUID.randomUUID().toString());
-        UserInfo nonExistingMember = new UserInfo(999L, null);
+        UserInfo guestInfo = new UserInfo(UUID.randomUUID(), UserType.GUEST);
+        UserInfo nonExistingMember = new UserInfo(UUID.randomUUID(), UserType.GUEST);
         assertAll(
                 () -> assertThat(memberExploreScoreProcessor.isSupported(null)).isFalse(),
                 () -> assertThat(memberExploreScoreProcessor.isSupported(guestInfo)).isFalse(),
@@ -104,7 +105,7 @@ class MemberExploreScoreProcessorTest {
     void getExploreHearitsReturnsResponses() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserInfo memberInfo = new UserInfo(member.getId(), null);
+        UserInfo memberInfo = new UserInfo(member.getUuid(), UserType.MEMBER);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));

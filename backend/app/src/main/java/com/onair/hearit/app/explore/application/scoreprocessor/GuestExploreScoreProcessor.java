@@ -10,6 +10,7 @@ import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,8 +28,8 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    protected String getUserUuid(UserInfo userInfo) {
-        return userInfo.getUuid().toString();
+    protected UUID getUserUuid(UserInfo userInfo) {
+        return userInfo.getUuid();
     }
 
     @Override

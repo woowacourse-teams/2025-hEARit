@@ -4,13 +4,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.DbHelper;
-import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.app.member.dto.MemberInfoResponse;
+import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.fixture.TestFixture;
+import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
+import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ class MemberServiceTest {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
 
         // when
-        MemberInfoResponse response = memberService.getMember(member.getId());
+        MemberInfoResponse response = memberService.getMember(member.getUuid());
 
         // then
         assertAll(() -> {
@@ -58,11 +59,11 @@ class MemberServiceTest {
     @DisplayName("존재하지 않는 ID로 회원 정보 조회 시 404 예외를 던진다.")
     void getMemberById() {
         // given
-        Long nonExistId = 999L;
+        UUID nonExistId = UUID.randomUUID();
 
         // when & then
         assertThatThrownBy(() -> memberService.getMember(nonExistId))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("memberId");
+                .hasMessageContaining("memberUuId");
     }
 }

@@ -68,7 +68,7 @@ class ExploreScoreInitializerTest {
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
-        exploreScoreInitializer.refreshScores(cursorId, userUuid, UserType.GUEST);
+        exploreScoreInitializer.refreshScores(cursorId, java.util.UUID.fromString(userUuid), UserType.GUEST);
 
         // then
         assertThat(findExploreScores(userUuid)).isEmpty();
@@ -84,7 +84,7 @@ class ExploreScoreInitializerTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        exploreScoreInitializer.refreshScores(cursorId, userUuid, UserType.GUEST);
+        exploreScoreInitializer.refreshScores(cursorId, java.util.UUID.fromString(userUuid), UserType.GUEST);
 
         List<ExploreScoreRow> rows = findExploreScores(userUuid);
 

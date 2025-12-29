@@ -42,8 +42,8 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     @Override
-    protected String getUserUuid(UserInfo userInfo) {
-        return userInfo.getUuid().toString();
+    protected UUID getUserUuid(UserInfo userInfo) {
+        return userInfo.getUuid();
     }
 
     @Override

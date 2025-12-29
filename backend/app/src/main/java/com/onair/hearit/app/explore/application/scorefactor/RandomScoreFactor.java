@@ -4,6 +4,7 @@ import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.UserType;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ public class RandomScoreFactor implements ScoreFactor {
     }
 
     @Override
-    public Map<Long, Double> calculate(String uuid, List<Hearit> hearits) {
+    public Map<Long, Double> calculate(UUID uuid, List<Hearit> hearits) {
         return hearits.stream()
                 .collect(Collectors.toMap(
                         Hearit::getId,

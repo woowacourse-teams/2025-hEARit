@@ -48,7 +48,7 @@ class AuthIntegrationTest extends IntegrationTest {
     void login_success() {
         // given
         Member member = Member.createLocalUser(
-                UUID.randomUUID().toString(),
+                UUID.randomUUID(),
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234"),
@@ -102,7 +102,7 @@ class AuthIntegrationTest extends IntegrationTest {
     @DisplayName("비밀번호 틀리면 401 Unauthorized 반환한다.")
     void login_invalidPassword() {
         Member member = Member.createLocalUser(
-                UUID.randomUUID().toString(),
+                UUID.randomUUID(),
                 "test123",
                 "testName",
                 passwordEncoder.encode("pass1234"),
@@ -159,7 +159,7 @@ class AuthIntegrationTest extends IntegrationTest {
     void signup_fail_with_duplicate_id() {
         // given
         Member existingMember = Member.createLocalUser(
-                UUID.randomUUID().toString(),
+                UUID.randomUUID(),
                 "existingUser",
                 "existingNickname",
                 passwordEncoder.encode("password1234"),
@@ -184,8 +184,8 @@ class AuthIntegrationTest extends IntegrationTest {
     void check_success() {
         // given
         Member member = dbHelper.insertMember(
-                Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname", "password", "profile.jpg"));
-        String validAccessToken = jwtTokenProvider.createAccessToken(member.getId());
+                Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", "password", "profile.jpg"));
+        String validAccessToken = jwtTokenProvider.createAccessToken(member.getUuid());
 
         // when & then
         RestAssured.given(this.spec)
@@ -217,9 +217,9 @@ class AuthIntegrationTest extends IntegrationTest {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         createAndSaveRefreshTokenFrom(member);
-        assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
+        assertThat(refreshTokenRepository.findByMemberUuid(member.getUuid())).isPresent();
 
-        String accessToken = jwtTokenProvider.createAccessToken(member.getId());
+        String accessToken = jwtTokenProvider.createAccessToken(member.getUuid());
 
         // when
         RestAssured.given(this.spec).log().all()
@@ -231,14 +231,14 @@ class AuthIntegrationTest extends IntegrationTest {
 
         // then
         assertAll(() -> {
-            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+            assertThat(refreshTokenRepository.findByMemberUuid(member.getUuid())).isEmpty();
             assertThat(memberRepository.findById(member.getId()).orElseThrow().getDeletedAt()).isNotNull();
         });
     }
 
     private RefreshToken createAndSaveRefreshTokenFrom(Member member) {
-        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getUuid());
         LocalDateTime expiryDate = jwtTokenProvider.extractExpiry(refreshToken);
-        return refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, expiryDate));
+        return refreshTokenRepository.save(new RefreshToken(member.getUuid(), refreshToken, expiryDate));
     }
 }

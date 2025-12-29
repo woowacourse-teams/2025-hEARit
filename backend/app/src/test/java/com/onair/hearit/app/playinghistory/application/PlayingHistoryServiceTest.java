@@ -11,7 +11,6 @@ import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryBuffer;
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryMapBuffer;
-import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -19,6 +18,7 @@ import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryMapBuffer.class,
-        PlayingHistoryCommandRepository.class, PlayingHistoryService.class, UserInfoService.class})
+        PlayingHistoryCommandRepository.class, PlayingHistoryService.class})
 class PlayingHistoryServiceTest {
 
     @Autowired
@@ -77,7 +77,7 @@ class PlayingHistoryServiceTest {
         void getRecentPlayingHistory_whenMember() {
             // given
             Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-            UserInfo memberInfo = RequestUser.member(member.getId()).getUserInfo();
+            UserInfo memberInfo = RequestUser.member(member.getUuid()).getUserInfo();
             Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
@@ -102,15 +102,15 @@ class PlayingHistoryServiceTest {
         @DisplayName("비회원은 최근 재생 기록을 조회할 수 있다.")
         void getRecentPlayingHistory_whenGuest() {
             // given
-            UserInfo guestInfo = new UserInfo(null, UUID.randomUUID().toString());
+            UserInfo guestInfo = new UserInfo(UUID.randomUUID(), UserType.GUEST);
             Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
             LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
-            dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestInfo.getGuestId(), hearit1, 10),
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestInfo.getUuid(), hearit1, 10),
                     baseTime.minusMinutes(10));
-            dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestInfo.getGuestId(), hearit2, 20),
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(guestInfo.getUuid(), hearit2, 20),
                     baseTime);
 
             // when
@@ -158,7 +158,7 @@ class PlayingHistoryServiceTest {
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
             PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
-            String guestUuid = UUID.randomUUID().toString();
+            UUID guestUuid = UUID.randomUUID();
 
             // when
             playingHistoryService.addPlayingHistory(TestFixture.createGuestUserInfo(guestUuid), request);
@@ -207,10 +207,10 @@ class PlayingHistoryServiceTest {
         @DisplayName("비회원은 재생기록을 수정할 수 있다.")
         void modifyPlayHistory_Guest() {
             // given
-            UserInfo guestUserInfo = TestFixture.createGuestUserInfo(UUID.randomUUID().toString());
+            UserInfo guestUserInfo = TestFixture.createGuestUserInfo(UUID.randomUUID());
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(createHearitWith(100, category));
-            dbHelper.insertPlayingHistory(new PlayingHistory(guestUserInfo.getGuestId(), hearit, 10_000));
+            dbHelper.insertPlayingHistory(new PlayingHistory(guestUserInfo.getUuid(), hearit, 10_000));
             PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 50_000L, 200L);
 
             // when
@@ -221,7 +221,7 @@ class PlayingHistoryServiceTest {
             List<PlayingHistory> playingHistories = playingHistoryRepository.findAll();
             assertAll(
                     () -> assertThat(playingHistories.size()).isEqualTo(1),
-                    () -> assertThat(playingHistories.getFirst().getUserUuid()).isEqualTo(guestUserInfo.getGuestId()),
+                    () -> assertThat(playingHistories.getFirst().getUserUuid()).isEqualTo(guestUserInfo.getUuid()),
                     () -> assertThat(playingHistories.getFirst().getHearitId()).isEqualTo(hearit.getId()),
                     () -> assertThat(playingHistories.getFirst().getLastPlayTime()).isEqualTo(50_000L)
             );

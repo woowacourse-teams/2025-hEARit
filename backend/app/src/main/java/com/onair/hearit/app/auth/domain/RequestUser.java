@@ -30,9 +30,6 @@ public class RequestUser {
     }
 
     public static RequestUser member(UUID memberUuid) {
-        if (memberUuid == null) {
-            throw new IllegalStateException("memberUuid는 null일 수 없습니다.");
-        }
         return new RequestUser(memberUuid, UserType.MEMBER);
     }
 
@@ -40,22 +37,11 @@ public class RequestUser {
         return userType.getName();
     }
 
-    public String getMemberId() {
-        return userType == UserType.MEMBER ? uuid.toString() : null;
-    }
-
-    public String getGuestId() {
-        return userType == UserType.GUEST ? uuid.toString() : null;
-    }
-
     public UserInfo getUserInfo() {
         return new UserInfo(uuid, userType);
     }
 
     private void validate(UUID uuid, UserType userType) {
-        if (uuid == null) {
-            throw new IllegalStateException("uuid는 null일 수 없습니다.");
-        }
         if (userType == null) {
             throw new IllegalStateException("userType은 null일 수 없습니다.");
         }

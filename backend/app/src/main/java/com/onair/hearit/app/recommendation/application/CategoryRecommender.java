@@ -54,7 +54,7 @@ public class CategoryRecommender {
                 .map(Category::getId)
                 .toList();
         return categoryRepository.findTopCategoriesByMemberBookmarks(
-                member.getId(),
+                member.getUuid(),
                 userBasedCount,
                 excludedIds
         );

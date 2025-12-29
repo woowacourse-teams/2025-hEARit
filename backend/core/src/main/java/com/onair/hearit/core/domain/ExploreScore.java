@@ -9,9 +9,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
@@ -26,8 +29,9 @@ public class ExploreScore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_uuid", nullable = false, length = 36)
-    private String userUuid;
+    @Column(columnDefinition = "BINARY(16)", nullable = false)
+    @JdbcTypeCode(SqlTypes.BINARY)
+    private UUID userUuid;
 
     @Column(name = "hearit_id", nullable = false)
     private Long hearitId;
@@ -38,7 +42,7 @@ public class ExploreScore {
     @Column(name = "cursor_id")
     private Long cursorId;
 
-    public ExploreScore(String userUuid, Long hearitId, Double score, Long cursorId) {
+    public ExploreScore(UUID userUuid, Long hearitId, Double score, Long cursorId) {
         validate(userUuid, hearitId, score);
         this.userUuid = userUuid;
         this.hearitId = hearitId;
@@ -46,18 +50,15 @@ public class ExploreScore {
         this.cursorId = cursorId;
     }
 
-    private void validate(String userUuid, Long hearitId, Double score) {
+    private void validate(UUID userUuid, Long hearitId, Double score) {
         validateUserUuid(userUuid);
         validateHearit(hearitId);
         validateScore(score);
     }
 
-    private void validateUserUuid(String userUuid) {
+    private void validateUserUuid(UUID userUuid) {
         if (userUuid == null) {
             throw new ExploreScoreDomainException("userUuid는 null일 수 없습니다.");
-        }
-        if (userUuid.length() != 36) {
-            throw new ExploreScoreDomainException("userUuid 형식이 올바르지 않습니다.");
         }
     }
 

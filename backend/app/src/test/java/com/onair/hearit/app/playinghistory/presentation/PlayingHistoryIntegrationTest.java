@@ -85,7 +85,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
 
             for (int i = 0; i < 12; i++) {
                 Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-                dbHelper.insertPlayingHistory(new PlayingHistory(guestUuid, hearit, 10L * i));
+                dbHelper.insertPlayingHistory(new PlayingHistory(UUID.fromString(guestUuid), hearit, 10L * i));
             }
 
             // when & then
@@ -152,7 +152,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
         @DisplayName("로그인하지 않은 사용자가 재생기록 저장 시, 200 OK를 반환한다.")
         void createPlayingHistory_guest() {
             // given
-            String guestUuid = UUID.randomUUID().toString();
+            UUID guestUuid = UUID.randomUUID();
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
@@ -217,7 +217,7 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
             String guestUuid = UUID.randomUUID().toString();
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-            dbHelper.insertPlayingHistory(new PlayingHistory(guestUuid, hearit, 20_000));
+            dbHelper.insertPlayingHistory(new PlayingHistory(UUID.fromString(guestUuid), hearit, 20_000));
 
             PlayingHistoryRequest request = new PlayingHistoryRequest(hearit.getId(), 100L, 200L);
 
@@ -242,6 +242,6 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
     }
 
     private String generateToken(Member member) {
-        return jwtTokenProvider.createAccessToken(member.getId());
+        return jwtTokenProvider.createAccessToken(member.getUuid());
     }
 }

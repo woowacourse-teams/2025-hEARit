@@ -44,7 +44,7 @@ public class BookmarkScoreFactor implements ScoreFactor {
     }
 
     @Override
-    public Map<Long, Double> calculate(String uuid, List<Hearit> hearits) {
+    public Map<Long, Double> calculate(UUID uuid, List<Hearit> hearits) {
         Member member = getMemberByUuid(uuid);
         Map<Long, Long> bookmarkCountsByCategory = getBookmarkCountsByCategory(member.getUuid());
         long totalBookmarkCount = calculateTotalBookmarkCount(bookmarkCountsByCategory);
@@ -55,9 +55,9 @@ public class BookmarkScoreFactor implements ScoreFactor {
                 ));
     }
 
-    private Member getMemberByUuid(String uuid) {
-        return memberRepository.findByUuid(UUID.fromString(uuid))
-                .orElseThrow(() -> new NotFoundException("uuid", uuid));
+    private Member getMemberByUuid(UUID uuid) {
+        return memberRepository.findByUuid(uuid)
+                .orElseThrow(() -> new NotFoundException("uuid", uuid.toString()));
     }
 
     private Map<Long, Long> getBookmarkCountsByCategory(UUID memberUuid) {

@@ -41,7 +41,7 @@ public class ExploreScoreCommandRepositoryTest {
     @DisplayName("회원의 개인화된 탐색 점수들을 일괄 저장할 수 있다.")
     void insertScores() {
         // given
-        String userUuid = UUID.randomUUID().toString();
+        UUID userUuid = UUID.randomUUID();
         Map<Long, Double> scores = Map.of(
                 10L, 15.5,
                 20L, 20.0,
@@ -53,7 +53,7 @@ public class ExploreScoreCommandRepositoryTest {
 
         // then
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM explore_score WHERE user_uuid = ?", Integer.class, userUuid);
+                "SELECT COUNT(*) FROM explore_score WHERE user_uuid = ?", Integer.class, uuidToBytes(userUuid));
         assertThat(count).isEqualTo(scores.size());
     }
 
@@ -66,7 +66,7 @@ public class ExploreScoreCommandRepositoryTest {
                 200L, 25.0
         );
 
-        String guestId = UUID.randomUUID().toString();
+        UUID guestId = UUID.randomUUID();
 
         // when
         exploreScoreCommandRepository.insertScores(guestId, scores);
@@ -74,7 +74,7 @@ public class ExploreScoreCommandRepositoryTest {
         // then
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM explore_score WHERE user_uuid = ?", Integer.class,
-                guestId);
+                uuidToBytes(guestId));
         assertThat(count).isEqualTo(scores.size());
     }
 
@@ -87,7 +87,7 @@ public class ExploreScoreCommandRepositoryTest {
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        String userUuid = member.getUuid();
+        UUID userUuid = member.getUuid();
         Map<Long, Double> scores = Map.of(
                 hearit1.getId(), 10.0,
                 hearit2.getId(), 20.0
@@ -98,16 +98,17 @@ public class ExploreScoreCommandRepositoryTest {
         exploreScoreCommandRepository.updateCursorIds(userUuid);
 
         // then
+        byte[] userUuidBytes = uuidToBytes(userUuid);
         Integer cursorHigh = jdbcTemplate.queryForObject(
                 "SELECT cursor_id FROM explore_score WHERE user_uuid = ? AND hearit_id = ?",
                 Integer.class,
-                userUuid,
+                userUuidBytes,
                 hearit1.getId()
         );
         Integer cursorLow = jdbcTemplate.queryForObject(
                 "SELECT cursor_id FROM explore_score WHERE user_uuid = ? AND hearit_id = ?",
                 Integer.class,
-                userUuid,
+                userUuidBytes,
                 hearit2.getId()
         );
 
@@ -115,5 +116,12 @@ public class ExploreScoreCommandRepositoryTest {
             assertThat(cursorHigh).isEqualTo(2);
             assertThat(cursorLow).isEqualTo(1);
         });
+    }
+
+    private byte[] uuidToBytes(UUID uuid) {
+        java.nio.ByteBuffer byteBuffer = java.nio.ByteBuffer.wrap(new byte[16]);
+        byteBuffer.putLong(uuid.getMostSignificantBits());
+        byteBuffer.putLong(uuid.getLeastSignificantBits());
+        return byteBuffer.array();
     }
 }

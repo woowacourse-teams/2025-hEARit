@@ -109,8 +109,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void setMdcForUser(RequestUser user) {
         MDC.put("userType", user.getUserType());
-        MDC.put("memberId", String.valueOf(user.getMemberId()));
-        MDC.put("guestId", String.valueOf(user.getGuestId()));
+        MDC.put("uuid", user.getUuid().toString());
     }
 
     private void handleAuthenticatedRequiredError(HttpServletResponse response, HttpServletRequest request)
