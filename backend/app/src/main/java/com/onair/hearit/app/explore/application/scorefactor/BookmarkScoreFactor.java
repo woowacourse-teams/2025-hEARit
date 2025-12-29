@@ -9,6 +9,7 @@ import com.onair.hearit.core.infrastructure.jpa.CategoryBookmarkCount;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -45,7 +46,7 @@ public class BookmarkScoreFactor implements ScoreFactor {
     @Override
     public Map<Long, Double> calculate(String uuid, List<Hearit> hearits) {
         Member member = getMemberByUuid(uuid);
-        Map<Long, Long> bookmarkCountsByCategory = getBookmarkCountsByCategory(member.getId());
+        Map<Long, Long> bookmarkCountsByCategory = getBookmarkCountsByCategory(member.getUuid());
         long totalBookmarkCount = calculateTotalBookmarkCount(bookmarkCountsByCategory);
         return hearits.stream()
                 .collect(Collectors.toMap(
@@ -55,12 +56,12 @@ public class BookmarkScoreFactor implements ScoreFactor {
     }
 
     private Member getMemberByUuid(String uuid) {
-        return memberRepository.findByUuid(uuid)
+        return memberRepository.findByUuid(UUID.fromString(uuid))
                 .orElseThrow(() -> new NotFoundException("uuid", uuid));
     }
 
-    private Map<Long, Long> getBookmarkCountsByCategory(Long memberId) {
-        return bookmarkRepository.countMemberBookmarksByCategoryId(memberId).stream()
+    private Map<Long, Long> getBookmarkCountsByCategory(UUID memberUuid) {
+        return bookmarkRepository.countMemberBookmarksByCategoryId(memberUuid).stream()
                 .collect(Collectors.toMap(
                         CategoryBookmarkCount::getCategoryId,
                         CategoryBookmarkCount::getCount
