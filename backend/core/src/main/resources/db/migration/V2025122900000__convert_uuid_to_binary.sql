@@ -1,5 +1,5 @@
 
--- 1. 마이그레이션: 멤버테이블 uuid VARCHAR(36) → BINARY(16)
+-- 1. 멤버테이블 마이그레이션 :  uuid VARCHAR(36) → BINARY(16)
 -- =====================================================
 
 -- 임시 칼럼 생성
@@ -26,7 +26,7 @@ ALTER TABLE member
 CREATE UNIQUE INDEX ux_member_uuid ON member (uuid);
 
 
--- 2. PLAYING_HISTORY TABLE: user_uuid CHAR(36) → BINARY(16)
+-- 2. 재생기록
 -- =====================================================
 
 ALTER TABLE playing_history
