@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +49,7 @@ public class CategoryRecommender {
     }
 
     private List<Category> getUserBasedRecommendations(UserInfo userInfo, int userBasedCount, List<Category> alreadyRecommended) {
-        Member member = getMemberById(userInfo.getMemberId());
+        Member member = getMemberByUuid(userInfo.getMemberUuid());
         List<Long> excludedIds = alreadyRecommended.stream()
                 .map(Category::getId)
                 .toList();
@@ -59,9 +60,9 @@ public class CategoryRecommender {
         );
     }
 
-    private Member getMemberById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
+    private Member getMemberByUuid(UUID memberUuid) {
+        return memberRepository.findByUuid(memberUuid)
+                .orElseThrow(() -> new NotFoundException("memberUuid", memberUuid.toString()));
     }
 
     private List<Category> getRandomRecommendations(int randomCount, List<Category> excludedCategories) {
