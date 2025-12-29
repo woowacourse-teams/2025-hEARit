@@ -79,7 +79,7 @@ class GuestExploreScoreProcessorTest {
     @DisplayName("게스트가 아니면 지원하지 않는다")
     @Test
     void isSupportedForNonGuest() {
-        UserInfo memberInfo = new UserInfo(UUID.randomUUID(), null);
+        UserInfo memberInfo = new UserInfo(UUID.randomUUID(), UserType.GUEST);
         assertAll(
                 () -> assertThat(guestExploreScoreProcessor.isSupported(null)).isFalse(),
                 () -> assertThat(guestExploreScoreProcessor.isSupported(memberInfo)).isFalse()

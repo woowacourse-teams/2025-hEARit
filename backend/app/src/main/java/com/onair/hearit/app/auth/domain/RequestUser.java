@@ -42,6 +42,9 @@ public class RequestUser {
     }
 
     private void validate(UUID uuid, UserType userType) {
+        if (uuid == null) {
+            throw new IllegalStateException("uuid는 null일 수 없습니다.");
+        }
         if (userType == null) {
             throw new IllegalStateException("userType은 null일 수 없습니다.");
         }

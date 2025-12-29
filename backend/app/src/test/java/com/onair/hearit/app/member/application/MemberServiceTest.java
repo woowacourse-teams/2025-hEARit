@@ -64,6 +64,6 @@ class MemberServiceTest {
         // when & then
         assertThatThrownBy(() -> memberService.getMember(nonExistId))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("memberUuId");
+                .hasMessageContaining("memberUuid");
     }
 }
