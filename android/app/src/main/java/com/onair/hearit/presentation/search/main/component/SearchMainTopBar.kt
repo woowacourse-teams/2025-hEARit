@@ -96,7 +96,7 @@ fun SearchBarInput(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(R.string.search_keyword),
+                text = stringResource(R.string.search_topbar_hint),
                 modifier = Modifier.weight(1f),
                 color = Gray2,
                 style = HearitTypoGraphy.bodyMedium,
