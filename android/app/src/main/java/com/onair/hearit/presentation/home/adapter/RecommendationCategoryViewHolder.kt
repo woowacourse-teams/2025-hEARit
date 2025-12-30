@@ -7,22 +7,20 @@ import com.onair.hearit.databinding.ItemRecommendationCategoryBinding
 import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.presentation.HearitClickListener
 import com.onair.hearit.presentation.dpToPx
-import com.onair.hearit.presentation.home.HorizontalMarginItemDecoration
+import com.onair.hearit.presentation.home.util.HorizontalMarginItemDecoration
 
 class RecommendationCategoryViewHolder(
     private val binding: ItemRecommendationCategoryBinding,
     hearitClickListener: HearitClickListener,
+    sharedPool: RecyclerView.RecycledViewPool,
 ) : RecyclerView.ViewHolder(binding.root) {
     private val itemAdapter = CategoryItemAdapter(hearitClickListener, DEFAULT_COLOR)
-    private var decorationAdded = false
 
     init {
         binding.rvCategoryItems.apply {
+            setRecycledViewPool(sharedPool)
             adapter = itemAdapter
-            if (!decorationAdded) {
-                addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(itemView.context)))
-                decorationAdded = true
-            }
+            addItemDecoration(HorizontalMarginItemDecoration(SIDE_MARGIN.dpToPx(itemView.context)))
         }
     }
 
@@ -40,10 +38,11 @@ class RecommendationCategoryViewHolder(
         fun create(
             parent: ViewGroup,
             hearitClickListener: HearitClickListener,
+            sharedPool: RecyclerView.RecycledViewPool,
         ): RecommendationCategoryViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemRecommendationCategoryBinding.inflate(inflater, parent, false)
-            return RecommendationCategoryViewHolder(binding, hearitClickListener)
+            return RecommendationCategoryViewHolder(binding, hearitClickListener, sharedPool)
         }
 
         private const val DEFAULT_COLOR = "#000000"
