@@ -162,45 +162,39 @@ class SearchViewModel @Inject constructor(
     }
 
     fun fetchCategoryHearits(isInitial: Boolean) {
-        val category = _categoryUiState.value.category
-        if (category == null) {
-            return
-        }
-        if (isLoading) {
-            return
-        }
-        if (!isInitial && isLastPage) {
-            return
-        }
-
+        val category = _categoryUiState.value.category ?: return
+        if (isLoading) return
+        if (!isInitial && isLastPage) return
         isLoading = true
 
         viewModelScope.launch {
-            _categoryUiState.update { it.copy(isLoading = true) }
+            try {
+                _categoryUiState.update { it.copy(isLoading = true) }
 
-            hearitRepository
-                .getCategoryHearits(category.id, if (isInitial) 0 else currentPage)
-                .onSuccess { response ->
-                    _categoryUiState.update { state ->
-                        state.copy(
-                            hearits =
-                                if (isInitial) {
-                                    response.items.toImmutableList()
-                                } else {
-                                    (state.hearits + response.items).toImmutableList()
-                                },
-                            isLoading = false,
-                            isLastPage = response.paging.isLast,
-                        )
+                hearitRepository
+                    .getCategoryHearits(category.id, if (isInitial) 0 else currentPage)
+                    .onSuccess { response ->
+                        _categoryUiState.update { state ->
+                            state.copy(
+                                hearits =
+                                    if (isInitial) {
+                                        response.items.toImmutableList()
+                                    } else {
+                                        (state.hearits + response.items).toImmutableList()
+                                    },
+                                isLoading = false,
+                                isLastPage = response.paging.isLast,
+                            )
+                        }
+                        currentPage = if (isInitial) 1 else currentPage + 1
+                        isLastPage = response.paging.isLast
+                    }.onFailure {
+                        _categoryUiState.update { it.copy(isLoading = false) }
+                        _toastMessage.value = R.string.category_toast_searched_hearits_load_fail
                     }
-                    currentPage = if (isInitial) 1 else currentPage + 1
-                    isLastPage = response.paging.isLast
-                }.onFailure {
-                    _categoryUiState.update { it.copy(isLoading = false) }
-                    _toastMessage.value = R.string.category_toast_searched_hearits_load_fail
-                }
-
-            isLoading = false
+            } finally {
+                isLoading = false
+            }
         }
     }
 
