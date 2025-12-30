@@ -26,7 +26,12 @@ public class RequestUser {
             log.warn("현재 Device-Uuid Header가 비어있습니다.");
             return new RequestUser(FALLBACK_GUEST_UUID, UserType.GUEST);
         }
-        return new RequestUser(UUID.fromString(guestId), UserType.GUEST);
+        try {
+            return new RequestUser(UUID.fromString(guestId), UserType.GUEST);
+        } catch (IllegalArgumentException e) {
+            log.warn("Device-Uuid Header가 유효하지 않은 UUID 형식입니다: {}", guestId);
+            return new RequestUser(FALLBACK_GUEST_UUID, UserType.GUEST);
+        }
     }
 
     public static RequestUser member(UUID memberUuid) {
