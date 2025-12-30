@@ -161,7 +161,7 @@ private fun EmptyRecentSearch(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.TopCenter,
     ) {
         Text(
-            text = "최근 검색 내역이 없습니다.",
+            text = stringResource(R.string.search_no_recent),
             style = HearitTypoGraphy.bodyMedium,
             color = Gray2,
         )
