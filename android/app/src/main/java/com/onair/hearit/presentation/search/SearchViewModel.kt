@@ -97,7 +97,7 @@ class SearchViewModel @Inject constructor(
         fetchResultData(isInitial = true)
     }
 
-    fun loadCategories() {
+    fun fetchCategories() {
         viewModelScope.launch {
             _searchMainUiState.update { it.copy(isLoading = true) }
 

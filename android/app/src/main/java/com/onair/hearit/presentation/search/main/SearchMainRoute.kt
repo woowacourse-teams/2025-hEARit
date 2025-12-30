@@ -19,7 +19,7 @@ fun SearchMainRoute(
     val uiState by viewModel.searchMainUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.loadCategories()
+        viewModel.fetchCategories()
     }
 
     SearchMainScreen(
