@@ -1,14 +1,10 @@
 package com.onair.hearit.presentation.detail.script
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.onair.hearit.domain.model.ScriptLine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import java.time.Clock
 import javax.inject.Inject
 
