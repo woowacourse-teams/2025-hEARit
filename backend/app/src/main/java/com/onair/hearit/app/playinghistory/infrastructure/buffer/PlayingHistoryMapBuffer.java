@@ -18,13 +18,13 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
 
     private static final int BUFFER_SIZE = 100_000;
 
-    private final Map<PlayKey, PlayHistoryValue> cache = new ConcurrentHashMap<>();
+    private final Map<PlayHistoryKey, PlayHistoryValue> cache = new ConcurrentHashMap<>();
     private final PlayingHistoryCommandRepository playingHistoryCommandRepository;
     private final PlayingHistoryConverter converter;
 
     @Override
     public void add(PlayingHistory playingHistory, long clientEventTime) {
-        PlayKey key = new PlayKey(playingHistory.getUserUuid(), playingHistory.getHearitId());
+        PlayHistoryKey key = new PlayHistoryKey(playingHistory.getUserUuid(), playingHistory.getHearitId());
         cache.compute(key, (k, existing) -> {
             if (existing == null) {
                 validateBufferSize(k);
@@ -37,7 +37,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
         });
     }
 
-    private void validateBufferSize(PlayKey key) {
+    private void validateBufferSize(PlayHistoryKey key) {
         if (!cache.containsKey(key) && cache.size() >= BUFFER_SIZE) {
             throw new BufferOverflowException("버퍼 용량 초과로 인해 재생 기록 저장할 수 없습니다.");
         }
@@ -45,7 +45,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
 
     @Override
     public void flush() {
-        Map<PlayKey, PlayHistoryValue> snapshot = createSnapshotAndRemoveFromCache();
+        Map<PlayHistoryKey, PlayHistoryValue> snapshot = createSnapshotAndRemoveFromCache();
         if (snapshot.isEmpty()) {
             return;
         }
@@ -63,8 +63,8 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
         return cache.size();
     }
 
-    private Map<PlayKey, PlayHistoryValue> createSnapshotAndRemoveFromCache() {
-        Map<PlayKey, PlayHistoryValue> snapshot = new ConcurrentHashMap<>();
+    private Map<PlayHistoryKey, PlayHistoryValue> createSnapshotAndRemoveFromCache() {
+        Map<PlayHistoryKey, PlayHistoryValue> snapshot = new ConcurrentHashMap<>();
         cache.forEach((key, value) -> {
             if (cache.remove(key, value)) {
                 snapshot.put(key, value);
@@ -73,7 +73,7 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
         return snapshot;
     }
 
-    private void rollbackSnapshot(Map<PlayKey, PlayHistoryValue> snapshot) {
+    private void rollbackSnapshot(Map<PlayHistoryKey, PlayHistoryValue> snapshot) {
         try {
             snapshot.forEach((key, newValue) ->
                     cache.merge(key, newValue, (oldValue, incomingValue) -> {

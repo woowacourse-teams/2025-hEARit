@@ -1,4 +1,4 @@
 package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
-public record PlayKey(String userUuid, long hearitId) {
+public record PlayHistoryKey(String userUuid, long hearitId) {
     }
