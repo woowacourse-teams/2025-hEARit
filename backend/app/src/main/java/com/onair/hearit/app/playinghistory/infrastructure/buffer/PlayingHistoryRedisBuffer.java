@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -22,14 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
-
-    @Value("${playing-history.lock.wait-time:1000}")
-    private long lockWaitTime;
-
-    @Value("${playing-history.lock.lease-time:3000}")
-    private long lockLeaseTime;
 
     private static final String REDIS_HASH_KEY = "playing_history";
     private static final String REDIS_TEMP_KEY = "playing_history:flushing";
@@ -40,6 +32,25 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
     private final PlayingHistoryCommandRepository commandRepository;
     private final PlayingHistoryConverter converter;
     private final ObjectMapper objectMapper;
+    private final long lockWaitTime;
+    private final long lockLeaseTime;
+
+    public PlayingHistoryRedisBuffer(
+            RedisTemplate<String, String> redisTemplate,
+            RedissonClient redissonClient,
+            PlayingHistoryCommandRepository commandRepository,
+            PlayingHistoryConverter converter,
+            ObjectMapper objectMapper,
+            @Value("${playing-history.lock.wait-time:1000}") long lockWaitTime,
+            @Value("${playing-history.lock.lease-time:3000}") long lockLeaseTime) {
+        this.redisTemplate = redisTemplate;
+        this.redissonClient = redissonClient;
+        this.commandRepository = commandRepository;
+        this.converter = converter;
+        this.objectMapper = objectMapper;
+        this.lockWaitTime = lockWaitTime;
+        this.lockLeaseTime = lockLeaseTime;
+    }
 
     @Override
     public void add(PlayingHistory playingHistory, long clientEventTime) {

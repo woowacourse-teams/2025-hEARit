@@ -123,7 +123,9 @@ class PlayingHistoryRedisBufferTest {
                 redissonClient,
                 commandRepository,
                 converter,
-                objectMapper
+                objectMapper,
+                1000L,
+                3000L
         );
     }
 
