@@ -26,16 +26,6 @@ class ScriptViewModel @Inject constructor(
     val followModeEnabled: StateFlow<Boolean> = _followModeEnabled
 
     private val lastUserScrollEpochMillis: MutableStateFlow<Long> = MutableStateFlow(0L)
-    private val latestScriptsSnapshot: MutableStateFlow<List<ScriptLine>> =
-        MutableStateFlow(emptyList())
-
-    val highlightedIndex: StateFlow<Int> =
-        combine(
-            _highlightedId,
-            latestScriptsSnapshot,
-        ) { highlightedIdValue: Long?, scripts: List<ScriptLine> ->
-            highlightedIdValue?.let { id -> scripts.indexOfFirst { it.id == id } } ?: -1
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STARTED_TIMEOUT_MS), -1)
 
     fun onUserScrollStateChange(isScrolling: Boolean) {
         _isUserScrolling.value = isScrolling
@@ -56,8 +46,6 @@ class ScriptViewModel @Inject constructor(
         currentPositionMillis: Long,
         currentScripts: List<ScriptLine>,
     ) {
-        latestScriptsSnapshot.value = currentScripts
-
         if (_isUserScrolling.value) {
             val now: Long = currentTimeMillis()
             val idleReached: Boolean =
@@ -67,11 +55,13 @@ class ScriptViewModel @Inject constructor(
             }
         }
 
-        val currentItem: ScriptLine? =
-            currentScripts.firstOrNull { script ->
+        val currentIndex: Int =
+            currentScripts.indexOfFirst { script ->
                 currentPositionMillis in script.start until script.end
             }
-        _highlightedId.value = currentItem?.id
+        val newHighlightedId: Long? =
+            if (currentIndex >= 0) currentScripts[currentIndex].id else null
+        if (_highlightedId.value != newHighlightedId) _highlightedId.value = newHighlightedId
     }
 
     private fun currentTimeMillis(): Long = clock.millis()
