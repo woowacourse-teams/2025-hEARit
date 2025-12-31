@@ -55,7 +55,7 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         }
         try {
             if (Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_TEMP_KEY))) {
-                log.warn("임시 키가 이미 존재함 (이전 flush 실패?), 복원 시도");
+                log.warn("임시 키가 존재함 - 이전 flush가 완료되지 않음, 복원 시도");
                 restoreSnapshot();
             }
             moveToSnapshot();
