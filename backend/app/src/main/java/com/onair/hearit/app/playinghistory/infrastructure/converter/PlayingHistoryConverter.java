@@ -20,7 +20,6 @@ public class PlayingHistoryConverter {
 
     private final HearitRepository hearitRepository;
 
-    //PlayValue 컬렉션을 PlayingHistory 리스트로 변환
     public List<PlayingHistory> toPlayingHistories(Collection<PlayHistoryValue> playHistoryValues) {
         if (playHistoryValues.isEmpty()) {
             return List.of();
