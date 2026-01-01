@@ -4,11 +4,10 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation.compose.rememberNavController
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.presentation.search.category.CategoryRoute
@@ -18,26 +17,37 @@ import com.onair.hearit.presentation.search.main.SearchMainRoute
 // Routes
 const val SEARCH_MAIN_ROUTE = "search_main"
 const val SEARCH_DETAIL_ROUTE = "search_detail"
-const val CATEGORY_ROUTE = "category/{categoryId}/{categoryName}/{categoryColor}"
-
-// Navigation arguments
-object CategoryArgs {
-    const val CATEGORY_ID = "categoryId"
-    const val CATEGORY_NAME = "categoryName"
-    const val CATEGORY_COLOR = "categoryColor"
-}
+const val CATEGORY_ROUTE = "category"
 
 @Composable
 fun SearchNavHost(
-    navController: NavHostController,
+    startArgs: SearchStartArgs = SearchStartArgs(),
+    onExitSearch: () -> Unit,
     onHearitClick: (Long) -> Unit,
-    onCategoryBack: () -> Unit,
+    viewModel: SearchViewModel = hiltViewModel(),
 ) {
+    val navController = rememberNavController()
     val analyticsLogger = LocalAnalyticsLogger.current
+
+    val startDestination =
+        if (startArgs.initialCategory != null) {
+            CATEGORY_ROUTE
+        } else {
+            SEARCH_MAIN_ROUTE
+        }
+
+    // Direct entry인 경우 초기 카테고리 데이터 세팅
+    LaunchedEffect(startArgs.initialCategory) {
+        if (startArgs.initialCategory != null) {
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.set(KEY_CATEGORY_NAV_MODEL, startArgs.initialCategory)
+        }
+    }
 
     NavHost(
         navController = navController,
-        startDestination = SEARCH_MAIN_ROUTE,
+        startDestination = startDestination,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None },
         popEnterTransition = { EnterTransition.None },
@@ -55,12 +65,20 @@ fun SearchNavHost(
             }
 
             SearchMainRoute(
+                viewModel = viewModel,
                 onSearchBarClick = {
                     navController.navigate(SEARCH_DETAIL_ROUTE)
                 },
                 onCategoryClick = { id, name, colorCode ->
-                    val encodedColor = colorCode.removePrefix("#")
-                    navController.navigate("category/$id/$name/$encodedColor")
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        KEY_CATEGORY_NAV_MODEL,
+                        CategoryNavModel(
+                            id = id,
+                            name = name,
+                            colorCode = colorCode,
+                        ),
+                    )
+                    navController.navigate(CATEGORY_ROUTE)
                 },
             )
         }
@@ -73,32 +91,32 @@ fun SearchNavHost(
             )
         }
 
-        composable(
-            route = CATEGORY_ROUTE,
-            arguments =
-                listOf(
-                    navArgument(CategoryArgs.CATEGORY_ID) { type = NavType.LongType },
-                    navArgument(CategoryArgs.CATEGORY_NAME) { type = NavType.StringType },
-                    navArgument(CategoryArgs.CATEGORY_COLOR) { type = NavType.StringType },
-                ),
-        ) { backStackEntry ->
-            val categoryId = backStackEntry.arguments?.getLong(CategoryArgs.CATEGORY_ID) ?: 0L
-            val categoryName = backStackEntry.arguments?.getString(CategoryArgs.CATEGORY_NAME) ?: ""
-            val categoryColorRaw =
-                backStackEntry.arguments?.getString(CategoryArgs.CATEGORY_COLOR) ?: ""
+        composable(CATEGORY_ROUTE) { backStackEntry ->
+            val model =
+                navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.get<CategoryNavModel>(KEY_CATEGORY_NAV_MODEL)
+                    // Direct entry인 경우 previousBackStackEntry가 없으므로 startArgs에서 가져옴
+                    ?: startArgs.initialCategory
 
-            val categoryColor =
-                if (categoryColorRaw.startsWith("#")) {
-                    categoryColorRaw
-                } else {
-                    "#$categoryColorRaw"
+            if (model == null) {
+                LaunchedEffect(Unit) {
+                    navController.navigateUp()
                 }
+                return@composable
+            }
 
             CategoryRoute(
-                categoryId = categoryId,
-                categoryName = categoryName,
-                categoryColor = categoryColor,
-                onBack = onCategoryBack,
+                categoryId = model.id,
+                categoryName = model.name,
+                categoryColor = model.colorCode,
+                onBack = {
+                    if (startArgs.isDirectEntry) {
+                        onExitSearch()
+                    } else {
+                        navController.navigateUp()
+                    }
+                },
                 onHearitClick = onHearitClick,
             )
         }

@@ -5,12 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.navigation.compose.rememberNavController
 import com.onair.hearit.analytics.AnalyticsLogger
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -25,10 +23,6 @@ class SearchFragment : Fragment() {
     @Inject
     lateinit var analyticsLogger: AnalyticsLogger
 
-    // 카테고리로 직접 들어왔는지 플래그
-    private val isDirectCategoryEntry: Boolean
-        get() = arguments?.getBoolean(IS_DIRECT_CATEGORY_ENTRY, false) ?: false
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,47 +34,24 @@ class SearchFragment : Fragment() {
                 CompositionLocalProvider(
                     LocalAnalyticsLogger provides analyticsLogger,
                 ) {
-                    val navController = rememberNavController()
-
                     SearchNavHost(
-                        navController = navController,
+                        startArgs = arguments.toSearchStartArgs(),
+                        onExitSearch = { parentFragmentManager.popBackStack() },
                         onHearitClick = { hearitId ->
                             // Hearit 클릭 처리 (기존 방식 유지 또는 Navigation으로 전환)
                             // 예: 기존 Fragment로 이동하거나 Compose 화면으로 이동
                         },
-                        onCategoryBack = {
-                            if (isDirectCategoryEntry) {
-                                // 홈으로 돌아가기 (Fragment 종료)
-                                parentFragmentManager.popBackStack()
-                            } else {
-                                // 검색 메인으로 돌아가기
-                                navController.navigateUp()
-                            }
-                        },
                     )
-
-                    // HomeFragment에서 카테고리 정보가 넘어왔다면 자동 이동
-                    LaunchedEffect(Unit) {
-                        arguments?.let { args ->
-                            val categoryId = args.getLong(CATEGORY_ID_KEY, -1L)
-                            if (categoryId != -1L) {
-                                val categoryName = args.getString(CATEGORY_NAME_KEY, "")
-                                val categoryColor = args.getString(CATEGORY_COLOR_KEY, "")
-                                val encodedColor = categoryColor.removePrefix("#")
-
-                                navController.navigate("category/$categoryId/$categoryName/$encodedColor")
-                            }
-                        }
-                    }
                 }
             }
         }
 
+    private fun Bundle?.toSearchStartArgs(): SearchStartArgs =
+        this?.getParcelable(ARG_START_ARGS)
+            ?: SearchStartArgs()
+
     companion object {
-        private const val CATEGORY_ID_KEY = "categoryId"
-        private const val CATEGORY_NAME_KEY = "categoryName"
-        private const val CATEGORY_COLOR_KEY = "categoryColor"
-        private const val IS_DIRECT_CATEGORY_ENTRY = "isDirectCategoryEntry"
+        private const val ARG_START_ARGS = "startArgs"
 
         fun newInstance() = SearchFragment()
 
@@ -91,10 +62,18 @@ class SearchFragment : Fragment() {
         ) = SearchFragment().apply {
             arguments =
                 Bundle().apply {
-                    putLong(CATEGORY_ID_KEY, categoryId)
-                    putString(CATEGORY_NAME_KEY, categoryName)
-                    putString(CATEGORY_COLOR_KEY, categoryColor)
-                    putBoolean(IS_DIRECT_CATEGORY_ENTRY, true)
+                    putParcelable(
+                        ARG_START_ARGS,
+                        SearchStartArgs(
+                            initialCategory =
+                                CategoryNavModel(
+                                    id = categoryId,
+                                    name = categoryName,
+                                    colorCode = categoryColor,
+                                ),
+                            isDirectEntry = true,
+                        ),
+                    )
                 }
         }
     }
