@@ -17,15 +17,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
@@ -34,6 +31,8 @@ import com.onair.hearit.presentation.search.category.component.SearchedHearitIte
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
+import com.onair.hearit.presentation.util.rememberSafeColor
+import com.onair.hearit.presentation.util.rememberTopFadeGradient
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -46,8 +45,16 @@ fun CategoryScreen(
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val safeColor = rememberSafeColor(categoryColor)
-    val gradientBrush = rememberGradientBrush(safeColor)
+    val safeColor =
+        rememberSafeColor(
+            colorString = categoryColor,
+            fallback = HearitBlack,
+        )
+    val gradientBrush =
+        rememberTopFadeGradient(
+            topColor = safeColor,
+            bottomColor = HearitBlack,
+        )
 
     Box(
         modifier =
@@ -129,24 +136,6 @@ private fun CategoryHearitList(
         }
     }
 }
-
-@Composable
-private fun rememberSafeColor(colorString: String): Color =
-    remember(colorString) {
-        runCatching { Color(colorString.toColorInt()) }.getOrElse { HearitBlack }
-    }
-
-@Composable
-private fun rememberGradientBrush(color: Color): Brush =
-    remember(color) {
-        Brush.verticalGradient(
-            colorStops =
-                arrayOf(
-                    0.0f to color,
-                    0.2f to HearitBlack,
-                ),
-        )
-    }
 
 @Preview(showBackground = true)
 @Composable
