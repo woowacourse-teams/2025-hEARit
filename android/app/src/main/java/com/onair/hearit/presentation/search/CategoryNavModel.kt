@@ -15,5 +15,3 @@ data class SearchStartArgs(
     val initialCategory: CategoryNavModel? = null,
     val isDirectEntry: Boolean = false,
 ) : Parcelable
-
-const val KEY_CATEGORY_NAV_MODEL = "categoryNavModel"
