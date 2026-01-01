@@ -19,7 +19,7 @@ fun rememberTopFadeGradient(
             colorStops =
                 arrayOf(
                     0.0f to topColor,
-                    fadeStop to bottomColor,
+                    fadeStop.coerceIn(0f, 1f) to bottomColor,
                 ),
         )
     }
