@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.onair.hearit.analytics.AnalyticsLogger
+import com.onair.hearit.presentation.util.getParcelableCompat
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -47,7 +48,7 @@ class SearchFragment : Fragment() {
         }
 
     private fun Bundle?.toSearchStartArgs(): SearchStartArgs =
-        this?.getParcelable(ARG_START_ARGS)
+        this?.getParcelableCompat<SearchStartArgs>(ARG_START_ARGS)
             ?: SearchStartArgs()
 
     companion object {
