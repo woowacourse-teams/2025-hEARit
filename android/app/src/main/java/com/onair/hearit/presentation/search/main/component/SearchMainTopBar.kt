@@ -1,8 +1,6 @@
 package com.onair.hearit.presentation.search.main.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +16,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -30,6 +27,7 @@ import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
+import com.onair.hearit.presentation.util.noRippleClickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,11 +86,8 @@ fun SearchBarInput(
                     .fillMaxWidth()
                     .height(36.dp)
                     .background(HearitBlack)
-                    .clickable(
-                        onClick = onSearchBarClick,
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                    ).padding(horizontal = 20.dp, vertical = 8.dp),
+                    .noRippleClickable(onClick = onSearchBarClick)
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
