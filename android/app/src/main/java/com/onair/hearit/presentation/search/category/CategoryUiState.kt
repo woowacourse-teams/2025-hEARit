@@ -12,4 +12,5 @@ data class CategoryUiState(
     val hearits: ImmutableList<SearchedCategoryHearit> = persistentListOf(),
     val isLoading: Boolean = false,
     val isLastPage: Boolean = false,
+    val currentPage: Int = 0,
 )
