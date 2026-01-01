@@ -36,12 +36,10 @@ fun SearchNavHost(
             SEARCH_MAIN_ROUTE
         }
 
-    // Direct entry인 경우 초기 카테고리 데이터 세팅
+    // Direct entry (홈에서 직접 진입)
     LaunchedEffect(startArgs.initialCategory) {
-        if (startArgs.initialCategory != null) {
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.set(KEY_CATEGORY_NAV_MODEL, startArgs.initialCategory)
+        startArgs.initialCategory?.let { category ->
+            viewModel.setCurrentCategory(category)
         }
     }
 
@@ -70,14 +68,7 @@ fun SearchNavHost(
                     navController.navigate(SEARCH_DETAIL_ROUTE)
                 },
                 onCategoryClick = { id, name, colorCode ->
-                    navController.currentBackStackEntry?.savedStateHandle?.set(
-                        KEY_CATEGORY_NAV_MODEL,
-                        CategoryNavModel(
-                            id = id,
-                            name = name,
-                            colorCode = colorCode,
-                        ),
-                    )
+                    viewModel.setCurrentCategory(CategoryNavModel(id, name, colorCode))
                     navController.navigate(CATEGORY_ROUTE)
                 },
             )
@@ -91,25 +82,9 @@ fun SearchNavHost(
             )
         }
 
-        composable(CATEGORY_ROUTE) { backStackEntry ->
-            val model =
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.get<CategoryNavModel>(KEY_CATEGORY_NAV_MODEL)
-                    // Direct entry인 경우 previousBackStackEntry가 없으므로 startArgs에서 가져옴
-                    ?: startArgs.initialCategory
-
-            if (model == null) {
-                LaunchedEffect(Unit) {
-                    navController.navigateUp()
-                }
-                return@composable
-            }
-
+        composable(CATEGORY_ROUTE) {
             CategoryRoute(
-                categoryId = model.id,
-                categoryName = model.name,
-                categoryColor = model.colorCode,
+                viewModel = viewModel,
                 onBack = {
                     if (startArgs.isDirectEntry) {
                         onExitSearch()

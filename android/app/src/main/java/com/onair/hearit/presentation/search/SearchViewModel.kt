@@ -70,19 +70,14 @@ class SearchViewModel @Inject constructor(
         fetchKeywordHearits(input.term, true)
     }
 
-    fun setCurrentCategory(
-        id: Long,
-        name: String,
-        colorCode: String,
-    ) {
-        if (_categoryUiState.value.category?.id == id) return
+    fun setCurrentCategory(category: CategoryNavModel) {
+        if (_categoryUiState.value.category?.id == category.id) return
 
         resetPaging()
 
-        val category = Category(id, name, colorCode)
         _categoryUiState.update {
             CategoryUiState(
-                category = category,
+                category = Category(category.id, category.name, category.colorCode),
                 hearits = persistentListOf(),
                 isLoading = true,
             )
