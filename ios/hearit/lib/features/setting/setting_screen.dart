@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hearit/core/theme/app_colors.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../auth/auth_viewmodel.dart';
+import 'my_profile_screen.dart';
 import 'oss_licenses_page.dart';
 
 class SettingScreen extends StatelessWidget {
@@ -44,6 +48,12 @@ class SettingScreen extends StatelessWidget {
     ).push(MaterialPageRoute(builder: (_) => OssLicensesPage()));
   }
 
+  void _openMyProfile(BuildContext context) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const MyProfileScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,42 +78,58 @@ class SettingScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              _SettingItem(
-                label: '개인정보처리방침',
-                onTap: () => _openExternalUrl(context, _privacyPolicyUrl),
-              ),
-              const SizedBox(height: 20),
-              _SettingItem(
-                label: '이용 약관',
-                onTap: () => _openExternalUrl(context, _termsUrl),
-              ),
-              const SizedBox(height: 20),
-              _SettingItem(
-                label: '오픈 라이선스',
-                onTap: () => _openLicenses(context),
-              ),
-              const Spacer(),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: _SettingItem(
-                    label: '피드백 및 문의하기',
-                    onTap: () => _openExternalUrl(
-                      context,
-                      'https://forms.gle/KGjHNi9ASdN3jR5v6',
+          child: Consumer<AuthViewModel>(
+            builder: (context, authViewModel, _) {
+              final isLoggedIn = authViewModel.isLoggedIn;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
+
+                  // 로그인 상태일 때만 "내 정보" 표시
+                  if (isLoggedIn) ...[
+                    _SettingItem(
+                      label: '내 정보',
+                      onTap: () => _openMyProfile(context),
                     ),
-                    textStyle: _itemTextStyle.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: 20),
+                  ],
+
+                  _SettingItem(
+                    label: '개인정보처리방침',
+                    onTap: () => _openExternalUrl(context, _privacyPolicyUrl),
+                  ),
+                  const SizedBox(height: 20),
+                  _SettingItem(
+                    label: '이용 약관',
+                    onTap: () => _openExternalUrl(context, _termsUrl),
+                  ),
+                  const SizedBox(height: 20),
+                  _SettingItem(
+                    label: '오픈 라이선스',
+                    onTap: () => _openLicenses(context),
+                  ),
+                  const Spacer(),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: _SettingItem(
+                        label: '피드백 및 문의하기',
+                        onTap: () => _openExternalUrl(
+                          context,
+                          'https://forms.gle/KGjHNi9ASdN3jR5v6',
+                        ),
+                        textStyle: _itemTextStyle.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
       ),
