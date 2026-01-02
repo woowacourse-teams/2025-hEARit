@@ -60,7 +60,7 @@ class LoginScreen extends StatelessWidget {
               const Spacer(flex: 2),
 
               // hEARit 앱 아이콘 (중앙)
-              Image.asset('assets/icon/app_icon.png', width: 120, height: 120),
+              Image.asset('assets/icon/app_icon.png', width: 250, height: 250),
 
               const Spacer(flex: 3),
 

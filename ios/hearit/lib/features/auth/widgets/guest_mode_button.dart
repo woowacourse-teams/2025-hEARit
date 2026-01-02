@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 class GuestModeButton extends StatelessWidget {
   const GuestModeButton({super.key, required this.onPressed});
 
@@ -9,14 +11,29 @@ class GuestModeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPressed,
-      child: const Text(
-        '회원가입 없이 히어릿을 이용하고 싶어요',
-        style: TextStyle(
-          color: Colors.white70,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          decoration: TextDecoration.underline,
-          decorationColor: Colors.white70,
+      child: RichText(
+        text: const TextSpan(
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Pretendard',
+            decoration: TextDecoration.underline,
+            decorationColor: AppColors.gray4,
+          ),
+          children: [
+            TextSpan(
+              text: '회원가입 없이 ',
+              style: TextStyle(color: AppColors.gray4),
+            ),
+            TextSpan(
+              text: '히어릿',
+              style: TextStyle(color: AppColors.hearitPurple1),
+            ),
+            TextSpan(
+              text: '을 이용하고 싶어요',
+              style: TextStyle(color: AppColors.gray4),
+            ),
+          ],
         ),
       ),
     );
