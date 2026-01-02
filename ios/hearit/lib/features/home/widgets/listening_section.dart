@@ -148,22 +148,24 @@ class ListeningCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-            Text(
-              data.description,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.gray4,
-                fontSize: 16,
-                height: 1.4,
-                fontWeight: FontWeight.bold,
+            SizedBox(
+              height: 44.8,
+              child: Text(
+                data.description,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.gray4,
+                  fontSize: 16,
+                  height: 1.4,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-            if (data.progress != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: ListeningProgressBar(progress: data.progress!),
-              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: ListeningProgressBar(progress: data.progress ?? 0.0),
+            ),
           ],
         ),
       ),
@@ -183,9 +185,9 @@ class ListeningProgressBar extends StatelessWidget {
       builder: (context, constraints) {
         final double barWidth = constraints.maxWidth * safeProgress;
         return Container(
-          height: 6,
+          height: 4,
           decoration: BoxDecoration(
-            color: const Color(0xFF3B3B46),
+            color: AppColors.darkGray,
             borderRadius: BorderRadius.circular(999),
           ),
           child: Align(
@@ -193,7 +195,7 @@ class ListeningProgressBar extends StatelessWidget {
             child: Container(
               width: barWidth,
               decoration: BoxDecoration(
-                color: const Color(0xFFA86BFF),
+                color: AppColors.hearitPurple2,
                 borderRadius: BorderRadius.circular(999),
               ),
             ),

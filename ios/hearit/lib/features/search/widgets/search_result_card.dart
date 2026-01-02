@@ -112,25 +112,28 @@ class _SearchProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (progress == null) {
-      return Container(
-        height: 6,
-        decoration: BoxDecoration(color: AppColors.darkGray),
-      );
-    }
-    final double clamped = progress!.clamp(0, 1).toDouble();
-    return Container(
-      height: 6,
-      decoration: BoxDecoration(color: const Color(0xFF3B3B46)),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: FractionallySizedBox(
-          widthFactor: clamped == 0 ? 0.02 : clamped,
-          child: Container(
-            decoration: BoxDecoration(color: const Color(0xFFA86BFF)),
+    final double safeProgress = (progress ?? 0.0).clamp(0, 1).toDouble();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double barWidth = constraints.maxWidth * safeProgress;
+        return Container(
+          height: 4,
+          decoration: BoxDecoration(
+            color: AppColors.darkGray,
+            borderRadius: BorderRadius.circular(999),
           ),
-        ),
-      ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              width: barWidth,
+              decoration: BoxDecoration(
+                color: AppColors.hearitPurple2,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
