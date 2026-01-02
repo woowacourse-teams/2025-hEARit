@@ -47,6 +47,9 @@ dependencies:
   firebase_core: ^2.27.2
   firebase_analytics: ^10.10.1
 
+  kakao_flutter_sdk_user: ^1.9.5 # 카카오 로그인 API 패키지
+  kakao_flutter_sdk_share: ^1.9.5 # 카카오톡 공유 API 패키지
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -74,6 +77,8 @@ flutter:
     - assets/images/backgroud_LP.png
     - assets/images/detail_LP.png
     - assets/images/explore_LP.png
+    - assets/images/kakao_login_large_wide.png
+    - assets/icon/app_icon.png
 
   fonts:
     - family: PretendardBold
