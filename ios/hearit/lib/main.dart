@@ -14,6 +14,7 @@ import 'firebase_options.dart';
 import 'core/theme/app_colors.dart';
 import 'features/auth/auth_viewmodel.dart';
 import 'features/auth/splash_screen.dart';
+import 'features/setting/setting_viewmodel.dart';
 
 const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
   statusBarColor: AppColors.hearitBlack,
@@ -46,6 +47,7 @@ Future<void> main() async {
           create: (_) => HearitPlayerController(audioHandler: audioHandler),
         ),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => SettingViewModel()),
       ],
       child: const MyApp(),
     ),
