@@ -11,6 +11,7 @@ import com.onair.hearit.core.fixture.DbHelper;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.projection.HearitWithPlayTimeProjection;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -91,15 +92,16 @@ class HearitRepositoryTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        PlayingHistory playingHistory1 = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit1, 14));
+        PlayingHistory playingHistory1 = dbHelper.insertPlayingHistory(
+                new PlayingHistory(member.getUuid(), hearit1, 14));
         PlayingHistory playingHistory2 = dbHelper.insertPlayingHistory(
-                new PlayingHistory(member.getId(), hearit3, 300));
+                new PlayingHistory(member.getUuid(), hearit3, 300));
 
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
         Page<HearitWithPlayTimeProjection> result =
-                hearitRepository.findWithPlayTimeBy(category.getId(), member.getId(), pageable);
+                hearitRepository.findWithPlayTimeBy(category.getId(), member.getUuid(), pageable);
 
         HearitWithPlayTimeProjection projection1 = result.getContent().get(0);
         HearitWithPlayTimeProjection projection2 = result.getContent().get(1);
@@ -120,26 +122,28 @@ class HearitRepositoryTest {
     @Test
     @Disabled
     @DisplayName("최근 업로드된 히어릿을 마지막 재생시간과 함께 조회한다.")
-    void findTopNHearitWithPlayTimeTest() throws InterruptedException {
+    void findTopNHearitWithPlayTimeTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 
-        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Thread.sleep(10);
-        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Thread.sleep(10);
-        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
+        Hearit hearit1 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category),
+                baseTime.minusMinutes(2));
+        Hearit hearit2 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category),
+                baseTime.minusMinutes(1));
+        Hearit hearit3 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category), baseTime);
 
-        PlayingHistory playingHistory1 = dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), hearit1, 14));
+        PlayingHistory playingHistory1 = dbHelper.insertPlayingHistory(
+                new PlayingHistory(member.getUuid(), hearit1, 14));
         PlayingHistory playingHistory2 = dbHelper.insertPlayingHistory(
-                new PlayingHistory(member.getId(), hearit3, 300));
+                new PlayingHistory(member.getUuid(), hearit3, 300));
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Direction.DESC, "createdAt"));
 
         // when
         Page<HearitWithPlayTimeProjection> result =
-                hearitRepository.findWithPlayTimeBy(null, member.getId(), pageable);
+                hearitRepository.findWithPlayTimeBy(null, member.getUuid(), pageable);
 
         HearitWithPlayTimeProjection projection3 = result.getContent().get(0);
         HearitWithPlayTimeProjection projection2 = result.getContent().get(1);

@@ -25,7 +25,7 @@ public class TestFixture {
         return new UserInfo(member.getId(), null);
     }
 
-    public static UserInfo createFixedGuestUserInfo(String guestId) {
+    public static UserInfo createGuestUserInfo(String guestId) {
         return new UserInfo(null, guestId);
     }
 

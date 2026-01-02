@@ -13,6 +13,7 @@ import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
 import com.onair.hearit.app.hearit.dto.param.HearitSortField;
 import com.onair.hearit.app.hearit.dto.param.SortDirection;
+import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -29,6 +30,7 @@ import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +45,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("fake-test")
-@Import({DbHelper.class, TestJpaAuditingConfig.class, HearitService.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, HearitService.class, UserInfoService.class})
 class HearitServiceTest {
 
     @Autowired
@@ -124,7 +126,7 @@ class HearitServiceTest {
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
             long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
-            playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
+            playingHistoryRepository.save(new PlayingHistory(member.getUuid(), hearit, lastPlayTime));
 
             // when
             HearitDetailResponse response = hearitService.getHearitDetail(
@@ -149,7 +151,7 @@ class HearitServiceTest {
 
             long remainingSeconds = 5001L;
             Long lastPlayTime = hearit.getPlayTime() * 1000 - remainingSeconds;
-            playingHistoryRepository.save(new PlayingHistory(member.getId(), hearit, lastPlayTime));
+            playingHistoryRepository.save(new PlayingHistory(member.getUuid(), hearit, lastPlayTime));
 
             // when
             HearitDetailResponse response = hearitService.getHearitDetail(
@@ -182,7 +184,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category1.getId(),
-                    sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -208,7 +210,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
-                    sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -232,7 +234,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
-                    sortRequest, TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -263,7 +265,7 @@ class HearitServiceTest {
             Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             PlayingHistory playingHistory = dbHelper.insertPlayingHistory(
-                    new PlayingHistory(member.getId(), hearit1, 450));
+                    new PlayingHistory(member.getUuid(), hearit1, 450));
             HearitSortRequest sortRequest = new HearitSortRequest(HearitSortField.CREATED_AT, SortDirection.DESC);
             PagingRequest pagingRequest = new PagingRequest(1, 2);
 
@@ -283,15 +285,14 @@ class HearitServiceTest {
 
         @Test
         @DisplayName("모든 카테고리 히어릿을 생성 날짜 오름차순으로 조회한다.")
-        void getHearitsAllCategory() throws InterruptedException {
+        void getHearitsAllCategory() {
             // given
             Category category1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Category category2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
-            Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-            Thread.sleep(100);
-            Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category1));
-            Thread.sleep(100);
-            Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category2));
+            LocalDateTime baseTime = LocalDateTime.of(2025, 1, 1, 0, 0);
+            Hearit hearit1 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1), baseTime.minusMinutes(2));
+            Hearit hearit2 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category1),  baseTime.minusMinutes(1));
+            Hearit hearit3 = dbHelper.insertHearitAt(TestFixture.createFixedHearitWith(category2), baseTime);
 
             HearitSortRequest sortRequest = new HearitSortRequest(HearitSortField.CREATED_AT, SortDirection.ASC);
             PagingRequest pagingRequest = new PagingRequest(0, 10);
@@ -300,7 +301,7 @@ class HearitServiceTest {
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(
                     null,
                     sortRequest,
-                    TestFixture.createFixedGuestUserInfo(UUID.randomUUID().toString()),
+                    TestFixture.createGuestUserInfo(UUID.randomUUID().toString()),
                     pagingRequest
             );
 
@@ -308,6 +309,7 @@ class HearitServiceTest {
             assertAll(
                     () -> assertThat(result.content()).hasSize(3),
                     () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId()),
+                    () -> assertThat(result.content().get(1).id()).isEqualTo(hearit2.getId()),
                     () -> assertThat(result.content().get(2).id()).isEqualTo(hearit3.getId())
             );
         }

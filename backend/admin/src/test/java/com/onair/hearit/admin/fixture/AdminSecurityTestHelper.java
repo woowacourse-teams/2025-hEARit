@@ -1,9 +1,9 @@
-package com.onair.hearit.admin.presentation;
+package com.onair.hearit.admin.fixture;
 
 import com.onair.hearit.admin.domain.Admin;
-import com.onair.hearit.admin.fixture.DbHelper;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import java.util.Objects;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -17,7 +17,7 @@ public class AdminSecurityTestHelper {
         String oldSessionId = loginPage.getCookie("JSESSIONID");
 
         Document doc = Jsoup.parse(loginPage.getBody().asString());
-        String csrfToken = doc.selectFirst("input[name=_csrf]").attr("value");
+        String csrfToken = Objects.requireNonNull(doc.selectFirst("input[name=_csrf]")).attr("value");
 
         // 2. 로그인 요청
         Response loginResponse = RestAssured.given()
@@ -34,8 +34,8 @@ public class AdminSecurityTestHelper {
                 .cookie("JSESSIONID", newSessionId)
                 .get("/admin/login");
 
-        String newCsrf = Jsoup.parse(afterLogin.getBody().asString())
-                .selectFirst("input[name=_csrf]")
+        String newCsrf = Objects.requireNonNull(Jsoup.parse(afterLogin.getBody().asString())
+                        .selectFirst("input[name=_csrf]"))
                 .attr("value");
 
         return new CsrfSession(newSessionId, newCsrf);

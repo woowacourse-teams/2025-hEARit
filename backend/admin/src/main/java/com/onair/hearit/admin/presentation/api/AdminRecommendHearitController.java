@@ -1,12 +1,12 @@
 package com.onair.hearit.admin.presentation.api;
 
 import com.onair.hearit.admin.application.AdminRecommendHearitService;
-import com.onair.hearit.admin.dto.request.AdminPagedResponse;
 import com.onair.hearit.admin.dto.request.AdminPagingRequest;
-import com.onair.hearit.admin.dto.request.AdminRecommendHearitResponse;
-import com.onair.hearit.admin.dto.request.MonthlyRecommendHearitResponse;
 import com.onair.hearit.admin.dto.request.RecommendHearitCreateRequest;
 import com.onair.hearit.admin.dto.request.RecommendHearitUpdateRequest;
+import com.onair.hearit.admin.dto.response.AdminPagedResponse;
+import com.onair.hearit.admin.dto.response.AdminRecommendHearitResponse;
+import com.onair.hearit.admin.dto.response.MonthlyRecommendHearitResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

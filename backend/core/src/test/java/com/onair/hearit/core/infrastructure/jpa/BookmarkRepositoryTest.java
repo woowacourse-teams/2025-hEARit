@@ -52,7 +52,7 @@ class BookmarkRepositoryTest {
         Sort createdAt = Sort.by(Direction.DESC, "createdAt");
         // when
         Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findFilteredByMember(
-                member.getId(),
+                member.getUuid(),
                 null,
                 PageRequest.of(0, 5, createdAt));
 
@@ -81,7 +81,7 @@ class BookmarkRepositoryTest {
         Sort createdAt = Sort.by(Direction.ASC, "createdAt");
         // when
         Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findFilteredByMember(
-                member.getId(),
+                member.getUuid(),
                 null,
                 PageRequest.of(0, 5, createdAt));
 
@@ -102,13 +102,13 @@ class BookmarkRepositoryTest {
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
         PlayingHistory playingHistory = dbHelper.insertPlayingHistory(new PlayingHistory(
-                member.getId(),
+                member.getUuid(),
                 hearit,
                 (hearit.getPlayTime() - 10) * 1000L));
 
         // when
         Page<BookmarkWithPlayingHistoryProjection> bookmarks = bookmarkRepository.findFilteredByMember(
-                member.getId(),
+                member.getUuid(),
                 null,
                 PageRequest.of(0, 5)
         );
@@ -160,17 +160,17 @@ class BookmarkRepositoryTest {
 
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished1));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished2));
-        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished1, 500_000L));
-        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished2, 500_000L));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), finished1, 500_000L));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), finished2, 500_000L));
 
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished1));
-        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), unfinished1, 100L));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), unfinished1, 100L));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished2));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished3));
 
         // when
         var unfinishedBookmarks = bookmarkRepository.findFilteredByMember(
-                member.getId(),
+                member.getUuid(),
                 false,
                 PageRequest.of(0, 5));
 
@@ -192,17 +192,17 @@ class BookmarkRepositoryTest {
 
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished1));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, finished2));
-        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished1, 500_000L));
-        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), finished2, 500_000L));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), finished1, 500_000L));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), finished2, 500_000L));
 
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished1));
-        dbHelper.insertPlayingHistory(new PlayingHistory(member.getId(), unfinished1, 100L));
+        dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), unfinished1, 100L));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished2));
         dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, unfinished3));
 
         // when
         var finishedBookmarks = bookmarkRepository.findFilteredByMember(
-                member.getId(),
+                member.getUuid(),
                 true,
                 PageRequest.of(0, 5));
 

@@ -4,6 +4,7 @@ import com.onair.hearit.app.playinghistory.application.PlayingHistoryService;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
 import com.onair.hearit.app.auth.domain.RequestUser;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ public class PlayingHistoryController {
     private final PlayingHistoryService playingHistoryService;
 
     @GetMapping("/hearits")
+    //TODO: 재생기록 개수 파라미터로 받기
     public ResponseEntity<List<RecentlyPlayedHearitResponse>> readPlayingHistories(
             @AuthenticationPrincipal RequestUser requestUser) {
         List<RecentlyPlayedHearitResponse> responses =
@@ -32,7 +34,7 @@ public class PlayingHistoryController {
 
     @PostMapping
     public ResponseEntity<Void> createPlayingHistory(
-            @RequestBody PlayingHistoryRequest request,
+            @RequestBody @Valid PlayingHistoryRequest request,
             @AuthenticationPrincipal RequestUser requestUser) {
         playingHistoryService.addPlayingHistory(requestUser.getUserInfo(), request);
         return ResponseEntity.status(HttpStatus.OK).build();

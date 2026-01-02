@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.dto.request;
+package com.onair.hearit.admin.dto.response;
 
 import java.util.List;
 import org.springframework.data.domain.Page;

@@ -23,13 +23,13 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
             JOIN FETCH h.category c
             LEFT JOIN PlayingHistory ph
                 ON ph.hearitId = h.id
-                AND ph.memberId = :memberId
-            WHERE b.member.id = :memberId
+                AND ph.userUuid = :userUuid
+            WHERE b.member.uuid = :userUuid
                 AND (:isFinished IS NULL OR
                     (:isFinished = true AND ph.isFinished = :isFinished) OR
                     (:isFinished = false AND (ph.isFinished = false OR ph IS NULL)))
             """)
-    Page<BookmarkWithPlayingHistoryProjection> findFilteredByMember(@Param("memberId") Long memberId,
+    Page<BookmarkWithPlayingHistoryProjection> findFilteredByMember(@Param("userUuid") String userUuid,
                                                                     @Param("isFinished") Boolean isFinished,
                                                                     Pageable pageable);
 
