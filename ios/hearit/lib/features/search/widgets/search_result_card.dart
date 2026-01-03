@@ -40,21 +40,37 @@ class SearchResultCard extends StatelessWidget {
               SizedBox(
                 height: titleHeight, // reserve space for up to 2 lines of title
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        data.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: AppColors.gray4,
-                          fontWeight: FontWeight.w700,
-                          fontSize:
-                              (theme.textTheme.titleMedium?.fontSize ?? 16) +
-                              fontDelta,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: data.isFinished == true ? 8 : 0,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        child: Text(
+                          data.title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: AppColors.gray4,
+                            fontWeight: FontWeight.w700,
+                            fontSize:
+                                (theme.textTheme.titleMedium?.fontSize ?? 16) +
+                                fontDelta,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
+                    if (data.isFinished == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Image.asset(
+                          'assets/images/finished_check.png',
+                          width: isTablet ? 24 : 20,
+                          height: isTablet ? 24 : 20,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                   ],
                 ),
               ),

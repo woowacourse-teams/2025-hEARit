@@ -82,6 +82,7 @@ flutter:
     - assets/images/detail_LP.png
     - assets/images/explore_LP.png
     - assets/images/kakao_login_large_wide.png
+    - assets/images/finished_check.png
     - assets/icon/app_icon.png
 
   fonts:
