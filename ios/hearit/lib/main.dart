@@ -3,6 +3,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 
@@ -24,7 +25,17 @@ const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  KakaoSdk.init(nativeAppKey: '613a999d3a3db5d91f9a1c3565bdb4e1');
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  // Initialize Kakao SDK with environment variable
+  final kakaoKey = dotenv.env['KAKAO_NATIVE_APP_KEY'];
+  if (kakaoKey == null || kakaoKey.isEmpty) {
+    throw Exception('KAKAO_NATIVE_APP_KEY not found in .env file');
+  }
+  KakaoSdk.init(nativeAppKey: kakaoKey);
+
   SystemChrome.setSystemUIOverlayStyle(_lightStatusBar);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Warm up device UUID so network calls don't block on first launch.

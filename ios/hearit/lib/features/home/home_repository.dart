@@ -1,13 +1,52 @@
 import 'package:flutter/material.dart';
 
 import '../../core/network/api_client.dart';
+import '../../core/network/api_exception.dart';
+import '../auth/services/auth_storage_service.dart';
 import 'home_models.dart';
+
+enum AuthCheckStatus {
+  ok, // 200 OK
+  unauthorized, // 401 Unauthorized
+  error, // 네트워크 에러 등
+}
 
 class HomeRepository {
   HomeRepository({ApiClient? apiClient})
     : _apiClient = apiClient ?? ApiClient();
 
   final ApiClient _apiClient;
+
+  /// 토큰 존재 여부 확인
+  Future<bool> hasValidToken() async {
+    final token = await AuthStorageService().getAccessToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  /// 인증 상태 체크 (/api/v1/auth/check)
+  Future<AuthCheckStatus> checkAuth() async {
+    try {
+      final token = await AuthStorageService().getAccessToken();
+      if (token == null || token.isEmpty) {
+        return AuthCheckStatus.error;
+      }
+
+      await _apiClient.get<void>(
+        '/api/v1/auth/check',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      return AuthCheckStatus.ok; // 200 OK
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        return AuthCheckStatus.unauthorized; // 401
+      }
+      debugPrint('Auth check failed: $e');
+      return AuthCheckStatus.error; // 기타 에러
+    } catch (error) {
+      debugPrint('Auth check unexpected error: $error');
+      return AuthCheckStatus.error;
+    }
+  }
 
   Future<List<RecommendCardData>> fetchRecommendations() async {
     final List<dynamic> data = await _apiClient.get<List<dynamic>>(
@@ -44,8 +83,14 @@ class HomeRepository {
   }
 
   Future<List<ListeningCardData>> fetchBookmarked() async {
+    final token = await AuthStorageService().getAccessToken();
+    if (token == null || token.isEmpty) {
+      return const []; // 토큰 없으면 빈 리스트
+    }
+
     final List<dynamic> data = await _apiClient.get<List<dynamic>>(
       '/api/v1/bookmarks',
+      headers: {'Authorization': 'Bearer $token'},
       queryParameters: {
         'page': 0,
         'size': 10,

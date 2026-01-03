@@ -3,7 +3,10 @@ import 'package:hearit/core/analytics/analytics_event_names.dart';
 import 'package:hearit/core/analytics/analytics_param_keys.dart';
 import 'package:hearit/core/analytics/analytics_provider.dart';
 import 'package:hearit/core/theme/app_colors.dart';
+import 'package:provider/provider.dart';
 
+import '../auth/auth_viewmodel.dart';
+import '../auth/login_screen.dart';
 import '../detail/hearit_detail.dart';
 import '../detail/hearit_detail_screen.dart';
 import 'home_models.dart';
@@ -29,14 +32,16 @@ class _HomeScreenState extends State<HomeScreen> {
   late final HomeViewModel _viewModel;
   late final PageController _pageController;
   double _page = 0;
-  static const bool _showListeningAndBookmarks = false;
-  static const bool _showRecentlyAdded = true;
   static const double _maxOverscrollExtent = 20;
 
   @override
   void initState() {
     super.initState();
-    _viewModel = HomeViewModel()..addListener(_onViewModelUpdated);
+    final authViewModel = context.read<AuthViewModel>();
+    _viewModel = HomeViewModel(
+      authViewModel: authViewModel,
+      onUnauthorized: _handleUnauthorized,
+    )..addListener(_onViewModelUpdated);
     _viewModel.loadHome();
     WidgetsBinding.instance.addPostFrameCallback((_) => _logScreenView());
     _pageController = PageController(viewportFraction: 0.6, initialPage: 2);
@@ -46,6 +51,16 @@ class _HomeScreenState extends State<HomeScreen> {
         _page = _pageController.page ?? 0;
       });
     });
+  }
+
+  void _handleUnauthorized() {
+    if (!mounted) return;
+    final authViewModel = context.read<AuthViewModel>();
+    authViewModel.clearAuthStatus();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
   @override
@@ -310,24 +325,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 36),
-                if (_showListeningAndBookmarks) ...[
-                  ListeningSection(
-                    title: 'hEARit님이 듣고 있는 팟캐스트',
-                    items: _viewModel.listeningNowHearits,
-                    onTap: _onPlayingHistoryTap,
-                  ),
+                ListeningSection(
+                  title: 'hEARit님이 듣고 있는 팟캐스트',
+                  items: _viewModel.listeningNowHearits,
+                  onTap: _onPlayingHistoryTap,
+                  emptyMessage: '아직 듣고 있는 팟캐스트가 없습니다',
+                ),
+                ListeningSection(
+                  title: '최근 추가된 팟캐스트',
+                  items: _viewModel.recentlyAddedHearits,
+                  onTap: _onRecentUploadTap,
+                ),
+                if (_viewModel.shouldShowBookmarks) ...[
                   ListeningSection(
                     title: '북마크한 팟캐스트를 들어보세요',
                     items: _viewModel.bookmarkedHearits,
                     showChevron: true,
                     onTap: _onPlayingBookmarkTap,
-                  ),
-                ],
-                if (_showRecentlyAdded) ...[
-                  ListeningSection(
-                    title: '최근 추가된 팟캐스트',
-                    items: _viewModel.recentlyAddedHearits,
-                    onTap: _onRecentUploadTap,
+                    emptyMessage: '아직 북마크한 팟캐스트가 없습니다',
                   ),
                 ],
                 Padding(

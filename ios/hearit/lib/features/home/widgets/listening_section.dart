@@ -11,12 +11,14 @@ class ListeningSection extends StatelessWidget {
     required this.items,
     this.showChevron = false,
     required this.onTap,
+    this.emptyMessage,
   });
 
   final String title;
   final List<ListeningCardData> items;
   final bool showChevron;
   final void Function(ListeningCardData data) onTap;
+  final String? emptyMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class ListeningSection extends StatelessWidget {
                     fontFamily: homeTitleFontFamily,
                     fontWeight: FontWeight.bold,
                     color: AppColors.gray4,
-                    fontSize: title.contains('북마크') ? 22 : 20,
+                    fontSize: 20,
                   ),
                 ),
                 if (showChevron)
@@ -50,7 +52,7 @@ class ListeningSection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              '아직 준비된 항목이 없습니다.',
+              emptyMessage ?? '아직 준비된 항목이 없습니다.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.gray4.withOpacity(0.7),
               ),
@@ -75,7 +77,7 @@ class ListeningSection extends StatelessWidget {
                   fontFamily: homeTitleFontFamily,
                   fontWeight: FontWeight.bold,
                   color: AppColors.gray4,
-                  fontSize: title.contains('북마크') ? 22 : 20,
+                  fontSize: 20,
                 ),
               ),
               if (showChevron)

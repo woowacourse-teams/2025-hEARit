@@ -28,13 +28,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final status = authViewModel.status;
 
-    // 로그인됨 또는 게스트 모드 -> 홈 화면
-    if (status == AuthStatus.authenticated || status == AuthStatus.guest) {
+    // 로그인된 사용자만 홈 화면으로 이동
+    if (status == AuthStatus.authenticated) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainNavigation()),
       );
     }
-    // 로그인 필요 -> 로그인 화면
+    // 비로그인(unauthenticated, guest 등) -> 로그인 화면
     else {
       Navigator.of(
         context,
