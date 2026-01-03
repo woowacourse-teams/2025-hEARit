@@ -326,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 36),
                 ListeningSection(
-                  title: 'hEARit님이 듣고 있는 팟캐스트',
+                  title: '${_viewModel.userNickname}님이 듣고 있는 팟캐스트',
                   items: _viewModel.listeningNowHearits,
                   onTap: _onPlayingHistoryTap,
                   emptyMessage: '아직 듣고 있는 팟캐스트가 없습니다',

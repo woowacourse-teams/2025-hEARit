@@ -60,8 +60,15 @@ class HomeRepository {
   }
 
   Future<List<ListeningCardData>> fetchListeningNow() async {
+    // 로그인 사용자는 토큰 기준, 게스트는 UUID 기준으로 재생 기록 조회
+    final token = await AuthStorageService().getAccessToken();
+    final headers = (token != null && token.isNotEmpty)
+        ? {'Authorization': 'Bearer $token'}
+        : null;
+
     final List<dynamic> data = await _apiClient.get<List<dynamic>>(
       '/api/v1/playing-histories/hearits',
+      headers: headers,
       parser: _asList,
     );
     return data
@@ -114,6 +121,27 @@ class HomeRepository {
         .whereType<Map<String, dynamic>>()
         .map(_mapCategorySection)
         .toList();
+  }
+
+  /// 사용자 닉네임 조회 (로그인 사용자만)
+  Future<String?> fetchUserNickname() async {
+    try {
+      final token = await AuthStorageService().getAccessToken();
+      if (token == null || token.isEmpty) {
+        return null; // 게스트 모드
+      }
+
+      final data = await _apiClient.get<Map<String, dynamic>>(
+        '/api/v1/members/me',
+        headers: {'Authorization': 'Bearer $token'},
+        parser: (raw) => raw as Map<String, dynamic>,
+      );
+
+      return data['nickname'] as String?;
+    } catch (e) {
+      debugPrint('Failed to fetch user nickname: $e');
+      return null; // 실패 시 null 반환 (기본값 사용)
+    }
   }
 
   RecommendCardData _mapRecommendation(Map<String, dynamic> json) {

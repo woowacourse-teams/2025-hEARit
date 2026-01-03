@@ -27,6 +27,7 @@ class HomeViewModel extends ChangeNotifier {
   String? _error;
   bool _loading = false;
   bool _shouldShowBookmarks = false;
+  String _userNickname = 'hEARit'; // 기본값
 
   List<RecommendCardData> get todayRecommendedHearits =>
       _todayRecommendedHearits;
@@ -38,6 +39,7 @@ class HomeViewModel extends ChangeNotifier {
   bool get isLoading => _loading;
   String? get error => _error;
   bool get shouldShowBookmarks => _shouldShowBookmarks;
+  String get userNickname => _userNickname;
 
   Future<void> loadHome() async {
     _loading = true;
@@ -127,6 +129,16 @@ class HomeViewModel extends ChangeNotifier {
       }
     }
 
+    Future<String> fetchUserNickname() async {
+      try {
+        final nickname = await _repository.fetchUserNickname();
+        return nickname ?? 'hEARit'; // null이면 기본값
+      } catch (error, stack) {
+        debugPrint('HomeViewModel.fetchUserNickname error: $error\n$stack');
+        return 'hEARit'; // 에러 시 기본값
+      }
+    }
+
     // 4. 병렬 API 호출
     try {
       final results = await Future.wait([
@@ -135,6 +147,7 @@ class HomeViewModel extends ChangeNotifier {
         fetchRecentlyAdded(),
         fetchBookmarked(),
         fetchCategoryRecommendations(),
+        fetchUserNickname(),
       ]);
 
       _todayRecommendedHearits = results[0] as List<RecommendCardData>;
@@ -142,6 +155,7 @@ class HomeViewModel extends ChangeNotifier {
       _recentlyAddedHearits = results[2] as List<ListeningCardData>;
       _bookmarkedHearits = results[3] as List<ListeningCardData>;
       _curatedCategoryHearits = results[4] as List<CategorySectionData>;
+      _userNickname = results[5] as String;
 
       if (failures.isNotEmpty) {
         _error = '${failures.join(', ')} 데이터를 불러오지 못했습니다.';
