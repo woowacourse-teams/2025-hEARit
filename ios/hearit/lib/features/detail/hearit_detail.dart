@@ -9,9 +9,9 @@ class HearitSource {
   final String sourceUrl;
 
   factory HearitSource.fromJson(Map<String, dynamic> json) => HearitSource(
-        sourceName: json['sourceName'] as String? ?? '',
-        sourceUrl: (json['sourceUrl'] as String?) ?? '',
-      );
+    sourceName: json['sourceName'] as String? ?? '',
+    sourceUrl: (json['sourceUrl'] as String?) ?? '',
+  );
 }
 
 class HearitKeyword {
@@ -21,9 +21,11 @@ class HearitKeyword {
   final String name;
 
   factory HearitKeyword.fromJson(Map<String, dynamic> json) => HearitKeyword(
-        id: json['id'] is int ? json['id'] as int : int.parse(json['id'].toString()),
-        name: json['name'] as String,
-      );
+    id: json['id'] is int
+        ? json['id'] as int
+        : int.parse(json['id'].toString()),
+    name: json['name'] as String,
+  );
 }
 
 class HearitCategory {
@@ -38,10 +40,12 @@ class HearitCategory {
   final Color color;
 
   factory HearitCategory.fromJson(Map<String, dynamic> json) => HearitCategory(
-        id: json['id'] is int ? json['id'] as int : int.parse(json['id'].toString()),
-        name: json['name'] as String,
-        color: _parseColor(json['colorCode'] as String),
-      );
+    id: json['id'] is int
+        ? json['id'] as int
+        : int.parse(json['id'].toString()),
+    name: json['name'] as String,
+    color: _parseColor(json['colorCode'] as String),
+  );
 }
 
 class HearitDetail {
@@ -74,24 +78,26 @@ class HearitDetail {
   Color get accentColor => category.color;
 
   factory HearitDetail.fromJson(Map<String, dynamic> json) => HearitDetail(
-        id: json['id'] is int ? json['id'] as int : int.parse(json['id'].toString()),
-        title: json['title'] as String,
-        summary: json['summary'] as String? ?? '',
-        sources: (json['sources'] as List<dynamic>? ?? [])
-            .map((e) => HearitSource.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        playTime: Duration(seconds: json['playTime'] as int? ?? 0),
-        lastPlayTime: json['lastPlayTime'] == null
-            ? null
-            : Duration(seconds: json['lastPlayTime'] as int),
-        createdAt: DateTime.parse(json['createdAt'] as String),
-        isBookmarked: json['isBookmarked'] as bool? ?? false,
-        bookmarkId: json['bookmarkId'] as int?,
-        category: HearitCategory.fromJson(json['category'] as Map<String, dynamic>),
-        keywords: (json['keywords'] as List<dynamic>? ?? [])
-            .map((e) => HearitKeyword.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    id: json['id'] is int
+        ? json['id'] as int
+        : int.parse(json['id'].toString()),
+    title: json['title'] as String,
+    summary: json['summary'] as String? ?? '',
+    sources: (json['sources'] as List<dynamic>? ?? [])
+        .map((e) => HearitSource.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    playTime: Duration(seconds: json['playTime'] as int? ?? 0),
+    lastPlayTime: json['lastPlayTime'] == null
+        ? null
+        : Duration(milliseconds: json['lastPlayTime'] as int),
+    createdAt: DateTime.parse(json['createdAt'] as String),
+    isBookmarked: json['isBookmarked'] as bool? ?? false,
+    bookmarkId: json['bookmarkId'] as int?,
+    category: HearitCategory.fromJson(json['category'] as Map<String, dynamic>),
+    keywords: (json['keywords'] as List<dynamic>? ?? [])
+        .map((e) => HearitKeyword.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 
   factory HearitDetail.fromSummaryStub({
     required int id,
@@ -100,24 +106,19 @@ class HearitDetail {
     required Color accentColor,
     required DateTime createdAt,
     Duration? lastPlayTime,
-  }) =>
-      HearitDetail(
-        id: id,
-        title: title,
-        summary: '',
-        sources: const [],
-        playTime: Duration.zero,
-        lastPlayTime: lastPlayTime,
-        createdAt: createdAt,
-        isBookmarked: false,
-        bookmarkId: null,
-        category: HearitCategory(
-          id: 0,
-          name: categoryName,
-          color: accentColor,
-        ),
-        keywords: const [],
-      );
+  }) => HearitDetail(
+    id: id,
+    title: title,
+    summary: '',
+    sources: const [],
+    playTime: Duration.zero,
+    lastPlayTime: lastPlayTime,
+    createdAt: createdAt,
+    isBookmarked: false,
+    bookmarkId: null,
+    category: HearitCategory(id: 0, name: categoryName, color: accentColor),
+    keywords: const [],
+  );
 }
 
 Color _parseColor(String code) {

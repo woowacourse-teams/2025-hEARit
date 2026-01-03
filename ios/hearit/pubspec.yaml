@@ -42,6 +42,7 @@ dependencies:
   flutter_oss_licenses: ^3.0.2
   dio: ^5.3.0
   flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2 # 로컬 큐 저장
   uuid: ^4.4.0
   path_provider: ^2.1.5
   firebase_core: ^2.27.2

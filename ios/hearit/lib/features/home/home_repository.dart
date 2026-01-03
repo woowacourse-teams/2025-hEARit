@@ -164,10 +164,10 @@ class HomeRepository {
     final category = json['category'] as Map<String, dynamic>?;
     final categoryName = category?['name'] as String? ?? 'Podcast';
     final colorCode = category?['colorCode'] as String?;
-    final playTime = (json['playTime'] as num?)?.toInt() ?? 0;
-    final lastPlayTime = (json['lastPlayTime'] as num?)?.toInt();
-    final progress = includeProgress && playTime > 0 && lastPlayTime != null
-        ? (lastPlayTime / playTime).clamp(0, 1).toDouble()
+    final playTime = (json['playTime'] as num?)?.toInt() ?? 0; // 초 단위
+    final lastPlayTimeMs = (json['lastPlayTime'] as num?)?.toInt(); // 밀리초 단위
+    final progress = includeProgress && playTime > 0 && lastPlayTimeMs != null
+        ? ((lastPlayTimeMs / 1000) / playTime).clamp(0, 1).toDouble()
         : null;
 
     return ListeningCardData(

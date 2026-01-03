@@ -52,15 +52,7 @@ class HearitDetailViewModel extends ChangeNotifier {
   Duration? _resumePosition;
   static final Map<int, Future<Uri>> _artworkUriFutures = {};
 
-  final List<double> _speedOptions = [
-    0.5,
-    0.75,
-    1.0,
-    1.25,
-    1.5,
-    1.75,
-    2.0,
-  ];
+  final List<double> _speedOptions = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
   int _speedIndex = 2;
   bool _bookmarked;
   List<ScriptLine> _scripts = [];
@@ -83,10 +75,7 @@ class HearitDetailViewModel extends ChangeNotifier {
     _initialLoading = false;
     notifyListeners();
 
-    await Future.wait([
-      _loadAudio(),
-      _loadScripts(),
-    ]);
+    await Future.wait([_loadAudio(), _loadScripts()]);
     notifyListeners();
   }
 
@@ -117,6 +106,7 @@ class HearitDetailViewModel extends ChangeNotifier {
             artist: _detail.category.name,
             duration: _detail.playTime,
             artUri: artUri,
+            extras: {'hearitId': _detail.id},
           ),
         );
         final resumePosition = _resumePosition ?? _detail.lastPlayTime;
@@ -155,7 +145,10 @@ class HearitDetailViewModel extends ChangeNotifier {
 
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder);
-      final size = Size(baseImage.width.toDouble(), baseImage.height.toDouble());
+      final size = Size(
+        baseImage.width.toDouble(),
+        baseImage.height.toDouble(),
+      );
       final rect = Offset.zero & size;
 
       // Fill background with category color, then paint the LP graphic on top to keep its original colors.
