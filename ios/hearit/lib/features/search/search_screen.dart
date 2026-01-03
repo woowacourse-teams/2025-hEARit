@@ -43,10 +43,13 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _logScreenView() {
-    AnalyticsProvider.logger.logEvent('screen_view', params: {
-      AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameSearch,
-      AnalyticsParamKeys.screenClass: 'SearchScreen',
-    });
+    AnalyticsProvider.logger.logEvent(
+      'screen_view',
+      params: {
+        AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameSearch,
+        AnalyticsParamKeys.screenClass: 'SearchScreen',
+      },
+    );
   }
 
   void _submitQuery() {
@@ -58,6 +61,14 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
     _viewModel.submitQuery();
+  }
+
+  void _handleBackButton() {
+    if (_viewModel.canGoBack) {
+      _viewModel.stepBack();
+    } else {
+      _viewModel.clearQuery();
+    }
   }
 
   @override
@@ -90,17 +101,49 @@ class _SearchScreenState extends State<SearchScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12),
-                    child: Text(
-                      '검색',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: AppColors.gray4,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 28,
-                      ),
-                    ),
-                  ),
+                  // 검색 전: 왼쪽 정렬, 검색 후: 뒤로가기 버튼 + 중앙 정렬
+                  _viewModel.hasSearched
+                      ? Row(
+                          children: [
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
+                              ),
+                              icon: const Icon(
+                                Icons.chevron_left,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                              onPressed: _handleBackButton,
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  '검색',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: AppColors.gray4,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 40),
+                          ],
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: Text(
+                            '검색',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: AppColors.gray4,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 28,
+                            ),
+                          ),
+                        ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Column(
@@ -261,7 +304,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                     categories: _viewModel.categories,
                                     onTap: (category) {
                                       AnalyticsProvider.logger.logEvent(
-                                        AnalyticsEventNames.searchCategorySelected,
+                                        AnalyticsEventNames
+                                            .searchCategorySelected,
                                         params: {
                                           AnalyticsParamKeys.categoryName:
                                               category.name,
