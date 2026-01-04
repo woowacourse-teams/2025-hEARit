@@ -9,6 +9,7 @@ import '../../features/detail/hearit_detail_screen.dart';
 import '../../features/explore/explore_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/library/library_screen.dart';
+import '../../features/library/widgets/playlist_drawer.dart';
 import '../../features/search/search_screen.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -97,6 +98,16 @@ class _MainNavigationState extends State<MainNavigation> {
       MaterialPageRoute(
         builder: (_) => HearitDetailScreen(detail: detail, pauseOnExit: false),
       ),
+    );
+  }
+
+  void _openPlaylistDrawer() {
+    if (!_playerController.isPlaylistMode) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PlaylistDrawer(playerController: _playerController),
     );
   }
 
@@ -224,6 +235,7 @@ class _MainNavigationState extends State<MainNavigation> {
                               progress: progress,
                               durationMs: durationMs,
                               isPlaying: _playerController.isPlaying,
+                              isPlaylistMode: _playerController.isPlaylistMode,
                               onTogglePlay: () =>
                                   _playerController.togglePlayback(),
                               onSeekFraction: (fraction) {
@@ -234,6 +246,7 @@ class _MainNavigationState extends State<MainNavigation> {
                                 _playerController.seek(target);
                               },
                               onTap: _openDetailFromMini,
+                              onPlaylistTap: _openPlaylistDrawer,
                             );
                           },
                         ),
@@ -408,18 +421,22 @@ class _DetailMiniPlayerBar extends StatefulWidget {
     required this.progress,
     required this.durationMs,
     required this.isPlaying,
+    required this.isPlaylistMode,
     required this.onTogglePlay,
     required this.onTap,
     required this.onSeekFraction,
+    required this.onPlaylistTap,
   });
 
   final String title;
   final double progress;
   final int durationMs;
   final bool isPlaying;
+  final bool isPlaylistMode;
   final VoidCallback onTogglePlay;
   final VoidCallback onTap;
   final ValueChanged<double> onSeekFraction;
+  final VoidCallback onPlaylistTap;
 
   @override
   State<_DetailMiniPlayerBar> createState() => _DetailMiniPlayerBarState();
@@ -458,6 +475,10 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
                     ),
                   ),
                   const SizedBox(width: 12),
+                  if (widget.isPlaylistMode) ...[
+                    _PlaylistButton(onTap: widget.onPlaylistTap),
+                    const SizedBox(width: 8),
+                  ],
                   _PlayPauseButton(
                     isPlaying: widget.isPlaying,
                     onToggle: widget.onTogglePlay,
@@ -517,7 +538,7 @@ class _PlayPauseButton extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -527,6 +548,39 @@ class _PlayPauseButton extends StatelessWidget {
           isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
           color: AppColors.gray4,
           size: 28,
+        ),
+      ),
+    );
+  }
+}
+
+class _PlaylistButton extends StatelessWidget {
+  const _PlaylistButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: AppColors.gray1,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: const Icon(
+          Icons.queue_music_rounded,
+          color: AppColors.hearitPurple2,
+          size: 24,
         ),
       ),
     );
