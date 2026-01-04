@@ -1,4 +1,3 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hearit/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
@@ -10,8 +9,8 @@ import '../../core/audio/hearit_player_controller.dart';
 import '../detail/hearit_detail.dart' as detail;
 import '../detail/hearit_detail_screen.dart';
 import 'library_models.dart';
-import 'library_repository.dart';
 import 'library_viewmodel.dart';
+import 'playlist_models.dart';
 import 'widgets/bookmark_delete_dialog.dart';
 import 'widgets/bookmark_section_header.dart';
 import 'widgets/bookmarked_hearit_card.dart';
@@ -107,9 +106,15 @@ class _LibraryScreenState extends State<LibraryScreen> {
       );
 
       if (confirmed && mounted) {
+        final playerController = context.read<HearitPlayerController>();
         final success = await _viewModel.deleteBookmark(hearit.bookmarkId);
 
         if (success) {
+          // 플레이리스트에서도 제거 (플레이리스트 모드일 때)
+          if (playerController.isPlaylistMode) {
+            playerController.removeFromPlaylist(hearit.hearitId);
+          }
+
           // Analytics: 북마크 삭제
           AnalyticsProvider.logger.logEvent(
             AnalyticsEventNames.libraryBookmarkDeleted,
@@ -150,58 +155,29 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
 
     final playerController = context.read<HearitPlayerController>();
-    final repository = LibraryRepository();
 
     try {
-      // 첫 번째 북마크 재생
-      final firstBookmark = _viewModel.bookmarks.first;
-
-      // 오디오 URL 가져오기
-      final url = await repository.fetchOriginalAudioUrl(
-        firstBookmark.hearitId,
-      );
-
-      if (url == null || url.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('오디오를 불러올 수 없습니다'),
-              backgroundColor: AppColors.error,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-        return;
-      }
-
-      // MediaItem 생성
-      final artUri = await _resolveArtworkUri(firstBookmark.category.colorCode);
-      final mediaItem = MediaItem(
-        id: 'hearit-${firstBookmark.hearitId}',
-        title: firstBookmark.title,
-        album: firstBookmark.category.name,
-        artist: firstBookmark.category.name,
-        duration: Duration(seconds: firstBookmark.playTime),
-        artUri: artUri,
-        extras: {'hearitId': firstBookmark.hearitId},
-      );
-
-      // 플레이어에 로드 및 재생
-      await playerController.loadSource(url, mediaItem: mediaItem);
-
-      // 마지막 재생 위치로 시크
-      if (firstBookmark.lastPlayTime > 0) {
-        await playerController.seek(
-          Duration(milliseconds: firstBookmark.lastPlayTime),
+      // 북마크 목록을 PlaylistItem으로 변환
+      final playlist = _viewModel.bookmarks.map((bookmark) {
+        return PlaylistItem(
+          hearitId: bookmark.hearitId,
+          title: bookmark.title,
+          sourceName: bookmark.sources.isNotEmpty
+              ? bookmark.sources.first.sourceName
+              : 'hEARit',
+          playTimeSeconds: bookmark.playTime,
+          categoryColorCode: bookmark.category.colorCode,
+          audioUrl: null, // 재생 시점에 lazy loading
         );
-      }
+      }).toList();
 
-      await playerController.play();
+      // 플레이리스트 로드 (첫 번째 항목부터 재생)
+      await playerController.loadPlaylist(playlist: playlist, startIndex: 0);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${firstBookmark.title} 재생 중'),
+            content: Text('플레이리스트 재생 중 (${playlist.length}개)'),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -218,16 +194,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
         );
       }
     }
-  }
-
-  /// 카테고리 색상 코드로 아트워크 URI 생성
-  Future<Uri> _resolveArtworkUri(String colorCode) async {
-    // 색상을 16진수로 변환 (# 제거)
-    final hexColor = colorCode.replaceAll('#', '');
-    // 임시로 placeholder 이미지 사용
-    return Uri.parse(
-      'https://via.placeholder.com/300/$hexColor/FFFFFF?text=hEARit',
-    );
   }
 
   @override

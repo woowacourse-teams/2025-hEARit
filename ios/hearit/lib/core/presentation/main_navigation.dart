@@ -475,13 +475,14 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  if (widget.isPlaylistMode) ...[
-                    _PlaylistButton(onTap: widget.onPlaylistTap),
-                    const SizedBox(width: 8),
-                  ],
                   _PlayPauseButton(
                     isPlaying: widget.isPlaying,
                     onToggle: widget.onTogglePlay,
+                  ),
+                  const SizedBox(width: 8),
+                  _PlaylistButton(
+                    onTap: widget.onPlaylistTap,
+                    isActive: widget.isPlaylistMode,
                   ),
                 ],
               ),
@@ -555,9 +556,10 @@ class _PlayPauseButton extends StatelessWidget {
 }
 
 class _PlaylistButton extends StatelessWidget {
-  const _PlaylistButton({required this.onTap});
+  const _PlaylistButton({required this.onTap, required this.isActive});
 
   final VoidCallback onTap;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
@@ -577,9 +579,9 @@ class _PlaylistButton extends StatelessWidget {
             ),
           ],
         ),
-        child: const Icon(
+        child: Icon(
           Icons.queue_music_rounded,
-          color: AppColors.hearitPurple2,
+          color: isActive ? AppColors.hearitPurple2 : AppColors.gray2,
           size: 24,
         ),
       ),
