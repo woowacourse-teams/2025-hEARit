@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/audio/hearit_player_controller.dart';
 import '../../../core/theme/app_colors.dart';
 import '../detail_font.dart';
+import 'bookmark_button.dart';
 
 class AudioControls extends StatefulWidget {
   const AudioControls({
@@ -17,6 +18,8 @@ class AudioControls extends StatefulWidget {
     required this.currentSpeed,
     required this.speedLabel,
     required this.formatDuration,
+    required this.isBookmarked,
+    required this.onBookmarkToggle,
     this.isTablet = false,
   });
 
@@ -28,6 +31,8 @@ class AudioControls extends StatefulWidget {
   final double currentSpeed;
   final String speedLabel;
   final String Function(Duration) formatDuration;
+  final bool isBookmarked;
+  final VoidCallback onBookmarkToggle;
   final bool isTablet;
 
   @override
@@ -124,8 +129,9 @@ class _AudioControlsState extends State<AudioControls> {
                     color: AppColors.gray4,
                     fontWeight: FontWeight.w500,
                     fontSize:
-                        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 12) +
-                            fontDelta,
+                        (Theme.of(context).textTheme.bodySmall?.fontSize ??
+                            12) +
+                        fontDelta,
                   ),
                 ),
                 Text(
@@ -135,8 +141,9 @@ class _AudioControlsState extends State<AudioControls> {
                     color: AppColors.gray4,
                     fontWeight: FontWeight.w500,
                     fontSize:
-                        (Theme.of(context).textTheme.bodySmall?.fontSize ?? 12) +
-                            fontDelta,
+                        (Theme.of(context).textTheme.bodySmall?.fontSize ??
+                            12) +
+                        fontDelta,
                   ),
                 ),
               ],
@@ -145,7 +152,10 @@ class _AudioControlsState extends State<AudioControls> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(width: 40),
+                BookmarkButton(
+                  isBookmarked: widget.isBookmarked,
+                  onPressed: widget.onBookmarkToggle,
+                ),
                 IconButton(
                   iconSize: 40,
                   onPressed: () =>
@@ -212,9 +222,7 @@ class _AudioControlsState extends State<AudioControls> {
                                   const SizedBox(width: 26),
                                 Text(
                                   '${_formatSpeed(speed)}x',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
+                                  style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         fontFamily: detailFontFamily,
                                         color: AppColors.gray4,

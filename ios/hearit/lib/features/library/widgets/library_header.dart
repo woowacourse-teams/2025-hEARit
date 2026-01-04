@@ -26,42 +26,67 @@ class LibraryHeader extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             AppColors.hearitPurple3,
+            AppColors.hearitPurple3.withOpacity(0.95),
+            AppColors.hearitPurple3.withOpacity(0.85),
             AppColors.hearitPurple3.withOpacity(0.7),
-            AppColors.hearitPurple3.withOpacity(0.3),
+            AppColors.hearitPurple3.withOpacity(0.5),
+            AppColors.hearitPurple3.withOpacity(0.25),
+            AppColors.hearitPurple3.withOpacity(0.05),
             Colors.transparent,
           ],
-          stops: const [0.0, 0.4, 0.7, 1.0],
+          stops: const [0.0, 0.2, 0.35, 0.5, 0.65, 0.8, 0.95, 1.0],
         ),
       ),
       child: SafeArea(
         bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              // 프로필 이미지
-              _buildProfileImage(),
-              const SizedBox(width: 16),
-              // 닉네임
-              Expanded(
-                child: Text(
-                  profile?.nickname ?? '사용자',
-                  style: const TextStyle(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 설정 아이콘 (상단에 배치)
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8, top: 4),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.settings,
                     color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
+                    size: 28,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  onPressed: () => _navigateToSettings(context),
                 ),
               ),
-              // 설정 버튼
-              IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white, size: 28),
-                onPressed: () => _navigateToSettings(context),
+            ),
+            // 프로필 영역 (위로 올림)
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 0,
+                bottom: 28,
               ),
-            ],
-          ),
+              child: Row(
+                children: [
+                  // 프로필 이미지
+                  _buildProfileImage(),
+                  const SizedBox(width: 16),
+                  // 닉네임
+                  Expanded(
+                    child: Text(
+                      profile?.nickname ?? '사용자',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -71,8 +96,8 @@ class LibraryHeader extends StatelessWidget {
     final hasImage = profile?.hasProfileImage ?? false;
 
     return Container(
-      width: 60,
-      height: 60,
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: hasImage ? Colors.grey[300] : AppColors.hearitPurple2,

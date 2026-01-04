@@ -22,10 +22,10 @@ class BookmarkedHearitCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(left: 20, right: 4, top: 0, bottom: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.gray1,
+          color: Colors.transparent, // 배경 투명
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -39,11 +39,10 @@ class BookmarkedHearitCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTitleRow(),
-                  const SizedBox(height: 6),
-                  _buildInfoRow(),
                   const SizedBox(height: 8),
-                  _buildProgressBar(),
+                  _buildTitleRow(), // 제목 + 체크 + 재생시간 한 줄
+                  const SizedBox(height: 12),
+                  _buildProgressBar(), // 진행률 바만
                 ],
               ),
             ),
@@ -60,8 +59,8 @@ class BookmarkedHearitCard extends StatelessWidget {
     final categoryColor = _parseColor(hearit.category.colorCode);
 
     return Container(
-      width: 64,
-      height: 64,
+      width: 60,
+      height: 60,
       decoration: BoxDecoration(
         color: categoryColor,
         borderRadius: BorderRadius.circular(8),
@@ -79,7 +78,7 @@ class BookmarkedHearitCard extends StatelessWidget {
     );
   }
 
-  /// 제목 행 (제목 + 완료 아이콘)
+  /// 제목 행 (제목 + 완료 아이콘 + 재생시간)
   Widget _buildTitleRow() {
     return Row(
       children: [
@@ -88,36 +87,27 @@ class BookmarkedHearitCard extends StatelessWidget {
             hearit.title,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ),
         if (hearit.isFinished) ...[
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           Image.asset(
             'assets/images/finished_check.png',
-            width: 24,
-            height: 24,
+            width: 20,
+            height: 20,
           ),
         ],
-      ],
-    );
-  }
-
-  /// 정보 행 (재생 시간)
-  Widget _buildInfoRow() {
-    return Row(
-      children: [
-        Icon(Icons.access_time, color: Colors.white.withOpacity(0.6), size: 14),
-        const SizedBox(width: 4),
+        const SizedBox(width: 8),
         Text(
           hearit.formattedPlayTime,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 14,
+          style: const TextStyle(
+            color: AppColors.gray4,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -127,44 +117,26 @@ class BookmarkedHearitCard extends StatelessWidget {
 
   /// 진행률 바
   Widget _buildProgressBar() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: hearit.progress,
-            minHeight: 6,
-            backgroundColor: AppColors.gray2,
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              AppColors.hearitPurple2,
-            ),
-          ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: LinearProgressIndicator(
+        value: hearit.progress,
+        minHeight: 4,
+        backgroundColor: const Color(0xFF44474B),
+        valueColor: const AlwaysStoppedAnimation<Color>(
+          AppColors.hearitPurple2,
         ),
-        const SizedBox(height: 4),
-        Text(
-          '${(hearit.progress * 100).toStringAsFixed(0)}% 완료',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
   /// 메뉴 버튼 (점 3개)
   Widget _buildMenuButton() {
     return IconButton(
-      icon: Icon(
-        Icons.more_vert,
-        color: Colors.white.withOpacity(0.7),
-        size: 24,
-      ),
+      icon: const Icon(Icons.more_vert, color: AppColors.gray4, size: 28),
       onPressed: onMenuTap,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(),
+      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
     );
   }
 

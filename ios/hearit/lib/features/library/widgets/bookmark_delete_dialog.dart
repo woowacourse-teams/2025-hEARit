@@ -107,6 +107,7 @@ class BookmarkMenuSheet {
     return await showModalBottomSheet<BookmarkMenuAction>(
       context: context,
       backgroundColor: Colors.transparent,
+      useRootNavigator: true,
       builder: (context) => _BookmarkMenuSheetContent(hearitTitle: hearitTitle),
     );
   }
@@ -126,54 +127,52 @@ class _BookmarkMenuSheetContent extends StatelessWidget {
         color: AppColors.gray1,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 핸들
-            Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 핸들
+          Container(
+            margin: const EdgeInsets.only(top: 8, bottom: 4),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // 타이틀
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Text(
+              hearitTitle,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          // 삭제 메뉴
+          ListTile(
+            leading: const Icon(Icons.delete_outline, color: AppColors.error),
+            title: const Text(
+              '북마크 삭제',
+              style: TextStyle(
+                color: AppColors.error,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            // 타이틀
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Text(
-                hearitTitle,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const Divider(color: AppColors.gray2, height: 1),
-            // 삭제 메뉴
-            ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.error),
-              title: const Text(
-                '북마크 삭제',
-                style: TextStyle(
-                  color: AppColors.error,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onTap: () {
-                Navigator.of(context).pop(BookmarkMenuAction.delete);
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
+            onTap: () {
+              Navigator.of(context).pop(BookmarkMenuAction.delete);
+            },
+          ),
+          // 하단 SafeArea 패딩 (네비게이션 바 고려)
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 36),
+        ],
       ),
     );
   }

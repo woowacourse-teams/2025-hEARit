@@ -55,10 +55,10 @@ class BookmarkSectionHeader extends StatelessWidget {
                 height: 56,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.hearitPurple2,
+                  color: AppColors.hearitPurple3,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.hearitPurple2.withOpacity(0.4),
+                      color: AppColors.hearitPurple3.withOpacity(0.4),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/audio/hearit_player_controller.dart';
+import '../auth/services/auth_storage_service.dart';
 import 'detail_repository.dart';
 import 'hearit_detail.dart';
 
@@ -38,16 +39,20 @@ class HearitDetailViewModel extends ChangeNotifier {
     required HearitDetail detail,
     required HearitPlayerController playerController,
     DetailRepository? repository,
+    AuthStorageService? authStorageService,
   }) : _detail = detail,
        _playerController = playerController,
        _bookmarked = detail.isBookmarked,
+       _bookmarkId = detail.bookmarkId,
        _repository = repository ?? DetailRepository(),
+       _authStorageService = authStorageService ?? AuthStorageService(),
        _resumePosition = detail.lastPlayTime;
 
   HearitDetail get detail => _detail;
   HearitDetail _detail;
   final HearitPlayerController _playerController;
   final DetailRepository _repository;
+  final AuthStorageService _authStorageService;
   HearitPlayerController get playerController => _playerController;
   Duration? _resumePosition;
   static final Map<int, Future<Uri>> _artworkUriFutures = {};
@@ -55,10 +60,12 @@ class HearitDetailViewModel extends ChangeNotifier {
   final List<double> _speedOptions = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
   int _speedIndex = 2;
   bool _bookmarked;
+  int? _bookmarkId;
   List<ScriptLine> _scripts = [];
   bool _initialLoading = true;
 
   bool get isBookmarked => _bookmarked;
+  int? get bookmarkId => _bookmarkId;
   String get speedLabel => '${_formatSpeedLabel(_currentSpeed)}x';
   double get _currentSpeed => _speedOptions[_speedIndex];
   double get currentSpeed => _currentSpeed;
@@ -85,6 +92,7 @@ class HearitDetailViewModel extends ChangeNotifier {
       _detail = latest;
       _resumePosition ??= latest.lastPlayTime;
       _bookmarked = latest.isBookmarked;
+      _bookmarkId = latest.bookmarkId;
       _playerController.setExternalDuration(latest.playTime);
       notifyListeners();
     } catch (_) {
@@ -185,9 +193,86 @@ class HearitDetailViewModel extends ChangeNotifier {
     return Uri.file(file.path);
   }
 
-  void toggleBookmark() {
+  Future<bool> toggleBookmark(BuildContext context) async {
+    // 로그인 체크
+    final token = await _authStorageService.getAccessToken();
+    if (token == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('북마크 기능은 로그인을 하셔야 이용할 수 있어요!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return false;
+    }
+
+    // 낙관적 UI 업데이트
+    final previousBookmarked = _bookmarked;
+    final previousBookmarkId = _bookmarkId;
     _bookmarked = !_bookmarked;
     notifyListeners();
+
+    try {
+      if (previousBookmarked) {
+        // 북마크 삭제
+        if (previousBookmarkId != null) {
+          await _repository.deleteBookmark(previousBookmarkId, token);
+          _bookmarkId = null;
+          _detail = HearitDetail(
+            id: _detail.id,
+            title: _detail.title,
+            summary: _detail.summary,
+            sources: _detail.sources,
+            playTime: _detail.playTime,
+            lastPlayTime: _detail.lastPlayTime,
+            createdAt: _detail.createdAt,
+            isBookmarked: false,
+            bookmarkId: null,
+            category: _detail.category,
+            keywords: _detail.keywords,
+          );
+        }
+      } else {
+        // 북마크 생성
+        final newBookmarkId = await _repository.createBookmark(
+          _detail.id,
+          token,
+        );
+        _bookmarkId = newBookmarkId;
+        _detail = HearitDetail(
+          id: _detail.id,
+          title: _detail.title,
+          summary: _detail.summary,
+          sources: _detail.sources,
+          playTime: _detail.playTime,
+          lastPlayTime: _detail.lastPlayTime,
+          createdAt: _detail.createdAt,
+          isBookmarked: true,
+          bookmarkId: newBookmarkId,
+          category: _detail.category,
+          keywords: _detail.keywords,
+        );
+      }
+      // API 성공 시에는 이미 낙관적 업데이트로 상태가 변경되었으므로 notifyListeners() 불필요
+      return true;
+    } catch (error) {
+      // API 실패 시 롤백
+      _bookmarked = previousBookmarked;
+      _bookmarkId = previousBookmarkId;
+      notifyListeners();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('북마크 저장에 실패했습니다. 잠시 후 다시 시도해주세요'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return false;
+    }
   }
 
   Future<void> seekRelative(Duration offset) =>

@@ -61,10 +61,13 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
   }
 
   void _logScreenView() {
-    AnalyticsProvider.logger.logEvent('screen_view', params: {
-      AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameDetail,
-      AnalyticsParamKeys.screenClass: 'HearitDetailScreen',
-    });
+    AnalyticsProvider.logger.logEvent(
+      'screen_view',
+      params: {
+        AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameDetail,
+        AnalyticsParamKeys.screenClass: 'HearitDetailScreen',
+      },
+    );
   }
 
   void _onKeywordTap(String keyword) {
@@ -89,8 +92,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
 
   Future<void> _showFullScript() async {
     if (_viewModel.scripts.isEmpty) return;
-    final bool isTablet =
-        MediaQuery.of(context).size.shortestSide >= 600;
+    final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -174,16 +176,16 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                             Center(
                               child: Material(
                                 color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: _showFullScript,
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: SizedBox(
+                                child: InkWell(
+                                  onTap: _showFullScript,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: SizedBox(
                                     height: scriptHeight,
-                                      width: double.infinity,
-                                      child: ScriptView(
-                                        scripts: _viewModel.scripts,
-                                        position:
-                                            _viewModel.playerController.position,
+                                    width: double.infinity,
+                                    child: ScriptView(
+                                      scripts: _viewModel.scripts,
+                                      position:
+                                          _viewModel.playerController.position,
                                       isTablet: isTablet,
                                     ),
                                   ),
@@ -203,6 +205,9 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                                 speedLabel: _viewModel.speedLabel,
                                 formatDuration: _viewModel.formatDuration,
                                 isTablet: isTablet,
+                                isBookmarked: _viewModel.isBookmarked,
+                                onBookmarkToggle: () =>
+                                    _viewModel.toggleBookmark(context),
                               ),
                             ),
                             const SizedBox(height: 12),
