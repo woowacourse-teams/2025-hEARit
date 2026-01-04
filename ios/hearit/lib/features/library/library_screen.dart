@@ -1,10 +1,16 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hearit/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/analytics/analytics_event_names.dart';
+import '../../core/analytics/analytics_param_keys.dart';
+import '../../core/analytics/analytics_provider.dart';
+import '../../core/audio/hearit_player_controller.dart';
 import '../detail/hearit_detail.dart' as detail;
 import '../detail/hearit_detail_screen.dart';
 import 'library_models.dart';
+import 'library_repository.dart';
 import 'library_viewmodel.dart';
 import 'widgets/bookmark_delete_dialog.dart';
 import 'widgets/bookmark_section_header.dart';
@@ -30,6 +36,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
     _viewModel = LibraryViewModel()..addListener(_onViewModelChanged);
     _viewModel.loadInitialData();
     _scrollController.addListener(_onScroll);
+
+    // Analytics: 화면 진입
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AnalyticsProvider.logger.logEvent(
+        AnalyticsEventNames.libraryScreenViewed,
+        params: {
+          AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameLibrary,
+        },
+      );
+    });
   }
 
   @override
@@ -60,6 +76,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   void _handleCardTap(BookmarkedHearit hearit) {
+    // Analytics: 히어릿 선택
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.libraryHearitSelected,
+      params: {
+        AnalyticsParamKeys.itemId: hearit.hearitId,
+        AnalyticsParamKeys.itemName: hearit.title,
+        AnalyticsParamKeys.categoryName: hearit.category.name,
+      },
+    );
+
     final detail = _convertToHearitDetail(hearit);
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => HearitDetailScreen(detail: detail)),
@@ -82,13 +108,25 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
       if (confirmed && mounted) {
         final success = await _viewModel.deleteBookmark(hearit.bookmarkId);
-        if (success && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('북마크가 삭제되었습니다'),
-              duration: Duration(seconds: 2),
-            ),
+
+        if (success) {
+          // Analytics: 북마크 삭제
+          AnalyticsProvider.logger.logEvent(
+            AnalyticsEventNames.libraryBookmarkDeleted,
+            params: {
+              AnalyticsParamKeys.itemId: hearit.hearitId,
+              AnalyticsParamKeys.itemName: hearit.title,
+            },
           );
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('북마크가 삭제되었습니다'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
         } else if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -102,13 +140,93 @@ class _LibraryScreenState extends State<LibraryScreen> {
     }
   }
 
-  void _handlePlayAll() {
-    // TODO: 전체재생 기능 (Phase 3에서 구현)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('전체재생 기능은 곧 추가될 예정입니다'),
-        duration: Duration(seconds: 2),
-      ),
+  void _handlePlayAll() async {
+    if (_viewModel.bookmarks.isEmpty) return;
+
+    // Analytics: 전체재생 클릭
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.libraryPlayAllClicked,
+      params: {AnalyticsParamKeys.bookmarkCount: _viewModel.bookmarks.length},
+    );
+
+    final playerController = context.read<HearitPlayerController>();
+    final repository = LibraryRepository();
+
+    try {
+      // 첫 번째 북마크 재생
+      final firstBookmark = _viewModel.bookmarks.first;
+
+      // 오디오 URL 가져오기
+      final url = await repository.fetchOriginalAudioUrl(
+        firstBookmark.hearitId,
+      );
+
+      if (url == null || url.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('오디오를 불러올 수 없습니다'),
+              backgroundColor: AppColors.error,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        return;
+      }
+
+      // MediaItem 생성
+      final artUri = await _resolveArtworkUri(firstBookmark.category.colorCode);
+      final mediaItem = MediaItem(
+        id: 'hearit-${firstBookmark.hearitId}',
+        title: firstBookmark.title,
+        album: firstBookmark.category.name,
+        artist: firstBookmark.category.name,
+        duration: Duration(seconds: firstBookmark.playTime),
+        artUri: artUri,
+        extras: {'hearitId': firstBookmark.hearitId},
+      );
+
+      // 플레이어에 로드 및 재생
+      await playerController.loadSource(url, mediaItem: mediaItem);
+
+      // 마지막 재생 위치로 시크
+      if (firstBookmark.lastPlayTime > 0) {
+        await playerController.seek(
+          Duration(milliseconds: firstBookmark.lastPlayTime),
+        );
+      }
+
+      await playerController.play();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${firstBookmark.title} 재생 중'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('전체재생 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('재생 중 오류가 발생했습니다'),
+            backgroundColor: AppColors.error,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  /// 카테고리 색상 코드로 아트워크 URI 생성
+  Future<Uri> _resolveArtworkUri(String colorCode) async {
+    // 색상을 16진수로 변환 (# 제거)
+    final hexColor = colorCode.replaceAll('#', '');
+    // 임시로 placeholder 이미지 사용
+    return Uri.parse(
+      'https://via.placeholder.com/300/$hexColor/FFFFFF?text=hEARit',
     );
   }
 
@@ -148,13 +266,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     '데이터를 불러올 수 없습니다',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -229,13 +347,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
           Icon(
             Icons.bookmark_border,
             size: 80,
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
             '아직 북마크된 팟캐스트가 없습니다',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -245,7 +363,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             '탐색 탭에서 마음에 드는\n팟캐스트를 북마크해보세요!',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               fontSize: 14,
             ),
           ),

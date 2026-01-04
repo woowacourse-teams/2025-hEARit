@@ -68,4 +68,20 @@ class LibraryRepository {
       throw Exception('북마크를 삭제할 수 없습니다: $error');
     }
   }
+
+  /// 히어릿 오디오 원본 URL 조회
+  /// GET /api/v1/hearits/{hearitId}/original-audio-url
+  Future<String?> fetchOriginalAudioUrl(int hearitId) async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '/api/v1/hearits/$hearitId/original-audio-url',
+        parser: (data) => data as Map<String, dynamic>,
+      );
+
+      return response['url'] as String?;
+    } catch (error) {
+      debugPrint('오디오 URL 조회 실패 (hearitId: $hearitId): $error');
+      return null;
+    }
+  }
 }

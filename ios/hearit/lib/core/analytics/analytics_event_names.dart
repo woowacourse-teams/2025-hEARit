@@ -18,6 +18,13 @@ class AnalyticsEventNames {
   static const searchKeywordEntered = 'search_keyword_entered';
   static const searchKeywordSelected = 'search_keyword_selected';
   static const searchHearitSelected = 'search_hearit_selected';
+
+  // Library screen events
+  static const libraryScreenViewed = 'library_screen_viewed';
+  static const libraryHearitSelected = 'library_hearit_selected';
+  static const libraryBookmarkDeleted = 'library_bookmark_deleted';
+  static const libraryPlayAllClicked = 'library_play_all_clicked';
+
   static const libraryToDetail = 'library_to_detail';
   static const detailKeywordSelected = 'detail_keyword_selected';
   static const detailCategorySelected = 'detail_category_selected';

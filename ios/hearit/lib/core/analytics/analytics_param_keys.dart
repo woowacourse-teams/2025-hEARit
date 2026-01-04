@@ -11,10 +11,12 @@ class AnalyticsParamKeys {
   static const screenName = 'screen_name';
   static const screenClass = 'screen_class';
   static const searchKeyword = 'search_keyword';
+  static const bookmarkCount = 'bookmark_count';
 
   // Screen name values.
   static const screenNameHome = 'home';
   static const screenNameDetail = 'detail';
   static const screenNameExplore = 'explore';
   static const screenNameSearch = 'search';
+  static const screenNameLibrary = 'library';
 }
