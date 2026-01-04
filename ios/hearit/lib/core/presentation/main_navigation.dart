@@ -8,8 +8,8 @@ import '../../features/detail/hearit_detail.dart';
 import '../../features/detail/hearit_detail_screen.dart';
 import '../../features/explore/explore_screen.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/library/library_screen.dart';
 import '../../features/search/search_screen.dart';
-import '../../features/setting/setting_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -31,7 +31,7 @@ class _MainNavigationState extends State<MainNavigation> {
     _NavItem(label: '홈', icon: Icons.home),
     _NavItem(label: '검색', icon: Icons.search),
     _NavItem(label: '탐색', icon: Icons.explore),
-    _NavItem(label: '설정', icon: Icons.settings),
+    _NavItem(label: '라이브러리', icon: Icons.collections_bookmark),
   ];
 
   @override
@@ -135,8 +135,7 @@ class _MainNavigationState extends State<MainNavigation> {
             ),
             _TabNavigator(
               navigatorKey: _navigatorKeys[3],
-              builder: (_) =>
-                  SettingScreen(onBackToHome: () => _onItemTapped(0)),
+              builder: (_) => const LibraryScreen(),
             ),
           ],
         ),
