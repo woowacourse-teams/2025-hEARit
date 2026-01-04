@@ -42,6 +42,7 @@ dependencies:
   flutter_oss_licenses: ^3.0.2
   dio: ^5.3.0
   flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2 # 로컬 큐 저장
   uuid: ^4.4.0
   path_provider: ^2.1.5
   firebase_core: ^2.27.2
@@ -50,6 +51,7 @@ dependencies:
   kakao_flutter_sdk_user: ^1.9.5 # 카카오 로그인 API 패키지
   kakao_flutter_sdk_share: ^1.9.5 # 카카오톡 공유 API 패키지
   package_info_plus: ^8.0.0 # 앱 버전 정보
+  flutter_dotenv: ^5.1.0 # 환경 변수 관리
 
 dev_dependencies:
   flutter_test:
@@ -74,11 +76,13 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - assets/images/LP.png
     - assets/images/backgroud_LP.png
     - assets/images/detail_LP.png
     - assets/images/explore_LP.png
     - assets/images/kakao_login_large_wide.png
+    - assets/images/finished_check.png
     - assets/icon/app_icon.png
 
   fonts:

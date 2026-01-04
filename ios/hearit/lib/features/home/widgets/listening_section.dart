@@ -11,12 +11,14 @@ class ListeningSection extends StatelessWidget {
     required this.items,
     this.showChevron = false,
     required this.onTap,
+    this.emptyMessage,
   });
 
   final String title;
   final List<ListeningCardData> items;
   final bool showChevron;
   final void Function(ListeningCardData data) onTap;
+  final String? emptyMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class ListeningSection extends StatelessWidget {
                     fontFamily: homeTitleFontFamily,
                     fontWeight: FontWeight.bold,
                     color: AppColors.gray4,
-                    fontSize: title.contains('북마크') ? 22 : 20,
+                    fontSize: 20,
                   ),
                 ),
                 if (showChevron)
@@ -50,7 +52,7 @@ class ListeningSection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              '아직 준비된 항목이 없습니다.',
+              emptyMessage ?? '아직 준비된 항목이 없습니다.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.gray4.withOpacity(0.7),
               ),
@@ -75,7 +77,7 @@ class ListeningSection extends StatelessWidget {
                   fontFamily: homeTitleFontFamily,
                   fontWeight: FontWeight.bold,
                   color: AppColors.gray4,
-                  fontSize: title.contains('북마크') ? 22 : 20,
+                  fontSize: 20,
                 ),
               ),
               if (showChevron)
@@ -148,22 +150,24 @@ class ListeningCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-            Text(
-              data.description,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.gray4,
-                fontSize: 16,
-                height: 1.4,
-                fontWeight: FontWeight.bold,
+            SizedBox(
+              height: 44.8,
+              child: Text(
+                data.description,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.gray4,
+                  fontSize: 16,
+                  height: 1.4,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-            if (data.progress != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: ListeningProgressBar(progress: data.progress!),
-              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: ListeningProgressBar(progress: data.progress ?? 0.0),
+            ),
           ],
         ),
       ),
@@ -183,9 +187,9 @@ class ListeningProgressBar extends StatelessWidget {
       builder: (context, constraints) {
         final double barWidth = constraints.maxWidth * safeProgress;
         return Container(
-          height: 6,
+          height: 4,
           decoration: BoxDecoration(
-            color: const Color(0xFF3B3B46),
+            color: AppColors.darkGray,
             borderRadius: BorderRadius.circular(999),
           ),
           child: Align(
@@ -193,7 +197,7 @@ class ListeningProgressBar extends StatelessWidget {
             child: Container(
               width: barWidth,
               decoration: BoxDecoration(
-                color: const Color(0xFFA86BFF),
+                color: AppColors.hearitPurple2,
                 borderRadius: BorderRadius.circular(999),
               ),
             ),

@@ -1,7 +1,7 @@
 class ApiConfig {
   const ApiConfig({this.baseUrl = defaultBaseUrl});
 
-  static const String defaultBaseUrl = 'https://hearit-dev.o-r.kr';
+  static const String defaultBaseUrl = 'https://hearit.o-r.kr';
 
   final String baseUrl;
 

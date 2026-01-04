@@ -40,21 +40,37 @@ class SearchResultCard extends StatelessWidget {
               SizedBox(
                 height: titleHeight, // reserve space for up to 2 lines of title
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        data.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: AppColors.gray4,
-                          fontWeight: FontWeight.w700,
-                          fontSize:
-                              (theme.textTheme.titleMedium?.fontSize ?? 16) +
-                              fontDelta,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: data.isFinished == true ? 8 : 0,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        child: Text(
+                          data.title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: AppColors.gray4,
+                            fontWeight: FontWeight.w700,
+                            fontSize:
+                                (theme.textTheme.titleMedium?.fontSize ?? 16) +
+                                fontDelta,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
+                    if (data.isFinished == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Image.asset(
+                          'assets/images/finished_check.png',
+                          width: isTablet ? 24 : 20,
+                          height: isTablet ? 24 : 20,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -112,25 +128,28 @@ class _SearchProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (progress == null) {
-      return Container(
-        height: 6,
-        decoration: BoxDecoration(color: AppColors.darkGray),
-      );
-    }
-    final double clamped = progress!.clamp(0, 1).toDouble();
-    return Container(
-      height: 6,
-      decoration: BoxDecoration(color: const Color(0xFF3B3B46)),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: FractionallySizedBox(
-          widthFactor: clamped == 0 ? 0.02 : clamped,
-          child: Container(
-            decoration: BoxDecoration(color: const Color(0xFFA86BFF)),
+    final double safeProgress = (progress ?? 0.0).clamp(0, 1).toDouble();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double barWidth = constraints.maxWidth * safeProgress;
+        return Container(
+          height: 4,
+          decoration: BoxDecoration(
+            color: AppColors.darkGray,
+            borderRadius: BorderRadius.circular(999),
           ),
-        ),
-      ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              width: barWidth,
+              decoration: BoxDecoration(
+                color: AppColors.hearitPurple2,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

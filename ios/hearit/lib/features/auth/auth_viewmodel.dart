@@ -40,15 +40,7 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. 게스트 모드 확인
-      final isGuest = await _storageService.isGuestMode();
-      if (isGuest) {
-        _status = AuthStatus.guest;
-        notifyListeners();
-        return;
-      }
-
-      // 2. 저장된 토큰 확인
+      // 1. 저장된 토큰 확인 (게스트 모드는 앱 재시작 시 초기화됨)
       final tokens = await _storageService.getTokens();
       if (tokens == null) {
         _status = AuthStatus.unauthenticated;
@@ -56,7 +48,7 @@ class AuthViewModel extends ChangeNotifier {
         return;
       }
 
-      // 3. 백엔드에 토큰 유효성 확인 (/api/v1/auth/check)
+      // 2. 백엔드에 토큰 유효성 확인 (/api/v1/auth/check)
       final isValid = await _repository.checkAuthStatus(tokens.accessToken);
       if (isValid) {
         _status = AuthStatus.authenticated;
@@ -111,9 +103,9 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  /// 게스트 모드로 진입
+  /// 게스트 모드로 진입 (세션 동안만 유지, 앱 재시작 시 초기화)
   Future<void> enterGuestMode() async {
-    await _storageService.setGuestMode(true);
+    // 메모리 상태만 변경 (저장소에 저장하지 않음)
     _status = AuthStatus.guest;
     notifyListeners();
   }
@@ -128,7 +120,6 @@ class AuthViewModel extends ChangeNotifier {
 
       // 2. 로컬 토큰 삭제
       await _storageService.clearTokens();
-      await _storageService.setGuestMode(false);
 
       _status = AuthStatus.unauthenticated;
       _user = null;
@@ -137,6 +128,14 @@ class AuthViewModel extends ChangeNotifier {
       _errorMessage = error.toString();
       _setLoading(false);
     }
+  }
+
+  /// 401 에러 발생 시 인증 상태 초기화
+  Future<void> clearAuthStatus() async {
+    await _storageService.clearTokens();
+    _status = AuthStatus.unauthenticated;
+    _user = null;
+    notifyListeners();
   }
 
   void _setLoading(bool value) {

@@ -1,13 +1,52 @@
 import 'package:flutter/material.dart';
 
 import '../../core/network/api_client.dart';
+import '../../core/network/api_exception.dart';
+import '../auth/services/auth_storage_service.dart';
 import 'home_models.dart';
+
+enum AuthCheckStatus {
+  ok, // 200 OK
+  unauthorized, // 401 Unauthorized
+  error, // 네트워크 에러 등
+}
 
 class HomeRepository {
   HomeRepository({ApiClient? apiClient})
     : _apiClient = apiClient ?? ApiClient();
 
   final ApiClient _apiClient;
+
+  /// 토큰 존재 여부 확인
+  Future<bool> hasValidToken() async {
+    final token = await AuthStorageService().getAccessToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  /// 인증 상태 체크 (/api/v1/auth/check)
+  Future<AuthCheckStatus> checkAuth() async {
+    try {
+      final token = await AuthStorageService().getAccessToken();
+      if (token == null || token.isEmpty) {
+        return AuthCheckStatus.error;
+      }
+
+      await _apiClient.get<void>(
+        '/api/v1/auth/check',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      return AuthCheckStatus.ok; // 200 OK
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        return AuthCheckStatus.unauthorized; // 401
+      }
+      debugPrint('Auth check failed: $e');
+      return AuthCheckStatus.error; // 기타 에러
+    } catch (error) {
+      debugPrint('Auth check unexpected error: $error');
+      return AuthCheckStatus.error;
+    }
+  }
 
   Future<List<RecommendCardData>> fetchRecommendations() async {
     final List<dynamic> data = await _apiClient.get<List<dynamic>>(
@@ -21,8 +60,15 @@ class HomeRepository {
   }
 
   Future<List<ListeningCardData>> fetchListeningNow() async {
+    // 로그인 사용자는 토큰 기준, 게스트는 UUID 기준으로 재생 기록 조회
+    final token = await AuthStorageService().getAccessToken();
+    final headers = (token != null && token.isNotEmpty)
+        ? {'Authorization': 'Bearer $token'}
+        : null;
+
     final List<dynamic> data = await _apiClient.get<List<dynamic>>(
       '/api/v1/playing-histories/hearits',
+      headers: headers,
       parser: _asList,
     );
     return data
@@ -44,8 +90,14 @@ class HomeRepository {
   }
 
   Future<List<ListeningCardData>> fetchBookmarked() async {
+    final token = await AuthStorageService().getAccessToken();
+    if (token == null || token.isEmpty) {
+      return const []; // 토큰 없으면 빈 리스트
+    }
+
     final List<dynamic> data = await _apiClient.get<List<dynamic>>(
       '/api/v1/bookmarks',
+      headers: {'Authorization': 'Bearer $token'},
       queryParameters: {
         'page': 0,
         'size': 10,
@@ -71,6 +123,27 @@ class HomeRepository {
         .toList();
   }
 
+  /// 사용자 닉네임 조회 (로그인 사용자만)
+  Future<String?> fetchUserNickname() async {
+    try {
+      final token = await AuthStorageService().getAccessToken();
+      if (token == null || token.isEmpty) {
+        return null; // 게스트 모드
+      }
+
+      final data = await _apiClient.get<Map<String, dynamic>>(
+        '/api/v1/members/me',
+        headers: {'Authorization': 'Bearer $token'},
+        parser: (raw) => raw as Map<String, dynamic>,
+      );
+
+      return data['nickname'] as String?;
+    } catch (e) {
+      debugPrint('Failed to fetch user nickname: $e');
+      return null; // 실패 시 null 반환 (기본값 사용)
+    }
+  }
+
   RecommendCardData _mapRecommendation(Map<String, dynamic> json) {
     return RecommendCardData(
       id: _asInt(json['id'] ?? json['hearitId']),
@@ -91,10 +164,10 @@ class HomeRepository {
     final category = json['category'] as Map<String, dynamic>?;
     final categoryName = category?['name'] as String? ?? 'Podcast';
     final colorCode = category?['colorCode'] as String?;
-    final playTime = (json['playTime'] as num?)?.toInt() ?? 0;
-    final lastPlayTime = (json['lastPlayTime'] as num?)?.toInt();
-    final progress = includeProgress && playTime > 0 && lastPlayTime != null
-        ? (lastPlayTime / playTime).clamp(0, 1).toDouble()
+    final playTime = (json['playTime'] as num?)?.toInt() ?? 0; // 초 단위
+    final lastPlayTimeMs = (json['lastPlayTime'] as num?)?.toInt(); // 밀리초 단위
+    final progress = includeProgress && playTime > 0 && lastPlayTimeMs != null
+        ? ((lastPlayTimeMs / 1000) / playTime).clamp(0, 1).toDouble()
         : null;
 
     return ListeningCardData(

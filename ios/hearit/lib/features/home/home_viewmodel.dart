@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
+import '../auth/auth_viewmodel.dart';
 import '../detail/hearit_detail.dart';
 import 'home_models.dart';
 import 'home_repository.dart';
 
 class HomeViewModel extends ChangeNotifier {
-  HomeViewModel({HomeRepository? repository})
-    : _repository = repository ?? HomeRepository();
+  HomeViewModel({
+    HomeRepository? repository,
+    required AuthViewModel authViewModel,
+    VoidCallback? onUnauthorized,
+  }) : _repository = repository ?? HomeRepository(),
+       _authViewModel = authViewModel,
+       _onUnauthorized = onUnauthorized;
 
   final HomeRepository _repository;
+  // ignore: unused_field
+  final AuthViewModel _authViewModel;
+  final VoidCallback? _onUnauthorized;
 
   List<RecommendCardData> _todayRecommendedHearits = const [];
   List<ListeningCardData> _listeningNowHearits = const [];
@@ -17,6 +26,8 @@ class HomeViewModel extends ChangeNotifier {
 
   String? _error;
   bool _loading = false;
+  bool _shouldShowBookmarks = false;
+  String _userNickname = 'hEARit'; // 기본값
 
   List<RecommendCardData> get todayRecommendedHearits =>
       _todayRecommendedHearits;
@@ -27,6 +38,8 @@ class HomeViewModel extends ChangeNotifier {
       _curatedCategoryHearits;
   bool get isLoading => _loading;
   String? get error => _error;
+  bool get shouldShowBookmarks => _shouldShowBookmarks;
+  String get userNickname => _userNickname;
 
   Future<void> loadHome() async {
     _loading = true;
@@ -35,7 +48,32 @@ class HomeViewModel extends ChangeNotifier {
 
     final List<String> failures = [];
 
-    // Fetch in parallel but isolate failures per section so partial data can render.
+    // 1. 토큰 확인 및 인증 체크
+    final hasToken = await _repository.hasValidToken();
+    bool shouldFetchBookmarks = false;
+
+    if (hasToken) {
+      // 2. 토큰이 있으면 /api/v1/auth/check 호출
+      final authCheckResult = await _repository.checkAuth();
+
+      if (authCheckResult == AuthCheckStatus.unauthorized) {
+        // 401 → 로그인 화면으로 이동
+        _onUnauthorized?.call();
+        _loading = false;
+        notifyListeners();
+        return; // 더 이상 진행하지 않음
+      } else if (authCheckResult == AuthCheckStatus.ok) {
+        // 200 → 북마크 섹션 표시 및 API 호출 허용
+        _shouldShowBookmarks = true;
+        shouldFetchBookmarks = true;
+      }
+      // error일 경우 (네트워크 에러 등) → 북마크 섹션 숨김, API 호출 안 함
+    } else {
+      // 토큰 없음 → 북마크 섹션 숨김
+      _shouldShowBookmarks = false;
+    }
+
+    // 3. API 호출 함수들
     Future<List<RecommendCardData>> fetchRecommendations() async {
       try {
         return await _repository.fetchRecommendations();
@@ -67,6 +105,9 @@ class HomeViewModel extends ChangeNotifier {
     }
 
     Future<List<ListeningCardData>> fetchBookmarked() async {
+      if (!shouldFetchBookmarks) {
+        return const []; // 인증 실패 또는 토큰 없음 → 빈 리스트
+      }
       try {
         return await _repository.fetchBookmarked();
       } catch (error, stack) {
@@ -88,6 +129,17 @@ class HomeViewModel extends ChangeNotifier {
       }
     }
 
+    Future<String> fetchUserNickname() async {
+      try {
+        final nickname = await _repository.fetchUserNickname();
+        return nickname ?? 'hEARit'; // null이면 기본값
+      } catch (error, stack) {
+        debugPrint('HomeViewModel.fetchUserNickname error: $error\n$stack');
+        return 'hEARit'; // 에러 시 기본값
+      }
+    }
+
+    // 4. 병렬 API 호출
     try {
       final results = await Future.wait([
         fetchRecommendations(),
@@ -95,6 +147,7 @@ class HomeViewModel extends ChangeNotifier {
         fetchRecentlyAdded(),
         fetchBookmarked(),
         fetchCategoryRecommendations(),
+        fetchUserNickname(),
       ]);
 
       _todayRecommendedHearits = results[0] as List<RecommendCardData>;
@@ -102,6 +155,7 @@ class HomeViewModel extends ChangeNotifier {
       _recentlyAddedHearits = results[2] as List<ListeningCardData>;
       _bookmarkedHearits = results[3] as List<ListeningCardData>;
       _curatedCategoryHearits = results[4] as List<CategorySectionData>;
+      _userNickname = results[5] as String;
 
       if (failures.isNotEmpty) {
         _error = '${failures.join(', ')} 데이터를 불러오지 못했습니다.';

@@ -3,6 +3,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 
@@ -24,7 +25,17 @@ const SystemUiOverlayStyle _lightStatusBar = SystemUiOverlayStyle(
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  KakaoSdk.init(nativeAppKey: '613a999d3a3db5d91f9a1c3565bdb4e1');
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  // Initialize Kakao SDK with environment variable
+  final kakaoKey = dotenv.env['KAKAO_NATIVE_APP_KEY'];
+  if (kakaoKey == null || kakaoKey.isEmpty) {
+    throw Exception('KAKAO_NATIVE_APP_KEY not found in .env file');
+  }
+  KakaoSdk.init(nativeAppKey: kakaoKey);
+
   SystemChrome.setSystemUIOverlayStyle(_lightStatusBar);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Warm up device UUID so network calls don't block on first launch.
@@ -54,8 +65,49 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // Get player controller from context
+    final playerController = context.read<HearitPlayerController>();
+
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        // App goes to background or receives interruption
+        playerController.saveOnAppPaused();
+        break;
+      case AppLifecycleState.detached:
+        // App is about to terminate
+        playerController.saveOnAppDetached();
+        break;
+      case AppLifecycleState.resumed:
+      case AppLifecycleState.hidden:
+        // App returns to foreground - no action needed
+        break;
+    }
+  }
 
   // This widget is the root of your application.
   @override

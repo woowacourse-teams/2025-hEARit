@@ -19,12 +19,13 @@ class SearchHearit {
 
   Duration get playTime => Duration(seconds: playTimeSeconds);
 
-  Duration? get lastPlayTime =>
-      lastPlayTimeSeconds == null ? null : Duration(seconds: lastPlayTimeSeconds!);
+  Duration? get lastPlayTime => lastPlayTimeSeconds == null
+      ? null
+      : Duration(seconds: lastPlayTimeSeconds!);
 
   double? get progress {
     if (playTimeSeconds <= 0 || lastPlayTimeSeconds == null) return null;
-    return (lastPlayTimeSeconds! / playTimeSeconds).clamp(0, 1);
+    return (lastPlayTimeSeconds! / 1000 / playTimeSeconds).clamp(0, 1);
   }
 
   String get formattedPlayTime {
