@@ -50,9 +50,7 @@ class PlaylistItemCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: isCurrentItem
-              ? AppColors.hearitPurple3.withValues(alpha: 0.2)
-              : Colors.transparent,
+          color: isCurrentItem ? const Color(0xFF795B9B) : AppColors.gray1,
         ),
         child: Row(
           children: [
@@ -67,10 +65,10 @@ class PlaylistItemCard extends StatelessWidget {
                 children: [
                   Text(
                     item.title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.hearitBlack,
+                      color: AppColors.gray4,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -80,7 +78,7 @@ class PlaylistItemCard extends StatelessWidget {
                     '${_formatSourceName(item.sourceName)} • ${item.formattedDuration}',
                     style: const TextStyle(
                       fontSize: 14,
-                      color: AppColors.darkGray,
+                      color: AppColors.gray2,
                     ),
                   ),
                 ],
@@ -96,11 +94,9 @@ class PlaylistItemCard extends StatelessWidget {
                 padding: const EdgeInsets.all(4.0), // 클릭 영역 확대
                 child: Icon(
                   // 현재 항목이면서 재생 중일 때만 일시정지 아이콘
-                  (isCurrentItem && isPlaying)
-                      ? Icons.pause_circle_filled
-                      : Icons.play_circle_filled,
+                  (isCurrentItem && isPlaying) ? Icons.pause : Icons.play_arrow,
                   size: 32,
-                  color: AppColors.hearitPurple3,
+                  color: AppColors.gray4,
                 ),
               ),
             ),
@@ -111,7 +107,7 @@ class PlaylistItemCard extends StatelessWidget {
   }
 }
 
-/// 카테고리 색상 아이콘 (64x64)
+/// 카테고리 색상 아이콘 (64x64) with LP.png overlay
 class _CategoryIcon extends StatelessWidget {
   final String colorCode;
 
@@ -138,7 +134,17 @@ class _CategoryIcon extends StatelessWidget {
         color: _parseColor(colorCode),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Icon(Icons.album_rounded, size: 32, color: Colors.white70),
+      child: Center(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.asset(
+            'assets/images/LP.png',
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
     );
   }
 }

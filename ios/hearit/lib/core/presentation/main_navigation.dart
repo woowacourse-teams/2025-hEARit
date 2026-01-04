@@ -580,7 +580,7 @@ class _PlaylistButton extends StatelessWidget {
         ),
         child: Icon(
           Icons.queue_music_rounded,
-          color: isActive ? AppColors.hearitPurple2 : AppColors.gray2,
+          color: AppColors.gray4,
           size: 24,
         ),
       ),

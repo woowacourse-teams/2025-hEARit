@@ -85,7 +85,7 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.gray1,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -93,8 +93,17 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
           ),
           child: Column(
             children: [
-              _PlaylistHeader(onClose: () => Navigator.pop(context)),
-              const Divider(height: 1),
+              // Drawer 핸들 막대기
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.gray2,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const _PlaylistHeader(),
               Expanded(
                 child: AnimatedBuilder(
                   animation: widget.playerController,
@@ -104,12 +113,32 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
                         widget.playerController.currentPlaylistIndex;
 
                     if (playlist.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          '플레이리스트가 비어있습니다',
-                          style: TextStyle(
-                            color: AppColors.darkGray,
-                            fontSize: 14,
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '플레이리스트가 없습니다.',
+                                style: TextStyle(
+                                  color: AppColors.gray2,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                '라이브러리에서 전체재생을 통해\n플레이리스트에 추가할 수 있습니다.',
+                                style: TextStyle(
+                                  color: AppColors.gray2,
+                                  fontSize: 14,
+                                  height: 1.5,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -163,42 +192,29 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
   }
 }
 
-/// 플레이리스트 헤더 (제목 + 닫기 버튼)
+/// 플레이리스트 헤더 (제목만 표시)
 class _PlaylistHeader extends StatelessWidget {
-  final VoidCallback onClose;
-
-  const _PlaylistHeader({required this.onClose});
+  const _PlaylistHeader();
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '재생목록',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.hearitBlack,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '내가 북마크한 히어릿',
-                  style: TextStyle(fontSize: 14, color: AppColors.darkGray),
-                ),
-              ],
+          const Text(
+            '재생목록',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.gray4,
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: onClose,
-            color: AppColors.hearitBlack,
+          const SizedBox(height: 4),
+          Text(
+            '내가 북마크한 히어릿',
+            style: TextStyle(fontSize: 14, color: AppColors.gray4),
           ),
         ],
       ),

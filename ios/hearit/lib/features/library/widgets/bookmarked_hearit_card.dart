@@ -97,13 +97,10 @@ class BookmarkedHearitCard extends StatelessWidget {
         ),
         if (hearit.isFinished) ...[
           const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: AppColors.hearitPurple2,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.check, color: Colors.white, size: 16),
+          Image.asset(
+            'assets/images/finished_check.png',
+            width: 24,
+            height: 24,
           ),
         ],
       ],
