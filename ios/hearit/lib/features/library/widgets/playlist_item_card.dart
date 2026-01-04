@@ -10,14 +10,18 @@ import '../playlist_models.dart';
 /// 우측: 재생/일시정지 버튼
 class PlaylistItemCard extends StatelessWidget {
   final PlaylistItem item;
-  final bool isPlaying;
+  final bool isCurrentItem; // 현재 재생 목록의 항목인지
+  final bool isPlaying; // 실제 재생 중인지 (일시정지 아님)
   final VoidCallback onTap;
+  final VoidCallback onPlayPauseTap;
 
   const PlaylistItemCard({
     super.key,
     required this.item,
+    required this.isCurrentItem,
     required this.isPlaying,
     required this.onTap,
+    required this.onPlayPauseTap,
   });
 
   @override
@@ -27,7 +31,7 @@ class PlaylistItemCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: isPlaying
+          color: isCurrentItem
               ? AppColors.hearitPurple3.withValues(alpha: 0.2)
               : Colors.transparent,
         ),
@@ -65,11 +69,21 @@ class PlaylistItemCard extends StatelessWidget {
             ),
             const SizedBox(width: 12),
 
-            // 우측: 재생/일시정지 버튼
-            Icon(
-              isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
-              size: 32,
-              color: AppColors.hearitPurple3,
+            // 우측: 재생/일시정지 버튼 (독립적인 GestureDetector)
+            GestureDetector(
+              onTap: onPlayPauseTap,
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.all(4.0), // 클릭 영역 확대
+                child: Icon(
+                  // 현재 항목이면서 재생 중일 때만 일시정지 아이콘
+                  (isCurrentItem && isPlaying)
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_filled,
+                  size: 32,
+                  color: AppColors.hearitPurple3,
+                ),
+              ),
             ),
           ],
         ),

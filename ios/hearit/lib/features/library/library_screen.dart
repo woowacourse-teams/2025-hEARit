@@ -173,15 +173,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
       // 플레이리스트 로드 (첫 번째 항목부터 재생)
       await playerController.loadPlaylist(playlist: playlist, startIndex: 0);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('플레이리스트 재생 중 (${playlist.length}개)'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
     } catch (e) {
       debugPrint('전체재생 실패: $e');
       if (mounted) {

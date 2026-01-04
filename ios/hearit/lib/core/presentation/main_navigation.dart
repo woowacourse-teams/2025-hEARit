@@ -102,7 +102,6 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 
   void _openPlaylistDrawer() {
-    if (!_playerController.isPlaylistMode) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

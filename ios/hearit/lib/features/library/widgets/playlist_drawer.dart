@@ -35,18 +35,45 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
     super.dispose();
   }
 
-  /// 현재 재생 중인 항목으로 스크롤
+  /// 현재 재생 중인 항목으로 스마트 스크롤
+  ///
+  /// 항목이 이미 화면에 보이면 스크롤하지 않음.
+  /// 보이지 않으면 최소한의 스크롤로 중앙에 위치시킴.
   void _scrollToCurrentItem() {
     final index = widget.playerController.currentPlaylistIndex;
-    if (index >= 0 && _scrollController.hasClients) {
-      // 각 카드의 높이는 약 80px (추정)
-      final offset = index * 80.0;
-      _scrollController.animateTo(
-        offset,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+    if (index < 0 || !_scrollController.hasClients) return;
+
+    // 현재 스크롤 위치 정보
+    final scrollOffset = _scrollController.offset;
+    final viewportHeight = _scrollController.position.viewportDimension;
+
+    // 항목 높이: padding(24) + content(64) = 88px
+    const itemHeight = 88.0;
+
+    // 현재 항목의 위치 계산
+    final itemTop = index * itemHeight;
+    final itemBottom = itemTop + itemHeight;
+
+    // 현재 보이는 영역 계산
+    final visibleTop = scrollOffset;
+    final visibleBottom = scrollOffset + viewportHeight;
+
+    // 항목이 이미 화면에 완전히 보이면 스크롤하지 않음
+    if (itemTop >= visibleTop && itemBottom <= visibleBottom) {
+      return;
     }
+
+    // 항목을 화면 중앙에 위치시키기 위한 스크롤 위치 계산
+    final targetOffset = (itemTop - viewportHeight / 2 + itemHeight / 2).clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
+
+    _scrollController.animateTo(
+      targetOffset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -94,14 +121,33 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
                       itemCount: playlist.length,
                       itemBuilder: (context, index) {
                         final item = playlist[index];
-                        final isPlaying = index == currentIndex;
+                        final isCurrentItem = index == currentIndex;
+                        final isActuallyPlaying =
+                            widget.playerController.isPlaying;
 
                         return PlaylistItemCard(
                           item: item,
-                          isPlaying: isPlaying,
+                          isCurrentItem: isCurrentItem,
+                          isPlaying: isActuallyPlaying,
                           onTap: () {
-                            widget.playerController.playPlaylistItem(index);
-                            _scrollToCurrentItem();
+                            // 카드 영역 클릭: 다른 항목이면 해당 항목 재생
+                            if (!isCurrentItem) {
+                              widget.playerController.playPlaylistItem(index);
+                            }
+                          },
+                          onPlayPauseTap: () {
+                            // 아이콘 클릭: 일시정지/재생 토글
+                            if (isCurrentItem) {
+                              // 현재 재생 중인 항목
+                              if (isActuallyPlaying) {
+                                widget.playerController.pause(); // 일시정지
+                              } else {
+                                widget.playerController.play(); // 재생 재개
+                              }
+                            } else {
+                              // 다른 항목 → 해당 항목 재생
+                              widget.playerController.playPlaylistItem(index);
+                            }
                           },
                         );
                       },

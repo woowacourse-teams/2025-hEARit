@@ -4,6 +4,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../../features/library/library_repository.dart';
 import '../../features/library/playlist_models.dart';
 import 'audio_handler.dart';
 import 'playing_history_service.dart';
@@ -12,10 +13,12 @@ class HearitPlayerController extends ChangeNotifier {
   HearitPlayerController({
     required LocalAudioHandler audioHandler,
     PlayingHistoryService? playingHistoryService,
+    LibraryRepository? libraryRepository,
     double initialSpeed = 1.0,
   }) : _audioHandler = audioHandler,
        _playingHistoryService =
-           playingHistoryService ?? PlayingHistoryService() {
+           playingHistoryService ?? PlayingHistoryService(),
+       _libraryRepository = libraryRepository ?? LibraryRepository() {
     _currentSpeed = initialSpeed;
 
     _audioHandler.setSpeed(initialSpeed);
@@ -48,6 +51,7 @@ class HearitPlayerController extends ChangeNotifier {
 
   late final LocalAudioHandler _audioHandler;
   final PlayingHistoryService _playingHistoryService;
+  final LibraryRepository _libraryRepository;
 
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
@@ -319,10 +323,19 @@ class HearitPlayerController extends ChangeNotifier {
 
   /// 오디오 원본 URL 가져오기 (API 호출)
   Future<String?> _fetchAudioUrl(int hearitId) async {
-    // TODO: LibraryRepository의 fetchOriginalAudioUrl 사용
-    // 현재는 임시로 null 반환 (실제 구현 시 의존성 주입 필요)
-    debugPrint('⚠️ _fetchAudioUrl는 아직 구현되지 않았습니다. hearitId: $hearitId');
-    return null;
+    try {
+      final url = await _libraryRepository.fetchOriginalAudioUrl(hearitId);
+      if (url != null && url.isNotEmpty) {
+        debugPrint('✅ 오디오 URL 로드 성공: hearitId=$hearitId');
+        return url;
+      } else {
+        debugPrint('⚠️ 오디오 URL이 비어있음: hearitId=$hearitId');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ 오디오 URL 로드 실패: hearitId=$hearitId, error=$e');
+      return null;
+    }
   }
 
   /// 카테고리 색상 코드로 아트워크 URI 생성
