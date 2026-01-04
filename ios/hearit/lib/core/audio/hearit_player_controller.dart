@@ -6,6 +6,7 @@ import 'package:just_audio/just_audio.dart';
 
 import '../../features/library/library_repository.dart';
 import '../../features/library/playlist_models.dart';
+import '../storage/playlist_storage.dart';
 import 'audio_handler.dart';
 import 'playing_history_service.dart';
 
@@ -14,14 +15,19 @@ class HearitPlayerController extends ChangeNotifier {
     required LocalAudioHandler audioHandler,
     PlayingHistoryService? playingHistoryService,
     LibraryRepository? libraryRepository,
+    PlaylistStorage? playlistStorage,
     double initialSpeed = 1.0,
   }) : _audioHandler = audioHandler,
        _playingHistoryService =
            playingHistoryService ?? PlayingHistoryService(),
-       _libraryRepository = libraryRepository ?? LibraryRepository() {
+       _libraryRepository = libraryRepository ?? LibraryRepository(),
+       _playlistStorage = playlistStorage ?? PlaylistStorage() {
     _currentSpeed = initialSpeed;
 
     _audioHandler.setSpeed(initialSpeed);
+
+    // 저장된 플레이리스트 로드
+    _loadSavedPlaylist();
 
     // Listen: duration updates
     _durationSub = _audioHandler.durationStream.listen((duration) {
@@ -52,6 +58,7 @@ class HearitPlayerController extends ChangeNotifier {
   late final LocalAudioHandler _audioHandler;
   final PlayingHistoryService _playingHistoryService;
   final LibraryRepository _libraryRepository;
+  late final PlaylistStorage _playlistStorage;
 
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
@@ -92,6 +99,18 @@ class HearitPlayerController extends ChangeNotifier {
   late final StreamSubscription<Duration?> _durationSub;
   late final StreamSubscription<Duration> _positionSub;
   late final StreamSubscription<PlayerState> _playerStateSub;
+
+  // ──────────────────────────────
+  // 저장된 플레이리스트 로드
+  // ──────────────────────────────
+  Future<void> _loadSavedPlaylist() async {
+    final savedPlaylist = await _playlistStorage.loadPlaylist();
+    if (savedPlaylist != null && savedPlaylist.isNotEmpty) {
+      _playlist = savedPlaylist;
+      debugPrint('🎵 저장된 플레이리스트 로드: ${savedPlaylist.length}개 항목');
+      notifyListeners();
+    }
+  }
 
   // ──────────────────────────────
   // PlayerState 변화 처리 (재생 기록 저장 포함)
@@ -195,6 +214,13 @@ class HearitPlayerController extends ChangeNotifier {
       await _saveCurrentProgress('다른 팟캐스트 재생');
     }
 
+    // 단일 재생으로 전환 (플레이리스트는 유지, 모드만 해제)
+    if (_isPlaylistMode) {
+      _isPlaylistMode = false;
+      _currentPlaylistIndex = -1;
+      debugPrint('🎵 단일 재생 모드로 전환 (플레이리스트는 유지)');
+    }
+
     // 새 팟캐스트 로드
     if (mediaItem != null) {
       _currentMediaItem = mediaItem;
@@ -266,7 +292,11 @@ class HearitPlayerController extends ChangeNotifier {
     _currentPlaylistIndex = startIndex;
     _isPlaylistMode = true;
 
-    debugPrint('🎵 플레이리스트 로드: ${playlist.length}개 항목, 시작 인덱스: $startIndex');
+    // 로컬 스토리지에 저장 (50개 제한은 PlaylistStorage에서 처리)
+    await _playlistStorage.savePlaylist(playlist);
+    debugPrint(
+      '🎵 플레이리스트 로드 및 저장: ${playlist.length}개 항목, 시작 인덱스: $startIndex',
+    );
 
     // 첫 곡 재생
     await _playItemAtIndex(startIndex);
@@ -372,16 +402,28 @@ class HearitPlayerController extends ChangeNotifier {
 
   /// 플레이리스트의 특정 항목 재생
   Future<void> playPlaylistItem(int index) async {
-    if (!_isPlaylistMode) {
-      debugPrint('⚠️ 플레이리스트 모드가 아닙니다');
+    if (_playlist.isEmpty) {
+      debugPrint('⚠️ 플레이리스트가 비어있습니다.');
       return;
     }
 
+    if (index < 0 || index >= _playlist.length) {
+      debugPrint('⚠️ 잘못된 인덱스: $index');
+      return;
+    }
+
+    // 플레이리스트 모드 자동 활성화
+    if (!_isPlaylistMode) {
+      _isPlaylistMode = true;
+      debugPrint('🎵 플레이리스트 모드 활성화');
+    }
+
+    _currentPlaylistIndex = index;
     await _playItemAtIndex(index);
   }
 
   /// 플레이리스트에서 항목 제거 (북마크 삭제 시)
-  void removeFromPlaylist(int hearitId) {
+  Future<void> removeFromPlaylist(int hearitId) async {
     if (!_isPlaylistMode) return;
 
     final index = _playlist.indexWhere((item) => item.hearitId == hearitId);
@@ -395,9 +437,9 @@ class HearitPlayerController extends ChangeNotifier {
     if (index == _currentPlaylistIndex) {
       // 다음 곡으로 스킵 (마지막 곡이면 종료)
       if (_playlist.isEmpty) {
-        clearPlaylist();
+        await clearPlaylist();
       } else {
-        playNext();
+        await playNext();
       }
     } else if (index < _currentPlaylistIndex) {
       // 인덱스 조정
@@ -408,11 +450,15 @@ class HearitPlayerController extends ChangeNotifier {
   }
 
   /// 플레이리스트 종료
-  void clearPlaylist() {
+  Future<void> clearPlaylist() async {
     debugPrint('🎵 플레이리스트 클리어');
     _playlist.clear();
     _currentPlaylistIndex = -1;
     _isPlaylistMode = false;
+
+    // 로컬 스토리지에서도 삭제
+    await _playlistStorage.clearPlaylist();
+
     notifyListeners();
   }
 

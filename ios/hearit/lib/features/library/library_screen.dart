@@ -112,7 +112,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
         if (success) {
           // 플레이리스트에서도 제거 (플레이리스트 모드일 때)
           if (playerController.isPlaylistMode) {
-            playerController.removeFromPlaylist(hearit.hearitId);
+            await playerController.removeFromPlaylist(hearit.hearitId);
           }
 
           // Analytics: 북마크 삭제

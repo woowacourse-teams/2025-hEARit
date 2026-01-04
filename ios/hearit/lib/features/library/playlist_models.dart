@@ -40,6 +40,29 @@ class PlaylistItem {
   /// 오디오 URL이 로드되었는지 확인
   bool get hasAudioUrl => audioUrl != null && audioUrl!.isNotEmpty;
 
+  /// JSON으로 직렬화 (audioUrl은 캐싱 데이터이므로 제외)
+  Map<String, dynamic> toJson() {
+    return {
+      'hearitId': hearitId,
+      'title': title,
+      'sourceName': sourceName,
+      'playTimeSeconds': playTimeSeconds,
+      'categoryColorCode': categoryColorCode,
+    };
+  }
+
+  /// JSON에서 역직렬화
+  factory PlaylistItem.fromJson(Map<String, dynamic> json) {
+    return PlaylistItem(
+      hearitId: json['hearitId'] as int,
+      title: json['title'] as String,
+      sourceName: json['sourceName'] as String,
+      playTimeSeconds: json['playTimeSeconds'] as int,
+      categoryColorCode: json['categoryColorCode'] as String,
+      audioUrl: null, // 항상 null로 시작 (재생 시 다시 fetch)
+    );
+  }
+
   @override
   String toString() {
     return 'PlaylistItem(hearitId: $hearitId, title: $title, sourceName: $sourceName, '
