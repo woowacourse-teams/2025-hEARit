@@ -7,10 +7,9 @@ import '../../setting/setting_screen.dart';
 /// 라이브러리 화면 상단 프로필 헤더
 /// 프로필 이미지 + 닉네임 + 그라데이션 배경 + 설정 버튼
 class LibraryHeader extends StatelessWidget {
-  const LibraryHeader({super.key, required this.profile, this.onSettingsTap});
+  const LibraryHeader({super.key, required this.profile});
 
   final MemberProfile? profile;
-  final VoidCallback? onSettingsTap;
 
   void _navigateToSettings(BuildContext context) {
     Navigator.of(
@@ -59,10 +58,7 @@ class LibraryHeader extends StatelessWidget {
               // 설정 버튼
               IconButton(
                 icon: const Icon(Icons.settings, color: Colors.white, size: 28),
-                onPressed: () {
-                  onSettingsTap?.call();
-                  _navigateToSettings(context);
-                },
+                onPressed: () => _navigateToSettings(context),
               ),
             ],
           ),

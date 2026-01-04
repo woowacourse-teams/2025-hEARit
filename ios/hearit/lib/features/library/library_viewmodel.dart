@@ -44,6 +44,8 @@ class LibraryViewModel extends ChangeNotifier {
 
     _isLoading = true;
     _error = null;
+    _bookmarks = []; // 에러 시에도 명확한 빈 상태 표시
+    _totalElements = 0;
     _currentPage = 0;
     _hasMore = true;
     notifyListeners();
@@ -66,6 +68,7 @@ class LibraryViewModel extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       debugPrint('초기 데이터 로드 실패: $e');
+      // _bookmarks와 _totalElements는 이미 초기화됨
     } finally {
       _isLoading = false;
       notifyListeners();
