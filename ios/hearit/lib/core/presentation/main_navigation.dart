@@ -234,7 +234,8 @@ class _MainNavigationState extends State<MainNavigation> {
                               progress: progress,
                               durationMs: durationMs,
                               isPlaying: _playerController.isPlaying,
-                              isPlaylistMode: _playerController.isPlaylistMode,
+                              isPlayingFromPlaylist:
+                                  _playerController.isPlayingFromPlaylist,
                               onTogglePlay: () =>
                                   _playerController.togglePlayback(),
                               onSeekFraction: (fraction) {
@@ -420,7 +421,7 @@ class _DetailMiniPlayerBar extends StatefulWidget {
     required this.progress,
     required this.durationMs,
     required this.isPlaying,
-    required this.isPlaylistMode,
+    required this.isPlayingFromPlaylist,
     required this.onTogglePlay,
     required this.onTap,
     required this.onSeekFraction,
@@ -431,7 +432,7 @@ class _DetailMiniPlayerBar extends StatefulWidget {
   final double progress;
   final int durationMs;
   final bool isPlaying;
-  final bool isPlaylistMode;
+  final bool isPlayingFromPlaylist;
   final VoidCallback onTogglePlay;
   final VoidCallback onTap;
   final ValueChanged<double> onSeekFraction;
@@ -481,7 +482,7 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
                   const SizedBox(width: 8),
                   _PlaylistButton(
                     onTap: widget.onPlaylistTap,
-                    isActive: widget.isPlaylistMode,
+                    isActive: widget.isPlayingFromPlaylist,
                   ),
                 ],
               ),

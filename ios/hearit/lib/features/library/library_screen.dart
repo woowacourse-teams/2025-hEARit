@@ -110,8 +110,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
         final success = await _viewModel.deleteBookmark(hearit.bookmarkId);
 
         if (success) {
-          // 플레이리스트에서도 제거 (플레이리스트 모드일 때)
-          if (playerController.isPlaylistMode) {
+          // 플레이리스트에서도 제거 (플레이리스트 재생 중일 때)
+          if (playerController.isPlayingFromPlaylist) {
             await playerController.removeFromPlaylist(hearit.hearitId);
           }
 
