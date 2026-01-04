@@ -24,6 +24,25 @@ class PlaylistItemCard extends StatelessWidget {
     required this.onPlayPauseTap,
   });
 
+  /// sourceName을 포맷팅
+  /// 1. ':'가 있으면 ':' 이전까지만 표시
+  /// 2. 15자 초과 시 '...'로 생략
+  String _formatSourceName(String sourceName) {
+    String formatted = sourceName;
+
+    // ':' 구분자가 있으면 ':' 이전까지만 사용
+    if (formatted.contains(':')) {
+      formatted = formatted.split(':').first;
+    }
+
+    // 15자 초과 시 생략
+    if (formatted.length > 15) {
+      formatted = '${formatted.substring(0, 15)}...';
+    }
+
+    return formatted;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -58,7 +77,7 @@ class PlaylistItemCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${item.sourceName} • ${item.formattedDuration}',
+                    '${_formatSourceName(item.sourceName)} • ${item.formattedDuration}',
                     style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.darkGray,
