@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -48,10 +49,12 @@ class PlayingHistoryMapBufferTest {
     PlayingHistoryRepository playingHistoryRepository;
 
     PlayingHistoryMapBuffer buffer;
+    PlayingHistoryConverter converter;
 
     @BeforeEach
     void setup() {
-        buffer = new PlayingHistoryMapBuffer(commandRepository, hearitRepository);
+        converter = new PlayingHistoryConverter(hearitRepository);
+        buffer = new PlayingHistoryMapBuffer(commandRepository, converter);
     }
 
     @Test
@@ -70,7 +73,7 @@ class PlayingHistoryMapBufferTest {
         // then
         assertAll(
                 () -> assertThat(playingHistoryRepository.findAll().size()).isEqualTo(1),
-                () -> assertThat(buffer.getCache()).isEmpty()
+                () -> assertThat(buffer.size()).isEqualTo(0)
         );
     }
 
@@ -116,18 +119,22 @@ class PlayingHistoryMapBufferTest {
         // spy repository로 bulkInsert에서 예외 발생
         PlayingHistoryCommandRepository spyRepo = spy(commandRepository);
         doThrow(new RuntimeException("DB error")).when(spyRepo).bulkInsert(anyList());
-        PlayingHistoryMapBuffer failingBuffer = new PlayingHistoryMapBuffer(spyRepo, hearitRepository);
+        PlayingHistoryMapBuffer failingBuffer = new PlayingHistoryMapBuffer(spyRepo, converter);
 
         failingBuffer.add(history1, 1_000L);
         failingBuffer.add(history2, 2_000L);
 
         // when
-        failingBuffer.flush();
+        try {
+            failingBuffer.flush();
+        } catch (Exception e) {
+            // expected
+        }
 
         // then
         assertAll(
                 () -> assertThat(playingHistoryRepository.findAll()).isEmpty(),
-                () -> assertThat(failingBuffer.getCache().size()).isEqualTo(2)
+                () -> assertThat(failingBuffer.size()).isEqualTo(2)
         );
     }
 }
