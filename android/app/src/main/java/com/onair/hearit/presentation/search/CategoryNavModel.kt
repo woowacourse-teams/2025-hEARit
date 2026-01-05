@@ -1,17 +1,26 @@
 package com.onair.hearit.presentation.search
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
-@Parcelize
-data class CategoryNavModel(
-    val id: Long,
-    val name: String,
-    val colorCode: String,
-) : Parcelable
+sealed interface SearchRoute {
+    @Serializable
+    data object SearchMain : SearchRoute
 
-@Parcelize
+    @Serializable
+    data object SearchDetail : SearchRoute
+
+    @Serializable
+    data class Category(
+        val id: Long,
+        val name: String,
+        val colorCode: String,
+    ) : SearchRoute
+}
+
+@Immutable
+@Serializable
 data class SearchStartArgs(
-    val initialCategory: CategoryNavModel? = null,
+    val initialCategory: SearchRoute.Category? = null,
     val isDirectEntry: Boolean = false,
-) : Parcelable
+)

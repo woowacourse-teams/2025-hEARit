@@ -4,7 +4,6 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -14,34 +13,17 @@ import com.onair.hearit.presentation.search.category.CategoryRoute
 import com.onair.hearit.presentation.search.detail.SearchDetailScreen
 import com.onair.hearit.presentation.search.main.SearchMainRoute
 
-// Routes
-const val SEARCH_MAIN_ROUTE = "search_main"
-const val SEARCH_DETAIL_ROUTE = "search_detail"
-const val CATEGORY_ROUTE = "category"
-
 @Composable
 fun SearchNavHost(
     startArgs: SearchStartArgs = SearchStartArgs(),
     onExitSearch: () -> Unit,
     onHearitClick: (Long) -> Unit,
-    viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
     val analyticsLogger = LocalAnalyticsLogger.current
 
-    val startDestination =
-        if (startArgs.initialCategory != null) {
-            CATEGORY_ROUTE
-        } else {
-            SEARCH_MAIN_ROUTE
-        }
-
-    // Direct entry (홈에서 직접 진입)
-    LaunchedEffect(startArgs.initialCategory) {
-        startArgs.initialCategory?.let { category ->
-            viewModel.setCurrentCategory(category)
-        }
-    }
+    val startDestination: SearchRoute =
+        startArgs.initialCategory ?: SearchRoute.SearchMain
 
     NavHost(
         navController = navController,
@@ -51,7 +33,7 @@ fun SearchNavHost(
         popEnterTransition = { EnterTransition.None },
         popExitTransition = { ExitTransition.None },
     ) {
-        composable(SEARCH_MAIN_ROUTE) {
+        composable<SearchRoute.SearchMain> {
             LaunchedEffect(Unit) {
                 analyticsLogger.logEvent(
                     FirebaseAnalytics.Event.SCREEN_VIEW,
@@ -63,18 +45,22 @@ fun SearchNavHost(
             }
 
             SearchMainRoute(
-                viewModel = viewModel,
                 onSearchBarClick = {
-                    navController.navigate(SEARCH_DETAIL_ROUTE)
+                    navController.navigate(SearchRoute.SearchDetail)
                 },
                 onCategoryClick = { id, name, colorCode ->
-                    viewModel.setCurrentCategory(CategoryNavModel(id, name, colorCode))
-                    navController.navigate(CATEGORY_ROUTE)
+                    navController.navigate(
+                        SearchRoute.Category(
+                            id = id,
+                            name = name,
+                            colorCode = colorCode,
+                        ),
+                    )
                 },
             )
         }
 
-        composable(SEARCH_DETAIL_ROUTE) {
+        composable<SearchRoute.SearchDetail> {
             SearchDetailScreen(
                 onBackClick = {
                     navController.navigateUp()
@@ -82,9 +68,8 @@ fun SearchNavHost(
             )
         }
 
-        composable(CATEGORY_ROUTE) {
+        composable<SearchRoute.Category> {
             CategoryRoute(
-                viewModel = viewModel,
                 onBack = {
                     if (startArgs.isDirectEntry) {
                         onExitSearch()

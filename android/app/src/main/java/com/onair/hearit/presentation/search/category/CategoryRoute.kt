@@ -2,14 +2,14 @@ package com.onair.hearit.presentation.search.category
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.onair.hearit.presentation.search.SearchViewModel
 
 @Composable
 fun CategoryRoute(
-    viewModel: SearchViewModel,
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
+    viewModel: CategoryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.categoryUiState.collectAsStateWithLifecycle()
 

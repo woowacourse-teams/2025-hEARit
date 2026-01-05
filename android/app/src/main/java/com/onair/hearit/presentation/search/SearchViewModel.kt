@@ -5,41 +5,28 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RecentSearch
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.presentation.SingleLiveData
-import com.onair.hearit.presentation.search.category.CategoryUiState
-import com.onair.hearit.presentation.search.main.SearchMainUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val categoryRepository: CategoryRepository,
     private val hearitRepository: HearitRepository,
     private val recentKeywordRepository: RecentKeywordRepository,
 ) : ViewModel() {
     private val _searchUiState = MutableLiveData<SearchUiState>()
     val searchUiState: LiveData<SearchUiState> = _searchUiState
-
-    private val _searchMainUiState = MutableStateFlow(SearchMainUiState())
-    val searchMainUiState: StateFlow<SearchMainUiState> = _searchMainUiState.asStateFlow()
-
-    private val _categoryUiState = MutableStateFlow(CategoryUiState())
-    val categoryUiState: StateFlow<CategoryUiState> = _categoryUiState.asStateFlow()
 
     private val _recentKeywords = MutableStateFlow<List<RecentSearch>?>(null)
     val recentKeywords: StateFlow<List<RecentSearch>?> = _recentKeywords.asStateFlow()
@@ -69,42 +56,13 @@ class SearchViewModel @Inject constructor(
         fetchKeywordHearits(input.term, true)
     }
 
-    fun setCurrentCategory(category: CategoryNavModel) {
-        if (_categoryUiState.value.category?.id == category.id) return
-
-        _categoryUiState.value =
-            CategoryUiState(
-                category = Category(category.id, category.name, category.colorCode),
-            )
-
-        fetchCategoryHearits(isInitial = true)
-    }
-
     fun refreshSearchResults() {
         resetPaging()
         _searchedHearits.value = emptyList()
-        fetchResultData(isInitial = true)
-    }
-
-    fun fetchCategories() {
-        viewModelScope.launch {
-            _searchMainUiState.update { it.copy(isLoading = true) }
-
-            categoryRepository
-                .getCategories(page = 0)
-                .onSuccess { pageCategories ->
-                    _searchMainUiState.update {
-                        it.copy(
-                            categories = pageCategories.items.toImmutableList(),
-                            isLoading = false,
-                        )
-                    }
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _searchMainUiState.update { it.copy(isLoading = false) }
-                    _toastMessage.value = R.string.all_toast_categories_load_fail
-                }
-        }
+        fetchKeywordHearits(
+            (_searchInput.value as? SearchInput.Keyword)?.term ?: return,
+            isInitial = true,
+        )
     }
 
     fun getRecentKeywords() {
@@ -138,50 +96,8 @@ class SearchViewModel @Inject constructor(
 
     fun loadNextPageIfPossible() {
         if (isLoading || paging?.isLast == true) return
-        fetchResultData(isInitial = false)
-    }
-
-    fun fetchResultData(isInitial: Boolean) {
-        val input = currentInput ?: return
-
-        when (input) {
-            is SearchInput.Category -> fetchCategoryHearits(isInitial)
-            is SearchInput.Keyword -> fetchKeywordHearits(input.term, isInitial)
-        }
-    }
-
-    fun fetchCategoryHearits(isInitial: Boolean) {
-        val currentState = _categoryUiState.value
-        val category = currentState.category ?: return
-        if (currentState.isLoading) return
-        if (!isInitial && currentState.isLastPage) return
-
-        val targetPage = if (isInitial) 0 else currentState.currentPage
-
-        viewModelScope.launch {
-            _categoryUiState.update { it.copy(isLoading = true) }
-
-            hearitRepository
-                .getCategoryHearits(category.id, targetPage)
-                .onSuccess { response ->
-                    _categoryUiState.update { state ->
-                        state.copy(
-                            hearits =
-                                if (isInitial) {
-                                    response.items.toImmutableList()
-                                } else {
-                                    (state.hearits + response.items).toImmutableList()
-                                },
-                            isLoading = false,
-                            isLastPage = response.paging.isLast,
-                            currentPage = if (isInitial) 1 else state.currentPage + 1,
-                        )
-                    }
-                }.onFailure {
-                    _categoryUiState.update { it.copy(isLoading = false) }
-                    _toastMessage.value = R.string.category_toast_searched_hearits_load_fail
-                }
-        }
+        val term = (_searchInput.value as? SearchInput.Keyword)?.term ?: return
+        fetchKeywordHearits(term, isInitial = false)
     }
 
     fun fetchKeywordHearits(
