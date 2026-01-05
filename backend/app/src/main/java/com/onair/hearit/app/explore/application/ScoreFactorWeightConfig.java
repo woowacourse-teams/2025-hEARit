@@ -1,6 +1,7 @@
 package com.onair.hearit.app.explore.application;
 
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.PlayingHistoryScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.ScoreFactor;
@@ -14,8 +15,9 @@ public class ScoreFactorWeightConfig {
 
     private final Map<Class<? extends ScoreFactor>, Double> weights = Map.of(
             RecencyScoreFactor.class, 0.2,
-            BookmarkScoreFactor.class, 0.12,
-            RandomScoreFactor.class, 0.2
+            RandomScoreFactor.class, 0.2,
+            BookmarkScoreFactor.class, 0.05,
+            PlayingHistoryScoreFactor.class, 0.05
     );
 
     public double getWeight(Class<? extends ScoreFactor> factorClass) {
