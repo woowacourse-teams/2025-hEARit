@@ -51,12 +51,15 @@ class ExploreScoreCalculatorTest {
     @Autowired
     private HearitRepository hearitRepository;
 
+    @Mock
+    private ScoreFactorWeightConfig scoreFactorWeightConfig;
+
     private ExploreScoreCalculator exploreScoreCalculator;
 
     @BeforeEach
     void setUp() {
         exploreScoreCalculator = new ExploreScoreCalculator(hearitRepository,
-                List.of(scoreFactor1, scoreFactor2, scoreFactor3));
+                List.of(scoreFactor1, scoreFactor2, scoreFactor3), scoreFactorWeightConfig);
     }
 
     @DisplayName("지원되는 모든 ScoreFactor 들의 점수를 합산하여 Map 으로 반환한다")
@@ -68,21 +71,22 @@ class ExploreScoreCalculatorTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         given(scoreFactor1.isSupported(any())).willReturn(true);
-        given(scoreFactor1.calculate(any(), anyList())).willReturn(Map.of(hearit1.getId(), 1.0, hearit2.getId(), 1.0));
+        given(scoreFactor1.calculate(any(), anyList())).willReturn(Map.of(hearit1.getId(), 0.1, hearit2.getId(), 0.1));
 
         given(scoreFactor2.isSupported(any())).willReturn(true);
-        given(scoreFactor2.calculate(any(), anyList())).willReturn(
-                Map.of(hearit1.getId(), 20.0, hearit2.getId(), 18.0));
+        given(scoreFactor2.calculate(any(), anyList())).willReturn(Map.of(hearit1.getId(), 0.3, hearit2.getId(), 0.0));
 
         given(scoreFactor3.isSupported(any())).willReturn(false);
         // scoreFactor3.calculate()는 호출되지 않으므로, given 설정이 불필요함 (에러 발생)
+
+        given(scoreFactorWeightConfig.getWeight(any())).willReturn(1.0);
 
         Map<Long, Double> memberScores = exploreScoreCalculator.calculateTotalScores("any-uuid", UserType.MEMBER);
 
         // then
         assertAll(
-                () -> assertThat(memberScores.get(hearit1.getId())).isEqualTo(1.0 + 20.0), // 21
-                () -> assertThat(memberScores.get(hearit2.getId())).isEqualTo(1.0 + 18.0)  // 19
+                () -> assertThat(memberScores).containsEntry(hearit1.getId(), 0.4),
+                () -> assertThat(memberScores).containsEntry(hearit2.getId(), 0.1)
         );
     }
 }
