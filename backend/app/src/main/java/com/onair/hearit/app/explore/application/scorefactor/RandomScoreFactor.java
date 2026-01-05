@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RandomScoreFactor implements ScoreFactor {
 
-    private static final int MAX_RANDOM_SCORE = 10;
-
     private final RandomNumberGenerator randomNumberGenerator;
 
     @Override
@@ -26,7 +24,7 @@ public class RandomScoreFactor implements ScoreFactor {
         return hearits.stream()
                 .collect(Collectors.toMap(
                         Hearit::getId,
-                        h -> randomNumberGenerator.getDouble() * MAX_RANDOM_SCORE
+                        h -> randomNumberGenerator.getDouble()
                 ));
     }
 }

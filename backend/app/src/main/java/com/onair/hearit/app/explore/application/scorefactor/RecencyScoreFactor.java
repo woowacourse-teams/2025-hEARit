@@ -12,9 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RecencyScoreFactor implements ScoreFactor {
 
-    private static final double MAX_RECENCY_SCORE = 20.0;
-    private static final double MIN_RECENCY_SCORE = 0.0;
-    private static final double POINT_LOSS_PER_DAY = 0.5;
+    private static final double RECENCY_EXPIRE_DAYS = 60.0;
 
     @Override
     public boolean isSupported(UserType userType) {
@@ -34,7 +32,6 @@ public class RecencyScoreFactor implements ScoreFactor {
     private double calculateRecencyScore(Hearit hearit, LocalDateTime now) {
         Duration duration = Duration.between(hearit.getCreatedAt(), now);
         long daysPassed = duration.toDays();
-        double score = MAX_RECENCY_SCORE - (daysPassed * POINT_LOSS_PER_DAY);
-        return Math.max(MIN_RECENCY_SCORE, score);
+        return Math.max(0, 1.0 - (daysPassed / RECENCY_EXPIRE_DAYS));
     }
 }
