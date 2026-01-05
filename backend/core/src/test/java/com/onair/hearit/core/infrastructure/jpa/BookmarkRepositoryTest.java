@@ -12,6 +12,7 @@ import com.onair.hearit.core.fixture.DbHelper;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.projection.BookmarkWithPlayingHistoryProjection;
+import com.onair.hearit.core.infrastructure.projection.CategoryBookmarkCount;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

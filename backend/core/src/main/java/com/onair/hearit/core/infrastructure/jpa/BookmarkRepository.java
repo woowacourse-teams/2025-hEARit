@@ -4,6 +4,7 @@ import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.infrastructure.projection.BookmarkWithPlayingHistoryProjection;
+import com.onair.hearit.core.infrastructure.projection.CategoryBookmarkCount;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
