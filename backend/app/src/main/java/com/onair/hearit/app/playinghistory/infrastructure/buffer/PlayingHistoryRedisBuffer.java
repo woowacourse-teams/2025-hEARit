@@ -61,35 +61,21 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
 
     @Override
     public void flush() {
-        if (!Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_HASH_KEY))) {
+        if (!hasDataToFlush()) {
             return;
         }
         try {
-            if (Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_TEMP_KEY))) {
-                log.warn("임시 키가 존재함 - 이전 flush가 완료되지 않음, 복원 시도");
-                restoreSnapshot();
-            }
-            moveToSnapshot();
-            HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
-            Map<String, String> snapshotData = hashOps.entries(REDIS_TEMP_KEY);
-            if (snapshotData.isEmpty()) {
-                redisTemplate.delete(REDIS_TEMP_KEY);
-                return;
-            }
-            List<PlayHistoryValue> playValues = parseToPlayValues(snapshotData);
+            checkAndRestorePreviousFlush();
+            List<PlayHistoryValue> playValues = loadSnapshotData();
             if (playValues.isEmpty()) {
-                redisTemplate.delete(REDIS_TEMP_KEY);
-                log.warn("Redis flush: 모든 데이터 파싱 실패, 키 삭제");
                 return;
             }
             saveHistoriesToDatabase(playValues);
             redisTemplate.delete(REDIS_TEMP_KEY);
         } catch (DataAccessException e) {
-            log.error("Redis 재생 기록 flush 실패 - Redis 오류", e);
-            restoreSnapshot();
+            handleFlushError("Redis 오류", e);
         } catch (Exception e) {
-            log.error("Redis 재생 기록 flush 실패 - 예상치 못한 오류", e);
-            restoreSnapshot();
+            handleFlushError("예상치 못한 오류", e);
         }
     }
 
@@ -184,6 +170,40 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             log.error("재생 기록 직렬화 실패: field={}", field, e);
             throw new BufferException("재생 기록 데이터 저장 중 오류가 발생했습니다.");
         }
+    }
+
+    private boolean hasDataToFlush() {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_HASH_KEY));
+    }
+
+    private void checkAndRestorePreviousFlush() {
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_TEMP_KEY))) {
+            log.warn("임시 키가 존재함 - 이전 flush가 완료되지 않음, 복원 시도");
+            restoreSnapshot();
+        }
+    }
+
+    private List<PlayHistoryValue> loadSnapshotData() {
+        moveToSnapshot();
+        HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+        Map<String, String> snapshotData = hashOps.entries(REDIS_TEMP_KEY);
+
+        if (snapshotData.isEmpty()) {
+            redisTemplate.delete(REDIS_TEMP_KEY);
+            return List.of();
+        }
+
+        List<PlayHistoryValue> playValues = parseToPlayValues(snapshotData);
+        if (playValues.isEmpty()) {
+            redisTemplate.delete(REDIS_TEMP_KEY);
+            log.warn("Redis flush: 모든 데이터 파싱 실패, 키 삭제");
+        }
+        return playValues;
+    }
+
+    private void handleFlushError(String errorType, Exception e) {
+        log.error("Redis 재생 기록 flush 실패 - {}", errorType, e);
+        restoreSnapshot();
     }
 
     private void moveToSnapshot() {
