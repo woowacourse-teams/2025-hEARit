@@ -3,6 +3,7 @@ package com.onair.hearit.presentation.search.category
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,6 +45,7 @@ fun CategoryScreen(
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    fadeStop: Float = 0.2f,
 ) {
     val safeColor =
         rememberSafeColor(
@@ -56,12 +58,14 @@ fun CategoryScreen(
             bottomColor = HearitBlack,
         )
 
-    Box(
+    BoxWithConstraints(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(brush = gradientBrush),
     ) {
+        val gradientEndPadding = maxHeight * fadeStop
+
         CategoryTopBar(
             categoryName = categoryName,
             onBack = onBack,
@@ -74,7 +78,7 @@ fun CategoryScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(top = 152.dp, bottom = 60.dp),
+                    .padding(top = gradientEndPadding, bottom = 60.dp),
         )
     }
 }
