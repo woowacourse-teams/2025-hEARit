@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     final authViewModel = context.read<AuthViewModel>();
     authViewModel.clearAuthStatus();
-    Navigator.of(context).pushAndRemoveUntil(
+    Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,
     );

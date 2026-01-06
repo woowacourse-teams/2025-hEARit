@@ -16,9 +16,10 @@ class BookmarkSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasBookmarks = totalCount > 0;
+    final showPlayButton = onPlayAll != null; // onPlayAll이 null이 아니면 버튼 표시
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       child: Row(
         children: [
           // 왼쪽: 타이틀 + 개수
@@ -46,8 +47,8 @@ class BookmarkSectionHeader extends StatelessWidget {
               ],
             ),
           ),
-          // 오른쪽: 전체재생 버튼
-          if (hasBookmarks)
+          // 오른쪽: 전체재생 버튼 (onPlayAll이 있으면 표시)
+          if (showPlayButton)
             GestureDetector(
               onTap: onPlayAll,
               child: Container(
