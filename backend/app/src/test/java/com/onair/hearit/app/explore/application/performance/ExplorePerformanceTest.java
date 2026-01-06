@@ -145,6 +145,7 @@ class ExplorePerformanceTest extends IntegrationTest {
             double idOverlapRate = (double) idOverlap / k;
 
             System.out.println("[비회원 " + (i + 1) + "회차] 추천 히어릿 ID 목록=" + curIdList);
+            System.out.println("[비회원 " + (i + 1) + "회차] 추천 히어릿 신선도(daysAgo)=" + topKDaysAgoResults.get(i));
             System.out.println("[비회원 " + (i + 1) + "회차] 1회차 대비 ID 중복 개수=" + idOverlap + "/" + k
                     + " (중복률 " + String.format("%.0f%%", idOverlapRate * 100) + ")");
             System.out.println();
@@ -167,7 +168,7 @@ class ExplorePerformanceTest extends IntegrationTest {
 
         addBookmarkAndPlayingHistory(backendEngineer, "java", 2, 5);
         addBookmarkAndPlayingHistory(backendEngineer, "spring", 1, 3);
-        addBookmarkAndPlayingHistory(backendEngineer, "IT트렌드", 1, 4);
+        addBookmarkAndPlayingHistory(backendEngineer, "itTrend", 1, 4);
 
         List<List<Long>> topKIdsPerRun = new ArrayList<>();
         List<List<Long>> topKCategoryIdsPerRun = new ArrayList<>();
