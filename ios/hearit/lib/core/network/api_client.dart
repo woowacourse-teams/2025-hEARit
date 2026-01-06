@@ -77,6 +77,26 @@ class ApiClient {
     return _parse(response.data, parser);
   }
 
+  Future<T> delete<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Object? body,
+    Map<String, String>? headers,
+    Options? options,
+    T Function(dynamic data)? parser,
+  }) async {
+    final uri = _config.resolve(path, queryParameters: queryParameters);
+    final response = await _send(
+      () => _dio.deleteUri<dynamic>(
+        uri,
+        data: body,
+        options: _mergeOptions(options, headers),
+      ),
+      uri,
+    );
+    return _parse(response.data, parser);
+  }
+
   Future<T> upload<T>(
     String path, {
     required FormData formData,
@@ -172,6 +192,8 @@ class ApiClient {
 
   T _parse<T>(Object? decoded, T Function(dynamic data)? parser) {
     if (parser != null) return parser(decoded);
+    // Handle void/Null types for DELETE and other methods with no return value
+    if (T.toString() == 'void' || T == Null) return null as T;
     if (T == Map<String, dynamic>) return decoded as T;
     if (T == List<dynamic>) return decoded as T;
     if (T == String) return decoded.toString() as T;

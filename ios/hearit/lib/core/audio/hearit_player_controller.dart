@@ -4,6 +4,9 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../../features/library/library_repository.dart';
+import '../../features/library/playlist_models.dart';
+import '../storage/playlist_storage.dart';
 import 'audio_handler.dart';
 import 'playing_history_service.dart';
 
@@ -11,13 +14,20 @@ class HearitPlayerController extends ChangeNotifier {
   HearitPlayerController({
     required LocalAudioHandler audioHandler,
     PlayingHistoryService? playingHistoryService,
+    LibraryRepository? libraryRepository,
+    PlaylistStorage? playlistStorage,
     double initialSpeed = 1.0,
   }) : _audioHandler = audioHandler,
        _playingHistoryService =
-           playingHistoryService ?? PlayingHistoryService() {
+           playingHistoryService ?? PlayingHistoryService(),
+       _libraryRepository = libraryRepository ?? LibraryRepository(),
+       _playlistStorage = playlistStorage ?? PlaylistStorage() {
     _currentSpeed = initialSpeed;
 
     _audioHandler.setSpeed(initialSpeed);
+
+    // 저장된 플레이리스트 로드
+    _loadSavedPlaylist();
 
     // Listen: duration updates
     _durationSub = _audioHandler.durationStream.listen((duration) {
@@ -47,6 +57,8 @@ class HearitPlayerController extends ChangeNotifier {
 
   late final LocalAudioHandler _audioHandler;
   final PlayingHistoryService _playingHistoryService;
+  final LibraryRepository _libraryRepository;
+  late final PlaylistStorage _playlistStorage;
 
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
@@ -55,10 +67,24 @@ class HearitPlayerController extends ChangeNotifier {
 
   MediaItem? _currentMediaItem;
 
+  // 플레이리스트 관련 상태
+  List<PlaylistItem> _playlist = [];
+  int _currentPlaylistIndex = -1; // -1 = 플레이리스트 없음
+
   Duration get duration => _duration;
   Duration get position => _position;
   double get currentSpeed => _currentSpeed;
   MediaItem? get currentMediaItem => _currentMediaItem;
+
+  // 플레이리스트 getters
+  List<PlaylistItem> get playlist => _playlist;
+  int get currentPlaylistIndex => _currentPlaylistIndex;
+  bool get isPlayingFromPlaylist =>
+      _currentPlaylistIndex >= 0 && _playlist.isNotEmpty;
+  bool get hasNextInPlaylist =>
+      isPlayingFromPlaylist && _currentPlaylistIndex < _playlist.length - 1;
+  bool get hasPreviousInPlaylist =>
+      isPlayingFromPlaylist && _currentPlaylistIndex > 0;
 
   bool get isPlaying => _latestState?.playing ?? false;
 
@@ -75,6 +101,18 @@ class HearitPlayerController extends ChangeNotifier {
   late final StreamSubscription<PlayerState> _playerStateSub;
 
   // ──────────────────────────────
+  // 저장된 플레이리스트 로드
+  // ──────────────────────────────
+  Future<void> _loadSavedPlaylist() async {
+    final savedPlaylist = await _playlistStorage.loadPlaylist();
+    if (savedPlaylist != null && savedPlaylist.isNotEmpty) {
+      _playlist = savedPlaylist;
+      debugPrint('🎵 저장된 플레이리스트 로드: ${savedPlaylist.length}개 항목');
+      notifyListeners();
+    }
+  }
+
+  // ──────────────────────────────
   // PlayerState 변화 처리 (재생 기록 저장 포함)
   // ──────────────────────────────
   void _handlePlayerStateChange(PlayerState state) {
@@ -84,6 +122,13 @@ class HearitPlayerController extends ChangeNotifier {
     // 1. 재생 완료 감지
     if (state.processingState == ProcessingState.completed) {
       _saveCurrentProgress('재생 완료');
+
+      // 플레이리스트 재생 중: 자동으로 다음 곡 재생
+      if (hasNextInPlaylist) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          playNext();
+        });
+      }
     }
 
     // 2. 일시정지 감지 (playing: true → false)
@@ -160,17 +205,41 @@ class HearitPlayerController extends ChangeNotifier {
   // ──────────────────────────────
   // Load Source + MediaItem 설정
   // ──────────────────────────────
+
+  /// 상세 화면에서 재생 시 사용 (플레이리스트 인덱스 해제)
   Future<void> loadSource(String url, {MediaItem? mediaItem}) async {
     // 이전 팟캐스트 재생 기록 저장
     if (_currentMediaItem != null) {
       await _saveCurrentProgress('다른 팟캐스트 재생');
     }
 
+    // 상세 화면에서 재생 시 플레이리스트 인덱스 해제
+    _currentPlaylistIndex = -1;
+
     // 새 팟캐스트 로드
     if (mediaItem != null) {
       _currentMediaItem = mediaItem;
       _audioHandler.mediaItem.add(mediaItem);
     }
+
+    await _audioHandler.setSource(url, mediaItem: mediaItem);
+
+    // 실패한 재생 기록 재시도
+    await _playingHistoryService.retryFailedRequests();
+  }
+
+  /// 플레이리스트 재생 시 사용 (플레이리스트 인덱스 유지)
+  Future<void> _loadSourceFromPlaylist(String url, MediaItem mediaItem) async {
+    // 이전 팟캐스트 재생 기록 저장
+    if (_currentMediaItem != null) {
+      await _saveCurrentProgress('다른 팟캐스트 재생');
+    }
+
+    // _currentPlaylistIndex는 건드리지 않음 (호출자가 이미 설정)
+
+    // 새 팟캐스트 로드
+    _currentMediaItem = mediaItem;
+    _audioHandler.mediaItem.add(mediaItem);
 
     await _audioHandler.setSource(url, mediaItem: mediaItem);
 
@@ -217,6 +286,185 @@ class HearitPlayerController extends ChangeNotifier {
   /// 앱 생명주기: 앱 종료
   Future<void> saveOnAppDetached() async {
     await _saveCurrentProgress('앱 종료');
+  }
+
+  // ──────────────────────────────
+  // 플레이리스트 기능
+  // ──────────────────────────────
+
+  /// 플레이리스트 로드 및 첫 곡 재생
+  Future<void> loadPlaylist({
+    required List<PlaylistItem> playlist,
+    int startIndex = 0,
+  }) async {
+    if (playlist.isEmpty) {
+      debugPrint('⚠️ 빈 플레이리스트');
+      return;
+    }
+
+    _playlist = playlist;
+    _currentPlaylistIndex = startIndex;
+
+    // 로컬 스토리지에 저장 (50개 제한은 PlaylistStorage에서 처리)
+    await _playlistStorage.savePlaylist(playlist);
+    debugPrint(
+      '🎵 플레이리스트 로드 및 저장: ${playlist.length}개 항목, 시작 인덱스: $startIndex',
+    );
+
+    // 첫 곡 재생
+    await _playItemAtIndex(startIndex);
+  }
+
+  /// 특정 인덱스의 곡 재생
+  Future<void> _playItemAtIndex(int index) async {
+    if (index < 0 || index >= _playlist.length) {
+      debugPrint('⚠️ 잘못된 플레이리스트 인덱스: $index');
+      return;
+    }
+
+    final item = _playlist[index];
+    _currentPlaylistIndex = index;
+
+    debugPrint('🎵 재생 시작: [$index/${_playlist.length - 1}] ${item.title}');
+
+    try {
+      // 오디오 URL 가져오기 (캐싱)
+      if (!item.hasAudioUrl) {
+        final url = await _fetchAudioUrl(item.hearitId);
+        if (url == null || url.isEmpty) {
+          // 에러 처리: 다음 곡으로 스킵
+          debugPrint('❌ 오디오 URL 로드 실패: ${item.title}');
+          // TODO: 토스트 메시지 표시 (BuildContext 필요)
+          await playNext(); // 재귀 호출
+          return;
+        }
+        item.audioUrl = url;
+      }
+
+      // MediaItem 생성
+      final artUri = await _resolveArtworkUri(item.categoryColorCode);
+      final mediaItem = MediaItem(
+        id: 'hearit-${item.hearitId}',
+        title: item.title,
+        album: item.sourceName,
+        artist: item.sourceName,
+        duration: Duration(seconds: item.playTimeSeconds),
+        artUri: artUri,
+        extras: {'hearitId': item.hearitId},
+      );
+
+      // 플레이리스트 재생용 로드 (인덱스 유지)
+      await _loadSourceFromPlaylist(item.audioUrl!, mediaItem);
+      await play();
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('❌ 재생 중 오류: $e');
+      await playNext(); // 다음 곡 시도
+    }
+  }
+
+  /// 오디오 원본 URL 가져오기 (API 호출)
+  Future<String?> _fetchAudioUrl(int hearitId) async {
+    try {
+      final url = await _libraryRepository.fetchOriginalAudioUrl(hearitId);
+      if (url != null && url.isNotEmpty) {
+        debugPrint('✅ 오디오 URL 로드 성공: hearitId=$hearitId');
+        return url;
+      } else {
+        debugPrint('⚠️ 오디오 URL이 비어있음: hearitId=$hearitId');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ 오디오 URL 로드 실패: hearitId=$hearitId, error=$e');
+      return null;
+    }
+  }
+
+  /// 카테고리 색상 코드로 아트워크 URI 생성
+  Future<Uri> _resolveArtworkUri(String colorCode) async {
+    final hexColor = colorCode.replaceAll('#', '');
+    return Uri.parse(
+      'https://via.placeholder.com/300/$hexColor/FFFFFF?text=hEARit',
+    );
+  }
+
+  /// 다음 곡 재생
+  Future<void> playNext() async {
+    if (!hasNextInPlaylist) {
+      // 플레이리스트 종료
+      debugPrint('🎵 플레이리스트 종료 (마지막 곡)');
+      await pause();
+      notifyListeners();
+      return;
+    }
+
+    await _playItemAtIndex(_currentPlaylistIndex + 1);
+  }
+
+  /// 이전 곡 재생
+  Future<void> playPrevious() async {
+    if (!hasPreviousInPlaylist) {
+      debugPrint('⚠️ 이전 곡 없음');
+      return;
+    }
+
+    await _playItemAtIndex(_currentPlaylistIndex - 1);
+  }
+
+  /// 플레이리스트의 특정 항목 재생
+  Future<void> playPlaylistItem(int index) async {
+    if (_playlist.isEmpty) {
+      debugPrint('⚠️ 플레이리스트가 비어있습니다.');
+      return;
+    }
+
+    if (index < 0 || index >= _playlist.length) {
+      debugPrint('⚠️ 잘못된 인덱스: $index');
+      return;
+    }
+
+    _currentPlaylistIndex = index;
+    await _playItemAtIndex(index);
+  }
+
+  /// 플레이리스트에서 항목 제거 (북마크 삭제 시)
+  Future<void> removeFromPlaylist(int hearitId) async {
+    if (!isPlayingFromPlaylist) return;
+
+    final index = _playlist.indexWhere((item) => item.hearitId == hearitId);
+    if (index == -1) return;
+
+    debugPrint('🗑️ 플레이리스트에서 제거: hearitId=$hearitId, index=$index');
+
+    _playlist.removeAt(index);
+
+    // 현재 재생 중인 곡이 삭제됨
+    if (index == _currentPlaylistIndex) {
+      // 다음 곡으로 스킵 (마지막 곡이면 종료)
+      if (_playlist.isEmpty) {
+        await clearPlaylist();
+      } else {
+        await playNext();
+      }
+    } else if (index < _currentPlaylistIndex) {
+      // 인덱스 조정
+      _currentPlaylistIndex--;
+    }
+
+    notifyListeners();
+  }
+
+  /// 플레이리스트 종료
+  Future<void> clearPlaylist() async {
+    debugPrint('🎵 플레이리스트 클리어');
+    _playlist.clear();
+    _currentPlaylistIndex = -1;
+
+    // 로컬 스토리지에서도 삭제
+    await _playlistStorage.clearPlaylist();
+
+    notifyListeners();
   }
 
   // ──────────────────────────────

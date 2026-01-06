@@ -8,8 +8,9 @@ import '../../features/detail/hearit_detail.dart';
 import '../../features/detail/hearit_detail_screen.dart';
 import '../../features/explore/explore_screen.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/library/library_screen.dart';
+import '../../features/library/widgets/playlist_drawer.dart';
 import '../../features/search/search_screen.dart';
-import '../../features/setting/setting_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -31,7 +32,7 @@ class _MainNavigationState extends State<MainNavigation> {
     _NavItem(label: '홈', icon: Icons.home),
     _NavItem(label: '검색', icon: Icons.search),
     _NavItem(label: '탐색', icon: Icons.explore),
-    _NavItem(label: '설정', icon: Icons.settings),
+    _NavItem(label: '라이브러리', icon: Icons.collections_bookmark),
   ];
 
   @override
@@ -100,6 +101,15 @@ class _MainNavigationState extends State<MainNavigation> {
     );
   }
 
+  void _openPlaylistDrawer() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PlaylistDrawer(playerController: _playerController),
+    );
+  }
+
   Future<bool> _onWillPop() async {
     final NavigatorState currentNav =
         _navigatorKeys[_currentIndex].currentState!;
@@ -116,6 +126,7 @@ class _MainNavigationState extends State<MainNavigation> {
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: AppColors.hearitBlack,
+        extendBody: true,
         body: IndexedStack(
           index: _currentIndex,
           children: [
@@ -135,8 +146,7 @@ class _MainNavigationState extends State<MainNavigation> {
             ),
             _TabNavigator(
               navigatorKey: _navigatorKeys[3],
-              builder: (_) =>
-                  SettingScreen(onBackToHome: () => _onItemTapped(0)),
+              builder: (_) => const LibraryScreen(),
             ),
           ],
         ),
@@ -146,129 +156,150 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 
   Widget _buildBottomNavigationBar() {
-    return ColoredBox(
-      color: AppColors.gray1,
-      child: SafeArea(
-        top: false,
-        bottom: true,
-        child: MediaQuery.removePadding(
-          context: context,
-          removeBottom: false,
-          child: MediaQuery.removeViewInsets(
-            context: context,
-            removeTop: false,
-            removeLeft: false,
-            removeRight: false,
-            removeBottom: false,
-            child: Container(
-              color: AppColors.gray1,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _currentIndex == 2
-                      ? ValueListenableBuilder<double>(
-                          valueListenable:
-                              ExploreScreenState.progressListenable(),
-                          builder: (context, value, _) {
-                            final isExploreRoot =
-                                !(_navigatorKeys[2].currentState?.canPop() ??
-                                    false);
-                            if (!isExploreRoot) {
-                              return const SizedBox.shrink();
-                            }
-                            return SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                trackHeight: 5,
-                                thumbShape: const RoundSliderThumbShape(
-                                  enabledThumbRadius: 0,
+    return AnimatedBuilder(
+      animation: _playerController,
+      builder: (context, child) {
+        // 재생바 표시 여부 판단
+        final canPopCurrent =
+            _navigatorKeys[_currentIndex].currentState?.canPop() ?? false;
+        final hasMediaItem = _playerController.currentMediaItem != null;
+        final showMiniPlayer =
+            _currentIndex != 2 && !canPopCurrent && hasMediaItem;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.gray1,
+            borderRadius: showMiniPlayer
+                ? const BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                  )
+                : BorderRadius.zero,
+          ),
+          child: SafeArea(
+            top: false,
+            bottom: true,
+            child: MediaQuery.removePadding(
+              context: context,
+              removeBottom: false,
+              child: MediaQuery.removeViewInsets(
+                context: context,
+                removeTop: false,
+                removeLeft: false,
+                removeRight: false,
+                removeBottom: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _currentIndex == 2
+                        ? ValueListenableBuilder<double>(
+                            valueListenable:
+                                ExploreScreenState.progressListenable(),
+                            builder: (context, value, _) {
+                              final isExploreRoot =
+                                  !(_navigatorKeys[2].currentState?.canPop() ??
+                                      false);
+                              if (!isExploreRoot) {
+                                return const SizedBox.shrink();
+                              }
+                              return SliderTheme(
+                                data: SliderTheme.of(context).copyWith(
+                                  trackHeight: 5,
+                                  thumbShape: const RoundSliderThumbShape(
+                                    enabledThumbRadius: 0,
+                                  ),
+                                  overlayShape: SliderComponentShape.noOverlay,
+                                  activeTrackColor: AppColors.hearitPurple2,
+                                  inactiveTrackColor: AppColors.gray2,
+                                  thumbColor: Colors.transparent,
                                 ),
-                                overlayShape: SliderComponentShape.noOverlay,
-                                activeTrackColor: AppColors.hearitPurple2,
-                                inactiveTrackColor: AppColors.gray2,
-                                thumbColor: Colors.transparent,
-                              ),
-                              child: Slider(
-                                value: value.clamp(0.0, 1.0),
-                                onChanged:
-                                    ExploreScreenState.updateTempProgress,
-                                onChangeStart: (_) =>
-                                    ExploreScreenState.beginUserSeek(),
-                                onChangeEnd: (v) =>
-                                    ExploreScreenState.endUserSeek(v),
+                                child: Slider(
+                                  value: value.clamp(0.0, 1.0),
+                                  onChanged:
+                                      ExploreScreenState.updateTempProgress,
+                                  onChangeStart: (_) =>
+                                      ExploreScreenState.beginUserSeek(),
+                                  onChangeEnd: (v) =>
+                                      ExploreScreenState.endUserSeek(v),
+                                ),
+                              );
+                            },
+                          )
+                        : AnimatedBuilder(
+                            animation: _playerController,
+                            builder: (context, _) {
+                              final canPopCurrent =
+                                  _navigatorKeys[_currentIndex].currentState
+                                      ?.canPop() ??
+                                  false;
+                              if (canPopCurrent) {
+                                return const SizedBox.shrink();
+                              }
+                              final media = _playerController.currentMediaItem;
+                              if (media == null) {
+                                return const SizedBox.shrink();
+                              }
+                              final durationMs =
+                                  _playerController.duration.inMilliseconds;
+                              final positionMs =
+                                  _playerController.position.inMilliseconds;
+                              final progress = durationMs > 0
+                                  ? (positionMs / durationMs).clamp(0.0, 1.0)
+                                  : 0.0;
+                              return _DetailMiniPlayerBar(
+                                title: media.title,
+                                progress: progress,
+                                durationMs: durationMs,
+                                isPlaying: _playerController.isPlaying,
+                                isPlayingFromPlaylist:
+                                    _playerController.isPlayingFromPlaylist,
+                                onTogglePlay: () =>
+                                    _playerController.togglePlayback(),
+                                onSeekFraction: (fraction) {
+                                  if (durationMs <= 0) return;
+                                  final target = Duration(
+                                    milliseconds: (durationMs * fraction)
+                                        .round(),
+                                  );
+                                  _playerController.seek(target);
+                                },
+                                onTap: _openDetailFromMini,
+                                onPlaylistTap: _openPlaylistDrawer,
+                              );
+                            },
+                          ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: SizedBox(
+                        height: 60,
+                        child: Row(
+                          children: List.generate(_navItems.length, (index) {
+                            final item = _navItems[index];
+                            final isSelected = _currentIndex == index;
+                            return Expanded(
+                              child: _NavTapTarget(
+                                onTap: () => _onItemTapped(index),
+                                child: _NavVisual(
+                                  icon: item.icon,
+                                  label: item.label,
+                                  color: isSelected
+                                      ? AppColors.hearitPurple1
+                                      : AppColors.gray4,
+                                  iconSize: 30,
+                                ),
                               ),
                             );
-                          },
-                        )
-                      : AnimatedBuilder(
-                          animation: _playerController,
-                          builder: (context, _) {
-                            final canPopCurrent =
-                                _navigatorKeys[_currentIndex].currentState
-                                    ?.canPop() ??
-                                false;
-                            if (canPopCurrent) {
-                              return const SizedBox.shrink();
-                            }
-                            final media = _playerController.currentMediaItem;
-                            if (media == null) {
-                              return const SizedBox.shrink();
-                            }
-                            final durationMs =
-                                _playerController.duration.inMilliseconds;
-                            final positionMs =
-                                _playerController.position.inMilliseconds;
-                            final progress = durationMs > 0
-                                ? (positionMs / durationMs).clamp(0.0, 1.0)
-                                : 0.0;
-                            return _DetailMiniPlayerBar(
-                              title: media.title,
-                              progress: progress,
-                              durationMs: durationMs,
-                              isPlaying: _playerController.isPlaying,
-                              onTogglePlay: () =>
-                                  _playerController.togglePlayback(),
-                              onSeekFraction: (fraction) {
-                                if (durationMs <= 0) return;
-                                final target = Duration(
-                                  milliseconds: (durationMs * fraction).round(),
-                                );
-                                _playerController.seek(target);
-                              },
-                              onTap: _openDetailFromMini,
-                            );
-                          },
+                          }),
                         ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: SizedBox(
-                      height: 60,
-                      child: Row(
-                        children: List.generate(_navItems.length, (index) {
-                          final item = _navItems[index];
-                          final isSelected = _currentIndex == index;
-                          return Expanded(
-                            child: _NavTapTarget(
-                              onTap: () => _onItemTapped(index),
-                              child: _NavVisual(
-                                icon: item.icon,
-                                label: item.label,
-                                color: isSelected
-                                    ? AppColors.hearitPurple1
-                                    : AppColors.gray4,
-                                iconSize: 34,
-                              ),
-                            ),
-                          );
-                        }),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -359,7 +390,7 @@ class _NavVisual extends StatelessWidget {
           padding: const EdgeInsets.only(top: 12),
           child: Icon(icon, size: iconSize, color: color),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 6),
         Text(
           label,
           textHeightBehavior: const TextHeightBehavior(
@@ -409,18 +440,22 @@ class _DetailMiniPlayerBar extends StatefulWidget {
     required this.progress,
     required this.durationMs,
     required this.isPlaying,
+    required this.isPlayingFromPlaylist,
     required this.onTogglePlay,
     required this.onTap,
     required this.onSeekFraction,
+    required this.onPlaylistTap,
   });
 
   final String title;
   final double progress;
   final int durationMs;
   final bool isPlaying;
+  final bool isPlayingFromPlaylist;
   final VoidCallback onTogglePlay;
   final VoidCallback onTap;
   final ValueChanged<double> onSeekFraction;
+  final VoidCallback onPlaylistTap;
 
   @override
   State<_DetailMiniPlayerBar> createState() => _DetailMiniPlayerBarState();
@@ -462,6 +497,11 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
                   _PlayPauseButton(
                     isPlaying: widget.isPlaying,
                     onToggle: widget.onTogglePlay,
+                  ),
+                  const SizedBox(width: 8),
+                  _PlaylistButton(
+                    onTap: widget.onPlaylistTap,
+                    isActive: widget.isPlayingFromPlaylist,
                   ),
                 ],
               ),
@@ -510,22 +550,34 @@ class _PlayPauseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onToggle,
-      child: Container(
+      child: SizedBox(
         width: 44,
         height: 44,
-        decoration: BoxDecoration(
-          color: AppColors.gray1,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
         child: Icon(
           isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+          color: AppColors.gray4,
+          size: 32,
+        ),
+      ),
+    );
+  }
+}
+
+class _PlaylistButton extends StatelessWidget {
+  const _PlaylistButton({required this.onTap, required this.isActive});
+
+  final VoidCallback onTap;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 44,
+        height: 44,
+        child: Icon(
+          Icons.queue_music_rounded,
           color: AppColors.gray4,
           size: 28,
         ),

@@ -47,12 +47,7 @@ class _FullScriptViewState extends State<FullScriptView> {
             color: AppColors.hearitBlack,
             borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
           ),
-          padding: const EdgeInsets.fromLTRB(
-            24,
-            14,
-            24,
-            0,
-          ),
+          padding: const EdgeInsets.fromLTRB(24, 14, 24, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -128,6 +123,9 @@ class _FullScriptViewState extends State<FullScriptView> {
                   speedLabel: widget.viewModel.speedLabel,
                   formatDuration: widget.viewModel.formatDuration,
                   isTablet: widget.isTablet,
+                  isBookmarked: widget.viewModel.isBookmarked,
+                  onBookmarkToggle: () =>
+                      widget.viewModel.toggleBookmark(context),
                 ),
               ),
             ],
@@ -159,9 +157,8 @@ class _ScriptScrollViewState extends State<ScriptScrollView> {
   int _currentIndex = 0;
   double _viewportHeight = 0;
   bool _autoFollow = true;
-  double get _lineExtent => (widget.isTablet
-          ? ScriptView.tabletLineHeight
-          : ScriptView.lineHeight) +
+  double get _lineExtent =>
+      (widget.isTablet ? ScriptView.tabletLineHeight : ScriptView.lineHeight) +
       ScriptView.lineSpacing;
 
   @override
@@ -245,8 +242,10 @@ class _ScriptScrollViewState extends State<ScriptScrollView> {
 
   void _jumpToCurrent({bool forceJump = false}) {
     if (!_scrollController.hasClients || _viewportHeight <= 0) return;
-    final double target = (_lineExtent * _currentIndex)
-        .clamp(0.0, _scrollController.position.maxScrollExtent);
+    final double target = (_lineExtent * _currentIndex).clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
     if (forceJump) {
       _scrollController.jumpTo(target);
       return;
@@ -274,8 +273,10 @@ class _ScriptScrollViewState extends State<ScriptScrollView> {
   Widget build(BuildContext context) {
     if (widget.scripts.isEmpty) return const SizedBox.shrink();
     final theme = Theme.of(context);
-    final centerPadding =
-        ((_viewportHeight - _lineExtent) / 2).clamp(0.0, double.infinity);
+    final centerPadding = ((_viewportHeight - _lineExtent) / 2).clamp(
+      0.0,
+      double.infinity,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -303,8 +304,9 @@ class _ScriptScrollViewState extends State<ScriptScrollView> {
               itemBuilder: (context, index) {
                 final script = widget.scripts[index];
                 final bool isRead = index <= _currentIndex;
-                final Color textColor =
-                    isRead ? AppColors.gray4 : AppColors.darkGray;
+                final Color textColor = isRead
+                    ? AppColors.gray4
+                    : AppColors.darkGray;
                 final double fontDelta = widget.isTablet ? 5 : 0;
 
                 return GestureDetector(

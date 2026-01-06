@@ -11,6 +11,7 @@ import 'core/analytics/analytics_provider.dart';
 import 'core/audio/audio_handler.dart';
 import 'core/audio/hearit_player_controller.dart';
 import 'core/device/device_uuid_service.dart';
+import 'features/library/library_repository.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_colors.dart';
 import 'features/auth/auth_viewmodel.dart';
@@ -55,7 +56,10 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => HearitPlayerController(audioHandler: audioHandler),
+          create: (_) => HearitPlayerController(
+            audioHandler: audioHandler,
+            libraryRepository: LibraryRepository(),
+          ),
         ),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => SettingViewModel()),
