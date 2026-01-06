@@ -94,7 +94,7 @@ class BookmarkedHearitCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        if (hearit.isFinished) ...[
+        if (hearit.isFinished == true) ...[
           const SizedBox(width: 4),
           Image.asset(
             'assets/images/finished_check.png',

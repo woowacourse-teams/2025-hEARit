@@ -5,8 +5,8 @@ class BookmarkedHearit {
   final String title;
   final String summary;
   final int playTime; // 전체 재생 시간 (초 단위)
-  final int lastPlayTime; // 마지막 재생 위치 (밀리초 단위)
-  final bool isFinished;
+  final int? lastPlayTime; // 마지막 재생 위치 (밀리초 단위) - nullable
+  final bool? isFinished; // 재생 완료 여부 - nullable
   final List<HearitSource> sources;
   final BookmarkCategory category;
 
@@ -29,8 +29,8 @@ class BookmarkedHearit {
       title: json['title'] as String,
       summary: json['summary'] as String,
       playTime: json['playTime'] as int,
-      lastPlayTime: json['lastPlayTime'] as int,
-      isFinished: json['isFinished'] as bool,
+      lastPlayTime: json['lastPlayTime'] as int?,
+      isFinished: json['isFinished'] as bool?,
       sources: (json['sources'] as List<dynamic>)
           .map(
             (source) => HearitSource.fromJson(source as Map<String, dynamic>),
@@ -45,7 +45,8 @@ class BookmarkedHearit {
   /// 재생 진행률 계산 (0.0 ~ 1.0)
   double get progress {
     if (playTime <= 0) return 0.0;
-    final progressValue = (lastPlayTime / 1000) / playTime;
+    if (lastPlayTime == null) return 0.0;
+    final progressValue = (lastPlayTime! / 1000) / playTime;
     return progressValue.clamp(0.0, 1.0);
   }
 
@@ -56,7 +57,8 @@ class BookmarkedHearit {
 
   /// 마지막 재생 위치 포맷
   String get formattedLastPlayTime {
-    return _formatDuration((lastPlayTime / 1000).round());
+    if (lastPlayTime == null) return '00:00';
+    return _formatDuration((lastPlayTime! / 1000).round());
   }
 
   String _formatDuration(int seconds) {

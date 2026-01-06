@@ -344,7 +344,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
           )
           .toList(),
       playTime: Duration(seconds: hearit.playTime),
-      lastPlayTime: Duration(milliseconds: hearit.lastPlayTime),
+      lastPlayTime: hearit.lastPlayTime != null
+          ? Duration(milliseconds: hearit.lastPlayTime!)
+          : null,
       createdAt: DateTime.now(), // API 응답에 없으므로 현재 시간 사용
       isBookmarked: true, // 북마크 리스트에서 왔으므로 항상 true
       bookmarkId: hearit.bookmarkId,
