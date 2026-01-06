@@ -62,7 +62,12 @@ Future<void> main() async {
           ),
         ),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
-        ChangeNotifierProvider(create: (_) => SettingViewModel()),
+        ChangeNotifierProxyProvider<AuthViewModel, SettingViewModel>(
+          create: (context) =>
+              SettingViewModel(authViewModel: context.read<AuthViewModel>()),
+          update: (context, authViewModel, previous) =>
+              previous ?? SettingViewModel(authViewModel: authViewModel),
+        ),
       ],
       child: const MyApp(),
     ),

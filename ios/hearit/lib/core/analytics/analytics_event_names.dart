@@ -34,4 +34,10 @@ class AnalyticsEventNames {
   static const detailKakaoShare = 'detail_kakao_share';
   static const exploreToDetail = 'explore_to_detail';
   static const exploreSwipe = 'explore_swipe';
+
+  // Setting screen events
+  static const settingLogoutClicked = 'setting_logout_clicked';
+  static const settingWithdrawClicked = 'setting_withdraw_clicked';
+  static const settingLogoutConfirmed = 'setting_logout_confirmed';
+  static const settingWithdrawConfirmed = 'setting_withdraw_confirmed';
 }

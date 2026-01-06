@@ -3,9 +3,15 @@ import 'package:hearit/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/analytics/analytics_provider.dart';
+import '../../core/analytics/analytics_event_names.dart';
 import '../auth/auth_viewmodel.dart';
+import '../auth/login_screen.dart';
 import 'my_profile_screen.dart';
 import 'oss_licenses_page.dart';
+import 'setting_viewmodel.dart';
+import 'widgets/logout_confirm_dialog.dart';
+import 'widgets/withdraw_confirm_dialog.dart';
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key, this.onBackToHome});
@@ -52,6 +58,106 @@ class SettingScreen extends StatelessWidget {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const MyProfileScreen()));
+  }
+
+  /// 로그아웃 처리
+  Future<void> _handleLogout(BuildContext context) async {
+    // Analytics: 로그아웃 버튼 클릭
+    await AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.settingLogoutClicked,
+    );
+
+    // 확인 다이얼로그
+    final confirmed = await LogoutConfirmDialog.show(context);
+    if (!confirmed || !context.mounted) return;
+
+    final settingViewModel = context.read<SettingViewModel>();
+
+    try {
+      // 로그아웃 실행
+      await settingViewModel.logout();
+
+      if (!context.mounted) return;
+
+      // 성공 메시지 Toast
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('로그아웃이 완료되었습니다.'),
+          backgroundColor: AppColors.hearitPurple2,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      // 로그인 화면으로 이동 (루트 네비게이터 사용하여 모든 스택 제거)
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+
+      // 실패 메시지
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString().replaceAll('Exception: ', '')),
+          backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  /// 회원탈퇴 처리
+  Future<void> _handleWithdraw(BuildContext context) async {
+    // Analytics: 회원탈퇴 버튼 클릭
+    await AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.settingWithdrawClicked,
+    );
+
+    // 경고 다이얼로그
+    final confirmed = await WithdrawConfirmDialog.show(context);
+    if (!confirmed || !context.mounted) return;
+
+    final settingViewModel = context.read<SettingViewModel>();
+
+    try {
+      // 회원탈퇴 실행
+      await settingViewModel.withdraw();
+
+      if (!context.mounted) return;
+
+      // 성공 메시지 Toast
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('회원탈퇴가 완료되었습니다.'),
+          backgroundColor: AppColors.hearitPurple2,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      // 로그인 화면으로 이동 (루트 네비게이터 사용하여 모든 스택 제거)
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+
+      // 실패 메시지 (API 실패해도 로컬 토큰은 이미 삭제됨)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('회원탈퇴에 실패했습니다. 다시 로그인해주세요.'),
+          backgroundColor: AppColors.error,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      // API 실패해도 로그인 화면으로 이동 (루트 네비게이터 사용하여 모든 스택 제거)
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    }
   }
 
   @override
@@ -110,6 +216,37 @@ class SettingScreen extends StatelessWidget {
                     label: '오픈 라이선스',
                     onTap: () => _openLicenses(context),
                   ),
+                  const SizedBox(height: 20),
+
+                  // 로그인 상태일 때만 로그아웃/회원탈퇴 표시
+                  if (isLoggedIn) ...[
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(
+                        color: AppColors.gray2,
+                        thickness: 1,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _SettingItem(
+                      label: '로그아웃',
+                      onTap: () => _handleLogout(context),
+                      textStyle: _itemTextStyle.copyWith(
+                        color: AppColors.gray4,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _SettingItem(
+                      label: '회원탈퇴',
+                      onTap: () => _handleWithdraw(context),
+                      textStyle: _itemTextStyle.copyWith(
+                        color: AppColors.error,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                   const Spacer(),
                   Center(
                     child: Padding(
