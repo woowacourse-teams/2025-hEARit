@@ -32,6 +32,6 @@ public class RandomScoreFactor implements ScoreFactor {
     private double getRandomValue() {
         double value = randomNumberGenerator.getDouble();
         // 사용자가 다양한 컨텐츠를 접하기 위해 10% 확률로 최대 점수 부여
-        return value < 0.1 ? 1.0 : value;
+        return value <= 0.1 ? 1.0 : value;
     }
 }

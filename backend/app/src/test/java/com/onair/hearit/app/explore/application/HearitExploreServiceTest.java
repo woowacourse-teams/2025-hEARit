@@ -44,7 +44,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, RandomScoreFactor.class,
         RecencyScoreFactor.class, BookmarkScoreFactor.class, ExploreScoreCalculator.class,
         ExploreScoreCommandRepository.class, ExploreScoreInitializer.class, GuestExploreScoreProcessor.class,
-        MemberExploreScoreProcessor.class})
+        MemberExploreScoreProcessor.class, ScoreFactorWeightConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
