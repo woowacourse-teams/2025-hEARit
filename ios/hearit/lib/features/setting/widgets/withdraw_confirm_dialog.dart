@@ -37,7 +37,7 @@ class WithdrawConfirmDialog {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
-                '⚠️ 탈퇴 시 모든 데이터가 삭제되며\n복구할 수 없습니다.',
+                '⚠️ 탈퇴 시 모든 데이터가 삭제됩니다.',
                 style: TextStyle(
                   color: AppColors.error,
                   fontSize: 14,
