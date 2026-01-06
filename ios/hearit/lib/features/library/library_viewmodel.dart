@@ -27,6 +27,7 @@ class LibraryViewModel extends ChangeNotifier {
   int _totalElements = 0;
   bool _hasMore = true;
   bool _isGuest = false;
+  String? _loadMoreAuthError; // 무한 스크롤 중 인증 에러
 
   static const int _pageSize = 20;
 
@@ -40,6 +41,7 @@ class LibraryViewModel extends ChangeNotifier {
   bool get hasMore => _hasMore;
   bool get isEmpty => _bookmarks.isEmpty && !_isLoading;
   bool get isGuest => _isGuest;
+  String? get loadMoreAuthError => _loadMoreAuthError;
 
   /// 초기 데이터 로드 (프로필 + 첫 페이지 북마크)
   Future<void> loadInitialData() async {
@@ -109,15 +111,11 @@ class LibraryViewModel extends ChangeNotifier {
       _hasMore = response.hasMore;
       _totalElements = response.totalElements;
     } on ApiException catch (e) {
-      // 401/403: 세션 만료 또는 인증 실패 → guest 상태로 전환 (Option B)
+      // 401/403: 세션 만료 또는 인증 실패 → 기존 데이터 유지하고 로딩만 중단
       if (e.statusCode == 401 || e.statusCode == 403) {
-        _isGuest = true;
-        _error = null;
-        _bookmarks = []; // 기존 데이터 클리어
-        _totalElements = 0;
         _hasMore = false;
-        _profile = null;
-        debugPrint('추가 북마크 로드 중 인증 실패 (401/403): guest 모드로 전환');
+        _loadMoreAuthError = '로그인이 만료됐습니다. 다시 로그인해주세요';
+        debugPrint('추가 북마크 로드 중 인증 실패 (401/403): 로딩 중단');
       } else {
         // 다른 API 에러: 기존 데이터 유지
         debugPrint('추가 북마크 로드 실패: $e');
@@ -163,5 +161,10 @@ class LibraryViewModel extends ChangeNotifier {
     } catch (e) {
       debugPrint('프로필 재로드 실패: $e');
     }
+  }
+
+  /// 무한 스크롤 인증 에러 소비
+  void clearLoadMoreAuthError() {
+    _loadMoreAuthError = null;
   }
 }

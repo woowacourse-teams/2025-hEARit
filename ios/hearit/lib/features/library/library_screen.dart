@@ -57,7 +57,38 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   void _onViewModelChanged() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+
+      // 무한 스크롤 중 인증 에러 처리
+      if (_viewModel.loadMoreAuthError != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(_viewModel.loadMoreAuthError!),
+                backgroundColor: AppColors.gray2,
+                action: SnackBarAction(
+                  label: '로그인',
+                  textColor: AppColors.hearitPurple3,
+                  onPressed: () {
+                    Navigator.of(
+                      context,
+                      rootNavigator: true,
+                    ).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (route) => false,
+                    );
+                  },
+                ),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+            _viewModel.clearLoadMoreAuthError();
+          }
+        });
+      }
+    }
   }
 
   void _onScroll() {
