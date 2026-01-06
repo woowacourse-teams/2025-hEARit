@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.onair.hearit.analytics.AnalyticsLogger
-import com.onair.hearit.presentation.util.getParcelableCompat
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -47,12 +46,28 @@ class SearchFragment : Fragment() {
             }
         }
 
-    private fun Bundle?.toSearchStartArgs(): SearchStartArgs =
-        this?.getParcelableCompat<SearchStartArgs>(ARG_START_ARGS)
-            ?: SearchStartArgs()
+    private fun Bundle?.toSearchStartArgs(): SearchStartArgs {
+        if (this == null) return SearchStartArgs()
+
+        val categoryId = getLong(ARG_CATEGORY_ID, -1L)
+        if (categoryId == -1L) return SearchStartArgs()
+
+        return SearchStartArgs(
+            initialCategory =
+                SearchRoute.Category(
+                    id = categoryId,
+                    name = getString(ARG_CATEGORY_NAME) ?: "",
+                    colorCode = getString(ARG_CATEGORY_COLOR) ?: "",
+                ),
+            isDirectEntry = getBoolean(ARG_IS_DIRECT_ENTRY, false),
+        )
+    }
 
     companion object {
-        private const val ARG_START_ARGS = "startArgs"
+        private const val ARG_CATEGORY_ID = "category_id"
+        private const val ARG_CATEGORY_NAME = "category_name"
+        private const val ARG_CATEGORY_COLOR = "category_color"
+        private const val ARG_IS_DIRECT_ENTRY = "is_direct_entry"
 
         fun newInstance() = SearchFragment()
 
@@ -63,18 +78,10 @@ class SearchFragment : Fragment() {
         ) = SearchFragment().apply {
             arguments =
                 Bundle().apply {
-                    putParcelable(
-                        ARG_START_ARGS,
-                        SearchStartArgs(
-                            initialCategory =
-                                CategoryNavModel(
-                                    id = categoryId,
-                                    name = categoryName,
-                                    colorCode = categoryColor,
-                                ),
-                            isDirectEntry = true,
-                        ),
-                    )
+                    putLong(ARG_CATEGORY_ID, categoryId)
+                    putString(ARG_CATEGORY_NAME, categoryName)
+                    putString(ARG_CATEGORY_COLOR, categoryColor)
+                    putBoolean(ARG_IS_DIRECT_ENTRY, true)
                 }
         }
     }
