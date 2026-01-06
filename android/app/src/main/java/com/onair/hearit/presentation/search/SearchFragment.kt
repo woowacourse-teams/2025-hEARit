@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.onair.hearit.analytics.AnalyticsLogger
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 
 val LocalAnalyticsLogger =
@@ -51,13 +52,20 @@ class SearchFragment : Fragment() {
 
         val categoryId = getLong(ARG_CATEGORY_ID, -1L)
         if (categoryId == -1L) return SearchStartArgs()
+        val categoryName = getString(ARG_CATEGORY_NAME)
+        val categoryColor = getString(ARG_CATEGORY_COLOR)
+
+        if (categoryName.isNullOrEmpty() || categoryColor.isNullOrEmpty()) {
+            Timber.w("Category 데이터가 null 또는 Empty입니다.: name=$categoryName, color=$categoryColor")
+            return SearchStartArgs()
+        }
 
         return SearchStartArgs(
             initialCategory =
                 SearchRoute.Category(
                     id = categoryId,
-                    name = getString(ARG_CATEGORY_NAME) ?: "",
-                    colorCode = getString(ARG_CATEGORY_COLOR) ?: "",
+                    name = categoryName,
+                    colorCode = categoryColor,
                 ),
             isDirectEntry = getBoolean(ARG_IS_DIRECT_ENTRY, false),
         )
