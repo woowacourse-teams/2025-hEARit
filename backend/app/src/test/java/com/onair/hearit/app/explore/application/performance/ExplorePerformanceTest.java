@@ -125,11 +125,11 @@ class ExplorePerformanceTest extends IntegrationTest {
             topKDaysAgoResults.add(topKDaysAgo);
         }
 
-        Set<Long> baseIds = new HashSet<>(topKIdResults.get(0));
+        Set<Long> baseIds = new HashSet<>(topKIdResults.getFirst());
 
         // then
-        System.out.println("[비회원 1회차] 추천 히어릿 ID 목록=" + topKIdResults.get(0));
-        System.out.println("[비회원 1회차] 추천 히어릿 신선도(daysAgo)=" + topKDaysAgoResults.get(0));
+        System.out.println("[비회원 1회차] 추천 히어릿 ID 목록=" + topKIdResults.getFirst());
+        System.out.println("[비회원 1회차] 추천 히어릿 신선도(daysAgo)=" + topKDaysAgoResults.getFirst());
         System.out.println();
 
         int idOverlapSum = 0;
@@ -150,10 +150,8 @@ class ExplorePerformanceTest extends IntegrationTest {
             System.out.println();
         }
 
-        if (runs > 1) {
-            double avgIdOverlapRate = (double) idOverlapSum / ((runs - 1) * k);
-            System.out.println("[비회원 요약] 평균 ID 중복률=" + String.format("%.1f%%", avgIdOverlapRate * 100));
-        }
+        double avgIdOverlapRate = (double) idOverlapSum / ((runs - 1) * k);
+        System.out.println("[비회원 요약] 평균 ID 중복률=" + String.format("%.1f%%", avgIdOverlapRate * 100));
     }
 
     @Test
@@ -173,7 +171,7 @@ class ExplorePerformanceTest extends IntegrationTest {
 
         List<List<Long>> topKIdsPerRun = new ArrayList<>();
         List<List<Long>> topKCategoryIdsPerRun = new ArrayList<>();
-        
+
         // when
         for (int r = 0; r < runs; r++) {
             CursorResponseV2<ExploredHearitResponse> res = hearitExploreService.getExploredHearits(
@@ -199,7 +197,7 @@ class ExplorePerformanceTest extends IntegrationTest {
             System.out.println("[회원 " + (r + 1) + "회차] 추천 히어릿 카테고리 ID 목록=" + categoryIds);
             System.out.println("[회원 " + (r + 1) + "회차] 카테고리별 개수=" + countByValue(categoryIds));
             if (r > 0) {
-                List<Long> baseIds = topKIdsPerRun.get(0);
+                List<Long> baseIds = topKIdsPerRun.getFirst();
                 int samePositionCount = countSamePositions(baseIds, ids);
                 double samePositionRate = (double) samePositionCount / k;
 
@@ -210,16 +208,14 @@ class ExplorePerformanceTest extends IntegrationTest {
             System.out.println();
         }
 
-        if (runs > 1) {
-            List<Long> baseCategoryIds = topKCategoryIdsPerRun.get(0);
-            int categoryOverlapSum = 0;
-            for (int i = 1; i < runs; i++) {
-                categoryOverlapSum += multisetOverlap(baseCategoryIds, topKCategoryIdsPerRun.get(i));
-            }
-            double avgCategoryOverlapRate = (double) categoryOverlapSum / ((runs - 1) * k);
-            System.out.println("[회원 요약] 1회차 대비 평균 카테고리 중복률="
-                    + String.format("%.1f%%", avgCategoryOverlapRate * 100));
+        List<Long> baseCategoryIds = topKCategoryIdsPerRun.getFirst();
+        int categoryOverlapSum = 0;
+        for (int i = 1; i < runs; i++) {
+            categoryOverlapSum += multisetOverlap(baseCategoryIds, topKCategoryIdsPerRun.get(i));
         }
+        double avgCategoryOverlapRate = (double) categoryOverlapSum / ((runs - 1) * k);
+        System.out.println("[회원 요약] 1회차 대비 평균 카테고리 중복률="
+                + String.format("%.1f%%", avgCategoryOverlapRate * 100));
     }
 
     private void addBookmarkAndPlayingHistory(Member member, String categoryName, int bookmarkCount, int playCount) {
