@@ -40,30 +40,14 @@ class LibraryHeader extends StatelessWidget {
       ),
       child: SafeArea(
         bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
           children: [
-            // 설정 아이콘 (상단에 배치)
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8, top: 4),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.settings,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                  onPressed: () => _navigateToSettings(context),
-                ),
-              ),
-            ),
-            // 프로필 영역 (위로 올림)
+            // 프로필 영역
             Padding(
               padding: const EdgeInsets.only(
                 left: 20,
                 right: 20,
-                top: 0,
+                top: 12,
                 bottom: 28,
               ),
               child: Row(
@@ -85,6 +69,15 @@ class LibraryHeader extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+            // 설정 아이콘 (우측 상단에 배치)
+            Positioned(
+              top: 4,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.settings, color: Colors.white, size: 28),
+                onPressed: () => _navigateToSettings(context),
               ),
             ),
           ],
@@ -115,8 +108,8 @@ class LibraryHeader extends StatelessWidget {
             'H',
             style: const TextStyle(
               color: AppColors.gray4,
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
+              fontSize: 22,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),

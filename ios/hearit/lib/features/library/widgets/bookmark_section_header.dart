@@ -19,7 +19,7 @@ class BookmarkSectionHeader extends StatelessWidget {
     final showPlayButton = onPlayAll != null; // onPlayAll이 null이 아니면 버튼 표시
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       child: Row(
         children: [
           // 왼쪽: 타이틀 + 개수
