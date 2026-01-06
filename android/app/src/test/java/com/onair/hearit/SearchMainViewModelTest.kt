@@ -5,12 +5,11 @@ import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.repository.CategoryRepository
-import com.onair.hearit.domain.repository.HearitRepository
-import com.onair.hearit.domain.repository.RecentKeywordRepository
-import com.onair.hearit.presentation.search.SearchViewModel
+import com.onair.hearit.presentation.search.main.SearchMainViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -24,28 +23,22 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SearchViewModelTest {
+class SearchMainViewModelTest {
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
     private val testDispatcher = UnconfinedTestDispatcher()
-    private lateinit var viewModel: SearchViewModel
+    private lateinit var viewModel: SearchMainViewModel
     private lateinit var categoryRepository: CategoryRepository
-    private lateinit var hearitRepository: HearitRepository
-    private lateinit var recentKeywordRepository: RecentKeywordRepository
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
         categoryRepository = mockk()
-        hearitRepository = mockk()
-        recentKeywordRepository = mockk()
 
         viewModel =
-            SearchViewModel(
+            SearchMainViewModel(
                 categoryRepository = categoryRepository,
-                hearitRepository = hearitRepository,
-                recentKeywordRepository = recentKeywordRepository,
             )
     }
 
@@ -79,7 +72,7 @@ class SearchViewModelTest {
             viewModel.fetchCategories()
 
             // Then
-            assertEquals(mockCategories, viewModel.searchMainUiState.value.categories)
+            assertEquals(mockCategories.toImmutableList(), viewModel.searchMainUiState.value.categories)
             assertEquals(false, viewModel.searchMainUiState.value.isLoading)
             coVerify(exactly = 1) { categoryRepository.getCategories(page = 0) }
         }
