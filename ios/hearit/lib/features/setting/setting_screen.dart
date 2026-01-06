@@ -19,7 +19,7 @@ class SettingScreen extends StatelessWidget {
   final VoidCallback? onBackToHome;
   static const Color _backgroundColor = AppColors.hearitBlack;
   static const TextStyle _itemTextStyle = TextStyle(
-    color: Colors.white70,
+    color: AppColors.gray4,
     fontSize: 16,
     fontWeight: FontWeight.w500,
   );
@@ -182,92 +182,140 @@ class SettingScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Consumer<AuthViewModel>(
-            builder: (context, authViewModel, _) {
-              final isLoggedIn = authViewModel.isLoggedIn;
+        child: Consumer<AuthViewModel>(
+          builder: (context, authViewModel, _) {
+            final isLoggedIn = authViewModel.isLoggedIn;
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 12),
+
+                      // 로그인 상태일 때만 "내 정보" 표시
+                      if (isLoggedIn) ...[
+                        _SettingItem(
+                          label: '내 정보',
+                          onTap: () => _openMyProfile(context),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+
+                      _SettingItem(
+                        label: '개인정보처리방침',
+                        onTap: () =>
+                            _openExternalUrl(context, _privacyPolicyUrl),
+                      ),
+                      const SizedBox(height: 20),
+                      _SettingItem(
+                        label: '이용 약관',
+                        onTap: () => _openExternalUrl(context, _termsUrl),
+                      ),
+                      const SizedBox(height: 20),
+                      _SettingItem(
+                        label: '오픈 라이선스',
+                        onTap: () => _openLicenses(context),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+
+                // 로그인 상태일 때만 로그아웃/회원탈퇴 표시
+                if (isLoggedIn) ...[
                   const SizedBox(height: 12),
-
-                  // 로그인 상태일 때만 "내 정보" 표시
-                  if (isLoggedIn) ...[
-                    _SettingItem(
-                      label: '내 정보',
-                      onTap: () => _openMyProfile(context),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-
-                  _SettingItem(
-                    label: '개인정보처리방침',
-                    onTap: () => _openExternalUrl(context, _privacyPolicyUrl),
+                  Container(
+                    width: double.infinity,
+                    height: 1,
+                    color: AppColors.darkGray,
                   ),
-                  const SizedBox(height: 20),
-                  _SettingItem(
-                    label: '이용 약관',
-                    onTap: () => _openExternalUrl(context, _termsUrl),
-                  ),
-                  const SizedBox(height: 20),
-                  _SettingItem(
-                    label: '오픈 라이선스',
-                    onTap: () => _openLicenses(context),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // 로그인 상태일 때만 로그아웃/회원탈퇴 표시
-                  if (isLoggedIn) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Divider(
-                        color: AppColors.gray2,
-                        thickness: 1,
-                        height: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _SettingItem(
-                      label: '로그아웃',
-                      onTap: () => _handleLogout(context),
-                      textStyle: _itemTextStyle.copyWith(
-                        color: AppColors.gray4,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _SettingItem(
-                      label: '회원탈퇴',
-                      onTap: () => _handleWithdraw(context),
-                      textStyle: _itemTextStyle.copyWith(
-                        color: AppColors.error,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                  const Spacer(),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
-                      child: _SettingItem(
-                        label: '피드백 및 문의하기',
-                        onTap: () => _openExternalUrl(
-                          context,
-                          'https://forms.gle/KGjHNi9ASdN3jR5v6',
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        _SettingItem(
+                          label: '로그아웃',
+                          onTap: () => _handleLogout(context),
+                          textStyle: _itemTextStyle.copyWith(
+                            color: AppColors.gray4,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        textStyle: _itemTextStyle.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(height: 20),
+                        _SettingItem(
+                          label: '회원탈퇴',
+                          onTap: () => _handleWithdraw(context),
+                          textStyle: _itemTextStyle.copyWith(
+                            color: AppColors.error,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    height: 1,
+                    color: AppColors.darkGray,
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        _SettingItem(
+                          label: '로그인 하러가기',
+                          onTap: () {
+                            Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            ).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                              (route) => false,
+                            );
+                          },
+                          textStyle: _itemTextStyle.copyWith(
+                            color: AppColors.gray4,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              );
-            },
-          ),
+                const Spacer(),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: _SettingItem(
+                      label: '피드백 및 문의하기',
+                      onTap: () => _openExternalUrl(
+                        context,
+                        'https://forms.gle/KGjHNi9ASdN3jR5v6',
+                      ),
+                      textStyle: _itemTextStyle.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

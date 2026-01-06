@@ -6,6 +6,7 @@ import '../../core/analytics/analytics_event_names.dart';
 import '../../core/analytics/analytics_param_keys.dart';
 import '../../core/analytics/analytics_provider.dart';
 import '../../core/audio/hearit_player_controller.dart';
+import '../auth/login_screen.dart';
 import '../detail/hearit_detail.dart' as detail;
 import '../detail/hearit_detail_screen.dart';
 import 'library_models.dart';
@@ -213,6 +214,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: CircularProgressIndicator(color: AppColors.hearitPurple2),
             ),
           )
+        // 게스트 상태 (401/403)
+        else if (_viewModel.isGuest) ...[
+          // 헤더 (기본 프로필)
+          SliverToBoxAdapter(
+            child: LibraryHeader(profile: null, isGuest: true),
+          ),
+          // 북마크 섹션 헤더
+          SliverToBoxAdapter(
+            child: BookmarkSectionHeader(
+              totalCount: 0,
+              onPlayAll: () {}, // No-op for guests
+            ),
+          ),
+          // 게스트 메시지 UI
+          SliverFillRemaining(child: _buildGuestState()),
+        ]
         // 에러 상태 (북마크가 없을 때만)
         else if (_viewModel.error != null && _viewModel.bookmarks.isEmpty)
           SliverFillRemaining(
@@ -249,7 +266,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
         // 정상 상태 (헤더 + 리스트)
         else ...[
           // 헤더 (프로필 + 그라데이션)
-          SliverToBoxAdapter(child: LibraryHeader(profile: _viewModel.profile)),
+          SliverToBoxAdapter(
+            child: LibraryHeader(profile: _viewModel.profile, isGuest: false),
+          ),
           // 북마크 섹션 헤더
           SliverToBoxAdapter(
             child: BookmarkSectionHeader(
@@ -299,8 +318,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Widget _buildEmptyState() {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          const Spacer(flex: 1), // 상단 여백
           Icon(
             Icons.bookmark_border,
             size: 80,
@@ -310,20 +330,80 @@ class _LibraryScreenState extends State<LibraryScreen> {
           Text(
             '아직 북마크된 팟캐스트가 없습니다',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: AppColors.gray3,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            '탐색 탭에서 마음에 드는\n팟캐스트를 북마크해보세요!',
+            '상세화면에서 마음에 드는\n팟캐스트를 북마크해보세요!',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.5),
               fontSize: 14,
             ),
           ),
+          const Spacer(flex: 2), // 하단 여백
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGuestState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Spacer(flex: 1), // 상단 여백
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: const TextStyle(
+                color: AppColors.gray4,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                height: 1.5,
+              ),
+              children: [
+                TextSpan(
+                  text: '히어릿',
+                  style: TextStyle(
+                    color: AppColors.hearitPurple1,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const TextSpan(text: '을 모아서 듣고 싶다면,\n로그인을 해주세요!'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.hearitPurple3,
+                foregroundColor: AppColors.gray4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                '로그인 하러가기',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+          const Spacer(flex: 2), // 하단 여백
         ],
       ),
     );

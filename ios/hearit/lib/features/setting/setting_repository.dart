@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../core/network/api_client.dart';
+import '../../core/network/api_exception.dart';
 import '../auth/services/auth_storage_service.dart';
 import 'models/member_profile.dart';
 
@@ -22,7 +23,7 @@ class SettingRepository {
       final token = await _authStorageService.getAccessToken();
 
       if (token == null) {
-        throw Exception('로그인이 필요합니다.');
+        throw ApiException.server(401, '로그인이 필요합니다.');
       }
 
       // 2. API 호출
@@ -34,6 +35,8 @@ class SettingRepository {
 
       // 3. MemberProfile 객체로 변환
       return MemberProfile.fromJson(response);
+    } on ApiException {
+      rethrow; // ApiException은 그대로 전달 (statusCode 보존)
     } catch (error) {
       debugPrint('프로필 조회 실패: $error');
       throw Exception('프로필 정보를 불러올 수 없습니다: $error');
@@ -48,13 +51,15 @@ class SettingRepository {
       final token = await _authStorageService.getAccessToken();
 
       if (token == null) {
-        throw Exception('로그인이 필요합니다.');
+        throw ApiException.server(401, '로그인이 필요합니다.');
       }
 
       await _apiClient.delete<void>(
         '/api/v1/auth/withdraw',
         headers: {'Authorization': 'Bearer $token'},
       );
+    } on ApiException {
+      rethrow; // ApiException은 그대로 전달 (statusCode 보존)
     } catch (error) {
       debugPrint('회원탈퇴 API 실패: $error');
       throw Exception('회원탈퇴에 실패했습니다.');

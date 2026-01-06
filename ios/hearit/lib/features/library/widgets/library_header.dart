@@ -7,9 +7,10 @@ import '../../setting/setting_screen.dart';
 /// 라이브러리 화면 상단 프로필 헤더
 /// 프로필 이미지 + 닉네임 + 그라데이션 배경 + 설정 버튼
 class LibraryHeader extends StatelessWidget {
-  const LibraryHeader({super.key, required this.profile});
+  const LibraryHeader({super.key, required this.profile, this.isGuest = false});
 
   final MemberProfile? profile;
+  final bool isGuest;
 
   void _navigateToSettings(BuildContext context) {
     Navigator.of(
@@ -73,7 +74,7 @@ class LibraryHeader extends StatelessWidget {
                   // 닉네임
                   Expanded(
                     child: Text(
-                      profile?.nickname ?? '사용자',
+                      isGuest ? 'hEARit' : (profile?.nickname ?? '사용자'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -93,6 +94,36 @@ class LibraryHeader extends StatelessWidget {
   }
 
   Widget _buildProfileImage() {
+    // Guest users always see 'H' initial on HearitPurple3 background
+    if (isGuest) {
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.hearitPurple3,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            'H',
+            style: const TextStyle(
+              color: AppColors.gray4,
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Logged-in users: existing logic
     final hasImage = profile?.hasProfileImage ?? false;
 
     return Container(

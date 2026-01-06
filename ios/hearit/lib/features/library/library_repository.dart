@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../core/network/api_client.dart';
+import '../../core/network/api_exception.dart';
 import '../auth/services/auth_storage_service.dart';
 import 'library_models.dart';
 
@@ -26,7 +27,7 @@ class LibraryRepository {
       final token = await _authStorageService.getAccessToken();
 
       if (token == null) {
-        throw Exception('로그인이 필요합니다.');
+        throw ApiException.server(401, '로그인이 필요합니다.');
       }
 
       // API 호출
@@ -39,6 +40,8 @@ class LibraryRepository {
 
       // BookmarkListResponse 객체로 변환
       return BookmarkListResponse.fromJson(response);
+    } on ApiException {
+      rethrow; // ApiException은 그대로 전달 (statusCode 보존)
     } catch (error) {
       debugPrint('북마크 목록 조회 실패: $error');
       throw Exception('북마크 목록을 불러올 수 없습니다: $error');
@@ -53,7 +56,7 @@ class LibraryRepository {
       final token = await _authStorageService.getAccessToken();
 
       if (token == null) {
-        throw Exception('로그인이 필요합니다.');
+        throw ApiException.server(401, '로그인이 필요합니다.');
       }
 
       // API 호출
@@ -63,6 +66,8 @@ class LibraryRepository {
       );
 
       debugPrint('북마크 삭제 성공: $bookmarkId');
+    } on ApiException {
+      rethrow; // ApiException은 그대로 전달 (statusCode 보존)
     } catch (error) {
       debugPrint('북마크 삭제 실패: $error');
       throw Exception('북마크를 삭제할 수 없습니다: $error');
