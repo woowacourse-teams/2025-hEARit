@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
-import com.onair.hearit.app.explore.application.scorefactor.DefaultRandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.randomgenerator.DefaultRandomNumberGenerator;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
@@ -91,7 +91,7 @@ class ExploreScoreInitializerTest {
         assertAll(
                 () -> assertThat(rows).hasSize(1),
                 () -> assertThat(rows.get(0).hearitId()).isEqualTo(hearit.getId()),
-                () -> assertThat(rows.get(0).score()).isNotNull(),
+                () -> assertThat(rows.get(0).score()).isNotZero(),
                 () -> assertThat(rows.get(0).cursorId()).isNotNull()
         );
     }

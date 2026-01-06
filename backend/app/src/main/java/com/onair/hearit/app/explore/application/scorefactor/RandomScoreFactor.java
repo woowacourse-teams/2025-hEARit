@@ -1,5 +1,6 @@
 package com.onair.hearit.app.explore.application.scorefactor;
 
+import com.onair.hearit.app.explore.application.scorefactor.randomgenerator.RandomNumberGenerator;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.UserType;
 import java.util.List;
