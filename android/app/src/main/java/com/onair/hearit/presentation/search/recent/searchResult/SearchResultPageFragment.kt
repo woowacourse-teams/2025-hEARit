@@ -96,7 +96,7 @@ class SearchResultPageFragment :
     }
 
     private fun fetchData() {
-        viewModel.fetchResultData(true)
+//        viewModel.fetchResultData(true)
     }
 
     private fun observeViewModel() {
