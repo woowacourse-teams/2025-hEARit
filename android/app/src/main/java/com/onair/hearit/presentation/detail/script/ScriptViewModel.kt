@@ -1,18 +1,17 @@
 package com.onair.hearit.presentation.detail.script
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.onair.hearit.domain.model.ScriptLine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import java.time.Clock
 import javax.inject.Inject
 
 @HiltViewModel
-class ScriptViewModel @Inject constructor() : ViewModel() {
+class ScriptViewModel @Inject constructor(
+    private val clock: Clock,
+) : ViewModel() {
     private val _highlightedId: MutableStateFlow<Long?> = MutableStateFlow(null)
     val highlightedId: StateFlow<Long?> = _highlightedId
 
@@ -23,16 +22,6 @@ class ScriptViewModel @Inject constructor() : ViewModel() {
     val followModeEnabled: StateFlow<Boolean> = _followModeEnabled
 
     private val lastUserScrollEpochMillis: MutableStateFlow<Long> = MutableStateFlow(0L)
-    private val latestScriptsSnapshot: MutableStateFlow<List<ScriptLine>> =
-        MutableStateFlow(emptyList())
-
-    val highlightedIndex: StateFlow<Int> =
-        combine(
-            _highlightedId,
-            latestScriptsSnapshot,
-        ) { highlightedIdValue: Long?, scripts: List<ScriptLine> ->
-            highlightedIdValue?.let { id -> scripts.indexOfFirst { it.id == id } } ?: -1
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STARTED_TIMEOUT_MS), -1)
 
     fun onUserScrollStateChange(isScrolling: Boolean) {
         _isUserScrolling.value = isScrolling
@@ -53,8 +42,6 @@ class ScriptViewModel @Inject constructor() : ViewModel() {
         currentPositionMillis: Long,
         currentScripts: List<ScriptLine>,
     ) {
-        latestScriptsSnapshot.value = currentScripts
-
         if (_isUserScrolling.value) {
             val now: Long = currentTimeMillis()
             val idleReached: Boolean =
@@ -64,14 +51,16 @@ class ScriptViewModel @Inject constructor() : ViewModel() {
             }
         }
 
-        val currentItem: ScriptLine? =
-            currentScripts.firstOrNull { script ->
+        val currentIndex: Int =
+            currentScripts.indexOfFirst { script ->
                 currentPositionMillis in script.start until script.end
             }
-        _highlightedId.value = currentItem?.id
+        val newHighlightedId: Long? =
+            if (currentIndex >= 0) currentScripts[currentIndex].id else null
+        if (_highlightedId.value != newHighlightedId) _highlightedId.value = newHighlightedId
     }
 
-    private fun currentTimeMillis(): Long = System.currentTimeMillis()
+    private fun currentTimeMillis(): Long = clock.millis()
 
     companion object {
         const val USER_SCROLL_IDLE_THRESHOLD_MS: Long = 3_000L
