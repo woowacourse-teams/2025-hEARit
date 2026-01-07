@@ -15,6 +15,9 @@ import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.SingleLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -41,6 +44,9 @@ class PlayerDetailViewModel @Inject constructor(
     private val _showLoginDialog = SingleLiveData<Unit>()
     val showLoginDialog: LiveData<Unit> = _showLoginDialog
 
+    private val _highlightedId: MutableStateFlow<Long?> = MutableStateFlow(null)
+    val highlightedId: StateFlow<Long?> = _highlightedId.asStateFlow()
+
     init {
         if (hearitId > INVALID_HEARIT_ID) {
             fetchData()
@@ -64,6 +70,11 @@ class PlayerDetailViewModel @Inject constructor(
         _hearit.value = null
         hearitId = newHearitId
         fetchData()
+    }
+
+    fun setHighlightedId(scriptId: Long?) {
+        if (_highlightedId.value == scriptId) return
+        _highlightedId.value = scriptId
     }
 
     private fun deleteBookmark() {

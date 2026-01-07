@@ -6,16 +6,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import com.onair.hearit.domain.model.ScriptLine
+import com.onair.hearit.presentation.detail.component.rememberScriptScrollState
 
 @Composable
 fun Scripts(
     scriptLines: List<ScriptLine>,
     highlightedId: Long?,
-    highlightedIndex: Int,
     isUserScrolling: Boolean,
     followHighlight: Boolean,
     onLineClick: (ScriptLine) -> Unit,
@@ -23,6 +24,15 @@ fun Scripts(
     onStopFollow: () -> Unit,
 ) {
     val scrollState = rememberScriptScrollState { scriptLines }
+
+    val highlightedIndex: Int =
+        remember(scriptLines, highlightedId) {
+            if (highlightedId == null) {
+                -1
+            } else {
+                scriptLines.indexOfFirst { it.id == highlightedId }
+            }
+        }
 
     LaunchedEffect(scrollState.listState) {
         snapshotFlow { scrollState.listState.isScrollInProgress }.collect { inProgress ->
