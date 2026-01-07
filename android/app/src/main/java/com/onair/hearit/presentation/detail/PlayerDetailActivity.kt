@@ -1,19 +1,18 @@
 package com.onair.hearit.presentation.detail
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.concurrent.futures.await
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
@@ -21,6 +20,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.MediaItem
@@ -29,7 +29,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -55,10 +54,9 @@ import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.detail.adapter.PlayerDetailKeywordAdapter
-import com.onair.hearit.presentation.detail.adapter.PlayerDetailScriptAdapter
 import com.onair.hearit.presentation.detail.adapter.PlayerDetailSourceAdapter
+import com.onair.hearit.presentation.detail.component.DetailScripts
 import com.onair.hearit.presentation.detail.script.ScriptFragment
-import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
@@ -80,7 +78,6 @@ class PlayerDetailActivity :
     private lateinit var binding: ActivityPlayerDetailBinding
 
     private val keywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
-    private val scriptAdapter by lazy { PlayerDetailScriptAdapter() }
     private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
     @Inject
@@ -89,7 +86,6 @@ class PlayerDetailActivity :
     private var mediaController: MediaController? = null
 
     private val updateIntervalMs = 500L
-    private val itemHeightPx by lazy { SCRIPT_ITEM_HEIGHT_DP.dpToPx(this) }
 
     private val previousScreen by lazy {
         intent.getStringExtra(PREVIOUS_SCREEN_KEY) ?: UNKNOWN_SCREEN_ID
@@ -131,6 +127,7 @@ class PlayerDetailActivity :
         setupBackPressHandler()
         setupWindowInsets()
         setupRecyclerView()
+        setupDetailScript()
         observeViewModel()
         startScriptSyncLoop()
         handleIncomingIntent(intent)
@@ -203,9 +200,6 @@ class PlayerDetailActivity :
     }
 
     private fun setupRecyclerView() {
-        binding.rvScript.adapter = scriptAdapter
-        setupScriptTapGesture()
-
         val layoutManager =
             FlexboxLayoutManager(this).apply {
                 flexDirection = FlexDirection.ROW
@@ -217,33 +211,32 @@ class PlayerDetailActivity :
         binding.layoutDetailSource.rvDetailSource.adapter = sourceAdapter
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupScriptTapGesture() {
-        val detector =
-            GestureDetector(
-                this,
-                object : GestureDetector.SimpleOnGestureListener() {
-                    override fun onSingleTapUp(e: MotionEvent): Boolean {
-                        supportFragmentManager
-                            .beginTransaction()
-                            .setCustomAnimations(R.anim.slide_up, 0)
-                            .replace(
-                                R.id.fragment_container_view,
-                                ScriptFragment.newInstance(),
-                            ).addToBackStack(null)
-                            .commit()
-                        return true
-                    }
-                },
+    private fun setupDetailScript() {
+        binding.cvScript.setContent {
+            val hearit by viewModel.hearit.observeAsState()
+            val highlightedId by viewModel.highlightedId.collectAsStateWithLifecycle()
+
+            DetailScripts(
+                scriptLines = hearit?.script.orEmpty(),
+                highlightedId = highlightedId,
+                onClick = { openScriptFragment() },
             )
-        binding.rvScript.setOnTouchListener { _, event -> detector.onTouchEvent(event) }
+        }
+    }
+
+    private fun openScriptFragment() {
+        supportFragmentManager
+            .beginTransaction()
+            .setCustomAnimations(R.anim.slide_up, 0)
+            .replace(R.id.fragment_container_view, ScriptFragment.newInstance())
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun observeViewModel() {
         viewModel.hearit.observe(this) { hearit ->
             binding.hearit = hearit
             keywordAdapter.submitList(hearit?.keywords)
-            scriptAdapter.submitList(hearit?.script)
             sourceAdapter.submitList(hearit?.sources)
 
             // hearit 로드 뒤, 아직 재생 시작 안했으면 시도
@@ -372,14 +365,10 @@ class PlayerDetailActivity :
                     mediaController?.let { controller ->
                         val position = controller.currentPosition
                         val current =
-                            scriptAdapter.currentList.firstOrNull { position in it.start until it.end }
-                        if (current != null) {
-                            scriptAdapter.highlightScriptLine(current.id)
-                            val index = scriptAdapter.currentList.indexOf(current)
-                            val center = binding.rvScript.height / 2 - itemHeightPx / 2
-                            (binding.rvScript.layoutManager as LinearLayoutManager)
-                                .scrollToPositionWithOffset(index, center)
-                        }
+                            viewModel.hearit.value
+                                ?.script
+                                ?.firstOrNull { position in it.start until it.end }
+                        viewModel.setHighlightedId(current?.id)
                     }
                     delay(updateIntervalMs)
                 }
@@ -579,7 +568,6 @@ class PlayerDetailActivity :
         const val LOGIN_REQUIRED_DIALOG_TAG = "login_required_dialog"
         private const val ERROR_UNSUPPORTED_LINK_MESSAGE = "지원되지 않는 링크입니다"
         private const val ERROR_INVALID_LINK_MESSAGE = "잘못된 링크 형식입니다"
-        private const val SCRIPT_ITEM_HEIGHT_DP = 16
         private const val TEMPLATE_ID = 124931L
         private const val TEMPLATE_TITLE_KEY = "title"
         private const val TEMPLATE_HEARIT_ID_KEY = "id"

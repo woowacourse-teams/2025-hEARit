@@ -194,8 +194,6 @@ class ScriptFragment : Fragment() {
 
             val highlightedId: Long? =
                 scriptViewModel.highlightedId.collectAsStateWithLifecycle().value
-            val highlightedIndex: Int =
-                scriptViewModel.highlightedIndex.collectAsStateWithLifecycle().value
             val isUserScrolling: Boolean =
                 scriptViewModel.isUserScrolling.collectAsStateWithLifecycle().value
             val followHighlight: Boolean =
@@ -204,7 +202,6 @@ class ScriptFragment : Fragment() {
             Scripts(
                 scriptLines = scripts,
                 highlightedId = highlightedId,
-                highlightedIndex = highlightedIndex,
                 isUserScrolling = isUserScrolling,
                 followHighlight = followHighlight,
                 onLineClick = { item ->
