@@ -1,7 +1,6 @@
 package com.onair.hearit.presentation.search
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
@@ -9,8 +8,10 @@ import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RecentSearch
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.domain.repository.HearitRepository
-import com.onair.hearit.domain.repository.RecentKeywordRepository
+import com.onair.hearit.domain.usecase.search.ClearRecentKeywordsUseCase
+import com.onair.hearit.domain.usecase.search.GetRecentKeywordsUseCase
+import com.onair.hearit.domain.usecase.search.SaveRecentKeywordUseCase
+import com.onair.hearit.domain.usecase.search.SearchHearitsUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,70 +23,55 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val hearitRepository: HearitRepository,
-    private val recentKeywordRepository: RecentKeywordRepository,
+    private val getRecentKeywords: GetRecentKeywordsUseCase,
+    private val saveRecentKeyword: SaveRecentKeywordUseCase,
+    private val clearRecentKeywords: ClearRecentKeywordsUseCase,
+    private val searchHearits: SearchHearitsUseCase,
 ) : ViewModel() {
-    private val _searchUiState = MutableLiveData<SearchUiState>()
-    val searchUiState: LiveData<SearchUiState> = _searchUiState
+    private val _recentKeywords = MutableStateFlow<List<RecentSearch>>(emptyList())
+    val recentKeywords: StateFlow<List<RecentSearch>> = _recentKeywords.asStateFlow()
 
-    private val _recentKeywords = MutableStateFlow<List<RecentSearch>?>(null)
-    val recentKeywords: StateFlow<List<RecentSearch>?> = _recentKeywords.asStateFlow()
-
-    private val _searchedHearits = MutableLiveData<List<SearchedHearit>>()
-    val searchedHearits: LiveData<List<SearchedHearit>> = _searchedHearits
-
-    private val _toastMessage = SingleLiveData<Int?>()
-    val toastMessage: LiveData<Int?> = _toastMessage
-
-    private var currentInput: SearchInput? = null
+    private val _searchedHearits = MutableStateFlow<List<SearchedHearit>>(emptyList())
+    val searchedHearits: StateFlow<List<SearchedHearit>> = _searchedHearits.asStateFlow()
 
     private val _searchInput = MutableStateFlow<SearchInput?>(null)
     val searchInput: StateFlow<SearchInput?> = _searchInput.asStateFlow()
 
+    private val _toastMessage = SingleLiveData<Int?>()
+    val toastMessage: LiveData<Int?> = _toastMessage
+
     private var paging: Paging? = null
     private var currentPage = 0
-    private var isLastPage = false
     private var isLoading = false
 
-    fun setSearchInput(input: SearchInput.Keyword) {
-        if (currentInput == input) return
-        _searchInput.value = input
-        resetPaging()
-        _searchedHearits.value = emptyList()
-
-        fetchKeywordHearits(input.term, true)
-    }
-
-    fun refreshSearchResults() {
-        resetPaging()
-        _searchedHearits.value = emptyList()
-        fetchKeywordHearits(
-            (_searchInput.value as? SearchInput.Keyword)?.term ?: return,
-            isInitial = true,
-        )
-    }
-
-    fun getRecentKeywords() {
+    fun loadRecentKeywords() {
         viewModelScope.launch {
-            recentKeywordRepository
-                .getKeywords()
-                .onSuccess { keywords ->
-                    _recentKeywords.value = keywords
-                }.onFailure { throwable ->
+            getRecentKeywords()
+                .onSuccess { _recentKeywords.value = it }
+                .onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.search_toast_recent_keyword_load_fail
                 }
         }
     }
 
-    fun deleteKeywords() {
+    fun saveKeyword(term: String) {
         viewModelScope.launch {
-            recentKeywordRepository
-                .clearKeywords()
+            saveRecentKeyword(term).onFailure { throwable ->
+                Timber.w(throwable)
+                _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
+            }
+        }
+    }
+
+    fun clearKeywords() {
+        viewModelScope.launch {
+            clearRecentKeywords()
                 .onSuccess { count ->
                     if (count > 0) {
                         _recentKeywords.value = emptyList()
-                        _toastMessage.value = R.string.search_toast_recent_keyword_delete_success
+                        _toastMessage.value =
+                            R.string.search_toast_recent_keyword_delete_success
                     }
                 }.onFailure { throwable ->
                     Timber.w(throwable)
@@ -94,40 +80,41 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun loadNextPageIfPossible() {
-        if (isLoading || paging?.isLast == true) return
-        val term = (_searchInput.value as? SearchInput.Keyword)?.term ?: return
-        fetchKeywordHearits(term, isInitial = false)
+    fun search(term: String) {
+        val input = SearchInput.Keyword(term)
+        if (_searchInput.value == input) return
+
+        _searchInput.value = input
+        resetPaging()
+        _searchedHearits.value = emptyList()
+
+        fetch(isInitial = true)
     }
 
-    fun fetchKeywordHearits(
-        term: String,
-        isInitial: Boolean,
-    ) {
-        if (isLoading) return
-        if (!isInitial && isLastPage) return
+    fun loadNextPage() {
+        if (isLoading || paging?.isLast == true) return
+        fetch(isInitial = false)
+    }
 
-        isLoading = true
+    private fun fetch(isInitial: Boolean) {
+        val term = (_searchInput.value as? SearchInput.Keyword)?.term ?: return
 
         viewModelScope.launch {
+            isLoading = true
+            val page = if (isInitial) 0 else currentPage + 1
+
             try {
-                val page = if (isInitial) 0 else currentPage + 1
-                val result = hearitRepository.getKeywordHearits(term, page)
+                searchHearits(term, page)
+                    .onSuccess { result ->
+                        paging = result.paging
+                        currentPage = result.paging.page
 
-                result
-                    .onSuccess { pageResult ->
-                        paging = pageResult.paging
-                        currentPage = pageResult.paging.page
-
-                        val updatedList =
+                        _searchedHearits.value =
                             if (isInitial) {
-                                pageResult.items
+                                result.items
                             } else {
-                                _searchedHearits.value.orEmpty() + pageResult.items
+                                _searchedHearits.value + result.items
                             }
-
-                        _searchedHearits.value = updatedList
-                        updateUiState(updatedList)
                     }.onFailure { throwable ->
                         Timber.w(throwable)
                         _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
@@ -138,34 +125,9 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun saveRecentKeyword(recentKeyword: String) {
-        viewModelScope.launch {
-            val recentSearch =
-                RecentSearch(
-                    term = recentKeyword,
-                    searchedAt = System.currentTimeMillis(),
-                )
-            recentKeywordRepository
-                .saveKeyword(recentSearch)
-                .onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
-                }
-        }
-    }
-
-    private fun updateUiState(hearits: List<SearchedHearit>) {
-        _searchUiState.value =
-            if (hearits.isEmpty()) {
-                SearchUiState.NoHearits
-            } else {
-                SearchUiState.HearitsExist(hearits)
-            }
-    }
-
     private fun resetPaging() {
         paging = null
         currentPage = 0
-        isLastPage = false
+        isLoading = false
     }
 }

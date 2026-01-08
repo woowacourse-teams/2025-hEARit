@@ -22,7 +22,6 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
 import com.onair.hearit.presentation.search.SearchViewModel
-import com.onair.hearit.presentation.showToast
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -88,7 +87,7 @@ class SearchResultPageFragment :
                         val threshold = layoutManager.itemCount - REFRESH_THRESHOLD
                         val last = layoutManager.findLastVisibleItemPosition()
 
-                        if (last >= threshold) viewModel.loadNextPageIfPossible()
+//                        if (last >= threshold) viewModel.loadNextPageIfPossible()
                     }
                 },
             )
@@ -100,19 +99,19 @@ class SearchResultPageFragment :
     }
 
     private fun observeViewModel() {
-        mainViewModel.hearitUpdated.observe(viewLifecycleOwner) {
-            viewModel.refreshSearchResults()
-        }
-
-        viewModel.searchUiState.observe(viewLifecycleOwner) { state ->
-            binding.uiState = state
-        }
-        viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
-            searchedAdapter.submitList(searchedHearits)
-        }
-        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(resId)
-        }
+//        mainViewModel.hearitUpdated.observe(viewLifecycleOwner) {
+//            viewModel.refreshSearchResults()
+//        }
+//
+//        viewModel.searchUiState.observe(viewLifecycleOwner) { state ->
+//            binding.uiState = state
+//        }
+//        viewModel.searchedHearits.observe(viewLifecycleOwner) { searchedHearits ->
+//            searchedAdapter.submitList(searchedHearits)
+//        }
+//        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
+//            showToast(resId)
+//        }
     }
 
     override fun onClick(
