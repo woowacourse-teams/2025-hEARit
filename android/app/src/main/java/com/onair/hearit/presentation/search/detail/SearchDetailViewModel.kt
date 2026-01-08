@@ -1,6 +1,5 @@
 package com.onair.hearit.presentation.search.detail
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
@@ -12,10 +11,11 @@ import com.onair.hearit.domain.usecase.search.ClearRecentKeywordsUseCase
 import com.onair.hearit.domain.usecase.search.GetRecentKeywordsUseCase
 import com.onair.hearit.domain.usecase.search.SaveRecentKeywordUseCase
 import com.onair.hearit.domain.usecase.search.SearchHearitsUseCase
-import com.onair.hearit.presentation.SingleLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -37,8 +37,8 @@ class SearchDetailViewModel @Inject constructor(
     private val _searchInput = MutableStateFlow<SearchInput?>(null)
     val searchInput: StateFlow<SearchInput?> = _searchInput.asStateFlow()
 
-    private val _toastMessage = SingleLiveData<Int?>()
-    val toastMessage: LiveData<Int?> = _toastMessage
+    private val _snackbarMessage = MutableSharedFlow<Int>()
+    val snackbarMessage = _snackbarMessage.asSharedFlow()
 
     private var paging: Paging? = null
     private var currentPage = 0
@@ -50,7 +50,7 @@ class SearchDetailViewModel @Inject constructor(
                 .onSuccess { _recentKeywords.value = it }
                 .onFailure { throwable ->
                     Timber.Forest.w(throwable)
-                    _toastMessage.value = R.string.search_toast_recent_keyword_load_fail
+                    _snackbarMessage.emit(R.string.search_toast_recent_keyword_load_fail)
                 }
         }
     }
@@ -62,7 +62,7 @@ class SearchDetailViewModel @Inject constructor(
                     loadRecentKeywords()
                 }.onFailure { throwable ->
                     Timber.Forest.w(throwable)
-                    _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
+                    _snackbarMessage.emit(R.string.search_toast_recent_hearit_save_fail)
                 }
         }
     }
@@ -73,12 +73,11 @@ class SearchDetailViewModel @Inject constructor(
                 .onSuccess { count ->
                     if (count > 0) {
                         _recentKeywords.value = emptyList()
-                        _toastMessage.value =
-                            R.string.search_toast_recent_keyword_delete_success
+                        _snackbarMessage.emit(R.string.search_toast_recent_keyword_delete_success)
                     }
                 }.onFailure { throwable ->
                     Timber.Forest.w(throwable)
-                    _toastMessage.value = R.string.search_toast_recent_keyword_delete_fail
+                    _snackbarMessage.emit(R.string.search_toast_recent_keyword_delete_fail)
                 }
         }
     }
@@ -120,7 +119,7 @@ class SearchDetailViewModel @Inject constructor(
                             }
                     }.onFailure { throwable ->
                         Timber.Forest.w(throwable)
-                        _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
+                        _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
                     }
             } finally {
                 isLoading = false
