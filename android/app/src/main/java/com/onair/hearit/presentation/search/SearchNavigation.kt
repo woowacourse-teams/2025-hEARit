@@ -8,14 +8,14 @@ sealed interface SearchRoute {
     data object SearchMain : SearchRoute
 
     @Serializable
-    data object SearchDetail : SearchRoute
-
-    @Serializable
     data class Category(
         val id: Long,
         val name: String,
         val colorCode: String,
     ) : SearchRoute
+
+    @Serializable
+    object SearchDetail : SearchRoute
 }
 
 @Immutable

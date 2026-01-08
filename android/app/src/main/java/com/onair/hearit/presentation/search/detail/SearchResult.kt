@@ -18,7 +18,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.presentation.search.detail.component.SearchResultItem
 import com.onair.hearit.presentation.theme.HearitBlack
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -27,7 +26,7 @@ import kotlinx.coroutines.flow.filter
 private const val LOAD_MORE_THRESHOLD = 3
 
 @Composable
-fun SearchResultScreen(
+fun SearchResult(
     hearits: List<SearchedHearit>,
     onHearitClick: (Long) -> Unit,
     onLoadNext: () -> Unit,
@@ -104,7 +103,7 @@ fun SearchResultScreenPreview() {
         )
 
     Box(modifier = Modifier.fillMaxSize()) {
-        SearchResultScreen(
+        SearchResult(
             hearits = dummyHearits,
             onHearitClick = {},
             onLoadNext = {},

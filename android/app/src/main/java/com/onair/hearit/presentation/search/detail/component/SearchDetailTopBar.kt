@@ -44,7 +44,7 @@ import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 
 @Composable
-fun SearchDetailTopBar(
+fun SearchTopBar(
     searchText: String,
     onSearchTextChange: (String) -> Unit,
     onBackClick: () -> Unit,
@@ -192,7 +192,7 @@ private fun SearchDetailTopBarEmptyPreview() {
     MaterialTheme {
         var searchText by remember { mutableStateOf("") }
 
-        SearchDetailTopBar(
+        SearchTopBar(
             searchText = searchText,
             onSearchTextChange = { searchText = it },
             onBackClick = {},
@@ -208,7 +208,7 @@ private fun SearchDetailTopBarWithTextPreview() {
     MaterialTheme {
         var searchText by remember { mutableStateOf("안드로이드") }
 
-        SearchDetailTopBar(
+        SearchTopBar(
             searchText = searchText,
             onSearchTextChange = { searchText = it },
             onBackClick = {},
@@ -224,7 +224,7 @@ private fun SearchDetailTopBarLongTextPreview() {
     MaterialTheme {
         var searchText by remember { mutableStateOf("안드로이드 클린 아키텍처 MVVM 패턴") }
 
-        SearchDetailTopBar(
+        SearchTopBar(
             searchText = searchText,
             onSearchTextChange = { searchText = it },
             onBackClick = {},

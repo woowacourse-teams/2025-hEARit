@@ -33,7 +33,7 @@ import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import com.onair.hearit.presentation.util.noRippleClickable
 
 @Composable
-fun RecentSearchScreen(
+fun SearchRecent(
     keywords: List<String>?,
     onKeywordClick: (String) -> Unit,
     onClearAll: () -> Unit,
@@ -166,7 +166,7 @@ private fun EmptyRecentSearch(modifier: Modifier = Modifier) {
 @Composable
 private fun RecentSearchScreenPreview() {
     MaterialTheme {
-        RecentSearchScreen(
+        SearchRecent(
             keywords =
                 listOf(
                     "Android 개발",
@@ -185,7 +185,7 @@ private fun RecentSearchScreenPreview() {
 @Composable
 private fun EmptyRecentSearchScreenPreview() {
     MaterialTheme {
-        RecentSearchScreen(
+        SearchRecent(
             keywords = emptyList(),
             onKeywordClick = {},
             onClearAll = {},

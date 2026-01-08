@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.detail.component
+package com.onair.hearit.presentation.search.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
