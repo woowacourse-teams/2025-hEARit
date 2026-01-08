@@ -48,7 +48,7 @@ class UserRepositoryImpl @Inject constructor(
             userLocalDataSource
                 .saveUserInfo(remote)
                 .onFailure {
-                    Timber.e(it, "❌ DataStore 저장 실패 (메모리 캐시는 유지)")
+                    Timber.e(it, "DataStore에 UserInfo 저장 실패 (메모리 캐시는 유지)")
                 }
 
             remote

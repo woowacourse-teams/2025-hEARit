@@ -14,6 +14,7 @@ import com.onair.hearit.domain.usecase.search.SearchHearitsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,7 +39,7 @@ class SearchDetailViewModel @Inject constructor(
     val searchInput: StateFlow<SearchInput?> = _searchInput.asStateFlow()
 
     private val _snackbarMessage = MutableSharedFlow<Int>()
-    val snackbarMessage = _snackbarMessage.asSharedFlow()
+    val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
     private var paging: Paging? = null
     private var currentPage = 0
