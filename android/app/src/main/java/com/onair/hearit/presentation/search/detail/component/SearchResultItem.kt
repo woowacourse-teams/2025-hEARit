@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.detail
+package com.onair.hearit.presentation.search.detail.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,7 +52,8 @@ fun SearchResultItem(
                 .background(
                     Gray1,
                     shape = RoundedCornerShape(8.dp),
-                ).clickable { onClick(item.id) }
+                )
+                .clickable { onClick(item.id) }
                 .padding(vertical = 16.dp),
     ) {
         Column(

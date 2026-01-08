@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search
+package com.onair.hearit.presentation.search.detail
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -22,7 +22,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(
+class SearchDetailViewModel @Inject constructor(
     private val getRecentKeywords: GetRecentKeywordsUseCase,
     private val saveRecentKeyword: SaveRecentKeywordUseCase,
     private val clearRecentKeywords: ClearRecentKeywordsUseCase,
@@ -49,7 +49,7 @@ class SearchViewModel @Inject constructor(
             getRecentKeywords()
                 .onSuccess { _recentKeywords.value = it }
                 .onFailure { throwable ->
-                    Timber.w(throwable)
+                    Timber.Forest.w(throwable)
                     _toastMessage.value = R.string.search_toast_recent_keyword_load_fail
                 }
         }
@@ -58,7 +58,7 @@ class SearchViewModel @Inject constructor(
     fun saveKeyword(term: String) {
         viewModelScope.launch {
             saveRecentKeyword(term).onFailure { throwable ->
-                Timber.w(throwable)
+                Timber.Forest.w(throwable)
                 _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
             }
         }
@@ -74,7 +74,7 @@ class SearchViewModel @Inject constructor(
                             R.string.search_toast_recent_keyword_delete_success
                     }
                 }.onFailure { throwable ->
-                    Timber.w(throwable)
+                    Timber.Forest.w(throwable)
                     _toastMessage.value = R.string.search_toast_recent_keyword_delete_fail
                 }
         }
@@ -116,7 +116,7 @@ class SearchViewModel @Inject constructor(
                                 _searchedHearits.value + result.items
                             }
                     }.onFailure { throwable ->
-                        Timber.w(throwable)
+                        Timber.Forest.w(throwable)
                         _toastMessage.value = R.string.search_toast_searched_hearits_load_fail
                     }
             } finally {

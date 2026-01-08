@@ -8,12 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.detail.component.SearchTopBar
 
 @Composable
 fun SearchDetailRoute(
-    viewModel: SearchViewModel = hiltViewModel(),
+    viewModel: SearchDetailViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
 ) {
     val searchInput by viewModel.searchInput.collectAsState()
