@@ -57,10 +57,13 @@ class SearchDetailViewModel @Inject constructor(
 
     fun saveKeyword(term: String) {
         viewModelScope.launch {
-            saveRecentKeyword(term).onFailure { throwable ->
-                Timber.Forest.w(throwable)
-                _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
-            }
+            saveRecentKeyword(term)
+                .onSuccess {
+                    loadRecentKeywords()
+                }.onFailure { throwable ->
+                    Timber.Forest.w(throwable)
+                    _toastMessage.value = R.string.search_toast_recent_hearit_save_fail
+                }
         }
     }
 

@@ -82,7 +82,7 @@ fun RecentSearchHeader(
             modifier
                 .fillMaxWidth()
                 .heightIn(min = 40.dp)
-                .padding(start = 20.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                .padding(start = 20.dp, end = 12.dp, top = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -2,6 +2,7 @@ package com.onair.hearit.presentation.search.detail
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,10 @@ fun SearchDetailRoute(
     var isFocused by remember { mutableStateOf(true) }
     val focusRequester = remember { FocusRequester() }
 
+    LaunchedEffect(Unit) {
+        viewModel.loadRecentKeywords()
+    }
+
     Column {
         SearchDetailTopBar(
             searchText = searchText,
@@ -31,6 +36,7 @@ fun SearchDetailRoute(
             onBackClick = onBackClick,
             onSearch = { query ->
                 viewModel.search(query)
+                viewModel.saveKeyword(query)
                 isFocused = false
             },
             isFocused = isFocused,
@@ -42,9 +48,10 @@ fun SearchDetailRoute(
             searchText.isEmpty() -> {
                 SearchRecentScreen(
                     keywords = recentKeywords.map { it.term },
-                    onKeywordClick = {
-                        searchText = it
-                        viewModel.search(it)
+                    onKeywordClick = { keyword ->
+                        searchText = keyword
+                        viewModel.search(keyword)
+                        viewModel.saveKeyword(keyword)
                         isFocused = false
                     },
                     onClearAll = { viewModel.clearKeywords() },
