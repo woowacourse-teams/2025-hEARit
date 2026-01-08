@@ -133,8 +133,8 @@ fun SearchTopBar(
                             if (searchText.isEmpty()) {
                                 Text(
                                     text = stringResource(R.string.search_topbar_hint),
-                                    style = HearitTypoGraphy.bodyLarge,
                                     color = Gray2,
+                                    style = HearitTypoGraphy.bodyMedium,
                                 )
                             }
                             innerTextField()

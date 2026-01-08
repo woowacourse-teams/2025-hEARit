@@ -33,14 +33,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
-private const val LOAD_MORE_THRESHOLD = 3
-
 @Composable
-fun SearchResult(
+fun SearchResultScreen(
     hearits: List<SearchedHearit>,
     onHearitClick: (Long) -> Unit,
     onLoadNext: () -> Unit,
     modifier: Modifier = Modifier,
+    loadMoreThreshold: Int = 3,
 ) {
     val listState = rememberLazyListState()
 
@@ -52,7 +51,7 @@ fun SearchResult(
         }.filter { it != null }
             .distinctUntilChanged()
             .collect { lastVisibleIndex ->
-                if (lastVisibleIndex != null && lastVisibleIndex >= hearits.size - LOAD_MORE_THRESHOLD) {
+                if (lastVisibleIndex != null && lastVisibleIndex >= hearits.size - loadMoreThreshold) {
                     onLoadNext()
                 }
             }
@@ -141,7 +140,7 @@ fun SearchResultScreenPreview() {
         )
 
     Box(modifier = Modifier.fillMaxSize()) {
-        SearchResult(
+        SearchResultScreen(
             hearits = dummyHearits,
             onHearitClick = {},
             onLoadNext = {},
@@ -153,7 +152,7 @@ fun SearchResultScreenPreview() {
 @Composable
 fun SearchResultEmptyPreview() {
     Box(modifier = Modifier.fillMaxSize()) {
-        SearchResult(
+        SearchResultScreen(
             hearits = emptyList(),
             onHearitClick = {},
             onLoadNext = {},

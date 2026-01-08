@@ -29,7 +29,7 @@ fun SearchDetailRoute(
 
         when (searchInput) {
             null -> {
-                SearchRecent(
+                SearchRecentScreen(
                     keywords = recentKeywords.map { it.term },
                     onKeywordClick = {
                         searchText = it
@@ -40,7 +40,7 @@ fun SearchDetailRoute(
             }
 
             else -> {
-                SearchResult(
+                SearchResultScreen(
                     hearits = viewModel.searchedHearits.collectAsState().value,
                     onLoadNext = { viewModel.loadNextPage() },
                     onHearitClick = { /* 클릭 처리 */ },

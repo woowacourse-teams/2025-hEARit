@@ -21,7 +21,6 @@ import com.facebook.shimmer.ShimmerFrameLayout
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.library.BookmarkUiState
-import com.onair.hearit.presentation.search.SearchUiState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -205,22 +204,6 @@ fun setRoundedBackgroundColor(
             setColor(colorInt)
         }
     view.background = drawable
-}
-
-@BindingAdapter("visibleIfNoHearits")
-fun setVisibleIfNoHearits(
-    view: View,
-    state: SearchUiState?,
-) {
-    view.isVisible = state is SearchUiState.NoHearits
-}
-
-@BindingAdapter("visibleIfHearitsExist")
-fun setVisibleIfHearitsExist(
-    view: View,
-    state: SearchUiState?,
-) {
-    view.isVisible = state is SearchUiState.HearitsExist
 }
 
 @BindingAdapter("setKeywords")
