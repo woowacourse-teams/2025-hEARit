@@ -16,7 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.presentation.search.SearchViewModel
 import com.onair.hearit.presentation.search.detail.component.SearchDetailTopBar
 
@@ -33,7 +32,12 @@ fun SearchDetailScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     LaunchedEffect(Unit) {
-        viewModel.getRecentKeywords()
+        viewModel.loadRecentKeywords()
+    }
+
+    val onSearchExecute: (String) -> Unit = onSearchExecute@{ query ->
+        if (query.length < 2) return@onSearchExecute
+        viewModel.search(query)
     }
 
     Scaffold(
@@ -43,12 +47,7 @@ fun SearchDetailScreen(
                 searchText = searchText,
                 onSearchTextChange = { searchText = it },
                 onBackClick = onBackClick,
-                onSearch = { query ->
-                    if (query.length >= 2) {
-                        viewModel.setSearchInput(SearchInput.Keyword(query))
-                        viewModel.saveRecentKeyword(query)
-                    }
-                },
+                onSearch = { onSearchExecute(searchText) },
             )
         },
     ) { padding ->
@@ -60,24 +59,24 @@ fun SearchDetailScreen(
         ) {
             when (searchInput) {
                 null -> {
-                    // 최근 검색어 화면
                     RecentSearchScreen(
-                        keywords = recentKeywords?.map { it.term },
+                        keywords = recentKeywords.map { it.term },
                         onKeywordClick = { keyword ->
                             searchText = keyword
-                            viewModel.setSearchInput(SearchInput.Keyword(keyword))
-                            viewModel.saveRecentKeyword(keyword)
+                            onSearchExecute(keyword)
                         },
-                        onClearAll = { viewModel.deleteKeywords() },
+                        onClearAll = { viewModel.clearKeywords() },
                     )
                 }
 
                 else -> {
-                    // 검색 결과 화면
-//                    SearchResultScreen(
-//                        searchInput = searchInput!!,
-//                        viewModel = viewModel,
-//                    )
+                    SearchResultScreen(
+                        hearits = viewModel.searchedHearits.collectAsState().value,
+                        onLoadNext = { viewModel.loadNextPage() },
+                        onHearitClick = { hearitId ->
+                            // 클릭 이벤트 처리
+                        },
+                    )
                 }
             }
         }

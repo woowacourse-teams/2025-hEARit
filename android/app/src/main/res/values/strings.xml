@@ -107,7 +107,7 @@
 
     <!-- SearchFragment-->
     <string name="search_category_text">카테고리</string>
-    <string name="search_recent_text">최근 검색</string>
+    <string name="search_recent_text">최근 검색어</string>
     <string name="search_recent_delete"><u>전체삭제</u></string>
     <string name="search_topbar_hint">검색어를 입력해주세요</string>
     <string name="search_toast_keywords_load_fail">오늘의 키워드 조회에 실패했습니다</string>

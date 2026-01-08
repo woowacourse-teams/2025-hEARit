@@ -144,9 +144,7 @@ fun SearchDetailTopBar(
 
                 if (searchText.isNotEmpty()) {
                     IconButton(
-                        onClick = {
-                            onSearchTextChange("")
-                        },
+                        onClick = { onSearchTextChange("") },
                         modifier = Modifier.size(32.dp),
                     ) {
                         Icon(
@@ -158,12 +156,22 @@ fun SearchDetailTopBar(
                     }
                 }
 
-                Icon(
-                    painter = painterResource(R.drawable.ic_search),
-                    contentDescription = "검색",
-                    modifier = Modifier.size(24.dp),
-                    tint = Gray4,
-                )
+                IconButton(
+                    onClick = {
+                        if (searchText.length >= 2) {
+                            onSearch(searchText)
+                            keyboardController?.hide()
+                        }
+                    },
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = "검색",
+                        modifier = Modifier.size(24.dp),
+                        tint = Gray4,
+                    )
+                }
             }
 
             HorizontalDivider(

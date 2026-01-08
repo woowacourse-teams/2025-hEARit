@@ -42,7 +42,7 @@ private fun SearchHearitsResponse.Content.toSearchedHearit(): SearchedHearit =
         title = this.title,
         playTime = this.playTime,
         lastPlayTime = this.lastPlayTime,
-        keywords = this.keywords.map { it.toDomain() },
+        keywords = this.keywords.map { it.toDomain() }.toImmutableList(),
     )
 
 private fun HearitsResponse.Content.toSearchedCategoryHearit(): SearchedCategoryHearit =
