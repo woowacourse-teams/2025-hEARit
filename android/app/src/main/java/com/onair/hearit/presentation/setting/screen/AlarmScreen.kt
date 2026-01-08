@@ -12,6 +12,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -34,7 +38,9 @@ import com.onair.hearit.presentation.setting.SettingViewModel
 import com.onair.hearit.presentation.setting.component.AlarmContent
 import com.onair.hearit.presentation.setting.component.SettingTopBar
 import com.onair.hearit.presentation.setting.component.SystemNotificationSettingDialog
+import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.HearitBlack
+import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 private const val COMMUTE_NOTIFICATION_TOPIC: String = "commute_1900"
@@ -49,6 +55,7 @@ fun AlarmScreen(
     val shouldRequestPermission: Boolean by viewModel.shouldRequestNotificationPermission.collectAsState()
 
     var shouldShowSystemNotificationDialog: Boolean by remember { mutableStateOf(false) }
+    val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 
     val permissionLauncher =
         rememberLauncherForActivityResult(
@@ -57,6 +64,12 @@ fun AlarmScreen(
                 viewModel.onPostNotificationPermissionResult(isGranted)
             },
         )
+
+    LaunchedEffect(Unit) {
+        viewModel.snackbarMessage.collectLatest { resId ->
+            snackbarHostState.showSnackbar(message = context.getString(resId))
+        }
+    }
 
     SyncSystemNotificationEffect(
         context = context,
@@ -87,6 +100,18 @@ fun AlarmScreen(
             )
         },
         containerColor = HearitBlack,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 64.dp),
+            ) { snackbarData ->
+                Snackbar(
+                    snackbarData = snackbarData,
+                    containerColor = Gray2,
+                    contentColor = HearitBlack,
+                )
+            }
+        },
     ) { padding ->
         AlarmContent(
             modifier = Modifier.padding(padding),

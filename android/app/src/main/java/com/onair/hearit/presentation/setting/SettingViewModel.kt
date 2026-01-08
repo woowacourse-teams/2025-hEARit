@@ -11,7 +11,10 @@ import com.onair.hearit.domain.repository.NotificationPreferenceRepository
 import com.onair.hearit.domain.repository.UserRepository
 import com.onair.hearit.presentation.SingleLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -36,6 +39,9 @@ class SettingViewModel @Inject constructor(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
+    private val _snackbarMessage = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+    val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
+
     init {
         loadUserInfo()
         loadPushNotificationSetting()
@@ -46,6 +52,8 @@ class SettingViewModel @Inject constructor(
             _isPushNotificationEnabled.value = false
             _shouldRequestNotificationPermission.value = false
             persistPushNotificationSetting(false)
+
+            _snackbarMessage.tryEmit(R.string.setting_alarm_push_disabled)
             return
         }
         _shouldRequestNotificationPermission.value = true
@@ -54,10 +62,12 @@ class SettingViewModel @Inject constructor(
     fun onPostNotificationPermissionResult(isGranted: Boolean) {
         _isPushNotificationEnabled.value = isGranted
         _shouldRequestNotificationPermission.value = false
-
         persistPushNotificationSetting(isGranted)
 
-        if (!isGranted) {
+        if (isGranted) {
+            _snackbarMessage.tryEmit(R.string.setting_alarm_push_enabled)
+        } else {
+            _snackbarMessage.tryEmit(R.string.setting_alarm_push_disabled)
             _toastMessage.value = R.string.all_toast_notification_permission_denied
         }
     }
@@ -69,6 +79,8 @@ class SettingViewModel @Inject constructor(
         _isPushNotificationEnabled.value = false
         _shouldRequestNotificationPermission.value = false
         persistPushNotificationSetting(false)
+
+        _snackbarMessage.tryEmit(R.string.setting_alarm_push_blocked_by_system)
     }
 
     private fun loadUserInfo() {
