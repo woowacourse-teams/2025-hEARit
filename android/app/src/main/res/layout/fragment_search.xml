@@ -57,7 +57,6 @@
                         android:layout_marginStart="20dp"
                         android:layout_weight="1"
                         android:autofillHints="@null"
-                        android:hint="@string/search_keyword"
                         android:imeOptions="actionSearch"
                         android:inputType="text|textNoSuggestions"
                         android:maxLines="1"
@@ -115,8 +114,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:spanCount="2"
-                    tools:itemCount="18"
-                    tools:listitem="@layout/item_category" />
+                    tools:itemCount="18" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>

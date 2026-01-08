@@ -1,7 +1,6 @@
 package com.onair.hearit.presentation.search.main.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +27,7 @@ import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
+import com.onair.hearit.presentation.util.noRippleClickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,12 +86,12 @@ fun SearchBarInput(
                     .fillMaxWidth()
                     .height(36.dp)
                     .background(HearitBlack)
-                    .clickable(onClick = onSearchBarClick)
+                    .noRippleClickable(onClick = onSearchBarClick)
                     .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(R.string.search_keyword),
+                text = stringResource(R.string.search_topbar_hint),
                 modifier = Modifier.weight(1f),
                 color = Gray2,
                 style = HearitTypoGraphy.bodyMedium,
@@ -100,8 +100,8 @@ fun SearchBarInput(
             Icon(
                 painter = painterResource(R.drawable.ic_search),
                 contentDescription = null,
-                tint = Gray4,
                 modifier = Modifier.size(24.dp),
+                tint = Gray4,
             )
         }
 

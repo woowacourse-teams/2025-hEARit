@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.concurrent.futures.CallbackToFutureAdapter
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -16,14 +15,10 @@ import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.domain.model.Keyword
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
-import com.onair.hearit.presentation.search.category.CategoryFragment
 import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,7 +52,9 @@ fun Intent?.toDetailResult(): DetailResult? {
             extras?.let { DetailResult.Keyword.fromBundle(it) }
         }
 
-        else -> null
+        else -> {
+            null
+        }
     }
 }
 
@@ -67,26 +64,26 @@ fun DetailResult.navigate(
 ) {
     when (this) {
         is DetailResult.Category -> {
-            val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = CategoryFragment::class.java.simpleName
-
-            // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
-            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            fragmentManager
-                .beginTransaction()
-                .replace(
-                    R.id.fragment_container_view,
-                    CategoryFragment().apply {
-                        arguments =
-                            bundleOf(
-                                CATEGORY_ID_KEY to categoryId,
-                                CATEGORY_NAME_KEY to name,
-                                CATEGORY_COLOR_KEY to colorCode,
-                            )
-                    },
-                    backStackTag,
-                ).addToBackStack(backStackTag)
-                .commit()
+//            val fragmentManager = mainActivity.supportFragmentManager
+//            val backStackTag = CategoryFragment::class.java.simpleName
+//
+//            // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
+//            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+//            fragmentManager
+//                .beginTransaction()
+//                .replace(
+//                    R.id.fragment_container_view,
+//                    CategoryFragment().apply {
+//                        arguments =
+//                            bundleOf(
+//                                CATEGORY_ID_KEY to categoryId,
+//                                CATEGORY_NAME_KEY to name,
+//                                CATEGORY_COLOR_KEY to colorCode,
+//                            )
+//                    },
+//                    backStackTag,
+//                ).addToBackStack(backStackTag)
+//                .commit()
 
             analyticsLogger.logEvent(
                 AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
