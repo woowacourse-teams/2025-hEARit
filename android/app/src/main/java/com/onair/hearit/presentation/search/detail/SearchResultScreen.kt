@@ -10,16 +10,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.presentation.search.detail.component.SearchResultItem
+import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
+import com.onair.hearit.presentation.theme.HearitPurple1
+import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -56,20 +65,48 @@ fun SearchResult(
                 .background(HearitBlack)
                 .padding(top = 12.dp),
     ) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            itemsIndexed(
-                items = hearits,
-                key = { _, item -> item.id },
-            ) { _, hearit ->
-                SearchResultItem(
-                    item = hearit,
-                    onClick = { onHearitClick(hearit.id) },
+        if (hearits.isEmpty()) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text =
+                        buildAnnotatedString {
+                            append("검색된 ")
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = HearitPurple1,
+                                        fontWeight = FontWeight.Bold,
+                                    ),
+                            ) {
+                                append("히어릿")
+                            }
+                            append("이 없어요!")
+                        },
+                    color = Gray4,
+                    style = HearitTypoGraphy.bodyLarge,
                 )
+            }
+        } else {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                itemsIndexed(
+                    items = hearits,
+                    key = { _, item -> item.id },
+                ) { _, hearit ->
+                    SearchResultItem(
+                        item = hearit,
+                        onClick = { onHearitClick(hearit.id) },
+                    )
+                }
             }
         }
     }
@@ -106,6 +143,18 @@ fun SearchResultScreenPreview() {
     Box(modifier = Modifier.fillMaxSize()) {
         SearchResult(
             hearits = dummyHearits,
+            onHearitClick = {},
+            onLoadNext = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SearchResultEmptyPreview() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        SearchResult(
+            hearits = emptyList(),
             onHearitClick = {},
             onLoadNext = {},
         )
