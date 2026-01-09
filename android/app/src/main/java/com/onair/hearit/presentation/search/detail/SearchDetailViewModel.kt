@@ -3,7 +3,6 @@ package com.onair.hearit.presentation.search.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.RecentSearch
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.model.SearchedHearit
@@ -21,6 +20,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+
+data class PagingState(
+    val currentPage: Int = 0,
+    val isLast: Boolean = false,
+)
 
 @HiltViewModel
 class SearchDetailViewModel @Inject constructor(
@@ -44,8 +48,7 @@ class SearchDetailViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private var paging: Paging? = null
-    private var currentPage = 0
+    private var pagingState = PagingState()
 
     fun loadRecentKeywords() {
         viewModelScope.launch {
@@ -90,36 +93,33 @@ class SearchDetailViewModel @Inject constructor(
         if (_searchInput.value == input) return
 
         _searchInput.value = input
-        resetPaging()
+        pagingState = PagingState()
         _searchedHearits.value = emptyList()
 
-        fetch(isInitial = true)
+        fetchSearchResults()
     }
 
     fun loadNextPage() {
-        if (_isLoading.value || paging?.isLast == true) return
-        fetch(isInitial = false)
+        if (_isLoading.value || pagingState.isLast) return
+        fetchSearchResults()
     }
 
-    private fun fetch(isInitial: Boolean) {
+    private fun fetchSearchResults() {
         val term = (_searchInput.value as? SearchInput.Keyword)?.term ?: return
 
         viewModelScope.launch {
             _isLoading.value = true
-            val page = if (isInitial) 0 else currentPage + 1
 
             try {
-                searchHearits(term, page)
+                searchHearits(term, pagingState.currentPage)
                     .onSuccess { result ->
-                        paging = result.paging
-                        currentPage = result.paging.page
+                        pagingState =
+                            PagingState(
+                                currentPage = result.paging.page + 1,
+                                isLast = result.paging.isLast,
+                            )
 
-                        _searchedHearits.value =
-                            if (isInitial) {
-                                result.items
-                            } else {
-                                _searchedHearits.value + result.items
-                            }
+                        _searchedHearits.value = _searchedHearits.value + result.items
                     }.onFailure { throwable ->
                         Timber.Forest.w(throwable)
                         _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
@@ -128,10 +128,5 @@ class SearchDetailViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
-    }
-
-    private fun resetPaging() {
-        paging = null
-        currentPage = 0
     }
 }
