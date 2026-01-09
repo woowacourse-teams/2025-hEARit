@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onair.hearit.presentation.search.detail.component.SearchDetailTopBar
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun SearchDetailRoute(
@@ -86,7 +87,7 @@ fun SearchDetailRoute(
             when {
                 searchInput == null -> {
                     SearchRecentScreen(
-                        keywords = recentKeywords?.map { it.term },
+                        keywords = recentKeywords.map { it.term }.toImmutableList(),
                         onKeywordClick = { keyword ->
                             searchText = keyword
                             performSearch(keyword)

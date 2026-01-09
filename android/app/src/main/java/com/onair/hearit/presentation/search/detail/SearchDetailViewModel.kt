@@ -11,12 +11,16 @@ import com.onair.hearit.domain.usecase.search.GetRecentKeywordsUseCase
 import com.onair.hearit.domain.usecase.search.SaveRecentKeywordUseCase
 import com.onair.hearit.domain.usecase.search.SearchHearitsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -33,11 +37,12 @@ class SearchDetailViewModel @Inject constructor(
     private val clearRecentKeywords: ClearRecentKeywordsUseCase,
     private val searchHearits: SearchHearitsUseCase,
 ) : ViewModel() {
-    private val _recentKeywords = MutableStateFlow<List<RecentSearch>?>(null)
-    val recentKeywords: StateFlow<List<RecentSearch>?> = _recentKeywords.asStateFlow()
+    private val _recentKeywords = MutableStateFlow<ImmutableList<RecentSearch>>(persistentListOf())
+    val recentKeywords: StateFlow<ImmutableList<RecentSearch>> = _recentKeywords.asStateFlow()
 
-    private val _searchedHearits = MutableStateFlow<List<SearchedHearit>>(emptyList())
-    val searchedHearits: StateFlow<List<SearchedHearit>> = _searchedHearits.asStateFlow()
+    private val _searchedHearits =
+        MutableStateFlow<ImmutableList<SearchedHearit>>(persistentListOf())
+    val searchedHearits: StateFlow<ImmutableList<SearchedHearit>> = _searchedHearits.asStateFlow()
 
     private val _searchInput = MutableStateFlow<SearchInput?>(null)
     val searchInput: StateFlow<SearchInput?> = _searchInput.asStateFlow()
@@ -53,7 +58,7 @@ class SearchDetailViewModel @Inject constructor(
     fun loadRecentKeywords() {
         viewModelScope.launch {
             getRecentKeywords()
-                .onSuccess { _recentKeywords.value = it }
+                .onSuccess { _recentKeywords.value = it.toImmutableList() }
                 .onFailure { throwable ->
                     Timber.Forest.w(throwable)
                     _snackbarMessage.emit(R.string.search_toast_recent_keyword_load_fail)
@@ -78,7 +83,7 @@ class SearchDetailViewModel @Inject constructor(
             clearRecentKeywords()
                 .onSuccess { count ->
                     if (count > 0) {
-                        _recentKeywords.value = emptyList()
+                        _recentKeywords.value = persistentListOf()
                         _snackbarMessage.emit(R.string.search_toast_recent_keyword_delete_success)
                     }
                 }.onFailure { throwable ->
@@ -94,7 +99,7 @@ class SearchDetailViewModel @Inject constructor(
 
         _searchInput.value = input
         pagingState = PagingState()
-        _searchedHearits.value = emptyList()
+        _searchedHearits.value = persistentListOf()
 
         fetchSearchResults()
     }
@@ -119,7 +124,9 @@ class SearchDetailViewModel @Inject constructor(
                                 isLast = result.paging.isLast,
                             )
 
-                        _searchedHearits.value = _searchedHearits.value + result.items
+                        _searchedHearits.update { current ->
+                            (current + result.items).toImmutableList()
+                        }
                     }.onFailure { throwable ->
                         Timber.Forest.w(throwable)
                         _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
