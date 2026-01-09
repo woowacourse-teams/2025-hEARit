@@ -1,8 +1,11 @@
 package com.onair.hearit.presentation.search.main
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -13,9 +16,17 @@ fun SearchMainRoute(
     viewModel: SearchMainViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.searchMainUiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.fetchCategories()
+    }
+
+    LaunchedEffect(viewModel.snackbarMessage) {
+        viewModel.snackbarMessage.collect { stringResId ->
+            snackbarHostState.showSnackbar(context.getString(stringResId))
+        }
     }
 
     SearchMainScreen(
