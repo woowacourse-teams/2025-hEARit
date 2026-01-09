@@ -33,24 +33,30 @@ fun SearchDetailRoute(
     val searchedHearits by viewModel.searchedHearits.collectAsState()
     val searchInput by viewModel.searchInput.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val context = LocalContext.current
+
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var searchText by rememberSaveable { mutableStateOf("") }
-    var isFocused by remember { mutableStateOf(true) }
-    val focusRequester = remember { FocusRequester() }
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    fun performSearch(query: String) {
+        viewModel.search(query)
+        viewModel.saveKeyword(query)
+        focusManager.clearFocus()
+        keyboardController?.hide()
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadRecentKeywords()
+        focusRequester.requestFocus()
     }
 
     LaunchedEffect(viewModel.snackbarMessage) {
         viewModel.snackbarMessage.collect { stringResId ->
-            val message = context.getString(stringResId)
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(context.getString(stringResId))
         }
     }
 
@@ -73,16 +79,8 @@ fun SearchDetailRoute(
                 searchText = searchText,
                 onSearchTextChange = { searchText = it },
                 onBackClick = onBackClick,
-                onSearch = { query ->
-                    viewModel.search(query)
-                    viewModel.saveKeyword(query)
-                    isFocused = false
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                },
-                isFocused = isFocused,
+                onSearch = ::performSearch,
                 focusRequester = focusRequester,
-                onClick = { isFocused = true },
             )
 
             when {
@@ -91,20 +89,16 @@ fun SearchDetailRoute(
                         keywords = recentKeywords?.map { it.term },
                         onKeywordClick = { keyword ->
                             searchText = keyword
-                            viewModel.search(keyword)
-                            viewModel.saveKeyword(keyword)
-                            isFocused = false
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
+                            performSearch(keyword)
                         },
-                        onClearAll = { viewModel.clearKeywords() },
+                        onClearAll = viewModel::clearKeywords,
                     )
                 }
 
                 else -> {
                     SearchResultScreen(
                         hearits = searchedHearits,
-                        onLoadNext = { viewModel.loadNextPage() },
+                        onLoadNext = viewModel::loadNextPage,
                         onHearitClick = { /* 클릭 처리 */ },
                         isLoading = isLoading,
                     )

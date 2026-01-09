@@ -50,16 +50,10 @@ fun SearchDetailTopBar(
     onSearchTextChange: (String) -> Unit,
     onBackClick: () -> Unit,
     onSearch: (String) -> Unit,
-    isFocused: Boolean,
     focusRequester: FocusRequester,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    LaunchedEffect(isFocused) {
-        if (isFocused) focusRequester.requestFocus()
-    }
 
     Column(
         modifier =
@@ -113,10 +107,7 @@ fun SearchDetailTopBar(
                         Modifier
                             .weight(1f)
                             .focusRequester(focusRequester)
-                            .clickable {
-                                onClick()
-                                focusRequester.requestFocus()
-                            },
+                            .clickable { focusRequester.requestFocus() },
                     textStyle =
                         HearitTypoGraphy.bodyLarge.copy(
                             color = Gray4,
@@ -154,7 +145,6 @@ fun SearchDetailTopBar(
                     IconButton(
                         onClick = {
                             onSearchTextChange("")
-                            onClick()
                             focusRequester.requestFocus()
                         },
                         modifier = Modifier.size(32.dp),
@@ -211,9 +201,7 @@ private fun SearchDetailTopBarEmptyPreview() {
             onSearchTextChange = { searchText = it },
             onBackClick = {},
             onSearch = {},
-            isFocused = false,
             focusRequester = focusRequester,
-            onClick = {},
         )
     }
 }
@@ -230,9 +218,7 @@ private fun SearchDetailTopBarWithTextPreview() {
             onSearchTextChange = { searchText = it },
             onBackClick = {},
             onSearch = {},
-            isFocused = false,
             focusRequester = focusRequester,
-            onClick = {},
         )
     }
 }
