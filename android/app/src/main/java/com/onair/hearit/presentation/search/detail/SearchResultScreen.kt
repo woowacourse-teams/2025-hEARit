@@ -29,20 +29,19 @@ import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitPurple1
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
-private const val LOAD_MORE_THRESHOLD = 3
-
 @Composable
 fun SearchResultScreen(
-    hearits: List<SearchedHearit>,
+    hearits: ImmutableList<SearchedHearit>,
     onHearitClick: (Long) -> Unit,
     onLoadNext: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
-    loadMoreThreshold: Int = LOAD_MORE_THRESHOLD,
+    loadMoreThreshold: Int = 3,
 ) {
     val listState = rememberLazyListState()
 
@@ -118,7 +117,7 @@ fun SearchResultScreen(
 @Composable
 fun SearchResultScreenPreview() {
     val dummyHearits =
-        listOf(
+        persistentListOf(
             SearchedHearit(
                 id = 1L,
                 title = "안드로이드 클린 아키텍처 이해하기",
@@ -156,7 +155,7 @@ fun SearchResultScreenPreview() {
 fun SearchResultEmptyPreview() {
     Box(modifier = Modifier.fillMaxSize()) {
         SearchResultScreen(
-            hearits = emptyList(),
+            hearits = persistentListOf(),
             onHearitClick = {},
             onLoadNext = {},
         )

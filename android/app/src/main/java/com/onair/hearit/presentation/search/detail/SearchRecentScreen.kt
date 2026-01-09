@@ -26,10 +26,12 @@ import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import com.onair.hearit.presentation.util.noRippleClickable
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun SearchRecentScreen(
-    keywords: List<String>?,
+    keywords: ImmutableList<String>?,
     onKeywordClick: (String) -> Unit,
     onClearAll: () -> Unit,
     modifier: Modifier = Modifier,
@@ -129,7 +131,7 @@ private fun RecentSearchScreenPreview() {
     MaterialTheme {
         SearchRecentScreen(
             keywords =
-                listOf(
+                persistentListOf(
                     "Android 개발",
                     "Jetpack Compose",
                     "클린 아키텍처",
@@ -147,7 +149,7 @@ private fun RecentSearchScreenPreview() {
 private fun EmptyRecentSearchScreenPreview() {
     MaterialTheme {
         SearchRecentScreen(
-            keywords = emptyList(),
+            keywords = persistentListOf(),
             onKeywordClick = {},
             onClearAll = {},
         )

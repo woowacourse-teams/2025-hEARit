@@ -43,8 +43,6 @@ import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 
-private const val MIN_SEARCH_QUERY_LENGTH = 2
-
 @Composable
 fun SearchDetailTopBar(
     searchText: String,
@@ -53,11 +51,12 @@ fun SearchDetailTopBar(
     onSearch: (String) -> Unit,
     focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
+    minSearchQueryLength: Int = 2,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     fun performSearch() {
-        if (searchText.length >= MIN_SEARCH_QUERY_LENGTH) {
+        if (searchText.length >= minSearchQueryLength) {
             onSearch(searchText)
             keyboardController?.hide()
             focusRequester.freeFocus()
