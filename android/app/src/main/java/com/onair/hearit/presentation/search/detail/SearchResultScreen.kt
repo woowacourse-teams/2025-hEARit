@@ -39,6 +39,7 @@ fun SearchResultScreen(
     onHearitClick: (Long) -> Unit,
     onLoadNext: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
     loadMoreThreshold: Int = 3,
 ) {
     val listState = rememberLazyListState()
@@ -64,7 +65,7 @@ fun SearchResultScreen(
                 .background(HearitBlack)
                 .padding(top = 12.dp),
     ) {
-        if (hearits.isEmpty()) {
+        if (hearits.isEmpty() && !isLoading) {
             Box(
                 modifier =
                     Modifier
@@ -90,7 +91,7 @@ fun SearchResultScreen(
                     style = HearitTypoGraphy.bodyLarge,
                 )
             }
-        } else {
+        } else if (hearits.isNotEmpty()) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),

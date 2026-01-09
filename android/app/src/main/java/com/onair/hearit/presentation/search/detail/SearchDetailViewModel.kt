@@ -29,8 +29,8 @@ class SearchDetailViewModel @Inject constructor(
     private val clearRecentKeywords: ClearRecentKeywordsUseCase,
     private val searchHearits: SearchHearitsUseCase,
 ) : ViewModel() {
-    private val _recentKeywords = MutableStateFlow<List<RecentSearch>>(emptyList())
-    val recentKeywords: StateFlow<List<RecentSearch>> = _recentKeywords.asStateFlow()
+    private val _recentKeywords = MutableStateFlow<List<RecentSearch>?>(null)
+    val recentKeywords: StateFlow<List<RecentSearch>?> = _recentKeywords.asStateFlow()
 
     private val _searchedHearits = MutableStateFlow<List<SearchedHearit>>(emptyList())
     val searchedHearits: StateFlow<List<SearchedHearit>> = _searchedHearits.asStateFlow()
@@ -41,9 +41,11 @@ class SearchDetailViewModel @Inject constructor(
     private val _snackbarMessage = MutableSharedFlow<Int>()
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private var paging: Paging? = null
     private var currentPage = 0
-    private var isLoading = false
 
     fun loadRecentKeywords() {
         viewModelScope.launch {
@@ -95,7 +97,7 @@ class SearchDetailViewModel @Inject constructor(
     }
 
     fun loadNextPage() {
-        if (isLoading || paging?.isLast == true) return
+        if (_isLoading.value || paging?.isLast == true) return
         fetch(isInitial = false)
     }
 
@@ -103,7 +105,7 @@ class SearchDetailViewModel @Inject constructor(
         val term = (_searchInput.value as? SearchInput.Keyword)?.term ?: return
 
         viewModelScope.launch {
-            isLoading = true
+            _isLoading.value = true
             val page = if (isInitial) 0 else currentPage + 1
 
             try {
@@ -123,7 +125,7 @@ class SearchDetailViewModel @Inject constructor(
                         _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
                     }
             } finally {
-                isLoading = false
+                _isLoading.value = false
             }
         }
     }
@@ -131,6 +133,5 @@ class SearchDetailViewModel @Inject constructor(
     private fun resetPaging() {
         paging = null
         currentPage = 0
-        isLoading = false
     }
 }

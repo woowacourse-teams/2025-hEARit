@@ -29,6 +29,8 @@ fun SearchDetailRoute(
 ) {
     val recentKeywords by viewModel.recentKeywords.collectAsState()
     val searchedHearits by viewModel.searchedHearits.collectAsState()
+    val searchInput by viewModel.searchInput.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val context = LocalContext.current
 
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -78,9 +80,9 @@ fun SearchDetailRoute(
             )
 
             when {
-                searchText.isEmpty() -> {
+                searchInput == null -> {
                     SearchRecentScreen(
-                        keywords = recentKeywords.map { it.term },
+                        keywords = recentKeywords?.map { it.term },
                         onKeywordClick = { keyword ->
                             searchText = keyword
                             viewModel.search(keyword)
@@ -96,6 +98,7 @@ fun SearchDetailRoute(
                         hearits = searchedHearits,
                         onLoadNext = { viewModel.loadNextPage() },
                         onHearitClick = { /* 클릭 처리 */ },
+                        isLoading = isLoading,
                     )
                 }
             }
