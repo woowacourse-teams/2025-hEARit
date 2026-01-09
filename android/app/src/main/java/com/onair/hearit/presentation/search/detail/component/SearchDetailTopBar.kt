@@ -152,7 +152,11 @@ fun SearchDetailTopBar(
 
                 if (searchText.isNotEmpty()) {
                     IconButton(
-                        onClick = { onSearchTextChange("") },
+                        onClick = {
+                            onSearchTextChange("")
+                            onClick()
+                            focusRequester.requestFocus()
+                        },
                         modifier = Modifier.size(32.dp),
                     ) {
                         Icon(

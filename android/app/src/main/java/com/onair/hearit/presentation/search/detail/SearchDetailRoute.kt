@@ -18,6 +18,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.onair.hearit.presentation.search.detail.component.SearchDetailTopBar
@@ -32,6 +34,8 @@ fun SearchDetailRoute(
     val searchInput by viewModel.searchInput.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     var searchText by rememberSaveable { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(true) }
@@ -73,6 +77,8 @@ fun SearchDetailRoute(
                     viewModel.search(query)
                     viewModel.saveKeyword(query)
                     isFocused = false
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
                 },
                 isFocused = isFocused,
                 focusRequester = focusRequester,
@@ -88,6 +94,8 @@ fun SearchDetailRoute(
                             viewModel.search(keyword)
                             viewModel.saveKeyword(keyword)
                             isFocused = false
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
                         },
                         onClearAll = { viewModel.clearKeywords() },
                     )
