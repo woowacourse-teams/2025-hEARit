@@ -33,6 +33,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
+private const val LOAD_MORE_THRESHOLD = 3
+
 @Composable
 fun SearchResultScreen(
     hearits: List<SearchedHearit>,
@@ -40,7 +42,7 @@ fun SearchResultScreen(
     onLoadNext: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
-    loadMoreThreshold: Int = 3,
+    loadMoreThreshold: Int = LOAD_MORE_THRESHOLD,
 ) {
     val listState = rememberLazyListState()
 
