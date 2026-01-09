@@ -21,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +53,14 @@ fun SearchDetailTopBar(
     modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    fun performSearch() {
+        if (searchText.length >= 2) {
+            onSearch(searchText)
+            keyboardController?.hide()
+            focusRequester.freeFocus()
+        }
+    }
 
     Column(
         modifier =
@@ -119,13 +126,7 @@ fun SearchDetailTopBar(
                         ),
                     keyboardActions =
                         KeyboardActions(
-                            onSearch = {
-                                if (searchText.length >= 2) {
-                                    onSearch(searchText)
-                                    keyboardController?.hide()
-                                    focusRequester.freeFocus()
-                                }
-                            },
+                            onSearch = { performSearch() },
                         ),
                     decorationBox = { innerTextField ->
                         Box {
@@ -159,13 +160,7 @@ fun SearchDetailTopBar(
                 }
 
                 IconButton(
-                    onClick = {
-                        if (searchText.length >= 2) {
-                            onSearch(searchText)
-                            keyboardController?.hide()
-                            focusRequester.freeFocus()
-                        }
-                    },
+                    onClick = ::performSearch,
                     modifier = Modifier.size(32.dp),
                 ) {
                     Icon(
