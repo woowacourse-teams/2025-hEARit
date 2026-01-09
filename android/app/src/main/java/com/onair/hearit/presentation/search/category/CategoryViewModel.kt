@@ -43,34 +43,26 @@ class CategoryViewModel @Inject constructor(
                         categoryArgs.colorCode,
                     ),
             )
-        fetchCategoryHearits(isInitial = true)
+        fetchCategoryHearits()
     }
 
-    fun fetchCategoryHearits(isInitial: Boolean) {
+    fun fetchCategoryHearits() {
         val currentState = _categoryUiState.value
         val category = currentState.category ?: return
-        if (currentState.isLoading) return
-        if (!isInitial && currentState.isLastPage) return
-
-        val targetPage = if (isInitial) 0 else currentState.currentPage
+        if (currentState.isLoading || currentState.isLastPage) return
 
         viewModelScope.launch {
             _categoryUiState.update { it.copy(isLoading = true) }
 
             hearitRepository
-                .getCategoryHearits(category.id, targetPage)
+                .getCategoryHearits(category.id, currentState.currentPage)
                 .onSuccess { response ->
                     _categoryUiState.update { state ->
                         state.copy(
-                            hearits =
-                                if (isInitial) {
-                                    response.items.toImmutableList()
-                                } else {
-                                    (state.hearits + response.items).toImmutableList()
-                                },
+                            hearits = (state.hearits + response.items).toImmutableList(),
                             isLoading = false,
                             isLastPage = response.paging.isLast,
-                            currentPage = if (isInitial) 1 else state.currentPage + 1,
+                            currentPage = response.paging.page + 1,
                         )
                     }
                 }.onFailure {
