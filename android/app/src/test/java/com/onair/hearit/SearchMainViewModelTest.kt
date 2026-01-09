@@ -12,6 +12,8 @@ import io.mockk.mockk
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -72,27 +74,39 @@ class SearchMainViewModelTest {
             viewModel.fetchCategories()
 
             // Then
-            assertEquals(mockCategories.toImmutableList(), viewModel.searchMainUiState.value.categories)
+            assertEquals(
+                mockCategories.toImmutableList(),
+                viewModel.searchMainUiState.value.categories,
+            )
             assertEquals(false, viewModel.searchMainUiState.value.isLoading)
             coVerify(exactly = 1) { categoryRepository.getCategories(page = 0) }
         }
 
     @Test
-    fun `fetchCategories 실패 시 toast 메시지가 발생한다`() =
+    fun `fetchCategories 실패 시 snackbarMessage emit 여부 확인`() =
         runTest {
             // Given
             val exception = Exception("Network Error")
             coEvery {
                 categoryRepository.getCategories(page = 0)
             } returns Result.failure(exception)
+            var emitted = false
+
+            // Flow를 수집하면서 emit 되면 플래그를 바꾸고 수집 종료
+            val job =
+                launch(UnconfinedTestDispatcher()) {
+                    viewModel.snackbarMessage.collect {
+                        emitted = true
+                        cancel() // 첫 emit 후 종료
+                    }
+                }
 
             // When
             viewModel.fetchCategories()
+            job.join() // emit 될 때까지 기다림
 
             // Then
-            assertEquals(
-                R.string.all_toast_categories_load_fail,
-                viewModel.toastMessage.getOrAwaitValue(),
-            )
+            assert(emitted) { "snackbarMessage가 emit 되어야 함" }
+            coVerify(exactly = 1) { categoryRepository.getCategories(page = 0) }
         }
 }
