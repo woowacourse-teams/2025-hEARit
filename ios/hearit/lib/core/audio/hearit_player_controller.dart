@@ -252,6 +252,12 @@ class HearitPlayerController extends ChangeNotifier {
     // 탐색 화면 미리듣기 여부 설정
     _isPlayingExplorePreview = isExplorePreview;
 
+    // 배속을 기본값(1.0x)으로 초기화
+    if (_currentSpeed != 1.0) {
+      _currentSpeed = 1.0;
+      await _audioHandler.setSpeed(1.0);
+    }
+
     // 새 팟캐스트 로드
     if (mediaItem != null) {
       _currentMediaItem = mediaItem;
@@ -278,6 +284,12 @@ class HearitPlayerController extends ChangeNotifier {
     }
 
     // _currentPlaylistIndex는 건드리지 않음 (호출자가 이미 설정)
+
+    // 배속을 기본값(1.0x)으로 초기화
+    if (_currentSpeed != 1.0) {
+      _currentSpeed = 1.0;
+      await _audioHandler.setSpeed(1.0);
+    }
 
     // 새 팟캐스트 로드
     _currentMediaItem = mediaItem;
