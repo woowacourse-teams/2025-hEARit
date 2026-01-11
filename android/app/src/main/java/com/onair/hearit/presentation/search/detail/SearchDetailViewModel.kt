@@ -60,7 +60,7 @@ class SearchDetailViewModel @Inject constructor(
             getRecentKeywords()
                 .onSuccess { _recentKeywords.value = it.toImmutableList() }
                 .onFailure { throwable ->
-                    Timber.Forest.w(throwable)
+                    Timber.w(throwable)
                     _snackbarMessage.emit(R.string.search_toast_recent_keyword_load_fail)
                 }
         }
@@ -72,7 +72,7 @@ class SearchDetailViewModel @Inject constructor(
                 .onSuccess {
                     loadRecentKeywords()
                 }.onFailure { throwable ->
-                    Timber.Forest.w(throwable)
+                    Timber.w(throwable)
                     _snackbarMessage.emit(R.string.search_toast_recent_hearit_save_fail)
                 }
         }
@@ -87,7 +87,7 @@ class SearchDetailViewModel @Inject constructor(
                         _snackbarMessage.emit(R.string.search_toast_recent_keyword_delete_success)
                     }
                 }.onFailure { throwable ->
-                    Timber.Forest.w(throwable)
+                    Timber.w(throwable)
                     _snackbarMessage.emit(R.string.search_toast_recent_keyword_delete_fail)
                 }
         }
@@ -128,7 +128,7 @@ class SearchDetailViewModel @Inject constructor(
                             (current + result.items).toImmutableList()
                         }
                     }.onFailure { throwable ->
-                        Timber.Forest.w(throwable)
+                        Timber.w(throwable)
                         _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
                     }
             } finally {
