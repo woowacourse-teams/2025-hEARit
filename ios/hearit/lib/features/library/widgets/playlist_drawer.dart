@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hearit/core/theme/app_colors.dart';
 
+import '../../../core/analytics/analytics_event_names.dart';
+import '../../../core/analytics/analytics_param_keys.dart';
+import '../../../core/analytics/analytics_provider.dart';
 import '../../../core/audio/hearit_player_controller.dart';
+import '../../detail/hearit_detail.dart';
+import '../../detail/hearit_detail_screen.dart';
 import 'playlist_item_card.dart';
 
 /// 플레이리스트를 보여주는 하단 Drawer
@@ -76,6 +81,50 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
     );
   }
 
+  /// 재생목록 항목을 탭했을 때 detail_screen으로 이동
+  void _navigateToDetail(BuildContext context, item, int index) {
+    // 1. PlaylistItem을 HearitDetail stub으로 변환
+    final detail = HearitDetail.fromSummaryStub(
+      id: item.hearitId,
+      title: item.title,
+      categoryName: '재생목록',
+      accentColor: _parseColor(item.categoryColorCode),
+      createdAt: DateTime.now(),
+      lastPlayTime: widget.playerController.position,
+    );
+
+    // 2. Analytics 이벤트 로깅
+    AnalyticsProvider.logger.logEvent(
+      AnalyticsEventNames.playlistItemDetailOpened,
+      params: {
+        AnalyticsParamKeys.itemId: item.hearitId,
+        AnalyticsParamKeys.itemName: item.title,
+        AnalyticsParamKeys.playlistIndex: index,
+      },
+    );
+
+    // 3. Detail 화면으로 이동 (fromPlaylist: true, pauseOnExit: false)
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => HearitDetailScreen(
+          detail: detail,
+          pauseOnExit: false, // 재생 유지 (dispose 시 fromPlaylist에 따라 일시정지)
+          fromPlaylist: true, // 재생목록에서 진입했음을 표시
+        ),
+      ),
+    );
+  }
+
+  /// 색상 코드를 Color로 변환
+  Color _parseColor(String hexColor) {
+    try {
+      final hex = hexColor.replaceAll('#', '');
+      return Color(int.parse('FF$hex', radix: 16));
+    } catch (e) {
+      return AppColors.hearitPurple2;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
@@ -130,7 +179,7 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                '라이브러리에서 전체재생을 통해\n플레이리스트에 추가할 수 있습니다.',
+                                '북마크로 재생목록을 만들어보세요!\n라이브러리에서 전체재생이 가능합니다.',
                                 style: TextStyle(
                                   color: AppColors.gray2,
                                   fontSize: 14,
@@ -159,8 +208,12 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
                           isCurrentItem: isCurrentItem,
                           isPlaying: isActuallyPlaying,
                           onTap: () {
-                            // 카드 영역 클릭: 다른 항목이면 해당 항목 재생
-                            if (!isCurrentItem) {
+                            // 카드 영역 클릭
+                            if (isCurrentItem) {
+                              // 현재 재생 중인 항목 → detail_screen으로 이동
+                              _navigateToDetail(context, item, index);
+                            } else {
+                              // 다른 항목 → 해당 항목 재생
                               widget.playerController.playPlaylistItem(index);
                             }
                           },

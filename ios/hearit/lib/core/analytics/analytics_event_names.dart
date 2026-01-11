@@ -24,6 +24,7 @@ class AnalyticsEventNames {
   static const libraryHearitSelected = 'library_hearit_selected';
   static const libraryBookmarkDeleted = 'library_bookmark_deleted';
   static const libraryPlayAllClicked = 'library_play_all_clicked';
+  static const playlistItemDetailOpened = 'playlist_item_detail_opened';
 
   static const libraryToDetail = 'library_to_detail';
   static const detailKeywordSelected = 'detail_keyword_selected';

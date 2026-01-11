@@ -38,6 +38,7 @@ class HearitDetailViewModel extends ChangeNotifier {
   HearitDetailViewModel({
     required HearitDetail detail,
     required HearitPlayerController playerController,
+    this.fromPlaylist = false, // 재생목록에서 진입했는지 여부
     DetailRepository? repository,
     AuthStorageService? authStorageService,
   }) : _detail = detail,
@@ -47,6 +48,8 @@ class HearitDetailViewModel extends ChangeNotifier {
        _repository = repository ?? DetailRepository(),
        _authStorageService = authStorageService ?? AuthStorageService(),
        _resumePosition = detail.lastPlayTime;
+
+  final bool fromPlaylist; // 재생목록에서 진입했는지 여부
 
   HearitDetail get detail => _detail;
   HearitDetail _detail;
@@ -116,6 +119,8 @@ class HearitDetailViewModel extends ChangeNotifier {
             artUri: artUri,
             extras: {'hearitId': _detail.id},
           ),
+          keepPlaylistContext: fromPlaylist, // 재생목록에서 왔으면 컨텍스트 유지
+          singlePlayMode: true, // 상세 화면에서는 항상 단일 재생 모드
         );
         final resumePosition = _resumePosition ?? _detail.lastPlayTime;
         if (resumePosition != null && resumePosition > Duration.zero) {

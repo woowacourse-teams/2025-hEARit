@@ -22,10 +22,12 @@ class HearitDetailScreen extends StatefulWidget {
     super.key,
     required this.detail,
     this.pauseOnExit = false,
+    this.fromPlaylist = false, // 재생목록에서 진입 여부
   });
 
   final HearitDetail detail;
   final bool pauseOnExit;
+  final bool fromPlaylist; // 재생목록에서 진입했는지 여부
 
   @override
   State<HearitDetailScreen> createState() => _HearitDetailScreenState();
@@ -40,6 +42,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
     _viewModel = HearitDetailViewModel(
       detail: widget.detail,
       playerController: context.read<HearitPlayerController>(),
+      fromPlaylist: widget.fromPlaylist, // 재생목록 진입 여부 전달
     )..addListener(_onViewModelUpdated);
     _viewModel.loadAll();
     WidgetsBinding.instance.addPostFrameCallback((_) => _logScreenView());
@@ -51,6 +54,9 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
       // Stop audio when leaving the detail screen so explore preview can resume cleanly.
       _viewModel.playerController.pause();
     }
+    // fromPlaylist == true인 경우: 재생 계속 (pause 하지 않음)
+    // - 재생 위치는 자동으로 유지됨
+    // - 하이라이트도 유지됨 (keepPlaylistContext: true로 인해)
     _viewModel.removeListener(_onViewModelUpdated);
     _viewModel.dispose();
     super.dispose();

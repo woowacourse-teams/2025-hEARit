@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../features/library/library_repository.dart';
 import '../../features/library/playlist_models.dart';
@@ -70,6 +74,10 @@ class HearitPlayerController extends ChangeNotifier {
   // 플레이리스트 관련 상태
   List<PlaylistItem> _playlist = [];
   int _currentPlaylistIndex = -1; // -1 = 플레이리스트 없음
+  bool _isSinglePlayMode = false; // 단일 재생 모드 (상세 화면에서 자동 재생 방지)
+
+  // 아트워크 캐시 (색상별로 캐싱)
+  static final Map<int, Future<Uri>> _artworkUriFutures = {};
 
   Duration get duration => _duration;
   Duration get position => _position;
@@ -123,10 +131,15 @@ class HearitPlayerController extends ChangeNotifier {
     if (state.processingState == ProcessingState.completed) {
       _saveCurrentProgress('재생 완료');
 
-      // 플레이리스트 재생 중: 자동으로 다음 곡 재생
-      if (hasNextInPlaylist) {
+      // 플레이리스트 재생 중이고 단일 재생 모드가 아닐 때만 자동으로 다음 곡 재생
+      if (hasNextInPlaylist && !_isSinglePlayMode) {
         Future.delayed(const Duration(milliseconds: 500), () {
           playNext();
+        });
+      } else if (_isSinglePlayMode) {
+        // 단일 재생 모드일 때는 명시적으로 일시정지 처리 (UI 아이콘 업데이트)
+        Future.delayed(const Duration(milliseconds: 100), () {
+          pause();
         });
       }
     }
@@ -206,15 +219,28 @@ class HearitPlayerController extends ChangeNotifier {
   // Load Source + MediaItem 설정
   // ──────────────────────────────
 
-  /// 상세 화면에서 재생 시 사용 (플레이리스트 인덱스 해제)
-  Future<void> loadSource(String url, {MediaItem? mediaItem}) async {
+  /// 상세 화면에서 재생 시 사용 (플레이리스트 컨텍스트 선택적 유지)
+  Future<void> loadSource(
+    String url, {
+    MediaItem? mediaItem,
+    bool keepPlaylistContext = false, // 플레이리스트 컨텍스트 유지 여부
+    bool singlePlayMode = false, // 단일 재생 모드 (자동 재생 방지)
+  }) async {
     // 이전 팟캐스트 재생 기록 저장
     if (_currentMediaItem != null) {
       await _saveCurrentProgress('다른 팟캐스트 재생');
     }
 
-    // 상세 화면에서 재생 시 플레이리스트 인덱스 해제
-    _currentPlaylistIndex = -1;
+    // 플레이리스트 컨텍스트 유지 여부에 따라 인덱스 처리
+    if (!keepPlaylistContext) {
+      // 기존 동작: 상세 화면에서 재생 시 플레이리스트 인덱스 해제
+      _currentPlaylistIndex = -1;
+    }
+    // keepPlaylistContext == true면 _currentPlaylistIndex를 그대로 유지
+    // (재생목록에서 진입한 경우 하이라이트 유지)
+
+    // 단일 재생 모드 설정
+    _isSinglePlayMode = singlePlayMode;
 
     // 새 팟캐스트 로드
     if (mediaItem != null) {
@@ -230,6 +256,9 @@ class HearitPlayerController extends ChangeNotifier {
 
   /// 플레이리스트 재생 시 사용 (플레이리스트 인덱스 유지)
   Future<void> _loadSourceFromPlaylist(String url, MediaItem mediaItem) async {
+    // 플레이리스트 재생 모드로 전환 (자동 재생 허용)
+    _isSinglePlayMode = false;
+
     // 이전 팟캐스트 재생 기록 저장
     if (_currentMediaItem != null) {
       await _saveCurrentProgress('다른 팟캐스트 재생');
@@ -381,12 +410,91 @@ class HearitPlayerController extends ChangeNotifier {
     }
   }
 
-  /// 카테고리 색상 코드로 아트워크 URI 생성
+  /// 카테고리 색상 코드로 아트워크 URI 생성 (로컬 이미지 사용)
   Future<Uri> _resolveArtworkUri(String colorCode) async {
-    final hexColor = colorCode.replaceAll('#', '');
-    return Uri.parse(
-      'https://via.placeholder.com/300/$hexColor/FFFFFF?text=hEARit',
+    // 색상 코드를 Color 객체로 변환
+    final color = _parseColorCode(colorCode);
+
+    // 캐시된 Future 반환 (동일한 색상은 한 번만 생성)
+    return _artworkUriFutures.putIfAbsent(
+      color.value,
+      () => _loadArtworkUri(color),
     );
+  }
+
+  /// 색상 코드를 Color로 변환
+  Color _parseColorCode(String hexColor) {
+    try {
+      final hex = hexColor.replaceAll('#', '');
+      return Color(int.parse('FF$hex', radix: 16));
+    } catch (e) {
+      debugPrint('⚠️ 색상 파싱 실패: $hexColor, 기본 색상 사용');
+      return const Color(0xFF6366F1); // 기본 보라색
+    }
+  }
+
+  /// 로컬 이미지를 색상으로 tinting하여 파일로 저장
+  Future<Uri> _loadArtworkUri(Color accentColor) async {
+    try {
+      // 1. 로컬 이미지 로드
+      final bytes = await rootBundle.load('assets/images/backgroud_LP.png');
+      final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
+      final frame = await codec.getNextFrame();
+      final baseImage = frame.image;
+
+      // 2. 캔버스에 색상 배경 + 이미지 그리기
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      final size = Size(
+        baseImage.width.toDouble(),
+        baseImage.height.toDouble(),
+      );
+      final rect = Offset.zero & size;
+
+      // 배경을 카테고리 색상으로 채우고, LP 그래픽을 위에 그림
+      canvas.drawRect(rect, Paint()..color = accentColor);
+      canvas.drawImageRect(
+        baseImage,
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        rect,
+        Paint(),
+      );
+
+      // 3. 이미지로 변환
+      final picture = recorder.endRecording();
+      final tinted = await picture.toImage(baseImage.width, baseImage.height);
+      final byteData = await tinted.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        return _copyFallbackArtwork();
+      }
+
+      // 4. 임시 디렉토리에 파일로 저장
+      final dir = await getTemporaryDirectory();
+      final hexColor = accentColor.value.toRadixString(16).padLeft(8, '0');
+      final file = File('${dir.path}/playlist_LP_$hexColor.png');
+      await file.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
+
+      debugPrint('✅ 아트워크 생성 완료: ${file.path}');
+      return Uri.file(file.path);
+    } catch (e) {
+      debugPrint('❌ 아트워크 생성 실패: $e, fallback 사용');
+      return _copyFallbackArtwork();
+    }
+  }
+
+  /// Fallback 아트워크 (기본 LP 이미지)
+  Future<Uri> _copyFallbackArtwork() async {
+    try {
+      final bytes = await rootBundle.load('assets/images/detail_LP.png');
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/playlist_LP_fallback.png');
+      await file.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+      return Uri.file(file.path);
+    } catch (e) {
+      debugPrint('❌ Fallback 아트워크 생성 실패: $e');
+      // 최후의 fallback: assets 경로 반환 (일부 플랫폼에서는 작동하지 않을 수 있음)
+      return Uri.parse('asset:///assets/images/detail_LP.png');
+    }
   }
 
   /// 다음 곡 재생
