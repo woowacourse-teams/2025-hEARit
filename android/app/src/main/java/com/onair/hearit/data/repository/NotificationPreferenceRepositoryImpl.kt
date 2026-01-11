@@ -17,7 +17,7 @@ class NotificationPreferenceRepositoryImpl @Inject constructor(
 
     override fun getCachedCommutePushEnabled(): Boolean? = cachedIsCommutePushEnabled
 
-    override suspend fun getIsCommutePushEnabled(): Result<Boolean> =
+    override suspend fun getCommutePushEnabled(): Result<Boolean> =
         runCatching {
             // 1. 캐시 확인
             val cached: Boolean? = mutex.withLock { cachedIsCommutePushEnabled }
@@ -34,7 +34,7 @@ class NotificationPreferenceRepositoryImpl @Inject constructor(
             Timber.w(throwable, "❌ 푸시 알림 설정을 불러오는 데 실패했습니다.")
         }
 
-    override suspend fun saveIsCommutePushEnabled(isEnabled: Boolean): Result<Unit> =
+    override suspend fun saveCommutePushEnabled(isEnabled: Boolean): Result<Unit> =
         runCatching {
             // 1. 캐시 먼저 갱신 (UI 반응 우선)
             mutex.withLock { cachedIsCommutePushEnabled = isEnabled }

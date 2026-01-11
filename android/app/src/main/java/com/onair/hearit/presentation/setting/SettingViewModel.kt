@@ -91,7 +91,7 @@ class SettingViewModel @Inject constructor(
     private fun loadPushNotificationSetting() {
         viewModelScope.launch {
             notificationPreferenceRepository
-                .getIsCommutePushEnabled()
+                .getCommutePushEnabled()
                 .onSuccess { isEnabled ->
                     _isPushNotificationEnabled.value = isEnabled
                 }.onFailure { throwable ->
@@ -103,7 +103,7 @@ class SettingViewModel @Inject constructor(
     private fun persistPushNotificationSetting(isEnabled: Boolean) {
         viewModelScope.launch {
             notificationPreferenceRepository
-                .saveIsCommutePushEnabled(isEnabled)
+                .saveCommutePushEnabled(isEnabled)
                 .onFailure { throwable ->
                     Timber.e(throwable)
                 }

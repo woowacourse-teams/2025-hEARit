@@ -3,7 +3,7 @@ package com.onair.hearit.domain.repository
 interface NotificationPreferenceRepository {
     fun getCachedCommutePushEnabled(): Boolean?
 
-    suspend fun getIsCommutePushEnabled(): Result<Boolean>
+    suspend fun getCommutePushEnabled(): Result<Boolean>
 
-    suspend fun saveIsCommutePushEnabled(isEnabled: Boolean): Result<Unit>
+    suspend fun saveCommutePushEnabled(isEnabled: Boolean): Result<Unit>
 }
