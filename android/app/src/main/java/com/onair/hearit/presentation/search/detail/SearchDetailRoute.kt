@@ -28,6 +28,7 @@ import kotlinx.collections.immutable.toImmutableList
 @Composable
 fun SearchDetailRoute(
     onBackClick: () -> Unit,
+    onHearitClick: (Long) -> Unit,
     viewModel: SearchDetailViewModel = hiltViewModel(),
 ) {
     val recentKeywords by viewModel.recentKeywords.collectAsStateWithLifecycle()
@@ -100,7 +101,7 @@ fun SearchDetailRoute(
                     SearchResultScreen(
                         hearits = searchedHearits,
                         onLoadNext = viewModel::loadNextPage,
-                        onHearitClick = { /* 클릭 처리 */ },
+                        onHearitClick = onHearitClick,
                         isLoading = isLoading,
                     )
                 }

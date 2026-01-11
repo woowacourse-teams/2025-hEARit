@@ -63,6 +63,7 @@ fun SearchNavHost(
         composable<SearchRoute.SearchDetail> {
             SearchDetailRoute(
                 onBackClick = { navController.navigateUp() },
+                onHearitClick = onHearitClick,
             )
         }
 
