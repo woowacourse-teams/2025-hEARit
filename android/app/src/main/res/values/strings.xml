@@ -87,6 +87,10 @@
     <string name="setting_logout">로그아웃</string>
     <string name="setting_profile">내 정보</string>
     <string name="setting_alarm">푸시 알림</string>
+    <string name="setting_alarm_system_dialog_title">알림이 꺼져 있어요</string>
+    <string name="setting_alarm_system_dialog_description">휴대폰 설정에서 hEARit 알림을 켜야 푸시를 받을 수 있어요.</string>
+    <string name="setting_alarm_system_dialog_confirm">설정으로 이동</string>
+    <string name="setting_alarm_system_dialog_dismiss">취소</string>
     <string name="setting_alarm_push_enabled">푸시 알림을 켰어요</string>
     <string name="setting_alarm_push_disabled">푸시 알림을 껐어요</string>
     <string name="setting_alarm_push_blocked_by_system">휴대폰 설정에서 알림이 꺼져 있어요</string>
