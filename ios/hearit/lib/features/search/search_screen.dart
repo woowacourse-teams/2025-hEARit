@@ -262,7 +262,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           left: 20,
                           right: 20,
                           top: 0,
-                          bottom: 0,
+                          bottom: 20,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

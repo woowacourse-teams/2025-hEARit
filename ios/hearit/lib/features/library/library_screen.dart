@@ -340,7 +340,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               ),
             ),
           // 하단 여백
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
         ],
       ],
     );

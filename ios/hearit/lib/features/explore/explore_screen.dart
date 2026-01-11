@@ -163,20 +163,21 @@ class ExploreScreenState extends State<ExploreScreen> {
     );
 
     if (!mounted) return;
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute(
-        builder: (_) => HearitDetailScreen(
-              detail: stub,
-              pauseOnExit: true,
-            )));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => HearitDetailScreen(detail: stub, pauseOnExit: true),
+      ),
+    );
   }
 
   void _logScreenView() {
-    AnalyticsProvider.logger.logEvent('screen_view', params: {
-      AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameExplore,
-      AnalyticsParamKeys.screenClass: 'ExploreScreen',
-    });
+    AnalyticsProvider.logger.logEvent(
+      'screen_view',
+      params: {
+        AnalyticsParamKeys.screenName: AnalyticsParamKeys.screenNameExplore,
+        AnalyticsParamKeys.screenClass: 'ExploreScreen',
+      },
+    );
   }
 
   @override
@@ -185,7 +186,7 @@ class ExploreScreenState extends State<ExploreScreen> {
     return Scaffold(
       backgroundColor: AppColors.hearitBlack,
       body: SafeArea(
-        bottom: false,
+        bottom: true,
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -216,8 +217,8 @@ class ExploreScreenState extends State<ExploreScreen> {
               }
 
               if (active == null) {
-                final errorText = _viewModel.initialError ??
-                    '탐색 피드를 불러오지 못했습니다. 다시 시도해 주세요.';
+                final errorText =
+                    _viewModel.initialError ?? '탐색 피드를 불러오지 못했습니다. 다시 시도해 주세요.';
                 return Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -227,9 +228,8 @@ class ExploreScreenState extends State<ExploreScreen> {
                         child: Text(
                           errorText,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.gray4,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.gray4),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -237,7 +237,9 @@ class ExploreScreenState extends State<ExploreScreen> {
                         onPressed: _refreshExplore,
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.hearitPurple1,
-                          side: const BorderSide(color: AppColors.hearitPurple1),
+                          side: const BorderSide(
+                            color: AppColors.hearitPurple1,
+                          ),
                         ),
                         child: const Text('다시 시도'),
                       ),

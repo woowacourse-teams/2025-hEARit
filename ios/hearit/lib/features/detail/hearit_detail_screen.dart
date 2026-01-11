@@ -141,7 +141,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
         backgroundColor: AppColors.hearitBlack,
         body: SafeArea(
           top: true,
-          bottom: false,
+          bottom: true,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: AnimatedBuilder(
@@ -223,7 +223,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                               onKeywordTap: _onKeywordTap,
                               isTablet: isTablet,
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 20),
                           ],
                         ),
                       ),

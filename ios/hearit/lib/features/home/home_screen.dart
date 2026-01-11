@@ -234,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.hearitBlack,
       body: SafeArea(
-        bottom: false,
+        bottom: true,
         child: RefreshIndicator(
           color: const Color(0xFFA86BFF),
           backgroundColor: AppColors.hearitBlack,
@@ -355,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onCategoryTap: _onCategoryTap,
                   onHearitTap: _onCategoryHearitTap,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
               ],
             ),
           ),

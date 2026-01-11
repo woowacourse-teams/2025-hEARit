@@ -120,9 +120,11 @@ class _CategoryHearitScreenState extends State<CategoryHearitScreen> {
                   );
                 }
                 return ListView.separated(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 24,
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    top: 24,
+                    bottom: 20,
                   ),
                   itemCount: data.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
