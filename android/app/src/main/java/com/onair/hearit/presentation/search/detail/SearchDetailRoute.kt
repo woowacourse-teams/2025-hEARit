@@ -53,7 +53,7 @@ fun SearchDetailRoute(
         focusRequester.requestFocus()
     }
 
-    LaunchedEffect(viewModel.snackbarMessage) {
+    LaunchedEffect(Unit) {
         viewModel.snackbarMessage.collect { resId ->
             snackbarHostState.showSnackbar(context.getString(resId))
         }
@@ -76,7 +76,10 @@ fun SearchDetailRoute(
         ) {
             SearchDetailTopBar(
                 searchText = searchText,
-                onSearchTextChange = { searchText = it },
+                onSearchTextChange = {
+                    searchText = it
+                    if (it.isBlank()) viewModel.clearSearch()
+                },
                 onBackClick = onBackClick,
                 onSearch = ::performSearch,
                 focusRequester = focusRequester,

@@ -93,6 +93,18 @@ class SearchDetailViewModel @Inject constructor(
         fetchSearchResults()
     }
 
+    fun clearSearch() {
+        _uiState.update {
+            it.copy(
+                searchInput = null,
+                searchedHearits = persistentListOf(),
+                currentPage = 0,
+                isLastPage = false,
+                isLoading = false,
+            )
+        }
+    }
+
     fun loadNextPage() {
         val currentState = _uiState.value
         if (currentState.isLoading || currentState.isLastPage) return
