@@ -114,7 +114,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
-            const SizedBox(height: 60),
+            const SizedBox(height: 30),
 
             // 프로필 아바타
             _ProfileAvatar(profile: profile),
@@ -122,7 +122,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             const SizedBox(height: 32),
 
             // 카톡 닉네임 버튼
-            _NicknameButton(nickname: profile.nickname),
+            Center(child: _NicknameButton(nickname: profile.nickname)),
 
             const Spacer(),
 
@@ -237,22 +237,24 @@ class _NicknameButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        border: Border.all(color: AppColors.hearitPurple2, width: 1.5),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Center(
-        child: Text(
-          nickname,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Pretendard',
+    return IntrinsicWidth(
+      child: Container(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border.all(color: AppColors.hearitPurple2, width: 1.5),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Center(
+          child: Text(
+            nickname,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Pretendard',
+            ),
           ),
         ),
       ),
