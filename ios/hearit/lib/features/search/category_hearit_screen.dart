@@ -119,23 +119,24 @@ class _CategoryHearitScreenState extends State<CategoryHearitScreen> {
                     ),
                   );
                 }
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 24,
-                    ),
-                    itemCount: data.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      return SearchResultCard(
-                        data: data[index],
-                        onTap: () => _openDetail(data[index]),
-                      );
-                    },
-                  );
-                },
-              ),
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 24,
+                  ),
+                  itemCount: data.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    return SearchResultCard(
+                      data: data[index],
+                      onTap: () => _openDetail(data[index]),
+                      progressColor: widget.category.color,
+                    );
+                  },
+                );
+              },
             ),
+          ),
         ],
       ),
     );
@@ -149,8 +150,8 @@ class _CategoryHearitScreenState extends State<CategoryHearitScreen> {
       accentColor: const Color(0xFFA86BFF),
       createdAt: DateTime.now(),
     );
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => HearitDetailScreen(detail: stub)),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => HearitDetailScreen(detail: stub)));
   }
 }

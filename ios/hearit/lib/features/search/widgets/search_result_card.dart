@@ -4,10 +4,16 @@ import 'package:hearit/core/theme/app_colors.dart';
 import '../search_models.dart';
 
 class SearchResultCard extends StatelessWidget {
-  const SearchResultCard({super.key, required this.data, this.onTap});
+  const SearchResultCard({
+    super.key,
+    required this.data,
+    this.onTap,
+    this.progressColor,
+  });
 
   final SearchHearit data;
   final VoidCallback? onTap;
+  final Color? progressColor;
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +118,7 @@ class SearchResultCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 6),
-              _SearchProgressBar(progress: progress),
+              _SearchProgressBar(progress: progress, color: progressColor),
             ],
           ),
         ),
@@ -122,9 +128,10 @@ class SearchResultCard extends StatelessWidget {
 }
 
 class _SearchProgressBar extends StatelessWidget {
-  const _SearchProgressBar({required this.progress});
+  const _SearchProgressBar({required this.progress, this.color});
 
   final double? progress;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +150,7 @@ class _SearchProgressBar extends StatelessWidget {
             child: Container(
               width: barWidth,
               decoration: BoxDecoration(
-                color: AppColors.hearitPurple2,
+                color: color ?? AppColors.hearitPurple2,
                 borderRadius: BorderRadius.circular(999),
               ),
             ),
