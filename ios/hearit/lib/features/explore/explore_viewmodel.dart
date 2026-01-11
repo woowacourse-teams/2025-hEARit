@@ -151,7 +151,11 @@ class ExploreViewModel extends ChangeNotifier {
   }) async {
     if (item.shortAudioUrl == null || item.shortAudioUrl!.isEmpty) return;
     _currentSourceUrl = item.shortAudioUrl;
-    await playerController.loadSource(item.shortAudioUrl!);
+    // 탐색 화면 미리듣기로 마킹
+    await playerController.loadSource(
+      item.shortAudioUrl!,
+      isExplorePreview: true,
+    );
     final start = startPosition ?? Duration.zero;
     await playerController.seek(start);
     _position = start;

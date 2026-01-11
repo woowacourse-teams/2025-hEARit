@@ -82,6 +82,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  bool _wasPlayingExplorePreviewBeforeBackground = false;
+
   @override
   void initState() {
     super.initState();
@@ -106,14 +108,39 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       case AppLifecycleState.inactive:
         // App goes to background or receives interruption
         playerController.saveOnAppPaused();
+
+        // 탐색 화면 미리듣기 중이면 일시정지
+        if (playerController.isPlayingExplorePreview) {
+          // 이미 true로 저장된 경우 덮어쓰지 않음 (여러 생명주기 이벤트 연속 발생 대응)
+          if (!_wasPlayingExplorePreviewBeforeBackground) {
+            _wasPlayingExplorePreviewBeforeBackground =
+                playerController.isPlaying;
+          }
+
+          // 실제로 재생 중일 때만 일시정지 실행
+          if (_wasPlayingExplorePreviewBeforeBackground &&
+              playerController.isPlaying) {
+            // 비동기 작업을 별도 태스크로 실행
+            Future.microtask(() => playerController.pause());
+          }
+        }
+        break;
+      case AppLifecycleState.resumed:
+        // App returns to foreground
+        // 탐색 화면 미리듣기였고 재생 중이었다면 다시 재생
+        if (playerController.isPlayingExplorePreview &&
+            _wasPlayingExplorePreviewBeforeBackground) {
+          // 비동기 작업을 별도 태스크로 실행
+          Future.microtask(() => playerController.play());
+          _wasPlayingExplorePreviewBeforeBackground = false;
+        }
         break;
       case AppLifecycleState.detached:
         // App is about to terminate
         playerController.saveOnAppDetached();
         break;
-      case AppLifecycleState.resumed:
       case AppLifecycleState.hidden:
-        // App returns to foreground - no action needed
+        // No action needed
         break;
     }
   }

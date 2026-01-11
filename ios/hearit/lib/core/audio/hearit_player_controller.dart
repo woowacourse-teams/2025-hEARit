@@ -76,6 +76,9 @@ class HearitPlayerController extends ChangeNotifier {
   int _currentPlaylistIndex = -1; // -1 = 플레이리스트 없음
   bool _isSinglePlayMode = false; // 단일 재생 모드 (상세 화면에서 자동 재생 방지)
 
+  // 탐색 화면 컨텍스트 추적 (백그라운드 일시정지 판단용)
+  bool _isPlayingExplorePreview = false;
+
   // 아트워크 캐시 (색상별로 캐싱)
   static final Map<int, Future<Uri>> _artworkUriFutures = {};
 
@@ -95,6 +98,9 @@ class HearitPlayerController extends ChangeNotifier {
       isPlayingFromPlaylist && _currentPlaylistIndex > 0;
 
   bool get isPlaying => _latestState?.playing ?? false;
+
+  // 탐색 화면 미리듣기 재생 중인지 여부
+  bool get isPlayingExplorePreview => _isPlayingExplorePreview;
 
   bool get isBuffering {
     final s = _latestState?.processingState;
@@ -225,6 +231,7 @@ class HearitPlayerController extends ChangeNotifier {
     MediaItem? mediaItem,
     bool keepPlaylistContext = false, // 플레이리스트 컨텍스트 유지 여부
     bool singlePlayMode = false, // 단일 재생 모드 (자동 재생 방지)
+    bool isExplorePreview = false, // 탐색 화면 미리듣기 여부
   }) async {
     // 이전 팟캐스트 재생 기록 저장
     if (_currentMediaItem != null) {
@@ -242,6 +249,9 @@ class HearitPlayerController extends ChangeNotifier {
     // 단일 재생 모드 설정
     _isSinglePlayMode = singlePlayMode;
 
+    // 탐색 화면 미리듣기 여부 설정
+    _isPlayingExplorePreview = isExplorePreview;
+
     // 새 팟캐스트 로드
     if (mediaItem != null) {
       _currentMediaItem = mediaItem;
@@ -258,6 +268,9 @@ class HearitPlayerController extends ChangeNotifier {
   Future<void> _loadSourceFromPlaylist(String url, MediaItem mediaItem) async {
     // 플레이리스트 재생 모드로 전환 (자동 재생 허용)
     _isSinglePlayMode = false;
+
+    // 탐색 화면 컨텍스트 해제 (플레이리스트는 풀 콘텐츠)
+    _isPlayingExplorePreview = false;
 
     // 이전 팟캐스트 재생 기록 저장
     if (_currentMediaItem != null) {
