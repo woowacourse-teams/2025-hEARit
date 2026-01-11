@@ -42,6 +42,19 @@ class _MainNavigationState extends State<MainNavigation> {
     _exploreRouteObserver = _TabRouteObserver(
       onStackChanged: _onExploreStackChanged,
     );
+
+    // PlayerController 리스너 추가 (에러 처리용)
+    _playerController.addListener(_onPlayerStateChanged);
+  }
+
+  @override
+  void dispose() {
+    _playerController.removeListener(_onPlayerStateChanged);
+    super.dispose();
+  }
+
+  void _onPlayerStateChanged() {
+    // 에러 상태 체크는 나중에 필요시 추가
   }
 
   void _onExploreStackChanged() {
@@ -92,6 +105,7 @@ class _MainNavigationState extends State<MainNavigation> {
       accentColor: AppColors.hearitPurple2,
       createdAt: DateTime.now(),
       lastPlayTime: _playerController.position,
+      playTime: _playerController.duration, // 복원된 duration 전달
     );
     if (!mounted) return;
     await Navigator.of(context).push(
@@ -253,6 +267,8 @@ class _MainNavigationState extends State<MainNavigation> {
                                 isPlaying: _playerController.isPlaying,
                                 isPlayingFromPlaylist:
                                     _playerController.isPlayingFromPlaylist,
+                                isLoadingAudio:
+                                    _playerController.isLoadingAudio,
                                 onTogglePlay: () =>
                                     _playerController.togglePlayback(),
                                 onSeekFraction: (fraction) {
@@ -441,6 +457,7 @@ class _DetailMiniPlayerBar extends StatefulWidget {
     required this.durationMs,
     required this.isPlaying,
     required this.isPlayingFromPlaylist,
+    required this.isLoadingAudio,
     required this.onTogglePlay,
     required this.onTap,
     required this.onSeekFraction,
@@ -452,6 +469,7 @@ class _DetailMiniPlayerBar extends StatefulWidget {
   final int durationMs;
   final bool isPlaying;
   final bool isPlayingFromPlaylist;
+  final bool isLoadingAudio;
   final VoidCallback onTogglePlay;
   final VoidCallback onTap;
   final ValueChanged<double> onSeekFraction;
@@ -496,6 +514,7 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
                   const SizedBox(width: 12),
                   _PlayPauseButton(
                     isPlaying: widget.isPlaying,
+                    isLoading: widget.isLoadingAudio,
                     onToggle: widget.onTogglePlay,
                   ),
                   const SizedBox(width: 8),
@@ -541,23 +560,39 @@ class _DetailMiniPlayerBarState extends State<_DetailMiniPlayerBar> {
 }
 
 class _PlayPauseButton extends StatelessWidget {
-  const _PlayPauseButton({required this.isPlaying, required this.onToggle});
+  const _PlayPauseButton({
+    required this.isPlaying,
+    required this.isLoading,
+    required this.onToggle,
+  });
 
   final bool isPlaying;
+  final bool isLoading;
   final VoidCallback onToggle;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onToggle,
+      onTap: isLoading ? null : onToggle,
       child: SizedBox(
         width: 44,
         height: 44,
-        child: Icon(
-          isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-          color: AppColors.gray4,
-          size: 32,
-        ),
+        child: isLoading
+            ? const Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.gray4),
+                  ),
+                ),
+              )
+            : Icon(
+                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                color: AppColors.gray4,
+                size: 32,
+              ),
       ),
     );
   }

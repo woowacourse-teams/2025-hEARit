@@ -105,32 +105,77 @@ class HearitDetailViewModel extends ChangeNotifier {
 
   Future<void> _loadAudio() async {
     try {
+      // 현재 MediaItem 확인 (복원된 상태인지 체크)
+      final currentMedia = _playerController.currentMediaItem;
+      final currentHearitId = _extractHearitId(currentMedia);
+      final isRestoredState = currentHearitId == _detail.id;
+
       final url = await _repository.fetchOriginalAudioUrl(_detail.id);
       if (url != null && url.isNotEmpty) {
         final artUri = await _resolveArtworkUri(_detail.category.color);
-        await _playerController.loadSource(
-          url,
-          mediaItem: MediaItem(
-            id: 'hearit-${_detail.id}',
-            title: _detail.title,
-            album: _detail.category.name,
-            artist: _detail.category.name,
-            duration: _detail.playTime,
-            artUri: artUri,
-            extras: {'hearitId': _detail.id},
-          ),
-          keepPlaylistContext: fromPlaylist, // 재생목록에서 왔으면 컨텍스트 유지
-          singlePlayMode: true, // 상세 화면에서는 항상 단일 재생 모드
-        );
-        final resumePosition = _resumePosition ?? _detail.lastPlayTime;
-        if (resumePosition != null && resumePosition > Duration.zero) {
-          await _playerController.seek(resumePosition);
+
+        if (isRestoredState) {
+          // 복원된 상태: 저장된 위치 유지하고 오디오만 로드
+          debugPrint('🔄 복원된 재생바 상태 감지 - 오디오 재로드');
+          final savedPosition = _playerController.position;
+
+          await _playerController.loadSource(
+            url,
+            mediaItem: MediaItem(
+              id: 'hearit-${_detail.id}',
+              title: _detail.title,
+              album: _detail.category.name,
+              artist: _detail.category.name,
+              duration: _detail.playTime,
+              artUri: artUri,
+              extras: {'hearitId': _detail.id},
+            ),
+            keepPlaylistContext: fromPlaylist,
+            singlePlayMode: true,
+          );
+
+          // 저장된 위치로 seek
+          if (savedPosition > Duration.zero) {
+            await _playerController.seek(savedPosition);
+          }
+
+          // 자동 재생 시작
+          await _playerController.play();
+        } else {
+          // 새로운 재생: 기존 로직
+          await _playerController.loadSource(
+            url,
+            mediaItem: MediaItem(
+              id: 'hearit-${_detail.id}',
+              title: _detail.title,
+              album: _detail.category.name,
+              artist: _detail.category.name,
+              duration: _detail.playTime,
+              artUri: artUri,
+              extras: {'hearitId': _detail.id},
+            ),
+            keepPlaylistContext: fromPlaylist, // 재생목록에서 왔으면 컨텍스트 유지
+            singlePlayMode: true, // 상세 화면에서는 항상 단일 재생 모드
+          );
+          final resumePosition = _resumePosition ?? _detail.lastPlayTime;
+          if (resumePosition != null && resumePosition > Duration.zero) {
+            await _playerController.seek(resumePosition);
+          }
+          await _playerController.play();
         }
-        await _playerController.play();
       }
     } catch (_) {
       // ignore audio load errors for now
     }
+  }
+
+  /// MediaItem extras에서 hearitId 추출
+  int? _extractHearitId(MediaItem? mediaItem) {
+    if (mediaItem == null) return null;
+    final id = mediaItem.extras?['hearitId'];
+    if (id is int) return id;
+    if (id is String) return int.tryParse(id);
+    return null;
   }
 
   Future<void> _loadScripts() async {

@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../features/library/library_repository.dart';
 import '../../features/library/playlist_models.dart';
+import '../storage/player_state_storage.dart';
 import '../storage/playlist_storage.dart';
 import 'audio_handler.dart';
 import 'playing_history_service.dart';
@@ -20,18 +21,23 @@ class HearitPlayerController extends ChangeNotifier {
     PlayingHistoryService? playingHistoryService,
     LibraryRepository? libraryRepository,
     PlaylistStorage? playlistStorage,
+    PlayerStateStorage? playerStateStorage,
     double initialSpeed = 1.0,
   }) : _audioHandler = audioHandler,
        _playingHistoryService =
            playingHistoryService ?? PlayingHistoryService(),
        _libraryRepository = libraryRepository ?? LibraryRepository(),
-       _playlistStorage = playlistStorage ?? PlaylistStorage() {
+       _playlistStorage = playlistStorage ?? PlaylistStorage(),
+       _playerStateStorage = playerStateStorage ?? PlayerStateStorage() {
     _currentSpeed = initialSpeed;
 
     _audioHandler.setSpeed(initialSpeed);
 
     // 저장된 플레이리스트 로드
     _loadSavedPlaylist();
+
+    // 저장된 재생바 상태 복원
+    _restorePlayerState();
 
     // Listen: duration updates
     _durationSub = _audioHandler.durationStream.listen((duration) {
@@ -63,6 +69,7 @@ class HearitPlayerController extends ChangeNotifier {
   final PlayingHistoryService _playingHistoryService;
   final LibraryRepository _libraryRepository;
   late final PlaylistStorage _playlistStorage;
+  late final PlayerStateStorage _playerStateStorage;
 
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
@@ -110,6 +117,13 @@ class HearitPlayerController extends ChangeNotifier {
   bool get isCompleted =>
       _latestState?.processingState == ProcessingState.completed;
 
+  // 오디오 소스가 로드되었는지 확인
+  bool get hasAudioSource => _audioHandler.hasAudioSource;
+
+  // 오디오 로딩 중인지 확인 (복원된 상태에서 API 호출 중)
+  bool _isLoadingAudio = false;
+  bool get isLoadingAudio => _isLoadingAudio;
+
   late final StreamSubscription<Duration?> _durationSub;
   late final StreamSubscription<Duration> _positionSub;
   late final StreamSubscription<PlayerState> _playerStateSub;
@@ -124,6 +138,68 @@ class HearitPlayerController extends ChangeNotifier {
       debugPrint('🎵 저장된 플레이리스트 로드: ${savedPlaylist.length}개 항목');
       notifyListeners();
     }
+  }
+
+  // ──────────────────────────────
+  // 저장된 재생바 상태 복원
+  // ──────────────────────────────
+  Future<void> _restorePlayerState() async {
+    final savedState = await _playerStateStorage.loadPlayerState();
+
+    if (savedState == null) {
+      debugPrint('📭 복원할 재생바 상태 없음');
+      return;
+    }
+
+    // 만료된 상태는 무시
+    if (savedState.isExpired) {
+      final age = DateTime.now().difference(savedState.savedAt);
+      debugPrint('⏰ 재생바 상태 만료 (${age.inDays}일 경과)');
+      await _playerStateStorage.clearPlayerState();
+      return;
+    }
+
+    debugPrint('🎵 재생바 상태 복원: ${savedState.title}');
+
+    // MediaItem 복원 (오디오 소스는 로드하지 않음)
+    _currentMediaItem = MediaItem(
+      id: 'hearit-${savedState.hearitId}',
+      title: savedState.title,
+      album: savedState.album,
+      artist: savedState.artist,
+      duration: Duration(seconds: savedState.durationSeconds),
+      artUri: null, // 필요 시 나중에 로드
+      extras: {'hearitId': savedState.hearitId},
+    );
+
+    // Duration 복원
+    _duration = Duration(seconds: savedState.durationSeconds);
+
+    // Position 복원 (UI에 표시용)
+    _position = Duration(milliseconds: savedState.lastPositionMs);
+
+    // 플레이리스트 인덱스 복원 (플레이리스트가 로드된 경우)
+    if (savedState.playlistIndex != null && _playlist.isNotEmpty) {
+      // hearitId로 현재 플레이리스트에서 인덱스 재계산
+      final savedHearitId = savedState.hearitId;
+      final newIndex = _playlist.indexWhere(
+        (item) => item.hearitId == savedHearitId,
+      );
+
+      if (newIndex >= 0) {
+        _currentPlaylistIndex = newIndex;
+        debugPrint('📂 플레이리스트 인덱스 복원: $_currentPlaylistIndex');
+      } else {
+        // 플레이리스트에서 제거된 항목 → 단일 재생으로 간주
+        _currentPlaylistIndex = -1;
+        debugPrint('⚠️ 플레이리스트에서 항목 제거됨, 단일 재생으로 전환');
+      }
+    }
+
+    // MediaItem을 AudioHandler에도 설정 (알림/잠금화면 표시용)
+    _audioHandler.mediaItem.add(_currentMediaItem);
+
+    notifyListeners();
   }
 
   // ──────────────────────────────
@@ -168,6 +244,14 @@ class HearitPlayerController extends ChangeNotifier {
     if (isPlaying) {
       await pause();
     } else {
+      // 오디오 소스가 없으면 먼저 로드
+      if (!hasAudioSource) {
+        final success = await ensureAudioLoaded();
+        if (!success) {
+          debugPrint('❌ 오디오 로드 실패 - 재생 불가');
+          return;
+        }
+      }
       await _audioHandler.play();
     }
   }
@@ -176,6 +260,8 @@ class HearitPlayerController extends ChangeNotifier {
     await _audioHandler.pause();
     // 일시정지 시 재생 기록 저장
     await _saveCurrentProgress('일시정지');
+    // 재생바 상태 저장
+    await _savePlayerState('일시정지');
   }
 
   Future<void> seekRelative(Duration offset) async {
@@ -236,6 +322,7 @@ class HearitPlayerController extends ChangeNotifier {
     // 이전 팟캐스트 재생 기록 저장
     if (_currentMediaItem != null) {
       await _saveCurrentProgress('다른 팟캐스트 재생');
+      await _savePlayerState('다른 팟캐스트 재생');
     }
 
     // 플레이리스트 컨텍스트 유지 여부에 따라 인덱스 처리
@@ -281,6 +368,7 @@ class HearitPlayerController extends ChangeNotifier {
     // 이전 팟캐스트 재생 기록 저장
     if (_currentMediaItem != null) {
       await _saveCurrentProgress('다른 팟캐스트 재생');
+      await _savePlayerState('다른 팟캐스트 재생');
     }
 
     // _currentPlaylistIndex는 건드리지 않음 (호출자가 이미 설정)
@@ -324,6 +412,36 @@ class HearitPlayerController extends ChangeNotifier {
     );
   }
 
+  /// 현재 재생 상태를 로컬에 저장 (재생바 복원용)
+  Future<void> _savePlayerState(String reason) async {
+    if (_currentMediaItem == null) {
+      // 재생 중인 항목이 없으면 저장된 상태 삭제
+      await _playerStateStorage.clearPlayerState();
+      debugPrint('🗑️ 재생바 상태 삭제: $reason');
+      return;
+    }
+
+    final hearitId = _extractHearitId(_currentMediaItem!);
+    if (hearitId == null) {
+      debugPrint('⚠️ MediaItem에 hearitId가 없습니다.');
+      return;
+    }
+
+    final state = PlayerStateModel(
+      hearitId: hearitId,
+      title: _currentMediaItem!.title,
+      album: _currentMediaItem!.album ?? '',
+      artist: _currentMediaItem!.artist ?? '',
+      durationSeconds: _duration.inSeconds,
+      lastPositionMs: _position.inMilliseconds,
+      playlistIndex: _currentPlaylistIndex >= 0 ? _currentPlaylistIndex : null,
+      savedAt: DateTime.now(),
+    );
+
+    await _playerStateStorage.savePlayerState(state);
+    debugPrint('💾 재생바 상태 저장: $reason');
+  }
+
   /// MediaItem extras에서 hearitId 추출
   int? _extractHearitId(MediaItem mediaItem) {
     final id = mediaItem.extras?['hearitId'];
@@ -335,11 +453,84 @@ class HearitPlayerController extends ChangeNotifier {
   /// 앱 생명주기: 백그라운드 진입
   Future<void> saveOnAppPaused() async {
     await _saveCurrentProgress('앱 백그라운드');
+    await _savePlayerState('앱 백그라운드');
   }
 
   /// 앱 생명주기: 앱 종료
   Future<void> saveOnAppDetached() async {
     await _saveCurrentProgress('앱 종료');
+    await _savePlayerState('앱 종료');
+  }
+
+  // ──────────────────────────────
+  // 오디오 소스 로드 (복원된 상태에서)
+  // ──────────────────────────────
+
+  /// 오디오 소스가 없으면 hearitId로 API 호출하여 로드
+  Future<bool> ensureAudioLoaded() async {
+    // 이미 오디오 소스가 있으면 성공
+    if (hasAudioSource) {
+      return true;
+    }
+
+    // MediaItem이 없으면 실패
+    if (_currentMediaItem == null) {
+      debugPrint('⚠️ MediaItem이 없어서 오디오 로드 불가');
+      return false;
+    }
+
+    // 이미 로딩 중이면 대기
+    if (_isLoadingAudio) {
+      debugPrint('⏳ 이미 오디오 로딩 중...');
+      return false;
+    }
+
+    final hearitId = _extractHearitId(_currentMediaItem!);
+    if (hearitId == null) {
+      debugPrint('⚠️ hearitId를 찾을 수 없음');
+      return false;
+    }
+
+    try {
+      _isLoadingAudio = true;
+      notifyListeners();
+
+      debugPrint('🔄 복원된 상태 - 오디오 URL 가져오는 중... (hearitId: $hearitId)');
+
+      // API로 오디오 URL 가져오기
+      final url = await _libraryRepository.fetchOriginalAudioUrl(hearitId);
+
+      if (url == null || url.isEmpty) {
+        debugPrint('❌ 오디오 URL을 가져오지 못함');
+        _isLoadingAudio = false;
+        notifyListeners();
+        return false;
+      }
+
+      debugPrint('✅ 오디오 URL 가져오기 성공: $url');
+
+      // 저장된 위치 백업
+      final savedPosition = _position;
+
+      // 오디오 소스 로드
+      await _audioHandler.setSource(url, mediaItem: _currentMediaItem);
+
+      // 저장된 위치로 seek
+      if (savedPosition > Duration.zero) {
+        await _audioHandler.seek(savedPosition);
+      }
+
+      debugPrint('✅ 오디오 로드 완료 (위치: ${savedPosition.inSeconds}초)');
+
+      _isLoadingAudio = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('❌ 오디오 로드 실패: $e');
+      _isLoadingAudio = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   // ──────────────────────────────

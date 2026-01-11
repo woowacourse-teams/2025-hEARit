@@ -19,6 +19,13 @@ class LocalAudioHandler extends BaseAudioHandler with SeekHandler {
     return _player.position;
   }
 
+  /// 오디오 소스가 로드되었는지 확인
+  bool get hasAudioSource {
+    final processingState = _player.processingState;
+    // idle = 소스 없음, 나머지는 소스가 로드됨 (loading, buffering, ready, completed)
+    return processingState != ProcessingState.idle;
+  }
+
   Future<void> _init() async {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.music());
