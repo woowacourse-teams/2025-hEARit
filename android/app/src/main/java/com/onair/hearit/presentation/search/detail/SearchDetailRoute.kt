@@ -31,10 +31,7 @@ fun SearchDetailRoute(
     onHearitClick: (Long) -> Unit,
     viewModel: SearchDetailViewModel = hiltViewModel(),
 ) {
-    val recentKeywords by viewModel.recentKeywords.collectAsStateWithLifecycle()
-    val searchedHearits by viewModel.searchedHearits.collectAsStateWithLifecycle()
-    val searchInput by viewModel.searchInput.collectAsStateWithLifecycle()
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -57,8 +54,8 @@ fun SearchDetailRoute(
     }
 
     LaunchedEffect(viewModel.snackbarMessage) {
-        viewModel.snackbarMessage.collect { stringResId ->
-            snackbarHostState.showSnackbar(context.getString(stringResId))
+        viewModel.snackbarMessage.collect { resId ->
+            snackbarHostState.showSnackbar(context.getString(resId))
         }
     }
 
@@ -85,10 +82,13 @@ fun SearchDetailRoute(
                 focusRequester = focusRequester,
             )
 
-            when {
-                searchInput == null -> {
+            when (uiState.searchInput) {
+                null -> {
                     SearchRecentScreen(
-                        keywords = recentKeywords.map { it.term }.toImmutableList(),
+                        keywords =
+                            uiState.recentKeywords
+                                .map { it.term }
+                                .toImmutableList(),
                         onKeywordClick = { keyword ->
                             searchText = keyword
                             performSearch(keyword)
@@ -99,10 +99,10 @@ fun SearchDetailRoute(
 
                 else -> {
                     SearchResultScreen(
-                        hearits = searchedHearits,
+                        hearits = uiState.searchedHearits,
                         onLoadNext = viewModel::loadNextPage,
                         onHearitClick = onHearitClick,
-                        isLoading = isLoading,
+                        isLoading = uiState.isLoading,
                     )
                 }
             }

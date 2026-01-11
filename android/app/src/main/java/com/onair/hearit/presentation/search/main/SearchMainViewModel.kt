@@ -24,9 +24,10 @@ class SearchMainViewModel @Inject constructor(
     private val _searchMainUiState = MutableStateFlow(SearchMainUiState())
     val searchMainUiState: StateFlow<SearchMainUiState> = _searchMainUiState.asStateFlow()
 
-    private val _snackbarMessage = MutableSharedFlow<Int>(
-        extraBufferCapacity = 1,
-    )
+    private val _snackbarMessage =
+        MutableSharedFlow<Int>(
+            extraBufferCapacity = 1,
+        )
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
     fun fetchCategories() {
