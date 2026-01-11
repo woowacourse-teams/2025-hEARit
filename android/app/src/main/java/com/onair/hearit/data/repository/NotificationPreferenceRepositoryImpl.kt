@@ -25,7 +25,7 @@ class NotificationPreferenceRepositoryImpl @Inject constructor(
 
             // 2. 로컬(DataStore) 조회
             val local: Boolean =
-                notificationLocalDataSource.getIsCommutePushEnabled().getOrThrow()
+                notificationLocalDataSource.getCommutePushEnabled().getOrThrow()
 
             // 3. 캐시 갱신
             mutex.withLock { cachedIsCommutePushEnabled = local }
@@ -41,7 +41,7 @@ class NotificationPreferenceRepositoryImpl @Inject constructor(
 
             // 2. 로컬 저장
             notificationLocalDataSource
-                .saveIsCommutePushEnabled(isEnabled)
+                .saveCommutePushEnabled(isEnabled)
                 .getOrThrow()
         }.onFailure { throwable ->
             Timber.e(throwable, "❌ 푸시 알림 설정 저장에 실패했습니다. (메모리 캐시는 갱신됨)")
