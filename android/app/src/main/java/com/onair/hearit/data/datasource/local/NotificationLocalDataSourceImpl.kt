@@ -14,19 +14,19 @@ class NotificationLocalDataSourceImpl @Inject constructor(
 ) : NotificationLocalDataSource {
     override suspend fun getCommutePushEnabled(): Result<Boolean> =
         runCatching {
-            val preferences: Preferences = dataStore.data.first()
-            preferences[IS_COMMUTE_PUSH_ENABLED_KEY] ?: DEFAULT_IS_COMMUTE_PUSH_ENABLED
+            val preferences = dataStore.data.first()
+            preferences[IS_COMMUTE_PUSH_ENABLED_KEY] ?: DEFAULT_COMMUTE_PUSH_ENABLED
         }
 
-    override suspend fun saveCommutePushEnabled(isEnabled: Boolean): Result<Unit> =
+    override suspend fun saveCommutePushEnabled(enabled: Boolean): Result<Unit> =
         runCatching {
             dataStore.edit { preferences ->
-                preferences[IS_COMMUTE_PUSH_ENABLED_KEY] = isEnabled
+                preferences[IS_COMMUTE_PUSH_ENABLED_KEY] = enabled
             }
         }
 
     companion object {
         private val IS_COMMUTE_PUSH_ENABLED_KEY = booleanPreferencesKey("is_commute_push_enabled")
-        private const val DEFAULT_IS_COMMUTE_PUSH_ENABLED: Boolean = false
+        private const val DEFAULT_COMMUTE_PUSH_ENABLED: Boolean = false
     }
 }
