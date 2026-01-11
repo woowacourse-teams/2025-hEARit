@@ -23,7 +23,7 @@ fun SearchMainRoute(
         viewModel.fetchCategories()
     }
 
-    LaunchedEffect(viewModel.snackbarMessage) {
+    LaunchedEffect(Unit) {
         viewModel.snackbarMessage.collect { stringResId ->
             snackbarHostState.showSnackbar(context.getString(stringResId))
         }

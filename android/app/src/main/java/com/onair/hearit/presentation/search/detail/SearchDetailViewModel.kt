@@ -47,7 +47,9 @@ class SearchDetailViewModel @Inject constructor(
     private val _searchInput = MutableStateFlow<SearchInput?>(null)
     val searchInput: StateFlow<SearchInput?> = _searchInput.asStateFlow()
 
-    private val _snackbarMessage = MutableSharedFlow<Int>()
+    private val _snackbarMessage = MutableSharedFlow<Int>(
+        extraBufferCapacity = 1,
+    )
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
     private val _isLoading = MutableStateFlow(false)
@@ -82,8 +84,8 @@ class SearchDetailViewModel @Inject constructor(
         viewModelScope.launch {
             clearRecentKeywords()
                 .onSuccess { count ->
+                    _recentKeywords.value = persistentListOf()
                     if (count > 0) {
-                        _recentKeywords.value = persistentListOf()
                         _snackbarMessage.emit(R.string.search_toast_recent_keyword_delete_success)
                     }
                 }.onFailure { throwable ->

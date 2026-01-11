@@ -70,13 +70,14 @@ fun CategoryScreen(
             )
         },
         containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0),
     ) { paddingValues ->
         BoxWithConstraints(
             modifier =
                 modifier
                     .fillMaxSize()
                     .background(brush = gradientBrush)
-                    .padding(paddingValues),
+                    .padding(bottom = paddingValues.calculateBottomPadding()),
         ) {
             val gradientEndPadding = maxHeight * fadeStop
 
