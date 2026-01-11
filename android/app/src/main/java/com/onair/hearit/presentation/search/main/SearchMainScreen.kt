@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.presentation.search.main.component.CategoryGridList
 import com.onair.hearit.presentation.search.main.component.SearchMainTopBar
@@ -45,7 +46,12 @@ fun SearchMainScreen(
                 onSearchBarClick = onSearchBarClick,
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 48.dp),
+            )
+        },
         containerColor = HearitBlack,
     ) { paddingValues ->
         if (isLoading && categories.isEmpty()) {

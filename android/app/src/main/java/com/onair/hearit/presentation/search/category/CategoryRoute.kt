@@ -19,7 +19,7 @@ fun CategoryRoute(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(viewModel.snackbarMessage) {
+    LaunchedEffect(Unit) {
         viewModel.snackbarMessage.collect { stringResId ->
             snackbarHostState.showSnackbar(context.getString(stringResId))
         }
@@ -31,5 +31,6 @@ fun CategoryRoute(
         hearits = uiState.hearits,
         onBack = onBack,
         onHearitClick = onHearitClick,
+        snackbarHostState = snackbarHostState,
     )
 }

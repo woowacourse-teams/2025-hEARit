@@ -16,6 +16,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,6 +48,7 @@ fun CategoryScreen(
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     fadeStop: Float = 0.2f,
 ) {
     val safeColor =
@@ -58,28 +62,39 @@ fun CategoryScreen(
             bottomColor = HearitBlack,
         )
 
-    BoxWithConstraints(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(brush = gradientBrush),
-    ) {
-        val gradientEndPadding = maxHeight * fadeStop
-
-        CategoryTopBar(
-            categoryName = categoryName,
-            onBack = onBack,
-        )
-
-        CategoryHearitList(
-            hearits = hearits,
-            color = safeColor,
-            onHearitClick = onHearitClick,
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 48.dp),
+            )
+        },
+        containerColor = Color.Transparent,
+    ) { paddingValues ->
+        BoxWithConstraints(
             modifier =
-                Modifier
+                modifier
                     .fillMaxSize()
-                    .padding(top = gradientEndPadding, bottom = 60.dp),
-        )
+                    .background(brush = gradientBrush)
+                    .padding(paddingValues),
+        ) {
+            val gradientEndPadding = maxHeight * fadeStop
+
+            CategoryTopBar(
+                categoryName = categoryName,
+                onBack = onBack,
+            )
+
+            CategoryHearitList(
+                hearits = hearits,
+                color = safeColor,
+                onHearitClick = onHearitClick,
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(top = gradientEndPadding, bottom = 60.dp),
+            )
+        }
     }
 }
 
