@@ -14,24 +14,43 @@ class AuthRepository {
 
   /// 카카오 로그인 (앱 -> 웹 폴백 자동)
   Future<String> loginWithKakao() async {
-    try {
-      OAuthToken token;
+    OAuthToken token;
 
-      // 카카오톡 설치 여부 확인 후 자동 선택
-      if (await isKakaoTalkInstalled()) {
+    // 카카오톡 실행 가능 여부 확인
+    // 카카오톡 실행이 가능하면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
+    if (await isKakaoTalkInstalled()) {
+      try {
         token = await UserApi.instance.loginWithKakaoTalk();
-      } else {
-        token = await UserApi.instance.loginWithKakaoAccount();
-      }
+        debugPrint('카카오톡으로 로그인 성공');
+      } catch (error) {
+        debugPrint('카카오톡으로 로그인 실패 $error');
 
-      return token.accessToken;
-    } catch (error) {
-      // 사용자가 취소한 경우
-      if (error is PlatformException && error.code == 'CANCELED') {
-        throw Exception('카카오 로그인이 취소되었습니다.');
+        // 사용자가 카카오톡 설치 후 디바이스 권한 요청 화면에서 로그인을 취소한 경우,
+        // 의도적인 로그인 취소로 보고 카카오계정으로 로그인 시도 없이 로그인 취소로 처리 (예: 뒤로 가기)
+        if (error is PlatformException && error.code == 'CANCELED') {
+          throw Exception('카카오 로그인이 취소되었습니다.');
+        }
+
+        // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인
+        try {
+          token = await UserApi.instance.loginWithKakaoAccount();
+          debugPrint('카카오계정으로 로그인 성공');
+        } catch (error) {
+          debugPrint('카카오계정으로 로그인 실패 $error');
+          throw Exception('카카오 로그인 실패: $error');
+        }
       }
-      throw Exception('카카오 로그인 실패: $error');
+    } else {
+      try {
+        token = await UserApi.instance.loginWithKakaoAccount();
+        debugPrint('카카오계정으로 로그인 성공');
+      } catch (error) {
+        debugPrint('카카오계정으로 로그인 실패 $error');
+        throw Exception('카카오 로그인 실패: $error');
+      }
     }
+
+    return token.accessToken;
   }
 
   /// 카카오 사용자 정보 가져오기 (추후 확장용)

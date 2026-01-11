@@ -94,8 +94,10 @@ class AuthViewModel extends ChangeNotifier {
       }
 
       _status = AuthStatus.authenticated;
+      debugPrint('카카오 로그인 성공');
       _setLoading(false);
     } catch (error) {
+      debugPrint('카카오 로그인 실패: $error');
       _errorMessage = error.toString();
       _status = AuthStatus.unauthenticated;
       _setLoading(false);
