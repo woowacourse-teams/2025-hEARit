@@ -12,12 +12,12 @@ import io.mockk.mockk
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -90,23 +90,25 @@ class SearchMainViewModelTest {
             coEvery {
                 categoryRepository.getCategories(page = 0)
             } returns Result.failure(exception)
-            var emitted = false
 
-            // Flow를 수집하면서 emit 되면 플래그를 바꾸고 수집 종료
+            val emittedMessages = mutableListOf<Int>()
+
+            // backgroundScope를 사용하여 수집 (viewModelScope와 같은 디스패처 사용)
             val job =
-                launch(UnconfinedTestDispatcher()) {
-                    viewModel.snackbarMessage.collect {
-                        emitted = true
-                        cancel() // 첫 emit 후 종료
+                backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                    viewModel.snackbarMessage.collect { message ->
+                        emittedMessages.add(message)
                     }
                 }
 
             // When
             viewModel.fetchCategories()
-            job.join() // emit 될 때까지 기다림
+            testScheduler.advanceUntilIdle()
 
             // Then
-            assert(emitted) { "snackbarMessage가 emit 되어야 함" }
+            assertThat(emittedMessages).containsExactly(R.string.all_toast_categories_load_fail)
             coVerify(exactly = 1) { categoryRepository.getCategories(page = 0) }
+
+            job.cancel()
         }
 }
