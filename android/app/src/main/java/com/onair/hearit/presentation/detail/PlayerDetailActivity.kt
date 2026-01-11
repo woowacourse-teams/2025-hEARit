@@ -41,7 +41,6 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.analytics.AnalyticsParamKeys.KEYWORD_NAME
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_DETAIL
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.domain.model.Hearit
@@ -76,7 +75,7 @@ class PlayerDetailActivity :
     PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
 
-    private val keywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
+    private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
     private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
     @Inject
@@ -507,17 +506,6 @@ class PlayerDetailActivity :
         }
     }
 
-    override fun onClickCategory(
-        id: Long,
-        name: String,
-        colorCode: String,
-    ) {
-        analyticsLogger.logEvent(
-            AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
-            mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
-        )
-    }
-
     override fun onClickSource(
         name: String,
         url: String,
@@ -539,20 +527,6 @@ class PlayerDetailActivity :
             Timber.w(e)
             showToast(ERROR_INVALID_LINK_MESSAGE)
         }
-    }
-
-    override fun onClickKeyword(term: String) {
-        analyticsLogger.logEvent(
-            AnalyticsEventNames.DETAIL_KEYWORD_SELECTED,
-            mapOf(KEYWORD_NAME to term),
-        )
-//        val input = SearchInput.Keyword(term)
-//        val resultIntent =
-//            Intent().apply {
-//                putExtras(input.toBundle())
-//            }]
-//        setResult(RESULT_OK, resultIntent)
-//        finish()
     }
 
     override fun onDestroy() {
