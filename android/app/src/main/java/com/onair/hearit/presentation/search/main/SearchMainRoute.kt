@@ -32,6 +32,7 @@ fun SearchMainRoute(
     SearchMainScreen(
         categories = uiState.categories,
         isLoading = uiState.isLoading,
+        snackbarHostState = snackbarHostState,
         onSearchBarClick = onSearchBarClick,
         onCategoryClick = onCategoryClick,
     )

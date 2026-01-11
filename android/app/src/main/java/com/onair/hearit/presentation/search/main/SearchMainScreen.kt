@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,9 +27,10 @@ import kotlinx.collections.immutable.persistentListOf
 fun SearchMainScreen(
     categories: ImmutableList<Category>,
     isLoading: Boolean,
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
     onSearchBarClick: () -> Unit,
     onCategoryClick: (Long, String, String) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -42,6 +45,7 @@ fun SearchMainScreen(
                 onSearchBarClick = onSearchBarClick,
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = HearitBlack,
     ) { paddingValues ->
         if (isLoading && categories.isEmpty()) {
@@ -77,6 +81,7 @@ private fun SearchMainScreenPreview() {
                 Category(3L, "Database", "#FF5722"),
             ),
         isLoading = false,
+        snackbarHostState = SnackbarHostState(),
         onSearchBarClick = {},
         onCategoryClick = { _, _, _ -> },
     )
@@ -88,6 +93,7 @@ private fun SearchMainScreenLoadingPreview() {
     SearchMainScreen(
         categories = persistentListOf(),
         isLoading = true,
+        snackbarHostState = SnackbarHostState(),
         onSearchBarClick = {},
         onCategoryClick = { _, _, _ -> },
     )
