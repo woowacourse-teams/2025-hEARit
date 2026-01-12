@@ -111,7 +111,12 @@ public class JwtTokenProvider {
     }
 
     public UUID getMemberUuid(String token) {
-        return UUID.fromString(parseClaims(token).getSubject());
+        try {
+            return UUID.fromString(parseClaims(token).getSubject());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid UUID format in token subject (legacy token?)");
+            throw new JwtException("유효하지 않은 토큰 형식입니다.");
+        }
     }
 
     private Claims parseClaims(String token) {
