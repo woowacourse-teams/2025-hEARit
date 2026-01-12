@@ -258,11 +258,11 @@ class _SearchScreenState extends State<SearchScreen> {
                 color: AppColors.hearitBlack, // 스크롤 영역 전체 배경 고정
                 child: !_viewModel.hasSearched
                     ? SingleChildScrollView(
-                        padding: const EdgeInsets.only(
+                        padding: EdgeInsets.only(
                           left: 20,
                           right: 20,
                           top: 0,
-                          bottom: 20,
+                          bottom: 20 + MediaQuery.of(context).padding.bottom,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,10 +338,11 @@ class _SearchScreenState extends State<SearchScreen> {
                         context: context,
                         removeTop: true, // 상단 고정 UI 위로 스크롤 방지
                         child: ListView.separated(
-                          padding: const EdgeInsets.only(
+                          padding: EdgeInsets.only(
                             left: 20,
                             right: 20,
-                            bottom: 20,
+                            bottom:
+                                20 + 60 + MediaQuery.of(context).padding.bottom,
                           ),
                           physics: const ClampingScrollPhysics(),
                           itemCount: _viewModel.results.length,
