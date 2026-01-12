@@ -34,7 +34,6 @@ import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
 import com.onair.hearit.presentation.login.LoginActivity
-import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.showToast
 import com.onair.hearit.presentation.toDetailResult
@@ -88,10 +87,13 @@ class ExploreFragment :
                 hidePlayerControlView()
 
                 when (val detailResult = result.data.toDetailResult()) {
-                    is DetailResult.Category, is DetailResult.Keyword ->
-                        detailResult.navigate(requireActivity() as MainActivity, analyticsLogger)
+                    is DetailResult.Category, is DetailResult.Keyword -> {
+                        detailResult.navigate(analyticsLogger)
+                    }
 
-                    null -> Timber.w("Invalid detail result")
+                    null -> {
+                        Timber.w("유효하지 않은 detail result입니다")
+                    }
                 }
             }
         }
