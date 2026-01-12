@@ -151,10 +151,8 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: AnimatedBuilder(
-              animation: Listenable.merge([
-                _viewModel,
-                _viewModel.playerController,
-              ]),
+              // ViewModel만 listen (isInitialLoading 체크용)
+              animation: _viewModel,
               builder: (context, _) {
                 if (_viewModel.isInitialLoading) {
                   return _Skeleton(detail: detail);
@@ -162,6 +160,7 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Header는 정적이므로 AnimatedBuilder 필요 없음
                     DetailHeader(
                       categoryName: detail.category.name,
                       onBack: _handleBackTap,
@@ -173,12 +172,16 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            HearitInfoCard(
-                              detail: detail,
-                              formatDate: _viewModel.formatDate,
-                              isTablet: isTablet,
+                            // HearitInfoCard: 정적 콘텐츠 (detail 변경 시에만 rebuild)
+                            RepaintBoundary(
+                              child: HearitInfoCard(
+                                detail: detail,
+                                formatDate: _viewModel.formatDate,
+                                isTablet: isTablet,
+                              ),
                             ),
                             const SizedBox(height: 24),
+                            // ScriptView: playerController만 listen (position 추적)
                             Center(
                               child: Material(
                                 color: Colors.transparent,
@@ -188,46 +191,70 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
                                   child: SizedBox(
                                     height: scriptHeight,
                                     width: double.infinity,
-                                    child: ScriptView(
-                                      scripts: _viewModel.scripts,
-                                      position:
-                                          _viewModel.playerController.position,
-                                      isTablet: isTablet,
+                                    child: AnimatedBuilder(
+                                      animation: _viewModel.playerController,
+                                      builder: (context, _) {
+                                        return RepaintBoundary(
+                                          child: ScriptView(
+                                            scripts: _viewModel.scripts,
+                                            position: _viewModel
+                                                .playerController
+                                                .position,
+                                            isTablet: isTablet,
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 4),
+                            // AudioControls: 내부에 AnimatedBuilder 있음 + 북마크 상태 필요
                             SizedBox(
                               height: 150,
-                              child: AudioControls(
-                                controller: _viewModel.playerController,
-                                onSeekRelative: _viewModel.seekRelative,
-                                onTogglePlayback: _viewModel.togglePlayback,
-                                onSpeedSelected: _viewModel.setSpeed,
-                                speedOptions: _viewModel.speedOptions,
-                                currentSpeed: _viewModel.currentSpeed,
-                                speedLabel: _viewModel.speedLabel,
-                                formatDuration: _viewModel.formatDuration,
-                                isTablet: isTablet,
-                                isBookmarked: _viewModel.isBookmarked,
-                                onBookmarkToggle: () =>
-                                    _viewModel.toggleBookmark(context),
+                              child: AnimatedBuilder(
+                                // 북마크 상태 변경 감지용
+                                animation: _viewModel,
+                                builder: (context, _) {
+                                  return RepaintBoundary(
+                                    child: AudioControls(
+                                      controller: _viewModel.playerController,
+                                      onSeekRelative: _viewModel.seekRelative,
+                                      onTogglePlayback:
+                                          _viewModel.togglePlayback,
+                                      onSpeedSelected: _viewModel.setSpeed,
+                                      speedOptions: _viewModel.speedOptions,
+                                      currentSpeed: _viewModel.currentSpeed,
+                                      speedLabel: _viewModel.speedLabel,
+                                      formatDuration: _viewModel.formatDuration,
+                                      isTablet: isTablet,
+                                      isBookmarked: _viewModel.isBookmarked,
+                                      onBookmarkToggle: () =>
+                                          _viewModel.toggleBookmark(context),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                             const SizedBox(height: 12),
-                            SourceCard(
-                              sources: detail.sources,
-                              onSourceTap: _onSourceTap,
-                              isTablet: isTablet,
+                            // SourceCard: 정적 콘텐츠
+                            RepaintBoundary(
+                              child: SourceCard(
+                                sources: detail.sources,
+                                onSourceTap: _onSourceTap,
+                                isTablet: isTablet,
+                              ),
                             ),
                             const SizedBox(height: 12),
-                            SummaryCard(
-                              summary: detail.summary,
-                              keywords: detail.keywords,
-                              onKeywordTap: _onKeywordTap,
-                              isTablet: isTablet,
+                            // SummaryCard: 정적 콘텐츠
+                            RepaintBoundary(
+                              child: SummaryCard(
+                                summary: detail.summary,
+                                keywords: detail.keywords,
+                                onKeywordTap: _onKeywordTap,
+                                isTablet: isTablet,
+                              ),
                             ),
                             const SizedBox(height: 20),
                           ],
