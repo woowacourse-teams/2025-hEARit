@@ -29,7 +29,7 @@ public class ExploreScore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "BINARY(16)", nullable = false)
+    @Column(name = "user_uuid", columnDefinition = "BINARY(16)", nullable = false)
     @JdbcTypeCode(SqlTypes.BINARY)
     private UUID userUuid;
 
