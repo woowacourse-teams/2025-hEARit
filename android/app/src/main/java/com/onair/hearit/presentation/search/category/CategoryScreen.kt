@@ -31,7 +31,7 @@ import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedCategoryHearit
-import com.onair.hearit.presentation.search.category.component.SearchedHearitItem
+import com.onair.hearit.presentation.search.component.HearitItem
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
@@ -148,9 +148,12 @@ private fun CategoryHearitList(
             items = hearits,
             key = { it.id },
         ) { item ->
-            SearchedHearitItem(
-                item = item,
-                color = color,
+            HearitItem(
+                title = item.title,
+                keywords = item.keywords,
+                playTime = item.playTime,
+                lastPlayTime = item.lastPlayTime,
+                progressColor = color,
                 onClick = { onHearitClick(item.id) },
             )
         }
