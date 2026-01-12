@@ -326,7 +326,8 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       )
                     : _viewModel.results.isEmpty && !_viewModel.isLoading
-                    ? Center(
+                    ? Align(
+                        alignment: const Alignment(0, -0.3),
                         child: Text(
                           '검색 결과가 없습니다.',
                           style: theme.textTheme.bodyMedium?.copyWith(
