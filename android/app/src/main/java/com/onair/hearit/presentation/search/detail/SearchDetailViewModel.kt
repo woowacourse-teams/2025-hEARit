@@ -85,8 +85,7 @@ class SearchDetailViewModel @Inject constructor(
             it.copy(
                 searchInput = input,
                 searchedHearits = persistentListOf(),
-                currentPage = 0,
-                isLastPage = false,
+                pagingState = it.pagingState.reset(),
             )
         }
 
@@ -98,16 +97,14 @@ class SearchDetailViewModel @Inject constructor(
             it.copy(
                 searchInput = null,
                 searchedHearits = persistentListOf(),
-                currentPage = 0,
-                isLastPage = false,
-                isLoading = false,
+                pagingState = it.pagingState.reset(),
             )
         }
     }
 
     fun loadNextPage() {
         val currentState = _uiState.value
-        if (currentState.isLoading || currentState.isLastPage) return
+        if (!currentState.pagingState.canLoadMore()) return
         fetchSearchResults()
     }
 
