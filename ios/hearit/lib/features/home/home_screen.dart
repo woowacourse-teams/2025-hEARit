@@ -124,7 +124,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _openHearitDetail(HearitDetail detail) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => HearitDetailScreen(detail: detail)),
+      MaterialPageRoute(
+        builder: (_) => HearitDetailScreen(detail: detail),
+        settings: const RouteSettings(name: '/detail'),
+      ),
     );
   }
 

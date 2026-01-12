@@ -166,6 +166,7 @@ class ExploreScreenState extends State<ExploreScreen> {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => HearitDetailScreen(detail: stub, pauseOnExit: true),
+        settings: const RouteSettings(name: '/detail'),
       ),
     );
   }

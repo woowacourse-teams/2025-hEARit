@@ -119,7 +119,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
     final detail = _convertToHearitDetail(hearit);
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => HearitDetailScreen(detail: detail)),
+      MaterialPageRoute(
+        builder: (_) => HearitDetailScreen(detail: detail),
+        settings: const RouteSettings(name: '/detail'),
+      ),
     );
   }
 

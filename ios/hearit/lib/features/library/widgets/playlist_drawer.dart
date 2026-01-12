@@ -111,6 +111,7 @@ class _PlaylistDrawerState extends State<PlaylistDrawer> {
           pauseOnExit: false, // 재생 유지 (dispose 시 fromPlaylist에 따라 일시정지)
           fromPlaylist: true, // 재생목록에서 진입했음을 표시
         ),
+        settings: const RouteSettings(name: '/detail'),
       ),
     );
   }

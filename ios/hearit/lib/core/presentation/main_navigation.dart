@@ -143,6 +143,18 @@ class _MainNavigationState extends State<MainNavigation> {
     }
   }
 
+  bool _isCurrentRouteDetail(int tabIndex) {
+    final navigator = _navigatorKeys[tabIndex].currentState;
+    if (navigator == null) return false;
+
+    bool isDetail = false;
+    navigator.popUntil((route) {
+      isDetail = route.settings.name == '/detail';
+      return true; // 현재 route만 확인하고 바로 복귀
+    });
+    return isDetail;
+  }
+
   Future<void> _openDetailFromMini() async {
     final media = _playerController.currentMediaItem;
     if (media == null) return;
@@ -162,6 +174,7 @@ class _MainNavigationState extends State<MainNavigation> {
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => HearitDetailScreen(detail: detail, pauseOnExit: false),
+        settings: const RouteSettings(name: '/detail'),
       ),
     );
   }
@@ -232,11 +245,16 @@ class _MainNavigationState extends State<MainNavigation> {
         // 탐색 미리듣기는 미니플레이어 표시하지 않음
         final isExplorePreviewing = _playerController.isPlayingExplorePreview;
 
+        // detail 화면인지 확인
+        final isDetailScreen =
+            canPopCurrent && _isCurrentRouteDetail(_currentIndex);
+
         // 검색 탭(index=1)에서는 스택이 있어도 미니플레이어 표시
-        // 단, 탐색 미리듣기 중에는 표시하지 않음
+        // 단, detail 화면이거나 탐색 미리듣기 중에는 표시하지 않음
         // 복원 중에도 미니플레이어 표시 (스켈레톤)
         final showMiniPlayer =
             _currentIndex != 2 &&
+            !isDetailScreen && // detail 화면이면 미니플레이어 숨김
             (_currentIndex == 1 || !canPopCurrent) &&
             (hasMediaItem || _isRestoringAudio) &&
             !isExplorePreviewing;
@@ -307,9 +325,16 @@ class _MainNavigationState extends State<MainNavigation> {
                                   _navigatorKeys[_currentIndex].currentState
                                       ?.canPop() ??
                                   false;
+
+                              // detail 화면인지 확인
+                              final isDetailScreen =
+                                  canPopCurrent &&
+                                  _isCurrentRouteDetail(_currentIndex);
+
                               // 검색 탭(index=1)에서는 스택이 있어도 미니플레이어 표시
-                              // 단, 탐색 미리듣기 중에는 표시하지 않음
-                              if (canPopCurrent && _currentIndex != 1) {
+                              // 단, detail 화면이거나 탐색 미리듣기 중에는 표시하지 않음
+                              if (isDetailScreen ||
+                                  (canPopCurrent && _currentIndex != 1)) {
                                 return const SizedBox.shrink();
                               }
 

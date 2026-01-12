@@ -377,8 +377,11 @@ class _SearchScreenState extends State<SearchScreen> {
       accentColor: const Color(0xFFA86BFF),
       createdAt: DateTime.now(),
     );
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => HearitDetailScreen(detail: stub)));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => HearitDetailScreen(detail: stub),
+        settings: const RouteSettings(name: '/detail'),
+      ),
+    );
   }
 }
