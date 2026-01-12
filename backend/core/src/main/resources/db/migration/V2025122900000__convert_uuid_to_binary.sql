@@ -111,7 +111,13 @@ SET user_uuid_binary = UNHEX(REPLACE(user_uuid, '-', ''))
 WHERE user_uuid IS NOT NULL;
 
 ALTER TABLE explore_score
+    DROP INDEX ux_user_uuid_hearit_id;
+
+ALTER TABLE explore_score
 DROP COLUMN user_uuid;
 
 ALTER TABLE explore_score
-    CHANGE COLUMN user_uuid_binary user_uuid BINARY(16);
+    CHANGE COLUMN user_uuid_binary user_uuid BINARY(16) NOT NULL;
+
+ALTER TABLE explore_score
+    ADD CONSTRAINT uq_explore_score_user_hearit UNIQUE (user_uuid, hearit_id);
