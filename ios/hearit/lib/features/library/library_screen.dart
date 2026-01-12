@@ -221,131 +221,133 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.hearitBlack,
-      body: RefreshIndicator(
-        color: AppColors.hearitPurple2,
-        backgroundColor: AppColors.hearitBlack,
-        onRefresh: _handleRefresh,
-        child: _buildBody(),
-      ),
-    );
+    return Scaffold(backgroundColor: AppColors.hearitBlack, body: _buildBody());
   }
 
   Widget _buildBody() {
+    // 초기 로딩 상태 (북마크가 없을 때만)
+    if (_viewModel.isLoading && _viewModel.bookmarks.isEmpty) {
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.hearitPurple2),
+      );
+    }
+
+    // 게스트 상태 (401/403)
+    if (_viewModel.isGuest) {
+      return Column(
+        children: [
+          // 헤더 (기본 프로필) - 고정
+          LibraryHeader(profile: null, isGuest: true),
+          // 북마크 섹션 헤더 - 고정
+          BookmarkSectionHeader(
+            totalCount: 0,
+            onPlayAll: () {}, // No-op for guests
+          ),
+          // 게스트 메시지 UI - 스크롤 가능
+          Expanded(child: _buildGuestState()),
+        ],
+      );
+    }
+
+    // 에러 상태 (북마크가 없을 때만)
+    if (_viewModel.error != null && _viewModel.bookmarks.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '데이터를 불러올 수 없습니다',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => _viewModel.loadInitialData(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.hearitPurple2,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('다시 시도'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 정상 상태 (헤더 고정 + 리스트 스크롤)
+    return Column(
+      children: [
+        // 헤더 (프로필 + 그라데이션) - 고정
+        LibraryHeader(profile: _viewModel.profile, isGuest: false),
+        // 북마크 섹션 헤더 - 고정
+        BookmarkSectionHeader(
+          totalCount: _viewModel.totalElements,
+          onPlayAll: _viewModel.bookmarks.isEmpty ? null : _handlePlayAll,
+        ),
+        // 북마크 리스트 - 스크롤 가능
+        Expanded(
+          child: RefreshIndicator(
+            color: AppColors.hearitPurple2,
+            backgroundColor: AppColors.hearitBlack,
+            onRefresh: _handleRefresh,
+            child: _buildScrollableContent(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScrollableContent() {
     return CustomScrollView(
       controller: _scrollController,
-      physics:
-          const AlwaysScrollableScrollPhysics(), // 항상 스크롤 가능 (RefreshIndicator 지원)
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        // 초기 로딩 상태 (북마크가 없을 때만)
-        if (_viewModel.isLoading && _viewModel.bookmarks.isEmpty)
-          SliverFillRemaining(
-            child: Center(
-              child: CircularProgressIndicator(color: AppColors.hearitPurple2),
-            ),
-          )
-        // 게스트 상태 (401/403)
-        else if (_viewModel.isGuest) ...[
-          // 헤더 (기본 프로필)
-          SliverToBoxAdapter(
-            child: LibraryHeader(profile: null, isGuest: true),
-          ),
-          // 북마크 섹션 헤더
-          SliverToBoxAdapter(
-            child: BookmarkSectionHeader(
-              totalCount: 0,
-              onPlayAll: () {}, // No-op for guests
-            ),
-          ),
-          // 게스트 메시지 UI
-          SliverFillRemaining(child: _buildGuestState()),
-        ]
-        // 에러 상태 (북마크가 없을 때만)
-        else if (_viewModel.error != null && _viewModel.bookmarks.isEmpty)
-          SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.white.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '데이터를 불러올 수 없습니다',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () => _viewModel.loadInitialData(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.hearitPurple2,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('다시 시도'),
-                  ),
-                ],
-              ),
-            ),
-          )
-        // 정상 상태 (헤더 + 리스트)
-        else ...[
-          // 헤더 (프로필 + 그라데이션)
-          SliverToBoxAdapter(
-            child: LibraryHeader(profile: _viewModel.profile, isGuest: false),
-          ),
-          // 북마크 섹션 헤더
-          SliverToBoxAdapter(
-            child: BookmarkSectionHeader(
-              totalCount: _viewModel.totalElements,
-              onPlayAll: _viewModel.bookmarks.isEmpty ? null : _handlePlayAll,
-            ),
-          ),
-          // 북마크 리스트 또는 빈 상태
-          if (_viewModel.isEmpty)
-            SliverFillRemaining(child: _buildEmptyState())
-          else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index < _viewModel.bookmarks.length) {
-                    final hearit = _viewModel.bookmarks[index];
-                    return BookmarkedHearitCard(
-                      hearit: hearit,
-                      onTap: () => _handleCardTap(hearit),
-                      onMenuTap: () => _handleMenuTap(hearit),
-                    );
-                  } else if (_viewModel.isLoadingMore) {
-                    // 로딩 인디케이터
-                    return const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.hearitPurple2,
-                        ),
+        // 북마크 리스트 또는 빈 상태
+        if (_viewModel.isEmpty)
+          SliverFillRemaining(child: _buildEmptyState())
+        else
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                if (index < _viewModel.bookmarks.length) {
+                  final hearit = _viewModel.bookmarks[index];
+                  return BookmarkedHearitCard(
+                    hearit: hearit,
+                    onTap: () => _handleCardTap(hearit),
+                    onMenuTap: () => _handleMenuTap(hearit),
+                  );
+                } else if (_viewModel.isLoadingMore) {
+                  // 로딩 인디케이터
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.hearitPurple2,
                       ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-                childCount:
-                    _viewModel.bookmarks.length +
-                    (_viewModel.isLoadingMore ? 1 : 0),
-              ),
-            ),
-          // 하단 여백
-          SliverPadding(
-            padding: EdgeInsets.only(
-              bottom: 20 + MediaQuery.of(context).padding.bottom,
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+              childCount:
+                  _viewModel.bookmarks.length +
+                  (_viewModel.isLoadingMore ? 1 : 0),
             ),
           ),
-        ],
+        // 하단 여백
+        SliverPadding(
+          padding: EdgeInsets.only(
+            bottom: 20 + MediaQuery.of(context).padding.bottom,
+          ),
+        ),
       ],
     );
   }
