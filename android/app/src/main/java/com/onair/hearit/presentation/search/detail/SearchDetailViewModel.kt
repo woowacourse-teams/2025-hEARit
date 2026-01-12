@@ -113,29 +113,25 @@ class SearchDetailViewModel @Inject constructor(
         val term = (currentState.searchInput as? SearchInput.Keyword)?.term ?: return
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(pagingState = it.pagingState.startLoading()) }
 
-            try {
-                searchHearits(term, currentState.currentPage)
-                    .onSuccess { result ->
-                        _uiState.update { state ->
-                            state.copy(
-                                searchedHearits = (state.searchedHearits + result.items).toImmutableList(),
-                                currentPage = result.paging.page + 1,
-                                isLastPage = result.paging.isLast,
-                                isLoading = false,
-                            )
-                        }
-                    }.onFailure { throwable ->
-                        Timber.w(throwable)
-                        _uiState.update { it.copy(isLoading = false) }
-                        _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
+            searchHearits(term, currentState.pagingState.currentPage)
+                .onSuccess { result ->
+                    _uiState.update { state ->
+                        state.copy(
+                            searchedHearits = (state.searchedHearits + result.items).toImmutableList(),
+                            pagingState =
+                                state.pagingState.finishLoading(
+                                    nextPage = result.paging.page + 1,
+                                    isLast = result.paging.isLast,
+                                ),
+                        )
                     }
-            } catch (e: Exception) {
-                Timber.e(e)
-                _uiState.update { it.copy(isLoading = false) }
-                _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
-            }
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _uiState.update { it.copy(pagingState = it.pagingState.failLoading()) }
+                    _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
+                }
         }
     }
 }
