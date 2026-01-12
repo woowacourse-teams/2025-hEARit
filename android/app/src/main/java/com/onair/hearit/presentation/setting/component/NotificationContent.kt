@@ -47,7 +47,7 @@ fun AlarmContent(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = stringResource(R.string.setting_alarm),
+                text = stringResource(R.string.setting_notification),
                 color = Color.White,
                 style = MaterialTheme.typography.bodyLarge,
             )

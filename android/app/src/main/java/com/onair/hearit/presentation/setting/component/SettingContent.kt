@@ -48,7 +48,7 @@ fun SettingContent(
         )
 
         SettingItem(
-            text = stringResource(R.string.setting_alarm),
+            text = stringResource(R.string.setting_notification),
             onClick = onAlarmClick,
         )
 

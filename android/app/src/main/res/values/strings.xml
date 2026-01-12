@@ -75,7 +75,6 @@
     <string name="explore_navigate_to_detail_hearit">팟캐스트 이어 듣기</string>
 
     <!-- SettingFragment-->
-    <string name="setting_notification">알림</string>
     <string name="setting_recommend_notification">히어릿 추천 알림</string>
     <string name="setting_app_version">앱 버전 v%s</string>
     <string name="setting_toast_user_info_load_fail">유저 정보 조회에 실패했습니다</string>
@@ -86,14 +85,15 @@
     <string name="setting_withdrawal">회원탈퇴</string>
     <string name="setting_logout">로그아웃</string>
     <string name="setting_profile">내 정보</string>
-    <string name="setting_alarm">푸시 알림</string>
-    <string name="setting_alarm_system_dialog_title">알림이 꺼져 있어요</string>
-    <string name="setting_alarm_system_dialog_description">휴대폰 설정에서 hEARit 알림을 켜야 푸시를 받을 수 있어요.</string>
-    <string name="setting_alarm_system_dialog_confirm">설정으로 이동</string>
-    <string name="setting_alarm_system_dialog_dismiss">취소</string>
-    <string name="setting_alarm_push_enabled">푸시 알림을 켰어요</string>
-    <string name="setting_alarm_push_disabled">푸시 알림을 껐어요</string>
-    <string name="setting_alarm_push_blocked_by_system">휴대폰 설정에서 알림이 꺼져 있어요</string>
+    <string name="setting_notification">푸시 알림</string>
+    <string name="setting_notification_system_dialog_title">알림이 꺼져 있어요</string>
+    <string name="setting_notification_system_dialog_description">휴대폰 설정에서 hEARit 알림을 켜야 푸시를 받을 수 있어요.</string>
+    <string name="setting_notification_system_dialog_confirm">설정으로 이동</string>
+    <string name="setting_notification_system_dialog_dismiss">취소</string>
+    <string name="setting_notification_push_enabled">푸시 알림을 켰어요</string>
+    <string name="setting_notification_push_disabled">푸시 알림을 껐어요</string>
+    <string name="setting_notification_push_blocked_by_system">휴대폰 설정에서 알림이 꺼져 있어요</string>
+    <string name="setting_notification_push_save_failed">설정 저장에 실패했어요. 잠시 후 다시 시도해 주세요.</string>
     <string name="privacy_policy">개인정보처리방침</string>
     <string name="terms_of_use">이용 약관</string>
     <string name="open_license">오픈 라이선스</string>

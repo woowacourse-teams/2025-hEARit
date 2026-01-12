@@ -95,7 +95,7 @@ fun AlarmScreen(
     Scaffold(
         topBar = {
             SettingTopBar(
-                title = stringResource(R.string.setting_alarm),
+                title = stringResource(R.string.setting_notification),
                 onBackClick = onBackClick,
             )
         },
@@ -137,7 +137,7 @@ private fun SyncSystemNotificationEffect(
                             isPostNotificationPermissionGranted(
                                 context,
                             )
-                    viewModel.onSystemNotificationAvailabilityChecked(isNotificationAvailable)
+                    viewModel.onSystemNotificationBlocked(isNotificationAvailable)
                 }
             }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -176,7 +176,7 @@ private fun PermissionRequestEffect(
         if (!shouldRequestPermission) return@LaunchedEffect
 
         if (isAppNotificationBlockedBySystem(context)) {
-            viewModel.onSystemNotificationAvailabilityChecked(isNotificationAvailable = false)
+            viewModel.onSystemNotificationBlocked(isNotificationAvailable = false)
             onNeedOpenSystemSettings()
             return@LaunchedEffect
         }

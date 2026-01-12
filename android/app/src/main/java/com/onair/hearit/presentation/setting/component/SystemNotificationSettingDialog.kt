@@ -15,19 +15,19 @@ fun SystemNotificationSettingDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = stringResource(R.string.setting_alarm_system_dialog_title))
+            Text(text = stringResource(R.string.setting_notification_system_dialog_title))
         },
         text = {
-            Text(text = stringResource(R.string.setting_alarm_system_dialog_description))
+            Text(text = stringResource(R.string.setting_notification_system_dialog_description))
         },
         confirmButton = {
             TextButton(onClick = onGoToSettings) {
-                Text(text = stringResource(R.string.setting_alarm_system_dialog_confirm))
+                Text(text = stringResource(R.string.setting_notification_system_dialog_confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.setting_alarm_system_dialog_dismiss))
+                Text(text = stringResource(R.string.setting_notification_system_dialog_dismiss))
             }
         },
     )
