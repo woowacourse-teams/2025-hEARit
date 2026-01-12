@@ -16,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -121,7 +120,7 @@ class MainActivity :
                 if (result.resultCode == RESULT_OK) {
                     val detailResult =
                         result.data.toDetailResult() ?: return@registerForActivityResult
-                    detailResult.navigate(this, analyticsLogger)
+                    detailResult.navigate(analyticsLogger)
                 }
                 mainViewModel.notifyCategoryUpdated()
                 mainViewModel.hearitUpdated.value = Unit
@@ -148,7 +147,6 @@ class MainActivity :
 
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, 0, 0, 0)
             insets
         }

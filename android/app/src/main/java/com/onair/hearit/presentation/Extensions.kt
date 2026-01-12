@@ -37,6 +37,15 @@ fun Int.toTimeString(): String {
 
 fun Keyword.toHashtagName(): String = "#${this.name}"
 
+fun calculateProgress(
+    lastPlayTimeMillis: Long?,
+    totalPlayTimeSec: Int,
+): Float {
+    if (totalPlayTimeSec <= 0) return 0f
+    val lastPlayTimeSec = (lastPlayTimeMillis ?: 0L) / 1000f
+    return (lastPlayTimeSec / totalPlayTimeSec).coerceIn(0f, 1f)
+}
+
 fun Intent?.toDetailResult(): DetailResult? {
     if (this == null) return null
     return when (getStringExtra(TYPE_KEY)) {
