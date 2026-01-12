@@ -37,8 +37,8 @@ class CategoryViewModel @Inject constructor(
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
     init {
-        _categoryUiState.value =
-            CategoryUiState(
+        _categoryUiState.update {
+            it.copy(
                 category =
                     Category(
                         categoryArgs.id,
@@ -46,6 +46,7 @@ class CategoryViewModel @Inject constructor(
                         categoryArgs.colorCode,
                     ),
             )
+        }
         fetchCategoryHearits()
     }
 
