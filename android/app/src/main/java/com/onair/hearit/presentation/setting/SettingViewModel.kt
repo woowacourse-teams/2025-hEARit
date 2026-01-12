@@ -44,43 +44,71 @@ class SettingViewModel @Inject constructor(
 
     init {
         loadUserInfo()
-        loadPushNotificationSetting()
+        loadNotificationSetting()
     }
 
     fun onPushNotificationToggleRequested(isEnabled: Boolean) {
         if (!isEnabled) {
-            _isPushNotificationEnabled.value = false
+            applyToggleAndPersist(
+                targetEnabled = false,
+                successResId = R.string.setting_notification_push_disabled,
+                failureResId = R.string.setting_notification_push_save_failed,
+            )
             _shouldRequestNotificationPermission.value = false
-            persistPushNotificationSetting(false)
-
-            _snackbarMessage.tryEmit(R.string.setting_alarm_push_disabled)
             return
         }
         _shouldRequestNotificationPermission.value = true
     }
 
     fun onPostNotificationPermissionResult(isGranted: Boolean) {
-        _isPushNotificationEnabled.value = isGranted
         _shouldRequestNotificationPermission.value = false
-        persistPushNotificationSetting(isGranted)
 
-        if (isGranted) {
-            _snackbarMessage.tryEmit(R.string.setting_alarm_push_enabled)
-        } else {
-            _snackbarMessage.tryEmit(R.string.setting_alarm_push_disabled)
+        if (!isGranted) {
+            _isPushNotificationEnabled.value = false
+            _snackbarMessage.tryEmit(R.string.setting_notification_push_disabled)
             _toastMessage.value = R.string.all_toast_notification_permission_denied
+            return
         }
+
+        applyToggleAndPersist(
+            targetEnabled = true,
+            successResId = R.string.setting_notification_push_enabled,
+            failureResId = R.string.setting_notification_push_save_failed,
+        )
     }
 
-    fun onSystemNotificationAvailabilityChecked(isNotificationAvailable: Boolean) {
+    fun onSystemNotificationBlocked(isNotificationAvailable: Boolean) {
         if (isNotificationAvailable) return
         if (!_isPushNotificationEnabled.value && !_shouldRequestNotificationPermission.value) return
 
-        _isPushNotificationEnabled.value = false
         _shouldRequestNotificationPermission.value = false
-        persistPushNotificationSetting(false)
 
-        _snackbarMessage.tryEmit(R.string.setting_alarm_push_blocked_by_system)
+        applyToggleAndPersist(
+            targetEnabled = false,
+            successResId = R.string.setting_notification_push_blocked_by_system,
+            failureResId = R.string.setting_notification_push_save_failed,
+        )
+    }
+
+    private fun applyToggleAndPersist(
+        targetEnabled: Boolean,
+        successResId: Int,
+        failureResId: Int,
+    ) {
+        val previousEnabled: Boolean = _isPushNotificationEnabled.value
+
+        _isPushNotificationEnabled.value = targetEnabled
+        _snackbarMessage.tryEmit(successResId)
+
+        viewModelScope.launch {
+            notificationPreferenceRepository
+                .saveCommutePushEnabled(targetEnabled)
+                .onFailure { throwable ->
+                    Timber.e(throwable)
+                    _isPushNotificationEnabled.value = previousEnabled
+                    _snackbarMessage.tryEmit(failureResId)
+                }
+        }
     }
 
     private fun loadUserInfo() {
@@ -88,7 +116,7 @@ class SettingViewModel @Inject constructor(
         fetchUserInfo()
     }
 
-    private fun loadPushNotificationSetting() {
+    private fun loadNotificationSetting() {
         viewModelScope.launch {
             notificationPreferenceRepository
                 .getCommutePushEnabled()
@@ -96,16 +124,6 @@ class SettingViewModel @Inject constructor(
                     _isPushNotificationEnabled.value = isEnabled
                 }.onFailure { throwable ->
                     Timber.w(throwable)
-                }
-        }
-    }
-
-    private fun persistPushNotificationSetting(isEnabled: Boolean) {
-        viewModelScope.launch {
-            notificationPreferenceRepository
-                .saveCommutePushEnabled(isEnabled)
-                .onFailure { throwable ->
-                    Timber.e(throwable)
                 }
         }
     }
