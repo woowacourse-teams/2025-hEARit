@@ -15,6 +15,29 @@ import '../storage/playlist_storage.dart';
 import 'audio_handler.dart';
 import 'playing_history_service.dart';
 
+/// 탐색 화면 진입 전 상태 저장용
+class _SavedPlaybackState {
+  const _SavedPlaybackState({
+    required this.mediaItem,
+    required this.audioUrl,
+    required this.position,
+    required this.wasPlaying,
+    required this.playlist,
+    required this.playlistIndex,
+    required this.isSinglePlayMode,
+    required this.currentSpeed,
+  });
+
+  final MediaItem? mediaItem;
+  final String? audioUrl;
+  final Duration position;
+  final bool wasPlaying;
+  final List<PlaylistItem> playlist;
+  final int playlistIndex;
+  final bool isSinglePlayMode;
+  final double currentSpeed;
+}
+
 class HearitPlayerController extends ChangeNotifier {
   HearitPlayerController({
     required LocalAudioHandler audioHandler,
@@ -77,6 +100,7 @@ class HearitPlayerController extends ChangeNotifier {
   double _currentSpeed = 1.0;
 
   MediaItem? _currentMediaItem;
+  String? _currentAudioUrl; // 현재 오디오 URL 추적
 
   // 플레이리스트 관련 상태
   List<PlaylistItem> _playlist = [];
@@ -85,6 +109,9 @@ class HearitPlayerController extends ChangeNotifier {
 
   // 탐색 화면 컨텍스트 추적 (백그라운드 일시정지 판단용)
   bool _isPlayingExplorePreview = false;
+
+  // 탐색 화면 진입 전 상태 저장
+  _SavedPlaybackState? _beforeExploreState;
 
   // 아트워크 캐시 (색상별로 캐싱)
   static final Map<int, Future<Uri>> _artworkUriFutures = {};
@@ -339,6 +366,9 @@ class HearitPlayerController extends ChangeNotifier {
     // 탐색 화면 미리듣기 여부 설정
     _isPlayingExplorePreview = isExplorePreview;
 
+    // 현재 오디오 URL 저장
+    _currentAudioUrl = url;
+
     // 배속을 기본값(1.0x)으로 초기화
     if (_currentSpeed != 1.0) {
       _currentSpeed = 1.0;
@@ -372,6 +402,9 @@ class HearitPlayerController extends ChangeNotifier {
     }
 
     // _currentPlaylistIndex는 건드리지 않음 (호출자가 이미 설정)
+
+    // 현재 오디오 URL 저장
+    _currentAudioUrl = url;
 
     // 배속을 기본값(1.0x)으로 초기화
     if (_currentSpeed != 1.0) {
@@ -439,6 +472,9 @@ class HearitPlayerController extends ChangeNotifier {
     );
 
     await _playerStateStorage.savePlayerState(state);
+    debugPrint(
+      '💾 재생바 상태 저장 완료: ${_currentMediaItem!.title} (위치: ${_position.inMilliseconds}ms)',
+    );
     debugPrint('💾 재생바 상태 저장: $reason');
   }
 
@@ -789,6 +825,155 @@ class HearitPlayerController extends ChangeNotifier {
     await _playlistStorage.clearPlaylist();
 
     notifyListeners();
+  }
+
+  // ──────────────────────────────
+  // 탐색 화면 상태 저장/복원
+  // ──────────────────────────────
+
+  /// 탐색 화면 진입 전 현재 재생 상태 저장
+  Future<void> saveStateBeforeExplore() async {
+    // 이미 탐색 미리듣기 중이면 중복 저장 방지
+    if (_isPlayingExplorePreview) {
+      debugPrint('⚠️ 이미 탐색 미리듣기 중 - 상태 저장 스킵');
+      return;
+    }
+
+    // 현재 상태 스냅샷 저장
+    _beforeExploreState = _SavedPlaybackState(
+      mediaItem: _currentMediaItem,
+      audioUrl: _currentAudioUrl,
+      position: _position,
+      wasPlaying: isPlaying,
+      playlist: List.from(_playlist),
+      playlistIndex: _currentPlaylistIndex,
+      isSinglePlayMode: _isSinglePlayMode,
+      currentSpeed: _currentSpeed,
+    );
+
+    debugPrint('💾 탐색 진입 전 상태 저장 완료:');
+    debugPrint('   - MediaItem: ${_currentMediaItem?.title}');
+    debugPrint('   - Position: ${_position.inSeconds}초');
+    debugPrint('   - Playing: $isPlaying');
+  }
+
+  /// 탐색 화면을 나간 후 이전 재생 상태 복원
+  Future<void> restoreStateAfterExplore() async {
+    debugPrint('🔄 [복원] restoreStateAfterExplore() 호출됨');
+
+    // 복원할 상태가 없으면 리턴
+    if (_beforeExploreState == null) {
+      debugPrint('⚠️ [복원] 복원할 상태 없음 (_beforeExploreState == null)');
+      return;
+    }
+
+    debugPrint('🔍 [복원] 현재 상태 체크:');
+    debugPrint('   - _isPlayingExplorePreview: $_isPlayingExplorePreview');
+    debugPrint(
+      '   - _beforeExploreState: ${_beforeExploreState?.mediaItem?.title}',
+    );
+
+    // ✅ FIX: 탐색 미리듣기 중이었을 때만 복원
+    if (_isPlayingExplorePreview) {
+      debugPrint('✅ [복원] 탐색 미리듣기였음 - 복원 시작');
+
+      final saved = _beforeExploreState!;
+      _beforeExploreState = null; // 복원 후 클리어
+      _isPlayingExplorePreview = false; // 탐색 컨텍스트 해제
+
+      debugPrint('🔄 [복원] 저장된 상태:');
+      debugPrint('   - MediaItem: ${saved.mediaItem?.title}');
+      debugPrint('   - Position: ${saved.position.inSeconds}초');
+      debugPrint('   - WasPlaying: ${saved.wasPlaying}');
+
+      // 이전에 재생 중인 것이 없었으면 클리어만
+      if (saved.mediaItem == null || saved.audioUrl == null) {
+        _currentMediaItem = null;
+        _currentAudioUrl = null;
+        _playlist = [];
+        _currentPlaylistIndex = -1;
+        notifyListeners();
+        debugPrint('✅ [복원] 이전 재생 없음 - 상태 클리어 완료');
+        return;
+      }
+
+      // 상태 복원
+      _currentMediaItem = saved.mediaItem;
+      _currentAudioUrl = saved.audioUrl;
+      _playlist = saved.playlist;
+      _currentPlaylistIndex = saved.playlistIndex;
+      _isSinglePlayMode = saved.isSinglePlayMode;
+
+      // 배속 복원
+      if (_currentSpeed != saved.currentSpeed) {
+        _currentSpeed = saved.currentSpeed;
+        await _audioHandler.setSpeed(saved.currentSpeed);
+        debugPrint('⚡ [복원] 배속 복원: ${saved.currentSpeed}x');
+      }
+
+      // MediaItem 복원
+      _audioHandler.mediaItem.add(saved.mediaItem);
+      debugPrint('📱 [복원] MediaItem 복원 완료');
+
+      try {
+        // 오디오 소스 복원 (네트워크 요청 발생)
+        debugPrint('🌐 [복원] 오디오 소스 로딩 시작: ${saved.audioUrl}');
+        await _audioHandler
+            .setSource(saved.audioUrl!, mediaItem: saved.mediaItem)
+            .timeout(
+              const Duration(seconds: 10),
+              onTimeout: () {
+                debugPrint('⚠️ [복원] 오디오 소스 로딩 타임아웃 (10초)');
+                throw TimeoutException('Audio source loading timeout');
+              },
+            );
+        debugPrint('✅ [복원] 오디오 소스 로딩 완료');
+
+        // ✅ FIX: 즉시 UI 업데이트 (스켈레톤 해제)
+        debugPrint('🔔 [복원] notifyListeners() 호출 (UI 즉시 업데이트)');
+        notifyListeners();
+        debugPrint('✅ [복원] UI 업데이트 완료 - 스켈레톤 해제됨!');
+
+        // ✅ FIX: seek와 play를 백그라운드에서 실행 (UI 블로킹 없음)
+        debugPrint('🚀 [복원] seek/play 백그라운드 실행 시작');
+        Future.microtask(() async {
+          try {
+            // 위치 복원
+            if (saved.position > Duration.zero) {
+              debugPrint('⏩ [복원-BG] seek() 시작: ${saved.position.inSeconds}초');
+              await _audioHandler.seek(saved.position);
+              _position = saved.position;
+              debugPrint('✅ [복원-BG] seek() 완료: ${saved.position.inSeconds}초');
+            }
+
+            // 재생 상태 복원
+            if (saved.wasPlaying) {
+              debugPrint('▶️ [복원-BG] play() 시작');
+              await _audioHandler.play();
+              debugPrint('✅ [복원-BG] play() 완료');
+            } else {
+              debugPrint('⏸️ [복원-BG] 일시정지 상태 유지');
+            }
+
+            debugPrint('🎉 [복원-BG] 백그라운드 복원 완료!');
+          } catch (e) {
+            debugPrint('⚠️ [복원-BG] 백그라운드 복원 실패: $e');
+          }
+        });
+
+        debugPrint('✅✅✅ [복원] 메인 복원 완료 (seek/play는 백그라운드 진행 중)');
+      } catch (e, stackTrace) {
+        debugPrint('❌ [복원] 오디오 복원 실패: $e');
+        debugPrint('📍 [복원] 스택 트레이스: $stackTrace');
+        // 실패 시에도 UI는 업데이트
+        notifyListeners();
+        debugPrint('🔔 [복원] 예외 발생했지만 notifyListeners() 호출함');
+      }
+    } else {
+      debugPrint('⚠️ [복원] 탐색 미리듣기가 아니었음 - 복원 불필요');
+      debugPrint('   (정상적인 케이스: 탐색에서 미리듣기를 안 했을 때)');
+      return;
+    }
   }
 
   // ──────────────────────────────

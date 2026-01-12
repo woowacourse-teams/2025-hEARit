@@ -21,6 +21,7 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
+  bool _isRestoringAudio = false; // 오디오 복원 중 상태
   final List<GlobalKey<NavigatorState>> _navigatorKeys = List.generate(
     4,
     (_) => GlobalKey<NavigatorState>(),
@@ -66,29 +67,79 @@ class _MainNavigationState extends State<MainNavigation> {
     }
   }
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index) async {
+    // ========================================
+    // 탐색 화면에서 나가는 경우
+    // ========================================
     if (_currentIndex == 2 && index != 2) {
-      // Pause explore preview audio only if it is currently active.
+      debugPrint('🔄 [탭전환] 탐색 → ${_navItems[index].label} (복원 시작)');
+
+      // 탐색 미리듣기 일시정지
       if (ExploreScreenState.isPlaybackEnabled()) {
         ExploreScreenState.pauseActiveAudio();
         ExploreScreenState.setActivePlayback(false);
+        debugPrint('⏸️ [탭전환] 탐색 미리듣기 일시정지');
       }
-    }
-    if (index == 2 && _currentIndex != 2) {
-      // Avoid overlapping with detail playback when entering explore.
-      if (_playerController.isPlaying) {
-        _playerController.pause();
-      }
-    }
-    if (_currentIndex == index) {
-      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
-    } else {
+
+      // 즉시 화면 전환 (복원은 백그라운드)
       setState(() {
         _currentIndex = index;
+        _isRestoringAudio = true; // 복원 시작
       });
-      if (index == 2) {
-        ExploreScreenState.setActivePlayback(true);
+      debugPrint('🎬 [탭전환] 화면 전환 완료, 복원 중 플래그: $_isRestoringAudio');
+
+      // ✅ FIX: try-finally로 안전하게 복원 상태 해제
+      try {
+        debugPrint('⏳ [탭전환] restoreStateAfterExplore() 호출...');
+        await _playerController.restoreStateAfterExplore();
+        debugPrint('✅ [탭전환] restoreStateAfterExplore() 완료');
+      } catch (e) {
+        debugPrint('❌ [탭전환] 복원 중 예외 발생: $e');
+      } finally {
+        // 복원 완료 (성공/실패 관계없이 UI 상태 해제)
+        if (mounted) {
+          setState(() {
+            _isRestoringAudio = false;
+          });
+          debugPrint('🏁 [탭전환] 복원 완료, 복원 중 플래그: $_isRestoringAudio');
+        } else {
+          debugPrint('⚠️ [탭전환] Widget unmounted, setState 스킵');
+        }
       }
+      return;
+    }
+
+    // ========================================
+    // 탐색 화면으로 진입하는 경우
+    // ========================================
+    if (index == 2 && _currentIndex != 2) {
+      // 현재 재생 상태 저장
+      await _playerController.saveStateBeforeExplore();
+
+      // 기존 재생 중인 오디오 일시정지
+      if (_playerController.isPlaying) {
+        await _playerController.pause();
+      }
+    }
+
+    // ========================================
+    // 같은 탭 다시 탭 (루트로 이동)
+    // ========================================
+    if (_currentIndex == index) {
+      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+      return;
+    }
+
+    // ========================================
+    // 다른 탭으로 전환
+    // ========================================
+    setState(() {
+      _currentIndex = index;
+    });
+
+    // 탐색 화면 진입 시 미리듣기 활성화
+    if (index == 2) {
+      ExploreScreenState.setActivePlayback(true);
     }
   }
 
@@ -177,8 +228,18 @@ class _MainNavigationState extends State<MainNavigation> {
         final canPopCurrent =
             _navigatorKeys[_currentIndex].currentState?.canPop() ?? false;
         final hasMediaItem = _playerController.currentMediaItem != null;
+
+        // 탐색 미리듣기는 미니플레이어 표시하지 않음
+        final isExplorePreviewing = _playerController.isPlayingExplorePreview;
+
+        // 검색 탭(index=1)에서는 스택이 있어도 미니플레이어 표시
+        // 단, 탐색 미리듣기 중에는 표시하지 않음
+        // 복원 중에도 미니플레이어 표시 (스켈레톤)
         final showMiniPlayer =
-            _currentIndex != 2 && !canPopCurrent && hasMediaItem;
+            _currentIndex != 2 &&
+            (_currentIndex == 1 || !canPopCurrent) &&
+            (hasMediaItem || _isRestoringAudio) &&
+            !isExplorePreviewing;
 
         return Container(
           decoration: BoxDecoration(
@@ -246,9 +307,22 @@ class _MainNavigationState extends State<MainNavigation> {
                                   _navigatorKeys[_currentIndex].currentState
                                       ?.canPop() ??
                                   false;
-                              if (canPopCurrent) {
+                              // 검색 탭(index=1)에서는 스택이 있어도 미니플레이어 표시
+                              // 단, 탐색 미리듣기 중에는 표시하지 않음
+                              if (canPopCurrent && _currentIndex != 1) {
                                 return const SizedBox.shrink();
                               }
+
+                              // 탐색 미리듣기 중에는 미니플레이어 숨김
+                              if (_playerController.isPlayingExplorePreview) {
+                                return const SizedBox.shrink();
+                              }
+
+                              // 복원 중이면 스켈레톤 표시
+                              if (_isRestoringAudio) {
+                                return const _MiniPlayerSkeleton();
+                              }
+
                               final media = _playerController.currentMediaItem;
                               if (media == null) {
                                 return const SizedBox.shrink();
@@ -616,6 +690,86 @@ class _PlaylistButton extends StatelessWidget {
           color: AppColors.gray4,
           size: 28,
         ),
+      ),
+    );
+  }
+}
+
+/// 미니플레이어 스켈레톤 UI (오디오 복원 중 표시)
+class _MiniPlayerSkeleton extends StatelessWidget {
+  const _MiniPlayerSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 12, 0, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                // 제목 스켈레톤
+                Expanded(
+                  child: Container(
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: AppColors.gray2.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 재생 버튼 스켈레톤 (로딩 스피너)
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.gray2.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.gray3,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 플레이리스트 버튼 스켈레톤
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.gray2.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          // 슬라이더 스켈레톤
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 5,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 0),
+              overlayShape: SliderComponentShape.noOverlay,
+              activeTrackColor: AppColors.gray2.withOpacity(0.3),
+              inactiveTrackColor: AppColors.gray2.withOpacity(0.1),
+              thumbColor: Colors.transparent,
+            ),
+            child: const Slider(value: 0.0, onChanged: null),
+          ),
+        ],
       ),
     );
   }

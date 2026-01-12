@@ -32,11 +32,12 @@ class _CategoryHearitScreenState extends State<CategoryHearitScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final top = MediaQuery.of(context).padding.top;
+    final bottom = MediaQuery.of(context).padding.bottom;
     final Color accent = widget.category.color;
 
-    return Scaffold(
-      backgroundColor: AppColors.hearitBlack,
-      body: Column(
+    return Container(
+      color: AppColors.hearitBlack,
+      child: Column(
         children: [
           Container(
             width: double.infinity,
@@ -124,7 +125,7 @@ class _CategoryHearitScreenState extends State<CategoryHearitScreen> {
                     left: 16,
                     right: 16,
                     top: 24,
-                    bottom: 20 + MediaQuery.of(context).padding.bottom,
+                    bottom: 20 + bottom + 60, // 하단 네비게이션 바 높이(60) 추가
                   ),
                   itemCount: data.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
