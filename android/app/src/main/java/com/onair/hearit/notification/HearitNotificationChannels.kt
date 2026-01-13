@@ -9,12 +9,15 @@ object HearitNotificationChannels {
     const val PLAYBACK_CHANNEL_ID: String = "hearit_playback_channel"
     const val COMMUTE_PUSH_CHANNEL_ID: String = "hearit_commute_channel"
 
+    private const val PLAYBACK_CHANNEL_DESCRIPTION: String = "Playback controls"
+    private const val COMMUTE_PUSH_CHANNEL_DESCRIPTION: String = "Commute push notifications"
+
     fun ensurePlaybackChannel(context: Context) {
         ensureChannel(
             context = context,
             channelId = PLAYBACK_CHANNEL_ID,
             channelName = context.getString(R.string.app_name),
-            channelDescription = "Playback controls",
+            channelDescription = PLAYBACK_CHANNEL_DESCRIPTION,
             importance = NotificationManager.IMPORTANCE_LOW,
             showBadge = false,
         )
@@ -25,7 +28,7 @@ object HearitNotificationChannels {
             context = context,
             channelId = COMMUTE_PUSH_CHANNEL_ID,
             channelName = context.getString(R.string.app_name),
-            channelDescription = "Commute push notifications",
+            channelDescription = COMMUTE_PUSH_CHANNEL_DESCRIPTION,
             importance = NotificationManager.IMPORTANCE_DEFAULT,
             showBadge = true,
         )
