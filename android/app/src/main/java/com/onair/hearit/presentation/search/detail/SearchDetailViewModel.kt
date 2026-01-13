@@ -45,7 +45,7 @@ class SearchDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(recentKeywords = keywords.toImmutableList()) }
                 }.onFailure { throwable ->
                     Timber.w(throwable)
-                    _snackbarMessage.emit(R.string.search_toast_recent_keyword_load_fail)
+                    _snackbarMessage.tryEmit(R.string.search_toast_recent_keyword_load_fail)
                 }
         }
     }
@@ -57,7 +57,7 @@ class SearchDetailViewModel @Inject constructor(
                     loadRecentKeywords()
                 }.onFailure { throwable ->
                     Timber.w(throwable)
-                    _snackbarMessage.emit(R.string.search_toast_recent_hearit_save_fail)
+                    _snackbarMessage.tryEmit(R.string.search_toast_recent_hearit_save_fail)
                 }
         }
     }
@@ -68,11 +68,11 @@ class SearchDetailViewModel @Inject constructor(
                 .onSuccess { count ->
                     _uiState.update { it.copy(recentKeywords = persistentListOf()) }
                     if (count > 0) {
-                        _snackbarMessage.emit(R.string.search_toast_recent_keyword_delete_success)
+                        _snackbarMessage.tryEmit(R.string.search_toast_recent_keyword_delete_success)
                     }
                 }.onFailure { throwable ->
                     Timber.w(throwable)
-                    _snackbarMessage.emit(R.string.search_toast_recent_keyword_delete_fail)
+                    _snackbarMessage.tryEmit(R.string.search_toast_recent_keyword_delete_fail)
                 }
         }
     }
@@ -130,7 +130,7 @@ class SearchDetailViewModel @Inject constructor(
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _uiState.update { it.copy(pagingState = it.pagingState.failLoading()) }
-                    _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
+                    _snackbarMessage.tryEmit(R.string.search_toast_searched_hearits_load_fail)
                 }
         }
     }

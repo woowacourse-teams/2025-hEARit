@@ -73,7 +73,7 @@ class CategoryViewModel @Inject constructor(
                     }
                 }.onFailure {
                     _categoryUiState.update { it.copy(pagingState = it.pagingState.failLoading()) }
-                    _snackbarMessage.emit(R.string.category_toast_searched_hearits_load_fail)
+                    _snackbarMessage.tryEmit(R.string.category_toast_searched_hearits_load_fail)
                 }
         }
     }
