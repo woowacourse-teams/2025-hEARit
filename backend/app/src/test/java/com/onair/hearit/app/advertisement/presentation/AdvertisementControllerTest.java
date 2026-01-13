@@ -3,7 +3,6 @@ package com.onair.hearit.app.advertisement.presentation;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -52,9 +51,7 @@ class AdvertisementControllerTest extends ControllerTest {
                                     .summary("랜덤 광고 조회")
                                     .description("등록된 광고 중 랜덤으로 하나를 조회합니다.")
                                     .responseFields(
-                                            fieldWithPath("imageUrl").description("광고 이미지 URL"),
-                                            fieldWithPath("linkUrl").description("광고 링크 URL"),
-                                            fieldWithPath("title").description("광고 제목")
+                                           com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields()
                                     )
                                     .build()
                             )));
@@ -78,8 +75,7 @@ class AdvertisementControllerTest extends ControllerTest {
                                     .summary("랜덤 광고 조회 - 광고 없음")
                                     .description("등록된 광고가 없는 경우 404 NOT FOUND를 반환합니다.")
                                     .responseFields(
-                                            fieldWithPath("title").description("에러 제목"),
-                                            fieldWithPath("detail").description("에러 상세 메시지")
+                                            com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields()
                                     )
                                     .build()
                             )));
