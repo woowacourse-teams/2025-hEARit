@@ -1,6 +1,6 @@
 package com.onair.hearit.app.explore.application.scorefactor;
 
-import com.onair.hearit.app.explore.application.scorefactor.randomgenerator.RandomNumberGenerator;
+import com.onair.hearit.app.explore.application.scorefactor.generator.RandomNumberGenerator;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.UserType;
 import java.util.List;
@@ -32,6 +32,9 @@ public class RandomScoreFactor implements ScoreFactor {
     private double getRandomValue() {
         double value = randomNumberGenerator.getDouble();
         // 사용자가 다양한 컨텐츠를 접하기 위해 10% 확률로 최대 점수 부여
-        return value <= 0.1 ? 1.0 : value;
+        if (value <= 0.1) {
+            return 1.0;
+        }
+        return value;
     }
 }

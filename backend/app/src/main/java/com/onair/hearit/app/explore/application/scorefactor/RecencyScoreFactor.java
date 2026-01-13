@@ -32,6 +32,6 @@ public class RecencyScoreFactor implements ScoreFactor {
     private double calculateRecencyScore(Hearit hearit, LocalDateTime now) {
         Duration duration = Duration.between(hearit.getCreatedAt(), now);
         long daysPassed = duration.toDays();
-        return Math.max(0, 1.0 - (daysPassed / RECENCY_EXPIRE_DAYS));
+        return Math.clamp(1.0 - (daysPassed / RECENCY_EXPIRE_DAYS), 0, 1.0);
     }
 }

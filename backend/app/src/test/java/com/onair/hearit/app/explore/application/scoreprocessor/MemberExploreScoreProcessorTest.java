@@ -9,7 +9,7 @@ import com.onair.hearit.app.explore.application.ScoreFactorWeightConfig;
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
-import com.onair.hearit.app.explore.application.scorefactor.randomgenerator.RandomNumberGenerator;
+import com.onair.hearit.app.explore.application.scorefactor.generator.RandomNumberGenerator;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.config.DataSourceConfig;

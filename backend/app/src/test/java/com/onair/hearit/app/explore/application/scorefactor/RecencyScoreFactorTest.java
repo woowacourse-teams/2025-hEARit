@@ -50,7 +50,6 @@ class RecencyScoreFactorTest {
         Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
 
         // then
-        // 20.0 - (4일 / 2.0) = 18.0
         assertThat(scores).containsEntry(hearit.getId(), 0.9);
     }
 
@@ -66,7 +65,6 @@ class RecencyScoreFactorTest {
         Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
 
         // then
-        // 20.0 - (40일 / 2.0) = 0.0
         assertThat(scores).containsEntry(hearit.getId(), 0.0);
     }
 
