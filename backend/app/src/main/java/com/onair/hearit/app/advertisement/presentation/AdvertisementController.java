@@ -2,7 +2,6 @@ package com.onair.hearit.app.advertisement.presentation;
 
 import com.onair.hearit.app.advertisement.application.AdvertisementService;
 import com.onair.hearit.app.advertisement.dto.AdvertisementResponse;
-import com.onair.hearit.core.domain.Advertisement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +17,7 @@ public class AdvertisementController {
 
     @GetMapping("/random")
     public ResponseEntity<AdvertisementResponse> getRandomAdvertisement() {
-        Advertisement advertisement = advertisementService.getRandomAdvertisement();
-        AdvertisementResponse response = AdvertisementResponse.from(advertisement);
+        AdvertisementResponse response = advertisementService.getRandomAdvertisement();
         return ResponseEntity.ok(response);
     }
 }

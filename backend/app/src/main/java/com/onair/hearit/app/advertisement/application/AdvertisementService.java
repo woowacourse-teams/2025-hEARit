@@ -1,5 +1,6 @@
 package com.onair.hearit.app.advertisement.application;
 
+import com.onair.hearit.app.advertisement.dto.AdvertisementResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.core.domain.Advertisement;
 import com.onair.hearit.core.infrastructure.jpa.AdvertisementRepository;
@@ -18,14 +19,15 @@ public class AdvertisementService {
 
     private final AdvertisementRepository advertisementRepository;
 
-    public Advertisement getRandomAdvertisement() {
+    public AdvertisementResponse getRandomAdvertisement() {
         List<Long> advertisementIds = advertisementRepository.findAllIds();
         if (advertisementIds.isEmpty()) {
             throw new NotFoundException("advertisement", "전체");
         }
         Long randomId = pickRandomId(advertisementIds);
-        return advertisementRepository.findById(randomId)
+        Advertisement advertisement = advertisementRepository.findById(randomId)
                 .orElseThrow(() -> new NotFoundException("advertisementId", randomId.toString()));
+        return AdvertisementResponse.from(advertisement);
     }
 
     private Long pickRandomId(List<Long> ids) {

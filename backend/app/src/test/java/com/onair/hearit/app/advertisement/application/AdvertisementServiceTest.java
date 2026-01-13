@@ -3,13 +3,12 @@ package com.onair.hearit.app.advertisement.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.onair.hearit.app.advertisement.dto.AdvertisementResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Advertisement;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jpa.AdvertisementRepository;
-import java.util.HashSet;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,10 +55,10 @@ class AdvertisementServiceTest {
             );
 
             // when
-            Advertisement result = advertisementService.getRandomAdvertisement();
+            AdvertisementResponse result = advertisementService.getRandomAdvertisement();
 
             // then
-            assertThat(result).isIn(ad1, ad2, ad3);
+            assertThat(result.id()).isIn(ad1.getId(), ad2.getId(), ad3.getId());
         }
 
          @Test
@@ -71,10 +70,10 @@ class AdvertisementServiceTest {
             );
 
             // when
-            Advertisement result = advertisementService.getRandomAdvertisement();
+            AdvertisementResponse result = advertisementService.getRandomAdvertisement();
 
             // then
-            assertThat(result).isEqualTo(ad);
+            assertThat(result.id()).isEqualTo(ad.getId());
         }
 
         @Test
