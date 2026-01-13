@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.onair.hearit.R
 import com.onair.hearit.presentation.theme.HearitBlack
+import com.onair.hearit.presentation.theme.HearitTypoGraphy
 
 @Composable
 fun AlarmContent(
@@ -49,7 +50,7 @@ fun AlarmContent(
             Text(
                 text = stringResource(R.string.setting_notification),
                 color = Color.White,
-                style = MaterialTheme.typography.bodyLarge,
+                style = HearitTypoGraphy.bodyLarge,
             )
             Switch(
                 checked = isPushNotificationEnabled,
