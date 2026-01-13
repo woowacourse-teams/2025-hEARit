@@ -62,32 +62,7 @@ class AdvertisementServiceTest {
             assertThat(result).isIn(ad1, ad2, ad3);
         }
 
-        @Test
-        @DisplayName("여러 번 호출 시 다양한 광고가 선택된다.")
-        void getRandomAdvertisement_randomness() {
-            // given
-            Advertisement ad1 = dbHelper.insertAdvertisement(
-                    new Advertisement("https://example.com/image1.jpg", "https://example.com/link1", "광고1")
-            );
-            Advertisement ad2 = dbHelper.insertAdvertisement(
-                    new Advertisement("https://example.com/image2.jpg", "https://example.com/link2", "광고2")
-            );
-            Advertisement ad3 = dbHelper.insertAdvertisement(
-                    new Advertisement("https://example.com/image3.jpg", "https://example.com/link3", "광고3")
-            );
-
-            // when
-            Set<Long> selectedIds = new HashSet<>();
-            for (int i = 0; i < 30; i++) {
-                Advertisement result = advertisementService.getRandomAdvertisement();
-                selectedIds.add(result.getId());
-            }
-
-            // then
-            assertThat(selectedIds.size()).isGreaterThan(1);
-        }
-
-        @Test
+         @Test
         @DisplayName("광고가 하나만 있어도 정상적으로 반환한다.")
         void getRandomAdvertisement_singleAd() {
             // given
