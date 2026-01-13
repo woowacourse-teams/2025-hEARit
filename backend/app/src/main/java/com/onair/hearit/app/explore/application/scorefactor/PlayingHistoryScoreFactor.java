@@ -27,7 +27,7 @@ public class PlayingHistoryScoreFactor implements ScoreFactor {
     @Override
     public Map<Long, Double> calculate(String userUuid, List<Hearit> hearits) {
         List<Long> isFinishedHearitIds = getFinishedHearitIds(userUuid);
-        Map<Long, Double> categoryScores = calculateCategoryScores(userUuid);
+        Map<Long, Double> categoryScores = calculateCategoryPlayRate(userUuid);
         return hearits.stream()
                 .collect(Collectors.toMap(
                         Hearit::getId,
@@ -37,26 +37,22 @@ public class PlayingHistoryScoreFactor implements ScoreFactor {
                 ));
     }
 
-    private Map<Long, Double> calculateCategoryScores(String userUuid) {
+    private Map<Long, Double> calculateCategoryPlayRate(String userUuid) {
         List<CategoryPlayingHistoryCount> playedCategoryCounts =
                 playingHistoryRepository.countPlayingHistoriesByCategory(userUuid);
         if (playedCategoryCounts == null || playedCategoryCounts.isEmpty()) {
             return Map.of();
         }
 
-        long maxCount = playedCategoryCounts.stream()
-                .mapToLong(c -> c.getCount() == null ? 0L : c.getCount())
+        long maxCategoryPlayCount = playedCategoryCounts.stream()
+                .mapToLong(CategoryPlayingHistoryCount::getCount)
                 .max()
                 .orElse(0L);
-
+        
         return playedCategoryCounts.stream()
                 .collect(Collectors.toMap(
                         CategoryPlayingHistoryCount::getCategoryId,
-                        c -> {
-                            long count = c.getCount() == null ? 0L : c.getCount();
-                            return (double) count / (double) maxCount;
-                        }
-                ));
+                        c -> (double) c.getCount() / (double) maxCategoryPlayCount));
     }
 
     private List<Long> getFinishedHearitIds(String userUuid) {
@@ -68,7 +64,7 @@ public class PlayingHistoryScoreFactor implements ScoreFactor {
                 .toList();
     }
 
-    private Double calculatePlayingHistoryScore(boolean isFinished, double categoryScore) {
+    private double calculatePlayingHistoryScore(boolean isFinished, double categoryScore) {
         if (isFinished) {
             return 0.0;
         }
