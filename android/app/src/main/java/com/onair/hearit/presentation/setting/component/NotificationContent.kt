@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,9 +23,9 @@ import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 
 @Composable
-fun AlarmContent(
-    isPushNotificationEnabled: Boolean,
-    onPushNotificationToggleRequested: (Boolean) -> Unit,
+fun NotificationContent(
+    isPushEnabled: Boolean,
+    onPushChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -53,9 +52,9 @@ fun AlarmContent(
                 style = HearitTypoGraphy.bodyLarge,
             )
             Switch(
-                checked = isPushNotificationEnabled,
+                checked = isPushEnabled,
                 onCheckedChange = { newValue: Boolean ->
-                    onPushNotificationToggleRequested(newValue)
+                    onPushChange(newValue)
                 },
             )
         }
@@ -64,9 +63,9 @@ fun AlarmContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun AlarmContentPreview() {
-    AlarmContent(
-        isPushNotificationEnabled = false,
-        onPushNotificationToggleRequested = {},
+private fun NotificationContentPreview() {
+    NotificationContent(
+        isPushEnabled = false,
+        onPushChange = {},
     )
 }

@@ -35,7 +35,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.firebase.messaging.FirebaseMessaging
 import com.onair.hearit.R
 import com.onair.hearit.presentation.setting.SettingViewModel
-import com.onair.hearit.presentation.setting.component.AlarmContent
+import com.onair.hearit.presentation.setting.component.NotificationContent
 import com.onair.hearit.presentation.setting.component.SettingTopBar
 import com.onair.hearit.presentation.setting.component.SystemNotificationSettingDialog
 import com.onair.hearit.presentation.theme.Gray2
@@ -113,10 +113,10 @@ fun AlarmScreen(
             }
         },
     ) { padding ->
-        AlarmContent(
+        NotificationContent(
             modifier = Modifier.padding(padding),
-            isPushNotificationEnabled = isPushNotificationEnabled,
-            onPushNotificationToggleRequested = viewModel::onPushNotificationToggleRequested,
+            isPushEnabled = isPushNotificationEnabled,
+            onPushChange = viewModel::onPushNotificationToggleRequested,
         )
     }
 }
