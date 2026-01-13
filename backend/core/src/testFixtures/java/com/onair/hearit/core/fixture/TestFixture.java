@@ -5,6 +5,7 @@ import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.domain.UserInfo;
 import java.util.List;
@@ -79,6 +80,14 @@ public class TestFixture {
 
     public static Bookmark createFixedBookmark(Member member, Hearit hearit) {
         return new Bookmark(member, hearit);
+    }
+
+    public static PlayingHistory createFixedPlayHistory(Member member, Hearit hearit) {
+        return new PlayingHistory(member.getUuid(), hearit, 10);
+    }
+
+    public static PlayingHistory createFixedFinishedPlayHistory(Member member, Hearit hearit) {
+        return new PlayingHistory(member.getUuid(), hearit, hearit.getPlayTime() * 1000);
     }
 
     public static List<Source> createFixedSources() {
