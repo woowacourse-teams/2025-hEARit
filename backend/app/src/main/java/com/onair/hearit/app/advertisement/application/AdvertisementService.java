@@ -20,14 +20,12 @@ public class AdvertisementService {
 
     public Advertisement getRandomAdvertisement() {
         List<Long> advertisementIds = advertisementRepository.findAllIds();
-
         if (advertisementIds.isEmpty()) {
-            throw new NotFoundException("등록된 광고가 없습니다.");
+            throw new NotFoundException("advertisement", "전체");
         }
-
         Long randomId = pickRandomId(advertisementIds);
         return advertisementRepository.findById(randomId)
-                .orElseThrow(() -> new NotFoundException("광고를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("advertisementId", randomId.toString()));
     }
 
     private Long pickRandomId(List<Long> ids) {

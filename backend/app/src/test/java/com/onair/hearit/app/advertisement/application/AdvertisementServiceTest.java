@@ -108,7 +108,7 @@ class AdvertisementServiceTest {
             // when & then
             assertThatThrownBy(() -> advertisementService.getRandomAdvertisement())
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessage("등록된 광고가 없습니다.");
+                    .hasMessage("advertisement을(를) 찾을 수 없습니다. 입력값: 전체");
         }
     }
 }
