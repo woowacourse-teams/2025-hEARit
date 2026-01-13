@@ -18,21 +18,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Advertisement {
 
-    public static final int IMAGE_URL_MAX_LENGTH = 500;
-    public static final int LINK_URL_MAX_LENGTH = 500;
-    public static final int TITLE_MAX_LENGTH = 200;
+    public static final int TITLE_MAX_LENGTH = 35;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "image_url", nullable = false, length = IMAGE_URL_MAX_LENGTH)
+    @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
-    @Column(name = "link_url", nullable = false, length = LINK_URL_MAX_LENGTH)
+    @Column(name = "link_url", nullable = false)
     private String linkUrl;
 
-    @Column(name = "title", nullable = false, length = TITLE_MAX_LENGTH)
+    @Column(name = "title", nullable = false)
     private String title;
 
     public Advertisement(String imageUrl, String linkUrl, String title) {
@@ -52,17 +50,11 @@ public class Advertisement {
         if (imageUrl == null || imageUrl.trim().isBlank()) {
             throw new AdvertisementDomainException("이미지 URL은 필수입니다.");
         }
-        if (imageUrl.length() > IMAGE_URL_MAX_LENGTH) {
-            throw new AdvertisementDomainException("이미지 URL은 " + IMAGE_URL_MAX_LENGTH + "자 이하여야 합니다.");
-        }
     }
 
     private void validateLinkUrl(String linkUrl) {
         if (linkUrl == null || linkUrl.trim().isBlank()) {
             throw new AdvertisementDomainException("링크 URL은 필수입니다.");
-        }
-        if (linkUrl.length() > LINK_URL_MAX_LENGTH) {
-            throw new AdvertisementDomainException("링크 URL은 " + LINK_URL_MAX_LENGTH + "자 이하여야 합니다.");
         }
     }
 
