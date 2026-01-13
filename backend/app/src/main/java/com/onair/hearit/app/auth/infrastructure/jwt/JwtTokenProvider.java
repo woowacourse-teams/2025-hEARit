@@ -114,7 +114,7 @@ public class JwtTokenProvider {
         try {
             return UUID.fromString(parseClaims(token).getSubject());
         } catch (IllegalArgumentException e) {
-            log.warn("Invalid UUID format in token subject (legacy token?)");
+            log.warn("Invalid UUID format in token subject");
             throw new JwtException("유효하지 않은 토큰 형식입니다.");
         }
     }
@@ -130,11 +130,13 @@ public class JwtTokenProvider {
     private UUID extractUuidFromToken(ExpiredJwtException e) {
         try {
             String subject = e.getClaims().getSubject();
-            if (subject != null) {
-                return UUID.fromString(subject);
-            }
+            return UUID.fromString(subject);
+        } catch (IllegalArgumentException ex) {
+            String subject = e.getClaims().getSubject();
+            log.warn("만료된 토큰의 subject가 UUID 형식이 아닙니다. subject: {}", subject);
             return null;
         } catch (Exception ex) {
+            log.warn("만료된 토큰에서 UUID 추출 중 예외 발생", ex);
             return null;
         }
     }
