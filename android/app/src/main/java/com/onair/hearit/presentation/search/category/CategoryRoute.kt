@@ -25,6 +25,10 @@ fun CategoryRoute(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchCategoryHearits()
+    }
+
     CategoryScreen(
         categoryName = uiState.category?.name ?: "",
         categoryColor = uiState.category?.colorCode ?: "",

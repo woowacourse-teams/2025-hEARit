@@ -47,7 +47,6 @@ class CategoryViewModel @Inject constructor(
                     ),
             )
         }
-        fetchCategoryHearits()
     }
 
     fun fetchCategoryHearits() {
