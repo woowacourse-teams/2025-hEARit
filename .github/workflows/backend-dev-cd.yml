@@ -5,8 +5,8 @@ permissions:
   contents: read
 
 on:
-  pull_request:
-    branches: ['develop-be', 'fix/#804-uuid-flyway-migration-fail']
+  push:
+    branches: [ "develop-be" ]
     paths:
       - 'backend/**'
   workflow_dispatch:
@@ -50,7 +50,7 @@ jobs:
       MYSQL_WRITER_ENDPOINT: ${{ secrets.MYSQL_WRITER_ENDPOINT }}
       REDIS_HOST: localhost
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ''
+      REDIS_PASSWORD: ""
 
     steps:
       - name: Checkout source
