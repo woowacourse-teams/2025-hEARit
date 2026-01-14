@@ -88,11 +88,11 @@ class BookmarkScoreFactorTest {
         // IT 카테고리 북마크 3개
         for (int i = 0; i < 3; i++) {
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(itCategory));
-            dbHelper.insertBookmark(new Bookmark(member, hearit));
+            dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit));
         }
         // Java 카테고리 북마크 1개
         Hearit javaHearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(javaCategory));
-        dbHelper.insertBookmark(new Bookmark(member, javaHearit));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), javaHearit));
         // 총 북마크 4개
 
         // 점수 계산 대상 히어릿
@@ -122,7 +122,7 @@ class BookmarkScoreFactorTest {
 
         // Bookmarked 카테고리에만 북마크 1개
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(bookmarkedCategory));
-        dbHelper.insertBookmark(new Bookmark(member, hearit));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit));
 
         Hearit target = dbHelper.insertHearit(TestFixture.createFixedHearitWith(unbookmarkedCategory));
 
@@ -154,7 +154,7 @@ class BookmarkScoreFactorTest {
     @DisplayName("존재하지 않는 사용자 uuid로 요청 시 NotFoundException이 발생한다.")
     void memberUuidDoesNotExist() {
         // given
-        String nonExistentUuid = UUID.randomUUID().toString();
+        UUID nonExistentUuid = UUID.randomUUID();
         Category category = dbHelper.insertCategory(new Category("any", "#112233"));
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         List<Hearit> hearits = List.of(hearit);

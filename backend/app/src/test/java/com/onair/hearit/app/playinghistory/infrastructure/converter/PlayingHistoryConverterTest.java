@@ -12,6 +12,7 @@ import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,8 +56,8 @@ class PlayingHistoryConverterTest {
 
         when(hearitRepository.findAllById(anySet())).thenReturn(List.of(hearit1, hearit2));
 
-        PlayHistoryValue value1 = new PlayHistoryValue("user-uuid-1", 1L, 5000L, 1000L);
-        PlayHistoryValue value2 = new PlayHistoryValue("user-uuid-2", 2L, 10000L, 2000L);
+        PlayHistoryValue value1 = new PlayHistoryValue(UUID.fromString("00000000-0000-0000-0000-000000000001"), 1L, 5000L, 1000L);
+        PlayHistoryValue value2 = new PlayHistoryValue(UUID.fromString("00000000-0000-0000-0000-000000000002"), 2L, 10000L, 2000L);
 
         // when
         List<PlayingHistory> result = converter.toPlayingHistories(List.of(value1, value2));
@@ -64,10 +65,10 @@ class PlayingHistoryConverterTest {
         // then
         assertAll(
                 () -> assertThat(result).hasSize(2),
-                () -> assertThat(result.get(0).getUserUuid()).isEqualTo("user-uuid-1"),
+                () -> assertThat(result.get(0).getUserUuid()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001")),
                 () -> assertThat(result.get(0).getHearitId()).isEqualTo(1L),
                 () -> assertThat(result.get(0).getLastPlayTime()).isEqualTo(5000L),
-                () -> assertThat(result.get(1).getUserUuid()).isEqualTo("user-uuid-2"),
+                () -> assertThat(result.get(1).getUserUuid()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000002")),
                 () -> assertThat(result.get(1).getHearitId()).isEqualTo(2L),
                 () -> assertThat(result.get(1).getLastPlayTime()).isEqualTo(10000L)
         );
@@ -79,7 +80,7 @@ class PlayingHistoryConverterTest {
         // given
         Category category = new Category("test", "#000000");
         Hearit hearit = createHearitWithId(1L, category, "title");
-        PlayingHistory history = new PlayingHistory("user-uuid", hearit, 5000L);
+        PlayingHistory history = new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000001"), hearit, 5000L);
         long clientEventTime = 1000L;
 
         // when
@@ -87,7 +88,7 @@ class PlayingHistoryConverterTest {
 
         // then
         assertAll(
-                () -> assertThat(playHistoryValue.userUuid()).isEqualTo("user-uuid"),
+                () -> assertThat(playHistoryValue.userUuid()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001")),
                 () -> assertThat(playHistoryValue.hearitId()).isEqualTo(1L),
                 () -> assertThat(playHistoryValue.lastPlayTime()).isEqualTo(5000L),
                 () -> assertThat(playHistoryValue.clientEventTime()).isEqualTo(1000L)
@@ -98,8 +99,8 @@ class PlayingHistoryConverterTest {
     @DisplayName("isMoreRecentThan()으로 최신 데이터를 판별한다")
     void playValue_isMoreRecentThan() {
         // given
-        PlayHistoryValue older = new PlayHistoryValue("user", 1L, 5000L, 1000L);
-        PlayHistoryValue newer = new PlayHistoryValue("user", 1L, 3000L, 2000L);
+        PlayHistoryValue older = new PlayHistoryValue(UUID.fromString("00000000-0000-0000-0000-000000000001"), 1L, 5000L, 1000L);
+        PlayHistoryValue newer = new PlayHistoryValue(UUID.fromString("00000000-0000-0000-0000-000000000001"), 1L, 3000L, 2000L);
 
         // when & then
         assertAll(

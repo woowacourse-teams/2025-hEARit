@@ -15,6 +15,7 @@ import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +62,7 @@ class ExploreScoreInitializerTest {
     @Test
     void skipRefreshingWhenCursorIsNotZero() {
         // given
-        String userUuid = UUID.randomUUID().toString();
+        UUID userUuid = UUID.randomUUID();
         long cursorId = 1L;
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -78,7 +79,7 @@ class ExploreScoreInitializerTest {
     @Test
     void refreshScoresScoresWhenCursorIsZero() {
         // given
-        String userUuid = UUID.randomUUID().toString();
+        UUID userUuid = UUID.randomUUID();
         long cursorId = 0L;
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -96,7 +97,7 @@ class ExploreScoreInitializerTest {
         );
     }
 
-    private List<ExploreScoreRow> findExploreScores(String userUuid) {
+    private List<ExploreScoreRow> findExploreScores(UUID userUuid) {
         return jdbcTemplate.query(
                 """
                         SELECT hearit_id, score, cursor_id
@@ -109,8 +110,15 @@ class ExploreScoreInitializerTest {
                         rs.getDouble("score"),
                         rs.getObject("cursor_id", Long.class)
                 ),
-                userUuid
+                uuidToBytes(userUuid)
         );
+    }
+
+    private byte[] uuidToBytes(UUID uuid) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[16]);
+        byteBuffer.putLong(uuid.getMostSignificantBits());
+        byteBuffer.putLong(uuid.getLeastSignificantBits());
+        return byteBuffer.array();
     }
 
     private record ExploreScoreRow(Long hearitId, double score, Long cursorId) {

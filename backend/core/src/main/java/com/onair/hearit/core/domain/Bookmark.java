@@ -14,9 +14,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -27,7 +30,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "bookmark",
         uniqueConstraints = {
                 @UniqueConstraint(name = "bookmark_unique_constraint", columnNames = {
-                        "member_id", "hearit_id"
+                        "member_uuid", "hearit_id"
                 })
         })
 public class Bookmark {
@@ -36,9 +39,9 @@ public class Bookmark {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @Column(name = "member_uuid", columnDefinition = "BINARY(16)", nullable = false)
+    @JdbcTypeCode(SqlTypes.BINARY)
+    private UUID memberUuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hearit_id", nullable = false)
@@ -48,20 +51,20 @@ public class Bookmark {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public Bookmark(Member member, Hearit hearit) {
-        validate(member, hearit);
-        this.member = member;
+    public Bookmark(UUID memberUuid, Hearit hearit) {
+        validate(memberUuid, hearit);
+        this.memberUuid = memberUuid;
         this.hearit = hearit;
     }
 
-    private void validate(Member member, Hearit hearit) {
-        validateMember(member);
+    private void validate(UUID memberUuid, Hearit hearit) {
+        validateMemberUuid(memberUuid);
         validateHearit(hearit);
     }
 
-    private void validateMember(Member member) {
-        if (member == null) {
-            throw new BookmarkDomainException("멤버는 null이 될 수 없습니다.");
+    private void validateMemberUuid(UUID memberUuid) {
+        if (memberUuid == null) {
+            throw new BookmarkDomainException("memberUuid는 null이 될 수 없습니다.");
         }
     }
 
@@ -71,8 +74,8 @@ public class Bookmark {
         }
     }
 
-    public boolean isCreatedBy(Member member) {
-        return this.member.equals(member);
+    public boolean isCreatedBy(UUID memberUuid) {
+        return this.memberUuid.equals(memberUuid);
     }
 
     @Override

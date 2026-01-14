@@ -26,6 +26,7 @@ import com.onair.hearit.app.exception.custom.InvalidInputException;
 import com.onair.hearit.app.exception.custom.UnauthorizedException;
 import com.onair.hearit.app.fixture.ControllerTest;
 import com.onair.hearit.fixture.ApiDocSnippets;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -239,6 +240,7 @@ class AuthControllerTest extends ControllerTest {
     void checkV1_OK() throws Exception {
         // given
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
 
         // when & then
         mockMvc.perform(get("/api/v1/auth/check")
@@ -277,6 +279,7 @@ class AuthControllerTest extends ControllerTest {
     void withdrawV1_NoContent() throws Exception {
         // given
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
         willDoNothing().given(authService).withdraw(any());
 
         // when & then

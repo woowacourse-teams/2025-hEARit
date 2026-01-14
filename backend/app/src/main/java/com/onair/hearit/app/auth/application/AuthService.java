@@ -66,7 +66,7 @@ public class AuthService {
     public void signup(SignupRequest request) {
         validateDuplicatedId(request);
         String hash = passwordEncoder.encode(request.password());
-        Member member = Member.createLocalUser(UUID.randomUUID().toString(), request.localId(), request.nickname(),
+        Member member = Member.createLocalUser(UUID.randomUUID(), request.localId(), request.nickname(),
                 hash, defaultProfileImage);
         Member savedMember = memberRepository.save(member);
         jsonLogger.info(SignUpLogProperty.fromLocal(savedMember));
@@ -91,34 +91,34 @@ public class AuthService {
 
     private Member signupWithUserInfo(OAuthUserInfoResponse userInfo, OAuthProvider provider) {
         Member member = Member.createSocialUser(
-                UUID.randomUUID().toString(), userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl(), provider);
+                UUID.randomUUID(), userInfo.id(), userInfo.nickname(), userInfo.profileImageUrl(), provider);
         Member savedMember = memberRepository.save(member);
         jsonLogger.info(SignUpLogProperty.ofOAuth(savedMember, provider));
         return savedMember;
     }
 
     private LoginTokenResponse createTokenResponseFrom(Member member) {
-        String accessToken = jwtTokenProvider.createAccessToken(member.getId());
-        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        String accessToken = jwtTokenProvider.createAccessToken(member.getUuid());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getUuid());
         saveOrUpdateRefreshToken(member, refreshToken);
         return new LoginTokenResponse(accessToken, refreshToken);
     }
 
     private void saveOrUpdateRefreshToken(Member member, String refreshToken) {
         LocalDateTime expiryDate = jwtTokenProvider.extractExpiry(refreshToken);
-        refreshTokenRepository.findByMemberId(member.getId())
+        refreshTokenRepository.findByMemberUuid(member.getUuid())
                 .ifPresentOrElse(
                         existing -> existing.update(refreshToken, expiryDate),
-                        () -> refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, expiryDate))
+                        () -> refreshTokenRepository.save(new RefreshToken(member.getUuid(), refreshToken, expiryDate))
                 );
     }
 
     public String reissue(String refreshToken) {
         validateRefreshTokenExpired(refreshToken);
-        Long memberId = jwtTokenProvider.getMemberId(refreshToken);
-        validateRefreshToken(refreshToken, memberId);
-        String newAccessToken = jwtTokenProvider.createAccessToken(memberId);
-        jsonLogger.info(TokenRefreshLogProperty.success(memberId));
+        UUID memberUuid = jwtTokenProvider.getMemberUuid(refreshToken);
+        validateRefreshToken(refreshToken, memberUuid);
+        String newAccessToken = jwtTokenProvider.createAccessToken(memberUuid);
+        jsonLogger.info(TokenRefreshLogProperty.success(memberUuid));
         return newAccessToken;
     }
 
@@ -128,20 +128,20 @@ public class AuthService {
         }
     }
 
-    private void validateRefreshToken(String refreshToken, Long memberId) {
-        RefreshToken stored = refreshTokenRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new UnauthorizedException("memberId:" + memberId + "의 저장된 토큰이 없습니다."));
+    private void validateRefreshToken(String refreshToken, UUID memberUuid) {
+        RefreshToken stored = refreshTokenRepository.findByMemberUuid(memberUuid)
+                .orElseThrow(() -> new UnauthorizedException("memberUuid:" + memberUuid + "의 저장된 토큰이 없습니다."));
 
         if (!stored.getToken().equals(refreshToken)) {
-            throw new UnauthorizedException("memberId:" + memberId + "의 리프레시 토큰이 불일치합니다.");
+            throw new UnauthorizedException("memberUuid:" + memberUuid + "의 리프레시 토큰이 불일치합니다.");
         }
     }
 
     @Transactional
-    public void withdraw(Long memberId) {
-        refreshTokenRepository.deleteByMemberId(memberId);
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
+    public void withdraw(UUID memberUuid) {
+        refreshTokenRepository.deleteByMemberUuid(memberUuid);
+        Member member = memberRepository.findByUuid(memberUuid)
+                .orElseThrow(() -> new NotFoundException("memberUuid", memberUuid.toString()));
         member.withdraw();
         jsonLogger.info(WithdrawalLogProperty.from(member));
     }

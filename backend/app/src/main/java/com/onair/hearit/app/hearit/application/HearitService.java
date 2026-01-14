@@ -7,24 +7,22 @@ import com.onair.hearit.app.exception.custom.UnauthenticatedException;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
-import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
-import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
-import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import com.onair.hearit.core.infrastructure.projection.HearitWithPlayTimeProjection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,11 +38,9 @@ public class HearitService {
     private static final int KEYWORDS_PER_CATEGORIZED_HEARIT = 3;
 
     private final HearitRepository hearitRepository;
-    private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
-    private final UserInfoService userInfoService;
 
     @Transactional(readOnly = true)
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
@@ -54,11 +50,11 @@ public class HearitService {
             return HearitDetailResponse.of(hearit, keywords, null, null);
         }
 
-        Member member = getMemberByUserInfo(userInfo);
-        Long bookmarkId = bookmarkRepository.findByHearitAndMember(hearit, member)
+        UUID memberUuid = getMemberUuidFromUserInfo(userInfo);
+        Long bookmarkId = bookmarkRepository.findByHearitAndMemberUuid(hearit, memberUuid)
                 .map(Bookmark::getId)
                 .orElse(null);
-        Long lastPlayTime = calculateLastPlayTime(hearit, member);
+        Long lastPlayTime = calculateLastPlayTime(hearit, memberUuid);
         return HearitDetailResponse.of(hearit, keywords, lastPlayTime, bookmarkId);
     }
 
@@ -67,16 +63,16 @@ public class HearitService {
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
     }
 
-    private Member getMemberByUserInfo(UserInfo userInfo) {
+    private UUID getMemberUuidFromUserInfo(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
             throw new UnauthenticatedException();
         }
-        return getMemberById(userInfo.getMemberId());
+        return userInfo.getUuid();
     }
 
-    private Long calculateLastPlayTime(Hearit hearit, Member member) {
+    private Long calculateLastPlayTime(Hearit hearit, UUID memberUuid) {
         Optional<Long> optionalLastPlayTime = playingHistoryRepository.findByHearitIdAndUserUuid(hearit.getId(),
-                        member.getUuid())
+                        memberUuid)
                 .map(PlayingHistory::getLastPlayTime);
         if (optionalLastPlayTime.isEmpty()) {
             return null;
@@ -89,15 +85,10 @@ public class HearitService {
         return lastPlayTime;
     }
 
-    private Member getMemberById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
-    }
-
     @Transactional(readOnly = true)
     public PagedResponse<HearitOverviewResponse> getFilteredHearits(
             Long categoryId, HearitSortRequest sortRequest, UserInfo userInfo, PagingRequest pagingRequest) {
-        String userUuid = userInfoService.getUuid(userInfo);
+        UUID userUuid = userInfo.getUuid();
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sortRequest.toSort());
         Page<HearitWithPlayTimeProjection> hearitsWithPlayTime = hearitRepository.findWithPlayTimeBy(
                 categoryId,

@@ -19,6 +19,7 @@ import com.onair.hearit.app.recommendation.dto.RecommendationByCategoryResponse;
 import com.onair.hearit.app.recommendation.dto.RecommendationByCategoryResponse.HearitResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,7 +32,8 @@ class RecommendationControllerTest extends ControllerTest {
     RecommendationService recommendationService;
 
     @Test
-    @DisplayName("추천 카테고리별 히어릿 조회 V1 - 200 OK") // To be Deprecated
+    @DisplayName("추천 카테고리별 히어릿 조회 V1 - 200 OK")
+        // To be Deprecated
     void readHearitsWithRecommendCategoryV1_OK() throws Exception {
         // given
         var itTrendCategory = new RecommendationByCategoryResponse(1L, "IT 트랜드", "#FF0000",
@@ -158,6 +160,7 @@ class RecommendationControllerTest extends ControllerTest {
         var mockedResponse = List.of(itTrendCategory, category1, category2, category3, randomCategory);
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
         given(recommendationService.getCategoryRecommendations(any(), anyInt(), anyInt())).willReturn(mockedResponse);
 
         // when & then
@@ -172,11 +175,14 @@ class RecommendationControllerTest extends ControllerTest {
                                 .summary("추천 카테고리별 히어릿 조회 V1")
                                 .description("요청에서 지정한 카테고리 개수와 히어릿 개수에 따라, 추천된 카테고리별 최신 히어릿 목록을 조회합니다.")
                                 .requestHeaders(
-                                        headerWithName("Authorization").description("Bearer 토큰 (형식: `Bearer {JWT}`)").optional()
+                                        headerWithName("Authorization").description("Bearer 토큰 (형식: `Bearer {JWT}`)")
+                                                .optional()
                                 )
                                 .queryParameters(
-                                        parameterWithName("categorySize").description("추천받을 카테고리 개수 (기본 5, 최대 20)").defaultValue("5"),
-                                        parameterWithName("hearitSize").description("카테고리 당 히어릿 개수 (기본 5, 최대 30)").defaultValue("5")
+                                        parameterWithName("categorySize").description("추천받을 카테고리 개수 (기본 5, 최대 20)")
+                                                .defaultValue("5"),
+                                        parameterWithName("hearitSize").description("카테고리 당 히어릿 개수 (기본 5, 최대 30)")
+                                                .defaultValue("5")
                                 )
                                 .responseFields(
                                         fieldWithPath("[].categoryId").description("카테고리 ID"),
@@ -255,8 +261,10 @@ class RecommendationControllerTest extends ControllerTest {
                                 .summary("추천 카테고리별 히어릿 조회 V1")
                                 .description("요청에서 지정한 카테고리 개수와 히어릿 개수에 따라, 추천된 카테고리별 최신 히어릿 목록을 조회합니다.")
                                 .queryParameters(
-                                        parameterWithName("categorySize").description("추천받을 카테고리 개수 (기본 5, 최대 20)").defaultValue("5"),
-                                        parameterWithName("hearitSize").description("카테고리 당 히어릿 개수 (기본 5, 최대 30)").defaultValue("5")
+                                        parameterWithName("categorySize").description("추천받을 카테고리 개수 (기본 5, 최대 20)")
+                                                .defaultValue("5"),
+                                        parameterWithName("hearitSize").description("카테고리 당 히어릿 개수 (기본 5, 최대 30)")
+                                                .defaultValue("5")
                                 )
                                 .responseFields(
                                         fieldWithPath("[].categoryId").description("카테고리 ID"),

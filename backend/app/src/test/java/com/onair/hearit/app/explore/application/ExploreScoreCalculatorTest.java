@@ -77,7 +77,7 @@ class ExploreScoreCalculatorTest {
         given(scoreFactor3.isSupported(any())).willReturn(false);
         // scoreFactor3.calculate()는 호출되지 않으므로, given 설정이 불필요함 (에러 발생)
 
-        Map<Long, Double> memberScores = exploreScoreCalculator.calculateTotalScores("any-uuid", UserType.MEMBER);
+        Map<Long, Double> memberScores = exploreScoreCalculator.calculateTotalScores(java.util.UUID.randomUUID(), UserType.MEMBER);
 
         // then
         assertAll(

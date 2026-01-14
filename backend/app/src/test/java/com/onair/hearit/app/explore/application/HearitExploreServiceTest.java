@@ -89,10 +89,10 @@ class HearitExploreServiceTest {
         Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit4 = dbHelper.insertHearitAt(createHearit(category2), now);
-        dbHelper.insertBookmark(new Bookmark(member, hearit1));
-        dbHelper.insertBookmark(new Bookmark(member, hearit2));
-        dbHelper.insertBookmark(new Bookmark(member, hearit3));
-        dbHelper.insertBookmark(new Bookmark(member, hearit4));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit1));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit2));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit3));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit4));
 
         Hearit hearit5 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit6 = dbHelper.insertHearitAt(createHearit(category2), now.minusDays(4));
@@ -160,7 +160,7 @@ class HearitExploreServiceTest {
         given(randomNumberGenerator.getDouble()).willReturn(0.1d);
 
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
-        UserInfo guestInfo = TestFixture.createGuestUserInfo(UUID.randomUUID().toString());
+        UserInfo guestInfo = TestFixture.createGuestUserInfo(UUID.randomUUID());
         LocalDateTime now = LocalDateTime.now();
 
         Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);

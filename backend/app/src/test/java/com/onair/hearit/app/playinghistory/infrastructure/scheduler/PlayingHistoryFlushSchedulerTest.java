@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryMapBuffer;
 import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
-import com.onair.hearit.app.playinghistory.infrastructure.scheduler.PlayingHistoryFlushScheduler;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -16,6 +15,7 @@ import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -70,7 +70,7 @@ class PlayingHistoryFlushSchedulerTest {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        buffer.add(new PlayingHistory("user-uuid", hearit, 5000L), 1000L);
+        buffer.add(new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000001"), hearit, 5000L), 1000L);
 
         // when
         scheduler.scheduleFlush();
@@ -88,7 +88,7 @@ class PlayingHistoryFlushSchedulerTest {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        buffer.add(new PlayingHistory("user-uuid", hearit, 5000L), 1000L);
+        buffer.add(new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000001"), hearit, 5000L), 1000L);
 
         // when
         scheduler.shutdown();

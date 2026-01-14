@@ -4,6 +4,7 @@ import com.onair.hearit.core.log.LogEvent;
 import com.onair.hearit.core.log.property.LogProperty;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,17 +13,17 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TokenRefreshLogProperty implements LogProperty {
 
-    private final long memberId;
+    private final UUID memberId;
     private final String refreshedAt;
     private final boolean success;
     private final String failureReason;
 
-    public static TokenRefreshLogProperty success(long memberId) {
+    public static TokenRefreshLogProperty success(UUID memberId) {
         return new TokenRefreshLogProperty(memberId, LocalDateTime.now(ZoneId.of("Asia/Seoul")).toString(),
                 true, null);
     }
 
-    public static TokenRefreshLogProperty failure(long memberId, String failureReason) {
+    public static TokenRefreshLogProperty failure(UUID memberId, String failureReason) {
         return new TokenRefreshLogProperty(memberId, LocalDateTime.now(ZoneId.of("Asia/Seoul")).toString(),
                 false, failureReason);
     }

@@ -4,7 +4,6 @@ import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryBuffer;
-import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.UserInfo;
@@ -14,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,15 +28,14 @@ public class PlayingHistoryService {
     private final HearitRepository hearitRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
     private final PlayingHistoryBuffer playingHistoryBuffer;
-    private final UserInfoService userInfoService;
 
     @Transactional(readOnly = true)
     public List<RecentlyPlayedHearitResponse> getRecentPlayingHistory(UserInfo userInfo) {
-        String userUuid = userInfoService.getUuid(userInfo);
+        UUID userUuid = userInfo.getUuid();
         return toPlayingHistoryResponse(userUuid);
     }
 
-    private List<RecentlyPlayedHearitResponse> toPlayingHistoryResponse(String userUuid) {
+    private List<RecentlyPlayedHearitResponse> toPlayingHistoryResponse(UUID userUuid) {
         List<PlayingHistory> histories = playingHistoryRepository.findByUserUuidOrderByUpdatedAtDesc(
                 userUuid, PLAYING_HISTORY_MAX_COUNT);
         Map<Long, Long> lastPlayTimeByHearitId = mapHearitIdToLastPlayTime(histories);
@@ -66,7 +65,7 @@ public class PlayingHistoryService {
 
     public void addPlayingHistory(UserInfo userInfo, PlayingHistoryRequest request) {
         Hearit hearit = getHearitById(request.hearitId());
-        String userUuid = userInfoService.getUuid(userInfo);
+        UUID userUuid = userInfo.getUuid();
         PlayingHistory history = new PlayingHistory(userUuid, hearit, request.lastPlayTime());
         long clientEventTime = extractClientEventTime(request.clientEventTime());
         playingHistoryBuffer.add(history, clientEventTime);

@@ -1,7 +1,6 @@
 package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +15,7 @@ import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -135,7 +135,7 @@ class PlayingHistoryRedisBufferTest {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        PlayingHistory history = new PlayingHistory("user-uuid", hearit, 5000L);
+        PlayingHistory history = new PlayingHistory(UUID.randomUUID(), hearit, 5000L);
 
         // when
         storage.add(history, 1000L);
@@ -151,8 +151,8 @@ class PlayingHistoryRedisBufferTest {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        PlayingHistory oldHistory = new PlayingHistory("user-uuid", hearit, 100L);
-        PlayingHistory newHistory = new PlayingHistory("user-uuid", hearit, 50L);
+        PlayingHistory oldHistory = new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000001"), hearit, 100L);
+        PlayingHistory newHistory = new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000001"), hearit, 50L);
 
         // when
         storage.add(newHistory, 2000L); // clientEventTime이 더 최신
@@ -170,8 +170,8 @@ class PlayingHistoryRedisBufferTest {
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        storage.add(new PlayingHistory("user1", hearit1, 5000L), 1000L);
-        storage.add(new PlayingHistory("user2", hearit2, 10000L), 2000L);
+        storage.add(new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000001"), hearit1, 5000L), 1000L);
+        storage.add(new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000002"), hearit2, 10000L), 2000L);
 
         // when
         storage.flush();
@@ -200,8 +200,8 @@ class PlayingHistoryRedisBufferTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
-        storage.add(new PlayingHistory("user1", hearit1, 5000L), 1000L);
-        storage.add(new PlayingHistory("user2", hearit2, 10000L), 2000L);
+        storage.add(new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000001"), hearit1, 5000L), 1000L);
+        storage.add(new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000002"), hearit2, 10000L), 2000L);
 
         // then
         assertThat(storage.size()).isEqualTo(2);
@@ -215,8 +215,8 @@ class PlayingHistoryRedisBufferTest {
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
-        storage.add(new PlayingHistory("user-uuid", hearit, 5000L), 1000L);
-        storage.add(new PlayingHistory("user-uuid", hearit, 10000L), 2000L);
+        storage.add(new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000001"), hearit, 5000L), 1000L);
+        storage.add(new PlayingHistory(UUID.fromString("00000000-0000-0000-0000-000000000001"), hearit, 10000L), 2000L);
 
         // then
         assertThat(storage.size()).isEqualTo(1); // 하나만 존재 (덮어씀)
