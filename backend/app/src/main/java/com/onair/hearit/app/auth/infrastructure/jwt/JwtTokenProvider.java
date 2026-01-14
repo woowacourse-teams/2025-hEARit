@@ -128,15 +128,21 @@ public class JwtTokenProvider {
     }
 
     private UUID extractUuidFromToken(ExpiredJwtException e) {
+        String subject = e.getClaims().getSubject();
+        if (subject == null || subject.isBlank()) {
+            return null;
+        }
+        return parseUuid(subject);
+    }
+
+    private UUID parseUuid(String subject) {
         try {
-            String subject = e.getClaims().getSubject();
             return UUID.fromString(subject);
-        } catch (IllegalArgumentException ex) {
-            String subject = e.getClaims().getSubject();
+        } catch (IllegalArgumentException e) {
             log.warn("만료된 토큰의 subject가 UUID 형식이 아닙니다. subject: {}", subject);
             return null;
-        } catch (Exception ex) {
-            log.warn("만료된 토큰에서 UUID 추출 중 예외 발생", ex);
+        } catch (Exception e) {
+            log.warn("만료된 토큰에서 UUID 추출 중 예외 발생", e);
             return null;
         }
     }
