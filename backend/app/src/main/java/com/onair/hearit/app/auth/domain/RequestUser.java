@@ -22,15 +22,20 @@ public class RequestUser {
     }
 
     public static RequestUser guest(String guestId) {
+        UUID uuid = parseGuestUuid(guestId);
+        return new RequestUser(uuid, UserType.GUEST);
+    }
+
+    private static UUID parseGuestUuid(String guestId) {
         if (guestId == null || guestId.isBlank()) {
             log.warn("현재 Device-Uuid Header가 비어있습니다.");
-            return new RequestUser(FALLBACK_GUEST_UUID, UserType.GUEST);
+            return FALLBACK_GUEST_UUID;
         }
         try {
-            return new RequestUser(UUID.fromString(guestId), UserType.GUEST);
+            return UUID.fromString(guestId);
         } catch (IllegalArgumentException e) {
             log.warn("Device-Uuid Header가 유효하지 않은 UUID 형식입니다: {}", guestId);
-            return new RequestUser(FALLBACK_GUEST_UUID, UserType.GUEST);
+            return FALLBACK_GUEST_UUID;
         }
     }
 
