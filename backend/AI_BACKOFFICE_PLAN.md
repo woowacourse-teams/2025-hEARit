@@ -4,6 +4,16 @@
 
 NotebookLM으로 생성한 오디오 파일을 백오피스에서 AI로 처리하여 콘텐츠를 등록하는 기능입니다.
 
+> **핵심 결정사항 요약**
+> - **API 경로**: `/admin/api/ai/*` (AdminSecurityConfig, 세션 기반 인증)
+> - **JSON 매핑**: JPA AttributeConverter로 `List<ScriptSegment>` ↔ JSON 자동 변환
+> - **MP3 처리**: mp3spi 라이브러리로 정확한 메타데이터 추출 후 바이트 기반 자르기
+> - **지원 포맷**: MP3만 허용 (FFmpeg 의존성 제거, NotebookLM 출력을 MP3로 변환 후 업로드)
+> - **파일 크기 제한**: 25MB (Whisper API 제한)
+> - **Whisper API 응답**: 초 단위 float → 밀리초 int 변환
+> - **재생 시간**: Whisper API의 `duration` 또는 마지막 segment의 `end` 사용
+> - **Admin 전용**: 동시성 고려 최소화, ThreadPool/재시도 전략은 추후 개선
+
 ### 현재 프로세스
 1. 사용자가 NotebookLM으로 오디오 생성
 2. 외부 Python 스크립트로 처리 (Whisper STT + Gemini 교정 + 쇼츠 생성)
@@ -24,7 +34,11 @@ NotebookLM으로 생성한 오디오 파일을 백오피스에서 AI로 처리�
 | LLM | Google Gemini API | 기존 스크립트와 동일 |
 | 프론트엔드 | Thymeleaf 확장 | 기존 관리자 페이지와 일관성 |
 | 임시 저장 | S3 `/hearit/temp/` | 기존 S3 인프라 활용 |
-| 오디오 처리 | Java 라이브러리 (mp3spi) | FFmpeg 설치 불필요, MP3 입력 전제 |
+| 오디오 처리 | mp3spi + 바이트 자르기 | MP3 메타데이터 정확히 추출, 바이트 기반 자르기 |
+| 지원 포맷 | MP3만 허용 | FFmpeg 의존성 제거, 단순화 |
+| 파일 크기 | 최대 25MB | Whisper API 제한 준수 |
+| JSON 매핑 | JPA AttributeConverter | List<ScriptSegment> ↔ JSON 자동 변환 |
+| API 경로 | `/admin/api/ai/*` | AdminSecurityConfig 보안 적용, 세션 기반 인증 |
 
 ---
 
@@ -68,19 +82,37 @@ admin/
 
 | Method | Endpoint | 설명 |
 |--------|----------|------|
-| `POST` | `/api/v1/admin/ai/process` | 원본 오디오 업로드 및 AI 처리 시작 |
-| `GET` | `/api/v1/admin/ai/process/{processId}/status` | 처리 상태 조회 (Polling용) |
-| `GET` | `/api/v1/admin/ai/results/{processId}` | 완료된 AI 처리 결과 조회 |
-| `PUT` | `/api/v1/admin/ai/results/{processId}/script` | 대본 수정 |
-| `PUT` | `/api/v1/admin/ai/results/{processId}/metadata` | 메타데이터(제목, 요약) 수정 |
-| `POST` | `/api/v1/admin/ai/results/{processId}/confirm` | 검토 완료 후 Hearit 등록 |
-| `DELETE` | `/api/v1/admin/ai/results/{processId}` | AI 결과 삭제 (취소) |
+| `POST` | `/admin/api/ai/process` | 원본 오디오 업로드 및 AI 처리 시작 |
+| `GET` | `/admin/api/ai/process/{processId}/status` | 처리 상태 조회 (Polling용) |
+| `GET` | `/admin/api/ai/results/{processId}` | 완료된 AI 처리 결과 조회 |
+| `PUT` | `/admin/api/ai/results/{processId}/script` | 대본 수정 |
+| `PUT` | `/admin/api/ai/results/{processId}/metadata` | 메타데이터(제목, 요약) 수정 |
+| `POST` | `/admin/api/ai/results/{processId}/confirm` | 검토 완료 후 Hearit 등록 |
+| `DELETE` | `/admin/api/ai/results/{processId}` | AI 결과 삭제 (취소) |
 
-### 1.3 새로운 엔티티: AiProcessResult
+> **참고**: `/admin/api/*` 경로는 AdminSecurityConfig에서 자동으로 세션 기반 인증이 적용됩니다.
+
+### 1.3 새로운 엔티티 및 DTO
+
+#### ScriptSegment DTO
+```java
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ScriptSegment {
+    private Integer id;       // 세그먼트 순번
+    private Integer start;    // 시작 시간 (밀리초)
+    private Integer end;      // 종료 시간 (밀리초)
+    private String text;      // 대본 텍스트
+}
+```
+
+#### AiProcessResult 엔티티
 
 ```java
 @Entity
 @Table(name = "ai_process_result")
+@EntityListeners(AuditingEntityListener.class)  // @CreatedDate 사용을 위해 필요
 public class AiProcessResult {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -97,12 +129,14 @@ public class AiProcessResult {
     private String generatedShrKey;   // 1분 쇼츠 MP3
     private String generatedScrKey;   // 대본 JSON
 
-    // AI 생성 결과
+    // AI 생성 결과 (AttributeConverter로 자동 변환)
+    @Convert(converter = ScriptSegmentListConverter.class)
     @Column(columnDefinition = "JSON")
-    private String rawTranscript;     // STT 원본 결과 JSON
+    private List<ScriptSegment> rawTranscript;     // STT 원본 결과
 
+    @Convert(converter = ScriptSegmentListConverter.class)
     @Column(columnDefinition = "JSON")
-    private String correctedScript;   // 교정된 대본 JSON
+    private List<ScriptSegment> correctedScript;   // 교정된 대본
 
     private String suggestedTitle;    // AI 제안 제목
 
@@ -110,8 +144,9 @@ public class AiProcessResult {
     private String suggestedSummary;  // AI 제안 요약
 
     // 수정된 값 (사용자 입력)
+    @Convert(converter = ScriptSegmentListConverter.class)
     @Column(columnDefinition = "JSON")
-    private String editedScript;      // 사용자 수정 대본
+    private List<ScriptSegment> editedScript;      // 사용자 수정 대본
 
     private String editedTitle;       // 사용자 수정 제목
 
@@ -136,6 +171,66 @@ public class AiProcessResult {
 }
 ```
 
+#### ScriptSegmentListConverter (JSON 자동 변환)
+
+```java
+@Converter
+public class ScriptSegmentListConverter
+    implements AttributeConverter<List<ScriptSegment>, String> {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Override
+    public String convertToDatabaseColumn(List<ScriptSegment> segments) {
+        if (segments == null) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(segments);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Failed to convert segments to JSON", e);
+        }
+    }
+
+    @Override
+    public List<ScriptSegment> convertToEntityAttribute(String json) {
+        if (json == null || json.isBlank()) {
+            return null;
+        }
+        try {
+            return objectMapper.readValue(json,
+                new TypeReference<List<ScriptSegment>>() {});
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Failed to parse JSON to segments", e);
+        }
+    }
+}
+```
+
+#### AiProcessResultRepository
+
+```java
+public interface AiProcessResultRepository extends JpaRepository<AiProcessResult, Long> {
+
+    /**
+     * 만료된 미확인 결과 조회 (스케줄러용)
+     */
+    List<AiProcessResult> findByStatusNotAndExpiresAtBefore(
+        ProcessStatus status, LocalDateTime expiresAt);
+
+    /**
+     * 특정 상태의 결과 목록 조회
+     */
+    List<AiProcessResult> findByStatusOrderByCreatedAtDesc(ProcessStatus status);
+
+    /**
+     * 최근 N일간 처리 결과 조회 (통계용)
+     */
+    @Query("SELECT r FROM AiProcessResult r WHERE r.createdAt >= :since ORDER BY r.createdAt DESC")
+    List<AiProcessResult> findRecentResults(@Param("since") LocalDateTime since);
+}
+```
+
 ### 1.4 처리 상태 (ProcessStatus)
 
 ```java
@@ -157,30 +252,32 @@ public enum ProcessStatus {
 ```
 [사용자]
     │
-    │ POST /api/v1/admin/ai/process (multipart/form-data: audioFile)
+    │ POST /admin/api/ai/process (multipart/form-data: audioFile)
     ▼
 [AiProcessController]
     │
-    │ 1. AiProcessResult 생성 (status: PENDING)
-    │ 2. 비동기 처리 시작 (@Async)
+    │ 1. 파일 검증 (MP3 형식, 25MB 이하)
+    │ 2. AiProcessResult 생성 (status: PENDING)
+    │ 3. 비동기 처리 시작 (@Async)
     │
     ▼
 [AiProcessingService] (비동기)
     │
     ├─ 1. 원본 파일 S3 업로드
-    │     → /hearit/temp/original/{uuid}.m4a
+    │     → /hearit/temp/original/{uuid}.mp3
     │     status: UPLOADING → CONVERTING
     │
-    ├─ 2. AudioProcessor: MP3 변환 + 1분 쇼츠 생성
-    │     FFmpeg 실행
-    │     → /hearit/temp/org/{uuid}.mp3
-    │     → /hearit/temp/shr/{uuid}.mp3
+    ├─ 2. AudioProcessor: 1분 쇼츠 생성
+    │     mp3spi로 비트레이트/재생시간 추출 후 바이트 기반 자르기
+    │     → /hearit/temp/org/{uuid}.mp3 (원본 복사)
+    │     → /hearit/temp/shr/{uuid}.mp3 (60초 쇼츠)
     │     status: CONVERTING → TRANSCRIBING
     │
     ├─ 3. TranscriptionService: STT 처리
-    │     OpenAI Whisper API 호출
+    │     OpenAI Whisper API 호출 (verbose_json)
+    │     응답의 segments를 ScriptSegment 형식으로 변환 (초 → 밀리초)
     │     결과를 rawTranscript에 저장
-    │     playTime 계산
+    │     playTime 계산 (duration 또는 마지막 segment.end)
     │     status: TRANSCRIBING → CORRECTING
     │
     ├─ 4. ScriptCorrectionService: 대본 교정
@@ -197,6 +294,7 @@ public enum ProcessStatus {
     └─ [에러 발생 시]
           status: FAILED
           errorMessage 저장
+          이미 생성된 S3 파일들 정리 (cleanup)
 ```
 
 ### 1.6 확인 후 Hearit 등록 플로우
@@ -204,7 +302,7 @@ public enum ProcessStatus {
 ```
 [사용자]
     │
-    │ POST /api/v1/admin/ai/results/{processId}/confirm
+    │ POST /admin/api/ai/results/{processId}/confirm
     │ {
     │   categoryId: 1,
     │   keywordIds: [1, 2, 3],
@@ -231,13 +329,16 @@ public enum ProcessStatus {
 
 ### 1.7 핵심 컴포넌트 구현
 
-#### Mp3AudioProcessor (Java 라이브러리)
+#### Mp3AudioProcessor (mp3spi 라이브러리 사용)
 
-> **참고**: NotebookLM에서 MP3로 제공되므로 FFmpeg 없이 Java 라이브러리로 처리합니다.
-> 재생 시간은 OpenAI Whisper API 응답의 `duration` 필드에서 추출합니다.
+> **참고**:
+> - mp3spi 라이브러리로 정확한 비트레이트/재생시간 추출
+> - 바이트 기반 계산으로 자르기 (정확도 ±1초 이내)
+> - MP3 파일만 지원 (FFmpeg 의존성 없음)
 
 ```java
 @Component
+@Slf4j
 public class Mp3AudioProcessor {
 
     @Value("${ai.shorts.duration.seconds:60}")
@@ -246,51 +347,122 @@ public class Mp3AudioProcessor {
     /**
      * MP3 파일에서 앞부분 N초를 잘라 쇼츠 생성
      *
-     * 방법 1: mp3spi 라이브러리 사용
-     * 방법 2: 바이트 단위로 MP3 프레임 파싱 (더 간단)
+     * @param originalMp3 원본 MP3 바이트 배열
+     * @param durationSeconds 자를 길이 (초)
+     * @return 잘린 MP3 바이트 배열
      */
     public byte[] createShortClip(byte[] originalMp3, int durationSeconds) {
-        // MP3 프레임 구조를 분석하여 지정된 시간만큼 자르기
-        // 또는 mp3spi + javax.sound.sampled 활용
+        try {
+            Mp3Metadata metadata = extractMetadata(originalMp3);
 
-        // 간단한 구현: MP3 비트레이트 기반 계산
-        // 예: 256kbps = 32KB/초 → 60초 = 약 1.92MB
+            // 원본이 목표 시간보다 짧으면 전체 반환
+            if (metadata.getDurationSeconds() <= durationSeconds) {
+                return originalMp3;
+            }
 
-        // 정밀한 구현이 필요하면 mp3spi 라이브러리 사용:
-        // - Maven: com.googlecode.soundlibs:mp3spi:1.9.5.4
-        // - AudioInputStream으로 디코딩 후 원하는 길이만큼 읽기
+            // 바이트/초 계산
+            int bytesPerSecond = (metadata.getBitrate() * 1000) / 8;
+            int targetBytes = bytesPerSecond * durationSeconds;
+
+            // 앞부분만 자르기
+            return Arrays.copyOf(originalMp3, Math.min(targetBytes, originalMp3.length));
+
+        } catch (Exception e) {
+            log.error("Failed to create short clip", e);
+            throw new AudioProcessingException("쇼츠 생성 실패: " + e.getMessage(), e);
+        }
     }
 
     /**
-     * MP3 파일의 재생 시간 조회 (초 단위)
-     *
-     * 참고: Whisper API 응답에 duration이 포함되어 있으므로
-     * 이 메서드는 백업용으로만 사용
+     * MP3 메타데이터 추출 (mp3spi 라이브러리 사용)
      */
-    public int getDurationSeconds(byte[] mp3Data) {
-        // MP3 헤더에서 비트레이트 추출 후 계산
-        // 또는 mp3spi로 AudioInputStream 열어서 프레임 수 계산
+    public Mp3Metadata extractMetadata(byte[] mp3Data) {
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(mp3Data);
+             AudioInputStream ais = AudioSystem.getAudioInputStream(bais)) {
+
+            AudioFormat format = ais.getFormat();
+
+            // mp3spi가 제공하는 프로퍼티에서 비트레이트 추출
+            Map<String, Object> properties = ((AudioFileFormat)
+                AudioSystem.getAudioFileFormat(new ByteArrayInputStream(mp3Data)))
+                .properties();
+
+            int bitrate = (int) properties.getOrDefault("mp3.bitrate.nominal.bps", 128000) / 1000;
+            long durationMicros = (long) properties.getOrDefault("duration", 0L);
+            double durationSeconds = durationMicros / 1_000_000.0;
+
+            // duration이 없으면 파일 크기로 계산
+            if (durationSeconds == 0 && bitrate > 0) {
+                durationSeconds = (mp3Data.length * 8.0) / (bitrate * 1000);
+            }
+
+            return new Mp3Metadata(bitrate, durationSeconds);
+
+        } catch (UnsupportedAudioFileException | IOException e) {
+            log.error("Failed to extract MP3 metadata", e);
+            throw new AudioProcessingException("MP3 메타데이터 추출 실패", e);
+        }
+    }
+
+    /**
+     * MP3 파일 유효성 검증
+     */
+    public void validateMp3(byte[] data, String filename) {
+        // 파일 크기 검증 (25MB 제한 - Whisper API)
+        if (data.length > 25 * 1024 * 1024) {
+            throw new AudioProcessingException("파일 크기가 25MB를 초과합니다.");
+        }
+
+        // MP3 매직 바이트 검증 (ID3 태그 또는 프레임 싱크)
+        if (!isValidMp3(data)) {
+            throw new AudioProcessingException("유효하지 않은 MP3 파일입니다.");
+        }
+
+        // 확장자 검증
+        if (!filename.toLowerCase().endsWith(".mp3")) {
+            throw new AudioProcessingException("MP3 파일만 지원합니다.");
+        }
+    }
+
+    private boolean isValidMp3(byte[] data) {
+        if (data.length < 3) return false;
+
+        // ID3v2 태그 체크
+        if (data[0] == 'I' && data[1] == 'D' && data[2] == '3') {
+            return true;
+        }
+
+        // MP3 프레임 싱크 워드 체크 (0xFF 0xFB, 0xFF 0xFA, 0xFF 0xF3, 0xFF 0xF2)
+        if ((data[0] & 0xFF) == 0xFF && ((data[1] & 0xE0) == 0xE0)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class Mp3Metadata {
+        private int bitrate;           // kbps
+        private double durationSeconds; // 재생 시간 (초)
     }
 }
 ```
 
 **의존성 추가 (build.gradle):**
 ```groovy
-// MP3 처리용 (필요시)
-implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
-implementation 'com.googlecode.soundlibs:tritonus-share:0.3.7.4'
-```
-
-**대안 - 더 간단한 방식:**
-- Whisper API가 `duration` 값을 반환하므로 재생 시간 조회는 불필요
-- 쇼츠 자르기: MP3 비트레이트 기반으로 바이트 단위 계산 (정확도 ±1초)
-- 정밀한 자르기가 필요하면 클라이언트(브라우저)에서 Web Audio API로 처리 가능
+// admin/build.gradle
+dependencies {
+    implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
+}
 ```
 
 #### WhisperClient (OpenAI API)
 
 ```java
 @Component
+@Slf4j
+@RequiredArgsConstructor
 public class WhisperClient {
 
     @Value("${openai.api.key}")
@@ -298,9 +470,18 @@ public class WhisperClient {
 
     private static final String WHISPER_URL =
         "https://api.openai.com/v1/audio/transcriptions";
+    private static final int MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     /**
      * 오디오 파일을 텍스트로 변환 (타임스탬프 포함)
+     *
+     * @return TranscriptionResult {
+     *   duration: 120.5,
+     *   segments: List<ScriptSegment>
+     * }
      */
     public TranscriptionResult transcribe(byte[] audioData, String filename) {
         HttpHeaders headers = new HttpHeaders();
@@ -316,8 +497,72 @@ public class WhisperClient {
         body.add("response_format", "verbose_json");
         body.add("language", "ko");
 
-        // API 호출 및 응답 파싱
-        // ...
+        HttpEntity<MultiValueMap<String, Object>> requestEntity =
+            new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                WHISPER_URL, requestEntity, String.class);
+
+            return parseWhisperResponse(response.getBody());
+
+        } catch (Exception e) {
+            log.error("Whisper API call failed", e);
+            throw new RuntimeException("STT 처리 실패: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Whisper API 응답을 ScriptSegment 형식으로 변환
+     *
+     * Whisper 응답 형식:
+     * {
+     *   "task": "transcribe",
+     *   "language": "ko",
+     *   "duration": 120.5,  // 전체 재생 시간 (초)
+     *   "segments": [
+     *     {
+     *       "id": 0,
+     *       "start": 0.0,    // 초 단위 float
+     *       "end": 3.34,     // 초 단위 float
+     *       "text": " 텍스트",
+     *       ... (기타 필드들)
+     *     }
+     *   ]
+     * }
+     */
+    private TranscriptionResult parseWhisperResponse(String jsonResponse) {
+        try {
+            JsonNode root = objectMapper.readTree(jsonResponse);
+
+            double duration = root.get("duration").asDouble();
+            JsonNode segmentsNode = root.get("segments");
+
+            List<ScriptSegment> segments = new ArrayList<>();
+
+            for (JsonNode seg : segmentsNode) {
+                ScriptSegment scriptSegment = new ScriptSegment(
+                    seg.get("id").asInt(),
+                    (int)(seg.get("start").asDouble() * 1000),  // 초 → 밀리초
+                    (int)(seg.get("end").asDouble() * 1000),    // 초 → 밀리초
+                    seg.get("text").asText().trim()
+                );
+                segments.add(scriptSegment);
+            }
+
+            return new TranscriptionResult(duration, segments);
+
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse Whisper response", e);
+            throw new RuntimeException("Whisper 응답 파싱 실패", e);
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class TranscriptionResult {
+        private double duration;              // 전체 재생 시간 (초)
+        private List<ScriptSegment> segments; // 변환된 대본
     }
 }
 ```
@@ -380,12 +625,16 @@ templates/admin/
     <div class="container">
         <h1>AI 콘텐츠 생성</h1>
 
+        <!-- CSRF 토큰 (JavaScript에서 사용) -->
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
         <!-- 1. 파일 업로드 영역 -->
         <section id="upload-section">
             <div class="upload-area" id="drop-zone">
-                <input type="file" id="audio-file" accept=".m4a,.mp3,.wav" />
+                <input type="file" id="audio-file" accept=".mp3,audio/mpeg" />
                 <p>NotebookLM에서 생성한 오디오 파일을 업로드하세요</p>
-                <p class="hint">지원 형식: M4A, MP3, WAV</p>
+                <p class="hint">지원 형식: MP3 (최대 25MB)</p>
             </div>
 
             <div id="file-preview" style="display:none;">
@@ -439,6 +688,9 @@ templates/admin/
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>AI 결과 검토 - Hearit Admin</title>
+    <!-- CSRF 토큰 (JavaScript에서 사용) -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
     <div class="container ai-result-container">
@@ -584,7 +836,7 @@ class AiUploadManager {
         formData.append('audioFile', this.selectedFile);
 
         try {
-            const response = await fetch('/api/v1/admin/ai/process', {
+            const response = await fetch('/admin/api/ai/process', {
                 method: 'POST',
                 body: formData,
                 headers: { [this.csrfHeader]: this.csrfToken }
@@ -603,7 +855,7 @@ class AiUploadManager {
     async pollStatus(processId) {
         try {
             const response = await fetch(
-                `/api/v1/admin/ai/process/${processId}/status`
+                `/admin/api/ai/process/${processId}/status`
             );
             const { status, progress, errorMessage } = await response.json();
 
@@ -749,7 +1001,7 @@ class AiResultManager {
         const segments = this.collectScript();
 
         try {
-            await fetch(`/api/v1/admin/ai/results/${this.processId}/script`, {
+            await fetch(`/admin/api/ai/results/${this.processId}/script`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -775,7 +1027,7 @@ class AiResultManager {
         const metadata = this.collectMetadata();
 
         try {
-            await fetch(`/api/v1/admin/ai/results/${this.processId}/metadata`, {
+            await fetch(`/admin/api/ai/results/${this.processId}/metadata`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -791,22 +1043,28 @@ class AiResultManager {
     }
 
     async confirmAndRegister() {
+        // 확인 데이터 수집 (카테고리, 키워드, 출처만 - 대본/메타데이터는 DB에 저장된 값 사용)
         const confirmData = {
-            title: document.getElementById('title').value.trim(),
-            summary: document.getElementById('summary').value.trim(),
             categoryId: parseInt(document.getElementById('category').value),
             keywordIds: this.getSelectedKeywordIds(),
             sources: this.collectSources(),
-            script: this.collectScript()
+            // 최종 대본/메타데이터도 함께 전송 (마지막 수정 반영)
+            finalTitle: document.getElementById('title').value.trim(),
+            finalSummary: document.getElementById('summary').value.trim(),
+            finalScript: this.collectScript()
         };
 
         // 유효성 검사
-        if (!confirmData.title || confirmData.title.length > 35) {
+        if (!confirmData.finalTitle || confirmData.finalTitle.length > 35) {
             alert('제목은 1-35자 이내로 입력해주세요.');
             return;
         }
-        if (!confirmData.summary || confirmData.summary.length > 250) {
+        if (!confirmData.finalSummary || confirmData.finalSummary.length > 250) {
             alert('요약은 1-250자 이내로 입력해주세요.');
+            return;
+        }
+        if (!confirmData.categoryId) {
+            alert('카테고리를 선택해주세요.');
             return;
         }
         if (confirmData.sources.length === 0 || !confirmData.sources[0].sourceName) {
@@ -820,7 +1078,7 @@ class AiResultManager {
 
         try {
             const response = await fetch(
-                `/api/v1/admin/ai/results/${this.processId}/confirm`, {
+                `/admin/api/ai/results/${this.processId}/confirm`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -829,7 +1087,10 @@ class AiResultManager {
                 body: JSON.stringify(confirmData)
             });
 
-            if (!response.ok) throw new Error('등록 실패');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || '등록 실패');
+            }
 
             alert('Hearit이 성공적으로 등록되었습니다!');
             window.location.href = '/admin/hearit-list';
@@ -845,7 +1106,7 @@ class AiResultManager {
         }
 
         try {
-            await fetch(`/api/v1/admin/ai/results/${this.processId}`, {
+            await fetch(`/admin/api/ai/results/${this.processId}`, {
                 method: 'DELETE',
                 headers: { [this.csrfHeader]: this.csrfToken }
             });
@@ -889,12 +1150,12 @@ ai.shorts.duration.seconds=60
 aws.s3.temp.prefix=hearit/temp/
 ```
 
-### 3.2 Spring Async 설정
+### 3.2 Spring Async 및 HTTP Client 설정
 
 ```java
 @Configuration
 @EnableAsync
-public class AsyncConfig {
+public class AiConfig {
 
     @Bean
     public Executor aiProcessingExecutor() {
@@ -903,13 +1164,64 @@ public class AsyncConfig {
         executor.setMaxPoolSize(5);
         executor.setQueueCapacity(10);
         executor.setThreadNamePrefix("ai-process-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
         return executor;
+    }
+
+    @Bean
+    public RestTemplate aiRestTemplate() {
+        RestTemplate restTemplate = new RestTemplate();
+
+        // 타임아웃 설정 (Whisper API는 긴 오디오 처리 시 시간이 걸림)
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(30));
+        factory.setReadTimeout(Duration.ofMinutes(5));
+        restTemplate.setRequestFactory(factory);
+
+        return restTemplate;
     }
 }
 ```
 
-### 3.3 스케줄러 (임시 파일 정리)
+### 3.3 진행률 계산 유틸리티
+
+```java
+public class ProcessStatusUtil {
+
+    private static final Map<ProcessStatus, Integer> PROGRESS_MAP = Map.of(
+        ProcessStatus.PENDING, 0,
+        ProcessStatus.UPLOADING, 10,
+        ProcessStatus.CONVERTING, 25,
+        ProcessStatus.TRANSCRIBING, 50,
+        ProcessStatus.CORRECTING, 70,
+        ProcessStatus.GENERATING_META, 85,
+        ProcessStatus.COMPLETED, 100,
+        ProcessStatus.FAILED, 0,
+        ProcessStatus.CONFIRMED, 100
+    );
+
+    public static int getProgress(ProcessStatus status) {
+        return PROGRESS_MAP.getOrDefault(status, 0);
+    }
+
+    public static String getStatusMessage(ProcessStatus status) {
+        return switch (status) {
+            case PENDING -> "대기 중...";
+            case UPLOADING -> "파일 업로드 중...";
+            case CONVERTING -> "오디오 처리 중...";
+            case TRANSCRIBING -> "음성 인식 중... (1-2분 소요)";
+            case CORRECTING -> "대본 교정 중...";
+            case GENERATING_META -> "메타데이터 생성 중...";
+            case COMPLETED -> "처리 완료!";
+            case FAILED -> "처리 실패";
+            case CONFIRMED -> "등록 완료";
+        };
+    }
+}
+```
+
+### 3.4 스케줄러 (임시 파일 정리)
 
 ```java
 @Component
@@ -1016,13 +1328,14 @@ CREATE TABLE ai_process_result (
 
 | 테스트 클래스 | 테스트 항목 |
 |--------------|------------|
-| `Mp3AudioProcessorTest` | 쇼츠 생성 (1분 자르기) |
-| `WhisperClientTest` | API 호출 모킹, 응답 파싱 |
+| `Mp3AudioProcessorTest` | 메타데이터 추출, 쇼츠 생성, MP3 검증 |
+| `WhisperClientTest` | API 호출 모킹, 응답 파싱, 에러 처리 |
 | `GeminiClientTest` | API 호출 모킹, JSON 응답 파싱 |
 | `TranscriptionServiceTest` | STT 결과 변환 로직 |
 | `ScriptCorrectionServiceTest` | 프롬프트 생성, 결과 파싱 |
 | `MetadataGenerationServiceTest` | 프롬프트 생성, 결과 파싱 |
 | `AiProcessingServiceTest` | 전체 플로우 오케스트레이션 |
+| `ProcessStatusUtilTest` | 진행률 계산, 상태 메시지 |
 
 ### 5.2 통합 테스트
 
@@ -1045,7 +1358,9 @@ CREATE TABLE ai_process_result (
 3. **엣지 케이스**
    - 매우 긴 오디오 (30분+) → 처리 시간 확인
    - 1분 미만 오디오 → 쇼츠 = 원본 확인
-   - 지원하지 않는 포맷 → 적절한 에러 메시지
+   - 25MB 초과 파일 → "파일 크기가 25MB를 초과합니다" 에러
+   - MP3가 아닌 파일 → "MP3 파일만 지원합니다" 에러
+   - 손상된 MP3 파일 → "유효하지 않은 MP3 파일입니다" 에러
 
 ---
 
@@ -1053,19 +1368,24 @@ CREATE TABLE ai_process_result (
 
 ### Step 1: 기반 설정
 - [ ] 환경 변수 추가 (API 키)
-- [ ] Spring Async 설정
+- [ ] AiConfig 클래스 생성 (Async + RestTemplate)
+- [ ] mp3spi 의존성 추가 (admin/build.gradle)
 
 ### Step 2: DB + 엔티티
 - [ ] Flyway 마이그레이션 스크립트 작성
-- [ ] AiProcessResult 엔티티 생성
+- [ ] ScriptSegment DTO 생성
+- [ ] ScriptSegmentListConverter (AttributeConverter) 생성
+- [ ] AiProcessResult 엔티티 생성 (@EntityListeners 포함)
 - [ ] ProcessStatus enum 생성
+- [ ] ProcessStatusUtil 유틸리티 클래스 생성
 - [ ] AiProcessResultRepository 생성
+- [ ] AudioProcessingException 예외 클래스 생성
 
 ### Step 3: 인프라 레이어
-- [ ] Mp3AudioProcessor (쇼츠 자르기) 구현
+- [ ] Mp3AudioProcessor (mp3spi 기반) 구현
 - [ ] WhisperClient (OpenAI API) 구현
 - [ ] GeminiClient (Gemini API) 구현
-- [ ] FileStorage temp 경로 지원 추가
+- [ ] FileStorage에 moveFile(), deleteFile() 메서드 추가
 
 ### Step 4: 서비스 레이어
 - [ ] TranscriptionService 구현
@@ -1075,16 +1395,16 @@ CREATE TABLE ai_process_result (
 - [ ] AiResultService 구현 (결과 조회/수정/확인)
 
 ### Step 5: 컨트롤러 레이어
-- [ ] AiProcessController 구현
-- [ ] AiResultController 구현
-- [ ] AdminViewController에 AI 페이지 라우팅 추가
+- [ ] AiProcessController 구현 (API)
+- [ ] AiResultController 구현 (API)
+- [ ] AiViewController 구현 (페이지 렌더링 + 카테고리/키워드 데이터 전달)
 
 ### Step 6: 프론트엔드
-- [ ] ai-upload.html 템플릿 작성
-- [ ] ai-result.html 템플릿 작성
+- [ ] ai-upload.html 템플릿 작성 (CSRF 메타 태그 포함)
+- [ ] ai-result.html 템플릿 작성 (CSRF 메타 태그 포함)
 - [ ] ai-upload.js 구현
 - [ ] ai-result.js 구현
-- [ ] CSS 스타일링
+- [ ] CSS 스타일링 (기존 admin 스타일 재사용)
 
 ### Step 7: 테스트
 - [ ] 단위 테스트 작성
@@ -1101,10 +1421,29 @@ CREATE TABLE ai_process_result (
 ## 주의사항
 
 1. **API 비용**: OpenAI Whisper, Gemini API 호출 비용 모니터링 필요
-2. **처리 시간**: 긴 오디오의 경우 처리 시간이 수 분 소요될 수 있음
-3. **임시 파일**: 만료된 임시 파일 정리 로직 필수
-4. **동시성**: 여러 AI 처리 요청이 동시에 들어올 경우 리소스 관리 필요
-5. **보안**: Admin 권한 체크, 파일 업로드 검증 필수
+   - Whisper: $0.006/분 (30분 오디오 = $0.18)
+   - Gemini: 토큰 기반 과금
+2. **파일 제한**:
+   - **형식**: MP3만 지원 (NotebookLM 출력을 MP3로 변환 후 업로드 필요)
+   - **크기**: 최대 25MB (Whisper API 제한)
+   - Spring의 `multipart.max-file-size`도 25MB 이상으로 설정 필요
+3. **처리 시간**: 긴 오디오(30분+)의 경우 처리 시간이 수 분 소요될 수 있음
+4. **임시 파일**: 만료된 임시 파일 정리 로직 필수 (24시간 후 자동 삭제)
+5. **보안**: Admin 권한 체크, 파일 업로드 검증 필수 (CSRF 토큰 포함)
+6. **JPA Auditing**: `@EnableJpaAuditing` 설정이 이미 존재하는지 확인 필요
+
+---
+
+## 추후 개선사항 (현재 구현 범위 외)
+
+1. **API 재시도 전략**: Whisper/Gemini API 실패 시 자동 재시도 (Spring Retry)
+2. **ThreadPool 최적화**: 동시 처리 요청이 많아질 경우 ThreadPool 크기 조정
+3. **처리 상태 알림**: 완료 시 이메일/슬랙 알림
+4. **중복 콘텐츠 방지**: 파일 해시(SHA-256)로 중복 업로드 체크
+5. **만료 시간 연장**: 사용자가 페이지를 열면 만료 시간 자동 연장
+6. **쇼츠 자르기 개선**: 60초에 가장 가까운 문장 경계에서 자르기
+7. **프론트엔드 폴링 개선**: WebSocket 또는 Server-Sent Events로 실시간 상태 업데이트
+8. **롤백 전략**: 중간 단계 실패 시 이전 S3 파일들 자동 정리
 
 ---
 
@@ -1113,7 +1452,83 @@ CREATE TABLE ai_process_result (
 | 기존 코드 | 재사용 방식 |
 |----------|------------|
 | `AdminHearitService.addHearitMetaData()` | 확인 후 Hearit 생성 시 호출 |
-| `FileStorage` | S3 업로드/다운로드/삭제 재사용 |
+| `FileStorage` | S3 업로드/다운로드/삭제 재사용, moveFile() 메서드 추가 필요 |
 | `AdminSecurityConfig` | AI 엔드포인트도 동일한 보안 적용 |
 | `hearit-create.html` CSS/JS | 스타일, 카테고리/키워드 로직 재사용 |
 | `Hearit`, `FileUrls`, `Source` | 도메인 엔티티 그대로 사용 |
+| `CategoryRepository`, `KeywordRepository` | AI 결과 페이지에서 카테고리/키워드 목록 조회 |
+
+### FileStorage 확장 (S3 파일 이동)
+
+```java
+// FileStorage 인터페이스에 추가
+public interface FileStorage {
+    // 기존 메서드들...
+
+    /**
+     * S3 파일 이동 (copy + delete)
+     * @param sourceKey 원본 경로
+     * @param destinationKey 대상 경로
+     */
+    void moveFile(String sourceKey, String destinationKey);
+
+    /**
+     * S3 파일 삭제
+     */
+    void deleteFile(String key);
+}
+
+// S3FileStorage 구현
+@Override
+public void moveFile(String sourceKey, String destinationKey) {
+    // 1. 복사
+    CopyObjectRequest copyRequest = CopyObjectRequest.builder()
+        .sourceBucket(bucket)
+        .sourceKey(sourceKey)
+        .destinationBucket(bucket)
+        .destinationKey(destinationKey)
+        .build();
+    s3Client.copyObject(copyRequest);
+
+    // 2. 원본 삭제
+    deleteFile(sourceKey);
+}
+
+@Override
+public void deleteFile(String key) {
+    DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+        .bucket(bucket)
+        .key(key)
+        .build();
+    s3Client.deleteObject(deleteRequest);
+}
+```
+
+### AiResultViewController (카테고리/키워드 데이터 전달)
+
+```java
+@Controller
+@RequiredArgsConstructor
+public class AiResultViewController {
+
+    private final AiProcessResultRepository resultRepository;
+    private final CategoryRepository categoryRepository;
+    private final KeywordRepository keywordRepository;
+
+    @GetMapping("/admin/ai-result/{processId}")
+    public String aiResultPage(@PathVariable Long processId, Model model) {
+        AiProcessResult result = resultRepository.findById(processId)
+            .orElseThrow(() -> new EntityNotFoundException("AI 결과를 찾을 수 없습니다."));
+
+        if (result.getStatus() != ProcessStatus.COMPLETED) {
+            return "redirect:/admin/ai-upload";
+        }
+
+        model.addAttribute("result", result);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("keywords", keywordRepository.findAll());
+
+        return "admin/ai-result";
+    }
+}
+```
