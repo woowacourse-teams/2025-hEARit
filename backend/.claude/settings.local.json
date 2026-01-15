@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew clean build:*)",
+      "Bash(./gradlew test:*)",
+      "Bash(find:*)",
+      "Bash(./gradlew :app:compileTestJava:*)",
+      "Bash(./gradlew :core:test:*)",
+      "Bash(./gradlew :core:compileTestJava:*)",
+      "Bash(./gradlew :app:test:*)",
+      "Bash(./gradlew :app:compileJava:*)",
+      "Bash(./gradlew:*)",
+      "Bash(for:*)",
+      "Bash(sed:*)",
+      "Bash(echo:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
