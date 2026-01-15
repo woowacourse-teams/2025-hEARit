@@ -21,6 +21,9 @@ dependencies {
     implementation 'software.amazon.awssdk:auth'
     implementation 'software.amazon.awssdk:regions'
 
+    // MP3 처리 (AI 오디오 쇼츠 생성)
+    implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
