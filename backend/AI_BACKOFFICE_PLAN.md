@@ -9,9 +9,9 @@ NotebookLM으로 생성한 오디오 파일을 백오피스에서 AI로 처리�
 > - **JSON 매핑**: JPA AttributeConverter로 `List<ScriptSegment>` ↔ JSON 자동 변환
 > - **MP3 처리**: mp3spi 라이브러리로 정확한 메타데이터 추출 후 바이트 기반 자르기
 > - **지원 포맷**: MP3만 허용 (FFmpeg 의존성 제거, NotebookLM 출력을 MP3로 변환 후 업로드)
-> - **파일 크기 제한**: 25MB (Whisper API 제한)
-> - **Whisper API 응답**: 초 단위 float → 밀리초 int 변환
-> - **재생 시간**: Whisper API의 `duration` 또는 마지막 segment의 `end` 사용
+> - **파일 크기 제한**: 25MB (Groq Whisper API 제한)
+> - **Groq Whisper API 응답**: 초 단위 float → 밀리초 int 변환
+> - **재생 시간**: Groq Whisper API의 `duration` 또는 마지막 segment의 `end` 사용
 > - **Admin 전용**: 동시성 고려 최소화, ThreadPool/재시도 전략은 추후 개선
 
 ### 현재 프로세스
@@ -30,13 +30,13 @@ NotebookLM으로 생성한 오디오 파일을 백오피스에서 AI로 처리�
 
 | 항목 | 선택 | 근거 |
 |------|------|------|
-| STT | 외부 API (OpenAI Whisper API) | 서버 GPU 불필요, 안정적 |
+| STT | 외부 API (Groq Whisper API - 무료) | 서버 GPU 불필요, 안정적, 비용 절감 |
 | LLM | Google Gemini API | 기존 스크립트와 동일 |
 | 프론트엔드 | Thymeleaf 확장 | 기존 관리자 페이지와 일관성 |
 | 임시 저장 | S3 `/hearit/temp/` | 기존 S3 인프라 활용 |
 | 오디오 처리 | mp3spi + 바이트 자르기 | MP3 메타데이터 정확히 추출, 바이트 기반 자르기 |
 | 지원 포맷 | MP3만 허용 | FFmpeg 의존성 제거, 단순화 |
-| 파일 크기 | 최대 25MB | Whisper API 제한 준수 |
+| 파일 크기 | 최대 25MB | Groq Whisper API 제한 준수 |
 | JSON 매핑 | JPA AttributeConverter | List<ScriptSegment> ↔ JSON 자동 변환 |
 | API 경로 | `/admin/api/ai/*` | AdminSecurityConfig 보안 적용, 세션 기반 인증 |
 
@@ -58,9 +58,8 @@ admin/
 │   │   ├── ScriptCorrectionService.java  # LLM 대본 교정
 │   │   └── MetadataGenerationService.java # LLM 메타데이터 생성
 │   ├── infrastructure/
-│   │   ├── openai/
-│   │   │   ├── WhisperClient.java        # OpenAI Whisper API 클라이언트
-│   │   │   └── WhisperConfig.java
+│   │   ├── groq/
+│   │   │   └── GroqWhisperClient.java    # Groq Whisper API 클라이언트 (무료)
 │   │   ├── gemini/
 │   │   │   ├── GeminiClient.java         # Google Gemini API 클라이언트
 │   │   │   └── GeminiConfig.java
@@ -274,7 +273,7 @@ public enum ProcessStatus {
     │     status: CONVERTING → TRANSCRIBING
     │
     ├─ 3. TranscriptionService: STT 처리
-    │     OpenAI Whisper API 호출 (verbose_json)
+    │     Groq Whisper API 호출 (verbose_json)
     │     응답의 segments를 ScriptSegment 형식으로 변환 (초 → 밀리초)
     │     결과를 rawTranscript에 저장
     │     playTime 계산 (duration 또는 마지막 segment.end)
@@ -408,7 +407,7 @@ public class Mp3AudioProcessor {
      * MP3 파일 유효성 검증
      */
     public void validateMp3(byte[] data, String filename) {
-        // 파일 크기 검증 (25MB 제한 - Whisper API)
+        // 파일 크기 검증 (25MB 제한 - Groq Whisper API)
         if (data.length > 25 * 1024 * 1024) {
             throw new AudioProcessingException("파일 크기가 25MB를 초과합니다.");
         }
@@ -457,19 +456,19 @@ dependencies {
 }
 ```
 
-#### WhisperClient (OpenAI API)
+#### GroqWhisperClient (Groq API - 무료)
 
 ```java
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class WhisperClient {
+public class GroqWhisperClient {
 
-    @Value("${openai.api.key}")
+    @Value("${groq.api.key}")
     private String apiKey;
 
-    private static final String WHISPER_URL =
-        "https://api.openai.com/v1/audio/transcriptions";
+    private static final String GROQ_WHISPER_URL =
+        "https://api.groq.com/openai/v1/audio/transcriptions";
     private static final int MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
     private final RestTemplate restTemplate;
@@ -493,7 +492,7 @@ public class WhisperClient {
             @Override
             public String getFilename() { return filename; }
         });
-        body.add("model", "whisper-1");
+        body.add("model", "whisper-large-v3-turbo");
         body.add("response_format", "verbose_json");
         body.add("language", "ko");
 
@@ -507,15 +506,15 @@ public class WhisperClient {
             return parseWhisperResponse(response.getBody());
 
         } catch (Exception e) {
-            log.error("Whisper API call failed", e);
+            log.error("Groq Whisper API call failed", e);
             throw new RuntimeException("STT 처리 실패: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Whisper API 응답을 ScriptSegment 형식으로 변환
+     * Groq Whisper API 응답을 ScriptSegment 형식으로 변환
      *
-     * Whisper 응답 형식:
+     * Groq Whisper 응답 형식 (OpenAI 호환):
      * {
      *   "task": "transcribe",
      *   "language": "ko",
@@ -553,8 +552,8 @@ public class WhisperClient {
             return new TranscriptionResult(duration, segments);
 
         } catch (JsonProcessingException e) {
-            log.error("Failed to parse Whisper response", e);
-            throw new RuntimeException("Whisper 응답 파싱 실패", e);
+            log.error("Failed to parse Groq Whisper response", e);
+            throw new RuntimeException("Groq Whisper 응답 파싱 실패", e);
         }
     }
 
@@ -1134,9 +1133,9 @@ document.addEventListener('DOMContentLoaded', () => {
 ```properties
 # application.properties
 
-# OpenAI API (Whisper STT)
-openai.api.key=${OPENAI_API_KEY}
-openai.whisper.model=whisper-1
+# Groq API (무료 Whisper STT)
+groq.api.key=${GROQ_API_KEY}
+groq.whisper.model=whisper-large-v3-turbo
 
 # Google Gemini API (대본 교정 + 메타데이터 생성)
 gemini.api.key=${GEMINI_API_KEY}
@@ -1173,7 +1172,7 @@ public class AiConfig {
     public RestTemplate aiRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();
 
-        // 타임아웃 설정 (Whisper API는 긴 오디오 처리 시 시간이 걸림)
+        // 타임아웃 설정 (Groq Whisper API는 긴 오디오 처리 시 시간이 걸림)
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofSeconds(30));
         factory.setReadTimeout(Duration.ofMinutes(5));
@@ -1329,7 +1328,7 @@ CREATE TABLE ai_process_result (
 | 테스트 클래스 | 테스트 항목 |
 |--------------|------------|
 | `Mp3AudioProcessorTest` | 메타데이터 추출, 쇼츠 생성, MP3 검증 |
-| `WhisperClientTest` | API 호출 모킹, 응답 파싱, 에러 처리 |
+| `GroqWhisperClientTest` | API 호출 모킹, 응답 파싱, 에러 처리 |
 | `GeminiClientTest` | API 호출 모킹, JSON 응답 파싱 |
 | `TranscriptionServiceTest` | STT 결과 변환 로직 |
 | `ScriptCorrectionServiceTest` | 프롬프트 생성, 결과 파싱 |
@@ -1383,7 +1382,7 @@ CREATE TABLE ai_process_result (
 
 ### Step 3: 인프라 레이어
 - [ ] Mp3AudioProcessor (mp3spi 기반) 구현
-- [ ] WhisperClient (OpenAI API) 구현
+- [ ] GroqWhisperClient (Groq API - 무료) 구현
 - [ ] GeminiClient (Gemini API) 구현
 - [ ] FileStorage에 moveFile(), deleteFile() 메서드 추가
 
@@ -1420,12 +1419,12 @@ CREATE TABLE ai_process_result (
 
 ## 주의사항
 
-1. **API 비용**: OpenAI Whisper, Gemini API 호출 비용 모니터링 필요
-   - Whisper: $0.006/분 (30분 오디오 = $0.18)
+1. **API 비용**: Gemini API 호출 비용 모니터링 필요 (Groq Whisper는 무료)
+   - Groq Whisper: **무료** (rate limit 존재)
    - Gemini: 토큰 기반 과금
 2. **파일 제한**:
    - **형식**: MP3만 지원 (NotebookLM 출력을 MP3로 변환 후 업로드 필요)
-   - **크기**: 최대 25MB (Whisper API 제한)
+   - **크기**: 최대 25MB (Groq Whisper API 제한)
    - Spring의 `multipart.max-file-size`도 25MB 이상으로 설정 필요
 3. **처리 시간**: 긴 오디오(30분+)의 경우 처리 시간이 수 분 소요될 수 있음
 4. **임시 파일**: 만료된 임시 파일 정리 로직 필수 (24시간 후 자동 삭제)
@@ -1436,7 +1435,7 @@ CREATE TABLE ai_process_result (
 
 ## 추후 개선사항 (현재 구현 범위 외)
 
-1. **API 재시도 전략**: Whisper/Gemini API 실패 시 자동 재시도 (Spring Retry)
+1. **API 재시도 전략**: Groq Whisper/Gemini API 실패 시 자동 재시도 (Spring Retry)
 2. **ThreadPool 최적화**: 동시 처리 요청이 많아질 경우 ThreadPool 크기 조정
 3. **처리 상태 알림**: 완료 시 이메일/슬랙 알림
 4. **중복 콘텐츠 방지**: 파일 해시(SHA-256)로 중복 업로드 체크

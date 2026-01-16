@@ -1,8 +1,8 @@
 package com.onair.hearit.admin.ai.application;
 
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
-import com.onair.hearit.admin.ai.infrastructure.openai.WhisperClient;
-import com.onair.hearit.admin.ai.infrastructure.openai.WhisperClient.TranscriptionResult;
+import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient;
+import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient.TranscriptionResult;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service;
 
 /**
  * STT(Speech-to-Text) 처리 서비스
- * OpenAI Whisper API를 사용하여 오디오를 텍스트로 변환
+ * Groq Whisper API를 사용하여 오디오를 텍스트로 변환 (무료)
  */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class TranscriptionService {
 
-    private final WhisperClient whisperClient;
+    private final GroqWhisperClient whisperClient;
 
     /**
      * 오디오 파일을 텍스트로 변환

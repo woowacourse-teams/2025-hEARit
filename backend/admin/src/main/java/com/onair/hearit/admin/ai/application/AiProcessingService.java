@@ -6,7 +6,7 @@ import com.onair.hearit.admin.ai.domain.AiProcessResult;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.infrastructure.audio.Mp3AudioProcessor;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
-import com.onair.hearit.admin.ai.infrastructure.openai.WhisperClient.TranscriptionResult;
+import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient.TranscriptionResult;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import java.time.LocalDateTime;
 import java.util.List;
