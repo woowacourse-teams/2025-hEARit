@@ -6,14 +6,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,6 +27,19 @@ public class GeminiClient {
 
     private static final String GEMINI_URL_TEMPLATE =
             "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s";
+
+    // Rate limiting: 동시 요청 1개로 제한
+    private static final Semaphore rateLimiter = new Semaphore(1);
+
+    // 요청 간 최소 간격 (밀리초) - Gemini 무료 tier: 15 RPM = 4초 간격 권장
+    private static final long MIN_REQUEST_INTERVAL_MS = 4000;
+
+    // 마지막 요청 시간
+    private static volatile long lastRequestTime = 0;
+
+    // 재시도 설정
+    private static final int MAX_RETRIES = 3;
+    private static final long INITIAL_RETRY_DELAY_MS = 5000;
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -100,7 +117,7 @@ public class GeminiClient {
     }
 
     /**
-     * Gemini API 호출
+     * Gemini API 호출 (Rate Limiting + Retry 적용)
      */
     private String callGeminiApi(String requestBody) {
         String url = String.format(GEMINI_URL_TEMPLATE, model, apiKey);
@@ -110,20 +127,82 @@ public class GeminiClient {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        try {
-            long startTime = System.currentTimeMillis();
+        int retryCount = 0;
+        long retryDelay = INITIAL_RETRY_DELAY_MS;
 
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    url, requestEntity, String.class);
+        while (true) {
+            try {
+                // Rate limiting: 세마포어 획득
+                rateLimiter.acquire();
+                try {
+                    // 요청 간 최소 간격 유지
+                    waitForRateLimit();
 
-            long elapsed = System.currentTimeMillis() - startTime;
-            log.info("Gemini API 응답 수신: {}ms 소요", elapsed);
+                    long startTime = System.currentTimeMillis();
 
-            return response.getBody();
+                    ResponseEntity<String> response = restTemplate.postForEntity(
+                            url, requestEntity, String.class);
 
-        } catch (RestClientException e) {
-            log.error("Gemini API 호출 실패", e);
-            throw AudioProcessingException.apiCallFailed("LLM 처리 실패: " + e.getMessage(), e);
+                    // 마지막 요청 시간 기록
+                    lastRequestTime = System.currentTimeMillis();
+
+                    long elapsed = System.currentTimeMillis() - startTime;
+                    log.info("Gemini API 응답 수신: {}ms 소요", elapsed);
+
+                    return response.getBody();
+
+                } finally {
+                    rateLimiter.release();
+                }
+
+            } catch (HttpClientErrorException e) {
+                if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS && retryCount < MAX_RETRIES) {
+                    retryCount++;
+                    log.warn("Gemini API 429 에러, {}ms 후 재시도 ({}/{})",
+                            retryDelay, retryCount, MAX_RETRIES);
+
+                    try {
+                        Thread.sleep(retryDelay);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw AudioProcessingException.apiCallFailed("재시도 중 인터럽트 발생", ie);
+                    }
+
+                    // Exponential backoff
+                    retryDelay *= 2;
+                    continue;
+                }
+
+                log.error("Gemini API 호출 실패: {}", e.getStatusCode(), e);
+                throw AudioProcessingException.apiCallFailed("LLM 처리 실패: " + e.getMessage(), e);
+
+            } catch (RestClientException e) {
+                log.error("Gemini API 호출 실패", e);
+                throw AudioProcessingException.apiCallFailed("LLM 처리 실패: " + e.getMessage(), e);
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw AudioProcessingException.apiCallFailed("요청 대기 중 인터럽트 발생", e);
+            }
+        }
+    }
+
+    /**
+     * Rate limit을 위한 대기
+     */
+    private void waitForRateLimit() {
+        long now = System.currentTimeMillis();
+        long elapsed = now - lastRequestTime;
+
+        if (elapsed < MIN_REQUEST_INTERVAL_MS && lastRequestTime > 0) {
+            long waitTime = MIN_REQUEST_INTERVAL_MS - elapsed;
+            log.debug("Rate limit 대기: {}ms", waitTime);
+
+            try {
+                Thread.sleep(waitTime);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
