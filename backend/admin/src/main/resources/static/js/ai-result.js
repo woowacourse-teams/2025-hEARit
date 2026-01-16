@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let correctedScript = [];
     let editableScript = [];
     let selectedKeywords = [];
+    let sourceIndex = 0;
+    const MAX_SOURCES = 5;
 
     // Modals
     const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
@@ -45,7 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== Initialization ==========
 
-    init();
+    // 이벤트 리스너는 먼저 등록 (init 오류가 발생해도 동작하도록)
+    bindEventListeners();
+
+    // 초기화는 try-catch로 감싸서 오류가 발생해도 이벤트 리스너가 동작하도록
+    try {
+        init();
+    } catch (error) {
+        console.error('초기화 중 오류 발생:', error);
+    }
 
     function init() {
         // Load script data from window.scriptData (set by Thymeleaf inline script)
@@ -53,8 +63,14 @@ document.addEventListener('DOMContentLoaded', function() {
         correctedScript = scriptData.correctedScript || [];
         editableScript = scriptData.finalScript || [];
 
+        console.log('Script data loaded:', {
+            rawTranscript: rawTranscript.length,
+            correctedScript: correctedScript.length,
+            editableScript: editableScript.length
+        });
+
         // Clone corrected script for editing if editable is empty
-        if (editableScript.length === 0) {
+        if (editableScript.length === 0 && correctedScript.length > 0) {
             editableScript = JSON.parse(JSON.stringify(correctedScript));
         }
 
@@ -68,6 +84,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Initialize source inputs
         initSourceInputs();
+    }
+
+    function bindEventListeners() {
+        // 출처 추가 버튼
+        if (addSourceBtn) {
+            addSourceBtn.addEventListener('click', function() {
+                const currentCount = sourcesContainer.querySelectorAll('.source-input-group').length;
+                if (currentCount >= MAX_SOURCES) {
+                    alert('출처는 최대 5개까지 추가할 수 있습니다.');
+                    return;
+                }
+                addSourceRow();
+            });
+        }
     }
 
     // ========== Script Rendering ==========
@@ -106,12 +136,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="timestamp">${formatTime(segment.start)} - ${formatTime(segment.end)}</div>
                 <textarea class="text" data-index="${index}" rows="2">${escapeHtml(segment.text)}</textarea>
             `;
-            container = div.querySelector('textarea');
-            container.addEventListener('input', function() {
+            const textarea = div.querySelector('textarea');
+            textarea.addEventListener('input', function() {
                 editableScript[index].text = this.value;
                 autoResize(this);
             });
-            container.addEventListener('focus', function() {
+            textarea.addEventListener('focus', function() {
                 autoResize(this);
             });
             editScriptPanel.appendChild(div);
@@ -222,22 +252,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== Source Management ==========
 
-    let sourceIndex = 0;
-    const MAX_SOURCES = 5;
-
     function initSourceInputs() {
         // Add initial source input
         addSourceRow();
     }
-
-    addSourceBtn.addEventListener('click', function() {
-        const currentCount = sourcesContainer.querySelectorAll('.source-input-group').length;
-        if (currentCount >= MAX_SOURCES) {
-            alert('출처는 최대 5개까지 추가할 수 있습니다.');
-            return;
-        }
-        addSourceRow();
-    });
 
     function addSourceRow() {
         const div = document.createElement('div');
