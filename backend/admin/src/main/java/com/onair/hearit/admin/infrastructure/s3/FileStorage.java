@@ -102,18 +102,17 @@ public class FileStorage {
     }
 
     /**
-     * S3 파일 이동 (복사 후 삭제)
+     * S3 파일 복사 (원본 유지)
      *
      * @param sourceKey 원본 경로
      * @param destinationKey 대상 경로
-     * @return 이동된 파일의 새 키
+     * @return 복사된 파일의 새 키
      */
-    public String moveFile(String sourceKey, String destinationKey) {
+    public String copyFile(String sourceKey, String destinationKey) {
         try {
             String validatedSource = validateKey(sourceKey);
             String validatedDest = validateKey(destinationKey);
 
-            // 1. 복사
             CopyObjectRequest copyRequest = CopyObjectRequest.builder()
                     .sourceBucket(bucket)
                     .sourceKey(validatedSource)
@@ -122,13 +121,23 @@ public class FileStorage {
                     .build();
             s3Client.copyObject(copyRequest);
 
-            // 2. 원본 삭제
-            deleteFile(validatedSource);
-
             return validatedDest;
         } catch (S3Exception e) {
-            throw new AdminFileException("S3 파일 이동 실패, source: " + sourceKey + ", dest: " + destinationKey);
+            throw new AdminFileException("S3 파일 복사 실패, source: " + sourceKey + ", dest: " + destinationKey);
         }
+    }
+
+    /**
+     * S3 파일 이동 (복사 후 삭제)
+     *
+     * @param sourceKey 원본 경로
+     * @param destinationKey 대상 경로
+     * @return 이동된 파일의 새 키
+     */
+    public String moveFile(String sourceKey, String destinationKey) {
+        String copiedKey = copyFile(sourceKey, destinationKey);
+        deleteFile(sourceKey);
+        return copiedKey;
     }
 
     private String validateKey(String key) {
