@@ -3,7 +3,7 @@ package com.onair.hearit.admin.ai.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import com.onair.hearit.admin.ai.domain.AiProcessResult;
 import com.onair.hearit.admin.ai.domain.ProcessStatus;
@@ -34,8 +34,8 @@ class AiProcessControllerTest extends IntegrationTest {
         // given
         CsrfSession csrfSession = AdminSecurityTestHelper.loginAdminAndGetCsrfSession(dbHelper);
 
-        // S3 업로드 모킹
-        doNothing().when(fileStorage).uploadBytes(any(), anyString(), anyString());
+        // S3 업로드 모킹 (uploadBytes는 String을 반환)
+        when(fileStorage.uploadBytes(any(), anyString(), anyString())).thenAnswer(invocation -> invocation.getArgument(1));
 
         // 유효한 MP3 데이터 생성 (ID3 태그)
         byte[] mp3Data = createValidMp3Data();

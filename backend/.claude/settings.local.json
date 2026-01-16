@@ -12,7 +12,10 @@
       "Bash(./gradlew:*)",
       "Bash(for:*)",
       "Bash(sed:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "WebSearch",
+      "Bash(.\\\\gradlew.bat :admin:compileJava:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

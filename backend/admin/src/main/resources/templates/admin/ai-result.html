@@ -100,9 +100,15 @@
 
     <!-- 숨겨진 데이터 -->
     <input type="hidden" id="process-id" th:value="${result.id}"/>
-    <input type="hidden" id="raw-transcript" th:value="${#strings.toString(result.rawTranscript)}"/>
-    <input type="hidden" id="corrected-script" th:value="${#strings.toString(result.correctedScript)}"/>
-    <input type="hidden" id="final-script" th:value="${#strings.toString(result.finalScript)}"/>
+
+    <!-- JSON 데이터는 inline script로 전달 (window 객체에 저장) -->
+    <script th:inline="javascript">
+        window.scriptData = {
+            rawTranscript: /*[[${result.rawTranscript}]]*/ [],
+            correctedScript: /*[[${result.correctedScript}]]*/ [],
+            finalScript: /*[[${result.finalScript}]]*/ []
+        };
+    </script>
 
     <!-- 1. 오디오 플레이어 -->
     <section class="audio-section mb-4">
@@ -257,15 +263,7 @@
         <p class="text-muted mb-3">참고한 자료의 출처를 입력하세요 (최대 5개)</p>
 
         <div id="sources-container">
-            <div class="source-input-group">
-                <div class="input-group">
-                    <span class="input-group-text">1</span>
-                    <input type="text" class="form-control source-input" placeholder="출처 URL 또는 제목"/>
-                    <button type="button" class="btn btn-outline-danger remove-source-btn d-none">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-            </div>
+            <!-- 초기 출처 입력란은 JavaScript에서 생성 -->
         </div>
 
         <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="add-source-btn">

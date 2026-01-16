@@ -5,9 +5,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const processId = document.getElementById('process-id').value;
-    const rawTranscriptData = document.getElementById('raw-transcript').value;
-    const correctedScriptData = document.getElementById('corrected-script').value;
-    const finalScriptData = document.getElementById('final-script').value;
+
+    // Script data from inline Thymeleaf script (window.scriptData)
+    const scriptData = window.scriptData || {};
 
     const rawScriptPanel = document.getElementById('raw-script-panel');
     const correctedScriptPanel = document.getElementById('corrected-script-panel');
@@ -48,18 +48,14 @@ document.addEventListener('DOMContentLoaded', function() {
     init();
 
     function init() {
-        // Parse script data
-        try {
-            rawTranscript = JSON.parse(rawTranscriptData || '[]');
-            correctedScript = JSON.parse(correctedScriptData || '[]');
-            editableScript = JSON.parse(finalScriptData || '[]');
+        // Load script data from window.scriptData (set by Thymeleaf inline script)
+        rawTranscript = scriptData.rawTranscript || [];
+        correctedScript = scriptData.correctedScript || [];
+        editableScript = scriptData.finalScript || [];
 
-            // Clone corrected script for editing if editable is empty
-            if (editableScript.length === 0) {
-                editableScript = JSON.parse(JSON.stringify(correctedScript));
-            }
-        } catch (e) {
-            console.error('Failed to parse script data:', e);
+        // Clone corrected script for editing if editable is empty
+        if (editableScript.length === 0) {
+            editableScript = JSON.parse(JSON.stringify(correctedScript));
         }
 
         // Render script panels
@@ -69,6 +65,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Initialize keyword selection
         initKeywordSelection();
+
+        // Initialize source inputs
+        initSourceInputs();
     }
 
     // ========== Script Rendering ==========
@@ -223,28 +222,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== Source Management ==========
 
-    let sourceCount = 1;
+    let sourceIndex = 0;
     const MAX_SOURCES = 5;
 
+    function initSourceInputs() {
+        // Add initial source input
+        addSourceRow();
+    }
+
     addSourceBtn.addEventListener('click', function() {
-        if (sourceCount >= MAX_SOURCES) {
+        const currentCount = sourcesContainer.querySelectorAll('.source-input-group').length;
+        if (currentCount >= MAX_SOURCES) {
             alert('출처는 최대 5개까지 추가할 수 있습니다.');
             return;
         }
-
-        sourceCount++;
-        addSourceInput();
-        updateSourceNumbers();
-        updateRemoveButtons();
+        addSourceRow();
     });
 
-    function addSourceInput() {
+    function addSourceRow() {
         const div = document.createElement('div');
-        div.className = 'source-input-group';
+        div.className = 'source-input-group mb-2';
         div.innerHTML = `
             <div class="input-group">
-                <span class="input-group-text source-number">${sourceCount}</span>
-                <input type="text" class="form-control source-input" placeholder="출처 URL 또는 제목"/>
+                <input type="text" class="form-control source-name" data-index="${sourceIndex}"
+                       placeholder="출처 이름 (예: 테코톡)" required/>
+                <input type="text" class="form-control source-url" data-index="${sourceIndex}"
+                       placeholder="URL (예: https://...)"/>
                 <button type="button" class="btn btn-outline-danger remove-source-btn">
                     <i class="bi bi-x"></i>
                 </button>
@@ -254,30 +257,39 @@ document.addEventListener('DOMContentLoaded', function() {
         const removeBtn = div.querySelector('.remove-source-btn');
         removeBtn.addEventListener('click', function() {
             div.remove();
-            sourceCount--;
-            updateSourceNumbers();
             updateRemoveButtons();
         });
 
         sourcesContainer.appendChild(div);
-    }
-
-    function updateSourceNumbers() {
-        const numbers = sourcesContainer.querySelectorAll('.source-number');
-        numbers.forEach((span, index) => {
-            span.textContent = index + 1;
-        });
+        sourceIndex++;
+        updateRemoveButtons();
     }
 
     function updateRemoveButtons() {
-        const removeButtons = sourcesContainer.querySelectorAll('.remove-source-btn');
-        removeButtons.forEach((btn, index) => {
-            if (sourceCount === 1) {
-                btn.classList.add('d-none');
+        const groups = sourcesContainer.querySelectorAll('.source-input-group');
+        groups.forEach((group, index) => {
+            const removeBtn = group.querySelector('.remove-source-btn');
+            if (groups.length === 1) {
+                removeBtn.classList.add('d-none');
             } else {
-                btn.classList.remove('d-none');
+                removeBtn.classList.remove('d-none');
             }
         });
+    }
+
+    function collectSources() {
+        const sources = [];
+        sourcesContainer.querySelectorAll('.source-input-group').forEach(group => {
+            const sourceName = group.querySelector('.source-name').value.trim();
+            const sourceUrl = group.querySelector('.source-url').value.trim();
+            if (sourceName) {
+                sources.push({
+                    sourceName: sourceName,
+                    sourceUrl: sourceUrl || null
+                });
+            }
+        });
+        return sources;
     }
 
     // ========== Confirmation ==========
@@ -313,16 +325,16 @@ document.addEventListener('DOMContentLoaded', function() {
             modalConfirmBtn.disabled = true;
             modalConfirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 등록 중...';
 
-            // 출처 수집
-            const sources = [];
-            sourcesContainer.querySelectorAll('.source-input').forEach(input => {
-                if (input.value.trim()) {
-                    sources.push(input.value.trim());
-                }
-            });
+            // 출처 수집 (sourceName + sourceUrl 형식)
+            const sources = collectSources();
 
-            // 최종 스크립트 텍스트 생성
-            const finalScriptText = editableScript.map(s => s.text).join('\n\n');
+            // 출처 검증 (최소 1개 필요)
+            if (sources.length === 0) {
+                alert('최소 1개의 출처를 입력해주세요.');
+                modalConfirmBtn.disabled = false;
+                modalConfirmBtn.innerHTML = '등록';
+                return;
+            }
 
             const response = await fetch(`/admin/api/ai/results/${processId}/confirm`, {
                 method: 'POST',
@@ -336,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     sources: sources,
                     finalTitle: titleInput.value,
                     finalSummary: summaryInput.value,
-                    finalScript: finalScriptText
+                    finalScript: editableScript
                 })
             });
 
