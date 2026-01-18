@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AiProcessingService {
 
     private final AiProcessResultRepository resultRepository;
+    private final AiProcessStatusUpdater statusUpdater;
     private final FileStorage fileStorage;
     private final Mp3AudioProcessor mp3Processor;
     private final TranscriptionService transcriptionService;
@@ -76,70 +77,68 @@ public class AiProcessingService {
 
     /**
      * AI 처리 실행 (비동기)
+     *
+     * 각 단계의 상태 업데이트는 AiProcessStatusUpdater를 통해 별도 트랜잭션으로 처리됩니다.
+     * 이를 통해 폴링 클라이언트가 실시간으로 진행 상태를 확인할 수 있습니다.
      */
     @Async("aiProcessingExecutor")
-    @Transactional
     public void executeProcessing(Long processId, byte[] audioData) {
         log.info("AI 처리 비동기 실행 시작: processId={}", processId);
 
-        AiProcessResult result = resultRepository.findById(processId)
-                .orElseThrow(() -> new IllegalArgumentException("처리 결과를 찾을 수 없습니다: " + processId));
-
+        AiProcessResult result = statusUpdater.findById(processId);
         String uuid = extractUuid(result.getOriginalFileKey());
+        String originalFileKey = result.getOriginalFileKey();
+        String originalFileName = result.getOriginalFileName();
 
         try {
             // 1. 원본 파일 S3 업로드
-            uploadOriginalFile(result, audioData);
+            uploadOriginalFile(processId, originalFileKey, audioData);
 
             // 2. 쇼츠 생성 및 업로드
-            byte[] shortsData = createAndUploadShorts(result, audioData, uuid);
+            createAndUploadShorts(processId, audioData, uuid);
 
             // 3. STT 처리
-            TranscriptionResult transcription = processTranscription(result, audioData);
+            TranscriptionResult transcription = processTranscription(processId, audioData, originalFileName);
 
             // 4. 대본 교정
-            List<ScriptSegment> correctedScript = correctScript(result, transcription.getSegments());
+            List<ScriptSegment> correctedScript = correctScript(processId, transcription.getSegments());
 
             // 5. 대본 JSON 파일 생성 및 업로드
-            uploadScriptFile(result, correctedScript, uuid);
+            uploadScriptFile(processId, correctedScript, uuid);
 
             // 6. 메타데이터 생성
-            generateMetadata(result, correctedScript);
+            generateMetadata(processId, correctedScript);
 
             // 7. 완료 처리
             LocalDateTime expiresAt = LocalDateTime.now().plusHours(expirationHours);
-            result.markAsCompleted(expiresAt);
-            resultRepository.save(result);
+            statusUpdater.markAsCompleted(processId, expiresAt);
 
             log.info("AI 처리 완료: processId={}", processId);
 
         } catch (Exception e) {
             log.error("AI 처리 실패: processId={}", processId, e);
-            result.markAsFailed(e.getMessage());
-            resultRepository.save(result);
+            statusUpdater.markAsFailed(processId, e.getMessage());
 
             // 실패 시 생성된 임시 파일 정리
-            cleanupTempFiles(result);
+            cleanupTempFiles(processId);
         }
     }
 
     /**
      * 1. 원본 파일 업로드
      */
-    private void uploadOriginalFile(AiProcessResult result, byte[] audioData) {
-        result.markAsUploading();
-        resultRepository.save(result);
+    private void uploadOriginalFile(Long processId, String originalFileKey, byte[] audioData) {
+        statusUpdater.markAsUploading(processId);
 
-        log.debug("원본 파일 업로드 중: {}", result.getOriginalFileKey());
-        fileStorage.uploadBytes(audioData, result.getOriginalFileKey(), "audio/mpeg");
+        log.debug("원본 파일 업로드 중: {}", originalFileKey);
+        fileStorage.uploadBytes(audioData, originalFileKey, "audio/mpeg");
     }
 
     /**
      * 2. 쇼츠 생성 및 업로드
      */
-    private byte[] createAndUploadShorts(AiProcessResult result, byte[] audioData, String uuid) {
-        result.markAsConverting();
-        resultRepository.save(result);
+    private void createAndUploadShorts(Long processId, byte[] audioData, String uuid) {
+        statusUpdater.markAsConverting(processId);
 
         log.debug("쇼츠 생성 중: {}초", shortsDurationSeconds);
 
@@ -153,24 +152,21 @@ public class AiProcessingService {
         fileStorage.uploadBytes(audioData, orgKey, "audio/mpeg");
         fileStorage.uploadBytes(shortsData, shrKey, "audio/mpeg");
 
-        result.setGeneratedFiles(orgKey, shrKey, null);
-
-        return shortsData;
+        statusUpdater.setGeneratedFiles(processId, orgKey, shrKey, null);
     }
 
     /**
      * 3. STT 처리
      */
-    private TranscriptionResult processTranscription(AiProcessResult result, byte[] audioData) {
-        result.markAsTranscribing();
-        resultRepository.save(result);
+    private TranscriptionResult processTranscription(Long processId, byte[] audioData, String originalFileName) {
+        statusUpdater.markAsTranscribing(processId);
 
         log.debug("STT 처리 중...");
 
-        TranscriptionResult transcription = transcriptionService.transcribe(
-                audioData, result.getOriginalFileName());
+        TranscriptionResult transcription = transcriptionService.transcribe(audioData, originalFileName);
 
-        result.setTranscriptionResult(
+        statusUpdater.setTranscriptionResult(
+                processId,
                 transcription.getSegments(),
                 transcription.getDurationSeconds()
         );
@@ -181,14 +177,13 @@ public class AiProcessingService {
     /**
      * 4. 대본 교정
      */
-    private List<ScriptSegment> correctScript(AiProcessResult result, List<ScriptSegment> rawSegments) {
-        result.markAsCorrecting();
-        resultRepository.save(result);
+    private List<ScriptSegment> correctScript(Long processId, List<ScriptSegment> rawSegments) {
+        statusUpdater.markAsCorrecting(processId);
 
         log.debug("대본 교정 중...");
 
         List<ScriptSegment> correctedScript = correctionService.correctScript(rawSegments);
-        result.setCorrectedScript(correctedScript);
+        statusUpdater.setCorrectedScript(processId, correctedScript);
 
         return correctedScript;
     }
@@ -196,17 +191,19 @@ public class AiProcessingService {
     /**
      * 5. 대본 JSON 파일 업로드
      */
-    private void uploadScriptFile(AiProcessResult result, List<ScriptSegment> script, String uuid) {
+    private void uploadScriptFile(Long processId, List<ScriptSegment> script, String uuid) {
         try {
             byte[] scriptJson = objectMapper.writeValueAsBytes(script);
             String scrKey = tempPrefix + "scr/" + uuid + ".json";
 
             fileStorage.uploadBytes(scriptJson, scrKey, "application/json");
 
-            // generatedScrKey 설정
-            result.setGeneratedFiles(
-                    result.getGeneratedOrgKey(),
-                    result.getGeneratedShrKey(),
+            // generatedScrKey 설정 - 기존 orgKey, shrKey 유지하면서 scrKey만 추가
+            AiProcessResult current = statusUpdater.findById(processId);
+            statusUpdater.setGeneratedFiles(
+                    processId,
+                    current.getGeneratedOrgKey(),
+                    current.getGeneratedShrKey(),
                     scrKey
             );
 
@@ -218,23 +215,23 @@ public class AiProcessingService {
     /**
      * 6. 메타데이터 생성
      */
-    private void generateMetadata(AiProcessResult result, List<ScriptSegment> script) {
-        result.markAsGeneratingMeta();
-        resultRepository.save(result);
+    private void generateMetadata(Long processId, List<ScriptSegment> script) {
+        statusUpdater.markAsGeneratingMeta(processId);
 
         log.debug("메타데이터 생성 중...");
 
         String fullText = transcriptionService.mergeSegmentsToText(script);
         GeneratedMetadata metadata = metadataService.generateMetadata(fullText);
 
-        result.setSuggestedMetadata(metadata.getTitle(), metadata.getSummary());
+        statusUpdater.setSuggestedMetadata(processId, metadata.getTitle(), metadata.getSummary());
     }
 
     /**
      * 실패 시 임시 파일 정리
      */
-    private void cleanupTempFiles(AiProcessResult result) {
+    private void cleanupTempFiles(Long processId) {
         try {
+            AiProcessResult result = statusUpdater.findById(processId);
             deleteIfExists(result.getOriginalFileKey());
             deleteIfExists(result.getGeneratedOrgKey());
             deleteIfExists(result.getGeneratedShrKey());
