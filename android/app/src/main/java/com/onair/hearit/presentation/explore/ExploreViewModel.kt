@@ -143,7 +143,7 @@ class ExploreViewModel @Inject constructor(
         // onPageChanged 로직을 재사용하여 저장된 위치에서 재생 시작
         // consumeResumePositionMs() 내부에서 resumePositionMs가 0으로 초기화됨
         onPageChanged(_uiState.value.currentPageIndex)
-        Timber.d("resumeIfScheduled called. Resuming at index ${_uiState.value.currentPageIndex}")
+        Timber.d("해당 index가 resume됨 index -> ${_uiState.value.currentPageIndex}")
 
         // 재개 로직을 수행했으므로 예약 상태 해제
         resumeScheduled = false
@@ -225,33 +225,8 @@ class ExploreViewModel @Inject constructor(
                 hearitRepository
                     .getExploreHearits(cursorId)
                     .onSuccess { randomItems ->
-                        isEndOfFeed = randomItems.isEmpty
-                        nextCursorId = randomItems.items.lastOrNull()?.cursorId
-
-                        // UseCase가 내부적으로 async/awaitAll을 수행하여 리스트를 반환
-                        val newShorts = getExploreHearitUseCase(randomItems.items)
-
-                        _uiState.update { currentState ->
-                            val combined =
-                                if (resumeItem != null) {
-                                    (listOf(resumeItem!!) + newShorts.filter { it.id != resumeItem?.id })
-                                } else {
-                                    currentState.shortsHearits + newShorts
-                                }
-
-                            val updatedList = combined.distinctBy { it.id }
-
-                            // 처음 로딩 시 첫 아이템 재생
-                            if (currentState.shortsHearits.isEmpty() && updatedList.isNotEmpty()) {
-                                launch { onPageChanged(0) }
-                            }
-
-                            currentState.copy(
-                                shortsHearits = updatedList,
-                                isLoading = false,
-                            )
-                        }
-                        resumeItem = null
+                        // 데이터 가공 및 상태 업데이트 로직을 분리
+                        updateShortsList(randomItems)
                     }.onFailure { throwable ->
                         Timber.w(throwable)
                         _sideEffect.emit(ExploreSideEffect.ShowToast(R.string.explore_toast_random_hearits_load_fail))
@@ -264,6 +239,37 @@ class ExploreViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
+    }
+
+    private suspend fun updateShortsList(result: com.onair.hearit.domain.model.CursorResult<ExploreHearit>) {
+        isEndOfFeed = result.isEmpty
+        nextCursorId = result.items.lastOrNull()?.cursorId
+
+        // UseCase를 통해 상세 데이터 채우기 (이미 리스트 병렬 처리 구현됨)
+        val newShorts = getExploreHearitUseCase(result.items)
+
+        _uiState.update { currentState ->
+            // resumeItem 안전하게 처리 (!! 제거됨)
+            val combined =
+                resumeItem?.let { item ->
+                    listOf(item) + newShorts.filter { it.id != item.id }
+                } ?: (currentState.shortsHearits + newShorts)
+
+            val updatedList = combined.distinctBy { it.id }
+
+            // 처음 로딩 시 첫 아이템 재생 트리거
+            if (currentState.shortsHearits.isEmpty() && updatedList.isNotEmpty()) {
+                viewModelScope.launch { onPageChanged(0) }
+            }
+
+            currentState.copy(
+                shortsHearits = updatedList,
+                isLoading = false,
+            )
+        }
+
+        // 상태 업데이트 완료 후 resumeItem 초기화
+        resumeItem = null
     }
 
     fun onPageChanged(pageIndex: Int) {
