@@ -103,7 +103,7 @@ fun ExploreRoute(
             viewModel.onPlayerStateChanged()
         },
         onSpeedChanged = {
-            viewModel.onPlayerSpeedChanged()
+            viewModel.onSetPlayerSpeed()
         },
         isPlaying = isPlaying,
         speed = speed,

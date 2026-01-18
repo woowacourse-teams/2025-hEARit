@@ -15,7 +15,7 @@ import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.HearitPurple2
 
 /**
- * 오디오 재생 진행 상태를 표시하고 사용자가 탐색(Seeking)할 수 있는 프로그레스 바
+ * 오디오 재생 진행 상태를 표시하고 사용자가 탐색할 수 있는 프로그레스 바
  *
  * 이 컴포저블은 현재 재생 위치와 전체 길이를 바탕으로 진행률을 시각화하며,
  * 사용자의 터치(탭) 및 드래그 제스처를 통해 재생 위치를 변경할 수 있는 기능을 제공합니다.

@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -56,19 +57,12 @@ fun ExploreShortsItem(
     val scripts = item.script ?: emptyList()
 
     var showPauseIcon by remember { mutableStateOf(false) }
-    var showSpeedIcon by remember { mutableStateOf(false) }
+    var isPressingSpeed by remember { mutableStateOf(false) }
 
     LaunchedEffect(showPauseIcon) {
         if (showPauseIcon) {
             delay(5000L)
             showPauseIcon = false
-        }
-    }
-
-    LaunchedEffect(showSpeedIcon) {
-        if (showSpeedIcon) {
-            delay(5000L)
-            showSpeedIcon = false
         }
     }
 
@@ -80,24 +74,34 @@ fun ExploreShortsItem(
             modifier =
                 modifier
                     .fillMaxSize()
-                    .pointerInput(Unit) {
+                    .pointerInput(isPlaying) {
                         detectTapGestures(
                             onTap = {
                                 onItemPlay()
                                 showPauseIcon = true
                             },
                             onLongPress = {
-                                onSpeedChanged()
-                                showSpeedIcon = true
-                            },
-                            onPress = {
-                                val released = tryAwaitRelease()
-                                if (released) {
+                                // 꾹 누를 때: 배속 시작
+                                if (isPlaying) {
                                     onSpeedChanged()
-                                    showSpeedIcon = false
+                                    isPressingSpeed = true
                                 }
                             },
                         )
+                    }
+                    // 손을 떼는 이벤트를 감지하기 위해 별도의 pointerInput 추가
+                    .pointerInput(isPressingSpeed) {
+                        awaitPointerEventScope {
+                            while (isPressingSpeed) {
+                                val event = awaitPointerEvent()
+                                // 모든 손가락이 화면에서 떨어졌는지 확인
+                                if (event.changes.all { !it.pressed }) {
+                                    // 손을 뗄 때: 배속 종료
+                                    onSpeedChanged()
+                                    isPressingSpeed = false
+                                }
+                            }
+                        }
                     },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -132,8 +136,7 @@ fun ExploreShortsItem(
                         .background(color = Gray1, shape = RoundedCornerShape(8.dp))
                         .clickable {
                             onNavigateToDetail(item.id)
-                        }
-                        .padding(vertical = 20.dp, horizontal = 16.dp),
+                        }.padding(vertical = 20.dp, horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
@@ -175,11 +178,18 @@ fun ExploreShortsItem(
             )
         }
 
-        if (showSpeedIcon && speed > 1.0f) {
+        if (isPlaying && speed > 1.0f) {
             Image(
                 painter = painterResource(id = R.drawable.img_shorts_boost),
                 contentDescription = null,
-                modifier = Modifier.size(width = 79.dp, height = 30.dp),
+                modifier =
+                    Modifier
+                        .align(
+                            BiasAlignment(
+                                horizontalBias = 0f,
+                                verticalBias = -0.5f,
+                            ),
+                        ).size(width = 79.dp, height = 30.dp),
             )
         }
     }
@@ -213,6 +223,6 @@ private fun PreviewExploreShortsItem() {
         onItemPlay = {},
         onSpeedChanged = {},
         isPlaying = false,
-        speed = 1.0f,
+        speed = 2.0f,
     )
 }

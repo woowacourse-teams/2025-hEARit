@@ -31,8 +31,7 @@ import com.onair.hearit.domain.model.ExploreHearit
  * 선형 이징(Linear Easing)을 사용하여 부드럽고 일정한 속도로 동작합니다.
  *
  * @param item LP의 배경색 정보를 포함하고 있는 탐색 아이템 데이터 모델
- * @param isPlaying 현재 오디오 재생 상태. true일 경우 LP 이미지가 2.4초마다 한 바퀴씩 회전하며, false일 경우 회전을 멈추고 정위치(0도)에 고정됨
- * @param modifier 레이아웃 수정을 위한 [Modifier]. 기본적으로 LP 이미지의 크기 및 회전 효과에 적용됩니다.
+ * @param isPlaying 현재 오디오 재생 상태.
  */
 @Composable
 fun RotatingLp(
@@ -85,8 +84,7 @@ fun RotatingLp(
                 modifier
                     .graphicsLayer {
                         rotationZ = rotation.value
-                    }
-                    .size(300.dp),
+                    }.size(300.dp),
         )
     }
 }

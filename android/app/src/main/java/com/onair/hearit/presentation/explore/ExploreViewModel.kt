@@ -3,15 +3,11 @@ package com.onair.hearit.presentation.explore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
-import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetExploreHearitUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -116,8 +112,11 @@ class ExploreViewModel @Inject constructor(
         }
     }
 
-    fun onPlayerSpeedChanged() {
-        if (playerManager.isPlaying.value && playerManager.speed.value == 1.0f) {
+    fun onSetPlayerSpeed() {
+        if (!playerManager.isPlaying.value) return
+
+        // 재생 중일 때만 속도 전환 로직 수행
+        if (playerManager.speed.value == 1.0f) {
             playerManager.setPlaybackSpeed(2.0f)
         } else {
             playerManager.setPlaybackSpeed(1.0f)
@@ -223,13 +222,14 @@ class ExploreViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val result = hearitRepository.getExploreHearits(cursorId)
-                result
+                hearitRepository
+                    .getExploreHearits(cursorId)
                     .onSuccess { randomItems ->
                         isEndOfFeed = randomItems.isEmpty
                         nextCursorId = randomItems.items.lastOrNull()?.cursorId
 
-                        val newShorts = buildShortsHearit(randomItems)
+                        // UseCase가 내부적으로 async/awaitAll을 수행하여 리스트를 반환
+                        val newShorts = getExploreHearitUseCase(randomItems.items)
 
                         _uiState.update { currentState ->
                             val combined =
@@ -241,13 +241,9 @@ class ExploreViewModel @Inject constructor(
 
                             val updatedList = combined.distinctBy { it.id }
 
-                            // [수정 포인트] 리스트가 처음 로드되었을 때 (기존 리스트가 비어있었을 때)
-                            // 첫 번째 아이템 재생 트리거
+                            // 처음 로딩 시 첫 아이템 재생
                             if (currentState.shortsHearits.isEmpty() && updatedList.isNotEmpty()) {
-                                // 조금의 지연 시간을 주어 UI가 준비된 후 재생되도록 할 수 있습니다.
-                                launch {
-                                    onPageChanged(0)
-                                }
+                                launch { onPageChanged(0) }
                             }
 
                             currentState.copy(
@@ -255,7 +251,6 @@ class ExploreViewModel @Inject constructor(
                                 isLoading = false,
                             )
                         }
-                        // 2. 처리가 끝났으므로 resumeItem 초기화
                         resumeItem = null
                     }.onFailure { throwable ->
                         Timber.w(throwable)
@@ -266,20 +261,13 @@ class ExploreViewModel @Inject constructor(
                 _sideEffect.emit(ExploreSideEffect.ShowToast(R.string.explore_toast_shorts_hearits_load_fail))
             } finally {
                 isLoadingPage = false
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
-    private suspend fun buildShortsHearit(cursorItems: CursorResult<ExploreHearit>): List<ExploreHearit> =
-        coroutineScope {
-            cursorItems.items
-                .map { item -> async { getExploreHearitUseCase(item).getOrNull() } }
-                .awaitAll()
-                .mapNotNull { it }
-        }
-
     fun onPageChanged(pageIndex: Int) {
-        // 1. 현재 상태의 인덱스와 입력받은 인덱스가 다를 때만 업데이트 (무한 루프 방지)
+        // 현재 상태의 인덱스와 입력받은 인덱스가 다를 때만 업데이트
         if (_uiState.value.currentPageIndex != pageIndex) {
             _uiState.update { it.copy(currentPageIndex = pageIndex) }
         }
@@ -299,5 +287,10 @@ class ExploreViewModel @Inject constructor(
 
         playerManager.play(currentItem.audioUrl, startPosition)
         maybeLoadMore(currentIndex = pageIndex, totalCount = items.size)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        playerManager.stop()
     }
 }
