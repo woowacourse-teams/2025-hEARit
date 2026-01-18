@@ -245,11 +245,11 @@ class ExploreViewModel @Inject constructor(
         isEndOfFeed = result.isEmpty
         nextCursorId = result.items.lastOrNull()?.cursorId
 
-        // UseCase를 통해 상세 데이터 채우기 (이미 리스트 병렬 처리 구현됨)
         val newShorts = getExploreHearitUseCase(result.items)
 
+        val isFirstLoad = _uiState.value.shortsHearits.isEmpty()
+
         _uiState.update { currentState ->
-            // resumeItem 안전하게 처리 (!! 제거됨)
             val combined =
                 resumeItem?.let { item ->
                     listOf(item) + newShorts.filter { it.id != item.id }
@@ -257,18 +257,16 @@ class ExploreViewModel @Inject constructor(
 
             val updatedList = combined.distinctBy { it.id }
 
-            // 처음 로딩 시 첫 아이템 재생 트리거
-            if (currentState.shortsHearits.isEmpty() && updatedList.isNotEmpty()) {
-                viewModelScope.launch { onPageChanged(0) }
-            }
-
             currentState.copy(
                 shortsHearits = updatedList,
                 isLoading = false,
             )
         }
 
-        // 상태 업데이트 완료 후 resumeItem 초기화
+        if (isFirstLoad && _uiState.value.shortsHearits.isNotEmpty()) {
+            onPageChanged(0)
+        }
+
         resumeItem = null
     }
 

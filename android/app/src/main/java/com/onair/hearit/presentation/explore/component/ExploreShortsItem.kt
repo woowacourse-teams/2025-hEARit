@@ -115,7 +115,7 @@ fun ExploreShortsItem(
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = item.keywords.joinToString("") { "#${it.name}" },
+                text = item.keywords.joinToString(" ") { "#${it.name}" },
                 style = HearitTypoGraphy.bodySmall,
                 color = Gray2,
                 textAlign = TextAlign.Center,
