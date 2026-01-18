@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -34,9 +33,6 @@ import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendationCategories
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.presentation.HearitClickListener
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_COLOR_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_ID_KEY
-import com.onair.hearit.presentation.IntentKeys.CATEGORY_NAME_KEY
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.dpToPx
 import com.onair.hearit.presentation.home.adapter.PlayingBookmarkHearitAdapter
@@ -44,10 +40,9 @@ import com.onair.hearit.presentation.home.adapter.PlayingHistoryHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecentUploadHearitAdapter
 import com.onair.hearit.presentation.home.adapter.RecommendationCategoryAdapter
 import com.onair.hearit.presentation.home.component.CarouselSection
-import com.onair.hearit.presentation.home.util.HorizontalMarginItemDecoration
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.main.MainViewModel
-import com.onair.hearit.presentation.search.category.CategoryFragment
+import com.onair.hearit.presentation.search.SearchFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -292,19 +287,17 @@ class HomeFragment :
             mapOf(ITEM_ID to id.toString(), CATEGORY_NAME to name),
         )
 
+        val fragment =
+            SearchFragment.newInstanceWithCategory(
+                categoryId = id,
+                categoryName = name,
+                categoryColor = colorCode,
+            )
+
         parentFragmentManager
             .beginTransaction()
-            .replace(
-                R.id.fragment_container_view,
-                CategoryFragment().apply {
-                    arguments =
-                        bundleOf(
-                            CATEGORY_ID_KEY to id,
-                            CATEGORY_NAME_KEY to name,
-                            CATEGORY_COLOR_KEY to colorCode,
-                        )
-                },
-            ).addToBackStack(null)
+            .replace(R.id.fragment_container_view, fragment)
+            .addToBackStack(null)
             .commit()
     }
 

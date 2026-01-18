@@ -1,21 +1,18 @@
 package com.onair.hearit
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.SavedStateHandle
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.repository.CategoryRepository
-import com.onair.hearit.domain.repository.HearitRepository
-import com.onair.hearit.domain.repository.RecentKeywordRepository
-import com.onair.hearit.presentation.search.SearchViewModel
+import com.onair.hearit.presentation.search.main.SearchMainViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -26,39 +23,22 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SearchViewModelTest {
+class SearchMainViewModelTest {
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
-    private lateinit var viewModel: SearchViewModel
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private lateinit var viewModel: SearchMainViewModel
     private lateinit var categoryRepository: CategoryRepository
-    private lateinit var hearitRepository: HearitRepository
-    private lateinit var recentKeywordRepository: RecentKeywordRepository
-
-    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
         categoryRepository = mockk()
-        hearitRepository = mockk()
-        recentKeywordRepository = mockk()
-
-        val savedStateHandle =
-            SavedStateHandle(
-                mapOf(
-                    "categoryId" to 1L,
-                    "categoryName" to "테스트 카테고리",
-                    "categoryColor" to "#FF5733",
-                ),
-            )
 
         viewModel =
-            SearchViewModel(
-                savedStateHandle,
+            SearchMainViewModel(
                 categoryRepository = categoryRepository,
-                hearitRepository = hearitRepository,
-                recentKeywordRepository = recentKeywordRepository,
             )
     }
 
@@ -68,7 +48,7 @@ class SearchViewModelTest {
     }
 
     @Test
-    fun `getCategories 성공 시 categories에 데이터가 설정된다`() =
+    fun `fetchCategories 성공 시 categories에 데이터가 설정된다`() =
         runTest {
             // Given
             val mockCategories =
@@ -77,27 +57,28 @@ class SearchViewModelTest {
                     Category(id = 2, name = "Android", colorCode = "#33FF57"),
                     Category(id = 3, name = "Compose", colorCode = "#3357FF"),
                 )
-            val mockPageCategories =
+            val mockPageResult =
                 PageResult(
                     items = mockCategories,
                     paging = Paging(1, 1, 1, 1, isFirst = true, isLast = true),
                 )
 
-            coEvery {
-                categoryRepository.getCategories(any())
-            } returns Result.success(mockPageCategories)
+            coEvery { categoryRepository.getCategories(any()) } returns
+                Result.success(
+                    mockPageResult,
+                )
 
             // When
-            viewModel.getCategories()
-            advanceUntilIdle()
+            viewModel.fetchCategories()
 
             // Then
-            assertEquals(mockCategories, viewModel.categories.value)
+            assertEquals(mockCategories.toImmutableList(), viewModel.searchMainUiState.value.categories)
+            assertEquals(false, viewModel.searchMainUiState.value.isLoading)
             coVerify(exactly = 1) { categoryRepository.getCategories(page = 0) }
         }
 
     @Test
-    fun `getCategories 실패 시 toast 메시지가 발생한다`() =
+    fun `fetchCategories 실패 시 toast 메시지가 발생한다`() =
         runTest {
             // Given
             val exception = Exception("Network Error")
@@ -106,8 +87,7 @@ class SearchViewModelTest {
             } returns Result.failure(exception)
 
             // When
-            viewModel.getCategories()
-            advanceUntilIdle()
+            viewModel.fetchCategories()
 
             // Then
             assertEquals(
