@@ -44,6 +44,8 @@ androidx-test-ext = "1.1.5"
 espressoCore = "3.5.0"
 androidx-test = "1.5.0"
 swiperefreshlayout = "1.2.0"
+lifecycleRuntimeKtx = "2.10.0"
+composeBom = "2024.09.00"
 
 [libraries]
 # AndroidX Core
@@ -151,6 +153,10 @@ androidx-core-testing = { module = "androidx.arch.core:core-testing", version.re
 
 # Logging
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
