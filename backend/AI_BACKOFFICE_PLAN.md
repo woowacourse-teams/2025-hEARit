@@ -1406,8 +1406,8 @@ CREATE TABLE ai_process_result (
 - [ ] CSS 스타일링 (기존 admin 스타일 재사용)
 
 ### Step 7: 테스트
-- [ ] 단위 테스트 작성
-- [ ] 통합 테스트 작성
+- [x] 단위 테스트 작성
+- [x] 통합 테스트 작성
 - [ ] E2E 테스트 수행
 
 ### Step 8: 운영
