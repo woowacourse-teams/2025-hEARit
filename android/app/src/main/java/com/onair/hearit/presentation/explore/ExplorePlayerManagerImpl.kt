@@ -59,6 +59,7 @@ class ExplorePlayerManagerImpl @Inject constructor(
 
                     Player.STATE_IDLE -> {
                         _isPlaying.value = false
+                        scriptSyncJob?.cancel()
                     }
 
                     Player.STATE_READY -> {
@@ -75,6 +76,8 @@ class ExplorePlayerManagerImpl @Inject constructor(
                     _isPlaybackEnded.value = false
                     _duration.value = player.duration.coerceAtLeast(0L)
                     startScriptSync()
+                } else {
+                    scriptSyncJob?.cancel()
                 }
             }
         }
@@ -83,7 +86,7 @@ class ExplorePlayerManagerImpl @Inject constructor(
         audioUrl: String,
         startPosition: Long,
     ) {
-        // 1. 현재 이미 같은 곡이 세팅되어 있는지 확인
+        // 현재 이미 같은 곡이 세팅되어 있는지 확인
         val currentUrl =
             player.currentMediaItem
                 ?.localConfiguration
@@ -123,6 +126,7 @@ class ExplorePlayerManagerImpl @Inject constructor(
     override fun pause() {
         player.pause()
         player.playWhenReady = false
+        scriptSyncJob?.cancel()
     }
 
     override fun setPlaybackSpeed(speed: Float) {
@@ -130,12 +134,6 @@ class ExplorePlayerManagerImpl @Inject constructor(
         player.playbackParameters = params
 
         _speed.value = speed
-    }
-
-    fun release() {
-        player.release()
-        scriptSyncJob?.cancel()
-        scriptSyncJob = null
     }
 
     private fun startScriptSync() {
