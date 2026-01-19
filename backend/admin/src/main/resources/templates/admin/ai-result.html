@@ -14,13 +14,30 @@
             border-radius: 10px;
             padding: 20px;
         }
-        .script-panel {
-            max-height: 400px;
+        /* 비교 탭 전체 스크롤 컨테이너 */
+        .compare-scroll-container {
+            max-height: 600px;
             overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .script-panel {
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 15px;
             background-color: #fff;
+        }
+        /* 비교 탭 내부 패널 - 스크롤 제거, 전체 컨테이너가 스크롤 담당 */
+        .compare-panel-inner {
+            border: none;
+            max-height: none;
+            overflow-y: visible;
+        }
+        /* 편집 탭 패널 - 기존대로 개별 스크롤 */
+        .edit-script-panel {
+            max-height: 600px;
+            overflow-y: auto;
         }
         .script-segment {
             padding: 8px 12px;
@@ -62,6 +79,18 @@
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 20px;
+            min-height: 200px;
+        }
+        /* AI 제안 텍스트가 가로로 넘치지 않도록 */
+        .ai-suggestion {
+            display: block;
+            white-space: normal;
+            word-break: break-word;
+            text-align: left;
+            padding: 8px 12px;
+            line-height: 1.5;
+            max-height: 80px;
+            overflow-y: auto;
         }
         .source-input-group {
             margin-bottom: 10px;
@@ -154,20 +183,31 @@
         <div class="tab-content">
             <!-- 비교 탭 -->
             <div class="tab-pane fade show active" id="compare-panel" role="tabpanel">
-                <div class="row">
+                <!-- 헤더 (스크롤 영역 바깥) -->
+                <div class="row mb-2">
                     <div class="col-md-5">
-                        <h6 class="text-muted mb-2">원본 STT 결과</h6>
-                        <div class="script-panel" id="raw-script-panel">
-                            <!-- JavaScript로 렌더링 -->
+                        <h6 class="text-muted mb-0">원본 STT 결과</h6>
+                    </div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-5">
+                        <h6 class="text-muted mb-0">AI 교정 결과</h6>
+                    </div>
+                </div>
+                <!-- 통합 스크롤 컨테이너 -->
+                <div class="compare-scroll-container p-3">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="script-panel compare-panel-inner" id="raw-script-panel">
+                                <!-- JavaScript로 렌더링 -->
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-2 comparison-arrow">
-                        <i class="bi bi-arrow-right-circle"></i>
-                    </div>
-                    <div class="col-md-5">
-                        <h6 class="text-muted mb-2">AI 교정 결과</h6>
-                        <div class="script-panel" id="corrected-script-panel">
-                            <!-- JavaScript로 렌더링 -->
+                        <div class="col-md-2 comparison-arrow">
+                            <i class="bi bi-arrow-right-circle"></i>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="script-panel compare-panel-inner" id="corrected-script-panel">
+                                <!-- JavaScript로 렌더링 -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -175,7 +215,7 @@
 
             <!-- 편집 탭 -->
             <div class="tab-pane fade" id="edit-panel" role="tabpanel">
-                <div class="script-panel" id="edit-script-panel" style="max-height: 500px;">
+                <div class="script-panel edit-script-panel" id="edit-script-panel">
                     <!-- JavaScript로 렌더링 -->
                 </div>
                 <div class="mt-3 d-flex justify-content-end gap-2">
@@ -199,8 +239,8 @@
                 <div class="metadata-card mb-3">
                     <label class="form-label fw-bold">제목</label>
                     <div class="mb-2">
-                        <small class="text-muted">AI 제안:</small>
-                        <span class="badge bg-light text-dark" th:text="${result.suggestedTitle}"></span>
+                        <small class="text-muted d-block mb-1">AI 제안:</small>
+                        <span class="badge bg-light text-dark ai-suggestion" th:text="${result.suggestedTitle}"></span>
                     </div>
                     <input type="text" class="form-control" id="title-input"
                            th:value="${result.finalTitle}" maxlength="100"
@@ -211,10 +251,10 @@
                 <div class="metadata-card mb-3">
                     <label class="form-label fw-bold">요약</label>
                     <div class="mb-2">
-                        <small class="text-muted">AI 제안:</small>
-                        <span class="badge bg-light text-dark" th:text="${result.suggestedSummary}"></span>
+                        <small class="text-muted d-block mb-1">AI 제안:</small>
+                        <span class="badge bg-light text-dark ai-suggestion" th:text="${result.suggestedSummary}"></span>
                     </div>
-                    <textarea class="form-control" id="summary-input" rows="3"
+                    <textarea class="form-control" id="summary-input" rows="5"
                               th:text="${result.finalSummary}" maxlength="500"
                               placeholder="요약을 입력하세요"></textarea>
                 </div>
