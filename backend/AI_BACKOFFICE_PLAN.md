@@ -8,7 +8,7 @@ NotebookLM으로 생성한 오디오 파일을 백오피스에서 AI로 처리�
 > - **API 경로**: `/admin/api/ai/*` (AdminSecurityConfig, 세션 기반 인증)
 > - **JSON 매핑**: JPA AttributeConverter로 `List<ScriptSegment>` ↔ JSON 자동 변환
 > - **MP3 처리**: mp3spi 라이브러리로 정확한 메타데이터 추출 후 바이트 기반 자르기
-> - **지원 포맷**: MP3만 허용 (FFmpeg 의존성 제거, NotebookLM 출력을 MP3로 변환 후 업로드)
+> - **지원 포맷**: MP3, M4A/AAC (AudioProcessor 추상화로 확장 가능)
 > - **파일 크기 제한**: 25MB (Groq Whisper API 제한)
 > - **Groq Whisper API 응답**: 초 단위 float → 밀리초 int 변환
 > - **재생 시간**: Groq Whisper API의 `duration` 또는 마지막 segment의 `end` 사용
@@ -38,7 +38,7 @@ NotebookLM으로 생성한 오디오 파일을 백오피스에서 AI로 처리�
 | 프론트엔드 | Thymeleaf 확장 | 기존 관리자 페이지와 일관성 |
 | 임시 저장 | S3 `/hearit/temp/` | 기존 S3 인프라 활용 |
 | 오디오 처리 | mp3spi + 바이트 자르기 | MP3 메타데이터 정확히 추출, 바이트 기반 자르기 |
-| 지원 포맷 | MP3만 허용 | FFmpeg 의존성 제거, 단순화 |
+| 지원 포맷 | MP3, M4A/AAC | AudioProcessor 인터페이스로 확장성 확보 |
 | 파일 크기 | 최대 25MB | Groq Whisper API 제한 준수 |
 | JSON 매핑 | JPA AttributeConverter | List<ScriptSegment> ↔ JSON 자동 변환 |
 | API 경로 | `/admin/api/ai/*` | AdminSecurityConfig 보안 적용, 세션 기반 인증 |
@@ -1452,7 +1452,19 @@ CREATE TABLE ai_process_result (
 
 **해결**: `SourceManageListener`를 분리하여 Hearit 엔티티의 `@PostPersist` 이벤트로 Source를 자동 저장하도록 리팩토링. AI confirm과 기존 수동 등록 모두 동일한 로직 사용.
 
-### 5. AI 결과 페이지 데이터 전달
+### 5. AudioProcessor 추상화 (M4A 지원)
+
+**목적**: M4A/AAC 오디오 포맷을 지원하고, 향후 다른 포맷도 쉽게 추가할 수 있도록 AudioProcessor 인터페이스 도입.
+
+**구현**:
+- `AudioProcessor` 인터페이스: `supports()`, `validate()`, `createShortClip()`, `extractMetadata()`, `getExtension()`, `getMimeType()` 정의
+- `Mp3AudioProcessor`: 기존 구현을 인터페이스 구현으로 변경
+- `M4aAudioProcessor`: M4A/AAC 파일 처리 구현 (ftyp box 검증, mvhd에서 메타데이터 추출)
+- `AudioProcessorResolver`: 파일 확장자에 따라 적절한 프로세서 선택
+
+**테스트**: `Mp3AudioProcessorTest`, `M4aAudioProcessorTest`, `AudioProcessorResolverTest` 추가
+
+### 6. AI 결과 페이지 데이터 전달
 
 **문제**: AI 결과 검토 페이지에서 카테고리/키워드 목록, 교정된 대본 등의 데이터를 프론트엔드에 전달해야 함.
 
@@ -1468,6 +1480,8 @@ CREATE TABLE ai_process_result (
 |--------------|------------|
 | `ProcessStatusUtilTest` | 진행률 계산, 상태 메시지 |
 | `Mp3AudioProcessorTest` | 메타데이터 추출, 쇼츠 생성, MP3 검증 |
+| `M4aAudioProcessorTest` | M4A 검증, 쇼츠 생성, ftyp box 검증 |
+| `AudioProcessorResolverTest` | 프로세서 선택, 지원 포맷 확인 |
 | `GroqWhisperClientTest` | API 호출 모킹, 응답 파싱, 에러 처리 |
 | `GeminiClientTest` | API 호출 모킹, JSON 응답 파싱, Rate Limiting |
 | `TranscriptionServiceTest` | STT 호출, 세그먼트 병합 |
