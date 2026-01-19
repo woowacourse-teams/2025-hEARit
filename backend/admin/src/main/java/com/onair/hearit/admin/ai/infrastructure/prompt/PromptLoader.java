@@ -3,6 +3,7 @@ package com.onair.hearit.admin.ai.infrastructure.prompt;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
+@Getter
 public class PromptLoader {
 
     private final Resource scriptCorrectionResource;
@@ -46,19 +48,4 @@ public class PromptLoader {
         }
     }
 
-    /**
-     * 대본 교정 프롬프트 템플릿 반환
-     * 사용법: String.format(getScriptCorrectionPrompt(), inputJson)
-     */
-    public String getScriptCorrectionPrompt() {
-        return scriptCorrectionPrompt;
-    }
-
-    /**
-     * 메타데이터 생성 프롬프트 템플릿 반환
-     * 사용법: String.format(getMetadataGenerationPrompt(), scriptText)
-     */
-    public String getMetadataGenerationPrompt() {
-        return metadataGenerationPrompt;
-    }
 }
