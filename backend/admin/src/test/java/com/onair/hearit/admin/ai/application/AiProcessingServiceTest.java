@@ -77,11 +77,11 @@ class AiProcessingServiceTest {
                 transcriptionService,
                 correctionService,
                 metadataService,
-                objectMapper
+                objectMapper,
+                24,           // expirationHours
+                60,           // shortsDurationSeconds
+                "hearit/temp/" // tempPrefix
         );
-        ReflectionTestUtils.setField(aiProcessingService, "expirationHours", 24);
-        ReflectionTestUtils.setField(aiProcessingService, "shortsDurationSeconds", 60);
-        ReflectionTestUtils.setField(aiProcessingService, "tempPrefix", "hearit/temp/");
     }
 
     @Nested

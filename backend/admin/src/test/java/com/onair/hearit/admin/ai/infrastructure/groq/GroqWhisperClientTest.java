@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,9 +36,12 @@ class GroqWhisperClientTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        whisperClient = new GroqWhisperClient(restTemplate, objectMapper);
-        ReflectionTestUtils.setField(whisperClient, "apiKey", "test-api-key");
-        ReflectionTestUtils.setField(whisperClient, "model", "whisper-large-v3-turbo");
+        whisperClient = new GroqWhisperClient(
+                restTemplate,
+                objectMapper,
+                "test-api-key",
+                "whisper-large-v3-turbo"
+        );
     }
 
     @Nested

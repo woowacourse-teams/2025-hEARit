@@ -13,7 +13,6 @@ import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import com.onair.hearit.core.domain.FileType;
 import java.util.List;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,16 +20,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class AiResultService {
 
     private final AiProcessResultRepository resultRepository;
     private final AdminHearitService hearitService;
     private final FileStorage fileStorage;
     private final TempFileManager tempFileManager;
+    private final String bucketUrl;
 
-    @Value("${aws.s3.bucket.url}")
-    private String bucketUrl;
+    public AiResultService(
+            AiProcessResultRepository resultRepository,
+            AdminHearitService hearitService,
+            FileStorage fileStorage,
+            TempFileManager tempFileManager,
+            @Value("${aws.s3.bucket.url}") String bucketUrl) {
+        this.resultRepository = resultRepository;
+        this.hearitService = hearitService;
+        this.fileStorage = fileStorage;
+        this.tempFileManager = tempFileManager;
+        this.bucketUrl = bucketUrl;
+    }
 
     @Transactional(readOnly = true)
     public AiProcessResult getResult(Long processId) {

@@ -21,8 +21,12 @@ public class Mp3AudioProcessor {
     private static final int MAX_FILE_SIZE_MB = 25;
     private static final int MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-    @Value("${ai.shorts.duration.seconds:60}")
-    private int shortsDurationSeconds;
+    private final int shortsDurationSeconds;
+
+    public Mp3AudioProcessor(
+            @Value("${ai.shorts.duration.seconds:60}") int shortsDurationSeconds) {
+        this.shortsDurationSeconds = shortsDurationSeconds;
+    }
 
     /**
      * MP3 파일에서 앞부분 N초를 잘라 쇼츠 생성

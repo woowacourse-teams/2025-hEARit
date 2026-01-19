@@ -12,7 +12,6 @@ import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class AiProcessingService {
 
     private final AiProcessResultRepository resultRepository;
@@ -33,15 +31,36 @@ public class AiProcessingService {
     private final ScriptCorrectionService correctionService;
     private final MetadataGenerationService metadataService;
     private final ObjectMapper objectMapper;
+    private final int expirationHours;
+    private final int shortsDurationSeconds;
+    private final String tempPrefix;
 
-    @Value("${ai.result.expiration.hours:24}")
-    private int expirationHours;
-
-    @Value("${ai.shorts.duration.seconds:60}")
-    private int shortsDurationSeconds;
-
-    @Value("${aws.s3.temp.prefix:hearit/temp/}")
-    private String tempPrefix;
+    public AiProcessingService(
+            AiProcessResultRepository resultRepository,
+            AiProcessStatusUpdater statusUpdater,
+            FileStorage fileStorage,
+            TempFileManager tempFileManager,
+            Mp3AudioProcessor mp3Processor,
+            TranscriptionService transcriptionService,
+            ScriptCorrectionService correctionService,
+            MetadataGenerationService metadataService,
+            ObjectMapper objectMapper,
+            @Value("${ai.result.expiration.hours:24}") int expirationHours,
+            @Value("${ai.shorts.duration.seconds:60}") int shortsDurationSeconds,
+            @Value("${aws.s3.temp.prefix:hearit/temp/}") String tempPrefix) {
+        this.resultRepository = resultRepository;
+        this.statusUpdater = statusUpdater;
+        this.fileStorage = fileStorage;
+        this.tempFileManager = tempFileManager;
+        this.mp3Processor = mp3Processor;
+        this.transcriptionService = transcriptionService;
+        this.correctionService = correctionService;
+        this.metadataService = metadataService;
+        this.objectMapper = objectMapper;
+        this.expirationHours = expirationHours;
+        this.shortsDurationSeconds = shortsDurationSeconds;
+        this.tempPrefix = tempPrefix;
+    }
 
     @Transactional
     public Long startProcessing(byte[] audioData, String filename) {

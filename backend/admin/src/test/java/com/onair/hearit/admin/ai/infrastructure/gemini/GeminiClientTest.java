@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -36,9 +35,12 @@ class GeminiClientTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        geminiClient = new GeminiClient(restTemplate, objectMapper);
-        ReflectionTestUtils.setField(geminiClient, "apiKey", "test-api-key");
-        ReflectionTestUtils.setField(geminiClient, "model", "gemini-2.5-flash");
+        geminiClient = new GeminiClient(
+                restTemplate,
+                objectMapper,
+                "test-api-key",
+                "gemini-2.5-flash"
+        );
     }
 
     @Nested

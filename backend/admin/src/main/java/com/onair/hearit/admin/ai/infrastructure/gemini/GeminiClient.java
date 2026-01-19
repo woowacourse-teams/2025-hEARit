@@ -43,18 +43,18 @@ public class GeminiClient {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-
-    @Value("${gemini.api.key}")
-    private String apiKey;
-
-    @Value("${gemini.model:gemini-2.5-flash}")
-    private String model;
+    private final String apiKey;
+    private final String model;
 
     public GeminiClient(
             @Qualifier("aiRestTemplate") RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            @Value("${gemini.api.key}") String apiKey,
+            @Value("${gemini.model:gemini-2.5-flash}") String model) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.apiKey = apiKey;
+        this.model = model;
     }
 
     /**

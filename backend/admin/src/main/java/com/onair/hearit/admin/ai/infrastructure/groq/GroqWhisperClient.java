@@ -35,18 +35,18 @@ public class GroqWhisperClient {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-
-    @Value("${groq.api.key}")
-    private String apiKey;
-
-    @Value("${groq.whisper.model:whisper-large-v3-turbo}")
-    private String model;
+    private final String apiKey;
+    private final String model;
 
     public GroqWhisperClient(
             @Qualifier("aiRestTemplate") RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            @Value("${groq.api.key}") String apiKey,
+            @Value("${groq.whisper.model:whisper-large-v3-turbo}") String model) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.apiKey = apiKey;
+        this.model = model;
     }
 
     /**
