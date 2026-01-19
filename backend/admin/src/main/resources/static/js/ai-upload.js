@@ -27,7 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Constants
     const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
-    const ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3'];
+    const ALLOWED_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/aac', 'audio/x-m4a'];
+    const ALLOWED_EXTENSIONS = ['.mp3', '.m4a', '.aac'];
     const POLLING_INTERVAL = 2000; // 2초
 
     let selectedFile = null;
@@ -79,8 +80,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // 파일 선택 처리
     function handleFileSelect(file) {
         // 파일 타입 검증
-        if (!ALLOWED_TYPES.includes(file.type) && !file.name.toLowerCase().endsWith('.mp3')) {
-            alert('MP3 파일만 업로드 가능합니다.');
+        const fileName = file.name.toLowerCase();
+        const hasValidExtension = ALLOWED_EXTENSIONS.some(ext => fileName.endsWith(ext));
+        if (!ALLOWED_TYPES.includes(file.type) && !hasValidExtension) {
+            alert('MP3, M4A, AAC 파일만 업로드 가능합니다.');
             return;
         }
 

@@ -19,8 +19,8 @@ class Mp3AudioProcessorTest {
     }
 
     @Nested
-    @DisplayName("validateMp3 메서드는")
-    class ValidateMp3Tests {
+    @DisplayName("validate 메서드는")
+    class ValidateTests {
 
         @Test
         @DisplayName("파일 크기가 25MB를 초과하면 예외를 던진다")
@@ -32,7 +32,7 @@ class Mp3AudioProcessorTest {
             largeFile[2] = '3';
 
             // when & then
-            assertThatThrownBy(() -> processor.validateMp3(largeFile, "test.mp3"))
+            assertThatThrownBy(() -> processor.validate(largeFile, "test.mp3"))
                     .isInstanceOf(AudioProcessingException.class)
                     .hasMessageContaining("25MB");
         }
@@ -44,7 +44,7 @@ class Mp3AudioProcessorTest {
             byte[] mp3Data = createValidMp3Header();
 
             // when & then
-            assertThatThrownBy(() -> processor.validateMp3(mp3Data, "test.wav"))
+            assertThatThrownBy(() -> processor.validate(mp3Data, "test.wav"))
                     .isInstanceOf(AudioProcessingException.class)
                     .hasMessageContaining("MP3");
         }
@@ -56,7 +56,7 @@ class Mp3AudioProcessorTest {
             byte[] mp3Data = createValidMp3Header();
 
             // when & then
-            assertThatThrownBy(() -> processor.validateMp3(mp3Data, null))
+            assertThatThrownBy(() -> processor.validate(mp3Data, null))
                     .isInstanceOf(AudioProcessingException.class)
                     .hasMessageContaining("MP3");
         }
@@ -68,7 +68,7 @@ class Mp3AudioProcessorTest {
             byte[] invalidData = new byte[]{0x00, 0x00, 0x00, 0x00};
 
             // when & then
-            assertThatThrownBy(() -> processor.validateMp3(invalidData, "test.mp3"))
+            assertThatThrownBy(() -> processor.validate(invalidData, "test.mp3"))
                     .isInstanceOf(AudioProcessingException.class)
                     .hasMessageContaining("유효하지 않은");
         }
@@ -80,7 +80,7 @@ class Mp3AudioProcessorTest {
             byte[] mp3Data = createValidMp3Header();
 
             // when & then - 예외 없이 통과
-            processor.validateMp3(mp3Data, "test.mp3");
+            processor.validate(mp3Data, "test.mp3");
         }
 
         @Test
@@ -92,7 +92,7 @@ class Mp3AudioProcessorTest {
             mp3Data[1] = (byte) 0xFB; // 0xE0 mask 만족
 
             // when & then - 예외 없이 통과
-            processor.validateMp3(mp3Data, "test.mp3");
+            processor.validate(mp3Data, "test.mp3");
         }
 
         @Test
@@ -102,7 +102,7 @@ class Mp3AudioProcessorTest {
             byte[] mp3Data = createValidMp3Header();
 
             // when & then - 예외 없이 통과
-            processor.validateMp3(mp3Data, "test.MP3");
+            processor.validate(mp3Data, "test.MP3");
         }
     }
 
@@ -144,7 +144,7 @@ class Mp3AudioProcessorTest {
             byte[] shortData = new byte[2];
 
             // when & then
-            assertThatThrownBy(() -> processor.validateMp3(shortData, "test.mp3"))
+            assertThatThrownBy(() -> processor.validate(shortData, "test.mp3"))
                     .isInstanceOf(AudioProcessingException.class);
         }
 
@@ -155,7 +155,7 @@ class Mp3AudioProcessorTest {
             byte[] shortData = new byte[2];
 
             // when & then
-            assertThatThrownBy(() -> processor.validateMp3(shortData, "test.mp3"))
+            assertThatThrownBy(() -> processor.validate(shortData, "test.mp3"))
                     .isInstanceOf(AudioProcessingException.class);
         }
     }

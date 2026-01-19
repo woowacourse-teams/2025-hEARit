@@ -19,7 +19,8 @@ import com.onair.hearit.admin.ai.domain.AiProcessResult;
 import com.onair.hearit.admin.ai.domain.ProcessStatus;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
-import com.onair.hearit.admin.ai.infrastructure.audio.Mp3AudioProcessor;
+import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessor;
+import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessorResolver;
 import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient.TranscriptionResult;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
 import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
@@ -33,9 +34,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class AiProcessingServiceTest {
 
     @Mock
@@ -51,7 +55,10 @@ class AiProcessingServiceTest {
     private TempFileManager tempFileManager;
 
     @Mock
-    private Mp3AudioProcessor mp3Processor;
+    private AudioProcessorResolver audioProcessorResolver;
+
+    @Mock
+    private AudioProcessor audioProcessor;
 
     @Mock
     private TranscriptionService transcriptionService;
@@ -73,7 +80,7 @@ class AiProcessingServiceTest {
                 statusUpdater,
                 fileStorage,
                 tempFileManager,
-                mp3Processor,
+                audioProcessorResolver,
                 transcriptionService,
                 correctionService,
                 metadataService,
@@ -82,6 +89,11 @@ class AiProcessingServiceTest {
                 60,           // shortsDurationSeconds
                 "hearit/temp/" // tempPrefix
         );
+
+        // 기본 AudioProcessor 동작 설정
+        when(audioProcessorResolver.resolve(anyString())).thenReturn(audioProcessor);
+        when(audioProcessor.getExtension()).thenReturn("mp3");
+        when(audioProcessor.getMimeType()).thenReturn("audio/mpeg");
     }
 
     @Nested
@@ -103,7 +115,8 @@ class AiProcessingServiceTest {
 
             // then
             assertThat(resultId).isEqualTo(1L);
-            verify(mp3Processor).validateMp3(audioData, filename);
+            verify(audioProcessorResolver).resolve(filename);
+            verify(audioProcessor).validate(audioData, filename);
             verify(resultRepository).save(any(AiProcessResult.class));
         }
 
@@ -139,13 +152,13 @@ class AiProcessingServiceTest {
             byte[] audioData = createTestAudioData();
             String filename = "test.wav";
 
-            doThrow(AudioProcessingException.unsupportedFormat("MP3 파일만 지원합니다"))
-                    .when(mp3Processor).validateMp3(any(), anyString());
+            doThrow(AudioProcessingException.unsupportedFormat("지원하지 않는 오디오 형식입니다"))
+                    .when(audioProcessor).validate(any(), anyString());
 
             // when & then
             assertThatThrownBy(() -> aiProcessingService.startProcessing(audioData, filename))
                     .isInstanceOf(AudioProcessingException.class)
-                    .hasMessageContaining("MP3 파일만 지원합니다");
+                    .hasMessageContaining("지원하지 않는 오디오 형식");
 
             verify(resultRepository, never()).save(any());
         }
@@ -166,7 +179,7 @@ class AiProcessingServiceTest {
             when(statusUpdater.findById(processId)).thenReturn(mockResult);
 
             byte[] shortsData = new byte[500];
-            when(mp3Processor.createShortClip(any(byte[].class), anyInt())).thenReturn(shortsData);
+            when(audioProcessor.createShortClip(any(byte[].class), anyInt())).thenReturn(shortsData);
 
             List<ScriptSegment> rawSegments = List.of(
                     new ScriptSegment(0, 0, 5000, "테스트")
@@ -215,7 +228,7 @@ class AiProcessingServiceTest {
             when(statusUpdater.findById(processId)).thenReturn(mockResult);
 
             byte[] shortsData = new byte[500];
-            when(mp3Processor.createShortClip(any(byte[].class), anyInt())).thenReturn(shortsData);
+            when(audioProcessor.createShortClip(any(byte[].class), anyInt())).thenReturn(shortsData);
 
             when(transcriptionService.transcribe(any(byte[].class), anyString()))
                     .thenThrow(new AudioProcessingException("STT 처리 실패"));
@@ -238,7 +251,7 @@ class AiProcessingServiceTest {
             when(statusUpdater.findById(processId)).thenReturn(mockResult);
 
             byte[] shortsData = new byte[500];
-            when(mp3Processor.createShortClip(any(byte[].class), anyInt())).thenReturn(shortsData);
+            when(audioProcessor.createShortClip(any(byte[].class), anyInt())).thenReturn(shortsData);
 
             List<ScriptSegment> rawSegments = List.of(
                     new ScriptSegment(0, 0, 5000, "테스트")
@@ -271,7 +284,7 @@ class AiProcessingServiceTest {
             when(statusUpdater.findById(processId)).thenReturn(mockResult);
 
             // 원본이 짧아서 그대로 반환
-            when(mp3Processor.createShortClip(any(byte[].class), anyInt())).thenReturn(audioData);
+            when(audioProcessor.createShortClip(any(byte[].class), anyInt())).thenReturn(audioData);
 
             List<ScriptSegment> rawSegments = List.of(
                     new ScriptSegment(0, 0, 5000, "짧은 오디오")
@@ -289,7 +302,7 @@ class AiProcessingServiceTest {
             aiProcessingService.executeProcessing(processId, audioData);
 
             // then
-            verify(mp3Processor).createShortClip(audioData, 60);
+            verify(audioProcessor).createShortClip(audioData, 60);
             verify(statusUpdater).markAsCompleted(eq(processId), any());
         }
     }

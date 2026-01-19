@@ -815,9 +815,9 @@ admin/ai/
 
 ### Phase 2: 구조 개선 (Medium Priority)
 
-- [ ] AudioProcessor 인터페이스 추상화
-- [ ] M4aAudioProcessor 구현
-- [ ] AudioProcessorResolver 생성
+- [x] AudioProcessor 인터페이스 추상화
+- [x] M4aAudioProcessor 구현
+- [x] AudioProcessorResolver 생성
 - [ ] JsonExtractionUtil 생성
 - [ ] S3UrlResolver 생성 및 적용
 - [ ] AiResultController에서 bucketUrl 제거
@@ -840,7 +840,7 @@ admin/ai/
 | GeminiRateLimiter | GeminiClientTest 수정 | GeminiRateLimiterTest |
 | 생성자 주입 변경 | 테스트 빈 설정 변경 | 없음 |
 | AiProperties | 설정 주입 방식 변경 | AiPropertiesTest |
-| AudioProcessor 추상화 | Mp3AudioProcessorTest 수정 | M4aAudioProcessorTest |
+| AudioProcessor 추상화 | Mp3AudioProcessorTest 수정 ✓ | M4aAudioProcessorTest ✓, AudioProcessorResolverTest ✓ |
 | 예외 클래스 | 예외 타입 검증 수정 | 없음 |
 
 ---

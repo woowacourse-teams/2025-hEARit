@@ -79,6 +79,10 @@ public class ScriptCorrectionService {
 
         } catch (JsonProcessingException e) {
             log.warn("교정 응답 파싱 실패, 원본 유지: {}", e.getMessage());
+            // 응답 끝부분 로깅 (잘린 부분 확인용)
+            int len = responseJson.length();
+            String tail = len > 500 ? responseJson.substring(len - 500) : responseJson;
+            log.warn("응답 끝부분 (마지막 500자):\n{}", tail);
             return fallback;
         }
     }

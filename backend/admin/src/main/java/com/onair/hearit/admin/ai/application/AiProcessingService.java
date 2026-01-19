@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.admin.ai.application.MetadataGenerationService.GeneratedMetadata;
 import com.onair.hearit.admin.ai.domain.AiProcessResult;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
-import com.onair.hearit.admin.ai.infrastructure.audio.Mp3AudioProcessor;
+import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessor;
+import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessorResolver;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
 import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient.TranscriptionResult;
 import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
@@ -26,7 +27,7 @@ public class AiProcessingService {
     private final AiProcessStatusUpdater statusUpdater;
     private final FileStorage fileStorage;
     private final TempFileManager tempFileManager;
-    private final Mp3AudioProcessor mp3Processor;
+    private final AudioProcessorResolver audioProcessorResolver;
     private final TranscriptionService transcriptionService;
     private final ScriptCorrectionService correctionService;
     private final MetadataGenerationService metadataService;
@@ -40,7 +41,7 @@ public class AiProcessingService {
             AiProcessStatusUpdater statusUpdater,
             FileStorage fileStorage,
             TempFileManager tempFileManager,
-            Mp3AudioProcessor mp3Processor,
+            AudioProcessorResolver audioProcessorResolver,
             TranscriptionService transcriptionService,
             ScriptCorrectionService correctionService,
             MetadataGenerationService metadataService,
@@ -52,7 +53,7 @@ public class AiProcessingService {
         this.statusUpdater = statusUpdater;
         this.fileStorage = fileStorage;
         this.tempFileManager = tempFileManager;
-        this.mp3Processor = mp3Processor;
+        this.audioProcessorResolver = audioProcessorResolver;
         this.transcriptionService = transcriptionService;
         this.correctionService = correctionService;
         this.metadataService = metadataService;
@@ -65,9 +66,15 @@ public class AiProcessingService {
     @Transactional
     public Long startProcessing(byte[] audioData, String filename) {
         log.info("AI 처리 시작: 파일={}, 크기={}KB", filename, audioData.length / 1024);
-        mp3Processor.validateMp3(audioData, filename);
+
+        // 파일 포맷에 맞는 프로세서 선택 및 유효성 검증
+        AudioProcessor processor = audioProcessorResolver.resolve(filename);
+        processor.validate(audioData, filename);
+
         String uuid = UUID.randomUUID().toString();
-        String originalKey = tempPrefix + "original/" + uuid + ".mp3";
+        String extension = processor.getExtension();
+        String originalKey = tempPrefix + "original/" + uuid + "." + extension;
+
         AiProcessResult result = AiProcessResult.builder()
                 .originalFileName(filename)
                 .originalFileKey(originalKey)
@@ -84,9 +91,13 @@ public class AiProcessingService {
         String uuid = extractUuid(result.getOriginalFileKey());
         String originalFileKey = result.getOriginalFileKey();
         String originalFileName = result.getOriginalFileName();
+
+        // 파일 포맷에 맞는 프로세서 선택
+        AudioProcessor processor = audioProcessorResolver.resolve(originalFileName);
+
         try {
-            uploadOriginalFile(processId, originalFileKey, audioData);
-            createAndUploadShorts(processId, audioData, uuid);
+            uploadOriginalFile(processId, originalFileKey, audioData, processor);
+            createAndUploadShorts(processId, audioData, uuid, processor);
             TranscriptionResult transcription = processTranscription(processId, audioData, originalFileName);
             List<ScriptSegment> correctedScript = correctScript(processId, transcription.getSegments());
             uploadScriptFile(processId, correctedScript, uuid);
@@ -101,20 +112,24 @@ public class AiProcessingService {
         }
     }
 
-    private void uploadOriginalFile(Long processId, String originalFileKey, byte[] audioData) {
+    private void uploadOriginalFile(Long processId, String originalFileKey, byte[] audioData,
+                                     AudioProcessor processor) {
         statusUpdater.markAsUploading(processId);
         log.debug("원본 파일 업로드 중: {}", originalFileKey);
-        fileStorage.uploadBytes(audioData, originalFileKey, "audio/mpeg");
+        fileStorage.uploadBytes(audioData, originalFileKey, processor.getMimeType());
     }
 
-    private void createAndUploadShorts(Long processId, byte[] audioData, String uuid) {
+    private void createAndUploadShorts(Long processId, byte[] audioData, String uuid,
+                                       AudioProcessor processor) {
         statusUpdater.markAsConverting(processId);
-        log.debug("쇼츠 생성 ");
-        byte[] shortsData = mp3Processor.createShortClip(audioData, shortsDurationSeconds);
-        String orgKey = tempPrefix + "org/" + uuid + ".mp3";
-        String shrKey = tempPrefix + "shr/" + uuid + ".mp3";
-        fileStorage.uploadBytes(audioData, orgKey, "audio/mpeg");
-        fileStorage.uploadBytes(shortsData, shrKey, "audio/mpeg");
+        log.debug("쇼츠 생성");
+        byte[] shortsData = processor.createShortClip(audioData, shortsDurationSeconds);
+        String extension = processor.getExtension();
+        String mimeType = processor.getMimeType();
+        String orgKey = tempPrefix + "org/" + uuid + "." + extension;
+        String shrKey = tempPrefix + "shr/" + uuid + "." + extension;
+        fileStorage.uploadBytes(audioData, orgKey, mimeType);
+        fileStorage.uploadBytes(shortsData, shrKey, mimeType);
         statusUpdater.setGeneratedFiles(processId, orgKey, shrKey, null);
     }
 
@@ -174,6 +189,11 @@ public class AiProcessingService {
 
     private String extractUuid(String key) {
         String filename = key.substring(key.lastIndexOf('/') + 1);
-        return filename.replace(".mp3", "");
+        // 확장자 제거 (마지막 . 이후 모두 제거)
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex > 0) {
+            return filename.substring(0, dotIndex);
+        }
+        return filename;
     }
 }

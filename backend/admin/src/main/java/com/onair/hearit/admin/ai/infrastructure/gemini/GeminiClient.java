@@ -103,7 +103,7 @@ public class GeminiClient {
             // generationConfig
             ObjectNode config = root.putObject("generationConfig");
             config.put("temperature", 0.7);
-            config.put("maxOutputTokens", 8192);
+            config.put("maxOutputTokens", 65536);  // Gemini 2.5 Flash 최대값
 
             if (jsonResponse) {
                 config.put("responseMimeType", "application/json");
@@ -233,6 +233,13 @@ public class GeminiClient {
             }
 
             JsonNode firstCandidate = candidates.get(0);
+
+            // finishReason 확인 (STOP, MAX_TOKENS, SAFETY 등)
+            String finishReason = firstCandidate.path("finishReason").asText("UNKNOWN");
+            if (!"STOP".equals(finishReason)) {
+                log.warn("Gemini 응답 종료 이유: {} (정상은 STOP)", finishReason);
+            }
+
             JsonNode parts = firstCandidate.path("content").path("parts");
 
             if (!parts.isArray() || parts.isEmpty()) {
@@ -242,7 +249,7 @@ public class GeminiClient {
 
             String text = parts.get(0).path("text").asText("");
 
-            log.debug("Gemini 응답 텍스트 추출 완료: 길이={}", text.length());
+            log.debug("Gemini 응답 텍스트 추출 완료: 길이={}, finishReason={}", text.length(), finishReason);
 
             return text;
 

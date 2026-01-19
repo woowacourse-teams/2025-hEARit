@@ -8,15 +8,13 @@ import java.util.Map;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class Mp3AudioProcessor {
+public class Mp3AudioProcessor implements AudioProcessor {
 
     private static final int MAX_FILE_SIZE_MB = 25;
     private static final int MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -28,16 +26,25 @@ public class Mp3AudioProcessor {
         this.shortsDurationSeconds = shortsDurationSeconds;
     }
 
-    /**
-     * MP3 파일에서 앞부분 N초를 잘라 쇼츠 생성
-     *
-     * @param originalMp3 원본 MP3 바이트 배열
-     * @param durationSeconds 자를 길이 (초)
-     * @return 잘린 MP3 바이트 배열
-     */
+    @Override
+    public boolean supports(String filename) {
+        return filename != null && filename.toLowerCase().endsWith(".mp3");
+    }
+
+    @Override
+    public String getExtension() {
+        return "mp3";
+    }
+
+    @Override
+    public String getMimeType() {
+        return "audio/mpeg";
+    }
+
+    @Override
     public byte[] createShortClip(byte[] originalMp3, int durationSeconds) {
         try {
-            Mp3Metadata metadata = extractMetadata(originalMp3);
+            AudioMetadata metadata = extractMetadata(originalMp3);
 
             // 원본이 목표 시간보다 짧으면 전체 반환
             if (metadata.getDurationSeconds() <= durationSeconds) {
@@ -71,10 +78,8 @@ public class Mp3AudioProcessor {
         return createShortClip(originalMp3, shortsDurationSeconds);
     }
 
-    /**
-     * MP3 메타데이터 추출 (mp3spi 라이브러리 사용)
-     */
-    public Mp3Metadata extractMetadata(byte[] mp3Data) {
+    @Override
+    public AudioMetadata extractMetadata(byte[] mp3Data) {
         try {
             AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(
                     new ByteArrayInputStream(mp3Data));
@@ -106,7 +111,7 @@ public class Mp3AudioProcessor {
 
             log.debug("MP3 메타데이터: 비트레이트={}kbps, 재생시간={:.1f}초", bitrate, durationSeconds);
 
-            return new Mp3Metadata(bitrate, durationSeconds);
+            return new AudioMetadata(bitrate, durationSeconds);
 
         } catch (UnsupportedAudioFileException e) {
             log.error("지원하지 않는 오디오 형식", e);
@@ -126,10 +131,8 @@ public class Mp3AudioProcessor {
         return 128;
     }
 
-    /**
-     * MP3 파일 유효성 검증
-     */
-    public void validateMp3(byte[] data, String filename) {
+    @Override
+    public void validate(byte[] data, String filename) {
         // 파일 크기 검증 (25MB 제한 - Whisper API)
         if (data.length > MAX_FILE_SIZE_BYTES) {
             throw AudioProcessingException.fileTooLarge(
@@ -169,19 +172,5 @@ public class Mp3AudioProcessor {
         }
 
         return false;
-    }
-
-    /**
-     * MP3 메타데이터 DTO
-     */
-    @Getter
-    @AllArgsConstructor
-    public static class Mp3Metadata {
-        private final int bitrate;           // kbps
-        private final double durationSeconds; // 재생 시간 (초)
-
-        public int getDurationSecondsInt() {
-            return (int) Math.ceil(durationSeconds);
-        }
     }
 }
