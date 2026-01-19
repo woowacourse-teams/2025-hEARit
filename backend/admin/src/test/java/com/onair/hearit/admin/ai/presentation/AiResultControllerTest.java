@@ -126,8 +126,8 @@ class AiResultControllerTest extends IntegrationTest {
 
         AiProcessResult result = createCompletedResult();
 
-        // S3 파일 이동 모킹 (moveFile은 String을 반환)
-        when(fileStorage.moveFile(anyString(), anyString())).thenAnswer(invocation -> invocation.getArgument(1));
+        // S3 파일 복사 모킹 (copyFile은 String을 반환)
+        when(fileStorage.copyFile(anyString(), anyString())).thenAnswer(invocation -> invocation.getArgument(1));
 
         Map<String, Object> request = Map.of(
                 "categoryId", category.getId(),
