@@ -806,8 +806,8 @@ admin/ai/
 
 ### Phase 1: 핵심 리팩토링 (High Priority)
 
-- [ ] TempFileManager 생성 및 중복 코드 대체
-- [ ] ProcessStatus + ProcessStatusUtil 통합 (enum에 필드 추가)
+- [x] TempFileManager 생성 및 중복 코드 대체
+- [x] ProcessStatus + ProcessStatusUtil 통합 (enum에 필드 추가)
 - [ ] GeminiRateLimiter 분리
 - [ ] @Value → 생성자 주입 변경 (private final)
 - [ ] AiProperties 설정 클래스 생성
