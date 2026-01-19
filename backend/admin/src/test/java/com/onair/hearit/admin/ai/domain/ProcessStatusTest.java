@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class ProcessStatusUtilTest {
+class ProcessStatusTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -27,7 +27,7 @@ class ProcessStatusUtilTest {
         ProcessStatus status = ProcessStatus.valueOf(statusName);
 
         // when
-        int progress = ProcessStatusUtil.getProgress(status);
+        int progress = status.getProgress();
 
         // then
         assertThat(progress).isEqualTo(expectedProgress);
@@ -46,12 +46,12 @@ class ProcessStatusUtilTest {
             "CONFIRMED, 등록 완료"
     })
     @DisplayName("각 상태별 메시지를 올바르게 반환한다")
-    void getStatusMessage_returnsCorrectMessageForEachStatus(String statusName, String expectedMessage) {
+    void getMessage_returnsCorrectMessageForEachStatus(String statusName, String expectedMessage) {
         // given
         ProcessStatus status = ProcessStatus.valueOf(statusName);
 
         // when
-        String message = ProcessStatusUtil.getStatusMessage(status);
+        String message = status.getMessage();
 
         // then
         assertThat(message).isEqualTo(expectedMessage);
@@ -61,7 +61,7 @@ class ProcessStatusUtilTest {
     @DisplayName("진행률은 0에서 100 사이의 값이다")
     void getProgress_returnsValueBetween0And100() {
         for (ProcessStatus status : ProcessStatus.values()) {
-            int progress = ProcessStatusUtil.getProgress(status);
+            int progress = status.getProgress();
             assertThat(progress).isBetween(0, 100);
         }
     }

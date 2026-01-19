@@ -184,10 +184,10 @@ public class AiProcessResult {
     }
 
     public int getProgress() {
-        return ProcessStatusUtil.getProgress(this.status);
+        return this.status.getProgress();
     }
 
     public String getStatusMessage() {
-        return ProcessStatusUtil.getStatusMessage(this.status);
+        return this.status.getMessage();
     }
 }
