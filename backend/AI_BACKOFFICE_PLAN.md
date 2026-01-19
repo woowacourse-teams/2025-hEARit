@@ -1484,19 +1484,6 @@ CREATE TABLE ai_process_result (
 
 ---
 
-## 추후 개선사항 (현재 구현 범위 외)
-
-1. ~~**API 재시도 전략**: Groq Whisper/Gemini API 실패 시 자동 재시도 (Spring Retry)~~ → **구현 완료** (GeminiClient에 Exponential Backoff 적용)
-2. **ThreadPool 최적화**: 동시 처리 요청이 많아질 경우 ThreadPool 크기 조정
-3. **처리 상태 알림**: 완료 시 이메일/슬랙 알림
-4. **중복 콘텐츠 방지**: 파일 해시(SHA-256)로 중복 업로드 체크
-5. **만료 시간 연장**: 사용자가 페이지를 열면 만료 시간 자동 연장
-6. **쇼츠 자르기 개선**: 60초에 가장 가까운 문장 경계에서 자르기
-7. **프론트엔드 폴링 개선**: WebSocket 또는 Server-Sent Events로 실시간 상태 업데이트
-8. **롤백 전략**: 중간 단계 실패 시 이전 S3 파일들 자동 정리
-
----
-
 ## 기존 코드와의 관계
 
 | 기존 코드 | 재사용 방식 |
