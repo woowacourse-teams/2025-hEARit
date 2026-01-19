@@ -1371,44 +1371,44 @@ CREATE TABLE ai_process_result (
 ## 구현 순서
 
 ### Step 1: 기반 설정
-- [ ] 환경 변수 추가 (API 키)
-- [ ] AiConfig 클래스 생성 (Async + RestTemplate)
-- [ ] mp3spi 의존성 추가 (admin/build.gradle)
+- [x] 환경 변수 추가 (API 키)
+- [x] AiConfig 클래스 생성 (Async + RestTemplate)
+- [x] mp3spi 의존성 추가 (admin/build.gradle)
 
 ### Step 2: DB + 엔티티
-- [ ] Flyway 마이그레이션 스크립트 작성
-- [ ] ScriptSegment DTO 생성
-- [ ] ScriptSegmentListConverter (AttributeConverter) 생성
-- [ ] AiProcessResult 엔티티 생성 (@EntityListeners 포함)
-- [ ] ProcessStatus enum 생성
-- [ ] ProcessStatusUtil 유틸리티 클래스 생성
-- [ ] AiProcessResultRepository 생성
-- [ ] AudioProcessingException 예외 클래스 생성
+- [x] Flyway 마이그레이션 스크립트 작성
+- [x] ScriptSegment DTO 생성
+- [x] ScriptSegmentListConverter (AttributeConverter) 생성
+- [x] AiProcessResult 엔티티 생성 (@EntityListeners 포함)
+- [x] ProcessStatus enum 생성
+- [x] ProcessStatusUtil 유틸리티 클래스 생성
+- [x] AiProcessResultRepository 생성
+- [x] AudioProcessingException 예외 클래스 생성
 
 ### Step 3: 인프라 레이어
-- [ ] Mp3AudioProcessor (mp3spi 기반) 구현
-- [ ] GroqWhisperClient (Groq API - 무료) 구현
-- [ ] GeminiClient (Gemini API) 구현
-- [ ] FileStorage에 moveFile(), deleteFile() 메서드 추가
+- [x] Mp3AudioProcessor (mp3spi 기반) 구현
+- [x] GroqWhisperClient (Groq API - 무료) 구현
+- [x] GeminiClient (Gemini API) 구현
+- [x] FileStorage에 moveFile(), deleteFile() 메서드 추가
 
 ### Step 4: 서비스 레이어
-- [ ] TranscriptionService 구현
-- [ ] ScriptCorrectionService 구현
-- [ ] MetadataGenerationService 구현
-- [ ] AiProcessingService 구현 (오케스트레이션)
-- [ ] AiResultService 구현 (결과 조회/수정/확인)
+- [x] TranscriptionService 구현
+- [x] ScriptCorrectionService 구현
+- [x] MetadataGenerationService 구현
+- [x] AiProcessingService 구현 (오케스트레이션)
+- [x] AiResultService 구현 (결과 조회/수정/확인)
 
 ### Step 5: 컨트롤러 레이어
-- [ ] AiProcessController 구현 (API)
-- [ ] AiResultController 구현 (API)
-- [ ] AiViewController 구현 (페이지 렌더링 + 카테고리/키워드 데이터 전달)
+- [x] AiProcessController 구현 (API)
+- [x] AiResultController 구현 (API)
+- [x] AiViewController 구현 (페이지 렌더링 + 카테고리/키워드 데이터 전달)
 
 ### Step 6: 프론트엔드
-- [ ] ai-upload.html 템플릿 작성 (CSRF 메타 태그 포함)
-- [ ] ai-result.html 템플릿 작성 (CSRF 메타 태그 포함)
-- [ ] ai-upload.js 구현
-- [ ] ai-result.js 구현
-- [ ] CSS 스타일링 (기존 admin 스타일 재사용)
+- [x] ai-upload.html 템플릿 작성 (CSRF 메타 태그 포함)
+- [x] ai-result.html 템플릿 작성 (CSRF 메타 태그 포함)
+- [x] ai-upload.js 구현
+- [x] ai-result.js 구현
+- [x] CSS 스타일링 (기존 admin 스타일 재사용)
 
 ### Step 7: 테스트
 - [x] 단위 테스트 작성
@@ -1416,27 +1416,8 @@ CREATE TABLE ai_process_result (
 - [ ] E2E 테스트 수행
 
 ### Step 8: 운영
-- [ ] 임시 파일 정리 스케줄러 구현
-- [ ] 모니터링/로깅 설정
-- [ ] API 비용 모니터링 설정
+- [x] 임시 파일 정리 스케줄러 구현
 
----
-
-## 주의사항
-
-1. **API 비용**: Gemini API 호출 비용 모니터링 필요 (Groq Whisper는 무료)
-   - Groq Whisper: **무료** (rate limit 존재)
-   - Gemini: 토큰 기반 과금
-2. **파일 제한**:
-   - **형식**: MP3만 지원 (NotebookLM 출력을 MP3로 변환 후 업로드 필요)
-   - **크기**: 최대 25MB (Groq Whisper API 제한)
-   - Spring의 `multipart.max-file-size`도 25MB 이상으로 설정 필요
-3. **처리 시간**: 긴 오디오(30분+)의 경우 처리 시간이 수 분 소요될 수 있음
-4. **임시 파일**: 만료된 임시 파일 정리 로직 필수 (24시간 후 자동 삭제)
-5. **보안**: Admin 권한 체크, 파일 업로드 검증 필수 (CSRF 토큰 포함)
-6. **JPA Auditing**: `@EnableJpaAuditing` 설정이 이미 존재하는지 확인 필요
-
----
 
 ## 구현 노트
 
