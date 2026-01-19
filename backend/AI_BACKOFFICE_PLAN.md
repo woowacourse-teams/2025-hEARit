@@ -13,6 +13,9 @@ NotebookLM으로 생성한 오디오 파일을 백오피스에서 AI로 처리�
 > - **Groq Whisper API 응답**: 초 단위 float → 밀리초 int 변환
 > - **재생 시간**: Groq Whisper API의 `duration` 또는 마지막 segment의 `end` 사용
 > - **Admin 전용**: 동시성 고려 최소화, ThreadPool/재시도 전략은 추후 개선
+> - **트랜잭션 분리**: `AiProcessStatusUpdater`로 상태 업데이트 분리 (REQUIRES_NEW)
+> - **S3 파일 이동**: 복사 후 원본 삭제 방식 (S3 copyObject API 활용)
+> - **Gemini Rate Limiting**: Semaphore + 요청 간격 제어 + Exponential Backoff 재시도
 
 ### 현재 프로세스
 1. 사용자가 NotebookLM으로 오디오 생성
@@ -39,6 +42,8 @@ NotebookLM으로 생성한 오디오 파일을 백오피스에서 AI로 처리�
 | 파일 크기 | 최대 25MB | Groq Whisper API 제한 준수 |
 | JSON 매핑 | JPA AttributeConverter | List<ScriptSegment> ↔ JSON 자동 변환 |
 | API 경로 | `/admin/api/ai/*` | AdminSecurityConfig 보안 적용, 세션 기반 인증 |
+| 트랜잭션 분리 | AiProcessStatusUpdater (REQUIRES_NEW) | 비동기 처리 중 상태 업데이트 즉시 커밋, 폴링 실시간 반영 |
+| Rate Limiting | Semaphore + Exponential Backoff | Gemini 무료 tier 15 RPM 제한 대응 |
 
 ---
 
@@ -255,7 +260,7 @@ public enum ProcessStatus {
     ▼
 [AiProcessController]
     │
-    │ 1. 파일 검증 (MP3 형식, 25MB 이하)
+    │ 1. 파일 검증
     │ 2. AiProcessResult 생성 (status: PENDING)
     │ 3. 비동기 처리 시작 (@Async)
     │
@@ -1433,9 +1438,74 @@ CREATE TABLE ai_process_result (
 
 ---
 
+## 구현 노트
+
+구현 과정에서 발생한 이슈와 해결 방안을 기록합니다.
+
+### 1. 트랜잭션 분리 (AiProcessStatusUpdater)
+
+**문제**: `AiProcessingService.executeProcessing()`은 `@Async`로 비동기 실행되며 여러 단계를 거칩니다. 각 단계에서 상태를 업데이트하지만, 전체 메서드가 하나의 트랜잭션으로 묶이면 처리가 완료될 때까지 DB에 상태가 반영되지 않습니다.
+
+**영향**: 프론트엔드에서 폴링으로 진행 상태를 조회할 때, 실제로는 STT 처리 중인데 DB에는 여전히 PENDING 상태로 조회됨.
+
+**해결**: `AiProcessStatusUpdater` 클래스를 분리하고, 모든 상태 업데이트 메서드에 `@Transactional(propagation = Propagation.REQUIRES_NEW)`를 적용하여 각 상태 변경이 즉시 커밋되도록 함.
+
+### 2. S3 파일 이동 로직 변경
+
+**문제**: S3에는 파일 이동(move) API가 없음. 원래 계획은 `moveFile()` 메서드로 temp → 정식 경로 이동이었음.
+
+**해결**: `copyFile()` 메서드로 복사 후, 원본 파일을 별도로 삭제하는 방식으로 구현. temp 파일 정리는 스케줄러에서 처리.
+
+### 3. Gemini API Rate Limiting
+
+**문제**: Gemini 무료 tier는 15 RPM(분당 요청) 제한이 있어, 연속 요청 시 429 에러 발생.
+
+**해결**:
+- `Semaphore(1)`로 동시 요청 1개로 제한
+- 요청 간 최소 4초 간격 유지
+- 429 에러 시 Exponential Backoff로 최대 3회 재시도 (5초 → 10초 → 20초)
+
+### 4. 출처 관리 리스너 분리
+
+**문제**: Hearit 생성 시 Source 엔티티도 함께 저장해야 하는데, 기존 `AdminHearitService`에서 Hearit 저장과 Source 저장이 결합되어 있어 AI 결과 confirm 시 재사용이 어려움.
+
+**해결**: `SourceManageListener`를 분리하여 Hearit 엔티티의 `@PostPersist` 이벤트로 Source를 자동 저장하도록 리팩토링. AI confirm과 기존 수동 등록 모두 동일한 로직 사용.
+
+### 5. AI 결과 페이지 데이터 전달
+
+**문제**: AI 결과 검토 페이지에서 카테고리/키워드 목록, 교정된 대본 등의 데이터를 프론트엔드에 전달해야 함.
+
+**해결**: Thymeleaf 템플릿에서 `th:inline="javascript"`로 JSON 데이터를 JavaScript 변수로 주입. `ScriptSegment` 리스트는 Jackson ObjectMapper로 직렬화.
+
+---
+
+## 테스트 현황
+
+### 단위 테스트 (완료)
+
+| 테스트 클래스 | 테스트 항목 |
+|--------------|------------|
+| `ProcessStatusUtilTest` | 진행률 계산, 상태 메시지 |
+| `Mp3AudioProcessorTest` | 메타데이터 추출, 쇼츠 생성, MP3 검증 |
+| `GroqWhisperClientTest` | API 호출 모킹, 응답 파싱, 에러 처리 |
+| `GeminiClientTest` | API 호출 모킹, JSON 응답 파싱, Rate Limiting |
+| `TranscriptionServiceTest` | STT 호출, 세그먼트 병합 |
+| `ScriptCorrectionServiceTest` | 프롬프트 생성, 결과 파싱, 폴백 처리 |
+| `MetadataGenerationServiceTest` | 프롬프트 생성, 결과 파싱 |
+| `AiProcessingServiceTest` | 전체 플로우 오케스트레이션, 실패 처리 |
+
+### 통합 테스트 (완료)
+
+| 테스트 클래스 | 테스트 항목 |
+|--------------|------------|
+| `AiProcessControllerTest` | 처리 시작, 상태 조회 API |
+| `AiResultControllerTest` | 결과 조회, 대본/메타데이터 수정, confirm, 삭제 API |
+
+---
+
 ## 추후 개선사항 (현재 구현 범위 외)
 
-1. **API 재시도 전략**: Groq Whisper/Gemini API 실패 시 자동 재시도 (Spring Retry)
+1. ~~**API 재시도 전략**: Groq Whisper/Gemini API 실패 시 자동 재시도 (Spring Retry)~~ → **구현 완료** (GeminiClient에 Exponential Backoff 적용)
 2. **ThreadPool 최적화**: 동시 처리 요청이 많아질 경우 ThreadPool 크기 조정
 3. **처리 상태 알림**: 완료 시 이메일/슬랙 알림
 4. **중복 콘텐츠 방지**: 파일 해시(SHA-256)로 중복 업로드 체크
