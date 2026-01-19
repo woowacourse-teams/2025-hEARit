@@ -7,6 +7,7 @@ import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.infrastructure.audio.Mp3AudioProcessor;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
 import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient.TranscriptionResult;
+import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,7 @@ public class AiProcessingService {
     private final AiProcessResultRepository resultRepository;
     private final AiProcessStatusUpdater statusUpdater;
     private final FileStorage fileStorage;
+    private final TempFileManager tempFileManager;
     private final Mp3AudioProcessor mp3Processor;
     private final TranscriptionService transcriptionService;
     private final ScriptCorrectionService correctionService;
@@ -145,22 +147,9 @@ public class AiProcessingService {
     private void cleanupTempFiles(Long processId) {
         try {
             AiProcessResult result = statusUpdater.findById(processId);
-            deleteIfExists(result.getOriginalFileKey());
-            deleteIfExists(result.getGeneratedOrgKey());
-            deleteIfExists(result.getGeneratedShrKey());
-            deleteIfExists(result.getGeneratedScrKey());
+            tempFileManager.cleanupTempFiles(result);
         } catch (Exception e) {
             log.warn("임시 파일 정리 중 오류 (무시)", e);
-        }
-    }
-
-    private void deleteIfExists(String key) {
-        if (key != null && !key.isBlank()) {
-            try {
-                fileStorage.deleteFile(key);
-            } catch (Exception e) {
-                log.debug("파일 삭제 실패 (무시): {}", key);
-            }
         }
     }
 

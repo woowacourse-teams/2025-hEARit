@@ -22,9 +22,9 @@ import com.onair.hearit.admin.ai.exception.AudioProcessingException;
 import com.onair.hearit.admin.ai.infrastructure.audio.Mp3AudioProcessor;
 import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient.TranscriptionResult;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
+import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,6 +48,9 @@ class AiProcessingServiceTest {
     private FileStorage fileStorage;
 
     @Mock
+    private TempFileManager tempFileManager;
+
+    @Mock
     private Mp3AudioProcessor mp3Processor;
 
     @Mock
@@ -69,6 +72,7 @@ class AiProcessingServiceTest {
                 resultRepository,
                 statusUpdater,
                 fileStorage,
+                tempFileManager,
                 mp3Processor,
                 transcriptionService,
                 correctionService,

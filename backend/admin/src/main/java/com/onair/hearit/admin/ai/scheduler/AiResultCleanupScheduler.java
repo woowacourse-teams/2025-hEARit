@@ -3,7 +3,7 @@ package com.onair.hearit.admin.ai.scheduler;
 import com.onair.hearit.admin.ai.domain.AiProcessResult;
 import com.onair.hearit.admin.ai.domain.ProcessStatus;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
-import com.onair.hearit.admin.infrastructure.s3.FileStorage;
+import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AiResultCleanupScheduler {
 
     private final AiProcessResultRepository resultRepository;
-    private final FileStorage fileStorage;
+    private final TempFileManager tempFileManager;
 
     @Scheduled(cron = "0 0 5 * * *")
     @Transactional
@@ -49,23 +49,8 @@ public class AiResultCleanupScheduler {
     private void cleanupSingleResult(AiProcessResult result) {
         Long resultId = result.getId();
         log.debug("AI 처리 결과 정리 시작 - id: {}", resultId);
-        deleteFileIfExists(result.getOriginalFileKey());
-        deleteFileIfExists(result.getGeneratedOrgKey());
-        deleteFileIfExists(result.getGeneratedShrKey());
-        deleteFileIfExists(result.getGeneratedScrKey());
+        tempFileManager.cleanupTempFiles(result);
         resultRepository.delete(result);
         log.debug("AI 처리 결과 정리 완료 - id: {}", resultId);
-    }
-
-    private void deleteFileIfExists(String key) {
-        if (key == null || key.isBlank()) {
-            return;
-        }
-        try {
-            fileStorage.deleteFile(key);
-            log.debug("S3 파일 삭제 완료: {}", key);
-        } catch (Exception e) {
-            log.warn("S3 파일 삭제 실패 (무시됨): {}, error: {}", key, e.getMessage());
-        }
     }
 }

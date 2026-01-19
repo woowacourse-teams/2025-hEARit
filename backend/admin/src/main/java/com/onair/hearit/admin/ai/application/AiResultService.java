@@ -4,6 +4,7 @@ import com.onair.hearit.admin.ai.domain.AiProcessResult;
 import com.onair.hearit.admin.ai.domain.ProcessStatus;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
+import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
 import com.onair.hearit.admin.application.AdminHearitService;
 import com.onair.hearit.admin.dto.request.HearitMetaDataRequest;
 import com.onair.hearit.admin.dto.request.HearitMetaDataRequest.SourceCreateRequest;
@@ -26,6 +27,7 @@ public class AiResultService {
     private final AiProcessResultRepository resultRepository;
     private final AdminHearitService hearitService;
     private final FileStorage fileStorage;
+    private final TempFileManager tempFileManager;
 
     @Value("${aws.s3.bucket.url}")
     private String bucketUrl;
@@ -104,7 +106,7 @@ public class AiResultService {
         hearitService.addHearitMetaData(request);
         result.markAsConfirmed(null);
         resultRepository.save(result);
-        cleanupAllTempFiles(result);
+        tempFileManager.cleanupTempFiles(result);
         log.info("Hearit 등록 완료: processId={}", processId);
         return processId;
     }
@@ -112,10 +114,7 @@ public class AiResultService {
     @Transactional
     public void deleteResult(Long processId) {
         AiProcessResult result = getResult(processId);
-        deleteIfExists(result.getOriginalFileKey());
-        deleteIfExists(result.getGeneratedOrgKey());
-        deleteIfExists(result.getGeneratedShrKey());
-        deleteIfExists(result.getGeneratedScrKey());
+        tempFileManager.cleanupTempFiles(result);
         resultRepository.delete(result);
         log.info("AI 결과 삭제 완료: processId={}", processId);
     }
@@ -129,22 +128,6 @@ public class AiResultService {
         return copiedKey.startsWith("/") ? copiedKey : "/" + copiedKey;
     }
 
-    private void cleanupAllTempFiles(AiProcessResult result) {
-        deleteIfExists(result.getOriginalFileKey());
-        deleteIfExists(result.getGeneratedOrgKey());
-        deleteIfExists(result.getGeneratedShrKey());
-        deleteIfExists(result.getGeneratedScrKey());
-    }
-
-    private void deleteIfExists(String key) {
-        if (key != null && !key.isBlank()) {
-            try {
-                fileStorage.deleteFile(key);
-            } catch (Exception e) {
-                log.debug("파일 삭제 실패 (무시): {}", key);
-            }
-        }
-    }
 
     private void validateEditable(AiProcessResult result) {
         if (result.getStatus() != ProcessStatus.COMPLETED) {
