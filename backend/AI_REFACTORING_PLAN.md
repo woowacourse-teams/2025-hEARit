@@ -825,7 +825,7 @@ admin/ai/
 
 ### Phase 3: 품질 향상 (Low Priority)
 
-- [ ] 프롬프트 외부화 (PromptLoader)
+- [x] 프롬프트 외부화 (PromptLoader)
 - [ ] 로깅 포맷 통일
 - [ ] 테스트 코드 개선
 
