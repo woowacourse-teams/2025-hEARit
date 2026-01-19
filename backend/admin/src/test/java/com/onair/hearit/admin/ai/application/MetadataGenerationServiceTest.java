@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.admin.ai.application.MetadataGenerationService.GeneratedMetadata;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
 import com.onair.hearit.admin.ai.infrastructure.gemini.GeminiClient;
+import com.onair.hearit.admin.ai.infrastructure.prompt.PromptLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,13 +24,19 @@ class MetadataGenerationServiceTest {
     @Mock
     private GeminiClient geminiClient;
 
+    @Mock
+    private PromptLoader promptLoader;
+
     private ObjectMapper objectMapper;
     private MetadataGenerationService metadataService;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        metadataService = new MetadataGenerationService(geminiClient, objectMapper);
+        metadataService = new MetadataGenerationService(geminiClient, objectMapper, promptLoader);
+
+        // 테스트용 프롬프트 템플릿 설정
+        when(promptLoader.getMetadataGenerationPrompt()).thenReturn("메타데이터 생성: %s");
     }
 
     @Nested

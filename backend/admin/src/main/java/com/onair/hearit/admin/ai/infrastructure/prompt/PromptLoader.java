@@ -1,0 +1,64 @@
+package com.onair.hearit.admin.ai.infrastructure.prompt;
+
+import jakarta.annotation.PostConstruct;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
+
+/**
+ * AI 프롬프트 템플릿을 외부 리소스 파일에서 로드하는 컴포넌트
+ */
+@Component
+@Slf4j
+public class PromptLoader {
+
+    private final Resource scriptCorrectionResource;
+    private final Resource metadataGenerationResource;
+
+    private String scriptCorrectionPrompt;
+    private String metadataGenerationPrompt;
+
+    public PromptLoader(
+            @Value("classpath:ai/prompts/script-correction.txt") Resource scriptCorrectionResource,
+            @Value("classpath:ai/prompts/metadata-generation.txt") Resource metadataGenerationResource) {
+        this.scriptCorrectionResource = scriptCorrectionResource;
+        this.metadataGenerationResource = metadataGenerationResource;
+    }
+
+    @PostConstruct
+    public void init() {
+        this.scriptCorrectionPrompt = loadPrompt(scriptCorrectionResource, "script-correction");
+        this.metadataGenerationPrompt = loadPrompt(metadataGenerationResource, "metadata-generation");
+        log.info("AI 프롬프트 템플릿 로드 완료");
+    }
+
+    private String loadPrompt(Resource resource, String name) {
+        try {
+            String content = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            log.debug("프롬프트 로드 완료: {}, 길이={}", name, content.length());
+            return content;
+        } catch (IOException e) {
+            log.error("프롬프트 로드 실패: {}", name, e);
+            throw new IllegalStateException("프롬프트 파일 로드 실패: " + name, e);
+        }
+    }
+
+    /**
+     * 대본 교정 프롬프트 템플릿 반환
+     * 사용법: String.format(getScriptCorrectionPrompt(), inputJson)
+     */
+    public String getScriptCorrectionPrompt() {
+        return scriptCorrectionPrompt;
+    }
+
+    /**
+     * 메타데이터 생성 프롬프트 템플릿 반환
+     * 사용법: String.format(getMetadataGenerationPrompt(), scriptText)
+     */
+    public String getMetadataGenerationPrompt() {
+        return metadataGenerationPrompt;
+    }
+}

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.infrastructure.gemini.GeminiClient;
+import com.onair.hearit.admin.ai.infrastructure.prompt.PromptLoader;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,13 +23,17 @@ class ScriptCorrectionServiceTest {
     @Mock
     private GeminiClient geminiClient;
 
+    @Mock
+    private PromptLoader promptLoader;
+
     private ObjectMapper objectMapper;
     private ScriptCorrectionService correctionService;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        correctionService = new ScriptCorrectionService(geminiClient, objectMapper);
+        correctionService = new ScriptCorrectionService(geminiClient, objectMapper, promptLoader);
+        when(promptLoader.getScriptCorrectionPrompt()).thenReturn("교정 요청: %s");
     }
 
     @Nested

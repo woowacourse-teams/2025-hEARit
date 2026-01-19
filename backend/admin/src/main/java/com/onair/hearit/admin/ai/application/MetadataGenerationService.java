@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
 import com.onair.hearit.admin.ai.infrastructure.gemini.GeminiClient;
+import com.onair.hearit.admin.ai.infrastructure.prompt.PromptLoader;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -22,36 +23,12 @@ public class MetadataGenerationService {
 
     private final GeminiClient geminiClient;
     private final ObjectMapper objectMapper;
-
-    private static final String METADATA_PROMPT_TEMPLATE = """
-            당신은 IT/기술 콘텐츠 큐레이터입니다.
-
-            아래 대본을 읽고 제목과 요약을 생성해주세요.
-
-            규칙:
-            1. 제목 (title):
-               - 35자 이내
-               - 콘텐츠의 핵심 주제를 명확하게 전달
-               - 호기심을 유발하는 매력적인 제목
-               - 이모지 사용 금지
-
-            2. 요약 (summary):
-               - 250자 이내
-               - 콘텐츠의 주요 내용을 3-4문장으로 요약
-               - 사용자가 들을지 결정할 수 있도록 핵심 정보 포함
-               - 이모지 사용 금지
-
-            대본:
-            %s
-
-            출력 형식 (JSON):
-            {"title": "제목", "summary": "요약"}
-            """;
+    private final PromptLoader promptLoader;
 
     public GeneratedMetadata generateMetadata(String scriptText) {
         log.info("메타데이터 생성 시작: 대본 길이={}", scriptText.length());
         String truncatedScript = truncateScript(scriptText, 10000);
-        String prompt = String.format(METADATA_PROMPT_TEMPLATE, truncatedScript);
+        String prompt = String.format(promptLoader.getMetadataGenerationPrompt(), truncatedScript);
         String responseJson = geminiClient.generateContentWithJson(prompt);
         GeneratedMetadata metadata = parseResponse(responseJson);
         log.info("메타데이터 생성 완료: 제목='{}', 요약 길이={}",
