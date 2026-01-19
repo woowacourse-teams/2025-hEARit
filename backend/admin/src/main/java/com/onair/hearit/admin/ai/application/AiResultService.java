@@ -18,10 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * AI 처리 결과 관리 서비스
- * 결과 조회, 수정, 확인 및 Hearit 등록
- */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -34,18 +30,12 @@ public class AiResultService {
     @Value("${aws.s3.bucket.url}")
     private String bucketUrl;
 
-    /**
-     * 처리 결과 조회
-     */
     @Transactional(readOnly = true)
     public AiProcessResult getResult(Long processId) {
         return resultRepository.findById(processId)
                 .orElseThrow(() -> new AdminNotFoundException("AI 처리 결과", processId.toString()));
     }
 
-    /**
-     * 처리 상태 조회
-     */
     @Transactional(readOnly = true)
     public AiProcessResult getStatus(Long processId) {
         return getResult(processId);
@@ -65,9 +55,6 @@ public class AiResultService {
         log.info("대본 수정 완료: processId={}, 세그먼트={}개", processId, editedScript.size());
     }
 
-    /**
-     * 메타데이터(제목, 요약) 수정
-     */
     @Transactional
     public void updateMetadata(Long processId, String title, String summary) {
         AiProcessResult result = getResult(processId);
@@ -79,12 +66,6 @@ public class AiResultService {
         log.info("메타데이터 수정 완료: processId={}, 제목='{}'", processId, title);
     }
 
-    /**
-     * 검토 완료 및 Hearit 등록
-     *
-     * 파일은 먼저 복사(copy)하고, Hearit 생성 성공 시에만 temp 파일을 삭제합니다.
-     * 이렇게 하면 Hearit 생성 실패 시에도 temp 파일이 유지되어 재시도할 수 있습니다.
-     */
     @Transactional
     public Long confirmAndCreateHearit(
             Long processId,
@@ -99,22 +80,16 @@ public class AiResultService {
         validateConfirmable(result);
 
         log.info("Hearit 등록 시작: processId={}", processId);
-
-        // 1. 최종값 저장
         if (finalTitle != null) {
             result.updateEditedMetadata(finalTitle, finalSummary);
         }
         if (finalScript != null) {
             result.updateEditedScript(finalScript);
         }
-
-        // 2. S3 파일 복사 (temp → 정식 경로, 원본 유지)
         String newUuid = UUID.randomUUID().toString();
         String orgKey = copyToFinalPath(result.getGeneratedOrgKey(), FileType.ORIGINAL, newUuid);
         String shrKey = copyToFinalPath(result.getGeneratedShrKey(), FileType.SHORT, newUuid);
         String scrKey = copyToFinalPath(result.getGeneratedScrKey(), FileType.SCRIPT, newUuid);
-
-        // 3. Hearit 생성
         HearitMetaDataRequest request = new HearitMetaDataRequest(
                 result.getFinalTitle(),
                 result.getFinalSummary(),
@@ -126,64 +101,34 @@ public class AiResultService {
                 shrKey,
                 scrKey
         );
-
         hearitService.addHearitMetaData(request);
-
-        // 4. 상태 업데이트
         result.markAsConfirmed(null);
         resultRepository.save(result);
-
-        // 5. Hearit 생성 성공 후에만 모든 temp 파일 삭제
         cleanupAllTempFiles(result);
-
         log.info("Hearit 등록 완료: processId={}", processId);
-
         return processId;
     }
 
-    /**
-     * AI 결과 삭제 (취소)
-     */
     @Transactional
     public void deleteResult(Long processId) {
         AiProcessResult result = getResult(processId);
-
-        // S3 임시 파일 삭제
         deleteIfExists(result.getOriginalFileKey());
         deleteIfExists(result.getGeneratedOrgKey());
         deleteIfExists(result.getGeneratedShrKey());
         deleteIfExists(result.getGeneratedScrKey());
-
-        // DB 레코드 삭제
         resultRepository.delete(result);
-
         log.info("AI 결과 삭제 완료: processId={}", processId);
     }
 
-    /**
-     * S3 파일을 temp에서 정식 경로로 복사 (원본 유지)
-     *
-     * FileType.validateKey()는 '/'로 시작하는 키를 기대하지만,
-     * FileStorage.copyFile()은 내부에서 '/'를 제거하고 반환합니다.
-     * 따라서 반환값에 '/'를 붙여서 FileType.validateKey()와 호환되도록 합니다.
-     */
     private String copyToFinalPath(String tempKey, FileType fileType, String uuid) {
         if (tempKey == null || tempKey.isBlank()) {
             return null;
         }
-
-        // FileType에 정의된 prefix 사용 (ORG, SHR, SCR)
         String newKey = fileType.getUploadPath() + fileType.getPrefix() + "_" + uuid + fileType.getExtension();
-
         String copiedKey = fileStorage.copyFile(tempKey, newKey);
-
-        // FileType.validateKey()는 '/'로 시작하는 키를 기대함
         return copiedKey.startsWith("/") ? copiedKey : "/" + copiedKey;
     }
 
-    /**
-     * Hearit 생성 성공 후 모든 temp 파일 삭제
-     */
     private void cleanupAllTempFiles(AiProcessResult result) {
         deleteIfExists(result.getOriginalFileKey());
         deleteIfExists(result.getGeneratedOrgKey());
@@ -213,9 +158,6 @@ public class AiResultService {
         }
     }
 
-    /**
-     * 오디오 파일 URL 생성
-     */
     public String getAudioUrl(String key) {
         if (key == null || key.isBlank()) {
             return null;

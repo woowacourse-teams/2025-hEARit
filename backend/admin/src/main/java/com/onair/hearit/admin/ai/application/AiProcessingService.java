@@ -18,10 +18,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * AI 처리 오케스트레이션 서비스
- * 전체 AI 처리 플로우를 관리하고 각 단계를 순차적으로 실행
- */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -92,7 +88,7 @@ public class AiProcessingService {
 
     private void createAndUploadShorts(Long processId, byte[] audioData, String uuid) {
         statusUpdater.markAsConverting(processId);
-        log.debug("쇼츠 생성 중: {}초", shortsDurationSeconds);
+        log.debug("쇼츠 생성 ");
         byte[] shortsData = mp3Processor.createShortClip(audioData, shortsDurationSeconds);
         String orgKey = tempPrefix + "org/" + uuid + ".mp3";
         String shrKey = tempPrefix + "shr/" + uuid + ".mp3";
@@ -103,7 +99,7 @@ public class AiProcessingService {
 
     private TranscriptionResult processTranscription(Long processId, byte[] audioData, String originalFileName) {
         statusUpdater.markAsTranscribing(processId);
-        log.debug("STT 처리 중...");
+        log.debug("STT 처리 중");
         TranscriptionResult transcription = transcriptionService.transcribe(audioData, originalFileName);
         statusUpdater.setTranscriptionResult(
                 processId,
@@ -115,7 +111,7 @@ public class AiProcessingService {
 
     private List<ScriptSegment> correctScript(Long processId, List<ScriptSegment> rawSegments) {
         statusUpdater.markAsCorrecting(processId);
-        log.debug("대본 교정 중...");
+        log.debug("대본 교정");
         List<ScriptSegment> correctedScript = correctionService.correctScript(rawSegments);
         statusUpdater.setCorrectedScript(processId, correctedScript);
         return correctedScript;
@@ -140,7 +136,7 @@ public class AiProcessingService {
 
     private void generateMetadata(Long processId, List<ScriptSegment> script) {
         statusUpdater.markAsGeneratingMeta(processId);
-        log.debug("메타데이터 생성 중...");
+        log.debug("메타데이터 생성");
         String fullText = transcriptionService.mergeSegmentsToText(script);
         GeneratedMetadata metadata = metadataService.generateMetadata(fullText);
         statusUpdater.setSuggestedMetadata(processId, metadata.getTitle(), metadata.getSummary());

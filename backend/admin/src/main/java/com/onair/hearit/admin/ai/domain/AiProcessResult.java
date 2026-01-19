@@ -39,14 +39,12 @@ public class AiProcessResult {
     @Column(name = "status", nullable = false)
     private ProcessStatus status;
 
-    // 원본 파일 정보
     @Column(name = "original_file_name")
     private String originalFileName;
 
     @Column(name = "original_file_key", length = 500)
     private String originalFileKey;
 
-    // 생성된 파일들 (S3 temp 경로)
     @Column(name = "generated_org_key", length = 500)
     private String generatedOrgKey;
 
@@ -56,7 +54,6 @@ public class AiProcessResult {
     @Column(name = "generated_scr_key", length = 500)
     private String generatedScrKey;
 
-    // AI 생성 결과
     @Convert(converter = ScriptSegmentListConverter.class)
     @Column(name = "raw_transcript", columnDefinition = "JSON")
     private List<ScriptSegment> rawTranscript;
@@ -71,7 +68,6 @@ public class AiProcessResult {
     @Column(name = "suggested_summary", columnDefinition = "TEXT")
     private String suggestedSummary;
 
-    // 수정된 값 (사용자 입력)
     @Convert(converter = ScriptSegmentListConverter.class)
     @Column(name = "edited_script", columnDefinition = "JSON")
     private List<ScriptSegment> editedScript;
@@ -82,15 +78,12 @@ public class AiProcessResult {
     @Column(name = "edited_summary", columnDefinition = "TEXT")
     private String editedSummary;
 
-    // 재생 시간 (초)
     @Column(name = "play_time")
     private Integer playTime;
 
-    // 에러 정보
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 
-    // 타임스탬프
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -101,7 +94,6 @@ public class AiProcessResult {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
-    // 확인 후 생성된 Hearit
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "confirmed_hearit_id")
     private Hearit confirmedHearit;
@@ -111,11 +103,6 @@ public class AiProcessResult {
         this.status = ProcessStatus.PENDING;
         this.originalFileName = originalFileName;
         this.originalFileKey = originalFileKey;
-    }
-
-    // 상태 변경 메서드
-    public void updateStatus(ProcessStatus status) {
-        this.status = status;
     }
 
     public void markAsUploading() {
@@ -155,14 +142,12 @@ public class AiProcessResult {
         this.confirmedHearit = hearit;
     }
 
-    // 파일 키 설정
     public void setGeneratedFiles(String orgKey, String shrKey, String scrKey) {
         this.generatedOrgKey = orgKey;
         this.generatedShrKey = shrKey;
         this.generatedScrKey = scrKey;
     }
 
-    // AI 결과 설정
     public void setTranscriptionResult(List<ScriptSegment> rawTranscript, int playTime) {
         this.rawTranscript = rawTranscript;
         this.playTime = playTime;
@@ -177,7 +162,6 @@ public class AiProcessResult {
         this.suggestedSummary = summary;
     }
 
-    // 사용자 수정 저장
     public void updateEditedScript(List<ScriptSegment> editedScript) {
         this.editedScript = editedScript;
     }
@@ -187,7 +171,6 @@ public class AiProcessResult {
         this.editedSummary = summary;
     }
 
-    // 최종 값 반환 (edited가 있으면 edited, 없으면 suggested/corrected)
     public List<ScriptSegment> getFinalScript() {
         return editedScript != null ? editedScript : correctedScript;
     }

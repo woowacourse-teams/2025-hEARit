@@ -29,7 +29,6 @@ public class AiProcessStatusUpdater {
         AiProcessResult result = findResultById(processId);
         result.markAsUploading();
         resultRepository.save(result);
-        log.debug("상태 변경: processId={}, status=UPLOADING", processId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -37,7 +36,6 @@ public class AiProcessStatusUpdater {
         AiProcessResult result = findResultById(processId);
         result.markAsConverting();
         resultRepository.save(result);
-        log.debug("상태 변경: processId={}, status=CONVERTING", processId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -45,7 +43,6 @@ public class AiProcessStatusUpdater {
         AiProcessResult result = findResultById(processId);
         result.markAsTranscribing();
         resultRepository.save(result);
-        log.debug("상태 변경: processId={}, status=TRANSCRIBING", processId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -53,7 +50,6 @@ public class AiProcessStatusUpdater {
         AiProcessResult result = findResultById(processId);
         result.markAsCorrecting();
         resultRepository.save(result);
-        log.debug("상태 변경: processId={}, status=CORRECTING", processId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -61,7 +57,6 @@ public class AiProcessStatusUpdater {
         AiProcessResult result = findResultById(processId);
         result.markAsGeneratingMeta();
         resultRepository.save(result);
-        log.debug("상태 변경: processId={}, status=GENERATING_META", processId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -69,7 +64,6 @@ public class AiProcessStatusUpdater {
         AiProcessResult result = findResultById(processId);
         result.markAsCompleted(expiresAt);
         resultRepository.save(result);
-        log.debug("상태 변경: processId={}, status=COMPLETED", processId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -77,7 +71,6 @@ public class AiProcessStatusUpdater {
         AiProcessResult result = findResultById(processId);
         result.markAsFailed(errorMessage);
         resultRepository.save(result);
-        log.debug("상태 변경: processId={}, status=FAILED, error={}", processId, errorMessage);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

@@ -48,27 +48,14 @@ public class MetadataGenerationService {
             {"title": "제목", "summary": "요약"}
             """;
 
-    /**
-     * 대본에서 제목과 요약 생성
-     *
-     * @param scriptText 전체 대본 텍스트
-     * @return 생성된 메타데이터 (제목, 요약)
-     */
     public GeneratedMetadata generateMetadata(String scriptText) {
         log.info("메타데이터 생성 시작: 대본 길이={}", scriptText.length());
-
-        // 대본이 너무 길면 앞부분만 사용 (토큰 제한)
         String truncatedScript = truncateScript(scriptText, 10000);
-
         String prompt = String.format(METADATA_PROMPT_TEMPLATE, truncatedScript);
-
         String responseJson = geminiClient.generateContentWithJson(prompt);
-
         GeneratedMetadata metadata = parseResponse(responseJson);
-
         log.info("메타데이터 생성 완료: 제목='{}', 요약 길이={}",
                 metadata.getTitle(), metadata.getSummary().length());
-
         return metadata;
     }
 
@@ -77,33 +64,23 @@ public class MetadataGenerationService {
      */
     private GeneratedMetadata parseResponse(String responseJson) {
         try {
-            // JSON 객체 추출
             String cleanJson = extractJsonObject(responseJson);
-
             JsonNode root = objectMapper.readTree(cleanJson);
-
             String title = root.path("title").asText("").trim();
             String summary = root.path("summary").asText("").trim();
-
-            // 길이 제한 적용
             if (title.length() > 35) {
                 title = title.substring(0, 35);
             }
             if (summary.length() > 250) {
                 summary = summary.substring(0, 250);
             }
-
             return new GeneratedMetadata(title, summary);
-
         } catch (JsonProcessingException e) {
             log.error("메타데이터 응답 파싱 실패: {}", responseJson, e);
             throw new AudioProcessingException("메타데이터 생성 실패", e);
         }
     }
 
-    /**
-     * 응답에서 JSON 객체 부분만 추출
-     */
     private String extractJsonObject(String response) {
         int start = response.indexOf('{');
         int end = response.lastIndexOf('}');
@@ -111,13 +88,9 @@ public class MetadataGenerationService {
         if (start == -1 || end == -1 || start >= end) {
             return response;
         }
-
         return response.substring(start, end + 1);
     }
 
-    /**
-     * 대본 길이 제한
-     */
     private String truncateScript(String script, int maxLength) {
         if (script.length() <= maxLength) {
             return script;
@@ -125,9 +98,6 @@ public class MetadataGenerationService {
         return script.substring(0, maxLength) + "...";
     }
 
-    /**
-     * 생성된 메타데이터 DTO
-     */
     @Getter
     @AllArgsConstructor
     public static class GeneratedMetadata {
