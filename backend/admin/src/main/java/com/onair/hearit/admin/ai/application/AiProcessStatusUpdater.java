@@ -11,12 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * AI 처리 상태 업데이트를 위한 서비스
- *
- * REQUIRES_NEW 트랜잭션을 사용하여 각 상태 변경이 즉시 커밋되도록 합니다.
- * 이를 통해 폴링 클라이언트가 실시간으로 진행 상태를 확인할 수 있습니다.
- */
 @Service
 @Slf4j
 @RequiredArgsConstructor
