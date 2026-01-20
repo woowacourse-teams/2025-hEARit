@@ -17,7 +17,8 @@ import ws.schild.jave.info.MultimediaInfo;
 
 /**
  * FFmpeg(JAVE2)를 사용한 AudioClipper 구현체
- * 정확한 시간 기반 오디오 자르기 및 메타데이터 추출
+ * Stream Copy 모드로 오디오 자르기 (재인코딩 없이 빠른 처리)
+ * 메타데이터 추출 지원
  */
 @Component
 @Slf4j
@@ -52,15 +53,9 @@ public class FfmpegAudioClipper implements AudioClipper {
                 return audioData;
             }
 
-            // 인코딩 설정
+            // Stream Copy 설정 (재인코딩 없이 빠른 자르기)
             AudioAttributes audioAttributes = new AudioAttributes();
-            audioAttributes.setCodec(getCodecForExtension(extension));
-            // 원본 품질 유지
-            if (info.getAudio() != null) {
-                audioAttributes.setBitRate(info.getAudio().getBitRate());
-                audioAttributes.setSamplingRate(info.getAudio().getSamplingRate());
-                audioAttributes.setChannels(info.getAudio().getChannels());
-            }
+            audioAttributes.setCodec("copy");  // -c copy: 스트림 복사, CPU 부하 최소화
 
             EncodingAttributes encodingAttributes = new EncodingAttributes();
             encodingAttributes.setOutputFormat(getFormatForExtension(extension));
@@ -141,14 +136,6 @@ public class FfmpegAudioClipper implements AudioClipper {
         } finally {
             cleanupTempDir(tempDir);
         }
-    }
-
-    private String getCodecForExtension(String extension) {
-        return switch (extension.toLowerCase()) {
-            case "mp3" -> "libmp3lame";
-            case "m4a", "aac" -> "aac";
-            default -> "copy"; // 스트림 복사
-        };
     }
 
     private String getFormatForExtension(String extension) {
