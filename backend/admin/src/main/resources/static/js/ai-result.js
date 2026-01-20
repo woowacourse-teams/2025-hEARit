@@ -84,6 +84,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Initialize source inputs
         initSourceInputs();
+
+        // Initialize shorts audio duration display
+        initShortsDuration();
+    }
+
+    function initShortsDuration() {
+        const shortsAudio = document.getElementById('shorts-audio');
+        const shortsDurationSpan = document.getElementById('shorts-duration');
+
+        if (shortsAudio && shortsDurationSpan) {
+            shortsAudio.addEventListener('loadedmetadata', function() {
+                const duration = shortsAudio.duration;
+                if (duration && isFinite(duration)) {
+                    // 실제 오디오 파일의 duration 표시 (최대 60초)
+                    const displayDuration = Math.min(duration, 60);
+                    const minutes = Math.floor(displayDuration / 60);
+                    const seconds = Math.floor(displayDuration % 60);
+                    shortsDurationSpan.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                    // 로그: 메타데이터와 실제 duration 비교
+                    if (duration > 61) {
+                        console.warn('쇼츠 오디오 duration이 60초를 초과합니다:', duration);
+                    }
+                }
+            });
+        }
     }
 
     function bindEventListeners() {

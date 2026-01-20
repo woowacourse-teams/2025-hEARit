@@ -153,10 +153,12 @@
             </div>
             <div class="col-md-6">
                 <h6><i class="bi bi-lightning"></i> 쇼츠 (60초)</h6>
-                <audio controls class="w-100" th:src="${result.shrAudioUrl}">
+                <audio id="shorts-audio" controls class="w-100" th:src="${result.shrAudioUrl}">
                     브라우저가 오디오를 지원하지 않습니다.
                 </audio>
-                <small class="text-muted">앱에서 미리듣기로 사용됩니다.</small>
+                <small class="text-muted">
+                    재생시간: <span id="shorts-duration">1:00</span> | 앱에서 미리듣기로 사용됩니다.
+                </small>
             </div>
         </div>
     </section>
