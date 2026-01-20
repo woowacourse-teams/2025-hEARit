@@ -24,18 +24,18 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
-class GeminiClientTest {
+class GeminiApiClientTest {
 
     @Mock
     private RestTemplate restTemplate;
 
     private ObjectMapper objectMapper;
-    private GeminiClient geminiClient;
+    private GeminiApiClient geminiApiClient;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        geminiClient = new GeminiClient(
+        geminiApiClient = new GeminiApiClient(
                 restTemplate,
                 objectMapper,
                 "test-api-key",
@@ -72,7 +72,7 @@ class GeminiClientTest {
             )).thenReturn(new ResponseEntity<>(geminiResponse, HttpStatus.OK));
 
             // when
-            String result = geminiClient.generateContent("테스트 프롬프트");
+            String result = geminiApiClient.generateContent("테스트 프롬프트");
 
             // then
             assertThat(result).isEqualTo("생성된 텍스트 응답");
@@ -95,7 +95,7 @@ class GeminiClientTest {
             )).thenReturn(new ResponseEntity<>(emptyResponse, HttpStatus.OK));
 
             // when & then
-            assertThatThrownBy(() -> geminiClient.generateContent("프롬프트"))
+            assertThatThrownBy(() -> geminiApiClient.generateContent("프롬프트"))
                     .isInstanceOf(AudioProcessingException.class)
                     .hasMessageContaining("Gemini 응답 형식 오류");
         }
@@ -111,7 +111,7 @@ class GeminiClientTest {
             )).thenThrow(new RestClientException("Connection refused"));
 
             // when & then
-            assertThatThrownBy(() -> geminiClient.generateContent("프롬프트"))
+            assertThatThrownBy(() -> geminiApiClient.generateContent("프롬프트"))
                     .isInstanceOf(AudioProcessingException.class)
                     .hasMessageContaining("LLM 처리 실패");
         }
@@ -146,7 +146,7 @@ class GeminiClientTest {
             )).thenReturn(new ResponseEntity<>(geminiResponse, HttpStatus.OK));
 
             // when
-            String result = geminiClient.generateContentWithJson("JSON 응답 요청 프롬프트");
+            String result = geminiApiClient.generateContentWithJson("JSON 응답 요청 프롬프트");
 
             // then
             assertThat(result).contains("[{");
@@ -176,7 +176,7 @@ class GeminiClientTest {
             )).thenReturn(new ResponseEntity<>(responseWithEmptyParts, HttpStatus.OK));
 
             // when & then
-            assertThatThrownBy(() -> geminiClient.generateContentWithJson("프롬프트"))
+            assertThatThrownBy(() -> geminiApiClient.generateContentWithJson("프롬프트"))
                     .isInstanceOf(AudioProcessingException.class)
                     .hasMessageContaining("Gemini 응답 형식 오류");
         }
@@ -194,7 +194,7 @@ class GeminiClientTest {
             )).thenReturn(new ResponseEntity<>(invalidJson, HttpStatus.OK));
 
             // when & then
-            assertThatThrownBy(() -> geminiClient.generateContentWithJson("프롬프트"))
+            assertThatThrownBy(() -> geminiApiClient.generateContentWithJson("프롬프트"))
                     .isInstanceOf(AudioProcessingException.class);
         }
     }
@@ -236,7 +236,7 @@ class GeminiClientTest {
                     .thenReturn(new ResponseEntity<>(successResponse, HttpStatus.OK));
 
             // when
-            String result = geminiClient.generateContent("프롬프트");
+            String result = geminiApiClient.generateContent("프롬프트");
 
             // then
             assertThat(result).isEqualTo("재시도 성공");

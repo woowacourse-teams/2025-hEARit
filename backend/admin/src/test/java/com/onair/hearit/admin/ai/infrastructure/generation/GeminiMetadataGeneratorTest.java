@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.ai.application;
+package com.onair.hearit.admin.ai.infrastructure.generation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,9 +6,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.admin.ai.application.MetadataGenerationService.GeneratedMetadata;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
-import com.onair.hearit.admin.ai.infrastructure.gemini.GeminiClient;
+import com.onair.hearit.admin.ai.infrastructure.gemini.GeminiApiClient;
+import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator.GeneratedMetadata;
 import com.onair.hearit.admin.ai.infrastructure.prompt.PromptLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,29 +19,29 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class MetadataGenerationServiceTest {
+class GeminiMetadataGeneratorTest {
 
     @Mock
-    private GeminiClient geminiClient;
+    private GeminiApiClient geminiApiClient;
 
     @Mock
     private PromptLoader promptLoader;
 
     private ObjectMapper objectMapper;
-    private MetadataGenerationService metadataService;
+    private GeminiMetadataGenerator metadataGenerator;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        metadataService = new MetadataGenerationService(geminiClient, objectMapper, promptLoader);
+        metadataGenerator = new GeminiMetadataGenerator(geminiApiClient, objectMapper, promptLoader);
 
         // 테스트용 프롬프트 템플릿 설정
         when(promptLoader.getMetadataGenerationPrompt()).thenReturn("메타데이터 생성: %s");
     }
 
     @Nested
-    @DisplayName("generateMetadata 메서드는")
-    class GenerateMetadataTests {
+    @DisplayName("generate 메서드는")
+    class GenerateTests {
 
         @Test
         @DisplayName("제목과 요약을 생성하여 반환한다")
@@ -53,10 +53,10 @@ class MetadataGenerationServiceTest {
                 {"title": "Spring Boot 3.0 새 기능 완벽 정리", "summary": "Spring Boot 3.0에서 추가된 주요 기능들을 살펴봅니다. Native Image 지원, Jakarta EE 마이그레이션, 그리고 관측성 향상에 대해 다룹니다."}
                 """;
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
 
             // when
-            GeneratedMetadata result = metadataService.generateMetadata(scriptText);
+            GeneratedMetadata result = metadataGenerator.generate(scriptText);
 
             // then
             assertThat(result.getTitle()).isEqualTo("Spring Boot 3.0 새 기능 완벽 정리");
@@ -75,10 +75,10 @@ class MetadataGenerationServiceTest {
                 위 JSON이 결과입니다.
                 """;
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
 
             // when
-            GeneratedMetadata result = metadataService.generateMetadata(scriptText);
+            GeneratedMetadata result = metadataGenerator.generate(scriptText);
 
             // then
             assertThat(result.getTitle()).isEqualTo("테스트 제목");
@@ -95,10 +95,10 @@ class MetadataGenerationServiceTest {
             String geminiResponse = String.format(
                     "{\"title\": \"%s\", \"summary\": \"요약\"}", longTitle);
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
 
             // when
-            GeneratedMetadata result = metadataService.generateMetadata(scriptText);
+            GeneratedMetadata result = metadataGenerator.generate(scriptText);
 
             // then
             assertThat(result.getTitle()).hasSize(35);
@@ -114,10 +114,10 @@ class MetadataGenerationServiceTest {
             String geminiResponse = String.format(
                     "{\"title\": \"제목\", \"summary\": \"%s\"}", longSummary);
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
 
             // when
-            GeneratedMetadata result = metadataService.generateMetadata(scriptText);
+            GeneratedMetadata result = metadataGenerator.generate(scriptText);
 
             // then
             assertThat(result.getSummary()).hasSize(250);
@@ -130,10 +130,10 @@ class MetadataGenerationServiceTest {
             String scriptText = "대본";
             String invalidResponse = "이것은 JSON이 아닙니다";
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(invalidResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(invalidResponse);
 
             // when & then
-            assertThatThrownBy(() -> metadataService.generateMetadata(scriptText))
+            assertThatThrownBy(() -> metadataGenerator.generate(scriptText))
                     .isInstanceOf(AudioProcessingException.class)
                     .hasMessageContaining("메타데이터 생성 실패");
         }
@@ -146,15 +146,13 @@ class MetadataGenerationServiceTest {
 
             String geminiResponse = "{\"title\": \"긴 대본\", \"summary\": \"요약\"}";
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
 
             // when
-            GeneratedMetadata result = metadataService.generateMetadata(longScript);
+            GeneratedMetadata result = metadataGenerator.generate(longScript);
 
             // then
             assertThat(result.getTitle()).isEqualTo("긴 대본");
-            // 실제로 Gemini에 전달되는 대본이 10000자 + "..."로 제한됨을 검증하려면
-            // ArgumentCaptor를 사용해야 하지만, 여기서는 동작 확인만
         }
 
         @Test
@@ -164,10 +162,10 @@ class MetadataGenerationServiceTest {
             String scriptText = "대본";
             String geminiResponse = "{\"title\": \"\", \"summary\": \"\"}";
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
 
             // when
-            GeneratedMetadata result = metadataService.generateMetadata(scriptText);
+            GeneratedMetadata result = metadataGenerator.generate(scriptText);
 
             // then
             assertThat(result.getTitle()).isEmpty();

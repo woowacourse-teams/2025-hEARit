@@ -1,37 +1,31 @@
-package com.onair.hearit.admin.ai.application;
+package com.onair.hearit.admin.ai.infrastructure.correction;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
-import com.onair.hearit.admin.ai.infrastructure.gemini.GeminiClient;
+import com.onair.hearit.admin.ai.infrastructure.gemini.GeminiApiClient;
 import com.onair.hearit.admin.ai.infrastructure.prompt.PromptLoader;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
- * 대본 교정 서비스
- * Gemini API를 사용하여 STT 결과의 오타/전문용어를 교정
+ * Gemini API를 사용한 대본 교정 구현체
  */
-@Service
+@Component
 @Slf4j
 @RequiredArgsConstructor
-public class ScriptCorrectionService {
+public class GeminiScriptCorrector implements ScriptCorrector {
 
-    private final GeminiClient geminiClient;
+    private final GeminiApiClient geminiApiClient;
     private final ObjectMapper objectMapper;
     private final PromptLoader promptLoader;
 
-    /**
-     * STT 결과 대본을 교정
-     *
-     * @param rawSegments STT로 생성된 원본 세그먼트 목록
-     * @return 교정된 세그먼트 목록
-     */
-    public List<ScriptSegment> correctScript(List<ScriptSegment> rawSegments) {
+    @Override
+    public List<ScriptSegment> correct(List<ScriptSegment> rawSegments) {
         log.info("대본 교정 시작: 세그먼트 {}개", rawSegments.size());
 
         try {
@@ -42,7 +36,7 @@ public class ScriptCorrectionService {
             String prompt = String.format(promptLoader.getScriptCorrectionPrompt(), inputJson);
 
             // Gemini API 호출
-            String responseJson = geminiClient.generateContentWithJson(prompt);
+            String responseJson = geminiApiClient.generateContentWithJson(prompt);
 
             // 응답 파싱
             List<ScriptSegment> correctedSegments = parseResponse(responseJson, rawSegments);

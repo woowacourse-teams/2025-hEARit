@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.ai.infrastructure.groq;
+package com.onair.hearit.admin.ai.infrastructure.transcription;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,8 +7,6 @@ import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,21 +22,21 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Groq Whisper API 클라이언트
- * OpenAI 호환 API를 제공하는 Groq의 무료 Whisper 서비스 사용
+ * Groq Whisper API를 사용한 음성 변환 구현체
  */
 @Component
 @Slf4j
-public class GroqWhisperClient {
+public class GroqSpeechTranscriber implements SpeechTranscriber {
 
     private static final String GROQ_WHISPER_URL = "https://api.groq.com/openai/v1/audio/transcriptions";
+    private static final int MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final String apiKey;
     private final String model;
 
-    public GroqWhisperClient(
+    public GroqSpeechTranscriber(
             @Qualifier("aiRestTemplate") RestTemplate restTemplate,
             ObjectMapper objectMapper,
             @Value("${groq.api.key}") String apiKey,
@@ -49,13 +47,7 @@ public class GroqWhisperClient {
         this.model = model;
     }
 
-    /**
-     * 오디오 파일을 텍스트로 변환 (타임스탬프 포함)
-     *
-     * @param audioData 오디오 바이트 배열
-     * @param filename 파일명 (확장자 포함)
-     * @return TranscriptionResult (duration + segments)
-     */
+    @Override
     public TranscriptionResult transcribe(byte[] audioData, String filename) {
         log.info("Groq Whisper API 호출 시작: 파일={}, 크기={}KB, 모델={}",
                 filename, audioData.length / 1024, model);
@@ -98,24 +90,13 @@ public class GroqWhisperClient {
         }
     }
 
+    @Override
+    public int getMaxFileSizeBytes() {
+        return MAX_FILE_SIZE;
+    }
+
     /**
-     * Whisper API 응답을 ScriptSegment 형식으로 변환
-     *
-     * Groq Whisper 응답 형식 (OpenAI 호환):
-     * {
-     *   "task": "transcribe",
-     *   "language": "ko",
-     *   "duration": 120.5,
-     *   "segments": [
-     *     {
-     *       "id": 0,
-     *       "start": 0.0,
-     *       "end": 3.34,
-     *       "text": " 텍스트",
-     *       ...
-     *     }
-     *   ]
-     * }
+     * Whisper API 응답을 TranscriptionResult로 변환
      */
     private TranscriptionResult parseWhisperResponse(String jsonResponse) {
         try {
@@ -147,27 +128,14 @@ public class GroqWhisperClient {
                 duration = lastSegment.getEnd() / 1000.0;  // 밀리초 → 초
             }
 
-            log.info("Groq Whisper 파싱 완료: 재생시간={:.1f}초, 세그먼트={}개", duration, segments.size());
+            log.info("Groq Whisper 파싱 완료: 재생시간={}초, 세그먼트={}개",
+                    String.format("%.1f", duration), segments.size());
 
             return new TranscriptionResult(duration, segments);
 
         } catch (JsonProcessingException e) {
             log.error("Groq Whisper 응답 파싱 실패: {}", jsonResponse, e);
             throw new AudioProcessingException("Whisper 응답 파싱 실패", e);
-        }
-    }
-
-    /**
-     * Whisper API 응답 결과
-     */
-    @Getter
-    @AllArgsConstructor
-    public static class TranscriptionResult {
-        private final double duration;              // 전체 재생 시간 (초)
-        private final List<ScriptSegment> segments; // 변환된 대본
-
-        public int getDurationSeconds() {
-            return (int) Math.ceil(duration);
         }
     }
 }

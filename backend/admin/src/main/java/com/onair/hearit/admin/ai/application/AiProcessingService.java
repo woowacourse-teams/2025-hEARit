@@ -1,18 +1,22 @@
 package com.onair.hearit.admin.ai.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.admin.ai.application.MetadataGenerationService.GeneratedMetadata;
 import com.onair.hearit.admin.ai.domain.AiProcessResult;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessor;
 import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessorResolver;
+import com.onair.hearit.admin.ai.infrastructure.correction.ScriptCorrector;
+import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator;
+import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator.GeneratedMetadata;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
-import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient.TranscriptionResult;
 import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
+import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber;
+import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber.TranscriptionResult;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -28,9 +32,9 @@ public class AiProcessingService {
     private final FileStorage fileStorage;
     private final TempFileManager tempFileManager;
     private final AudioProcessorResolver audioProcessorResolver;
-    private final TranscriptionService transcriptionService;
-    private final ScriptCorrectionService correctionService;
-    private final MetadataGenerationService metadataService;
+    private final SpeechTranscriber speechTranscriber;
+    private final ScriptCorrector scriptCorrector;
+    private final MetadataGenerator metadataGenerator;
     private final ObjectMapper objectMapper;
     private final int expirationHours;
     private final int shortsDurationSeconds;
@@ -42,9 +46,9 @@ public class AiProcessingService {
             FileStorage fileStorage,
             TempFileManager tempFileManager,
             AudioProcessorResolver audioProcessorResolver,
-            TranscriptionService transcriptionService,
-            ScriptCorrectionService correctionService,
-            MetadataGenerationService metadataService,
+            SpeechTranscriber speechTranscriber,
+            ScriptCorrector scriptCorrector,
+            MetadataGenerator metadataGenerator,
             ObjectMapper objectMapper,
             @Value("${ai.result.expiration.hours:24}") int expirationHours,
             @Value("${ai.shorts.duration.seconds:60}") int shortsDurationSeconds,
@@ -54,9 +58,9 @@ public class AiProcessingService {
         this.fileStorage = fileStorage;
         this.tempFileManager = tempFileManager;
         this.audioProcessorResolver = audioProcessorResolver;
-        this.transcriptionService = transcriptionService;
-        this.correctionService = correctionService;
-        this.metadataService = metadataService;
+        this.speechTranscriber = speechTranscriber;
+        this.scriptCorrector = scriptCorrector;
+        this.metadataGenerator = metadataGenerator;
         this.objectMapper = objectMapper;
         this.expirationHours = expirationHours;
         this.shortsDurationSeconds = shortsDurationSeconds;
@@ -136,7 +140,7 @@ public class AiProcessingService {
     private TranscriptionResult processTranscription(Long processId, byte[] audioData, String originalFileName) {
         statusUpdater.markAsTranscribing(processId);
         log.debug("STT 처리 중");
-        TranscriptionResult transcription = transcriptionService.transcribe(audioData, originalFileName);
+        TranscriptionResult transcription = speechTranscriber.transcribe(audioData, originalFileName);
         statusUpdater.setTranscriptionResult(
                 processId,
                 transcription.getSegments(),
@@ -148,7 +152,7 @@ public class AiProcessingService {
     private List<ScriptSegment> correctScript(Long processId, List<ScriptSegment> rawSegments) {
         statusUpdater.markAsCorrecting(processId);
         log.debug("대본 교정");
-        List<ScriptSegment> correctedScript = correctionService.correctScript(rawSegments);
+        List<ScriptSegment> correctedScript = scriptCorrector.correct(rawSegments);
         statusUpdater.setCorrectedScript(processId, correctedScript);
         return correctedScript;
     }
@@ -173,9 +177,16 @@ public class AiProcessingService {
     private void generateMetadata(Long processId, List<ScriptSegment> script) {
         statusUpdater.markAsGeneratingMeta(processId);
         log.debug("메타데이터 생성");
-        String fullText = transcriptionService.mergeSegmentsToText(script);
-        GeneratedMetadata metadata = metadataService.generateMetadata(fullText);
+        String fullText = mergeSegmentsToText(script);
+        GeneratedMetadata metadata = metadataGenerator.generate(fullText);
         statusUpdater.setSuggestedMetadata(processId, metadata.getTitle(), metadata.getSummary());
+    }
+
+    private String mergeSegmentsToText(List<ScriptSegment> segments) {
+        return segments.stream()
+                .map(ScriptSegment::getText)
+                .filter(text -> text != null && !text.isEmpty())
+                .collect(Collectors.joining(" "));
     }
 
     private void cleanupTempFiles(Long processId) {

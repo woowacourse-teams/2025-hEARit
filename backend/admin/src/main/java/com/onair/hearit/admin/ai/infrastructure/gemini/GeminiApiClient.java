@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,9 +20,15 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Gemini API 호출을 위한 저수준 클라이언트
+ * Rate Limiting, Retry, 응답 추출 등 공통 로직 담당
+ *
+ * 이 클래스는 행위 인터페이스의 구현체들이 내부적으로 사용
+ */
 @Component
 @Slf4j
-public class GeminiClient {
+public class GeminiApiClient {
 
     private static final String GEMINI_URL_TEMPLATE =
             "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s";
@@ -46,7 +51,7 @@ public class GeminiClient {
     private final String apiKey;
     private final String model;
 
-    public GeminiClient(
+    public GeminiApiClient(
             @Qualifier("aiRestTemplate") RestTemplate restTemplate,
             ObjectMapper objectMapper,
             @Value("${gemini.api.key}") String apiKey,
@@ -208,19 +213,6 @@ public class GeminiClient {
 
     /**
      * Gemini 응답에서 텍스트 추출
-     *
-     * 응답 형식:
-     * {
-     *   "candidates": [
-     *     {
-     *       "content": {
-     *         "parts": [
-     *           { "text": "응답 텍스트" }
-     *         ]
-     *       }
-     *     }
-     *   ]
-     * }
      */
     private String extractTextFromResponse(String jsonResponse) {
         try {

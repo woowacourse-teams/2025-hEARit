@@ -14,16 +14,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.admin.ai.application.MetadataGenerationService.GeneratedMetadata;
 import com.onair.hearit.admin.ai.domain.AiProcessResult;
 import com.onair.hearit.admin.ai.domain.ProcessStatus;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
 import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessor;
 import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessorResolver;
-import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient.TranscriptionResult;
+import com.onair.hearit.admin.ai.infrastructure.correction.ScriptCorrector;
+import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator;
+import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator.GeneratedMetadata;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
 import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
+import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber;
+import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber.TranscriptionResult;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,13 +64,13 @@ class AiProcessingServiceTest {
     private AudioProcessor audioProcessor;
 
     @Mock
-    private TranscriptionService transcriptionService;
+    private SpeechTranscriber speechTranscriber;
 
     @Mock
-    private ScriptCorrectionService correctionService;
+    private ScriptCorrector scriptCorrector;
 
     @Mock
-    private MetadataGenerationService metadataService;
+    private MetadataGenerator metadataGenerator;
 
     private ObjectMapper objectMapper;
     private AiProcessingService aiProcessingService;
@@ -81,9 +84,9 @@ class AiProcessingServiceTest {
                 fileStorage,
                 tempFileManager,
                 audioProcessorResolver,
-                transcriptionService,
-                correctionService,
-                metadataService,
+                speechTranscriber,
+                scriptCorrector,
+                metadataGenerator,
                 objectMapper,
                 24,           // expirationHours
                 60,           // shortsDurationSeconds
@@ -185,16 +188,15 @@ class AiProcessingServiceTest {
                     new ScriptSegment(0, 0, 5000, "테스트")
             );
             TranscriptionResult transcription = new TranscriptionResult(60.0, rawSegments);
-            when(transcriptionService.transcribe(any(byte[].class), anyString()))
+            when(speechTranscriber.transcribe(any(byte[].class), anyString()))
                     .thenReturn(transcription);
 
             List<ScriptSegment> correctedSegments = List.of(
                     new ScriptSegment(0, 0, 5000, "테스트 교정됨")
             );
-            when(correctionService.correctScript(any())).thenReturn(correctedSegments);
+            when(scriptCorrector.correct(any())).thenReturn(correctedSegments);
 
-            when(transcriptionService.mergeSegmentsToText(any())).thenReturn("테스트 교정됨");
-            when(metadataService.generateMetadata(anyString()))
+            when(metadataGenerator.generate(anyString()))
                     .thenReturn(new GeneratedMetadata("테스트 제목", "테스트 요약"));
 
             // when
@@ -230,7 +232,7 @@ class AiProcessingServiceTest {
             byte[] shortsData = new byte[500];
             when(audioProcessor.createShortClip(any(byte[].class), anyInt())).thenReturn(shortsData);
 
-            when(transcriptionService.transcribe(any(byte[].class), anyString()))
+            when(speechTranscriber.transcribe(any(byte[].class), anyString()))
                     .thenThrow(new AudioProcessingException("STT 처리 실패"));
 
             // when
@@ -257,12 +259,11 @@ class AiProcessingServiceTest {
                     new ScriptSegment(0, 0, 5000, "테스트")
             );
             TranscriptionResult transcription = new TranscriptionResult(60.0, rawSegments);
-            when(transcriptionService.transcribe(any(byte[].class), anyString()))
+            when(speechTranscriber.transcribe(any(byte[].class), anyString()))
                     .thenReturn(transcription);
 
-            when(correctionService.correctScript(any())).thenReturn(rawSegments);
-            when(transcriptionService.mergeSegmentsToText(any())).thenReturn("테스트");
-            when(metadataService.generateMetadata(anyString()))
+            when(scriptCorrector.correct(any())).thenReturn(rawSegments);
+            when(metadataGenerator.generate(anyString()))
                     .thenThrow(new AudioProcessingException("메타데이터 생성 실패"));
 
             // when
@@ -290,12 +291,11 @@ class AiProcessingServiceTest {
                     new ScriptSegment(0, 0, 5000, "짧은 오디오")
             );
             TranscriptionResult transcription = new TranscriptionResult(30.0, rawSegments);
-            when(transcriptionService.transcribe(any(byte[].class), anyString()))
+            when(speechTranscriber.transcribe(any(byte[].class), anyString()))
                     .thenReturn(transcription);
 
-            when(correctionService.correctScript(any())).thenReturn(rawSegments);
-            when(transcriptionService.mergeSegmentsToText(any())).thenReturn("짧은 오디오");
-            when(metadataService.generateMetadata(anyString()))
+            when(scriptCorrector.correct(any())).thenReturn(rawSegments);
+            when(metadataGenerator.generate(anyString()))
                     .thenReturn(new GeneratedMetadata("제목", "요약"));
 
             // when

@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.ai.infrastructure.groq;
+package com.onair.hearit.admin.ai.infrastructure.transcription;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
-import com.onair.hearit.admin.ai.infrastructure.groq.GroqWhisperClient.TranscriptionResult;
+import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber.TranscriptionResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,18 +25,18 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
-class GroqWhisperClientTest {
+class GroqSpeechTranscriberTest {
 
     @Mock
     private RestTemplate restTemplate;
 
     private ObjectMapper objectMapper;
-    private GroqWhisperClient whisperClient;
+    private GroqSpeechTranscriber speechTranscriber;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        whisperClient = new GroqWhisperClient(
+        speechTranscriber = new GroqSpeechTranscriber(
                 restTemplate,
                 objectMapper,
                 "test-api-key",
@@ -83,7 +83,7 @@ class GroqWhisperClientTest {
             byte[] audioData = createTestAudioData();
 
             // when
-            TranscriptionResult result = whisperClient.transcribe(audioData, "test.mp3");
+            TranscriptionResult result = speechTranscriber.transcribe(audioData, "test.mp3");
 
             // then
             assertThat(result.getDuration()).isEqualTo(120.5);
@@ -125,12 +125,10 @@ class GroqWhisperClientTest {
             byte[] audioData = createTestAudioData();
 
             // when
-            TranscriptionResult result = whisperClient.transcribe(audioData, "test.mp3");
+            TranscriptionResult result = speechTranscriber.transcribe(audioData, "test.mp3");
 
             // then
             assertThat(result.getSegments()).hasSize(1);
-            // duration은 마지막 segment의 end / 1000 (밀리초 -> 초)
-            // 마지막 segment.end = 30000ms = 30초
         }
 
         @Test
@@ -157,7 +155,7 @@ class GroqWhisperClientTest {
             byte[] audioData = createTestAudioData();
 
             // when
-            TranscriptionResult result = whisperClient.transcribe(audioData, "test.mp3");
+            TranscriptionResult result = speechTranscriber.transcribe(audioData, "test.mp3");
 
             // then
             assertThat(result.getSegments()).hasSize(1);
@@ -177,7 +175,7 @@ class GroqWhisperClientTest {
             byte[] audioData = createTestAudioData();
 
             // when & then
-            assertThatThrownBy(() -> whisperClient.transcribe(audioData, "test.mp3"))
+            assertThatThrownBy(() -> speechTranscriber.transcribe(audioData, "test.mp3"))
                     .isInstanceOf(AudioProcessingException.class)
                     .hasMessageContaining("STT 처리 실패");
         }
@@ -197,8 +195,21 @@ class GroqWhisperClientTest {
             byte[] audioData = createTestAudioData();
 
             // when & then
-            assertThatThrownBy(() -> whisperClient.transcribe(audioData, "test.mp3"))
+            assertThatThrownBy(() -> speechTranscriber.transcribe(audioData, "test.mp3"))
                     .isInstanceOf(AudioProcessingException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("getMaxFileSizeBytes 메서드는")
+    class GetMaxFileSizeBytesTests {
+
+        @Test
+        @DisplayName("25MB를 반환한다")
+        void returns25MB() {
+            // when & then
+            assertThat(speechTranscriber.getMaxFileSizeBytes())
+                    .isEqualTo(25 * 1024 * 1024);
         }
     }
 

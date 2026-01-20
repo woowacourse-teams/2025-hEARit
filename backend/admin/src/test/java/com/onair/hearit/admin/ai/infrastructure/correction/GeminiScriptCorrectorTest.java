@@ -1,4 +1,4 @@
-package com.onair.hearit.admin.ai.application;
+package com.onair.hearit.admin.ai.infrastructure.correction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
-import com.onair.hearit.admin.ai.infrastructure.gemini.GeminiClient;
+import com.onair.hearit.admin.ai.infrastructure.gemini.GeminiApiClient;
 import com.onair.hearit.admin.ai.infrastructure.prompt.PromptLoader;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,27 +18,27 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ScriptCorrectionServiceTest {
+class GeminiScriptCorrectorTest {
 
     @Mock
-    private GeminiClient geminiClient;
+    private GeminiApiClient geminiApiClient;
 
     @Mock
     private PromptLoader promptLoader;
 
     private ObjectMapper objectMapper;
-    private ScriptCorrectionService correctionService;
+    private GeminiScriptCorrector scriptCorrector;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        correctionService = new ScriptCorrectionService(geminiClient, objectMapper, promptLoader);
+        scriptCorrector = new GeminiScriptCorrector(geminiApiClient, objectMapper, promptLoader);
         when(promptLoader.getScriptCorrectionPrompt()).thenReturn("교정 요청: %s");
     }
 
     @Nested
-    @DisplayName("correctScript 메서드는")
-    class CorrectScriptTests {
+    @DisplayName("correct 메서드는")
+    class CorrectTests {
 
         @Test
         @DisplayName("교정된 세그먼트 목록을 반환한다")
@@ -56,10 +56,10 @@ class ScriptCorrectionServiceTest {
                 ]
                 """;
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
 
             // when
-            List<ScriptSegment> result = correctionService.correctScript(rawSegments);
+            List<ScriptSegment> result = scriptCorrector.correct(rawSegments);
 
             // then
             assertThat(result).hasSize(2);
@@ -86,10 +86,10 @@ class ScriptCorrectionServiceTest {
                 위 내용이 교정 결과입니다.
                 """;
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
 
             // when
-            List<ScriptSegment> result = correctionService.correctScript(rawSegments);
+            List<ScriptSegment> result = scriptCorrector.correct(rawSegments);
 
             // then
             assertThat(result).hasSize(1);
@@ -110,10 +110,10 @@ class ScriptCorrectionServiceTest {
                 [{"id": 0, "start": 0, "end": 10000, "text": "병합된 텍스트"}]
                 """;
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(geminiResponse);
 
             // when
-            List<ScriptSegment> result = correctionService.correctScript(rawSegments);
+            List<ScriptSegment> result = scriptCorrector.correct(rawSegments);
 
             // then
             assertThat(result).hasSize(2);
@@ -131,10 +131,10 @@ class ScriptCorrectionServiceTest {
 
             String invalidResponse = "이것은 JSON이 아닙니다";
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn(invalidResponse);
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn(invalidResponse);
 
             // when
-            List<ScriptSegment> result = correctionService.correctScript(rawSegments);
+            List<ScriptSegment> result = scriptCorrector.correct(rawSegments);
 
             // then
             assertThat(result).hasSize(1);
@@ -147,10 +147,10 @@ class ScriptCorrectionServiceTest {
             // given
             List<ScriptSegment> rawSegments = List.of();
 
-            when(geminiClient.generateContentWithJson(anyString())).thenReturn("[]");
+            when(geminiApiClient.generateContentWithJson(anyString())).thenReturn("[]");
 
             // when
-            List<ScriptSegment> result = correctionService.correctScript(rawSegments);
+            List<ScriptSegment> result = scriptCorrector.correct(rawSegments);
 
             // then
             assertThat(result).isEmpty();
