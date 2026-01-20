@@ -44,3 +44,4 @@ out/
 
 afterMigrate.sql
 /*.md
+.claude/settings.local.json
