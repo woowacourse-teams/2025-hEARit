@@ -9,9 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-/**
- * AI 프롬프트 템플릿을 외부 리소스 파일에서 로드하는 컴포넌트
- */
 @Component
 @Slf4j
 @Getter

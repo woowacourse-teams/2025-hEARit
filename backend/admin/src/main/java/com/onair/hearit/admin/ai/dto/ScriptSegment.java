@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ScriptSegment {
 
-    private Integer id;     // 세그먼트 순번
-    private Integer start;  // 시작 시간 (밀리초)
-    private Integer end;    // 종료 시간 (밀리초)
-    private String text;    // 대본 텍스트
+    private Integer id;
+    private Integer start;
+    private Integer end;
+    private String text;
 
     public static ScriptSegment of(int id, double startSeconds, double endSeconds, String text) {
         return new ScriptSegment(

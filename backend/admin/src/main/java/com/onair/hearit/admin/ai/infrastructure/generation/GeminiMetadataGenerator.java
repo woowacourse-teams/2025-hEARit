@@ -10,9 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Gemini API를 사용한 메타데이터 생성 구현체
- */
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -42,27 +39,19 @@ public class GeminiMetadataGenerator implements MetadataGenerator {
         return metadata;
     }
 
-    /**
-     * 응답 파싱
-     */
     private GeneratedMetadata parseResponse(String responseJson) {
         try {
             String cleanJson = extractJsonObject(responseJson);
             JsonNode root = objectMapper.readTree(cleanJson);
-
             String title = root.path("title").asText("").trim();
             String summary = root.path("summary").asText("").trim();
-
-            // 길이 제한 적용
             if (title.length() > MAX_TITLE_LENGTH) {
                 title = title.substring(0, MAX_TITLE_LENGTH);
             }
             if (summary.length() > MAX_SUMMARY_LENGTH) {
                 summary = summary.substring(0, MAX_SUMMARY_LENGTH);
             }
-
             return new GeneratedMetadata(title, summary);
-
         } catch (JsonProcessingException e) {
             log.error("메타데이터 응답 파싱 실패: {}", responseJson, e);
             throw new AudioProcessingException("메타데이터 생성 실패", e);

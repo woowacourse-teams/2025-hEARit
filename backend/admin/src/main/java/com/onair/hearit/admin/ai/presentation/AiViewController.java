@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/**
- * AI 백오피스 페이지 컨트롤러
- */
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -29,30 +26,18 @@ public class AiViewController {
     @Value("${aws.s3.bucket.url}")
     private String bucketUrl;
 
-    /**
-     * AI 업로드 페이지
-     * GET /admin/ai-upload
-     */
     @GetMapping("/ai-upload")
     public String aiUploadPage() {
         return "admin/ai-upload";
     }
 
-    /**
-     * AI 처리 결과 검토 페이지
-     * GET /admin/ai-result/{processId}
-     */
     @GetMapping("/ai-result/{processId}")
     public String aiResultPage(@PathVariable Long processId, Model model) {
         AiProcessResult result = resultService.getResult(processId);
-
-        // 완료되지 않은 결과는 업로드 페이지로 리다이렉트
         if (result.getStatus() != ProcessStatus.COMPLETED) {
             return "redirect:/admin/ai-upload";
         }
-
         AiResultResponse resultResponse = AiResultResponse.from(result, bucketUrl);
-
         model.addAttribute("result", resultResponse);
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("keywords", keywordRepository.findAll());

@@ -59,10 +59,8 @@ public class AiResultService {
     public void updateScript(Long processId, List<ScriptSegment> editedScript) {
         AiProcessResult result = getResult(processId);
         validateEditable(result);
-
         result.updateEditedScript(editedScript);
         resultRepository.save(result);
-
         log.info("대본 수정 완료: processId={}, 세그먼트={}개", processId, editedScript.size());
     }
 
@@ -70,10 +68,8 @@ public class AiResultService {
     public void updateMetadata(Long processId, String title, String summary) {
         AiProcessResult result = getResult(processId);
         validateEditable(result);
-
         result.updateEditedMetadata(title, summary);
         resultRepository.save(result);
-
         log.info("메타데이터 수정 완료: processId={}, 제목='{}'", processId, title);
     }
 
@@ -86,10 +82,8 @@ public class AiResultService {
             String finalTitle,
             String finalSummary,
             List<ScriptSegment> finalScript) {
-
         AiProcessResult result = getResult(processId);
         validateConfirmable(result);
-
         log.info("Hearit 등록 시작: processId={}", processId);
         if (finalTitle != null) {
             result.updateEditedMetadata(finalTitle, finalSummary);
@@ -136,7 +130,6 @@ public class AiResultService {
         String copiedKey = fileStorage.copyFile(tempKey, newKey);
         return copiedKey.startsWith("/") ? copiedKey : "/" + copiedKey;
     }
-
 
     private void validateEditable(AiProcessResult result) {
         if (result.getStatus() != ProcessStatus.COMPLETED) {

@@ -10,27 +10,18 @@ public record AiResultResponse(
         Long id,
         ProcessStatus status,
         String originalFileName,
-
-        // 오디오 URL
         String orgAudioUrl,
         String shrAudioUrl,
-
-        // AI 생성 결과
         List<ScriptSegment> rawTranscript,
         List<ScriptSegment> correctedScript,
         String suggestedTitle,
         String suggestedSummary,
-
-        // 수정된 값
         List<ScriptSegment> editedScript,
         String editedTitle,
         String editedSummary,
-
-        // 최종값 (edited가 있으면 edited, 없으면 suggested)
         List<ScriptSegment> finalScript,
         String finalTitle,
         String finalSummary,
-
         Integer playTime,
         String playTimeFormatted,
 

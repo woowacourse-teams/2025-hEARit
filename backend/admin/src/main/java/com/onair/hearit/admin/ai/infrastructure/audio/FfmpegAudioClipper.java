@@ -15,11 +15,6 @@ import ws.schild.jave.encode.AudioAttributes;
 import ws.schild.jave.encode.EncodingAttributes;
 import ws.schild.jave.info.MultimediaInfo;
 
-/**
- * FFmpeg(JAVE2)를 사용한 AudioClipper 구현체
- * Stream Copy 모드로 오디오 자르기 (재인코딩 없이 빠른 처리)
- * 메타데이터 추출 지원
- */
 @Component
 @Slf4j
 public class FfmpegAudioClipper implements AudioClipper {
@@ -28,52 +23,37 @@ public class FfmpegAudioClipper implements AudioClipper {
     public byte[] clip(byte[] audioData, String extension, int durationSeconds) {
         Path tempDir = null;
         try {
-            // 임시 디렉토리 생성
             tempDir = Files.createTempDirectory("audio-clip-");
             String uuid = UUID.randomUUID().toString();
-
-            // 입력 파일 생성
             File inputFile = tempDir.resolve("input-" + uuid + "." + extension).toFile();
             Files.write(inputFile.toPath(), audioData);
-
-            // 출력 파일 경로
             File outputFile = tempDir.resolve("output-" + uuid + "." + extension).toFile();
 
-            // 원본 재생 시간 확인
             MultimediaObject multimediaObject = new MultimediaObject(inputFile);
             MultimediaInfo info = multimediaObject.getInfo();
             long originalDurationMs = info.getDuration();
             double originalDurationSec = originalDurationMs / 1000.0;
-
             log.info("원본 오디오 길이: {:.1f}초, 목표 길이: {}초", originalDurationSec, durationSeconds);
 
-            // 원본이 목표 시간보다 짧으면 전체 반환
             if (originalDurationSec <= durationSeconds) {
                 log.info("원본이 목표보다 짧아 전체 반환");
                 return audioData;
             }
 
-            // Stream Copy 설정 (재인코딩 없이 빠른 자르기)
             AudioAttributes audioAttributes = new AudioAttributes();
-            audioAttributes.setCodec("copy");  // -c copy: 스트림 복사, CPU 부하 최소화
-
+            audioAttributes.setCodec("copy");
             EncodingAttributes encodingAttributes = new EncodingAttributes();
             encodingAttributes.setOutputFormat(getFormatForExtension(extension));
             encodingAttributes.setAudioAttributes(audioAttributes);
-            // 시작 시간 0초부터, durationSeconds 길이만큼 자르기
             encodingAttributes.setOffset(0f);
             encodingAttributes.setDuration((float) durationSeconds);
 
-            // 인코딩 실행
             Encoder encoder = new Encoder();
             encoder.encode(multimediaObject, outputFile, encodingAttributes);
 
-            // 결과 파일의 실제 duration 확인
             MultimediaObject outputMultimedia = new MultimediaObject(outputFile);
             MultimediaInfo outputInfo = outputMultimedia.getInfo();
             double outputDurationSec = outputInfo.getDuration() / 1000.0;
-
-            // 결과 파일 읽기
             byte[] result = Files.readAllBytes(outputFile.toPath());
             log.info("쇼츠 생성 완료: 원본={}KB({}초), 결과={}KB({}초)",
                     audioData.length / 1024, String.format("%.1f", originalDurationSec),
@@ -88,7 +68,6 @@ public class FfmpegAudioClipper implements AudioClipper {
             log.error("파일 처리 실패", e);
             throw new AudioProcessingException("오디오 자르기 중 파일 처리 실패", e);
         } finally {
-            // 임시 파일 정리
             cleanupTempDir(tempDir);
         }
     }

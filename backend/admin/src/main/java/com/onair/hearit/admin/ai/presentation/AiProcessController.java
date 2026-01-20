@@ -17,10 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * AI 처리 API 컨트롤러
- * 오디오 업로드 및 처리 상태 조회
- */
 @RestController
 @RequestMapping("/admin/api/ai")
 @RequiredArgsConstructor
@@ -30,10 +26,6 @@ public class AiProcessController {
     private final AiProcessingService processingService;
     private final AiResultService resultService;
 
-    /**
-     * AI 처리 시작
-     * POST /admin/api/ai/process
-     */
     @PostMapping("/process")
     public ResponseEntity<Map<String, Long>> startProcess(
             @RequestParam("audioFile") MultipartFile audioFile) throws IOException {
@@ -44,20 +36,11 @@ public class AiProcessController {
 
         byte[] audioData = audioFile.getBytes();
         String filename = audioFile.getOriginalFilename();
-
-        // 1. 동기: 엔티티 생성
         Long processId = processingService.startProcessing(audioData, filename);
-
-        // 2. 비동기: AI 처리 실행
         processingService.executeProcessing(processId, audioData);
-
         return ResponseEntity.ok(Map.of("processId", processId));
     }
 
-    /**
-     * 처리 상태 조회 (Polling용)
-     * GET /admin/api/ai/process/{processId}/status
-     */
     @GetMapping("/process/{processId}/status")
     public ResponseEntity<AiProcessStatusResponse> getStatus(@PathVariable Long processId) {
         AiProcessResult result = resultService.getStatus(processId);

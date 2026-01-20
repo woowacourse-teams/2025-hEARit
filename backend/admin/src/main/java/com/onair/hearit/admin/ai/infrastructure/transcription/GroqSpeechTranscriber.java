@@ -21,9 +21,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Groq Whisper API를 사용한 음성 변환 구현체
- */
 @Component
 @Slf4j
 public class GroqSpeechTranscriber implements SpeechTranscriber {
@@ -55,22 +52,17 @@ public class GroqSpeechTranscriber implements SpeechTranscriber {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(apiKey);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        // 파일 리소스 생성
         ByteArrayResource fileResource = new ByteArrayResource(audioData) {
             @Override
             public String getFilename() {
                 return filename;
             }
         };
-
-        // 요청 바디 구성
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", fileResource);
         body.add("model", model);
-        body.add("response_format", "verbose_json");  // 타임스탬프 포함
+        body.add("response_format", "verbose_json");
         body.add("language", "ko");
-
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         try {
@@ -95,20 +87,12 @@ public class GroqSpeechTranscriber implements SpeechTranscriber {
         return MAX_FILE_SIZE;
     }
 
-    /**
-     * Whisper API 응답을 TranscriptionResult로 변환
-     */
     private TranscriptionResult parseWhisperResponse(String jsonResponse) {
         try {
             JsonNode root = objectMapper.readTree(jsonResponse);
-
-            // 전체 재생 시간
             double duration = root.path("duration").asDouble(0);
-
-            // segments 파싱
             JsonNode segmentsNode = root.path("segments");
             List<ScriptSegment> segments = new ArrayList<>();
-
             if (segmentsNode.isArray()) {
                 for (JsonNode seg : segmentsNode) {
                     int id = seg.path("id").asInt();
@@ -121,13 +105,10 @@ public class GroqSpeechTranscriber implements SpeechTranscriber {
                     }
                 }
             }
-
-            // duration이 없으면 마지막 segment의 end 사용
             if (duration == 0 && !segments.isEmpty()) {
                 ScriptSegment lastSegment = segments.get(segments.size() - 1);
-                duration = lastSegment.getEnd() / 1000.0;  // 밀리초 → 초
+                duration = lastSegment.getEnd() / 1000.0;
             }
-
             log.info("Groq Whisper 파싱 완료: 재생시간={}초, 세그먼트={}개",
                     String.format("%.1f", duration), segments.size());
 
