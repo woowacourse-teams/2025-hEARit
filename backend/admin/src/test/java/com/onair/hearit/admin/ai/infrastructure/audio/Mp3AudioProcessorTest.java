@@ -22,13 +22,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 class Mp3AudioProcessorTest {
 
     @Mock
-    private FfmpegAudioClipper ffmpegAudioClipper;
+    private AudioClipper audioClipper;
 
     private Mp3AudioProcessor processor;
 
     @BeforeEach
     void setUp() {
-        processor = new Mp3AudioProcessor(ffmpegAudioClipper);
+        processor = new Mp3AudioProcessor(audioClipper);
         ReflectionTestUtils.setField(processor, "shortsDurationSeconds", 60);
     }
 
@@ -125,12 +125,12 @@ class Mp3AudioProcessorTest {
     class CreateShortClipTests {
 
         @Test
-        @DisplayName("FfmpegAudioClipper를 호출한다")
-        void callsFfmpegAudioClipper() {
+        @DisplayName("AudioClipper를 통해 쇼츠를 생성한다")
+        void callsAudioClipper() {
             // given
             byte[] mp3Data = createValidMp3Header();
             byte[] expectedResult = new byte[500];
-            when(ffmpegAudioClipper.clip(any(byte[].class), eq("mp3"), eq(60)))
+            when(audioClipper.clip(any(byte[].class), eq("mp3"), eq(60)))
                     .thenReturn(expectedResult);
 
             // when
@@ -138,7 +138,7 @@ class Mp3AudioProcessorTest {
 
             // then
             assertThat(result).isEqualTo(expectedResult);
-            verify(ffmpegAudioClipper).clip(mp3Data, "mp3", 60);
+            verify(audioClipper).clip(mp3Data, "mp3", 60);
         }
 
         @Test
@@ -147,14 +147,14 @@ class Mp3AudioProcessorTest {
             // given
             byte[] mp3Data = createValidMp3Header();
             byte[] expectedResult = new byte[500];
-            when(ffmpegAudioClipper.clip(any(byte[].class), eq("mp3"), eq(60)))
+            when(audioClipper.clip(any(byte[].class), eq("mp3"), eq(60)))
                     .thenReturn(expectedResult);
 
             // when
             byte[] result = processor.createShortClip(mp3Data);
 
             // then
-            verify(ffmpegAudioClipper).clip(mp3Data, "mp3", 60);
+            verify(audioClipper).clip(mp3Data, "mp3", 60);
         }
     }
 

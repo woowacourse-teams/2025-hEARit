@@ -16,7 +16,7 @@ public class Mp3AudioProcessor implements AudioProcessor {
     private static final int DEFAULT_BITRATE_KBPS = 128;
     private static final String EXTENSION = "mp3";
 
-    private final FfmpegAudioClipper ffmpegAudioClipper;
+    private final AudioClipper audioClipper;
 
     @Value("${ai.shorts.duration.seconds:60}")
     private int shortsDurationSeconds;
@@ -39,7 +39,7 @@ public class Mp3AudioProcessor implements AudioProcessor {
     @Override
     public byte[] createShortClip(byte[] originalMp3, int durationSeconds) {
         log.info("MP3 쇼츠 생성 시작: 목표={}초", durationSeconds);
-        return ffmpegAudioClipper.clip(originalMp3, EXTENSION, durationSeconds);
+        return audioClipper.clip(originalMp3, EXTENSION, durationSeconds);
     }
 
     /**
@@ -51,8 +51,8 @@ public class Mp3AudioProcessor implements AudioProcessor {
 
     @Override
     public AudioMetadata extractMetadata(byte[] mp3Data) {
-        double durationSeconds = ffmpegAudioClipper.getDuration(mp3Data, EXTENSION);
-        int bitrate = ffmpegAudioClipper.getBitrate(mp3Data, EXTENSION);
+        double durationSeconds = audioClipper.getDuration(mp3Data, EXTENSION);
+        int bitrate = audioClipper.getBitrate(mp3Data, EXTENSION);
 
         // FFmpeg에서 추출 실패 시 기본값 사용
         if (bitrate <= 0) {

@@ -21,13 +21,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 class M4aAudioProcessorTest {
 
     @Mock
-    private FfmpegAudioClipper ffmpegAudioClipper;
+    private AudioClipper audioClipper;
 
     private M4aAudioProcessor processor;
 
     @BeforeEach
     void setUp() {
-        processor = new M4aAudioProcessor(ffmpegAudioClipper);
+        processor = new M4aAudioProcessor(audioClipper);
         ReflectionTestUtils.setField(processor, "shortsDurationSeconds", 60);
     }
 
@@ -187,12 +187,12 @@ class M4aAudioProcessorTest {
         }
 
         @Test
-        @DisplayName("FfmpegAudioClipper를 호출한다")
-        void callsFfmpegAudioClipper() {
+        @DisplayName("AudioClipper를 통해 쇼츠를 생성한다")
+        void callsAudioClipper() {
             // given
             byte[] m4aData = createValidM4aHeader();
             byte[] expectedResult = new byte[500];
-            when(ffmpegAudioClipper.clip(any(byte[].class), eq("m4a"), eq(60)))
+            when(audioClipper.clip(any(byte[].class), eq("m4a"), eq(60)))
                     .thenReturn(expectedResult);
 
             // when
@@ -200,7 +200,7 @@ class M4aAudioProcessorTest {
 
             // then
             assertThat(result).isEqualTo(expectedResult);
-            verify(ffmpegAudioClipper).clip(m4aData, "m4a", 60);
+            verify(audioClipper).clip(m4aData, "m4a", 60);
         }
 
         @Test
@@ -209,14 +209,14 @@ class M4aAudioProcessorTest {
             // given
             byte[] m4aData = createValidM4aHeader();
             byte[] expectedResult = new byte[500];
-            when(ffmpegAudioClipper.clip(any(byte[].class), eq("m4a"), eq(60)))
+            when(audioClipper.clip(any(byte[].class), eq("m4a"), eq(60)))
                     .thenReturn(expectedResult);
 
             // when
             byte[] result = processor.createShortClip(m4aData);
 
             // then
-            verify(ffmpegAudioClipper).clip(m4aData, "m4a", 60);
+            verify(audioClipper).clip(m4aData, "m4a", 60);
         }
     }
 

@@ -20,7 +20,7 @@ public class M4aAudioProcessor implements AudioProcessor {
     private static final int DEFAULT_BITRATE_KBPS = 128;
     private static final String EXTENSION = "m4a";
 
-    private final FfmpegAudioClipper ffmpegAudioClipper;
+    private final AudioClipper audioClipper;
 
     @Value("${ai.shorts.duration.seconds:60}")
     private int shortsDurationSeconds;
@@ -51,7 +51,7 @@ public class M4aAudioProcessor implements AudioProcessor {
         }
 
         log.info("M4A 쇼츠 생성 시작: 목표={}초", durationSeconds);
-        return ffmpegAudioClipper.clip(originalAudio, EXTENSION, durationSeconds);
+        return audioClipper.clip(originalAudio, EXTENSION, durationSeconds);
     }
 
     /**
@@ -63,8 +63,8 @@ public class M4aAudioProcessor implements AudioProcessor {
 
     @Override
     public AudioMetadata extractMetadata(byte[] audioData) {
-        double durationSeconds = ffmpegAudioClipper.getDuration(audioData, EXTENSION);
-        int bitrate = ffmpegAudioClipper.getBitrate(audioData, EXTENSION);
+        double durationSeconds = audioClipper.getDuration(audioData, EXTENSION);
+        int bitrate = audioClipper.getBitrate(audioData, EXTENSION);
 
         // FFmpeg에서 추출 실패 시 기본값 사용
         if (bitrate <= 0) {
