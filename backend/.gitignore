@@ -43,3 +43,4 @@ out/
 .env
 
 afterMigrate.sql
+/*.md
