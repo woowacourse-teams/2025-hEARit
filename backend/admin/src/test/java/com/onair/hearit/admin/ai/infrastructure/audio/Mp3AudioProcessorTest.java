@@ -2,20 +2,34 @@ package com.onair.hearit.admin.ai.infrastructure.audio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
+@ExtendWith(MockitoExtension.class)
 class Mp3AudioProcessorTest {
+
+    @Mock
+    private FfmpegAudioClipper ffmpegAudioClipper;
 
     private Mp3AudioProcessor processor;
 
     @BeforeEach
     void setUp() {
-        processor = new Mp3AudioProcessor(60);
+        processor = new Mp3AudioProcessor(ffmpegAudioClipper);
+        ReflectionTestUtils.setField(processor, "shortsDurationSeconds", 60);
     }
 
     @Nested
@@ -111,25 +125,36 @@ class Mp3AudioProcessorTest {
     class CreateShortClipTests {
 
         @Test
-        @DisplayName("유효하지 않은 MP3 데이터는 예외를 던진다")
-        void throwsExceptionForInvalidMp3Data() {
-            // given - mp3spi가 읽을 수 없는 가짜 MP3 데이터
-            byte[] fakeMp3 = createValidMp3Header();
+        @DisplayName("FfmpegAudioClipper를 호출한다")
+        void callsFfmpegAudioClipper() {
+            // given
+            byte[] mp3Data = createValidMp3Header();
+            byte[] expectedResult = new byte[500];
+            when(ffmpegAudioClipper.clip(any(byte[].class), eq("mp3"), eq(60)))
+                    .thenReturn(expectedResult);
 
-            // when & then - mp3spi가 실제로 파싱할 수 없으므로 예외 발생
-            assertThatThrownBy(() -> processor.createShortClip(fakeMp3, 60))
-                    .isInstanceOf(AudioProcessingException.class);
+            // when
+            byte[] result = processor.createShortClip(mp3Data, 60);
+
+            // then
+            assertThat(result).isEqualTo(expectedResult);
+            verify(ffmpegAudioClipper).clip(mp3Data, "mp3", 60);
         }
 
         @Test
-        @DisplayName("빈 데이터는 예외를 던진다")
-        void throwsExceptionForEmptyData() {
+        @DisplayName("기본 쇼츠 길이를 사용한다")
+        void usesDefaultShortsDuration() {
             // given
-            byte[] emptyData = new byte[0];
+            byte[] mp3Data = createValidMp3Header();
+            byte[] expectedResult = new byte[500];
+            when(ffmpegAudioClipper.clip(any(byte[].class), eq("mp3"), eq(60)))
+                    .thenReturn(expectedResult);
 
-            // when & then
-            assertThatThrownBy(() -> processor.createShortClip(emptyData, 60))
-                    .isInstanceOf(AudioProcessingException.class);
+            // when
+            byte[] result = processor.createShortClip(mp3Data);
+
+            // then
+            verify(ffmpegAudioClipper).clip(mp3Data, "mp3", 60);
         }
     }
 
@@ -138,25 +163,60 @@ class Mp3AudioProcessorTest {
     class MagicByteValidationTests {
 
         @Test
-        @DisplayName("데이터가 null이면 false")
-        void returnsFalseForNullData() {
-            // given - null을 직접 테스트하기 어려우므로 너무 짧은 데이터로 테스트
-            byte[] shortData = new byte[2];
-
-            // when & then
-            assertThatThrownBy(() -> processor.validate(shortData, "test.mp3"))
-                    .isInstanceOf(AudioProcessingException.class);
-        }
-
-        @Test
-        @DisplayName("데이터가 3바이트 미만이면 false")
-        void returnsFalseForDataShorterThan3Bytes() {
+        @DisplayName("데이터가 3바이트 미만이면 예외")
+        void throwsExceptionForDataShorterThan3Bytes() {
             // given
             byte[] shortData = new byte[2];
 
             // when & then
             assertThatThrownBy(() -> processor.validate(shortData, "test.mp3"))
                     .isInstanceOf(AudioProcessingException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("supports 메서드는")
+    class SupportsTests {
+
+        @Test
+        @DisplayName("mp3 확장자를 지원한다")
+        void supportsMp3Extension() {
+            assertThat(processor.supports("test.mp3")).isTrue();
+        }
+
+        @Test
+        @DisplayName("대소문자 상관없이 지원한다")
+        void supportsUppercaseExtension() {
+            assertThat(processor.supports("test.MP3")).isTrue();
+        }
+
+        @Test
+        @DisplayName("m4a 확장자는 지원하지 않는다")
+        void doesNotSupportM4a() {
+            assertThat(processor.supports("test.m4a")).isFalse();
+        }
+
+        @Test
+        @DisplayName("null 파일명은 지원하지 않는다")
+        void doesNotSupportNull() {
+            assertThat(processor.supports(null)).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("getExtension/getMimeType 메서드는")
+    class MetadataTests {
+
+        @Test
+        @DisplayName("mp3를 반환한다")
+        void returnsCorrectExtension() {
+            assertThat(processor.getExtension()).isEqualTo("mp3");
+        }
+
+        @Test
+        @DisplayName("audio/mpeg를 반환한다")
+        void returnsCorrectMimeType() {
+            assertThat(processor.getMimeType()).isEqualTo("audio/mpeg");
         }
     }
 

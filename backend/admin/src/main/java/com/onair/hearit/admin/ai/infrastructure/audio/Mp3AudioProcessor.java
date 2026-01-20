@@ -1,30 +1,25 @@
 package com.onair.hearit.admin.ai.infrastructure.audio;
 
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class Mp3AudioProcessor implements AudioProcessor {
 
     private static final int MAX_FILE_SIZE_MB = 25;
     private static final int MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+    private static final int DEFAULT_BITRATE_KBPS = 128;
+    private static final String EXTENSION = "mp3";
 
-    private final int shortsDurationSeconds;
+    private final FfmpegAudioClipper ffmpegAudioClipper;
 
-    public Mp3AudioProcessor(
-            @Value("${ai.shorts.duration.seconds:60}") int shortsDurationSeconds) {
-        this.shortsDurationSeconds = shortsDurationSeconds;
-    }
+    @Value("${ai.shorts.duration.seconds:60}")
+    private int shortsDurationSeconds;
 
     @Override
     public boolean supports(String filename) {
@@ -43,32 +38,8 @@ public class Mp3AudioProcessor implements AudioProcessor {
 
     @Override
     public byte[] createShortClip(byte[] originalMp3, int durationSeconds) {
-        try {
-            AudioMetadata metadata = extractMetadata(originalMp3);
-
-            // 원본이 목표 시간보다 짧으면 전체 반환
-            if (metadata.getDurationSeconds() <= durationSeconds) {
-                log.info("원본 오디오({:.1f}초)가 목표 시간({}초)보다 짧아 전체 반환",
-                        metadata.getDurationSeconds(), durationSeconds);
-                return originalMp3;
-            }
-
-            // 바이트/초 계산
-            int bytesPerSecond = (metadata.getBitrate() * 1000) / 8;
-            int targetBytes = bytesPerSecond * durationSeconds;
-
-            log.info("쇼츠 생성: 비트레이트={}kbps, 목표={}초, 예상크기={}KB",
-                    metadata.getBitrate(), durationSeconds, targetBytes / 1024);
-
-            // 앞부분만 자르기
-            return Arrays.copyOf(originalMp3, Math.min(targetBytes, originalMp3.length));
-
-        } catch (AudioProcessingException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("쇼츠 생성 실패", e);
-            throw new AudioProcessingException("쇼츠 생성 실패: " + e.getMessage(), e);
-        }
+        log.info("MP3 쇼츠 생성 시작: 목표={}초", durationSeconds);
+        return ffmpegAudioClipper.clip(originalMp3, EXTENSION, durationSeconds);
     }
 
     /**
@@ -80,55 +51,21 @@ public class Mp3AudioProcessor implements AudioProcessor {
 
     @Override
     public AudioMetadata extractMetadata(byte[] mp3Data) {
-        try {
-            AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(
-                    new ByteArrayInputStream(mp3Data));
+        double durationSeconds = ffmpegAudioClipper.getDuration(mp3Data, EXTENSION);
+        int bitrate = ffmpegAudioClipper.getBitrate(mp3Data, EXTENSION);
 
-            Map<String, Object> properties = fileFormat.properties();
-
-            // 비트레이트 추출 (bps → kbps)
-            Object bitrateObj = properties.get("mp3.bitrate.nominal.bps");
-            int bitrate;
-            if (bitrateObj != null) {
-                bitrate = ((Number) bitrateObj).intValue() / 1000;
-            } else {
-                // 비트레이트를 못 가져오면 파일 크기로 추정
-                bitrate = estimateBitrate(mp3Data);
-                log.warn("비트레이트 정보 없음, 추정값 사용: {}kbps", bitrate);
-            }
-
-            // 재생 시간 추출 (마이크로초 → 초)
-            Object durationObj = properties.get("duration");
-            double durationSeconds;
-            if (durationObj != null) {
-                long durationMicros = ((Number) durationObj).longValue();
-                durationSeconds = durationMicros / 1_000_000.0;
-            } else {
-                // duration을 못 가져오면 파일 크기로 계산
-                durationSeconds = (mp3Data.length * 8.0) / (bitrate * 1000);
-                log.warn("재생시간 정보 없음, 추정값 사용: {:.1f}초", durationSeconds);
-            }
-
-            log.debug("MP3 메타데이터: 비트레이트={}kbps, 재생시간={:.1f}초", bitrate, durationSeconds);
-
-            return new AudioMetadata(bitrate, durationSeconds);
-
-        } catch (UnsupportedAudioFileException e) {
-            log.error("지원하지 않는 오디오 형식", e);
-            throw AudioProcessingException.unsupportedFormat("MP3 파일만 지원합니다.");
-        } catch (IOException e) {
-            log.error("MP3 메타데이터 추출 실패", e);
-            throw new AudioProcessingException("MP3 메타데이터 추출 실패", e);
+        // FFmpeg에서 추출 실패 시 기본값 사용
+        if (bitrate <= 0) {
+            bitrate = DEFAULT_BITRATE_KBPS;
+            log.warn("비트레이트 추출 실패, 기본값 사용: {}kbps", bitrate);
         }
-    }
+        if (durationSeconds <= 0) {
+            durationSeconds = (mp3Data.length * 8.0) / (bitrate * 1000);
+            log.warn("재생시간 추출 실패, 추정값 사용: {:.1f}초", durationSeconds);
+        }
 
-    /**
-     * 파일 크기로 비트레이트 추정 (일반적인 MP3는 5-20분 정도)
-     */
-    private int estimateBitrate(byte[] mp3Data) {
-        // 1MB당 약 1분 = 128kbps 기준
-        // 일반적인 팟캐스트는 128-192kbps
-        return 128;
+        log.debug("MP3 메타데이터: 비트레이트={}kbps, 재생시간={:.1f}초", bitrate, durationSeconds);
+        return new AudioMetadata(bitrate, durationSeconds);
     }
 
     @Override

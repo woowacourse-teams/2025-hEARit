@@ -2,20 +2,33 @@ package com.onair.hearit.admin.ai.infrastructure.audio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
+@ExtendWith(MockitoExtension.class)
 class M4aAudioProcessorTest {
+
+    @Mock
+    private FfmpegAudioClipper ffmpegAudioClipper;
 
     private M4aAudioProcessor processor;
 
     @BeforeEach
     void setUp() {
-        processor = new M4aAudioProcessor(60);
+        processor = new M4aAudioProcessor(ffmpegAudioClipper);
+        ReflectionTestUtils.setField(processor, "shortsDurationSeconds", 60);
     }
 
     @Nested
@@ -166,17 +179,44 @@ class M4aAudioProcessorTest {
         }
 
         @Test
-        @DisplayName("짧은 데이터는 그대로 반환한다")
-        void returnsOriginalForShortData() {
+        @DisplayName("null 데이터는 예외를 던진다")
+        void throwsExceptionForNullData() {
+            // when & then
+            assertThatThrownBy(() -> processor.createShortClip(null, 60))
+                    .isInstanceOf(AudioProcessingException.class);
+        }
+
+        @Test
+        @DisplayName("FfmpegAudioClipper를 호출한다")
+        void callsFfmpegAudioClipper() {
             // given
-            byte[] shortData = createValidM4aHeader();
-            // 예상 재생시간: (100 * 8) / (128 * 1000) ≈ 0.006초 (60초보다 훨씬 짧음)
+            byte[] m4aData = createValidM4aHeader();
+            byte[] expectedResult = new byte[500];
+            when(ffmpegAudioClipper.clip(any(byte[].class), eq("m4a"), eq(60)))
+                    .thenReturn(expectedResult);
 
             // when
-            byte[] result = processor.createShortClip(shortData, 60);
+            byte[] result = processor.createShortClip(m4aData, 60);
 
             // then
-            assertThat(result).isEqualTo(shortData);
+            assertThat(result).isEqualTo(expectedResult);
+            verify(ffmpegAudioClipper).clip(m4aData, "m4a", 60);
+        }
+
+        @Test
+        @DisplayName("기본 쇼츠 길이를 사용한다")
+        void usesDefaultShortsDuration() {
+            // given
+            byte[] m4aData = createValidM4aHeader();
+            byte[] expectedResult = new byte[500];
+            when(ffmpegAudioClipper.clip(any(byte[].class), eq("m4a"), eq(60)))
+                    .thenReturn(expectedResult);
+
+            // when
+            byte[] result = processor.createShortClip(m4aData);
+
+            // then
+            verify(ffmpegAudioClipper).clip(m4aData, "m4a", 60);
         }
     }
 
