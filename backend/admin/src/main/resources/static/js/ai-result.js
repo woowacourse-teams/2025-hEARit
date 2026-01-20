@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Hearit이 성공적으로 등록되었습니다!');
 
             // 목록 페이지로 이동
-            window.location.href = '/admin/hearit';
+            window.location.href = '/admin';
 
         } catch (error) {
             alert('등록에 실패했습니다: ' + error.message);
