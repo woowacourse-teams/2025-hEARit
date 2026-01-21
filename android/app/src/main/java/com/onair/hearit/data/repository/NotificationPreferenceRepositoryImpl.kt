@@ -48,6 +48,6 @@ class NotificationPreferenceRepositoryImpl @Inject constructor(
         }.onFailure { throwable ->
             val cached: Boolean? = mutex.withLock { cachedIsCommutePushEnabled }
             Timber.d("푸시 알림 설정 저장 실패: requestedIsEnabled=$isEnabled, cachedIsCommutePushEnabled=$cached")
-            Timber.e(throwable, "❌ 푸시 알림 설정 저장에 실패했습니다. (메모리 캐시는 갱신됨)")
+            Timber.e(throwable, "❌ 푸시 알림 설정 저장에 실패했습니다.")
         }
 }

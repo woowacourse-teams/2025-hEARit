@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import com.onair.hearit.presentation.setting.SettingRoute.ALARM
 import com.onair.hearit.presentation.setting.SettingRoute.PROFILE
 import com.onair.hearit.presentation.setting.SettingRoute.SETTING
-import com.onair.hearit.presentation.setting.screen.AlarmScreen
+import com.onair.hearit.presentation.setting.screen.NotificationScreen
 import com.onair.hearit.presentation.setting.screen.ProfileScreen
 import com.onair.hearit.presentation.setting.screen.SettingScreen
 
@@ -50,7 +50,7 @@ fun SettingNavHost(
         }
 
         composable(ALARM) {
-            AlarmScreen(
+            NotificationScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
             )

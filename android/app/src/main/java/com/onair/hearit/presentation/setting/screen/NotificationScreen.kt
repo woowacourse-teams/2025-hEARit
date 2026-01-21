@@ -46,7 +46,7 @@ import timber.log.Timber
 private const val COMMUTE_NOTIFICATION_TOPIC: String = "commute_1900"
 
 @Composable
-fun AlarmScreen(
+fun NotificationScreen(
     viewModel: SettingViewModel,
     onBackClick: () -> Unit,
 ) {
