@@ -49,8 +49,8 @@ fun NotificationScreen(
     onBackClick: () -> Unit,
 ) {
     val context: Context = LocalContext.current
-    val isPushNotificationEnabled: Boolean by viewModel.isPushNotificationEnabled.collectAsState()
-    val shouldRequestPermission: Boolean by viewModel.shouldRequestNotificationPermission.collectAsState()
+    val isPushNotificationEnabled: Boolean by viewModel.isNotificationEnabled.collectAsState()
+    val shouldRequestPermission: Boolean by viewModel.shouldRequestNotification.collectAsState()
 
     var showSystemDialog: Boolean by remember { mutableStateOf(false) }
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }

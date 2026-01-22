@@ -30,11 +30,11 @@ class SettingViewModel @Inject constructor(
     private val _userInfo = MutableStateFlow(userRepository.getCachedUserInfo())
     val userInfo = _userInfo.asStateFlow()
 
-    private val _isPushNotificationEnabled = MutableStateFlow(false)
-    val isPushNotificationEnabled = _isPushNotificationEnabled.asStateFlow()
+    private val _isNotificationEnabled = MutableStateFlow(false)
+    val isNotificationEnabled = _isNotificationEnabled.asStateFlow()
 
-    private val _shouldRequestNotificationPermission = MutableStateFlow(false)
-    val shouldRequestNotificationPermission = _shouldRequestNotificationPermission.asStateFlow()
+    private val _shouldRequestNotification = MutableStateFlow(false)
+    val shouldRequestNotification = _shouldRequestNotification.asStateFlow()
 
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
@@ -54,17 +54,17 @@ class SettingViewModel @Inject constructor(
                 successResId = R.string.setting_notification_push_disabled,
                 failureResId = R.string.setting_notification_push_save_failed,
             )
-            _shouldRequestNotificationPermission.value = false
+            _shouldRequestNotification.value = false
             return
         }
-        _shouldRequestNotificationPermission.value = true
+        _shouldRequestNotification.value = true
     }
 
     fun onPostNotificationPermissionResult(isGranted: Boolean) {
-        _shouldRequestNotificationPermission.value = false
+        _shouldRequestNotification.value = false
 
         if (!isGranted) {
-            _isPushNotificationEnabled.value = false
+            _isNotificationEnabled.value = false
             _snackbarMessage.tryEmit(R.string.setting_notification_push_disabled)
             _toastMessage.value = R.string.all_toast_notification_permission_denied
             return
@@ -79,9 +79,9 @@ class SettingViewModel @Inject constructor(
 
     fun onSystemNotificationBlocked(isNotificationAvailable: Boolean) {
         if (isNotificationAvailable) return
-        if (!_isPushNotificationEnabled.value && !_shouldRequestNotificationPermission.value) return
+        if (!_isNotificationEnabled.value && !_shouldRequestNotification.value) return
 
-        _shouldRequestNotificationPermission.value = false
+        _shouldRequestNotification.value = false
 
         applyToggleAndPersist(
             targetEnabled = false,
@@ -95,9 +95,9 @@ class SettingViewModel @Inject constructor(
         successResId: Int,
         failureResId: Int,
     ) {
-        val previousEnabled: Boolean = _isPushNotificationEnabled.value
+        val previousEnabled: Boolean = _isNotificationEnabled.value
 
-        _isPushNotificationEnabled.value = targetEnabled
+        _isNotificationEnabled.value = targetEnabled
         _snackbarMessage.tryEmit(successResId)
 
         viewModelScope.launch {
@@ -105,7 +105,7 @@ class SettingViewModel @Inject constructor(
                 .saveCommutePushEnabled(targetEnabled)
                 .onFailure { throwable ->
                     Timber.e(throwable)
-                    _isPushNotificationEnabled.value = previousEnabled
+                    _isNotificationEnabled.value = previousEnabled
                     _snackbarMessage.tryEmit(failureResId)
                 }
         }
@@ -121,7 +121,7 @@ class SettingViewModel @Inject constructor(
             notificationPreferenceRepository
                 .getCommutePushEnabled()
                 .onSuccess { isEnabled ->
-                    _isPushNotificationEnabled.value = isEnabled
+                    _isNotificationEnabled.value = isEnabled
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                 }
