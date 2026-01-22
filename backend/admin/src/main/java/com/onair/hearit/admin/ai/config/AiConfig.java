@@ -8,9 +8,6 @@ import com.onair.hearit.admin.ai.infrastructure.llm.LlmProvider;
 import com.onair.hearit.admin.ai.infrastructure.llm.gemini.GeminiLlmProvider;
 import com.onair.hearit.admin.ai.infrastructure.llm.gemini.GeminiRequestBuilder;
 import com.onair.hearit.admin.ai.infrastructure.llm.gemini.GeminiResponseParser;
-import com.onair.hearit.admin.ai.infrastructure.llm.ratelimit.TokenBucketRateLimiter;
-import com.onair.hearit.admin.ai.infrastructure.llm.retry.ExponentialBackoffRetryPolicy;
-import com.onair.hearit.admin.ai.infrastructure.llm.retry.RetryPolicy;
 import com.onair.hearit.admin.ai.infrastructure.prompt.PromptLoader;
 import com.onair.hearit.admin.ai.infrastructure.stt.SttProvider;
 import com.onair.hearit.admin.ai.infrastructure.stt.groq.GroqRequestBuilder;
@@ -25,12 +22,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 
 @Configuration
 @EnableAsync
+@EnableRetry
 @EnableConfigurationProperties({LlmProviderProperties.class, SttProviderProperties.class})
 public class AiConfig {
 
@@ -60,22 +59,6 @@ public class AiConfig {
                 .build();
     }
 
-    @Bean(name = "llmRateLimiter")
-    public TokenBucketRateLimiter llmRateLimiter(LlmProviderProperties properties) {
-        return new TokenBucketRateLimiter(properties.getRateLimit().getMinIntervalMs());
-    }
-
-    @Bean(name = "llmRetryPolicy")
-    public RetryPolicy llmRetryPolicy(LlmProviderProperties properties) {
-        LlmProviderProperties.RetryProperties retry = properties.getRetry();
-        return new ExponentialBackoffRetryPolicy(
-                retry.getMaxRetries(),
-                retry.getInitialDelayMs(),
-                retry.getBackoffMultiplier(),
-                retry.getMaxDelayMs()
-        );
-    }
-
     @Bean
     public GeminiRequestBuilder geminiRequestBuilder(
             ObjectMapper objectMapper,
@@ -88,16 +71,12 @@ public class AiConfig {
             @Qualifier("aiRestClient") RestClient restClient,
             LlmProviderProperties properties,
             GeminiRequestBuilder requestBuilder,
-            GeminiResponseParser responseParser,
-            @Qualifier("llmRateLimiter") TokenBucketRateLimiter rateLimiter,
-            @Qualifier("llmRetryPolicy") RetryPolicy retryPolicy) {
+            GeminiResponseParser responseParser) {
         return new GeminiLlmProvider(
                 restClient,
                 properties.getGemini(),
                 requestBuilder,
-                responseParser,
-                rateLimiter,
-                retryPolicy
+                responseParser
         );
     }
 
@@ -119,22 +98,6 @@ public class AiConfig {
         );
     }
 
-    @Bean(name = "sttRateLimiter")
-    public TokenBucketRateLimiter sttRateLimiter(SttProviderProperties properties) {
-        return new TokenBucketRateLimiter(properties.getRateLimit().getMinIntervalMs());
-    }
-
-    @Bean(name = "sttRetryPolicy")
-    public RetryPolicy sttRetryPolicy(SttProviderProperties properties) {
-        SttProviderProperties.RetryProperties retry = properties.getRetry();
-        return new ExponentialBackoffRetryPolicy(
-                retry.getMaxRetries(),
-                retry.getInitialDelayMs(),
-                retry.getBackoffMultiplier(),
-                retry.getMaxDelayMs()
-        );
-    }
-
     @Bean
     public GroqRequestBuilder groqRequestBuilder(SttProviderProperties properties) {
         return new GroqRequestBuilder(properties.getGroq());
@@ -145,16 +108,12 @@ public class AiConfig {
             @Qualifier("aiRestClient") RestClient restClient,
             SttProviderProperties properties,
             GroqRequestBuilder requestBuilder,
-            GroqResponseParser responseParser,
-            @Qualifier("sttRateLimiter") TokenBucketRateLimiter rateLimiter,
-            @Qualifier("sttRetryPolicy") RetryPolicy retryPolicy) {
+            GroqResponseParser responseParser) {
         return new GroqSttProvider(
                 restClient,
                 properties.getGroq(),
                 requestBuilder,
-                responseParser,
-                rateLimiter,
-                retryPolicy
+                responseParser
         );
     }
 }

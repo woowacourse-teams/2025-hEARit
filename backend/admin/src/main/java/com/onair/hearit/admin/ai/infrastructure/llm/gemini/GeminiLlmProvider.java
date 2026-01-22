@@ -6,13 +6,14 @@ import com.onair.hearit.admin.ai.exception.LlmRateLimitException;
 import com.onair.hearit.admin.ai.infrastructure.llm.LlmProvider;
 import com.onair.hearit.admin.ai.infrastructure.llm.LlmRequest;
 import com.onair.hearit.admin.ai.infrastructure.llm.LlmResponse;
-import com.onair.hearit.admin.ai.infrastructure.llm.ratelimit.TokenBucketRateLimiter;
-import com.onair.hearit.admin.ai.infrastructure.llm.retry.RetryPolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
@@ -26,17 +27,27 @@ public class GeminiLlmProvider implements LlmProvider {
     private final GeminiProperties properties;
     private final GeminiRequestBuilder requestBuilder;
     private final GeminiResponseParser responseParser;
-    private final TokenBucketRateLimiter rateLimiter;
-    private final RetryPolicy retryPolicy;
 
     @Override
+    @Retryable(
+            retryFor = {LlmRateLimitException.class, ResourceAccessException.class},
+            maxAttempts = 4,
+            backoff = @Backoff(delay = 5000, multiplier = 2.0, maxDelay = 60000)
+    )
     public LlmResponse generate(LlmRequest request) {
-        return executeWithRetry(request, false);
+        log.debug("Gemini API 호출: 프롬프트 길이={}, JSON응답=false", request.getPrompt().length());
+        return executeRequest(request, false);
     }
 
     @Override
+    @Retryable(
+            retryFor = {LlmRateLimitException.class, ResourceAccessException.class},
+            maxAttempts = 4,
+            backoff = @Backoff(delay = 5000, multiplier = 2.0, maxDelay = 60000)
+    )
     public LlmResponse generateJson(LlmRequest request) {
-        return executeWithRetry(request, true);
+        log.debug("Gemini API 호출: 프롬프트 길이={}, JSON응답=true", request.getPrompt().length());
+        return executeRequest(request, true);
     }
 
     @Override
@@ -49,20 +60,7 @@ public class GeminiLlmProvider implements LlmProvider {
         return properties.getApiKey() != null && !properties.getApiKey().isBlank();
     }
 
-    private LlmResponse executeWithRetry(LlmRequest request, boolean jsonResponse) {
-        log.debug("Gemini API 호출: 프롬프트 길이={}, JSON응답={}", request.getPrompt().length(), jsonResponse);
-
-        return retryPolicy.execute(() -> executeRequest(request, jsonResponse));
-    }
-
     private LlmResponse executeRequest(LlmRequest request, boolean jsonResponse) {
-        try {
-            rateLimiter.acquire();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new LlmApiException("요청 대기 중 인터럽트 발생", e);
-        }
-
         String url = buildUrl();
         String requestBody = requestBuilder.buildRequestBody(request, jsonResponse);
 

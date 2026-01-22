@@ -3,8 +3,6 @@ package com.onair.hearit.admin.ai.infrastructure.stt.groq;
 import com.onair.hearit.admin.ai.config.SttProviderProperties.GroqProperties;
 import com.onair.hearit.admin.ai.exception.LlmApiException;
 import com.onair.hearit.admin.ai.exception.LlmRateLimitException;
-import com.onair.hearit.admin.ai.infrastructure.llm.ratelimit.TokenBucketRateLimiter;
-import com.onair.hearit.admin.ai.infrastructure.llm.retry.RetryPolicy;
 import com.onair.hearit.admin.ai.infrastructure.stt.SttProvider;
 import com.onair.hearit.admin.ai.infrastructure.stt.SttRequest;
 import com.onair.hearit.admin.ai.infrastructure.stt.SttResponse;
@@ -12,7 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
@@ -26,15 +27,18 @@ public class GroqSttProvider implements SttProvider {
     private final GroqProperties properties;
     private final GroqRequestBuilder requestBuilder;
     private final GroqResponseParser responseParser;
-    private final TokenBucketRateLimiter rateLimiter;
-    private final RetryPolicy retryPolicy;
 
     @Override
+    @Retryable(
+            retryFor = {LlmRateLimitException.class, ResourceAccessException.class},
+            maxAttempts = 4,
+            backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 30000)
+    )
     public SttResponse transcribe(SttRequest request) {
         log.info("Groq Whisper API 호출 시작: 파일={}, 크기={}KB, 모델={}",
                 request.getFilename(), request.getAudioData().length / 1024, properties.getModel());
 
-        return retryPolicy.execute(() -> executeRequest(request));
+        return executeRequest(request);
     }
 
     @Override
@@ -53,13 +57,6 @@ public class GroqSttProvider implements SttProvider {
     }
 
     private SttResponse executeRequest(SttRequest request) {
-        try {
-            rateLimiter.acquire();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new LlmApiException("요청 대기 중 인터럽트 발생", e);
-        }
-
         MultiValueMap<String, Object> multipartBody = requestBuilder.buildMultipartBody(request);
 
         try {

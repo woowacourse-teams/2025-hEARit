@@ -15,14 +15,15 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // Retry
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
     // S3
     implementation platform('software.amazon.awssdk:bom:2.25.30')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:auth'
     implementation 'software.amazon.awssdk:regions'
-
-    // MP3 메타데이터 추출 (AI 오디오 쇼츠 생성)
-    implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
 
     // 오디오 자르기 (FFmpeg 기반, 정확한 시간 기반 자르기)
     implementation 'ws.schild:jave-all-deps:3.5.0'
