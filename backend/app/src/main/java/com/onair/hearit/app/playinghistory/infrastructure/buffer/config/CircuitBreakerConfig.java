@@ -1,4 +1,4 @@
-package com.onair.hearit.app.playinghistory.infrastructure.config;
+package com.onair.hearit.app.playinghistory.infrastructure.buffer.config;
 
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryMapBuffer;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;

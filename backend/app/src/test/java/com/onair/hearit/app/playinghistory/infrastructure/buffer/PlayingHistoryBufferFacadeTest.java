@@ -10,7 +10,7 @@ import static org.mockito.Mockito.spy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.exception.custom.RedisBufferException;
 import com.onair.hearit.app.fixture.DbHelper;
-import com.onair.hearit.app.playinghistory.infrastructure.config.CircuitBreakerConfig;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.config.CircuitBreakerConfig;
 import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
