@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DefaultSpeechTranscriber {
+public class SpeechTranscriber {
 
     private final SttProvider sttProvider;
 

@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.admin.ai.config.LlmProviderProperties.MetadataProperties;
 import com.onair.hearit.admin.ai.exception.LlmResponseParseException;
-import com.onair.hearit.admin.ai.infrastructure.generation.DefaultMetadataGenerator.GeneratedMetadata;
+import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator.GeneratedMetadata;
 import com.onair.hearit.admin.ai.infrastructure.json.JsonExtractor;
 import com.onair.hearit.admin.ai.infrastructure.json.TextTruncator;
 import com.onair.hearit.admin.ai.infrastructure.llm.LlmProvider;
@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DefaultMetadataGeneratorTest {
+class MetadataGeneratorTest {
 
     @Mock
     private LlmProvider llmProvider;
@@ -36,7 +36,7 @@ class DefaultMetadataGeneratorTest {
     private JsonExtractor jsonExtractor;
     private TextTruncator textTruncator;
     private MetadataProperties metadataProperties;
-    private DefaultMetadataGenerator metadataGenerator;
+    private MetadataGenerator metadataGenerator;
 
     @BeforeEach
     void setUp() {
@@ -48,7 +48,7 @@ class DefaultMetadataGeneratorTest {
         metadataProperties.setMaxTitleLength(35);
         metadataProperties.setMaxSummaryLength(250);
 
-        metadataGenerator = new DefaultMetadataGenerator(
+        metadataGenerator = new MetadataGenerator(
                 llmProvider, objectMapper, promptLoader, jsonExtractor, textTruncator, metadataProperties);
     }
 

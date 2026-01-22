@@ -1,7 +1,7 @@
 package com.onair.hearit.admin.ai.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.admin.ai.infrastructure.generation.DefaultMetadataGenerator;
+import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator;
 import com.onair.hearit.admin.ai.infrastructure.json.JsonExtractor;
 import com.onair.hearit.admin.ai.infrastructure.json.TextTruncator;
 import com.onair.hearit.admin.ai.infrastructure.llm.LlmProvider;
@@ -81,14 +81,14 @@ public class AiConfig {
     }
 
     @Bean
-    public DefaultMetadataGenerator metadataGenerator(
+    public MetadataGenerator metadataGenerator(
             LlmProvider llmProvider,
             ObjectMapper objectMapper,
             PromptLoader promptLoader,
             JsonExtractor jsonExtractor,
             TextTruncator textTruncator,
             LlmProviderProperties properties) {
-        return new DefaultMetadataGenerator(
+        return new MetadataGenerator(
                 llmProvider,
                 objectMapper,
                 promptLoader,

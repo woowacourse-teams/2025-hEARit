@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.infrastructure.stt.SttProvider;
 import com.onair.hearit.admin.ai.infrastructure.stt.SttResponse;
-import com.onair.hearit.admin.ai.infrastructure.transcription.DefaultSpeechTranscriber.TranscriptionResult;
+import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber.TranscriptionResult;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,16 +20,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("DefaultSpeechTranscriber 테스트")
-class DefaultSpeechTranscriberTest {
+class SpeechTranscriberTest {
 
     @Mock
     private SttProvider sttProvider;
 
-    private DefaultSpeechTranscriber transcriber;
+    private SpeechTranscriber transcriber;
 
     @BeforeEach
     void setUp() {
-        transcriber = new DefaultSpeechTranscriber(sttProvider);
+        transcriber = new SpeechTranscriber(sttProvider);
     }
 
     @Nested

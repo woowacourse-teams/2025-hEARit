@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-public class DefaultMetadataGenerator {
+public class MetadataGenerator {
 
     private final LlmProvider llmProvider;
     private final ObjectMapper objectMapper;

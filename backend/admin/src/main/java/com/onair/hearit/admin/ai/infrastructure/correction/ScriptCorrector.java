@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DefaultScriptCorrector {
+public class ScriptCorrector {
 
     private final LlmProvider llmProvider;
     private final ObjectMapper objectMapper;

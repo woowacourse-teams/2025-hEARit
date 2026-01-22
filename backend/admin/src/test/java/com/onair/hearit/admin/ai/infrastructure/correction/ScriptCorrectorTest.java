@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DefaultScriptCorrectorTest {
+class ScriptCorrectorTest {
 
     @Mock
     private LlmProvider llmProvider;
@@ -33,13 +33,13 @@ class DefaultScriptCorrectorTest {
 
     private ObjectMapper objectMapper;
     private JsonExtractor jsonExtractor;
-    private DefaultScriptCorrector scriptCorrector;
+    private ScriptCorrector scriptCorrector;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         jsonExtractor = new JsonExtractor();
-        scriptCorrector = new DefaultScriptCorrector(llmProvider, objectMapper, promptLoader, jsonExtractor);
+        scriptCorrector = new ScriptCorrector(llmProvider, objectMapper, promptLoader, jsonExtractor);
     }
 
     private void stubPromptLoader() {

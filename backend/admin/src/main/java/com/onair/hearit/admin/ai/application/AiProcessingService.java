@@ -5,13 +5,13 @@ import com.onair.hearit.admin.ai.domain.AiProcessResult;
 import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessor;
 import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessorResolver;
-import com.onair.hearit.admin.ai.infrastructure.correction.DefaultScriptCorrector;
-import com.onair.hearit.admin.ai.infrastructure.generation.DefaultMetadataGenerator;
-import com.onair.hearit.admin.ai.infrastructure.generation.DefaultMetadataGenerator.GeneratedMetadata;
+import com.onair.hearit.admin.ai.infrastructure.correction.ScriptCorrector;
+import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator;
+import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator.GeneratedMetadata;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
 import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
-import com.onair.hearit.admin.ai.infrastructure.transcription.DefaultSpeechTranscriber;
-import com.onair.hearit.admin.ai.infrastructure.transcription.DefaultSpeechTranscriber.TranscriptionResult;
+import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber;
+import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber.TranscriptionResult;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,9 +32,9 @@ public class AiProcessingService {
     private final FileStorage fileStorage;
     private final TempFileManager tempFileManager;
     private final AudioProcessorResolver audioProcessorResolver;
-    private final DefaultSpeechTranscriber speechTranscriber;
-    private final DefaultScriptCorrector scriptCorrector;
-    private final DefaultMetadataGenerator metadataGenerator;
+    private final SpeechTranscriber speechTranscriber;
+    private final ScriptCorrector scriptCorrector;
+    private final MetadataGenerator metadataGenerator;
     private final ObjectMapper objectMapper;
     private final int expirationHours;
     private final int shortsDurationSeconds;
@@ -46,9 +46,9 @@ public class AiProcessingService {
             FileStorage fileStorage,
             TempFileManager tempFileManager,
             AudioProcessorResolver audioProcessorResolver,
-            DefaultSpeechTranscriber speechTranscriber,
-            DefaultScriptCorrector scriptCorrector,
-            DefaultMetadataGenerator metadataGenerator,
+            SpeechTranscriber speechTranscriber,
+            ScriptCorrector scriptCorrector,
+            MetadataGenerator metadataGenerator,
             ObjectMapper objectMapper,
             @Value("${ai.result.expiration.hours:24}") int expirationHours,
             @Value("${ai.shorts.duration.seconds:60}") int shortsDurationSeconds,
