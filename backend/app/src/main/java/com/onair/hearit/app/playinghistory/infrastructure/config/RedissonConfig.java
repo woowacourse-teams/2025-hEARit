@@ -1,4 +1,4 @@
-package com.onair.hearit.app.playinghistory.infrastructure.buffer;
+package com.onair.hearit.app.playinghistory.infrastructure.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
