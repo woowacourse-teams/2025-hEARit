@@ -31,6 +31,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.redisson:redisson-spring-boot-starter:3.52.0'
 
+    // Resilience4j (Circuit Breaker)
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
+
     // ShedLock (분산 스케줄러 락)
     implementation 'net.javacrumbs.shedlock:shedlock-spring:5.10.2'
     implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.10.2'
