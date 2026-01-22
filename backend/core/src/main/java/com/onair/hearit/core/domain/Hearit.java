@@ -43,6 +43,9 @@ public class Hearit {
     @Column(name = "play_time", nullable = false)
     private Integer playTime;
 
+    @Column(name = "view_count", nullable = false)
+    private long viewCount;
+
     @Embedded
     private FileUrls fileUrls;
 
