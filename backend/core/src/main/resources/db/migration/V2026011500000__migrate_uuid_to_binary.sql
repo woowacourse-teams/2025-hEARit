@@ -1,5 +1,4 @@
-DELIMITER
-$$
+DELIMITER $$
 
 DROP PROCEDURE IF EXISTS MigrateIdempotent $$
 
