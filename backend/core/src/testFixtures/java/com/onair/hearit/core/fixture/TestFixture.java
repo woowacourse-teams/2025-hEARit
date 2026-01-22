@@ -28,15 +28,11 @@ public class TestFixture {
     }
 
     public static UserInfo createFixedGuestUserInfo() {
-        return new UserInfo(null, UUID.randomUUID().toString());
+        return new UserInfo(UUID.randomUUID(), UserType.GUEST);
     }
 
-    public static UserInfo createGuestUserInfo(String guestId) {
-        return new UserInfo(null, guestId);
-      
     public static UserInfo createGuestUserInfo(UUID guestId) {
         return new UserInfo(guestId, UserType.GUEST);
-
     }
 
     public static Keyword createFixedKeyword() {
@@ -93,13 +89,5 @@ public class TestFixture {
 
     public static PlayingHistory createFixedFinishedPlayHistory(Member member, Hearit hearit) {
         return new PlayingHistory(member.getUuid(), hearit, hearit.getPlayTime() * 1000);
-    }
-
-    public static List<Source> createFixedSources() {
-        return List.of(
-                new Source("이 컨텐츠는 쿠버네티스 공식 문서 (저작자: The Kubernetes Authors)를 참고하여 만들어졌습니다.",
-                        "https://example.com/1"),
-                new Source("원본은 CC BY 4.0 라이선스를 따릅니다.", "https://example.com/2")
-        );
     }
 }

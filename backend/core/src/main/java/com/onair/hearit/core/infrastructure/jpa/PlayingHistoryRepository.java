@@ -30,7 +30,7 @@ public interface PlayingHistoryRepository extends JpaRepository<PlayingHistory, 
             WHERE ph.userUuid = :userUuid
             GROUP BY h.category.id
             """)
-    List<CategoryPlayingHistoryCount> countPlayingHistoriesByCategory(@Param("userUuid") String userUuid);
+    List<CategoryPlayingHistoryCount> countPlayingHistoriesByCategory(@Param("userUuid") UUID userUuid);
 
     List<PlayingHistory> findByUserUuidAndHearitIdIn(UUID userUuid, List<Long> hearitIds);
 }

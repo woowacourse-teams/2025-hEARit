@@ -7,6 +7,7 @@ import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import com.onair.hearit.core.infrastructure.projection.CategoryPlayingHistoryCount;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class PlayingHistoryScoreFactor implements ScoreFactor {
     }
 
     @Override
-    public Map<Long, Double> calculate(String userUuid, List<Hearit> hearits) {
+    public Map<Long, Double> calculate(UUID userUuid, List<Hearit> hearits) {
         List<Long> isFinishedHearitIds = getFinishedHearitIds(userUuid);
         Map<Long, Double> categoryScores = calculateCategoryPlayRate(userUuid);
         return hearits.stream()
@@ -37,7 +38,7 @@ public class PlayingHistoryScoreFactor implements ScoreFactor {
                 ));
     }
 
-    private Map<Long, Double> calculateCategoryPlayRate(String userUuid) {
+    private Map<Long, Double> calculateCategoryPlayRate(UUID userUuid) {
         List<CategoryPlayingHistoryCount> playedCategoryCounts =
                 playingHistoryRepository.countPlayingHistoriesByCategory(userUuid);
         if (playedCategoryCounts == null || playedCategoryCounts.isEmpty()) {
@@ -48,14 +49,14 @@ public class PlayingHistoryScoreFactor implements ScoreFactor {
                 .mapToLong(CategoryPlayingHistoryCount::getCount)
                 .max()
                 .orElse(0L);
-        
+
         return playedCategoryCounts.stream()
                 .collect(Collectors.toMap(
                         CategoryPlayingHistoryCount::getCategoryId,
                         c -> (double) c.getCount() / (double) maxCategoryPlayCount));
     }
 
-    private List<Long> getFinishedHearitIds(String userUuid) {
+    private List<Long> getFinishedHearitIds(UUID userUuid) {
         List<PlayingHistory> playingHistories =
                 playingHistoryRepository.findByUserUuidOrderByUpdatedAtDesc(userUuid, RECENT_PLAYED_HEARIT_LIMIT);
         return playingHistories.stream()
