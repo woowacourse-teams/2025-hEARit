@@ -88,5 +88,9 @@ public class PlayingHistoryMapBuffer implements PlayingHistoryBuffer {
             log.error("재생 기록 롤백 실패. snapshot size: {}", snapshot.size(), e);
         }
     }
-}
 
+    // 테스트 및 장애 복구 용도
+    public void clear() {
+        cache.clear();
+    }
+}
