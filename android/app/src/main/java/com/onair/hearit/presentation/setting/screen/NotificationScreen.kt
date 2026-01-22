@@ -49,7 +49,7 @@ fun NotificationScreen(
     onBackClick: () -> Unit,
 ) {
     val context: Context = LocalContext.current
-    val isPushNotificationEnabled: Boolean by viewModel.isNotificationEnabled.collectAsState()
+    val isNotificationEnabled: Boolean by viewModel.isNotificationEnabled.collectAsState()
     val shouldRequestPermission: Boolean by viewModel.shouldRequestNotification.collectAsState()
 
     var showSystemDialog: Boolean by remember { mutableStateOf(false) }
@@ -74,7 +74,7 @@ fun NotificationScreen(
         viewModel = viewModel,
     )
 
-    TopicSubscriptionEffect(isPushNotificationEnabled = isPushNotificationEnabled)
+    TopicSubscriptionEffect(isPushNotificationEnabled = isNotificationEnabled)
 
     PermissionRequestEffect(
         context = context,
@@ -116,7 +116,7 @@ fun NotificationScreen(
     ) { padding ->
         NotificationContent(
             modifier = Modifier.padding(padding),
-            isPushEnabled = isPushNotificationEnabled,
+            isPushEnabled = isNotificationEnabled,
             onPushChange = viewModel::onPushNotificationToggleRequested,
         )
     }

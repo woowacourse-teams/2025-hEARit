@@ -24,11 +24,13 @@ fun Context.openNotificationSettings() {
     val intent =
         Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
             putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
     val fallbackIntent =
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.fromParts("package", packageName, null)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
     runCatching { startActivity(intent) }
