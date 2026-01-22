@@ -17,6 +17,7 @@ import com.onair.hearit.app.fixture.ControllerTest;
 import com.onair.hearit.app.hearit.application.HearitService;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse.CategoryResponse;
+import com.onair.hearit.app.hearit.dto.HearitDetailResponse.LikeResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse.SourceResponse;
 import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import java.time.LocalDateTime;
@@ -56,7 +57,8 @@ class HearitControllerTest extends ControllerTest {
                 null,
                 new CategoryResponse(2L, "categoryName", "#FFFFFF"),
                 List.of(new HearitDetailResponse.KeywordResponse(1L, "keyword1"),
-                        new HearitDetailResponse.KeywordResponse(2L, "keyword2"))
+                        new HearitDetailResponse.KeywordResponse(2L, "keyword2")),
+                new LikeResponse(10L, true)
         );
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
@@ -71,9 +73,13 @@ class HearitControllerTest extends ControllerTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("단일 히어릿 조회 V1")
-                                .description("히어릿의 상세 정보를 조회합니다. \n\n"
-                                        + "로그인한 사용자의 경우, `isBookmarked`와 `bookmarkId` 필드가 사용자의 북마크 상태를 반영하여 반환됩니다. \n\n"
-                                        + "비로그인 사용자의 경우, `isBookmarked`는 항상 `false`이며 `bookmarkId`는 `null` 입니다.")
+                                .description("""
+                                        히어릿의 상세 정보를 조회합니다.
+
+                                        로그인한 사용자의 경우, `isBookmarked`와 `bookmarkId` 필드가 사용자의 북마크 상태를 반영하여 반환됩니다.
+                                        `like.isLiked`와 `like.count`에 좋아요 상태를 반영하여 반환됩니다.
+
+                                        비로그인 사용자의 경우, `isBookmarked`는 항상 `false`이며 `bookmarkId`는 `null` 입니다.""")
                                 .pathParameters(
                                         parameterWithName("hearitId").description("조회할 히어릿의 ID")
                                 )
@@ -214,7 +220,9 @@ class HearitControllerTest extends ControllerTest {
                 fieldWithPath("category.colorCode").type(JsonFieldType.STRING).description("카테고리 컬러코드"),
                 fieldWithPath("keywords").type(JsonFieldType.ARRAY).description("키워드 목록"),
                 fieldWithPath("keywords[].id").type(JsonFieldType.NUMBER).description("키워드 ID"),
-                fieldWithPath("keywords[].name").type(JsonFieldType.STRING).description("키워드 이름")
+                fieldWithPath("keywords[].name").type(JsonFieldType.STRING).description("키워드 이름"),
+                fieldWithPath("like.count").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                fieldWithPath("like.isLiked").type(JsonFieldType.BOOLEAN).description("좋아요 유무")
         };
     }
 }
