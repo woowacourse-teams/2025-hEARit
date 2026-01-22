@@ -70,8 +70,8 @@ class PlayingHistoryRepositoryTest {
         @DisplayName("비회원의 재생 기록을 업데이트 날짜를 기준으로 내림차순 정렬하여 10개 조회한다.")
         void findByUserUuidOrderByUpdatedAtDesc_Guest() {
             // given
-            String guestUuid1 = UUID.randomUUID().toString();
-            String guestUuid2 = UUID.randomUUID().toString();
+            UUID guestUuid1 = UUID.randomUUID();
+            UUID guestUuid2 = UUID.randomUUID();
             Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));

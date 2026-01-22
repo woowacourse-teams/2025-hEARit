@@ -12,12 +12,12 @@ import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.exception.custom.UnauthenticatedException;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
-import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.projection.BookmarkWithPlayingHistoryProjection;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,10 +43,10 @@ public class BookmarkService {
         if (userInfo == null || userInfo.isGuest()) {
             return PagedResponse.empty();
         }
-        Member member = getMemberByUserInfo(userInfo);
+        UUID memberUuid = getMemberUuidFromUserInfo(userInfo);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(), sort.toSort());
         Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(
-                member.getUuid(),
+                memberUuid,
                 filter.isFinished(), pageable);
         return PagedResponse.from(toBookmarkHearitResponse(projections));
     }
@@ -56,11 +56,11 @@ public class BookmarkService {
     public PagedResponse<BookmarkHearitResponseV2> getBookmarkHearitsV2(UserInfo userInfo,
                                                                         PagingRequest pagingRequest,
                                                                         BookmarkFilter filter) {
-        Member member = getMemberByUserInfo(userInfo);
+        UUID memberUuid = getMemberUuidFromUserInfo(userInfo);
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(),
                 Sort.by(Direction.DESC, "createdAt"));
         Page<BookmarkWithPlayingHistoryProjection> projections = bookmarkRepository.findFilteredByMember(
-                member.getUuid(),
+                memberUuid,
                 filter.isFinished(), pageable);
         return PagedResponse.from(toBookmarkHearitResponse(projections));
     }
@@ -76,12 +76,13 @@ public class BookmarkService {
 
     @Transactional
     public BookmarkInfoResponse addBookmark(UserInfo userInfo, Long hearitId) {
-        Member member = getMemberByUserInfo(userInfo);
+        UUID memberUuid = getMemberUuidFromUserInfo(userInfo);
+        validateMemberExists(memberUuid);
         Hearit hearit = getHearitById(hearitId);
-        if (bookmarkRepository.existsByHearitAndMember(hearit, member)) {
+        if (bookmarkRepository.existsByHearitAndMemberUuid(hearit, memberUuid)) {
             throw new AlreadyExistException("이미 북마크된 히어릿입니다.");
         }
-        Bookmark bookmark = new Bookmark(member, hearit);
+        Bookmark bookmark = new Bookmark(memberUuid, hearit);
         Bookmark saved = bookmarkRepository.save(bookmark);
         return BookmarkInfoResponse.from(saved);
     }
@@ -89,23 +90,18 @@ public class BookmarkService {
     @Transactional
     public void deleteBookmark(Long bookmarkId, UserInfo userInfo) {
         Bookmark bookmark = getBookmarkById(bookmarkId);
-        Member member = getMemberByUserInfo(userInfo);
-        if (!bookmark.isCreatedBy(member)) {
+        UUID memberUuid = getMemberUuidFromUserInfo(userInfo);
+        if (!bookmark.isCreatedBy(memberUuid)) {
             throw new ForbiddenException("북마크를 삭제할 권한이 없습니다.");
         }
         bookmarkRepository.delete(bookmark);
     }
 
-    private Member getMemberByUserInfo(UserInfo userInfo) {
+    private UUID getMemberUuidFromUserInfo(UserInfo userInfo) {
         if (userInfo == null || userInfo.isGuest()) {
             throw new UnauthenticatedException();
         }
-        return getMemberById(userInfo.getMemberId());
-    }
-
-    private Member getMemberById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
+        return userInfo.getUuid();
     }
 
     private Bookmark getBookmarkById(Long bookmarkId) {
@@ -116,5 +112,11 @@ public class BookmarkService {
     private Hearit getHearitById(Long hearitId) {
         return hearitRepository.findById(hearitId)
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
+    }
+
+    private void validateMemberExists(UUID memberUuid) {
+        if (!memberRepository.findByUuid(memberUuid).isPresent()) {
+            throw new NotFoundException("memberUuid", memberUuid.toString());
+        }
     }
 }

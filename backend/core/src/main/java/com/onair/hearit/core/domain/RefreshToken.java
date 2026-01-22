@@ -8,9 +8,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
@@ -22,8 +25,9 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "member_id", nullable = false, unique = true)
-    private Long memberId;
+    @Column(name = "member_uuid", columnDefinition = "BINARY(16)", nullable = false, unique = true)
+    @JdbcTypeCode(SqlTypes.BINARY)
+    private UUID memberUuid;
 
     @Column(name = "token", nullable = false)
     private String token;
@@ -31,15 +35,15 @@ public class RefreshToken {
     @Column(name = "expiry_date", nullable = false)
     private LocalDateTime expiryDate;
 
-    public RefreshToken(Long memberId, String token, LocalDateTime expiryDate) {
-        validate(memberId, token, expiryDate);
-        this.memberId = memberId;
+    public RefreshToken(UUID memberUuid, String token, LocalDateTime expiryDate) {
+        validate(memberUuid, token, expiryDate);
+        this.memberUuid = memberUuid;
         this.token = token;
         this.expiryDate = expiryDate;
     }
 
-    private void validate(Long memberId, String token, LocalDateTime expiryDate) {
-        validateMember(memberId);
+    private void validate(UUID memberUuid, String token, LocalDateTime expiryDate) {
+        validateMember(memberUuid);
         validateToken(token);
         validateExpiryDate(expiryDate);
     }
@@ -56,8 +60,8 @@ public class RefreshToken {
         }
     }
 
-    private void validateMember(Long memberId) {
-        if (memberId == null) {
+    private void validateMember(UUID memberUuid) {
+        if (memberUuid == null) {
             throw new RefreshTokenDomainException("멤버는 null이 될 수 없습니다.");
         }
     }

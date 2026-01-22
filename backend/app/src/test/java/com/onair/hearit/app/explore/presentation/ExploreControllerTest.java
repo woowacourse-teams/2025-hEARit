@@ -18,6 +18,7 @@ import com.onair.hearit.app.explore.dto.ExploredHearitResponse.KeywordResponse;
 import com.onair.hearit.app.fixture.ControllerTest;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +50,7 @@ class ExploreControllerTest extends ControllerTest {
         var pagedResponses = CursorResponseV2.from(responses);
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
         given(hearitExploreService.getExploredHearits(any(), any())).willReturn(pagedResponses);
 
         // when & then
@@ -72,13 +74,15 @@ class ExploreControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].categoryColorCode").description("카테고리 색상"),
                                                         fieldWithPath("content[].isBookmarked").description("북마크 여부"),
-                                                        fieldWithPath("content[].bookmarkId").description("북마크 ID (북마크된 경우)").optional(),
+                                                        fieldWithPath("content[].bookmarkId").description(
+                                                                "북마크 ID (북마크된 경우)").optional(),
                                                         fieldWithPath("content[].keywords").description("히어릿에 포함된 키워드 목록"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description("키워드 이름"),
                                                         fieldWithPath("content[].cursorId").description("커서 ID"),
                                                 }),
-                                                Arrays.stream(com.onair.hearit.fixture.ApiDocSnippets.getCustomCursorResponseV1Fields())
+                                                Arrays.stream(
+                                                        com.onair.hearit.fixture.ApiDocSnippets.getCustomCursorResponseV1Fields())
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
@@ -102,6 +106,7 @@ class ExploreControllerTest extends ControllerTest {
         var pagedResponses = CursorResponseV2.from(responses);
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
         given(hearitExploreService.getExploredHearits(any(), any())).willReturn(pagedResponses);
 
         // when & then
@@ -125,13 +130,15 @@ class ExploreControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].categoryColorCode").description("카테고리 색상"),
                                                         fieldWithPath("content[].isBookmarked").description("북마크 여부"),
-                                                        fieldWithPath("content[].bookmarkId").description("북마크 ID (북마크된 경우)").optional(),
+                                                        fieldWithPath("content[].bookmarkId").description(
+                                                                "북마크 ID (북마크된 경우)").optional(),
                                                         fieldWithPath("content[].keywords").description("히어릿에 포함된 키워드 목록"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description("키워드 이름"),
                                                         fieldWithPath("content[].cursorId").description("커서 ID"),
                                                 }),
-                                                Arrays.stream(com.onair.hearit.fixture.ApiDocSnippets.getCustomCursorResponseFields())
+                                                Arrays.stream(
+                                                        com.onair.hearit.fixture.ApiDocSnippets.getCustomCursorResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())

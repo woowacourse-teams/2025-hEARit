@@ -9,6 +9,7 @@ import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -142,8 +143,8 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         }
     }
 
-    private String buildHashField(String userUuid, long hearitId) {
-        return userUuid + ":" + hearitId;
+    private String buildHashField(UUID userUuid, long hearitId) {
+        return userUuid.toString() + ":" + hearitId;
     }
 
     private boolean shouldUpdatePlayHistory(String field, PlayHistoryValue incoming) {

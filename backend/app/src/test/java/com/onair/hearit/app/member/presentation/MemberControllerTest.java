@@ -14,6 +14,7 @@ import com.onair.hearit.app.auth.infrastructure.jwt.TokenStatus;
 import com.onair.hearit.app.fixture.ControllerTest;
 import com.onair.hearit.app.member.application.MemberService;
 import com.onair.hearit.app.member.dto.MemberInfoResponse;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,6 +37,7 @@ class MemberControllerTest extends ControllerTest {
         );
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
         given(memberService.getMember(any())).willReturn(response);
 
         // when & then
@@ -68,7 +70,8 @@ class MemberControllerTest extends ControllerTest {
                 .andDo(document("v1-get-members-me-unauthorized",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Member API")
-                                .responseFields(com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFieldsWithAuthProperties())
                                 .build())
                 ));
     }

@@ -97,7 +97,7 @@ class BookmarkServiceTest {
 
         // when
         List<BookmarkHearitResponseV2> responses = bookmarkService.getBookmarkHearits(
-                        RequestUser.member(member.getId()).getUserInfo(),
+                        RequestUser.member(member.getUuid()).getUserInfo(),
                         new PagingRequest(0, 20),
                         BookmarkFilter.ALL,
                         new BookmarkSort(BookmarkSortType.CREATED_AT, BookmarkSortDirection.DESC))
@@ -127,7 +127,7 @@ class BookmarkServiceTest {
 
         // when
         List<BookmarkHearitResponseV2> responses = bookmarkService.getBookmarkHearits(
-                        RequestUser.member(member.getId()).getUserInfo(),
+                        RequestUser.member(member.getUuid()).getUserInfo(),
                         new PagingRequest(0, 20),
                         BookmarkFilter.UNFINISHED,
                         new BookmarkSort(BookmarkSortType.CREATED_AT, BookmarkSortDirection.DESC))
@@ -151,7 +151,7 @@ class BookmarkServiceTest {
         int previousBookmarkCount = bookmarkRepository.findAll().size();
 
         // when
-        BookmarkInfoResponse response = bookmarkService.addBookmark(RequestUser.member(member.getId()).getUserInfo(),
+        BookmarkInfoResponse response = bookmarkService.addBookmark(RequestUser.member(member.getUuid()).getUserInfo(),
                 hearit.getId());
 
         // then
@@ -167,7 +167,7 @@ class BookmarkServiceTest {
     void addBookmarkTest_AlreadyExistTest() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserInfo memberInfo = RequestUser.member(member.getId()).getUserInfo();
+        UserInfo memberInfo = RequestUser.member(member.getUuid()).getUserInfo();
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Long hearitId = hearit.getId();
@@ -191,7 +191,7 @@ class BookmarkServiceTest {
         Bookmark bookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit));
 
         // when
-        bookmarkService.deleteBookmark(bookmark.getId(), RequestUser.member(member.getId()).getUserInfo());
+        bookmarkService.deleteBookmark(bookmark.getId(), RequestUser.member(member.getUuid()).getUserInfo());
 
         // then
         assertThat(bookmarkRepository.findById(bookmark.getId())).isNotPresent();
@@ -203,7 +203,7 @@ class BookmarkServiceTest {
         // given
         Member bookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
         Member notBookmarkMember = dbHelper.insertMember(TestFixture.createFixedMember());
-        UserInfo notBookmarkMemberInfo = RequestUser.member(notBookmarkMember.getId()).getUserInfo();
+        UserInfo notBookmarkMemberInfo = RequestUser.member(notBookmarkMember.getUuid()).getUserInfo();
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
 

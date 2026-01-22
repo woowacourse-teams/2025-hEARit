@@ -30,7 +30,7 @@ class RandomScoreFactorTest {
         }
 
         // when
-        Map<Long, Double> scores = randomScoreFactor.calculate(UUID.randomUUID().toString(), hearits);
+        Map<Long, Double> scores = randomScoreFactor.calculate(UUID.randomUUID(), hearits);
 
         // then
         assertAll(
@@ -51,7 +51,7 @@ class RandomScoreFactorTest {
         hearits.add(createHearitWith(2, category, LocalDateTime.now()));
 
         // when
-        Map<Long, Double> scores = randomScoreFactor.calculate(UUID.randomUUID().toString(), hearits);
+        Map<Long, Double> scores = randomScoreFactor.calculate(UUID.randomUUID(), hearits);
 
         // then
         assertAll(

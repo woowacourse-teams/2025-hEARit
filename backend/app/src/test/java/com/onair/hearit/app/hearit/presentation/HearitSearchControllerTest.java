@@ -18,6 +18,7 @@ import com.onair.hearit.app.hearit.dto.HearitSearchResponse;
 import com.onair.hearit.app.hearit.dto.HearitSearchResponse.KeywordResponse;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,7 @@ public class HearitSearchControllerTest extends ControllerTest {
         var pagedResponses = PagedResponse.from(new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
         given(hearitSearchService.search(any(), any(), any())).willReturn(pagedResponses);
 
         // when & then
@@ -72,13 +74,17 @@ public class HearitSearchControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].id").description("히어릿 ID"),
                                                         fieldWithPath("content[].title").description("히어릿 제목"),
                                                         fieldWithPath("content[].playTime").description("히어릿 재생 시간(초)"),
-                                                        fieldWithPath("content[].lastPlayTime").description("히어릿 마지막 재생 시간(ms)").optional(),
-                                                        fieldWithPath("content[].isFinished").description("히어릿을 끝까지 시청했는지 여부").optional(),
-                                                        fieldWithPath("content[].keywords").description("히어릿에 포함된 키워드 목록"),
+                                                        fieldWithPath("content[].lastPlayTime").description(
+                                                                "히어릿 마지막 재생 시간(ms)").optional(),
+                                                        fieldWithPath("content[].isFinished").description(
+                                                                "히어릿을 끝까지 시청했는지 여부").optional(),
+                                                        fieldWithPath("content[].keywords").description(
+                                                                "히어릿에 포함된 키워드 목록"),
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description("키워드 이름")
                                                 }),
-                                                Arrays.stream(com.onair.hearit.fixture.ApiDocSnippets.getCustomPagedResponseFields())
+                                                Arrays.stream(
+                                                        com.onair.hearit.fixture.ApiDocSnippets.getCustomPagedResponseFields())
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())
@@ -90,6 +96,7 @@ public class HearitSearchControllerTest extends ControllerTest {
     void readSearchedHearitsV1_BadRequest() throws Exception {
         // given
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
 
         // when & then
         mockMvc.perform(get("/api/v1/hearits/search")
@@ -102,7 +109,8 @@ public class HearitSearchControllerTest extends ControllerTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Search API")
                                 .summary("히어릿 검색 V1")
-                                .responseFields(com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
                                 .build())
                 ));
     }

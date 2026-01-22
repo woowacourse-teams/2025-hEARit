@@ -7,7 +7,6 @@ import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.hearit.dto.HearitSearchResponse;
-import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -36,7 +35,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class,
-        HearitSearchService.class, UserInfoService.class})
+        HearitSearchService.class})
 class HearitSearchServiceTest {
 
     @Autowired
