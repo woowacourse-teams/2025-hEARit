@@ -18,6 +18,8 @@ public enum AdminErrorCode {
     AI_FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "파일 크기가 제한을 초과했습니다."),
     AI_UNSUPPORTED_FORMAT(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식입니다."),
     AI_API_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "외부 AI 서비스 호출에 실패했습니다."),
+    AI_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, "AI 서비스 호출 횟수가 제한을 초과했습니다."),
+    AI_RESPONSE_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI 응답 파싱에 실패했습니다."),
     ;
 
     private final HttpStatus httpStatus;

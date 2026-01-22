@@ -20,13 +20,13 @@ import com.onair.hearit.admin.ai.dto.ScriptSegment;
 import com.onair.hearit.admin.ai.exception.AudioProcessingException;
 import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessor;
 import com.onair.hearit.admin.ai.infrastructure.audio.AudioProcessorResolver;
-import com.onair.hearit.admin.ai.infrastructure.correction.ScriptCorrector;
-import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator;
-import com.onair.hearit.admin.ai.infrastructure.generation.MetadataGenerator.GeneratedMetadata;
+import com.onair.hearit.admin.ai.infrastructure.correction.DefaultScriptCorrector;
+import com.onair.hearit.admin.ai.infrastructure.generation.DefaultMetadataGenerator;
+import com.onair.hearit.admin.ai.infrastructure.generation.DefaultMetadataGenerator.GeneratedMetadata;
 import com.onair.hearit.admin.ai.infrastructure.jpa.AiProcessResultRepository;
 import com.onair.hearit.admin.ai.infrastructure.storage.TempFileManager;
-import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber;
-import com.onair.hearit.admin.ai.infrastructure.transcription.SpeechTranscriber.TranscriptionResult;
+import com.onair.hearit.admin.ai.infrastructure.transcription.DefaultSpeechTranscriber;
+import com.onair.hearit.admin.ai.infrastructure.transcription.DefaultSpeechTranscriber.TranscriptionResult;
 import com.onair.hearit.admin.infrastructure.s3.FileStorage;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,13 +64,13 @@ class AiProcessingServiceTest {
     private AudioProcessor audioProcessor;
 
     @Mock
-    private SpeechTranscriber speechTranscriber;
+    private DefaultSpeechTranscriber speechTranscriber;
 
     @Mock
-    private ScriptCorrector scriptCorrector;
+    private DefaultScriptCorrector scriptCorrector;
 
     @Mock
-    private MetadataGenerator metadataGenerator;
+    private DefaultMetadataGenerator metadataGenerator;
 
     private ObjectMapper objectMapper;
     private AiProcessingService aiProcessingService;
