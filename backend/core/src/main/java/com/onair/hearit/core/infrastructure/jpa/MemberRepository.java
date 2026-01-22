@@ -3,6 +3,7 @@ package com.onair.hearit.core.infrastructure.jpa;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.OAuthProvider;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,8 +20,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByLocalId(String localId);
 
     @Query("SELECT m FROM Member m WHERE m.uuid = :uuid AND m.deletedAt IS NULL")
-    Optional<Member> findByUuid(String uuid);
+    Optional<Member> findByUuid(UUID uuid);
 
     @Query("SELECT m.uuid FROM Member m WHERE m.id = :memberId AND m.deletedAt IS NULL")
-    Optional<String> findUuidById(@Param("memberId") Long memberId);
+    Optional<UUID> findUuidById(@Param("memberId") Long memberId);
 }

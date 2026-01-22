@@ -141,7 +141,7 @@ class BookmarkRepositoryTest {
 
         // when
         List<CategoryBookmarkCount> categoryBookmarkCounts = bookmarkRepository.countMemberBookmarksByCategoryId(
-                member.getId());
+                member.getUuid());
 
         // then
         assertThat(categoryBookmarkCounts.getFirst().getCount()).isEqualTo(3);

@@ -85,7 +85,7 @@ class AuthKakaoServiceTest {
         String profileImage = "프로필이미지.URL";
         OAuthProvider provider = OAuthProvider.KAKAO;
         Member saved = memberRepository.save(
-                Member.createSocialUser(UUID.randomUUID().toString(), kakaoId, nickname, profileImage, provider));
+                Member.createSocialUser(UUID.randomUUID(), kakaoId, nickname, profileImage, provider));
         assertThat(memberRepository.findBySocialIdAndOAuthProvider(kakaoId, provider)).isPresent(); // 회원 정보가 이미 있음을 확인
 
         String accessToken = "test-access-token";

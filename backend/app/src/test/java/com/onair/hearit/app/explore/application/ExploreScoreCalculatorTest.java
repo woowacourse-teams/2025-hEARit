@@ -77,11 +77,9 @@ class ExploreScoreCalculatorTest {
         given(scoreFactor2.calculate(any(), anyList())).willReturn(Map.of(hearit1.getId(), 0.3, hearit2.getId(), 0.0));
 
         given(scoreFactor3.isSupported(any())).willReturn(false);
-        // scoreFactor3.calculate()는 호출되지 않으므로, given 설정이 불필요함 (에러 발생)
-
         given(scoreFactorWeightConfig.getWeight(any())).willReturn(1.0);
-
-        Map<Long, Double> memberScores = exploreScoreCalculator.calculateTotalScores("any-uuid", UserType.MEMBER);
+      
+        Map<Long, Double> memberScores = exploreScoreCalculator.calculateTotalScores(java.util.UUID.randomUUID(), UserType.MEMBER);
 
         // then
         assertAll(

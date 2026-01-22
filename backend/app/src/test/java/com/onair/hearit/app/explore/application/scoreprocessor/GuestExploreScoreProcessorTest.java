@@ -17,6 +17,7 @@ import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.ExploreScore;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
@@ -72,14 +73,14 @@ class GuestExploreScoreProcessorTest {
     @DisplayName("게스트 사용자를 지원한다")
     @Test
     void isSupportedForGuest() {
-        UserInfo guestInfo = new UserInfo(null, UUID.randomUUID().toString());
+        UserInfo guestInfo = new UserInfo(UUID.randomUUID(), UserType.GUEST);
         assertThat(guestExploreScoreProcessor.isSupported(guestInfo)).isTrue();
     }
 
     @DisplayName("게스트가 아니면 지원하지 않는다")
     @Test
     void isSupportedForNonGuest() {
-        UserInfo memberInfo = new UserInfo(1L, null);
+        UserInfo memberInfo = new UserInfo(UUID.randomUUID(), UserType.MEMBER);
         assertAll(
                 () -> assertThat(guestExploreScoreProcessor.isSupported(null)).isFalse(),
                 () -> assertThat(guestExploreScoreProcessor.isSupported(memberInfo)).isFalse()
@@ -90,8 +91,8 @@ class GuestExploreScoreProcessorTest {
     @Test
     void getExploreHearitsReturnsResponses() {
         // given
-        String uuid = UUID.randomUUID().toString();
-        UserInfo guestInfo = new UserInfo(null, uuid);
+        UUID uuid = UUID.randomUUID();
+        UserInfo guestInfo = new UserInfo(uuid, UserType.GUEST);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));

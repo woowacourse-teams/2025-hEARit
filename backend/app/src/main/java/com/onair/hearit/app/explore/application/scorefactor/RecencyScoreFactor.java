@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class RecencyScoreFactor implements ScoreFactor {
     }
 
     @Override
-    public Map<Long, Double> calculate(String ignored, List<Hearit> hearits) {
+    public Map<Long, Double> calculate(UUID ignored, List<Hearit> hearits) {
         LocalDateTime now = LocalDateTime.now();
         return hearits.stream()
                 .collect(Collectors.toMap(

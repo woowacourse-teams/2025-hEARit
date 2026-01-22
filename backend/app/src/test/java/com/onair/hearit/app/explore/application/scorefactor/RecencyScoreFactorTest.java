@@ -32,7 +32,7 @@ class RecencyScoreFactorTest {
         Hearit hearit = createHearit(1L, category, now);
 
         // when
-        Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
+        Map<Long, Double> scores = recencyScoreFactor.calculate(java.util.UUID.randomUUID(), List.of(hearit));
 
         // then
         assertThat(scores).containsEntry(hearit.getId(), 1.0);
@@ -47,7 +47,7 @@ class RecencyScoreFactorTest {
         Hearit hearit = createHearit(1L, category, now.minusDays(6));
 
         // when
-        Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
+        Map<Long, Double> scores = recencyScoreFactor.calculate(java.util.UUID.randomUUID(), List.of(hearit));
 
         // then
         assertThat(scores).containsEntry(hearit.getId(), 0.9);
@@ -62,7 +62,7 @@ class RecencyScoreFactorTest {
         Hearit hearit = createHearit(1L, category, now.minusDays(60));
 
         // when
-        Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
+        Map<Long, Double> scores = recencyScoreFactor.calculate(java.util.UUID.randomUUID(), List.of(hearit));
 
         // then
         assertThat(scores).containsEntry(hearit.getId(), 0.0);
@@ -77,7 +77,7 @@ class RecencyScoreFactorTest {
         Hearit hearit = createHearit(1L, category, now.minusDays(60));
 
         // when
-        Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
+        Map<Long, Double> scores = recencyScoreFactor.calculate(java.util.UUID.randomUUID(), List.of(hearit));
 
         // then
         assertThat(scores).containsEntry(hearit.getId(), 0.0);

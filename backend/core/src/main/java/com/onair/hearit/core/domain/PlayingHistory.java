@@ -10,9 +10,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -39,8 +42,9 @@ public class PlayingHistory {
     @Column(name = "member_id", nullable = true)
     private Long memberId;
 
-    @Column(name = "user_uuid", nullable = false, columnDefinition = "CHAR(36)")
-    private String userUuid;
+    @Column(columnDefinition = "BINARY(16)", nullable = false)
+    @JdbcTypeCode(SqlTypes.BINARY)
+    private UUID userUuid;
 
     @Column(name = "hearit_id", nullable = false)
     private Long hearitId;
@@ -55,7 +59,7 @@ public class PlayingHistory {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public PlayingHistory(String userUuid, Hearit hearit, long lastPlayTime) {
+    public PlayingHistory(UUID userUuid, Hearit hearit, long lastPlayTime) {
         validateHearitPlayTime(hearit, lastPlayTime);
         this.userUuid = userUuid;
         this.hearitId = hearit.getId();

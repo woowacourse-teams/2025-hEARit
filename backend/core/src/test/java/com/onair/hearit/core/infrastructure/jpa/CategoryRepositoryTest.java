@@ -55,7 +55,7 @@ class CategoryRepositoryTest {
 
         // when
         List<Category> result = categoryRepository.findTopCategoriesByMemberBookmarks(
-                member.getId(),
+                member.getUuid(),
                 3,
                 Collections.emptyList()
         );
@@ -91,7 +91,7 @@ class CategoryRepositoryTest {
 
         // when: category1 제외
         List<Category> result = categoryRepository.findTopCategoriesByMemberBookmarks(
-                member.getId(),
+                member.getUuid(),
                 3,
                 List.of(category1.getId())
         );

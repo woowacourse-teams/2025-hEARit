@@ -13,7 +13,6 @@ import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
 import com.onair.hearit.app.hearit.dto.param.HearitSortField;
 import com.onair.hearit.app.hearit.dto.param.SortDirection;
-import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -45,7 +44,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("fake-test")
-@Import({DbHelper.class, TestJpaAuditingConfig.class, HearitService.class, UserInfoService.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, HearitService.class})
 class HearitServiceTest {
 
     @Autowired
@@ -184,7 +183,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category1.getId(),
-                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -210,7 +209,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
-                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -234,7 +233,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
-                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -301,7 +300,7 @@ class HearitServiceTest {
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(
                     null,
                     sortRequest,
-                    TestFixture.createGuestUserInfo(UUID.randomUUID().toString()),
+                    TestFixture.createGuestUserInfo(UUID.randomUUID()),
                     pagingRequest
             );
 

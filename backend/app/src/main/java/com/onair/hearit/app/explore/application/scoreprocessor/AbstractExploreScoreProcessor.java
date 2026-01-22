@@ -11,6 +11,7 @@ import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
 
     @Override
     public List<ExploredHearitResponse> getExploreHearits(UserInfo userInfo, long cursorId, int size) {
-        String userUuid = getUserUuid(userInfo);
+        UUID userUuid = getUserUuid(userInfo);
         List<ExploredHearitProjection> exploredHearitProjections =
                 exploredHearitQueryRepository.findExploredHearits(userUuid, cursorId, Pageable.ofSize(size));
         if (exploredHearitProjections.isEmpty()) {
@@ -57,7 +58,7 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
                 ));
     }
 
-    protected abstract String getUserUuid(UserInfo userInfo);
+    protected abstract UUID getUserUuid(UserInfo userInfo);
 
     protected abstract List<ExploredHearitResponse> convertToExploredHearitResponses(
             List<ExploredHearitProjection> infos,

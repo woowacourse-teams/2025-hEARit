@@ -8,6 +8,7 @@ import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.core.domain.UserType;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +16,7 @@ public class TestFixture {
 
     public static Member createFixedMember() {
         return Member.createLocalUser(
-                UUID.randomUUID().toString(),
+                UUID.randomUUID(),
                 "memberID",
                 "nickname",
                 "password",
@@ -23,7 +24,7 @@ public class TestFixture {
     }
 
     public static UserInfo createFixedMemberUserInfo(Member member) {
-        return new UserInfo(member.getId(), null);
+        return new UserInfo(member.getUuid(), UserType.MEMBER);
     }
 
     public static UserInfo createFixedGuestUserInfo() {
@@ -32,6 +33,10 @@ public class TestFixture {
 
     public static UserInfo createGuestUserInfo(String guestId) {
         return new UserInfo(null, guestId);
+      
+    public static UserInfo createGuestUserInfo(UUID guestId) {
+        return new UserInfo(guestId, UserType.GUEST);
+
     }
 
     public static Keyword createFixedKeyword() {
@@ -79,7 +84,7 @@ public class TestFixture {
     }
 
     public static Bookmark createFixedBookmark(Member member, Hearit hearit) {
-        return new Bookmark(member, hearit);
+        return new Bookmark(member.getUuid(), hearit);
     }
 
     public static PlayingHistory createFixedPlayHistory(Member member, Hearit hearit) {
