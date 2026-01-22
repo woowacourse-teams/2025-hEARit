@@ -2,11 +2,7 @@ package com.onair.hearit.presentation.setting.screen
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,13 +23,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.firebase.messaging.FirebaseMessaging
 import com.onair.hearit.R
+import com.onair.hearit.notification.canNotify
+import com.onair.hearit.notification.hasPostNotificationPermission
+import com.onair.hearit.notification.isNotificationBlocked
+import com.onair.hearit.notification.openNotificationSettings
 import com.onair.hearit.presentation.setting.SettingViewModel
 import com.onair.hearit.presentation.setting.component.NotificationContent
 import com.onair.hearit.presentation.setting.component.SettingTopBar
@@ -54,7 +52,7 @@ fun NotificationScreen(
     val isPushNotificationEnabled: Boolean by viewModel.isPushNotificationEnabled.collectAsState()
     val shouldRequestPermission: Boolean by viewModel.shouldRequestNotificationPermission.collectAsState()
 
-    var shouldShowSystemNotificationDialog: Boolean by remember { mutableStateOf(false) }
+    var showSystemDialog: Boolean by remember { mutableStateOf(false) }
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 
     val permissionLauncher =
@@ -83,13 +81,16 @@ fun NotificationScreen(
         shouldRequestPermission = shouldRequestPermission,
         permissionLauncher = permissionLauncher,
         viewModel = viewModel,
-        onNeedOpenSystemSettings = { shouldShowSystemNotificationDialog = true },
+        onNeedOpenSettings = { showSystemDialog = true },
     )
 
     SystemNotificationDialog(
-        context = context,
-        shouldShow = shouldShowSystemNotificationDialog,
-        onDismiss = { shouldShowSystemNotificationDialog = false },
+        shouldShow = showSystemDialog,
+        onDismiss = { showSystemDialog = false },
+        onGoToSettings = {
+            showSystemDialog = false
+            context.openNotificationSettings()
+        },
     )
 
     Scaffold(
@@ -132,12 +133,9 @@ private fun SyncSystemNotificationEffect(
         val observer =
             LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_RESUME) {
-                    val isNotificationAvailable: Boolean =
-                        !isAppNotificationBlockedBySystem(context) &&
-                            isPostNotificationPermissionGranted(
-                                context,
-                            )
-                    viewModel.onSystemNotificationBlocked(isNotificationAvailable)
+                    viewModel.onSystemNotificationBlocked(
+                        isNotificationAvailable = context.canNotify(),
+                    )
                 }
             }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -170,14 +168,14 @@ private fun PermissionRequestEffect(
     shouldRequestPermission: Boolean,
     permissionLauncher: ActivityResultLauncher<String>,
     viewModel: SettingViewModel,
-    onNeedOpenSystemSettings: () -> Unit,
+    onNeedOpenSettings: () -> Unit,
 ) {
     LaunchedEffect(shouldRequestPermission) {
         if (!shouldRequestPermission) return@LaunchedEffect
 
-        if (isAppNotificationBlockedBySystem(context)) {
+        if (context.isNotificationBlocked()) {
             viewModel.onSystemNotificationBlocked(isNotificationAvailable = false)
-            onNeedOpenSystemSettings()
+            onNeedOpenSettings()
             return@LaunchedEffect
         }
 
@@ -186,7 +184,7 @@ private fun PermissionRequestEffect(
             return@LaunchedEffect
         }
 
-        if (isPostNotificationPermissionGranted(context)) {
+        if (context.hasPostNotificationPermission()) {
             viewModel.onPostNotificationPermissionResult(true)
         } else {
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -196,40 +194,14 @@ private fun PermissionRequestEffect(
 
 @Composable
 private fun SystemNotificationDialog(
-    context: Context,
     shouldShow: Boolean,
     onDismiss: () -> Unit,
+    onGoToSettings: () -> Unit,
 ) {
     if (!shouldShow) return
 
     SystemNotificationSettingDialog(
         onDismiss = onDismiss,
-        onGoToSettings = {
-            onDismiss()
-            openAppNotificationSettings(context)
-        },
+        onGoToSettings = onGoToSettings,
     )
-}
-
-private fun isAppNotificationBlockedBySystem(context: Context): Boolean = !NotificationManagerCompat.from(context).areNotificationsEnabled()
-
-private fun isPostNotificationPermissionGranted(context: Context): Boolean {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
-    val permissionState: Int =
-        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-    return permissionState == PackageManager.PERMISSION_GRANTED
-}
-
-private fun openAppNotificationSettings(context: Context) {
-    val intent =
-        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-        }
-
-    val fallbackIntent =
-        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            data = Uri.fromParts("package", context.packageName, null)
-        }
-
-    runCatching { context.startActivity(intent) }.onFailure { context.startActivity(fallbackIntent) }
 }
