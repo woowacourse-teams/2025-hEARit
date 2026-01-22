@@ -40,8 +40,9 @@ public class CircuitBreakerConfig {
 
                     log.info("Circuit 상태 전환: {} -> {}", from, to);
 
-                    if (from == State.OPEN && to == State.CLOSED) {
-                        log.info("Redis 복구 감지, Map Buffer flush 시도");
+                    // HALF_OPEN -> CLOSED 전환 시 Redis 복구로 간주
+                    if (from == State.HALF_OPEN && to == State.CLOSED) {
+                        log.info("Redis 복구 감지 ({}->CLOSED), Map Buffer flush 시도", from);
                         try {
                             mapBuffer.flush();
                             log.info("Map Buffer flush 성공");

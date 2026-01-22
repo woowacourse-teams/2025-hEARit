@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.RedisException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -138,6 +139,10 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         } catch (DataAccessException e) {
             log.error("재생 기록 저장 실패 - Redis 데이터 접근 오류: {}", field, e);
             throw new RedisBufferException("Redis 데이터 접근 실패", e);
+        } catch (RedisException e) {
+            // Redisson의 Redis 관련 예외
+            log.error("재생 기록 저장 실패 - Redisson Redis 오류: {}", field, e);
+            throw new RedisBufferException("Redisson Redis 오류", e);
         } catch (Exception e) {
             log.error("재생 기록 저장 실패 - 예상치 못한 오류: {}", field, e);
             throw new BufferException("재생 기록 저장 중 오류가 발생했습니다.");
