@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
-import com.onair.hearit.app.explore.application.scorefactor.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.generator.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scoreprocessor.GuestExploreScoreProcessor;
 import com.onair.hearit.app.explore.application.scoreprocessor.MemberExploreScoreProcessor;
 import com.onair.hearit.app.explore.dto.CursorRequest;
@@ -44,7 +44,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, RandomScoreFactor.class,
         RecencyScoreFactor.class, BookmarkScoreFactor.class, ExploreScoreCalculator.class,
         ExploreScoreCommandRepository.class, ExploreScoreInitializer.class, GuestExploreScoreProcessor.class,
-        MemberExploreScoreProcessor.class})
+        MemberExploreScoreProcessor.class, ScoreFactorWeightConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
@@ -150,7 +150,7 @@ class HearitExploreServiceTest {
         // then
         assertThat(secondResponse.content())
                 .extracting("id")
-                .doesNotContain(newHearit.getId());
+                .doesNotContain(newHearit.getId()).isEmpty();
     }
 
     @DisplayName("게스트가 탐색 요청 시, 최신, 랜덤 순으로 정렬하여 반환한다")
