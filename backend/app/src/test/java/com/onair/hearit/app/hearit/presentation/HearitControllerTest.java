@@ -5,8 +5,10 @@ import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithNam
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
@@ -192,6 +194,61 @@ class HearitControllerTest extends ControllerTest {
                                         com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields()
                                 )
                                 .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("히어릿 조회수 증가 - 200 OK")
+    void increaseViewCount_OK() throws Exception {
+        // given
+        Long hearitId = 1L;
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
+
+        // when & then
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", hearitId)
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isOk())
+                .andDo(document("v1-increase-hearit-view-ok",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("히어릿 조회수 증가 V1")
+                                .description("히어릿 상세 조회 시 조회수를 1 증가시킵니다.")
+                                .pathParameters(
+                                        parameterWithName("hearitId").description("조회수를 증가시킬 히어릿 ID")
+                                )
+                                .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("히어릿 조회수 증가 - 404 Not Found")
+    void increaseViewCount_NotFound() throws Exception {
+        // given
+        Long notFoundHearitId = 9999L;
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
+        willThrow(new NotFoundException("hearitId", notFoundHearitId.toString()))
+                .given(hearitService)
+                .increaseViewCount(notFoundHearitId);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", notFoundHearitId)
+                        .header("Authorization", "Bearer valid-token"))
+                .andExpect(status().isNotFound())
+                .andDo(document("v1-increase-hearit-view-not-found",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("히어릿 조회수 증가 V1")
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets
+                                                .getProblemDetailResponseFields()
+                                )
+                                .build()
+                        )
                 ));
     }
 

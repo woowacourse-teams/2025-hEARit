@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,5 +44,11 @@ public class HearitController {
                 requestUser.getUserInfo(),
                 pagingRequest);
         return ResponseEntity.ok(responses);
+    }
+
+    @PostMapping("/api/v1/hearits/{hearitId}/view")
+    public ResponseEntity<Void> updateViewCount(@PathVariable Long hearitId) {
+        hearitService.increaseViewCount(hearitId);
+        return ResponseEntity.ok().build();
     }
 }
