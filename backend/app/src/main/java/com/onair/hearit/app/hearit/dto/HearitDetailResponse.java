@@ -17,6 +17,7 @@ public record HearitDetailResponse(
         LocalDateTime createdAt,
         Boolean isBookmarked,
         Long bookmarkId,
+        long viewCount,
         CategoryResponse category,
         List<KeywordResponse> keywords
 ) {
@@ -37,7 +38,8 @@ public record HearitDetailResponse(
                 hearit.getCreatedAt(),
                 bookmarkId != null,
                 bookmarkId,
-                CategoryResponse.of(hearit.getCategory()),
+                hearit.getViewCount(),
+                HearitDetailResponse.CategoryResponse.of(hearit.getCategory()),
                 keywordResponses
         );
     }

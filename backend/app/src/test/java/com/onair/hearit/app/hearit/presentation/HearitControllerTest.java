@@ -56,6 +56,7 @@ class HearitControllerTest extends ControllerTest {
                 LocalDateTime.of(2025, 9, 30, 10, 0),
                 false,
                 null,
+                100,
                 new CategoryResponse(2L, "categoryName", "#FFFFFF"),
                 List.of(new HearitDetailResponse.KeywordResponse(1L, "keyword1"),
                         new HearitDetailResponse.KeywordResponse(2L, "keyword2"))
@@ -265,6 +266,7 @@ class HearitControllerTest extends ControllerTest {
                 fieldWithPath("createdAt").type(JsonFieldType.STRING).description("생성 일시"),
                 fieldWithPath("isBookmarked").type(JsonFieldType.BOOLEAN).description("현재 사용자의 북마크 여부"),
                 fieldWithPath("bookmarkId").type(JsonFieldType.NUMBER).description("북마크 ID (북마크된 경우)").optional(),
+                fieldWithPath("viewCount").type(JsonFieldType.NUMBER).description("히어릿 조회수"),
                 fieldWithPath("category").description("카테고리 정보"),
                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                 fieldWithPath("category.name").type(JsonFieldType.STRING).description("카테고리 이름"),
