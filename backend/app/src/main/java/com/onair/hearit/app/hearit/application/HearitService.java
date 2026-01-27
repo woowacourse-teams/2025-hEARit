@@ -130,4 +130,12 @@ public class HearitService {
             return HearitOverviewResponse.from(hearit, keywords, lastPlayTime);
         });
     }
+
+    @Transactional
+    public void increaseViewCount(Long hearitId) {
+        int updated = hearitRepository.increaseViewCount(hearitId);
+        if (updated == 0) {
+            throw new NotFoundException("hearitId", hearitId.toString());
+        }
+    }
 }
