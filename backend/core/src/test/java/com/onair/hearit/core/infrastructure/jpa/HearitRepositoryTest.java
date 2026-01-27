@@ -11,8 +11,12 @@ import com.onair.hearit.core.fixture.DbHelper;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.projection.HearitWithPlayTimeProjection;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +28,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @DataJpaTest
 @Import({DbHelper.class, TestJpaAuditingConfig.class})
@@ -32,10 +41,16 @@ import org.springframework.test.context.ActiveProfiles;
 class HearitRepositoryTest {
 
     @Autowired
-    private DbHelper dbHelper;
+    EntityManager em;
 
     @Autowired
-    private HearitRepository hearitRepository;
+    PlatformTransactionManager transactionManager;
+
+    @Autowired
+    DbHelper dbHelper;
+
+    @Autowired
+    HearitRepository hearitRepository;
 
     @Test
     @DisplayName("단일 히어릿 조회 시 카테고리도 함께 조회한다.")
@@ -159,5 +174,38 @@ class HearitRepositoryTest {
                 () -> assertThat(projection3.getHearit().getId()).isEqualTo(hearit3.getId()),
                 () -> assertThat(projection3.getLastPlayTime()).isEqualTo(playingHistory2.getLastPlayTime())
         );
+    }
+
+    @Test
+    @DisplayName("히어릿에 대한 조회수 증가 시 정상적으로 1을 반환한다.")
+    void increaseViewCount_success() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        // when
+        int updated = hearitRepository.increaseViewCount(hearit.getId());
+
+        em.clear();
+        Hearit updatedHearit = hearitRepository.findById(hearit.getId()).get();
+
+        // then
+        assertAll(
+                () -> assertThat(updated).isEqualTo(1),
+                () -> assertThat(updatedHearit.getViewCount()).isEqualTo(1L)
+        );
+    }
+
+    @Test
+    @DisplayName("존재하지 않은 히어릿 ID로 조회수 증가 시 0을 반환한다.")
+    void increaseViewCount_notFound() {
+        // given
+        Long notExistHearitId = 9999L;
+
+        // when
+        int updated = hearitRepository.increaseViewCount(notExistHearitId);
+
+        // then
+        assertThat(updated).isEqualTo(0);
     }
 }
