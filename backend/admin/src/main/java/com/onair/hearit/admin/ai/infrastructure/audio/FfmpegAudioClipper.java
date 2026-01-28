@@ -33,7 +33,7 @@ public class FfmpegAudioClipper implements AudioClipper {
             MultimediaInfo info = multimediaObject.getInfo();
             long originalDurationMs = info.getDuration();
             double originalDurationSec = originalDurationMs / 1000.0;
-            log.info("원본 오디오 길이: {:.1f}초, 목표 길이: {}초", originalDurationSec, durationSeconds);
+            log.info("원본 오디오 길이: {}초, 목표 길이: {}초", String.format("%.1f", originalDurationSec), durationSeconds);
 
             if (originalDurationSec <= durationSeconds) {
                 log.info("원본이 목표보다 짧아 전체 반환");

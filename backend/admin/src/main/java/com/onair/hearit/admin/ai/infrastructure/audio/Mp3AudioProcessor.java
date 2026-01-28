@@ -56,10 +56,10 @@ public class Mp3AudioProcessor implements AudioProcessor {
         }
         if (durationSeconds <= 0) {
             durationSeconds = (mp3Data.length * 8.0) / (bitrate * 1000);
-            log.warn("재생시간 추출 실패, 추정값 사용: {:.1f}초", durationSeconds);
+            log.warn("재생시간 추출 실패, 추정값 사용: {}초", String.format("%.1f", durationSeconds));
         }
 
-        log.debug("MP3 메타데이터: 비트레이트={}kbps, 재생시간={:.1f}초", bitrate, durationSeconds);
+        log.debug("MP3 메타데이터: 비트레이트={}kbps, 재생시간={}초", bitrate, String.format("%.1f", durationSeconds));
         return new AudioMetadata(bitrate, durationSeconds);
     }
 
