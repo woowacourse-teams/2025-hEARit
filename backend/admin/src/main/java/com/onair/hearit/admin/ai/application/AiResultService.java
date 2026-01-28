@@ -61,7 +61,7 @@ public class AiResultService {
         validateEditable(result);
         result.updateEditedScript(editedScript);
         resultRepository.save(result);
-        log.info("대본 수정 완료: processId={}, 세그먼트={}개", processId, editedScript.size());
+        log.info("대본 수정 완료: processId={}", processId);
     }
 
     @Transactional
