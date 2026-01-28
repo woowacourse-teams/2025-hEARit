@@ -73,6 +73,9 @@ public class M4aAudioProcessor implements AudioProcessor {
 
     @Override
     public void validate(byte[] data, String filename) {
+        if (data == null || data.length == 0) {
+            throw AudioProcessingException.invalidFile("오디오 데이터가 비어있습니다.");
+        }
         if (data.length > MAX_FILE_SIZE_BYTES) {
             throw AudioProcessingException.fileTooLarge(
                     String.format("파일 크기가 %dMB를 초과합니다. (현재: %.1fMB)",
