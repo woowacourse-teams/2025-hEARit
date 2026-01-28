@@ -85,7 +85,7 @@ public class AiResultService {
         AiProcessResult result = getResult(processId);
         validateConfirmable(result);
         log.info("Hearit 등록 시작: processId={}", processId);
-        if (finalTitle != null) {
+        if (finalTitle != null || finalSummary != null) {
             result.updateEditedMetadata(finalTitle, finalSummary);
         }
         if (finalScript != null) {
