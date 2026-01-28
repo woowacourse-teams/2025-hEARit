@@ -38,6 +38,9 @@ public class Mp3AudioProcessor implements AudioProcessor {
 
     @Override
     public byte[] createShortClip(byte[] originalMp3, int durationSeconds) {
+        if (originalMp3 == null || originalMp3.length == 0) {
+            throw new AudioProcessingException("오디오 데이터가 비어있습니다.");
+        }
         log.info("MP3 쇼츠 생성 시작: 목표={}초", durationSeconds);
         return audioClipper.clip(originalMp3, EXTENSION, durationSeconds);
     }
