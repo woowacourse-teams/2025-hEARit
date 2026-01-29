@@ -7,5 +7,7 @@ data class SearchedHearit(
     val title: String,
     val playTime: Int,
     val lastPlayTime: Long? = null,
+    val createdAt: String? = null,
     val keywords: ImmutableList<Keyword>,
+    val category: Category? = null,
 )

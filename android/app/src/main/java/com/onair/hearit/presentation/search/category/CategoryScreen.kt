@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
-import com.onair.hearit.domain.model.SearchedCategoryHearit
-import com.onair.hearit.presentation.search.category.component.SearchedHearitItem
+import com.onair.hearit.domain.model.SearchedHearit
+import com.onair.hearit.presentation.search.component.SearchedHearitItem
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
@@ -44,7 +44,7 @@ import kotlinx.collections.immutable.persistentListOf
 fun CategoryScreen(
     categoryName: String,
     categoryColor: String,
-    hearits: ImmutableList<SearchedCategoryHearit>,
+    hearits: ImmutableList<SearchedHearit>,
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -134,7 +134,7 @@ private fun CategoryTopBar(
 
 @Composable
 private fun CategoryHearitList(
-    hearits: ImmutableList<SearchedCategoryHearit>,
+    hearits: ImmutableList<SearchedHearit>,
     color: Color,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -166,7 +166,7 @@ private fun CategoryScreenPreview() {
             categoryColor = "#73A01A",
             hearits =
                 persistentListOf(
-                    SearchedCategoryHearit(
+                    SearchedHearit(
                         id = 0,
                         title = "이건 첫 번째 레슨, 좋은 건 너만 알기",
                         playTime = 123,
@@ -175,7 +175,7 @@ private fun CategoryScreenPreview() {
                         keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
                         category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
                     ),
-                    SearchedCategoryHearit(
+                    SearchedHearit(
                         id = 1,
                         title = "이제 두 번째 레슨, 슬픔도 너만 갖기",
                         playTime = 1234,

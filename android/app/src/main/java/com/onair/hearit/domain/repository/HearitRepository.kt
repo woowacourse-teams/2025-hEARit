@@ -6,7 +6,6 @@ import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
-import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 
 interface HearitRepository {
@@ -29,7 +28,7 @@ interface HearitRepository {
         categoryId: Long,
         page: Int? = 0,
         size: Int? = 20,
-    ): Result<PageResult<SearchedCategoryHearit>>
+    ): Result<PageResult<SearchedHearit>>
 
     suspend fun getRecentUploadHearits(
         page: Int? = 0,
