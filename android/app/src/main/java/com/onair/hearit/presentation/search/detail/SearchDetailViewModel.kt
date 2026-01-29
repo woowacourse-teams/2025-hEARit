@@ -4,10 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.SearchInput
-import com.onair.hearit.domain.usecase.search.ClearRecentKeywordsUseCase
-import com.onair.hearit.domain.usecase.search.GetRecentKeywordsUseCase
+import com.onair.hearit.domain.repository.HearitRepository
+import com.onair.hearit.domain.repository.RecentKeywordRepository
 import com.onair.hearit.domain.usecase.search.SaveRecentKeywordUseCase
-import com.onair.hearit.domain.usecase.search.SearchHearitsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -24,10 +23,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchDetailViewModel @Inject constructor(
-    private val getRecentKeywords: GetRecentKeywordsUseCase,
-    private val saveRecentKeyword: SaveRecentKeywordUseCase,
-    private val clearRecentKeywords: ClearRecentKeywordsUseCase,
-    private val searchHearits: SearchHearitsUseCase,
+    private val hearitRepository: HearitRepository,
+    private val recentKeywordRepository: RecentKeywordRepository,
+    private val saveRecentKeywordUseCase: SaveRecentKeywordUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SearchDetailUiState())
     val uiState: StateFlow<SearchDetailUiState> = _uiState.asStateFlow()
@@ -40,7 +38,8 @@ class SearchDetailViewModel @Inject constructor(
 
     fun loadRecentKeywords() {
         viewModelScope.launch {
-            getRecentKeywords()
+            recentKeywordRepository
+                .getKeywords()
                 .onSuccess { keywords ->
                     _uiState.update { it.copy(recentKeywords = keywords.toImmutableList()) }
                 }.onFailure { throwable ->
@@ -52,7 +51,7 @@ class SearchDetailViewModel @Inject constructor(
 
     fun saveKeyword(term: String) {
         viewModelScope.launch {
-            saveRecentKeyword(term)
+            saveRecentKeywordUseCase(term)
                 .onSuccess {
                     loadRecentKeywords()
                 }.onFailure { throwable ->
@@ -64,7 +63,8 @@ class SearchDetailViewModel @Inject constructor(
 
     fun clearKeywords() {
         viewModelScope.launch {
-            clearRecentKeywords()
+            recentKeywordRepository
+                .clearKeywords()
                 .onSuccess { count ->
                     _uiState.update { it.copy(recentKeywords = persistentListOf()) }
                     if (count > 0) {
@@ -119,7 +119,8 @@ class SearchDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
 
             try {
-                searchHearits(term, currentState.currentPage)
+                hearitRepository
+                    .getKeywordHearits(term, currentState.currentPage)
                     .onSuccess { result ->
                         _uiState.update { state ->
                             state.copy(
