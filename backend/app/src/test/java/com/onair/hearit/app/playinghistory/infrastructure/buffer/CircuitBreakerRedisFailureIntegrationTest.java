@@ -1,6 +1,9 @@
 package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
@@ -211,17 +214,29 @@ class CircuitBreakerRedisFailureIntegrationTest {
             facade.add(history, 2000L + i);
         }
 
-        // then: Circuit CLOSED, Map Buffer가 Redis로 flush됨
+        // then: Circuit CLOSED
         assertThat(circuitBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        assertThat(mapBuffer.size()).isEqualTo(0);
-        List<PlayingHistory> savedHistories =
-                playingHistoryRepository.findByUserUuidOrderByUpdatedAtDesc(member.getUuid(), 100);
-        assertThat(savedHistories).hasSize(5);
 
-        List<Long> savedHearitIds = savedHistories.stream()
-                .map(PlayingHistory::getHearitId)
-                .toList();
-        assertThat(savedHearitIds).containsExactlyInAnyOrderElementsOf(expectedHearitIds);
+        // 비동기 flush 완료 대기 (최대 5초)
+        await().atMost(5, SECONDS)
+                .pollInterval(100, MILLISECONDS)
+                .untilAsserted(() -> {
+                    assertThat(mapBuffer.size()).isEqualTo(0);
+                });
+
+        // DB에 저장 확인 (비동기 flush 완료 후 저장됨)
+        await().atMost(3, SECONDS)
+                .pollInterval(100, MILLISECONDS)
+                .untilAsserted(() -> {
+                    List<PlayingHistory> savedHistories =
+                            playingHistoryRepository.findByUserUuidOrderByUpdatedAtDesc(member.getUuid(), 100);
+                    assertThat(savedHistories).hasSize(5);
+
+                    List<Long> savedHearitIds = savedHistories.stream()
+                            .map(PlayingHistory::getHearitId)
+                            .toList();
+                    assertThat(savedHearitIds).containsExactlyInAnyOrderElementsOf(expectedHearitIds);
+                });
     }
 
     @Test

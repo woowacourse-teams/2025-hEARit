@@ -1,19 +1,22 @@
 package com.onair.hearit.app.playinghistory.infrastructure.buffer.config;
 
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryMapBuffer;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Configuration;
+
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.event.RedisRecoveredEvent;
+
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker.State;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Redis 재생 기록 버퍼용 Circuit Breaker 이벤트 설정.
  *
  * <p>Redis 장애 시 Map Buffer로 전환하고,
- * Redis 복구(CLOSED 전환) 시 Map Buffer를 flush한다.</p>
+ * Redis 복구(CLOSED 전환) 시 비동기 이벤트를 발행하여 Map Buffer를 flush한다.</p>
  *
  * <p>Circuit Breaker 자체 설정은 application properties에서 관리한다.</p>
  */
@@ -23,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 public class CircuitBreakerConfig {
 
     private final CircuitBreakerRegistry circuitBreakerRegistry;
-    private final PlayingHistoryMapBuffer mapBuffer;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     @PostConstruct
@@ -42,13 +45,8 @@ public class CircuitBreakerConfig {
 
                     // HALF_OPEN -> CLOSED 전환 시 Redis 복구로 간주
                     if (from == State.HALF_OPEN && to == State.CLOSED) {
-                        log.info("Redis 복구 감지 ({}->CLOSED), Map Buffer flush 시도", from);
-                        try {
-                            mapBuffer.flush();
-                            log.info("Map Buffer flush 성공");
-                        } catch (Exception e) {
-                            log.error("Map Buffer flush 실패, 다음 주기에 재시도 예정", e);
-                        }
+                        log.info("Redis 복구 감지 ({}->CLOSED), 비동기 이벤트 발행", from);
+                        eventPublisher.publishEvent(new RedisRecoveredEvent());
                     }
                 });
 

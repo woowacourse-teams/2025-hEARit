@@ -61,6 +61,9 @@ dependencies {
     testImplementation 'org.testcontainers:testcontainers:1.19.3'
     testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
 
+    // Awaitility for async testing
+    testImplementation 'org.awaitility:awaitility:4.2.0'
+
     // REST Docs & restdocs-api-spec
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation "com.epages:restdocs-api-spec-mockmvc:0.18.2"
