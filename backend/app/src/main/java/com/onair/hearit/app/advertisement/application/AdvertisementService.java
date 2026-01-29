@@ -14,11 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class AdvertisementService {
 
     private final AdvertisementRepository advertisementRepository;
 
+    @Transactional(readOnly = true)
     public AdvertisementResponse getRandomAdvertisement() {
         List<Long> advertisementIds = advertisementRepository.findAllIds();
         if (advertisementIds.isEmpty()) {
