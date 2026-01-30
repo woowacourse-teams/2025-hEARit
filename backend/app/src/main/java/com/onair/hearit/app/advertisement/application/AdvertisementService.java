@@ -9,9 +9,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdvertisementService {
@@ -20,9 +22,10 @@ public class AdvertisementService {
 
     @Transactional(readOnly = true)
     public AdvertisementResponse getRandomAdvertisement() {
-        List<Long> advertisementIds = advertisementRepository.findAllIds();
+        List<Long> advertisementIds = advertisementRepository.findLatestIds();
         if (advertisementIds.isEmpty()) {
-            throw new NotFoundException("advertisement", "전체");
+            log.error("등록된 광고가 존재하지 않습니다.");
+            throw new IllegalStateException("등록된 광고가 존재하지 않습니다.");
         }
         Long randomId = pickRandomId(advertisementIds);
         Advertisement advertisement = advertisementRepository.findById(randomId)
