@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.onair.hearit.app.advertisement.application.AdvertisementService;
 import com.onair.hearit.app.advertisement.dto.AdvertisementResponse;
-import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.ControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -63,25 +62,20 @@ class AdvertisementControllerTest extends ControllerTest {
         }
 
         @Test
-        @DisplayName("등록된 광고가 없으면 404 NOT FOUND를 반환한다.")
-        void getRandomAdvertisement_notFound() throws Exception {
+        @DisplayName("등록된 광고가 없으면 500 Internal Server Error를 반환한다.")
+        void getRandomAdvertisement_noAds() throws Exception {
             // given
             given(advertisementService.getRandomAdvertisement())
-                    .willThrow(new NotFoundException("advertisement", "전체"));
+                    .willThrow(new IllegalStateException("등록된 광고가 존재하지 않습니다."));
 
             // when & then
             mockMvc.perform(get("/api/v1/advertisements/random"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.title").value("해당 정보를 찾을 수 없습니다."))
-                    .andExpect(jsonPath("$.detail").value("advertisement을(를) 찾을 수 없습니다. 입력값: 전체"))
-                    .andDo(document("get-random-advertisement-not-found",
+                    .andExpect(status().isInternalServerError())
+                    .andDo(document("get-random-advertisement-server-error",
                             resource(ResourceSnippetParameters.builder()
                                     .tag("Advertisement API")
-                                    .summary("랜덤 광고 조회 - 광고 없음")
-                                    .description("등록된 광고가 없는 경우 404 NOT FOUND를 반환합니다.")
-                                    .responseFields(
-                                            com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields()
-                                    )
+                                    .summary("랜덤 광고 조회 - 서버 오류")
+                                    .description("등록된 광고가 없는 경우 500 Internal Server Error를 반환합니다.")
                                     .build()
                             )));
         }
