@@ -12,6 +12,7 @@ import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,7 +64,7 @@ public class HearitSearchService {
                                 playingHistory -> playingHistory));
         return hearits.map(hearit -> HearitSearchResponse.of(
                 hearit,
-                hearitKeywords.get(hearit.getId()),
+                hearitKeywords.getOrDefault(hearit.getId(), Collections.emptyList()),
                 playingHistories.get(hearit.getId())));
     }
 
