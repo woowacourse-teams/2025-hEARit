@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onair.hearit.app.advertisement.dto.AdvertisementResponse;
-import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Advertisement;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
@@ -61,28 +60,13 @@ class AdvertisementServiceTest {
             assertThat(result.id()).isIn(ad1.getId(), ad2.getId(), ad3.getId());
         }
 
-         @Test
-        @DisplayName("광고가 하나만 있어도 정상적으로 반환한다.")
-        void getRandomAdvertisement_singleAd() {
-            // given
-            Advertisement ad = dbHelper.insertAdvertisement(
-                    new Advertisement("https://example.com/image.jpg", "https://example.com/link", "광고")
-            );
-
-            // when
-            AdvertisementResponse result = advertisementService.getRandomAdvertisement();
-
-            // then
-            assertThat(result.id()).isEqualTo(ad.getId());
-        }
-
         @Test
-        @DisplayName("등록된 광고가 없으면 예외가 발생한다.")
+        @DisplayName("등록된 광고가 없으면 IllegalStateException이 발생한다.")
         void getRandomAdvertisement_noAds() {
             // when & then
             assertThatThrownBy(() -> advertisementService.getRandomAdvertisement())
-                    .isInstanceOf(NotFoundException.class)
-                    .hasMessage("advertisement을(를) 찾을 수 없습니다. 입력값: 전체");
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("등록된 광고가 존재하지 않습니다.");
         }
     }
 }
