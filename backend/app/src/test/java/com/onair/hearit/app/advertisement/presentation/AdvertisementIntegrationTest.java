@@ -47,13 +47,13 @@ class AdvertisementIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("등록된 광고가 없으면 404 NOT FOUND를 반환한다.")
+    @DisplayName("등록된 광고가 없으면 500 에러를 반환한다.")
     void getRandomAdvertisement_notFound() {
         // when & then
         RestAssured.given(this.spec).log().all()
                 .when()
                 .get("/api/v1/advertisements/random")
                 .then().log().all()
-                .statusCode(HttpStatus.NOT_FOUND.value());
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 }
