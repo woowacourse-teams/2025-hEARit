@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.onair.hearit.app.advertisement.dto.AdvertisementResponse;
+import com.onair.hearit.app.common.DefaultRandomNumberGenerator;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Advertisement;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
@@ -32,7 +33,7 @@ class AdvertisementServiceTest {
 
     @BeforeEach
     void setup() {
-        advertisementService = new AdvertisementService(advertisementRepository);
+        advertisementService = new AdvertisementService(advertisementRepository, new DefaultRandomNumberGenerator());
     }
 
     @Nested
