@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.core.domain.exception.UserInfoDomainException;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,79 +18,48 @@ class UserInfoTest {
     class ConstructorTest {
 
         @Test
-        @DisplayName("memberId만 있으면 MEMBER 타입으로 생성된다")
-        void createWithMemberId() {
-            UserInfo userInfo = new UserInfo(1L, null);
+        @DisplayName("UUID와 MEMBER 타입으로 생성된다")
+        void createWithMemberType() {
+            UUID uuid = UUID.randomUUID();
+            UserInfo userInfo = new UserInfo(uuid, UserType.MEMBER);
 
             assertAll(
                     () -> assertThat(userInfo.isMember()).isTrue(),
                     () -> assertThat(userInfo.isGuest()).isFalse(),
-                    () -> assertThat(userInfo.getMemberId()).isEqualTo(1L)
+                    () -> assertThat(userInfo.getUuid()).isEqualTo(uuid),
+                    () -> assertThat(userInfo.getUserType()).isEqualTo(UserType.MEMBER)
             );
         }
 
         @Test
-        @DisplayName("guestId만 있으면 GUEST 타입으로 생성된다")
-        void createWithGuestId() {
-            String guestId = "123e4567-e89b-12d3-a456-426614174000"; // 36자
-            UserInfo userInfo = new UserInfo(null, guestId);
+        @DisplayName("UUID와 GUEST 타입으로 생성된다")
+        void createWithGuestType() {
+            UUID uuid = UUID.randomUUID();
+            UserInfo userInfo = new UserInfo(uuid, UserType.GUEST);
 
             assertAll(
                     () -> assertThat(userInfo.isGuest()).isTrue(),
                     () -> assertThat(userInfo.isMember()).isFalse(),
-                    () -> assertThat(userInfo.getGuestId()).isEqualTo(guestId)
+                    () -> assertThat(userInfo.getUuid()).isEqualTo(uuid),
+                    () -> assertThat(userInfo.getUserType()).isEqualTo(UserType.GUEST)
             );
-
         }
 
         @Test
-        @DisplayName("memberId와 guestId가 동시에 null이면 예외 발생")
-        void bothNull_throwsException() {
-            assertThatThrownBy(() -> new UserInfo(null, null))
+        @DisplayName("uuid가 null이면 예외 발생")
+        void nullUuid_throwsException() {
+            assertThatThrownBy(() -> new UserInfo(null, UserType.MEMBER))
                     .isInstanceOf(UserInfoDomainException.class)
-                    .hasMessageContaining("생성할 수 없습니다");
+                    .hasMessageContaining("uuid는 null일 수 없습니다");
         }
 
         @Test
-        @DisplayName("memberId와 guestId가 동시에 존재하면 예외 발생")
-        void bothPresent_throwsException() {
-            assertThatThrownBy(() -> new UserInfo(1L, "123e4567-e89b-12d3-a456-426614174000"))
+        @DisplayName("userType이 null이면 예외 발생")
+        void nullUserType_throwsException() {
+            UUID uuid = UUID.randomUUID();
+            assertThatThrownBy(() -> new UserInfo(uuid, null))
                     .isInstanceOf(UserInfoDomainException.class)
-                    .hasMessageContaining("동시에 지정할 수 없습니다");
-        }
-
-        @Test
-        @DisplayName("잘못된 guestId 길이면 예외 발생")
-        void invalidGuestId_throwsException() {
-            assertThatThrownBy(() -> new UserInfo(null, "not-uuid-length"))
-                    .isInstanceOf(UserInfoDomainException.class)
-                    .hasMessageContaining("유효하지 않은 guestId");
-        }
-    }
-
-    @Nested
-    @DisplayName("잘못된 getter 호출 검증")
-    class GetterTest {
-
-        @Test
-        @DisplayName("Member 타입에서 getGuestId 호출 시 예외 발생")
-        void memberCallingGetGuestId_throwsException() {
-            UserInfo userInfo = new UserInfo(1L, null);
-
-            assertThatThrownBy(userInfo::getGuestId)
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("회원 컨텍스트");
-        }
-
-        @Test
-        @DisplayName("Guest 타입에서 getMemberId 호출 시 예외 발생")
-        void guestCallingGetMemberId_throwsException() {
-            String guestId = "123e4567-e89b-12d3-a456-426614174000";
-            UserInfo userInfo = new UserInfo(null, guestId);
-
-            assertThatThrownBy(userInfo::getMemberId)
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("비회원 컨텍스트");
+                    .hasMessageContaining("userType은 null일 수 없습니다");
         }
     }
 }

@@ -8,6 +8,7 @@ import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.common.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.generator.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scoreprocessor.GuestExploreScoreProcessor;
 import com.onair.hearit.app.explore.application.scoreprocessor.MemberExploreScoreProcessor;
 import com.onair.hearit.app.explore.dto.CursorRequest;
@@ -44,7 +45,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, RandomScoreFactor.class,
         RecencyScoreFactor.class, BookmarkScoreFactor.class, ExploreScoreCalculator.class,
         ExploreScoreCommandRepository.class, ExploreScoreInitializer.class, GuestExploreScoreProcessor.class,
-        MemberExploreScoreProcessor.class})
+        MemberExploreScoreProcessor.class, ScoreFactorWeightConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {
@@ -89,10 +90,10 @@ class HearitExploreServiceTest {
         Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit4 = dbHelper.insertHearitAt(createHearit(category2), now);
-        dbHelper.insertBookmark(new Bookmark(member, hearit1));
-        dbHelper.insertBookmark(new Bookmark(member, hearit2));
-        dbHelper.insertBookmark(new Bookmark(member, hearit3));
-        dbHelper.insertBookmark(new Bookmark(member, hearit4));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit1));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit2));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit3));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit4));
 
         Hearit hearit5 = dbHelper.insertHearitAt(createHearit(category1), now);
         Hearit hearit6 = dbHelper.insertHearitAt(createHearit(category2), now.minusDays(4));
@@ -150,7 +151,7 @@ class HearitExploreServiceTest {
         // then
         assertThat(secondResponse.content())
                 .extracting("id")
-                .doesNotContain(newHearit.getId());
+                .doesNotContain(newHearit.getId()).isEmpty();
     }
 
     @DisplayName("게스트가 탐색 요청 시, 최신, 랜덤 순으로 정렬하여 반환한다")
@@ -160,7 +161,7 @@ class HearitExploreServiceTest {
         given(randomNumberGenerator.getDouble()).willReturn(0.1d);
 
         Category category1 = dbHelper.insertCategory(new Category("Java", "#112233"));
-        UserInfo guestInfo = TestFixture.createGuestUserInfo(UUID.randomUUID().toString());
+        UserInfo guestInfo = TestFixture.createGuestUserInfo(UUID.randomUUID());
         LocalDateTime now = LocalDateTime.now();
 
         Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);

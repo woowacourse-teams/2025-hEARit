@@ -4,6 +4,7 @@ import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.infrastructure.projection.HearitWithPlayTimeProjection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -81,7 +82,7 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             """)
     Page<HearitWithPlayTimeProjection> findWithPlayTimeBy(
             @Param("categoryId") Long categoryId,
-            @Param("userUuid") String userUuid,
+            @Param("userUuid") UUID userUuid,
             Pageable pageable
     );
 }

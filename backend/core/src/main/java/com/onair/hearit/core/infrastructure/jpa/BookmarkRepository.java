@@ -2,10 +2,11 @@ package com.onair.hearit.core.infrastructure.jpa;
 
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
-import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.infrastructure.projection.BookmarkWithPlayingHistoryProjection;
+import com.onair.hearit.core.infrastructure.projection.CategoryBookmarkCount;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,27 +24,27 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
             JOIN FETCH h.category c
             LEFT JOIN PlayingHistory ph
                 ON ph.hearitId = h.id
-                AND ph.userUuid = :userUuid
-            WHERE b.member.uuid = :userUuid
+                AND ph.userUuid = :memberUuid
+            WHERE b.memberUuid = :memberUuid
                 AND (:isFinished IS NULL OR
                     (:isFinished = true AND ph.isFinished = :isFinished) OR
                     (:isFinished = false AND (ph.isFinished = false OR ph IS NULL)))
             """)
-    Page<BookmarkWithPlayingHistoryProjection> findFilteredByMember(@Param("userUuid") String userUuid,
+    Page<BookmarkWithPlayingHistoryProjection> findFilteredByMember(@Param("memberUuid") UUID memberUuid,
                                                                     @Param("isFinished") Boolean isFinished,
                                                                     Pageable pageable);
 
-    Optional<Bookmark> findByHearitAndMember(Hearit hearit, Member member);
+    Optional<Bookmark> findByHearitAndMemberUuid(Hearit hearit, UUID memberUuid);
 
-    List<Bookmark> findAllByHearitInAndMember(List<Hearit> hearits, Member member);
+    List<Bookmark> findAllByHearitInAndMemberUuid(List<Hearit> hearits, UUID memberUuid);
 
     @Query("""
                 SELECT b.hearit.category.id AS categoryId, COUNT(b) AS count
                 FROM Bookmark b
-                WHERE b.member.id = :memberId
+                WHERE b.memberUuid = :memberUuid
                 GROUP BY b.hearit.category.id
             """)
-    List<CategoryBookmarkCount> countMemberBookmarksByCategoryId(@Param("memberId") Long memberId);
+    List<CategoryBookmarkCount> countMemberBookmarksByCategoryId(@Param("memberUuid") UUID memberUuid);
 
-    boolean existsByHearitAndMember(Hearit hearit, Member member);
+    boolean existsByHearitAndMemberUuid(Hearit hearit, UUID memberUuid);
 }

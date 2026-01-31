@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ class PlayingHistoryTest {
         Hearit hearit = createHearitWith(playTime);
 
         // when & then
-        assertThatThrownBy(() -> new PlayingHistory("test-user-Uuid", hearit, lastPlayTime));
+        assertThatThrownBy(() -> new PlayingHistory(UUID.randomUUID(), hearit, lastPlayTime));
     }
 
     @Test
@@ -29,7 +30,7 @@ class PlayingHistoryTest {
         Hearit hearit = createHearitWith(100);
 
         // when
-        PlayingHistory playingHistory = new PlayingHistory("test-user-Uuid", hearit, 90_000);
+        PlayingHistory playingHistory = new PlayingHistory(UUID.randomUUID(), hearit, 90_000);
 
         // then
         assertThat(playingHistory.isFinished()).isTrue();

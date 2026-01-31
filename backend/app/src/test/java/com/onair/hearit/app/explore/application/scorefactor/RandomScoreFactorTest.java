@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class RandomScoreFactorTest {
 
-    @DisplayName("랜덤 점수는 0 이상 10 이하의 범위를 만족한다.")
+    @DisplayName("랜덤 점수는 0 이상 1 이하의 범위를 만족한다.")
     @Test
     void calculateRandomScores() {
         // given
@@ -32,16 +32,16 @@ class RandomScoreFactorTest {
         }
 
         // when
-        Map<Long, Double> scores = randomScoreFactor.calculate(UUID.randomUUID().toString(), hearits);
+        Map<Long, Double> scores = randomScoreFactor.calculate(UUID.randomUUID(), hearits);
 
         // then
         assertAll(
                 () -> assertThat(scores).hasSize(hearits.size()),
-                () -> assertThat(scores.values()).allMatch(value -> value >= 0.0 && value <= 10.0)
+                () -> assertThat(scores.values()).allMatch(value -> value >= 0.0 && value <= 1.0)
         );
     }
 
-    @DisplayName("랜덤 생성기가 0.1을 반환할 때, 모든 점수는 1.0이 된다.")
+    @DisplayName("랜덤 생성기가 0.1 이하 반환 시, 점수는 1.0이 된다.")
     @Test
     void calculateRandomScores_withFixedGenerator() {
         // given
@@ -53,13 +53,12 @@ class RandomScoreFactorTest {
         hearits.add(createHearitWith(2, category, LocalDateTime.now()));
 
         // when
-        Map<Long, Double> scores = randomScoreFactor.calculate(UUID.randomUUID().toString(), hearits);
+        Map<Long, Double> scores = randomScoreFactor.calculate(UUID.randomUUID(), hearits);
 
         // then
         assertAll(
                 () -> assertThat(scores).hasSize(hearits.size()),
                 () -> assertThat(scores.values()).allSatisfy(score -> assertThat(score).isEqualTo(1.0))
-                // 0.1 * 10 = 1.0
         );
     }
 

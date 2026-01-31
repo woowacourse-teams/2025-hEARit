@@ -24,7 +24,7 @@ class RecencyScoreFactorTest {
     }
 
     @Test
-    @DisplayName("당일 생성된 히어릿은 최대 점수(20점)를 받는다.")
+    @DisplayName("당일 생성된 히어릿은 최대 점수(1.0점)를 받는다.")
     void hearitIsCreatedToday() {
         // given
         LocalDateTime now = LocalDateTime.now();
@@ -32,46 +32,44 @@ class RecencyScoreFactorTest {
         Hearit hearit = createHearit(1L, category, now);
 
         // when
-        Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
+        Map<Long, Double> scores = recencyScoreFactor.calculate(java.util.UUID.randomUUID(), List.of(hearit));
 
         // then
-        assertThat(scores.get(hearit.getId())).isEqualTo(20.0);
+        assertThat(scores).containsEntry(hearit.getId(), 1.0);
     }
 
     @Test
-    @DisplayName("생성 후 4일이 지난 히어릿은 2점 감소한 18점을 받는다 (하루 0.5점 감소).")
+    @DisplayName("생성 후 6일이 지난 히어릿은 1점 감소한 0.9점을 받는다 (하루 0.016점 감소).")
     void returnDecreasedScore() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Category category = TestFixture.createFixedCategory();
-        Hearit hearit = createHearit(1L, category, now.minusDays(4));
+        Hearit hearit = createHearit(1L, category, now.minusDays(6));
 
         // when
-        Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
+        Map<Long, Double> scores = recencyScoreFactor.calculate(java.util.UUID.randomUUID(), List.of(hearit));
 
         // then
-        // 20.0 - (4일 / 2.0) = 18.0
-        assertThat(scores.get(hearit.getId())).isEqualTo(18.0);
+        assertThat(scores).containsEntry(hearit.getId(), 0.9);
     }
 
     @Test
-    @DisplayName("생성 후 40일이 지난 히어릿은 최소 점수(0점)를 받는다.")
+    @DisplayName("생성 후 60일이 지난 히어릿은 최소 점수(0점)를 받는다.")
     void returnMinScore() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Category category = TestFixture.createFixedCategory();
-        Hearit hearit = createHearit(1L, category, now.minusDays(40));
+        Hearit hearit = createHearit(1L, category, now.minusDays(60));
 
         // when
-        Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
+        Map<Long, Double> scores = recencyScoreFactor.calculate(java.util.UUID.randomUUID(), List.of(hearit));
 
         // then
-        // 20.0 - (40일 / 2.0) = 0.0
-        assertThat(scores.get(hearit.getId())).isEqualTo(0.0);
+        assertThat(scores).containsEntry(hearit.getId(), 0.0);
     }
 
     @Test
-    @DisplayName("생성 후 40일을 초과한 히어릿도 최소 점수(0점) 이하로 내려가지 않는다.")
+    @DisplayName("생성 후 60일을 초과한 히어릿도 최소 점수(0점) 이하로 내려가지 않는다.")
     void returnMinScore2() {
         // given
         LocalDateTime now = LocalDateTime.now();
@@ -79,10 +77,10 @@ class RecencyScoreFactorTest {
         Hearit hearit = createHearit(1L, category, now.minusDays(60));
 
         // when
-        Map<Long, Double> scores = recencyScoreFactor.calculate("ignored", List.of(hearit));
+        Map<Long, Double> scores = recencyScoreFactor.calculate(java.util.UUID.randomUUID(), List.of(hearit));
 
         // then
-        assertThat(scores.get(hearit.getId())).isEqualTo(0.0);
+        assertThat(scores).containsEntry(hearit.getId(), 0.0);
     }
 
     private Hearit createHearit(long id, Category category, LocalDateTime createdAt) {

@@ -166,7 +166,7 @@ class KeywordManager {
         this.searchInput = document.getElementById(searchInputId);
         this.paginationContainer = document.getElementById(paginationId);
         this.countElement = document.getElementById(countId);
-        this.KEYWORDS_PER_PAGE = 20;
+        this.KEYWORDS_PER_PAGE = 50;
         this.allKeywords = [];
         this.filteredKeywords = [];
         this.currentPage = 1;
@@ -195,33 +195,36 @@ class KeywordManager {
     }
 
     createCheckbox(keyword) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'form-check';
+        const isChecked = this.selectedIds.has(keyword.id);
+
+        // 레이블 자체를 컨테이너로 사용하여 클릭 범위를 넓힘
+        const label = document.createElement('label');
+        label.className = `keyword-item ${isChecked ? 'selected' : ''}`;
+        label.setAttribute('for', `keyword-${keyword.id}`);
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'form-check-input';
-        checkbox.name = 'keywordIds';
         checkbox.value = keyword.id;
         checkbox.id = `keyword-${keyword.id}`;
-        checkbox.checked = this.selectedIds.has(keyword.id);
+        checkbox.checked = isChecked;
+
         checkbox.addEventListener('change', (e) => {
             if (e.target.checked) {
                 this.selectedIds.add(keyword.id);
+                label.classList.add('selected');
             } else {
                 this.selectedIds.delete(keyword.id);
+                label.classList.remove('selected');
             }
             this.updateCount();
         });
 
-        const label = document.createElement('label');
-        label.className = 'form-check-label';
-        label.setAttribute('for', `keyword-${keyword.id}`);
-        label.textContent = keyword.name;
+        const text = document.createTextNode(keyword.name);
 
-        wrapper.appendChild(checkbox);
-        wrapper.appendChild(label);
-        return wrapper;
+        label.appendChild(checkbox);
+        label.appendChild(text);
+        return label;
     }
 
     getPagedKeywords() {
@@ -310,6 +313,10 @@ class KeywordManager {
 
     initSearch() {
         this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+    }
+
+    getSelectedIds() {
+        return Array.from(this.selectedIds);
     }
 }
 
@@ -612,12 +619,14 @@ class FormSubmitHandler {
         formData.delete('shortAudio');
         formData.delete('script');
 
+        const selectedKeywordIds = window.app.keywordManager.getSelectedIds();
+
         const json = {
             title: formData.get("title"),
             summary: formData.get("summary"),
             playTime: formData.get("playTime"),
             categoryId: formData.get("categoryId"),
-            keywordIds: [...formData.getAll("keywordIds")],
+            keywordIds: selectedKeywordIds,
             sources: extractSources(formData),
             originalAudioKey: presigned.originalAudio.key,
             shortAudioKey: presigned.shortAudio.key,

@@ -1,12 +1,10 @@
 package com.onair.hearit.app.explore.application.scoreprocessor;
 
-import com.onair.hearit.app.exception.custom.NotFoundException;
 import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;
-import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.ExploredHearitQueryRepository;
@@ -15,6 +13,7 @@ import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
@@ -39,12 +38,12 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
         if (userInfo == null || userInfo.isGuest()) {
             return false;
         }
-        return userInfo.isMember() && memberRepository.existsById(userInfo.getMemberId());
+        return userInfo.isMember() && memberRepository.findByUuid(userInfo.getUuid()).isPresent();
     }
 
     @Override
-    protected String getUserUuid(UserInfo userInfo) {
-        return getMemberById(userInfo.getMemberId()).getUuid();
+    protected UUID getUserUuid(UserInfo userInfo) {
+        return userInfo.getUuid();
     }
 
     @Override
@@ -68,9 +67,9 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
     }
 
     private Map<Long, Bookmark> prepareBookmarksMap(List<Hearit> hearits, UserInfo userInfo) {
-        Member member = getMemberById(userInfo.getMemberId());
+        UUID memberUuid = userInfo.getUuid();
         return bookmarkRepository
-                .findAllByHearitInAndMember(hearits, member).stream()
+                .findAllByHearitInAndMemberUuid(hearits, memberUuid).stream()
                 .collect(Collectors.toMap(bookmark -> bookmark.getHearit().getId(), bookmark -> bookmark));
     }
 
@@ -80,10 +79,5 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
             return ExploredHearitResponse.from(hearit, keywords, info.getCursorId());
         }
         return ExploredHearitResponse.fromWithBookmark(hearit, bookmark, keywords, info.getCursorId());
-    }
-
-    private Member getMemberById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("memberId", memberId.toString()));
     }
 }

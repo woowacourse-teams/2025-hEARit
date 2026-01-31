@@ -7,6 +7,7 @@ import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.common.DefaultRandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.generator.DefaultRandomNumberGenerator;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
@@ -15,6 +16,7 @@ import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +35,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql("/dbclean.sql")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, ExploreScoreCommandRepository.class,
         DefaultRandomNumberGenerator.class, RandomScoreFactor.class, RecencyScoreFactor.class,
-        BookmarkScoreFactor.class, ExploreScoreCalculator.class})
+        BookmarkScoreFactor.class, ExploreScoreCalculator.class, ScoreFactorWeightConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ExploreScoreInitializerTest {
@@ -61,7 +63,7 @@ class ExploreScoreInitializerTest {
     @Test
     void skipRefreshingWhenCursorIsNotZero() {
         // given
-        String userUuid = UUID.randomUUID().toString();
+        UUID userUuid = UUID.randomUUID();
         long cursorId = 1L;
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -78,7 +80,7 @@ class ExploreScoreInitializerTest {
     @Test
     void refreshScoresScoresWhenCursorIsZero() {
         // given
-        String userUuid = UUID.randomUUID().toString();
+        UUID userUuid = UUID.randomUUID();
         long cursorId = 0L;
 
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -91,12 +93,12 @@ class ExploreScoreInitializerTest {
         assertAll(
                 () -> assertThat(rows).hasSize(1),
                 () -> assertThat(rows.get(0).hearitId()).isEqualTo(hearit.getId()),
-                () -> assertThat(rows.get(0).score()).isNotNull(),
+                () -> assertThat(rows.get(0).score()).isNotZero(),
                 () -> assertThat(rows.get(0).cursorId()).isNotNull()
         );
     }
 
-    private List<ExploreScoreRow> findExploreScores(String userUuid) {
+    private List<ExploreScoreRow> findExploreScores(UUID userUuid) {
         return jdbcTemplate.query(
                 """
                         SELECT hearit_id, score, cursor_id
@@ -109,8 +111,15 @@ class ExploreScoreInitializerTest {
                         rs.getDouble("score"),
                         rs.getObject("cursor_id", Long.class)
                 ),
-                userUuid
+                uuidToBytes(userUuid)
         );
+    }
+
+    private byte[] uuidToBytes(UUID uuid) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[16]);
+        byteBuffer.putLong(uuid.getMostSignificantBits());
+        byteBuffer.putLong(uuid.getLeastSignificantBits());
+        return byteBuffer.array();
     }
 
     private record ExploreScoreRow(Long hearitId, double score, Long cursorId) {

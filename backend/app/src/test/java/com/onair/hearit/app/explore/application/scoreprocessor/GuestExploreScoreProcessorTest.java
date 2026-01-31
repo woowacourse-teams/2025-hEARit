@@ -5,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.explore.application.ExploreScoreCalculator;
 import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
+import com.onair.hearit.app.explore.application.ScoreFactorWeightConfig;
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.common.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.application.scorefactor.generator.RandomNumberGenerator;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.config.DataSourceConfig;
@@ -16,6 +18,7 @@ import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.ExploreScore;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.jdbc.ExploreScoreCommandRepository;
@@ -39,7 +42,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql("/dbclean.sql")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, RandomScoreFactor.class,
         RecencyScoreFactor.class, BookmarkScoreFactor.class, ExploreScoreCalculator.class,
-        ExploreScoreCommandRepository.class, ExploreScoreInitializer.class})
+        ExploreScoreCommandRepository.class, ExploreScoreInitializer.class, ScoreFactorWeightConfig.class,})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class GuestExploreScoreProcessorTest {
@@ -71,14 +74,14 @@ class GuestExploreScoreProcessorTest {
     @DisplayName("게스트 사용자를 지원한다")
     @Test
     void isSupportedForGuest() {
-        UserInfo guestInfo = new UserInfo(null, UUID.randomUUID().toString());
+        UserInfo guestInfo = new UserInfo(UUID.randomUUID(), UserType.GUEST);
         assertThat(guestExploreScoreProcessor.isSupported(guestInfo)).isTrue();
     }
 
     @DisplayName("게스트가 아니면 지원하지 않는다")
     @Test
     void isSupportedForNonGuest() {
-        UserInfo memberInfo = new UserInfo(1L, null);
+        UserInfo memberInfo = new UserInfo(UUID.randomUUID(), UserType.MEMBER);
         assertAll(
                 () -> assertThat(guestExploreScoreProcessor.isSupported(null)).isFalse(),
                 () -> assertThat(guestExploreScoreProcessor.isSupported(memberInfo)).isFalse()
@@ -89,8 +92,8 @@ class GuestExploreScoreProcessorTest {
     @Test
     void getExploreHearitsReturnsResponses() {
         // given
-        String uuid = UUID.randomUUID().toString();
-        UserInfo guestInfo = new UserInfo(null, uuid);
+        UUID uuid = UUID.randomUUID();
+        UserInfo guestInfo = new UserInfo(uuid, UserType.GUEST);
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
