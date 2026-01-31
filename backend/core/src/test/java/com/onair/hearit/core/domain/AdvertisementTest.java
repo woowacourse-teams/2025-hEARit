@@ -21,7 +21,7 @@ class AdvertisementTest {
             // given
             String imageUrl = "https://example.com/image.jpg";
             String linkUrl = "https://example.com/link";
-            String title = "광고 제목";
+            String title = "a".repeat(Advertisement.TITLE_MAX_LENGTH);
 
             // when
             Advertisement advertisement = new Advertisement(imageUrl, linkUrl, title);
