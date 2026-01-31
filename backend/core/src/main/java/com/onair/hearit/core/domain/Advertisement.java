@@ -47,19 +47,19 @@ public class Advertisement {
     }
 
     private void validateImageUrl(String imageUrl) {
-        if (imageUrl == null || imageUrl.trim().isBlank()) {
+        if (imageUrl == null || imageUrl.isBlank()) {
             throw new AdvertisementDomainException("이미지 URL은 필수입니다.");
         }
     }
 
     private void validateLinkUrl(String linkUrl) {
-        if (linkUrl == null || linkUrl.trim().isBlank()) {
+        if (linkUrl == null || linkUrl.isBlank()) {
             throw new AdvertisementDomainException("링크 URL은 필수입니다.");
         }
     }
 
     private void validateTitle(String title) {
-        if (title == null || title.trim().isBlank()) {
+        if (title == null || title.isBlank()) {
             throw new AdvertisementDomainException("제목은 필수입니다.");
         }
         if (title.length() > TITLE_MAX_LENGTH) {
