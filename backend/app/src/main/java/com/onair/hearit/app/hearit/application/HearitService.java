@@ -133,8 +133,8 @@ public class HearitService {
 
     @Transactional
     public void increaseViewCount(Long hearitId) {
-        int updated = hearitRepository.increaseViewCount(hearitId);
-        if (updated == 0) {
+        int affectedRowCount = hearitRepository.increaseViewCount(hearitId);
+        if (affectedRowCount == 0) {
             throw new NotFoundException("hearitId", hearitId.toString());
         }
     }
