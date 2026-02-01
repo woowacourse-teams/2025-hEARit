@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReactionRepository extends JpaRepository<Reaction, Long> {
 
-    Optional<Reaction> findByUserUuidAndHearit(UUID uuid, Hearit hearit);
+    Optional<Reaction> findByUserUuidAndHearitAndType(UUID uuid, Hearit hearit, ReactionType type);
 
     long countByHearitAndType(Hearit hearit, ReactionType type);
 

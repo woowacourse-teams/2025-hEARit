@@ -1,4 +1,4 @@
-package com.onair.hearit.app.like.presentation;
+package com.onair.hearit.app.reaction.presentation;
 
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.app.fixture.IntegrationTest;
@@ -71,7 +71,7 @@ class LikeIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("비회원 좋아요 삭제 - 401Unauthorized")
+    @DisplayName("비회원 좋아요 삭제 - 403Forbidden")
     void deleteLike_401Unauthorized() {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));

@@ -1,4 +1,4 @@
-package com.onair.hearit.app.like.presentation;
+package com.onair.hearit.app.reaction.presentation;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
@@ -12,18 +12,18 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.onair.hearit.app.auth.infrastructure.jwt.TokenStatus;
 import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.fixture.ControllerTest;
-import com.onair.hearit.app.like.application.LikeService;
+import com.onair.hearit.app.reaction.application.ReactionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-@WebMvcTest(controllers = LikeController.class)
-class LikeControllerTest extends ControllerTest {
+@WebMvcTest(controllers = ReactionController.class)
+class ReactionControllerTest extends ControllerTest {
 
     @MockitoBean
-    private LikeService likeService;
+    private ReactionService reactionService;
 
     @Test
     @DisplayName("204 NoContent - 좋아요 삭제")
@@ -57,7 +57,7 @@ class LikeControllerTest extends ControllerTest {
         var hearitId = 1L;
 
         willThrow(new ForbiddenException("비회원은 좋아요을 삭제할 권한이 없습니다."))
-                .given(likeService).removeLike(any(), any());
+                .given(reactionService).removeReaction(any(), any(), any());
 
         // when & then
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/hearits/{hearitId}/likes", hearitId))
@@ -107,7 +107,7 @@ class LikeControllerTest extends ControllerTest {
         var hearitId = 1L;
 
         willThrow(new ForbiddenException("비회원은 좋아요을 추가할 권한이 없습니다."))
-                .given(likeService).addLike(any(), any());
+                .given(reactionService).addReaction(any(), any(), any());
 
         // when & then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/hearits/{hearitId}/likes", hearitId))
