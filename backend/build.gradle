@@ -11,7 +11,7 @@ subprojects {
     apply plugin: 'io.spring.dependency-management'
 
     group = 'com.onair'
-    version = '1.3.5'
+    version = '1.3.6'
 
     java {
         toolchain {
