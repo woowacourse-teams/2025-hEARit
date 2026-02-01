@@ -86,20 +86,6 @@ class ExplorePlayerManagerImpl @Inject constructor(
         audioUrl: String,
         startPosition: Long,
     ) {
-        // 현재 이미 같은 곡이 세팅되어 있는지 확인
-        val currentUrl =
-            player.currentMediaItem
-                ?.localConfiguration
-                ?.uri
-                ?.toString()
-
-        if (currentUrl == audioUrl) {
-            // 같은 곡이면 재생 위치만 맞추거나 그냥 재생
-            if (!player.isPlaying) player.play()
-            return
-        }
-
-        // 2. 다른 곡일 때만 새로 세팅
         val mediaItem = MediaItem.fromUri(audioUrl)
         player.setMediaItem(mediaItem)
         player.prepare()
@@ -110,6 +96,7 @@ class ExplorePlayerManagerImpl @Inject constructor(
 
     override fun seekTo(position: Long) {
         player.seekTo(position)
+        player.play()
     }
 
     override fun stop() {

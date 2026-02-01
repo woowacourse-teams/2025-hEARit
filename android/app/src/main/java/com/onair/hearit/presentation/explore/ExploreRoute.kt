@@ -1,11 +1,8 @@
 package com.onair.hearit.presentation.explore
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -19,8 +16,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
-import com.google.android.material.snackbar.Snackbar
-import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.filterIsInstance
 
@@ -47,8 +42,10 @@ fun ExploreRoute(
             LifecycleEventObserver { _, event ->
                 when (event) {
                     Lifecycle.Event.ON_RESUME -> {
-                        // 상세화면에서 돌아왔을 때 재생 재개 명령
-                        viewModel.resumeIfScheduled()
+                        // resumeIfScheduled() 대신 현재 페이지를 다시 트리거하여 재생 재개
+                        // ViewModel에 onPageChanged를 현재 인덱스로 다시 호출하거나
+                        // 별도의 resume 함수를 만들 수 있습니다.
+                        viewModel.onPageChanged(uiState.currentPageIndex)
                     }
 
                     Lifecycle.Event.ON_PAUSE -> {
