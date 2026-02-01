@@ -250,7 +250,7 @@ class HearitIntegrationTest extends IntegrationTest {
                                 .when()
                                 .post("/api/v1/hearits/{hearitId}/view", hearitId)
                                 .then()
-                                .statusCode(HttpStatus.OK.value());
+                                .statusCode(HttpStatus.NO_CONTENT.value());
                     } finally {
                         latch.countDown();
                     }
