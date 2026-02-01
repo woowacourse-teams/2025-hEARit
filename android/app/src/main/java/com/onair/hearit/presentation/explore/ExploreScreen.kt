@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -55,9 +56,14 @@ fun ExploreScreen(
         }
     }
 
-    // 2. UI의 변경(사용자 스와이프)을 뷰모델에 반영
-    LaunchedEffect(pagerState.currentPage) {
-        onPageChanged(pagerState.currentPage)
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .collect { page ->
+                // 사용자가 드래그를 멈추거나 페이지가 완전히 바뀌었을 때만 호출됨
+                if (page != currentPageIndex) {
+                    onPageChanged(page)
+                }
+            }
     }
 
     Box(
@@ -67,7 +73,7 @@ fun ExploreScreen(
     ) {
         VerticalPager(
             state = pagerState,
-            modifier = modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             key = { index -> shortsHearit[index].id },
         ) { page ->
             val item = shortsHearit[page]

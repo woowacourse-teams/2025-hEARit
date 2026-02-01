@@ -2,11 +2,15 @@ package com.onair.hearit.presentation.explore
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -15,20 +19,22 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
+import com.google.android.material.snackbar.Snackbar
+import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun ExploreRoute(
     onBackClick: () -> Unit,
-    onNavigateToLogin: () -> Unit,
     onNavigateToDetail: (id: Long, position: Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ExploreViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val currentPosition by viewModel.currentPosition.collectAsStateWithLifecycle()
     val duration by viewModel.duration.collectAsStateWithLifecycle()
@@ -70,15 +76,16 @@ fun ExploreRoute(
             .collect { effect ->
                 when (effect) {
                     is ExploreSideEffect.ShowToast -> {
-                        Toast
-                            .makeText(
-                                context,
-                                context.getString(effect.messageResId),
-                                Toast.LENGTH_SHORT,
-                            ).show()
+                        snackbarHostState.showSnackbar(
+                            message = context.getString(effect.messageResId),
+                            duration = SnackbarDuration.Short,
+                        )
                     }
 
-                    ExploreSideEffect.NavigateToBack -> onBackClick()
+                    ExploreSideEffect.NavigateToBack -> {
+                        onBackClick()
+                    }
+
                     is ExploreSideEffect.NavigateToDetail -> {
                         onNavigateToDetail(effect.hearitId, effect.lastPosition)
                     }

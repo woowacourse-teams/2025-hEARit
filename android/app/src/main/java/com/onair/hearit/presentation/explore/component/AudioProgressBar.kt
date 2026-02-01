@@ -50,8 +50,10 @@ fun AudioProgressBar(
                         val newTimeMs = (newPosition * durationMs).toLong()
                         onPositionChanged(newTimeMs)
                     }
-                }.pointerInput(Unit) {
+                }
+                .pointerInput(Unit) {
                     detectDragGestures { change, _ ->
+                        change.consume()
                         val newPosition = (change.position.x / size.width).coerceIn(0f, 1f)
                         val newTimeMs = (newPosition * durationMs).toLong()
                         onPositionChanged(newTimeMs)

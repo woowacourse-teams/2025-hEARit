@@ -8,19 +8,15 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsLogger
-import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.presentation.DetailResult
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.toDetailResult
-import com.onair.hearit.service.PlaybackService
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
@@ -40,9 +36,6 @@ class ExploreFragment : Fragment() {
                     },
                     onNavigateToDetail = { id, position ->
                         navigateToDetail(id, position)
-                    },
-                    onNavigateToLogin = {
-                        navigateToLogin()
                     },
                 )
             }
@@ -78,19 +71,5 @@ class ExploreFragment : Fragment() {
                 putExtra(PREVIOUS_SCREEN_KEY, EXPLORE_VALUE)
             }
         playerDetailLauncher.launch(intent)
-    }
-
-    private fun navigateToLogin() {
-        analyticsLogger.logEvent(
-            AnalyticsEventNames.LOGIN_EVENT,
-            mapOf(AnalyticsParamKeys.SOURCE_NAME to "explore_login"),
-        )
-
-        val intent = LoginActivity.newIntent(requireContext())
-        startActivity(intent)
-
-        requireContext().stopService(PlaybackService.stopIntent(requireContext()))
-
-        parentFragmentManager.beginTransaction().remove(this).commit()
     }
 }
