@@ -26,7 +26,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @DataJpaTest
 @Import({DbHelper.class, TestJpaAuditingConfig.class})
@@ -35,9 +34,6 @@ class HearitRepositoryTest {
 
     @Autowired
     EntityManager em;
-
-    @Autowired
-    PlatformTransactionManager transactionManager;
 
     @Autowired
     DbHelper dbHelper;
