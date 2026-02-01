@@ -15,6 +15,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -96,8 +97,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void authenticateAsMember(String token) {
-        Long memberId = jwtTokenProvider.getMemberId(token);
-        RequestUser memberUser = RequestUser.member(memberId);
+        UUID memberUuid = jwtTokenProvider.getMemberUuid(token);
+        RequestUser memberUser = RequestUser.member(memberUuid);
 
         setMdcForUser(memberUser);
 
@@ -108,8 +109,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void setMdcForUser(RequestUser user) {
         MDC.put("userType", user.getUserType());
-        MDC.put("memberId", String.valueOf(user.getMemberId()));
-        MDC.put("guestId", String.valueOf(user.getGuestId()));
+        MDC.put("uuid", user.getUuid().toString());
     }
 
     private void handleAuthenticatedRequiredError(HttpServletResponse response, HttpServletRequest request)

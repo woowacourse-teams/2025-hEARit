@@ -1,0 +1,46 @@
+/* 키워드 컨테이너 커스텀 스타일 */
+#keyword-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* 자동 열 맞춤 */
+    gap: 8px;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    max-height: 400px; /* 높이를 조금 더 확보 */
+    overflow-y: auto;
+}
+
+/* 체크박스 항목을 버튼/배지 형태로 변경 */
+.keyword-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.keyword-item:hover {
+    background-color: #e7f1ff;
+    border-color: #0d6efd;
+}
+
+.keyword-item input {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+/* 선택된 항목 강조 */
+.keyword-item.selected {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+.keyword-item.selected input {
+    accent-color: white;
+}

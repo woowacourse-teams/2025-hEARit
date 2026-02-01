@@ -7,4 +7,6 @@ public interface PlayingHistoryBuffer {
     void add(PlayingHistory playingHistory, long clientEventTime);
 
     void flush();
+
+    int size();
 }

@@ -96,7 +96,7 @@ public class HearitSearchIntegrationTest extends IntegrationTest {
     }
 
     private String generateToken(Member member) {
-        return jwtTokenProvider.createAccessToken(member.getId());
+        return jwtTokenProvider.createAccessToken(member.getUuid());
     }
 
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {

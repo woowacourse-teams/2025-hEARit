@@ -28,6 +28,15 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     env:
       MYSQL_TEST_USER_PASSWORD: ${{ secrets.MYSQL_TEST_USER_PASSWORD }}
@@ -35,6 +44,9 @@ jobs:
       DB_MYSQL_HOST: ${{ secrets.DB_MYSQL_HOST }}
       MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
       MYSQL_WRITER_ENDPOINT: ${{ secrets.MYSQL_WRITER_ENDPOINT }}
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
 
     steps:
       - name: Checkout

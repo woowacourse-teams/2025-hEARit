@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.Optional;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -38,24 +38,24 @@ public class JwtTokenProvider {
         this.jsonLogger = jsonLogger;
     }
 
-    public String createAccessToken(Long memberId) {
+    public String createAccessToken(UUID memberUuid) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenExpiration);
 
         return Jwts.builder()
-                .setSubject(String.valueOf(memberId))
+                .setSubject(memberUuid.toString())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String createRefreshToken(Long memberId) {
+    public String createRefreshToken(UUID memberUuid) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + refreshTokenExpiration);
 
         return Jwts.builder()
-                .setSubject(String.valueOf(memberId))
+                .setSubject(memberUuid.toString())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
@@ -79,14 +79,11 @@ public class JwtTokenProvider {
             parseClaims(token);
             return true;
         } catch (ExpiredJwtException e) {
-            Long memberId = Optional.ofNullable(e.getClaims())
-                    .map(Claims::getSubject)
-                    .map(Long::parseLong)
-                    .orElse(-1L);
-            jsonLogger.warn(TokenRefreshLogProperty.failure(memberId, "토큰이 만료되었습니다."));
+            UUID memberUuid = extractUuidFromToken(e);
+            jsonLogger.warn(TokenRefreshLogProperty.failure(memberUuid, "토큰이 만료되었습니다."));
             return false;
         } catch (JwtException e) {
-            jsonLogger.warn(TokenRefreshLogProperty.failure(-1L, "토큰이 유효하지 않습니다."));
+            jsonLogger.warn(TokenRefreshLogProperty.failure(null, "토큰이 유효하지 않습니다."));
             return false;
         }
     }
@@ -104,20 +101,22 @@ public class JwtTokenProvider {
             }
             return TokenStatus.VALID;
         } catch (ExpiredJwtException e) {
-            Long memberId = Optional.ofNullable(e.getClaims())
-                    .map(Claims::getSubject)
-                    .map(Long::parseLong)
-                    .orElse(-1L);
-            jsonLogger.warn(TokenRefreshLogProperty.failure(memberId, "토큰이 만료되었습니다."));
+            UUID memberUuid = extractUuidFromToken(e);
+            jsonLogger.warn(TokenRefreshLogProperty.failure(memberUuid, "토큰이 만료되었습니다."));
             return TokenStatus.EXPIRED;
         } catch (JwtException e) {
-            jsonLogger.warn(TokenRefreshLogProperty.failure(-1L, "토큰이 유효하지 않습니다."));
+            jsonLogger.warn(TokenRefreshLogProperty.failure(null, "토큰이 유효하지 않습니다."));
             return TokenStatus.INVALID;
         }
     }
 
-    public Long getMemberId(String token) {
-        return Long.parseLong(parseClaims(token).getSubject());
+    public UUID getMemberUuid(String token) {
+        try {
+            return UUID.fromString(parseClaims(token).getSubject());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid UUID format in token subject");
+            throw new JwtException("유효하지 않은 토큰 형식입니다.");
+        }
     }
 
     private Claims parseClaims(String token) {
@@ -126,5 +125,25 @@ public class JwtTokenProvider {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    private UUID extractUuidFromToken(ExpiredJwtException e) {
+        String subject = e.getClaims().getSubject();
+        if (subject == null || subject.isBlank()) {
+            return null;
+        }
+        return parseUuid(subject);
+    }
+
+    private UUID parseUuid(String subject) {
+        try {
+            return UUID.fromString(subject);
+        } catch (IllegalArgumentException e) {
+            log.warn("만료된 토큰의 subject가 UUID 형식이 아닙니다. subject: {}", subject);
+            return null;
+        } catch (Exception e) {
+            log.warn("만료된 토큰에서 UUID 추출 중 예외 발생", e);
+            return null;
+        }
     }
 }

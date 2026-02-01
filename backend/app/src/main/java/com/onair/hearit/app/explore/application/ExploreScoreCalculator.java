@@ -7,6 +7,7 @@ import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -18,15 +19,21 @@ public class ExploreScoreCalculator {
 
     private final HearitRepository hearitRepository;
     private final List<ScoreFactor> scoreFactors;
+    private final ScoreFactorWeightConfig scoreFactorWeight;
 
-    public Map<Long, Double> calculateTotalScores(String uuid, UserType userType) {
+    public Map<Long, Double> calculateTotalScores(UUID uuid, UserType userType) {
         List<ScoreFactor> supportedScoreFactors = getSupportedScoreFactors(userType);
         List<Hearit> hearits = hearitRepository.findAll(Pageable.ofSize(100)).getContent();
         Map<Long, Double> totalExploreScores = initTotalExploreScores(hearits);
         for (ScoreFactor scoreFactor : supportedScoreFactors) {
+            double weight = scoreFactorWeight.getWeight(scoreFactor.getClass());
             Map<Long, Double> scores = scoreFactor.calculate(uuid, hearits);
+
             for (Map.Entry<Long, Double> entry : scores.entrySet()) {
-                totalExploreScores.merge(entry.getKey(), entry.getValue(), Double::sum);
+                totalExploreScores.merge(
+                        entry.getKey(),
+                        entry.getValue() * weight,
+                        Double::sum);
             }
         }
         return totalExploreScores;

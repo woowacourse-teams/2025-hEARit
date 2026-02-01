@@ -176,7 +176,7 @@ class HearitIntegrationTest extends IntegrationTest {
     }
 
     private String generateToken(Member member) {
-        return jwtTokenProvider.createAccessToken(member.getId());
+        return jwtTokenProvider.createAccessToken(member.getUuid());
     }
 
     private Hearit saveHearitWithCategoryAndKeyword(Category category, Keyword keyword) {

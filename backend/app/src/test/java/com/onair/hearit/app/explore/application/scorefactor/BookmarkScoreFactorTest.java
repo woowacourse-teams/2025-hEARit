@@ -1,11 +1,10 @@
-package com.onair.hearit.explore.application.scorefactor;
+package com.onair.hearit.app.explore.application.scorefactor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.onair.hearit.app.exception.custom.NotFoundException;
-import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
@@ -88,11 +87,11 @@ class BookmarkScoreFactorTest {
         // IT 카테고리 북마크 3개
         for (int i = 0; i < 3; i++) {
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(itCategory));
-            dbHelper.insertBookmark(new Bookmark(member, hearit));
+            dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit));
         }
         // Java 카테고리 북마크 1개
         Hearit javaHearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(javaCategory));
-        dbHelper.insertBookmark(new Bookmark(member, javaHearit));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), javaHearit));
         // 총 북마크 4개
 
         // 점수 계산 대상 히어릿
@@ -104,11 +103,11 @@ class BookmarkScoreFactorTest {
         Map<Long, Double> scores = bookmarkScoreFactor.calculate(member.getUuid(), targets);
 
         // then
-        // IT 히어릿 점수: (3 / 4) * 30 = 22.5
+        // IT 히어릿 점수: (3 / 4) = 0.75
         assertAll(
-                () -> assertThat(scores.get(targetItHearit.getId())).isEqualTo(22.5),
-                // Java 히어릿 점수: (1 / 4) * 30 = 7.5
-                () -> assertThat(scores.get(targetJavaHearit.getId())).isEqualTo(7.5)
+                () -> assertThat(scores).containsEntry(targetItHearit.getId(), 0.75),
+                // Java 히어릿 점수: (1 / 4) = 0.25
+                () -> assertThat(scores).containsEntry(targetJavaHearit.getId(), 0.25)
         );
     }
 
@@ -122,7 +121,7 @@ class BookmarkScoreFactorTest {
 
         // Bookmarked 카테고리에만 북마크 1개
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(bookmarkedCategory));
-        dbHelper.insertBookmark(new Bookmark(member, hearit));
+        dbHelper.insertBookmark(new Bookmark(member.getUuid(), hearit));
 
         Hearit target = dbHelper.insertHearit(TestFixture.createFixedHearitWith(unbookmarkedCategory));
 
@@ -131,7 +130,7 @@ class BookmarkScoreFactorTest {
 
         // then
         // 점수: (0 / 1) * 30 = 0.0
-        assertThat(scores.get(target.getId())).isEqualTo(0.0);
+        assertThat(scores).containsEntry(target.getId(), 0.0);
     }
 
     @Test
@@ -147,14 +146,14 @@ class BookmarkScoreFactorTest {
 
         // then
         // 점수: (0 / 1) * 30 = 0.0
-        assertThat(scores.get(hearit.getId())).isEqualTo(0.0);
+        assertThat(scores).containsEntry(hearit.getId(), 0.0);
     }
 
     @Test
     @DisplayName("존재하지 않는 사용자 uuid로 요청 시 NotFoundException이 발생한다.")
     void memberUuidDoesNotExist() {
         // given
-        String nonExistentUuid = UUID.randomUUID().toString();
+        UUID nonExistentUuid = UUID.randomUUID();
         Category category = dbHelper.insertCategory(new Category("any", "#112233"));
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         List<Hearit> hearits = List.of(hearit);

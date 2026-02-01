@@ -29,7 +29,7 @@ class ApiSecurityConfigTest extends IntegrationTest {
     void canAccessPublicGetListPathWithoutAuth() {
         // when & then
         RestAssured.given().log().all()
-                .header("Device-Uuid", UUID.randomUUID().toString())
+                .header("Device-Uuid", UUID.randomUUID())
                 .when()
                 .get("/api/v1/categories") // 인증 필요없는 경로
                 .then().log().all()
@@ -108,6 +108,6 @@ class ApiSecurityConfigTest extends IntegrationTest {
     }
 
     private String generateToken(Member member) {
-        return jwtTokenProvider.createAccessToken(member.getId());
+        return jwtTokenProvider.createAccessToken(member.getUuid());
     }
 }
