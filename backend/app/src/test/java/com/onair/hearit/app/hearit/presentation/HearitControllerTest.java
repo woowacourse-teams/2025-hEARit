@@ -199,15 +199,15 @@ class HearitControllerTest extends ControllerTest {
     }
 
     @Test
-    @DisplayName("히어릿 조회수 증가 - 200 OK")
+    @DisplayName("히어릿 조회수 증가 - 204 NoContent")
     void increaseViewCount_OK() throws Exception {
         // given
         Long hearitId = 1L;
 
         // when & then
         mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", hearitId))
-                .andExpect(status().isOk())
-                .andDo(document("v1-increase-hearit-view-ok",
+                .andExpect(status().isNoContent())
+                .andDo(document("v1-increase-hearit-view-no-content",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("히어릿 조회수 증가 V1")

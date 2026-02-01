@@ -196,7 +196,7 @@ class HearitIntegrationTest extends IntegrationTest {
     class ViewCountTest {
 
         @Test
-        @DisplayName("히어릿 조회수 증가 API 호출 시 200 OK와 함께 viewCount가 1 증가한다.")
+        @DisplayName("히어릿 조회수 증가 API 호출 시 204 No Content와 함께 viewCount가 1 증가한다.")
         void increaseViewCount_success() {
             // given
             Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
@@ -208,7 +208,7 @@ class HearitIntegrationTest extends IntegrationTest {
                     .when()
                     .post("/api/v1/hearits/{hearitId}/view", hearitId)
                     .then()
-                    .statusCode(HttpStatus.OK.value());
+                    .statusCode(HttpStatus.NO_CONTENT.value());
 
             // then
             Hearit updatedHearit = hearitRepository.findById(hearitId).get();
