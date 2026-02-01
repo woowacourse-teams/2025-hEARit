@@ -204,12 +204,8 @@ class HearitControllerTest extends ControllerTest {
         // given
         Long hearitId = 1L;
 
-        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
-        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
-
         // when & then
-        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", hearitId)
-                        .header("Authorization", "Bearer valid-token"))
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", hearitId))
                 .andExpect(status().isOk())
                 .andDo(document("v1-increase-hearit-view-ok",
                         resource(ResourceSnippetParameters.builder()
@@ -230,15 +226,12 @@ class HearitControllerTest extends ControllerTest {
         // given
         Long notFoundHearitId = 9999L;
 
-        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
-        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
         willThrow(new NotFoundException("hearitId", notFoundHearitId.toString()))
                 .given(hearitService)
                 .increaseViewCount(notFoundHearitId);
 
         // when & then
-        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", notFoundHearitId)
-                        .header("Authorization", "Bearer valid-token"))
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", notFoundHearitId))
                 .andExpect(status().isNotFound())
                 .andDo(document("v1-increase-hearit-view-not-found",
                         resource(ResourceSnippetParameters.builder()
