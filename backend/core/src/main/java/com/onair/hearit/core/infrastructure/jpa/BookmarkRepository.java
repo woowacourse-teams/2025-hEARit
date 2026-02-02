@@ -3,6 +3,7 @@ package com.onair.hearit.core.infrastructure.jpa;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.infrastructure.projection.BookmarkWithPlayingHistoryProjection;
+import com.onair.hearit.core.infrastructure.projection.CategoryBookmarkCount;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

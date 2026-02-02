@@ -1,4 +1,4 @@
-package com.onair.hearit.core.infrastructure.jpa;
+package com.onair.hearit.core.infrastructure.projection;
 
 public interface CategoryBookmarkCount {
 
