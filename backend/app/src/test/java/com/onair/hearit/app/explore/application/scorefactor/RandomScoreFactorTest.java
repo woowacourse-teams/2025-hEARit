@@ -3,8 +3,8 @@ package com.onair.hearit.app.explore.application.scorefactor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.app.explore.application.scorefactor.generator.DefaultRandomNumberGenerator;
-import com.onair.hearit.app.explore.application.scorefactor.generator.RandomNumberGenerator;
+import com.onair.hearit.app.common.DefaultRandomNumberGenerator;
+import com.onair.hearit.app.common.RandomNumberGenerator;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Source;
