@@ -3,8 +3,8 @@ package com.onair.hearit.app.hearit.application;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.exception.custom.NotFoundException;
-import com.onair.hearit.app.exception.custom.UnauthenticatedException;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
+import com.onair.hearit.app.hearit.dto.HearitDetailResponse.LikeResponse;
 import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
 import com.onair.hearit.core.domain.Bookmark;
@@ -12,11 +12,13 @@ import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.PlayingHistory;
+import com.onair.hearit.core.domain.ReactionType;
 import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.infrastructure.jpa.BookmarkRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
+import com.onair.hearit.core.infrastructure.jpa.ReactionRepository;
 import com.onair.hearit.core.infrastructure.projection.HearitWithPlayTimeProjection;
 import java.util.Collections;
 import java.util.List;
@@ -41,33 +43,40 @@ public class HearitService {
     private final BookmarkRepository bookmarkRepository;
     private final HearitKeywordRepository hearitKeywordRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
+    private final ReactionRepository reactionRepository;
 
     @Transactional(readOnly = true)
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
         Hearit hearit = getHearitById(hearitId);
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId());
-        if (userInfo == null || userInfo.isGuest()) {
-            return HearitDetailResponse.of(hearit, keywords, null, null);
+        long likeCount = reactionRepository.countByHearitAndType(hearit, ReactionType.LIKE);
+
+        if (isGuest(userInfo)) {
+            return HearitDetailResponse.ofGuest(hearit, keywords, likeCount);
         }
 
-        UUID memberUuid = getMemberUuidFromUserInfo(userInfo);
-        Long bookmarkId = bookmarkRepository.findByHearitAndMemberUuid(hearit, memberUuid)
+        UUID memberUuid = userInfo.getUuid();
+        Long bookmarkId = findBookmarkId(hearit, memberUuid);
+        Long lastPlayTime = calculateLastPlayTime(hearit, memberUuid);
+        boolean isLiked = reactionRepository.existsByHearitAndUserUuidAndType(hearit, memberUuid, ReactionType.LIKE);
+
+        LikeResponse like = new LikeResponse(likeCount, isLiked);
+        return HearitDetailResponse.ofMember(hearit, keywords, lastPlayTime, bookmarkId, like);
+    }
+
+    private boolean isGuest(UserInfo userInfo) {
+        return userInfo == null || userInfo.isGuest();
+    }
+
+    private Long findBookmarkId(Hearit hearit, UUID memberUuid) {
+        return bookmarkRepository.findByHearitAndMemberUuid(hearit, memberUuid)
                 .map(Bookmark::getId)
                 .orElse(null);
-        Long lastPlayTime = calculateLastPlayTime(hearit, memberUuid);
-        return HearitDetailResponse.of(hearit, keywords, lastPlayTime, bookmarkId);
     }
 
     private Hearit getHearitById(Long hearitId) {
         return hearitRepository.findWithCategoryById(hearitId)
                 .orElseThrow(() -> new NotFoundException("hearitId", hearitId.toString()));
-    }
-
-    private UUID getMemberUuidFromUserInfo(UserInfo userInfo) {
-        if (userInfo == null || userInfo.isGuest()) {
-            throw new UnauthenticatedException();
-        }
-        return userInfo.getUuid();
     }
 
     private Long calculateLastPlayTime(Hearit hearit, UUID memberUuid) {

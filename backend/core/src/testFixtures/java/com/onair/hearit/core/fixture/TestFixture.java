@@ -5,6 +5,8 @@ import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.Reaction;
+import com.onair.hearit.core.domain.ReactionType;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.domain.UserInfo;
@@ -89,5 +91,9 @@ public class TestFixture {
 
     public static PlayingHistory createFixedFinishedPlayHistory(Member member, Hearit hearit) {
         return new PlayingHistory(member.getUuid(), hearit, hearit.getPlayTime() * 1000);
+    }
+
+    public static Reaction createFixedReaction(Member member, Hearit hearit, ReactionType type) {
+        return new Reaction(member.getUuid(), hearit, type);
     }
 }
