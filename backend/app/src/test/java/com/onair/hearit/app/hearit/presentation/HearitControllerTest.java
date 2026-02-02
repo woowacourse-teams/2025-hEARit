@@ -5,8 +5,10 @@ import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithNam
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
@@ -55,6 +57,7 @@ class HearitControllerTest extends ControllerTest {
                 LocalDateTime.of(2025, 9, 30, 10, 0),
                 false,
                 null,
+                100,
                 new CategoryResponse(2L, "categoryName", "#FFFFFF"),
                 List.of(new HearitDetailResponse.KeywordResponse(1L, "keyword1"),
                         new HearitDetailResponse.KeywordResponse(2L, "keyword2")),
@@ -201,6 +204,54 @@ class HearitControllerTest extends ControllerTest {
                 ));
     }
 
+    @Test
+    @DisplayName("히어릿 조회수 증가 - 204 NoContent")
+    void increaseViewCount_OK() throws Exception {
+        // given
+        Long hearitId = 1L;
+
+        // when & then
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", hearitId))
+                .andExpect(status().isNoContent())
+                .andDo(document("v1-increase-hearit-view-no-content",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("히어릿 조회수 증가 V1")
+                                .description("히어릿 상세 조회 시 조회수를 1 증가시킵니다.")
+                                .pathParameters(
+                                        parameterWithName("hearitId").description("조회수를 증가시킬 히어릿 ID")
+                                )
+                                .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("히어릿 조회수 증가 - 404 Not Found")
+    void increaseViewCount_NotFound() throws Exception {
+        // given
+        Long notFoundHearitId = 9999L;
+
+        willThrow(new NotFoundException("hearitId", notFoundHearitId.toString()))
+                .given(hearitService)
+                .increaseViewCount(notFoundHearitId);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", notFoundHearitId))
+                .andExpect(status().isNotFound())
+                .andDo(document("v1-increase-hearit-view-not-found",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("히어릿 조회수 증가 V1")
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets
+                                                .getProblemDetailResponseFields()
+                                )
+                                .build()
+                        )
+                ));
+    }
+
     private FieldDescriptor[] getHearitDetailResponseFields() {
         return new FieldDescriptor[]{
                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("히어릿 ID"),
@@ -214,6 +265,7 @@ class HearitControllerTest extends ControllerTest {
                 fieldWithPath("createdAt").type(JsonFieldType.STRING).description("생성 일시"),
                 fieldWithPath("isBookmarked").type(JsonFieldType.BOOLEAN).description("현재 사용자의 북마크 여부"),
                 fieldWithPath("bookmarkId").type(JsonFieldType.NUMBER).description("북마크 ID (북마크된 경우)").optional(),
+                fieldWithPath("viewCount").type(JsonFieldType.NUMBER).description("히어릿 조회수"),
                 fieldWithPath("category").description("카테고리 정보"),
                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                 fieldWithPath("category.name").type(JsonFieldType.STRING).description("카테고리 이름"),
