@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -73,6 +74,70 @@ public class FileStorage {
         } catch (AdminInvalidInputException | S3Exception e) {
             throw new AdminFileException("S3 파일 삭제 실패, key: " + key);
         }
+    }
+
+    /**
+     * 바이트 배열을 S3에 업로드
+     *
+     * @param data 업로드할 바이트 배열
+     * @param key S3 키 (경로)
+     * @param contentType MIME 타입
+     * @return 업로드된 S3 키
+     */
+    public String uploadBytes(byte[] data, String key, String contentType) {
+        try {
+            String validatedKey = validateKey(key);
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(validatedKey)
+                            .contentType(contentType)
+                            .build(),
+                    RequestBody.fromBytes(data)
+            );
+            return validatedKey;
+        } catch (S3Exception e) {
+            throw new AdminFileException("S3 파일 업로드 실패, key: " + key);
+        }
+    }
+
+    /**
+     * S3 파일 복사 (원본 유지)
+     *
+     * @param sourceKey 원본 경로
+     * @param destinationKey 대상 경로
+     * @return 복사된 파일의 새 키
+     */
+    public String copyFile(String sourceKey, String destinationKey) {
+        try {
+            String validatedSource = validateKey(sourceKey);
+            String validatedDest = validateKey(destinationKey);
+
+            CopyObjectRequest copyRequest = CopyObjectRequest.builder()
+                    .sourceBucket(bucket)
+                    .sourceKey(validatedSource)
+                    .destinationBucket(bucket)
+                    .destinationKey(validatedDest)
+                    .build();
+            s3Client.copyObject(copyRequest);
+
+            return validatedDest;
+        } catch (S3Exception e) {
+            throw new AdminFileException("S3 파일 복사 실패, source: " + sourceKey + ", dest: " + destinationKey);
+        }
+    }
+
+    /**
+     * S3 파일 이동 (복사 후 삭제)
+     *
+     * @param sourceKey 원본 경로
+     * @param destinationKey 대상 경로
+     * @return 이동된 파일의 새 키
+     */
+    public String moveFile(String sourceKey, String destinationKey) {
+        String copiedKey = copyFile(sourceKey, destinationKey);
+        deleteFile(sourceKey);
+        return copiedKey;
     }
 
     private String validateKey(String key) {
