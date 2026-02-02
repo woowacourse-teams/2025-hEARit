@@ -10,6 +10,7 @@ import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import java.util.List;
@@ -48,10 +49,11 @@ class CategoryRecommenderTest {
             for (int i = 0; i < 15; i++) { // 충분한 수의 랜덤 카테고리 생성
                 dbHelper.insertCategory(TestFixture.createFixedCategory());
             }
-            UserInfo userInfo = new UserInfo(null, UUID.randomUUID().toString());
+            UserInfo userInfo = new UserInfo(UUID.randomUUID(), UserType.GUEST);
 
             // when
-            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo, totalRecommendCount);
+            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo,
+                    totalRecommendCount);
 
             // then
             assertAll(
@@ -95,10 +97,11 @@ class CategoryRecommenderTest {
             dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit5));
             dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit6));
 
-            UserInfo userInfo = new UserInfo(member.getId(), null);
+            UserInfo userInfo = new UserInfo(member.getUuid(), UserType.MEMBER);
 
             // when
-            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo, totalRecommendCount);
+            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo,
+                    totalRecommendCount);
 
             // then
             List<Long> recommendedIds = recommendedCategories.stream()
@@ -131,10 +134,11 @@ class CategoryRecommenderTest {
             Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(c1));
             dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
 
-            UserInfo userInfo = new UserInfo(member.getId(), null);
+            UserInfo userInfo = new UserInfo(member.getUuid(), UserType.MEMBER);
 
             // when
-            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo, totalRecommendCount);
+            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo,
+                    totalRecommendCount);
 
             // then
             List<Long> expectedRandomIds = List.of(c2.getId(), c3.getId(), c4.getId(), c5.getId());
@@ -157,7 +161,7 @@ class CategoryRecommenderTest {
         void member_without_bookmarks() {
             // given
             Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-            UserInfo userInfo = new UserInfo(member.getId(), null);
+            UserInfo userInfo = new UserInfo(member.getUuid(), UserType.MEMBER);
 
             Category itTrendCategory = dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
             for (int i = 0; i < 10; i++) {
@@ -166,7 +170,8 @@ class CategoryRecommenderTest {
 
             // when
             int totalRecommendCount = 5;
-            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo, totalRecommendCount);
+            List<Category> recommendedCategories = categoryRecommender.getRecommendedCategories(userInfo,
+                    totalRecommendCount);
 
             // then
             assertAll(
@@ -187,7 +192,7 @@ class CategoryRecommenderTest {
             // given
             dbHelper.insertCategory(TestFixture.createFixedCategory());
             dbHelper.insertCategory(TestFixture.createFixedCategory());
-            UserInfo guest = new UserInfo(null, UUID.randomUUID().toString());
+            UserInfo guest = new UserInfo(UUID.randomUUID(), UserType.GUEST);
 
             // when & then
             assertThatThrownBy(() -> categoryRecommender.getRecommendedCategories(guest, 5))
@@ -200,13 +205,12 @@ class CategoryRecommenderTest {
         void missing_member_throws_exception() {
             // given
             dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
-            long nonExistId = 999L;
-            UserInfo userInfo = new UserInfo(nonExistId, null);
+            UserInfo userInfo = new UserInfo(UUID.randomUUID(), UserType.MEMBER);
 
             // when & then
             assertThatThrownBy(() -> categoryRecommender.getRecommendedCategories(userInfo, 5))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("memberId");
+                    .hasMessageContaining("memberUuid");
         }
 
         @ParameterizedTest
@@ -217,7 +221,7 @@ class CategoryRecommenderTest {
             Category c1 = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Category c2 = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Category itTrendCategory = dbHelper.insertCategory(TestFixture.createCategoryByName("IT 트렌드"));
-            UserInfo guest = new UserInfo(null, UUID.randomUUID().toString());
+            UserInfo guest = new UserInfo(UUID.randomUUID(), UserType.GUEST);
 
             // when
             List<Category> recommended = categoryRecommender.getRecommendedCategories(guest, totalRecommendCount);

@@ -13,7 +13,6 @@ import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
 import com.onair.hearit.app.hearit.dto.param.HearitSortField;
 import com.onair.hearit.app.hearit.dto.param.SortDirection;
-import com.onair.hearit.app.userinfo.application.UserInfoService;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -30,6 +29,7 @@ import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -45,11 +45,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("fake-test")
-@Import({DbHelper.class, TestJpaAuditingConfig.class, HearitService.class, UserInfoService.class})
+@Import({DbHelper.class, TestJpaAuditingConfig.class, HearitService.class})
 class HearitServiceTest {
 
     @Autowired
     DbHelper dbHelper;
+
+    @Autowired
+    EntityManager em;
 
     @Autowired
     HearitRepository hearitRepository;
@@ -74,6 +77,7 @@ class HearitServiceTest {
 
     @Nested
     class HearitDetailTest {
+
         @Test
         @DisplayName("히어릿 아이디로 단일 히어릿 정보를 조회 할 수 있다.")
         void getHearitDetailTest() {
@@ -169,6 +173,7 @@ class HearitServiceTest {
 
     @Nested
     class FilteredHearitTest {
+
         @Test
         @DisplayName("히어릿 목록을 카테고리 조회 시 카테고리에 해당하는 히어릿을 생성날짜를 기준 내림차순으로 반환한다.")
         void getHearitsByCategory_onlyMatchingCategory() {
@@ -184,7 +189,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category1.getId(),
-                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -210,7 +215,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
-                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -234,7 +239,7 @@ class HearitServiceTest {
 
             // when
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(category.getId(),
-                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID().toString()), pagingRequest);
+                    sortRequest, TestFixture.createGuestUserInfo(UUID.randomUUID()), pagingRequest);
 
             // then
             assertAll(() -> {
@@ -301,7 +306,7 @@ class HearitServiceTest {
             PagedResponse<HearitOverviewResponse> result = hearitService.getFilteredHearits(
                     null,
                     sortRequest,
-                    TestFixture.createGuestUserInfo(UUID.randomUUID().toString()),
+                    TestFixture.createGuestUserInfo(UUID.randomUUID()),
                     pagingRequest
             );
 
@@ -312,6 +317,41 @@ class HearitServiceTest {
                     () -> assertThat(result.content().get(1).id()).isEqualTo(hearit2.getId()),
                     () -> assertThat(result.content().get(2).id()).isEqualTo(hearit3.getId())
             );
+        }
+    }
+
+    @Nested
+    class ViewCountTest {
+
+        @Test
+        @DisplayName("히어릿 조회수 증가 API를 호출하면 viewCount가 1 증가한다.")
+        void increaseViewCount_success() {
+            // given
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+            Long hearitId = hearit.getId();
+            long beforeViewCount = hearit.getViewCount();
+
+            // when
+            hearitService.increaseViewCount(hearitId);
+
+            // then
+            em.clear();
+            Hearit updatedHearit = hearitRepository.findById(hearitId).get();
+            assertThat(updatedHearit.getViewCount()).isEqualTo(beforeViewCount + 1);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 히어릿에 대해 조회수 증가 요청 시 예외를 던진다.")
+        void increaseViewCount_notFound() {
+            // given
+            Long notExistHearitId = 9999L;
+
+            // when & then
+            assertThatThrownBy(() -> hearitService.increaseViewCount(notExistHearitId))
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessageContaining("hearitId");
         }
     }
 }

@@ -27,6 +27,7 @@ import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.fixture.ControllerTest;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -73,6 +74,7 @@ class BookmarkControllerTest extends ControllerTest {
                     new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+            given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
             given(bookmarkService.getBookmarkHearitsV2(any(), any(), any())).willReturn(pagedResponses);
 
             // when & then
@@ -124,6 +126,7 @@ class BookmarkControllerTest extends ControllerTest {
         void readBookmarkHearitsV2_BadRequest() throws Exception {
             // given
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+            given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
 
             // when & then
             mockMvc.perform(get("/api/v2/bookmarks/hearits")
@@ -180,6 +183,7 @@ class BookmarkControllerTest extends ControllerTest {
                     new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+            given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
             given(bookmarkService.getBookmarkHearits(any(), any(), any(), any())).willReturn(pagedResponses);
 
             // when & then
@@ -252,6 +256,7 @@ class BookmarkControllerTest extends ControllerTest {
                     new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+            given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
             given(bookmarkService.getBookmarkHearits(any(), any(), any(), any())).willReturn(pagedResponses);
 
             // when & then
@@ -316,6 +321,7 @@ class BookmarkControllerTest extends ControllerTest {
         void readBookmarkHearitsV1_BadRequest() throws Exception {
             // given
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+            given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
             String invalidFilter = "invalid-filter";
 
             // when & then
@@ -368,6 +374,7 @@ class BookmarkControllerTest extends ControllerTest {
             var response = new BookmarkInfoResponse(hearitId);
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+            given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
             given(bookmarkService.addBookmark(any(), any())).willReturn(response);
 
             // when & then
@@ -396,6 +403,7 @@ class BookmarkControllerTest extends ControllerTest {
             var hearitId = 3L;
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+            given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
             given(bookmarkService.addBookmark(any(), any()))
                     .willThrow(new AlreadyExistException("이미 북마크된 히어릿입니다."));
 
@@ -426,6 +434,7 @@ class BookmarkControllerTest extends ControllerTest {
             var bookmarkId = 1L;
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+            given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
             willDoNothing().given(bookmarkService).deleteBookmark(any(), any());
 
             // when & then
@@ -451,6 +460,7 @@ class BookmarkControllerTest extends ControllerTest {
             var bookmarkId = 1L;
 
             given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+            given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
             willThrow(new ForbiddenException("북마크를 삭제할 권한이 없습니다."))
                     .given(bookmarkService).deleteBookmark(any(), any());
 

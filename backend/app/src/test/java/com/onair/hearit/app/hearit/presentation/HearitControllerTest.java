@@ -5,8 +5,10 @@ import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithNam
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
@@ -17,11 +19,13 @@ import com.onair.hearit.app.fixture.ControllerTest;
 import com.onair.hearit.app.hearit.application.HearitService;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse.CategoryResponse;
+import com.onair.hearit.app.hearit.dto.HearitDetailResponse.LikeResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse.SourceResponse;
 import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,12 +57,15 @@ class HearitControllerTest extends ControllerTest {
                 LocalDateTime.of(2025, 9, 30, 10, 0),
                 false,
                 null,
+                100,
                 new CategoryResponse(2L, "categoryName", "#FFFFFF"),
                 List.of(new HearitDetailResponse.KeywordResponse(1L, "keyword1"),
-                        new HearitDetailResponse.KeywordResponse(2L, "keyword2"))
+                        new HearitDetailResponse.KeywordResponse(2L, "keyword2")),
+                new LikeResponse(10L, true)
         );
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
         given(hearitService.getHearitDetail(any(), any())).willReturn(response);
 
         // when & then
@@ -69,9 +76,13 @@ class HearitControllerTest extends ControllerTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("단일 히어릿 조회 V1")
-                                .description("히어릿의 상세 정보를 조회합니다. \n\n"
-                                             + "로그인한 사용자의 경우, `isBookmarked`와 `bookmarkId` 필드가 사용자의 북마크 상태를 반영하여 반환됩니다. \n\n"
-                                             + "비로그인 사용자의 경우, `isBookmarked`는 항상 `false`이며 `bookmarkId`는 `null` 입니다.")
+                                .description("""
+                                        히어릿의 상세 정보를 조회합니다.
+
+                                        로그인한 사용자의 경우, `isBookmarked`와 `bookmarkId` 필드가 사용자의 북마크 상태를 반영하여 반환됩니다.
+                                        `like.isLiked`와 `like.count`에 좋아요 상태를 반영하여 반환됩니다.
+
+                                        비로그인 사용자의 경우, `isBookmarked`는 항상 `false`이며 `bookmarkId`는 `null` 입니다.""")
                                 .pathParameters(
                                         parameterWithName("hearitId").description("조회할 히어릿의 ID")
                                 )
@@ -87,6 +98,7 @@ class HearitControllerTest extends ControllerTest {
         Long notFoundHearitId = 9999L;
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
         given(hearitService.getHearitDetail(any(), any())).willThrow(new NotFoundException("hearitId", "9999"));
 
         // when & then
@@ -121,6 +133,7 @@ class HearitControllerTest extends ControllerTest {
         var pagedResponses = PagedResponse.from(new PageImpl<>(responses, PageRequest.of(0, 20), responses.size()));
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
         given(hearitService.getFilteredHearits(any(), any(), any(), any())).willReturn(pagedResponses);
 
         // when & then
@@ -170,6 +183,7 @@ class HearitControllerTest extends ControllerTest {
     void readFilteredHearitsV1_BadRequest() throws Exception {
         // given
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
 
         // when & then
         mockMvc.perform(get("/api/v1/hearits")
@@ -190,6 +204,54 @@ class HearitControllerTest extends ControllerTest {
                 ));
     }
 
+    @Test
+    @DisplayName("히어릿 조회수 증가 - 204 NoContent")
+    void increaseViewCount_OK() throws Exception {
+        // given
+        Long hearitId = 1L;
+
+        // when & then
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", hearitId))
+                .andExpect(status().isNoContent())
+                .andDo(document("v1-increase-hearit-view-no-content",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("히어릿 조회수 증가 V1")
+                                .description("히어릿 상세 조회 시 조회수를 1 증가시킵니다.")
+                                .pathParameters(
+                                        parameterWithName("hearitId").description("조회수를 증가시킬 히어릿 ID")
+                                )
+                                .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("히어릿 조회수 증가 - 404 Not Found")
+    void increaseViewCount_NotFound() throws Exception {
+        // given
+        Long notFoundHearitId = 9999L;
+
+        willThrow(new NotFoundException("hearitId", notFoundHearitId.toString()))
+                .given(hearitService)
+                .increaseViewCount(notFoundHearitId);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", notFoundHearitId))
+                .andExpect(status().isNotFound())
+                .andDo(document("v1-increase-hearit-view-not-found",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Hearit API")
+                                .summary("히어릿 조회수 증가 V1")
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets
+                                                .getProblemDetailResponseFields()
+                                )
+                                .build()
+                        )
+                ));
+    }
+
     private FieldDescriptor[] getHearitDetailResponseFields() {
         return new FieldDescriptor[]{
                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("히어릿 ID"),
@@ -203,13 +265,16 @@ class HearitControllerTest extends ControllerTest {
                 fieldWithPath("createdAt").type(JsonFieldType.STRING).description("생성 일시"),
                 fieldWithPath("isBookmarked").type(JsonFieldType.BOOLEAN).description("현재 사용자의 북마크 여부"),
                 fieldWithPath("bookmarkId").type(JsonFieldType.NUMBER).description("북마크 ID (북마크된 경우)").optional(),
+                fieldWithPath("viewCount").type(JsonFieldType.NUMBER).description("히어릿 조회수"),
                 fieldWithPath("category").description("카테고리 정보"),
                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                 fieldWithPath("category.name").type(JsonFieldType.STRING).description("카테고리 이름"),
                 fieldWithPath("category.colorCode").type(JsonFieldType.STRING).description("카테고리 컬러코드"),
                 fieldWithPath("keywords").type(JsonFieldType.ARRAY).description("키워드 목록"),
                 fieldWithPath("keywords[].id").type(JsonFieldType.NUMBER).description("키워드 ID"),
-                fieldWithPath("keywords[].name").type(JsonFieldType.STRING).description("키워드 이름")
+                fieldWithPath("keywords[].name").type(JsonFieldType.STRING).description("키워드 이름"),
+                fieldWithPath("like.count").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                fieldWithPath("like.isLiked").type(JsonFieldType.BOOLEAN).description("좋아요 유무")
         };
     }
 }

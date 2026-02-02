@@ -91,7 +91,7 @@ class AuthServiceTest {
         void signup_duplicate_id() {
             // given
             dbHelper.insertMember(
-                    Member.createLocalUser(UUID.randomUUID().toString(), "sameId", "nickname",
+                    Member.createLocalUser(UUID.randomUUID(), "sameId", "nickname",
                             passwordEncoder.encode("password"), "profile.jpg"));
 
             SignupRequest signupRequest = new SignupRequest("sameId", "another", "password");
@@ -112,7 +112,7 @@ class AuthServiceTest {
         void login_success() {
             // given
             dbHelper.insertMember(
-                    Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                    Member.createLocalUser(UUID.randomUUID(), "localId", "nickname",
                             passwordEncoder.encode("password"), "profile.jpg"));
 
             LoginRequest loginRequest = new LoginRequest("localId", "password");
@@ -149,7 +149,7 @@ class AuthServiceTest {
         void login_fail_wrong_password() {
             // given
             dbHelper.insertMember(
-                    Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname", "password",
+                    Member.createLocalUser(UUID.randomUUID(), "localId", "nickname", "password",
                             "profile.jpg"));
 
             LoginRequest loginRequest = new LoginRequest("localId", "wrongpassword");
@@ -165,15 +165,15 @@ class AuthServiceTest {
         void logout_then_deleteRefreshToken() {
             // given
             Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-            String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
-            refreshTokenRepository.save(new RefreshToken(member.getId(), refreshToken, LocalDateTime.now()));
-            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isPresent();
+            String refreshToken = jwtTokenProvider.createRefreshToken(member.getUuid());
+            refreshTokenRepository.save(new RefreshToken(member.getUuid(), refreshToken, LocalDateTime.now()));
+            assertThat(refreshTokenRepository.findByMemberUuid(member.getUuid())).isPresent();
 
             // when
-            authService.withdraw(member.getId());
+            authService.withdraw(member.getUuid());
 
             // then
-            assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
+            assertThat(refreshTokenRepository.findByMemberUuid(member.getUuid())).isEmpty();
             Member withdrawnMember = memberRepository.findById(member.getId()).orElseThrow();
             assertThat(withdrawnMember.getDeletedAt()).isNotNull();
         }
@@ -187,11 +187,11 @@ class AuthServiceTest {
             void reissue_success() {
                 // given
                 Member member = dbHelper.insertMember(
-                        Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                        Member.createLocalUser(UUID.randomUUID(), "localId", "nickname",
                                 passwordEncoder.encode("password"),
                                 "profile.jpg"));
-                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
-                refreshTokenRepository.save(new RefreshToken(member.getId(), refreshTokenValue, LocalDateTime.now()));
+                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getUuid());
+                refreshTokenRepository.save(new RefreshToken(member.getUuid(), refreshTokenValue, LocalDateTime.now()));
 
                 // when
                 String reissuedAccessToken = authService.reissue(refreshTokenValue);
@@ -206,11 +206,11 @@ class AuthServiceTest {
             void reissue_fail_when_refreshToken_expired() throws InterruptedException {
                 // given
                 Member member = dbHelper.insertMember(
-                        Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                        Member.createLocalUser(UUID.randomUUID(), "localId", "nickname",
                                 passwordEncoder.encode("password"),
                                 "profile.jpg"));
-                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
-                refreshTokenRepository.save(new RefreshToken(member.getId(), refreshTokenValue, LocalDateTime.now()));
+                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getUuid());
+                refreshTokenRepository.save(new RefreshToken(member.getUuid(), refreshTokenValue, LocalDateTime.now()));
 
                 Thread.sleep(1000); // 리프레시 토큰 유효시간 1초 -> 1초 기다려서 토큰 만료시킴
 
@@ -225,10 +225,10 @@ class AuthServiceTest {
             void reissue_fail_when_refreshToken_not_found_in_db() {
                 // given
                 Member member = dbHelper.insertMember(
-                        Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                        Member.createLocalUser(UUID.randomUUID(), "localId", "nickname",
                                 passwordEncoder.encode("password"),
                                 "profile.jpg"));
-                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
+                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getUuid());
                 // 리프레시토큰 DB에 저장 안 함
 
                 // when & then
@@ -242,13 +242,13 @@ class AuthServiceTest {
             void reissue_fail_when_refreshToken_mismatch() {
                 // given
                 Member member = dbHelper.insertMember(
-                        Member.createLocalUser(UUID.randomUUID().toString(), "localId", "nickname",
+                        Member.createLocalUser(UUID.randomUUID(), "localId", "nickname",
                                 passwordEncoder.encode("password"),
                                 "profile.jpg"));
-                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getId());
+                String refreshTokenValue = jwtTokenProvider.createRefreshToken(member.getUuid());
                 // 다른 리프레시토큰 저장
                 refreshTokenRepository.save(
-                        new RefreshToken(member.getId(), "other-refresh-token", LocalDateTime.now()));
+                        new RefreshToken(member.getUuid(), "other-refresh-token", LocalDateTime.now()));
 
                 // when & then
                 assertThatThrownBy(() -> authService.reissue(refreshTokenValue))

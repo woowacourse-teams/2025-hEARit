@@ -19,6 +19,7 @@ import com.onair.hearit.app.playinghistory.application.PlayingHistoryService;
 import com.onair.hearit.app.playinghistory.dto.PlayingHistoryRequest;
 import com.onair.hearit.app.playinghistory.dto.RecentlyPlayedHearitResponse;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ class PlayingHistoryControllerTest extends ControllerTest {
         );
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
         given(playingHistoryService.getRecentPlayingHistory(any())).willReturn(responses);
 
         // when & then
@@ -114,6 +116,7 @@ class PlayingHistoryControllerTest extends ControllerTest {
         var request = new PlayingHistoryRequest(1L, 100L, 200L);
 
         given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(java.util.UUID.randomUUID());
         willDoNothing().given(playingHistoryService).addPlayingHistory(any(), any());
 
         // when & then

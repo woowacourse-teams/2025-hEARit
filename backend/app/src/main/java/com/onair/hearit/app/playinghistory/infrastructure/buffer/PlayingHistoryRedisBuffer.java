@@ -1,23 +1,31 @@
 package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.app.exception.custom.BufferException;
-import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
-import com.onair.hearit.core.domain.PlayingHistory;
-import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import lombok.extern.slf4j.Slf4j;
+
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.RedisException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onair.hearit.app.exception.custom.BufferException;
+import com.onair.hearit.app.exception.custom.RedisBufferException;
+import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
+import com.onair.hearit.core.domain.PlayingHistory;
+import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -72,8 +80,12 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             }
             saveHistoriesToDatabase(playValues);
             redisTemplate.delete(REDIS_TEMP_KEY);
+        } catch (RedisConnectionFailureException e) {
+            handleFlushError("Redis 연결 실패", e);
+        } catch (RedisSystemException e) {
+            handleFlushError("Redis 시스템 오류", e);
         } catch (DataAccessException e) {
-            handleFlushError("Redis 오류", e);
+            handleFlushError("Redis 데이터 접근 오류", e);
         } catch (Exception e) {
             handleFlushError("예상치 못한 오류", e);
         }
@@ -88,11 +100,17 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
                 return 0;
             }
             return size.intValue();
+        } catch (RedisConnectionFailureException e) {
+            log.error("Redis 크기 조회 실패 - Redis 연결 실패", e);
+            return 0;
+        } catch (RedisSystemException e) {
+            log.error("Redis 크기 조회 실패 - Redis 시스템 오류", e);
+            return 0;
         } catch (DataAccessException e) {
-            log.error("Redis 크기 조회 실패 - Redis 오류", e);
+            log.error("Redis 크기 조회 실패 - Redis 데이터 접근 오류", e);
             return 0;
         } catch (Exception e) {
-            log.error("Redis 크기 조회 실패", e);
+            log.error("Redis 크기 조회 실패 - 예상치 못한 오류", e);
             return 0;
         }
     }
@@ -112,8 +130,21 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
             Thread.currentThread().interrupt();
             log.error("재생 기록 저장 중 인터럽트: {}", field, e);
             throw new BufferException("재생 기록 저장 중 오류가 발생했습니다.");
+        } catch (RedisConnectionFailureException e) {
+            log.error("재생 기록 저장 실패 - Redis 연결 실패: {}", field, e);
+            throw new RedisBufferException("Redis 연결 실패", e);
+        } catch (RedisSystemException e) {
+            log.error("재생 기록 저장 실패 - Redis 시스템 오류: {}", field, e);
+            throw new RedisBufferException("Redis 시스템 오류", e);
+        } catch (DataAccessException e) {
+            log.error("재생 기록 저장 실패 - Redis 데이터 접근 오류: {}", field, e);
+            throw new RedisBufferException("Redis 데이터 접근 실패", e);
+        } catch (RedisException e) {
+            // Redisson의 Redis 관련 예외
+            log.error("재생 기록 저장 실패 - Redisson Redis 오류: {}", field, e);
+            throw new RedisBufferException("Redisson Redis 오류", e);
         } catch (Exception e) {
-            log.error("재생 기록 저장 실패: {}", field, e);
+            log.error("재생 기록 저장 실패 - 예상치 못한 오류: {}", field, e);
             throw new BufferException("재생 기록 저장 중 오류가 발생했습니다.");
         }
     }
@@ -142,8 +173,8 @@ public class PlayingHistoryRedisBuffer implements PlayingHistoryBuffer {
         }
     }
 
-    private String buildHashField(String userUuid, long hearitId) {
-        return userUuid + ":" + hearitId;
+    private String buildHashField(UUID userUuid, long hearitId) {
+        return userUuid.toString() + ":" + hearitId;
     }
 
     private boolean shouldUpdatePlayHistory(String field, PlayHistoryValue incoming) {

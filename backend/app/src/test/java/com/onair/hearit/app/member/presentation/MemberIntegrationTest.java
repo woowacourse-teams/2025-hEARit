@@ -28,7 +28,7 @@ class MemberIntegrationTest extends IntegrationTest {
         String nickname = "nickname";
         String profileImage = "profile-image.jpg";
         Member member = dbHelper.insertMember(
-                Member.createSocialUser(UUID.randomUUID().toString(), socialId, nickname, profileImage,
+                Member.createSocialUser(UUID.randomUUID(), socialId, nickname, profileImage,
                         OAuthProvider.KAKAO));
 
         String token = generateToken(member);
@@ -60,6 +60,6 @@ class MemberIntegrationTest extends IntegrationTest {
     }
 
     private String generateToken(Member member) {
-        return jwtTokenProvider.createAccessToken(member.getId());
+        return jwtTokenProvider.createAccessToken(member.getUuid());
     }
 }

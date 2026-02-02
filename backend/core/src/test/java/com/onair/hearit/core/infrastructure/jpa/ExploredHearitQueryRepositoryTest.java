@@ -57,7 +57,7 @@ class ExploredHearitQueryRepositoryTest {
         });
     }
 
-    private List<ExploreScore> insertTestExploreScoreByMemberIdAndCount(String userUuid, int count) {
+    private List<ExploreScore> insertTestExploreScoreByMemberIdAndCount(java.util.UUID userUuid, int count) {
         List<ExploreScore> exploreScores = new ArrayList<>();
 
         Category category = dbHelper.insertCategory(new Category("Test", "#000000"));

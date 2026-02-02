@@ -17,13 +17,39 @@ public record HearitDetailResponse(
         LocalDateTime createdAt,
         Boolean isBookmarked,
         Long bookmarkId,
+        long viewCount,
         CategoryResponse category,
-        List<KeywordResponse> keywords
+        List<KeywordResponse> keywords,
+        LikeResponse like
 ) {
-    public static HearitDetailResponse of(Hearit hearit,
-                                          List<Keyword> keywords,
-                                          Long lastPlayTime,
-                                          Long bookmarkId) {
+    public static HearitDetailResponse ofGuest(Hearit hearit,
+                                               List<Keyword> keywords,
+                                               Long likeCount) {
+        List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
+        List<SourceResponse> sources = getSources(hearit.getSources());
+
+        return new HearitDetailResponse(
+                hearit.getId(),
+                hearit.getTitle(),
+                hearit.getSummary(),
+                sources,
+                hearit.getPlayTime(),
+                null,
+                hearit.getCreatedAt(),
+                false,
+                null,
+                hearit.getViewCount(),
+                CategoryResponse.of(hearit.getCategory()),
+                keywordResponses,
+                new LikeResponse(likeCount, false)
+        );
+    }
+
+    public static HearitDetailResponse ofMember(Hearit hearit,
+                                                List<Keyword> keywords,
+                                                Long lastPlayTime,
+                                                Long bookmarkId,
+                                                LikeResponse like) {
         List<KeywordResponse> keywordResponses = getKeywordNames(keywords);
         List<SourceResponse> sources = getSources(hearit.getSources());
 
@@ -37,8 +63,10 @@ public record HearitDetailResponse(
                 hearit.getCreatedAt(),
                 bookmarkId != null,
                 bookmarkId,
+                hearit.getViewCount(),
                 CategoryResponse.of(hearit.getCategory()),
-                keywordResponses
+                keywordResponses,
+                like
         );
     }
 
@@ -85,5 +113,11 @@ public record HearitDetailResponse(
                     source.getSourceUrl()
             );
         }
+    }
+
+    public record LikeResponse(
+            long count,
+            boolean isLiked
+    ) {
     }
 }

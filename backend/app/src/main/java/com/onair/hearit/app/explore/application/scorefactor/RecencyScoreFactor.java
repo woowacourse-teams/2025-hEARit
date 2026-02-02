@@ -6,15 +6,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RecencyScoreFactor implements ScoreFactor {
 
-    private static final double MAX_RECENCY_SCORE = 20.0;
-    private static final double MIN_RECENCY_SCORE = 0.0;
-    private static final double POINT_LOSS_PER_DAY = 0.5;
+    private static final double RECENCY_EXPIRE_DAYS = 60.0;
 
     @Override
     public boolean isSupported(UserType userType) {
@@ -22,7 +21,7 @@ public class RecencyScoreFactor implements ScoreFactor {
     }
 
     @Override
-    public Map<Long, Double> calculate(String ignored, List<Hearit> hearits) {
+    public Map<Long, Double> calculate(UUID ignored, List<Hearit> hearits) {
         LocalDateTime now = LocalDateTime.now();
         return hearits.stream()
                 .collect(Collectors.toMap(
@@ -34,7 +33,6 @@ public class RecencyScoreFactor implements ScoreFactor {
     private double calculateRecencyScore(Hearit hearit, LocalDateTime now) {
         Duration duration = Duration.between(hearit.getCreatedAt(), now);
         long daysPassed = duration.toDays();
-        double score = MAX_RECENCY_SCORE - (daysPassed * POINT_LOSS_PER_DAY);
-        return Math.max(MIN_RECENCY_SCORE, score);
+        return Math.clamp(1.0 - (daysPassed / RECENCY_EXPIRE_DAYS), 0, 1.0);
     }
 }
