@@ -1,6 +1,7 @@
 package com.onair.hearit.app.fixture;
 
 import com.onair.hearit.common.TestClock;
+import com.onair.hearit.core.domain.Advertisement;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.ExploreScore;
@@ -100,5 +101,11 @@ public class DbHelper {
         em.persist(reaction);
         em.flush();
         return reaction;
+    }
+
+    public Advertisement insertAdvertisement(Advertisement advertisement) {
+        em.persist(advertisement);
+        em.flush();
+        return advertisement;
     }
 }

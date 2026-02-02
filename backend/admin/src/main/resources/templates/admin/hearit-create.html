@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<link rel="stylesheet" th:href="@{/css/hearit-create.css}">
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -64,15 +65,22 @@
                 </div>
             </div>
             <div class="mb-3">
-                <label class="form-label d-block">키워드</label>
-                <input type="text" class="form-control mb-2" id="keyword-search" placeholder="키워드 검색...">
-                <div id="keyword-checkboxes" class="border rounded p-3"
-                     style="max-height: 200px; overflow-y: auto;"></div>
-                <div class="d-flex justify-content-between align-items-center mt-2">
-                    <small class="text-muted">
-                        선택된 키워드: <span id="selected-keyword-count">0</span>개
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                    <label class="form-label mb-0 fw-bold">키워드 선택</label>
+                    <small class="text-primary fw-bold">
+                        선택됨: <span id="selected-keyword-count">0</span>개
                     </small>
-                    <div id="keyword-pagination" class="btn-group btn-group-sm"></div>
+                </div>
+
+                <div class="input-group mb-2">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="keyword-search" placeholder="등록할 키워드를 검색해 보세요...">
+                </div>
+
+                <div id="keyword-checkboxes"></div>
+
+                <div class="d-flex justify-content-center mt-3">
+                    <div id="keyword-pagination" class="btn-group shadow-sm"></div>
                 </div>
             </div>
             <div id="button-container" class="d-flex gap-2">

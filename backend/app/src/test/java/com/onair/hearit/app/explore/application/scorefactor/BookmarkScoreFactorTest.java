@@ -1,11 +1,10 @@
-package com.onair.hearit.explore.application.scorefactor;
+package com.onair.hearit.app.explore.application.scorefactor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.onair.hearit.app.exception.custom.NotFoundException;
-import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
@@ -104,11 +103,11 @@ class BookmarkScoreFactorTest {
         Map<Long, Double> scores = bookmarkScoreFactor.calculate(member.getUuid(), targets);
 
         // then
-        // IT 히어릿 점수: (3 / 4) * 30 = 22.5
+        // IT 히어릿 점수: (3 / 4) = 0.75
         assertAll(
-                () -> assertThat(scores.get(targetItHearit.getId())).isEqualTo(22.5),
-                // Java 히어릿 점수: (1 / 4) * 30 = 7.5
-                () -> assertThat(scores.get(targetJavaHearit.getId())).isEqualTo(7.5)
+                () -> assertThat(scores).containsEntry(targetItHearit.getId(), 0.75),
+                // Java 히어릿 점수: (1 / 4) = 0.25
+                () -> assertThat(scores).containsEntry(targetJavaHearit.getId(), 0.25)
         );
     }
 
@@ -131,7 +130,7 @@ class BookmarkScoreFactorTest {
 
         // then
         // 점수: (0 / 1) * 30 = 0.0
-        assertThat(scores.get(target.getId())).isEqualTo(0.0);
+        assertThat(scores).containsEntry(target.getId(), 0.0);
     }
 
     @Test
@@ -147,7 +146,7 @@ class BookmarkScoreFactorTest {
 
         // then
         // 점수: (0 / 1) * 30 = 0.0
-        assertThat(scores.get(hearit.getId())).isEqualTo(0.0);
+        assertThat(scores).containsEntry(hearit.getId(), 0.0);
     }
 
     @Test

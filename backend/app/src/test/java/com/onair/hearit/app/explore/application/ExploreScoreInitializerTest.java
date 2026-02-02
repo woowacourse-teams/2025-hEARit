@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
-import com.onair.hearit.app.explore.application.scorefactor.DefaultRandomNumberGenerator;
+import com.onair.hearit.app.common.DefaultRandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
 import com.onair.hearit.app.fixture.DbHelper;
@@ -34,7 +34,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql("/dbclean.sql")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, ExploreScoreCommandRepository.class,
         DefaultRandomNumberGenerator.class, RandomScoreFactor.class, RecencyScoreFactor.class,
-        BookmarkScoreFactor.class, ExploreScoreCalculator.class})
+        BookmarkScoreFactor.class, ExploreScoreCalculator.class, ScoreFactorWeightConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ExploreScoreInitializerTest {
@@ -92,7 +92,7 @@ class ExploreScoreInitializerTest {
         assertAll(
                 () -> assertThat(rows).hasSize(1),
                 () -> assertThat(rows.get(0).hearitId()).isEqualTo(hearit.getId()),
-                () -> assertThat(rows.get(0).score()).isNotNull(),
+                () -> assertThat(rows.get(0).score()).isNotZero(),
                 () -> assertThat(rows.get(0).cursorId()).isNotNull()
         );
     }
