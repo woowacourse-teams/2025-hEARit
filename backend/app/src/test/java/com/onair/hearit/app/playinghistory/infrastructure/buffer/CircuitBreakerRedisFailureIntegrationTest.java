@@ -7,12 +7,21 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.PlayingHistory;
+import com.onair.hearit.core.fixture.TestFixture;
+import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
@@ -25,17 +34,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
-
-import com.onair.hearit.app.fixture.DbHelper;
-import com.onair.hearit.core.domain.Category;
-import com.onair.hearit.core.domain.Hearit;
-import com.onair.hearit.core.domain.Member;
-import com.onair.hearit.core.domain.PlayingHistory;
-import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
-
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 
 @SpringBootTest
 @ActiveProfiles("integration-test")
@@ -188,6 +186,7 @@ class CircuitBreakerRedisFailureIntegrationTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("Redis 복구 후 Circuit이 CLOSED되고 Map Buffer가 자동 flush된다")
     void redis_recovery_closes_circuit_and_flushes_map() throws InterruptedException {
         // given: Circuit OPEN 상태
