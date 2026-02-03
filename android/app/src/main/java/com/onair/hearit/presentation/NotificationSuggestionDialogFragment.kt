@@ -42,6 +42,9 @@ import com.onair.hearit.presentation.theme.HearitPurple1
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 
 class NotificationSuggestionDialogFragment : DialogFragment() {
+    var onConfirm: (() -> Unit)? = null
+    var onDismiss: (() -> Unit)? = null
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = Dialog(requireContext())
 
@@ -52,8 +55,14 @@ class NotificationSuggestionDialogFragment : DialogFragment() {
                 )
                 setContent {
                     NotificationSuggestionDialog(
-                        onConfirm = { dismiss() },
-                        onDismiss = { dismiss() },
+                        onConfirm = {
+                            onConfirm?.invoke()
+                            dismiss()
+                        },
+                        onDismiss = {
+                            onDismiss?.invoke()
+                            dismiss()
+                        },
                     )
                 }
             }
