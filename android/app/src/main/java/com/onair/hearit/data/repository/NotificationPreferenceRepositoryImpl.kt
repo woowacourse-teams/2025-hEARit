@@ -50,4 +50,22 @@ class NotificationPreferenceRepositoryImpl @Inject constructor(
             Timber.d("푸시 알림 설정 저장 실패: requestedIsEnabled=$isEnabled, cachedIsCommutePushEnabled=$cached")
             Timber.e(throwable, "❌ 푸시 알림 설정 저장에 실패했습니다.")
         }
+
+    override suspend fun hasShownNotificationSuggestion(): Result<Boolean> =
+        runCatching {
+            notificationLocalDataSource
+                .hasShownNotificationSuggestion()
+                .getOrThrow()
+        }.onFailure { throwable ->
+            Timber.w(throwable, "❌ 알림 제안 노출 여부 조회 실패")
+        }
+
+    override suspend fun setNotificationSuggestionShown(): Result<Unit> =
+        runCatching {
+            notificationLocalDataSource
+                .setNotificationSuggestionShown()
+                .getOrThrow()
+        }.onFailure { throwable ->
+            Timber.e(throwable, "❌ 알림 제안 노출 여부 저장 실패")
+        }
 }

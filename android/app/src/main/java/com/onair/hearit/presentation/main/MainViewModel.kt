@@ -49,8 +49,8 @@ class MainViewModel @Inject constructor(
     private val _navigateToDetail = SingleLiveData<Long>()
     val navigateToDetail: LiveData<Long> = _navigateToDetail
 
-    private val _shouldShowNotificationSuggestion = MutableLiveData<Boolean>()
-    val shouldShowNotificationSuggestion: LiveData<Boolean> = _shouldShowNotificationSuggestion
+    private val _showNotificationSuggestion = SingleLiveData<Unit>()
+    val showNotificationSuggestion: LiveData<Unit> = _showNotificationSuggestion
 
     val hearitUpdated = MutableLiveData<Unit>()
 
@@ -110,18 +110,18 @@ class MainViewModel @Inject constructor(
         if (isSystemNotificationEnabled) return
 
         viewModelScope.launch {
-            val isUserAgreed =
+            val hasShown =
                 notificationPreferenceRepository
-                    .getCommutePushEnabled()
-                    .getOrNull()
+                    .hasShownNotificationSuggestion()
+                    .getOrDefault(false)
 
-            if (isUserAgreed != true) _shouldShowNotificationSuggestion.value = true
+            if (!hasShown) _showNotificationSuggestion.call()
         }
     }
 
     fun onNotificationSuggestionShown() {
         viewModelScope.launch {
-            notificationPreferenceRepository.saveCommutePushEnabled(false)
+            notificationPreferenceRepository.setNotificationSuggestionShown()
         }
     }
 

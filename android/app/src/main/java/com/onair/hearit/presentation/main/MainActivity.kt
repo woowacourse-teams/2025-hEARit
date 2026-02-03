@@ -255,8 +255,8 @@ class MainActivity :
             navigateToDetail(hearitId)
         }
 
-        mainViewModel.shouldShowNotificationSuggestion.observe(this) { shouldShow ->
-            if (shouldShow == true) showNotificationSuggestionDialog()
+        mainViewModel.showNotificationSuggestion.observe(this) {
+            showNotificationSuggestionDialog()
         }
     }
 
