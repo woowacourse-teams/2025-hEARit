@@ -68,4 +68,10 @@ class HearitRemoteDataSourceImpl @Inject constructor(
             apiCall = { hearitService.getCategoryHearits() },
             errorHandler = errorResponseHandler,
         )
+
+    override suspend fun postHearitView(hearitId: Long): NetworkResult<Unit> =
+        handleApiCall(
+            apiCall = { hearitService.postHearitView(hearitId) },
+            errorHandler = errorResponseHandler,
+        )
 }

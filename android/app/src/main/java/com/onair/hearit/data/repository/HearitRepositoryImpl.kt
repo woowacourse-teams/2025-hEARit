@@ -60,4 +60,7 @@ class HearitRepositoryImpl @Inject constructor(
         hearitRemoteDataSource
             .getHearits(null, page, size)
             .toDomainResult { it.toRecentUploadHearit() }
+
+    override suspend fun postHearitView(hearitId: Long): Result<Unit> =
+        hearitRemoteDataSource.postHearitView(hearitId = hearitId).toDomainResult()
 }

@@ -35,4 +35,6 @@ interface HearitRepository {
         page: Int? = 0,
         size: Int? = 20,
     ): Result<PageResult<RecentUploadHearit>>
+
+    suspend fun postHearitView(hearitId: Long): Result<Unit>
 }
