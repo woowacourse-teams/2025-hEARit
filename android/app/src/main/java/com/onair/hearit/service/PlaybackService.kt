@@ -48,11 +48,21 @@ class PlaybackService : MediaSessionService() {
     @Inject
     lateinit var sessionCallback: PlaybackSessionCallback
 
+    @Inject
+    lateinit var durationTracker: PlaybackDurationTracker
+
     private lateinit var playbackPositionListener: PlaybackPositionListener
 
     private lateinit var mediaSession: MediaSession
 
     private var notificationController: PlayerNotificationController? = null
+
+    private val errorListener =
+        object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException) {
+                player.pause()
+            }
+        }
 
     override fun onCreate() {
         super.onCreate()
@@ -65,9 +75,10 @@ class PlaybackService : MediaSessionService() {
         playbackPositionListener.attach()
         sessionCallback.setPlaybackPositionListener(playbackPositionListener)
 
+        durationTracker.attach(player)
+
         initializeMediaSession()
 
-        // 2) 알림 + 포그라운드 제어는 컨트롤러에 위임
         notificationController =
             PlayerNotificationController(
                 service = this,
@@ -76,13 +87,7 @@ class PlaybackService : MediaSessionService() {
                 notificationId = NOTIFICATION_ID,
             ).also { it.attach(player) }
 
-        player.addListener(
-            object : Player.Listener {
-                override fun onPlayerError(error: PlaybackException) {
-                    player.pause()
-                }
-            },
-        )
+        player.addListener(errorListener)
     }
 
     override fun onStartCommand(
@@ -140,11 +145,13 @@ class PlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        player.removeListener(errorListener)
+        player.removeListener(stateSaver.listener)
         notificationController?.detach()
+        playbackPositionListener.detach()
+        durationTracker.detach()
         stateSaver.release()
         mediaSession.release()
-        player.removeListener(stateSaver.listener)
-        playbackPositionListener.detach()
         player.release()
     }
 
