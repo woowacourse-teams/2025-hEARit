@@ -81,6 +81,9 @@ class SearchDetailViewModel @Inject constructor(
     }
 
     fun search(term: String) {
+        val normalized = term.trim()
+        if (normalized.isEmpty()) return
+
         val input = SearchInput.Keyword(term)
         val currentState = _uiState.value
         // 동일 검색어이고 결과가 있거나 로딩 중이면 스킵

@@ -27,7 +27,17 @@ class CategoryViewModel @Inject constructor(
 ) : ViewModel() {
     private val categoryArgs: SearchRoute.Category = savedStateHandle.toRoute()
 
-    private val _categoryUiState = MutableStateFlow(CategoryUiState())
+    private val _categoryUiState =
+        MutableStateFlow(
+            CategoryUiState(
+                category =
+                    Category(
+                        id = categoryArgs.id,
+                        name = categoryArgs.name,
+                        colorCode = categoryArgs.colorCode,
+                    ),
+            ),
+        )
     val categoryUiState: StateFlow<CategoryUiState> = _categoryUiState.asStateFlow()
 
     private val _snackbarMessage =
@@ -37,15 +47,6 @@ class CategoryViewModel @Inject constructor(
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
     init {
-        _categoryUiState.value =
-            CategoryUiState(
-                category =
-                    Category(
-                        categoryArgs.id,
-                        categoryArgs.name,
-                        categoryArgs.colorCode,
-                    ),
-            )
         fetchCategoryHearits()
     }
 
