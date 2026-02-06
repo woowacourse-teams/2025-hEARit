@@ -10,7 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.presentation.search.category.CategoryRoute
-import com.onair.hearit.presentation.search.detail.SearchDetailScreen
+import com.onair.hearit.presentation.search.detail.SearchDetailRoute
 import com.onair.hearit.presentation.search.main.SearchMainRoute
 
 @Composable
@@ -61,10 +61,9 @@ fun SearchNavHost(
         }
 
         composable<SearchRoute.SearchDetail> {
-            SearchDetailScreen(
-                onBackClick = {
-                    navController.navigateUp()
-                },
+            SearchDetailRoute(
+                onBackClick = { navController.navigateUp() },
+                onHearitClick = onHearitClick,
             )
         }
 

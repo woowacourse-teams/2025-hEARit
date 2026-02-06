@@ -4,15 +4,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.onair.hearit.domain.model.Keyword
-import com.onair.hearit.presentation.detail.PlayerDetailClickListener
 
-class PlayerDetailKeywordAdapter(
-    private val clickListener: PlayerDetailClickListener,
-) : ListAdapter<Keyword, PlayerDetailKeywordViewHolder>(DiffCallback) {
+class PlayerDetailKeywordAdapter : ListAdapter<Keyword, PlayerDetailKeywordViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int,
-    ): PlayerDetailKeywordViewHolder = PlayerDetailKeywordViewHolder.create(parent, clickListener)
+    ): PlayerDetailKeywordViewHolder = PlayerDetailKeywordViewHolder.create(parent)
 
     override fun onBindViewHolder(
         holder: PlayerDetailKeywordViewHolder,

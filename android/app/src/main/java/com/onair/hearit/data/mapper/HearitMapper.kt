@@ -24,7 +24,6 @@ import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendationCategories
-import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.Source
 import com.onair.hearit.domain.model.UserInfo
@@ -42,11 +41,11 @@ private fun SearchHearitsResponse.Content.toSearchedHearit(): SearchedHearit =
         title = this.title,
         playTime = this.playTime,
         lastPlayTime = this.lastPlayTime,
-        keywords = this.keywords.map { it.toDomain() },
+        keywords = this.keywords.map { it.toDomain() }.toImmutableList(),
     )
 
-private fun HearitsResponse.Content.toSearchedCategoryHearit(): SearchedCategoryHearit =
-    SearchedCategoryHearit(
+private fun HearitsResponse.Content.toSearchedHearit(): SearchedHearit =
+    SearchedHearit(
         id = this.id,
         title = this.title,
         playTime = this.playTime,
@@ -154,9 +153,9 @@ fun SearchHearitsResponse.toSearchedHearit(): PageResult<SearchedHearit> =
             ),
     )
 
-fun HearitsResponse.toSearchedCategoryHearit(): PageResult<SearchedCategoryHearit> =
+fun HearitsResponse.toSearchedHearit(): PageResult<SearchedHearit> =
     PageResult(
-        items = content.map { it.toSearchedCategoryHearit() },
+        items = content.map { it.toSearchedHearit() },
         paging =
             Paging(
                 page = page,

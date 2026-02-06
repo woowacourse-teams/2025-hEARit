@@ -1,4 +1,4 @@
-package com.onair.hearit.presentation.search.category.component
+package com.onair.hearit.presentation.search.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,8 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
-import com.onair.hearit.domain.model.SearchedCategoryHearit
-import com.onair.hearit.presentation.theme.DarkGray
+import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.presentation.theme.Gray1
 import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.Gray3
@@ -41,7 +39,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun SearchedHearitItem(
-    item: SearchedCategoryHearit,
+    item: SearchedHearit,
     color: Color,
     onClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -136,44 +134,10 @@ private fun HearitMetaRow(
 }
 
 @Composable
-private fun HearitProgressBar(
-    lastPlayTimeMillis: Long?,
-    totalPlayTimeSec: Int,
-    progressColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    val progress =
-        remember(lastPlayTimeMillis, totalPlayTimeSec) {
-            calculateProgress(lastPlayTimeMillis, totalPlayTimeSec)
-        }
-
-    CustomLinearProgressBar(
-        progress = progress,
-        backgroundColor = DarkGray,
-        progressColor = progressColor,
-        cornerRadius = 48.dp,
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .padding(start = 20.dp, end = 8.dp),
-    )
-}
-
-private fun calculateProgress(
-    lastPlayTimeMillis: Long?,
-    totalPlayTimeSec: Int,
-): Float {
-    if (totalPlayTimeSec <= 0) return 0f
-    val lastPlayTimeSec = (lastPlayTimeMillis ?: 0L) / 1000f
-    return (lastPlayTimeSec / totalPlayTimeSec).coerceIn(0f, 1f)
-}
-
-@Composable
 @Preview(showBackground = true)
 private fun SearchedHearitItemPreview() {
     val dummy =
-        SearchedCategoryHearit(
+        SearchedHearit(
             0,
             "드디어 세 번째 레슨, 일희일비 않기. 좀 더 강해져야 돼. 웃어 넘길 수 있게...",
             playTime = 350,

@@ -8,9 +8,7 @@ import androidx.annotation.StringRes
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import com.google.common.util.concurrent.ListenableFuture
-import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
@@ -19,7 +17,6 @@ import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
 import com.onair.hearit.presentation.main.MainActivity
-import com.onair.hearit.presentation.search.recent.SearchRecentFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -92,19 +89,19 @@ fun DetailResult.navigate(
         }
 
         is DetailResult.Keyword -> {
-            mainActivity.selectTab(R.id.nav_search)
-            val fragmentManager = mainActivity.supportFragmentManager
-            val backStackTag = SearchRecentFragment::class.java.simpleName
-
-            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            fragmentManager
-                .beginTransaction()
-                .replace(
-                    R.id.fragment_container_view,
-                    SearchRecentFragment.newInstance(term),
-                    backStackTag,
-                ).addToBackStack(backStackTag)
-                .commit()
+//            mainActivity.selectTab(R.id.nav_search)
+//            val fragmentManager = mainActivity.supportFragmentManager
+//            val backStackTag = SearchRecentFragment::class.java.simpleName
+//
+//            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+//            fragmentManager
+//                .beginTransaction()
+//                .replace(
+//                    R.id.fragment_container_view,
+//                    SearchRecentFragment.newInstance(term),
+//                    backStackTag,
+//                ).addToBackStack(backStackTag)
+//                .commit()
 
             analyticsLogger.logEvent(
                 AnalyticsEventNames.SEARCH_KEYWORD_ENTERED,

@@ -8,10 +8,6 @@
         <variable
             name="keyword"
             type="com.onair.hearit.domain.model.Keyword" />
-
-        <variable
-            name="clickListener"
-            type="com.onair.hearit.presentation.detail.PlayerDetailClickListener" />
     </data>
 
     <TextView
@@ -23,7 +19,6 @@
         android:layout_marginEnd="12dp"
         android:background="@drawable/bg_dark_gray_radius_24dp"
         android:gravity="center"
-        android:onClick="@{() -> clickListener.onClickKeyword(keyword.name)}"
         android:paddingHorizontal="16dp"
         android:paddingVertical="6dp"
         android:text="@{@string/all_keyword_name(keyword.name)}"

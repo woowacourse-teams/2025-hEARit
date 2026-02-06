@@ -1,6 +1,7 @@
 package com.onair.hearit.presentation.search.detail.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,13 +49,18 @@ fun SearchDetailTopBar(
     onSearchTextChange: (String) -> Unit,
     onBackClick: () -> Unit,
     onSearch: (String) -> Unit,
+    focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
+    minSearchQueryLength: Int = 2,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+    fun performSearch() {
+        if (searchText.length >= minSearchQueryLength) {
+            onSearch(searchText)
+            keyboardController?.hide()
+            focusRequester.freeFocus()
+        }
     }
 
     Column(
@@ -109,7 +114,8 @@ fun SearchDetailTopBar(
                     modifier =
                         Modifier
                             .weight(1f)
-                            .focusRequester(focusRequester),
+                            .focusRequester(focusRequester)
+                            .clickable { focusRequester.requestFocus() },
                     textStyle =
                         HearitTypoGraphy.bodyLarge.copy(
                             color = Gray4,
@@ -121,20 +127,15 @@ fun SearchDetailTopBar(
                         ),
                     keyboardActions =
                         KeyboardActions(
-                            onSearch = {
-                                if (searchText.length >= 2) {
-                                    onSearch(searchText)
-                                    keyboardController?.hide()
-                                }
-                            },
+                            onSearch = { performSearch() },
                         ),
                     decorationBox = { innerTextField ->
                         Box {
                             if (searchText.isEmpty()) {
                                 Text(
                                     text = stringResource(R.string.search_topbar_hint),
-                                    style = HearitTypoGraphy.bodyLarge,
                                     color = Gray2,
+                                    style = HearitTypoGraphy.bodyMedium,
                                 )
                             }
                             innerTextField()
@@ -146,6 +147,7 @@ fun SearchDetailTopBar(
                     IconButton(
                         onClick = {
                             onSearchTextChange("")
+                            focusRequester.requestFocus()
                         },
                         modifier = Modifier.size(32.dp),
                     ) {
@@ -158,12 +160,17 @@ fun SearchDetailTopBar(
                     }
                 }
 
-                Icon(
-                    painter = painterResource(R.drawable.ic_search),
-                    contentDescription = "검색",
-                    modifier = Modifier.size(24.dp),
-                    tint = Gray4,
-                )
+                IconButton(
+                    onClick = ::performSearch,
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = "검색",
+                        modifier = Modifier.size(24.dp),
+                        tint = Gray4,
+                    )
+                }
             }
 
             HorizontalDivider(
@@ -183,44 +190,31 @@ fun SearchDetailTopBar(
 private fun SearchDetailTopBarEmptyPreview() {
     MaterialTheme {
         var searchText by remember { mutableStateOf("") }
+        val focusRequester = remember { FocusRequester() }
 
         SearchDetailTopBar(
             searchText = searchText,
             onSearchTextChange = { searchText = it },
             onBackClick = {},
             onSearch = {},
+            focusRequester = focusRequester,
         )
     }
 }
 
-// Preview - 텍스트 있을 때
 @Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 private fun SearchDetailTopBarWithTextPreview() {
     MaterialTheme {
         var searchText by remember { mutableStateOf("안드로이드") }
+        val focusRequester = remember { FocusRequester() }
 
         SearchDetailTopBar(
             searchText = searchText,
             onSearchTextChange = { searchText = it },
             onBackClick = {},
             onSearch = {},
-        )
-    }
-}
-
-// Preview - 긴 텍스트
-@Preview(showBackground = true, backgroundColor = 0xFF000000)
-@Composable
-private fun SearchDetailTopBarLongTextPreview() {
-    MaterialTheme {
-        var searchText by remember { mutableStateOf("안드로이드 클린 아키텍처 MVVM 패턴") }
-
-        SearchDetailTopBar(
-            searchText = searchText,
-            onSearchTextChange = { searchText = it },
-            onBackClick = {},
-            onSearch = {},
+            focusRequester = focusRequester,
         )
     }
 }

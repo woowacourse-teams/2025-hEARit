@@ -31,8 +31,8 @@
     <string name="home_toast_recommendation_category_load_fail">카테고리별 히어릿 조회에 실패했습니다</string>
     <string name="home_toast_refresh_fail">새로고침 중 오류가 발생했습니다</string>
 
-    <!--CategoryFragment-->
-    <string name="category_text">전체 카테고리 목록</string>
+    <!--CategoryScreen-->
+    <string name="category_back_content_description">뒤로가기</string>
     <string name="category_toast_searched_hearits_load_fail">카테고리 히어릿 목록 조회에 실패했습니다</string>
 
     <!-- CreateHearitActivity-->
@@ -107,7 +107,7 @@
 
     <!-- SearchFragment-->
     <string name="search_category_text">카테고리</string>
-    <string name="search_recent_text">최근 검색</string>
+    <string name="search_recent_text">최근 검색어</string>
     <string name="search_recent_delete"><u>전체삭제</u></string>
     <string name="search_topbar_hint">검색어를 입력해주세요</string>
     <string name="search_toast_keywords_load_fail">오늘의 키워드 조회에 실패했습니다</string>
