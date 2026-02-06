@@ -10,6 +10,7 @@ import com.onair.hearit.domain.usecase.search.SaveRecentKeywordUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -35,6 +36,8 @@ class SearchDetailViewModel @Inject constructor(
             extraBufferCapacity = 1,
         )
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
+
+    private var fetchJob: Job? = null
 
     fun loadRecentKeywords() {
         viewModelScope.launch {
@@ -109,20 +112,21 @@ class SearchDetailViewModel @Inject constructor(
 
     fun loadNextPage() {
         val currentState = _uiState.value
-        if (currentState.isLoading || currentState.isLastPage) return
+        val hasTerm = currentState.searchInput is SearchInput.Keyword
+        if (!hasTerm || currentState.isLoading || currentState.isLastPage) return
         fetchSearchResults()
     }
 
     private fun fetchSearchResults() {
-        val currentState = _uiState.value
-        val term = (currentState.searchInput as? SearchInput.Keyword)?.term ?: return
+        if (fetchJob?.isActive == true) return
+        val term = (_uiState.value.searchInput as? SearchInput.Keyword)?.term ?: return
 
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+        fetchJob =
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true) }
 
-            try {
                 hearitRepository
-                    .getKeywordHearits(term, currentState.currentPage)
+                    .getKeywordHearits(term, _uiState.value.currentPage)
                     .onSuccess { result ->
                         _uiState.update { state ->
                             state.copy(
@@ -137,11 +141,6 @@ class SearchDetailViewModel @Inject constructor(
                         _uiState.update { it.copy(isLoading = false) }
                         _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
                     }
-            } catch (e: Exception) {
-                Timber.e(e)
-                _uiState.update { it.copy(isLoading = false) }
-                _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
             }
-        }
     }
 }

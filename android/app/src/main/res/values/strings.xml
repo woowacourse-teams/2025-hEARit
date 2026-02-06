@@ -31,8 +31,8 @@
     <string name="home_toast_recommendation_category_load_fail">카테고리별 히어릿 조회에 실패했습니다</string>
     <string name="home_toast_refresh_fail">새로고침 중 오류가 발생했습니다</string>
 
-    <!--CategoryFragment-->
-    <string name="category_text">전체 카테고리 목록</string>
+    <!--CategoryScreen-->
+    <string name="category_back_content_description">뒤로가기</string>
     <string name="category_toast_searched_hearits_load_fail">카테고리 히어릿 목록 조회에 실패했습니다</string>
 
     <!-- CreateHearitActivity-->
