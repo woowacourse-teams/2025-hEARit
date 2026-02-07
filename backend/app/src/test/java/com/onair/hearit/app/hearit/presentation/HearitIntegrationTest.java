@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -216,6 +217,69 @@ class HearitIntegrationTest extends IntegrationTest {
         }
 
         @Test
+        @DisplayName("TTL 내 동일 사용자의 중복 조회 요청은 viewCount가 증가하지 않는다.")
+        void increaseViewCount_duplicatedKey_beforeTTL() {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            String token = generateToken(member);
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+            Long hearitId = hearit.getId();
+
+            // when
+            RestAssured.given(spec)
+                    .when()
+                    .header("Authorization", "Bearer " + token)
+                    .post("/api/v1/hearits/{hearitId}/view", hearitId)
+                    .then()
+                    .statusCode(HttpStatus.NO_CONTENT.value());
+
+            RestAssured.given(spec)
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .post("/api/v1/hearits/{hearitId}/view", hearitId)
+                    .then()
+                    .statusCode(HttpStatus.NO_CONTENT.value());
+
+            // then
+            Hearit updatedHearit = hearitRepository.findById(hearitId).get();
+            assertThat(updatedHearit.getViewCount()).isEqualTo(1L);
+        }
+
+        @Test
+        @Disabled("CI 환경에서는 느릴 수 있어서 비활성화합니다.")
+        @DisplayName("TTL 만료 이후에는 동일 사용자 요청 시 viewCount가 다시 증가한다")
+        void increaseViewCount_afterTTL() throws InterruptedException {
+            // given
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            String token = generateToken(member);
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+            Long hearitId = hearit.getId();
+
+            // when
+            RestAssured.given(spec)
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .post("/api/v1/hearits/{hearitId}/view", hearitId)
+                    .then()
+                    .statusCode(HttpStatus.NO_CONTENT.value());
+
+            Thread.sleep(11_000); // TTL 대기 (ViewCountRateLimiter의 TTL_SECONDS보다 크게)
+
+            RestAssured.given(spec)
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .post("/api/v1/hearits/{hearitId}/view", hearitId)
+                    .then()
+                    .statusCode(HttpStatus.NO_CONTENT.value());
+
+            // then
+            Hearit updatedHearit = hearitRepository.findById(hearitId).get();
+            assertThat(updatedHearit.getViewCount()).isEqualTo(2L);
+        }
+
+        @Test
         @DisplayName("히어릿 조회수 증가 시 존재하지 않는 ID면 404를 반환한다.")
         void increaseViewCount_notFound() {
             // given
@@ -231,8 +295,8 @@ class HearitIntegrationTest extends IntegrationTest {
 
         @Test
         @Disabled("멀티 스레드 환경에서의 DB 동시성 검증 테스트입니다. CI 환경에서는 스레드 스케줄링 및 DB 상태에 따라 결과가 예측 불가능해 비활성화합니다.")
-        @DisplayName("동시에 여러 요청이 와도 조회수는 요청 수 만큼 정확히 증가한다.")
-        void increaseViewCount_concurrent() throws InterruptedException {
+        @DisplayName("동일 사용자의 동시 요청은 1번만 조회수가 증가한다.")
+        void increaseViewCount_concurrent_onlyOne() throws InterruptedException {
             // given
             Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
@@ -262,8 +326,53 @@ class HearitIntegrationTest extends IntegrationTest {
 
             // then
             Hearit updatedHearit = hearitRepository.findById(hearitId).get();
-            assertThat(updatedHearit.getViewCount()).isEqualTo(threadCount);
+            assertThat(updatedHearit.getViewCount()).isEqualTo(1L);
         }
+    }
+
+    @Test
+    @Disabled("멀티 스레드 환경에서의 DB 동시성 검증 테스트입니다. CI 환경에서는 스레드 스케줄링 및 DB 상태에 따라 결과가 예측 불가능해 비활성화합니다.")
+    @DisplayName("서로 다른 사용자의 동시 요청은 요청 수 만큼 조회수가 증가한다.")
+    void increaseViewCount_concurrent_differentUsers() throws InterruptedException {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Long hearitId = hearit.getId();
+
+        int threadCount = 50;
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        List<String> tokens = IntStream.range(0, threadCount)
+                .mapToObj(i -> {
+                    Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+                    return generateToken(member);
+                })
+                .toList();
+
+        // when
+        for (int i = 0; i < threadCount; i++) {
+            final String token = tokens.get(i);
+            executorService.execute(() -> {
+                try {
+                    RestAssured.given(HearitIntegrationTest.this.spec)
+                            .header("Authorization", "Bearer " + token)
+                            .when()
+                            .post("/api/v1/hearits/{hearitId}/view", hearitId)
+                            .then()
+                            .statusCode(HttpStatus.NO_CONTENT.value());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        // then
+        Hearit updatedHearit = hearitRepository.findById(hearitId).get();
+        assertThat(updatedHearit.getViewCount()).isEqualTo(threadCount);
     }
 
     private String generateToken(Member member) {
