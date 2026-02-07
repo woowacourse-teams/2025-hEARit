@@ -23,66 +23,57 @@ class PlaybackDurationTracker @Inject constructor(
 ) : Player.Listener {
     private var player: Player? = null
     private var trackingJob: Job? = null
-    private var viewHistoryJob: Job? = null
-    private var currentMediaId: String? = null
 
-    private var accumulatedMs = 0L
-    private var isHistorySent = false
-    private var lastCheckTime = 0L
+    private data class TrackingState(
+        val mediaId: String?,
+        var accumulatedMs: Long = 0L,
+        var isHistorySent: Boolean = false,
+    )
 
-    private val targetMs = 15_000L
-    private val checkInterval = 1_000L
+    private var currentState: TrackingState? = null
 
     fun attach(player: Player) {
         this.player = player
-        this.currentMediaId = player.currentMediaItem?.mediaId
+        this.currentState = TrackingState(player.currentMediaItem?.mediaId)
         player.addListener(this)
         updateTrackingState()
     }
 
     fun detach() {
         stopTracking()
-        viewHistoryJob?.cancel()
-        viewHistoryJob = null
         player?.removeListener(this)
         player = null
-        currentMediaId = null
-        accumulatedMs = 0L
-        isHistorySent = false
+        currentState = null
     }
 
     private fun updateTrackingState() {
-        val player = this.player ?: return
-        val isPlaying = player.isPlaying
-        val hasValidMedia = player.currentMediaItem != null
+        val state = currentState ?: return
+        val player = player ?: return
 
-        if (isPlaying && !isHistorySent && hasValidMedia) {
-            startTracking()
-        } else {
-            stopTracking()
+        with(player) {
+            if (isPlaying && !state.isHistorySent && currentMediaItem != null) {
+                startTracking()
+            } else {
+                stopTracking()
+            }
         }
     }
 
     private fun startTracking() {
         if (trackingJob?.isActive == true) return
 
-        lastCheckTime = System.currentTimeMillis()
-
         trackingJob =
             scope.launch {
                 while (isActive) {
-                    delay(checkInterval)
+                    delay(CHECK_INTERVAL_MS)
 
-                    val now = System.currentTimeMillis()
-                    val actualElapsed = now - lastCheckTime
-                    lastCheckTime = now
+                    currentState?.let { state ->
+                        state.accumulatedMs += CHECK_INTERVAL_MS
 
-                    accumulatedMs += actualElapsed
-
-                    if (accumulatedMs >= targetMs) {
-                        sendViewHistory()
-                        stopTracking()
-                        break
+                        if (state.accumulatedMs >= TARGET_DURATION_MS) {
+                            sendViewHistory(state)
+                            stopTracking()
+                        }
                     }
                 }
             }
@@ -94,26 +85,25 @@ class PlaybackDurationTracker @Inject constructor(
     }
 
     @OptIn(UnstableApi::class)
-    private fun sendViewHistory() {
+    private fun sendViewHistory(state: TrackingState) {
         val hearitId =
             player
                 ?.currentMediaItem
                 ?.requestMetadata
                 ?.extras
-                ?.getLong(EXTRA_HEARIT_ID, -1L) ?: return
+                ?.getLong(EXTRA_HEARIT_ID, -1L)
+                ?.takeIf { it != -1L } ?: return
 
-        isHistorySent = true
+        state.isHistorySent = true
 
-        viewHistoryJob?.cancel()
-        viewHistoryJob =
-            scope.launch {
-                runCatching {
-                    postHearitView(hearitId)
-                }.onFailure { e ->
-                    Timber.d("hearit 조회수 전송에 실패했습니다")
-                    isHistorySent = false
-                }
+        scope.launch {
+            runCatching {
+                postHearitView(hearitId)
+            }.onFailure { e ->
+                Timber.d("hearit 조회수 전송에 실패했습니다")
+                state.isHistorySent = false
             }
+        }
     }
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -124,12 +114,14 @@ class PlaybackDurationTracker @Inject constructor(
         mediaItem: MediaItem?,
         reason: Int,
     ) {
-        val newId = mediaItem?.mediaId
-        if (currentMediaId != newId) {
-            currentMediaId = newId
-            accumulatedMs = 0L
-            isHistorySent = false
-            updateTrackingState()
-        }
+        // 곡이 바뀌면 상태를 새 객체로 교체하여 시간과 전송 여부를 초기화
+        currentState = TrackingState(mediaItem?.mediaId)
+        stopTracking()
+        updateTrackingState()
+    }
+
+    companion object {
+        private const val TARGET_DURATION_MS = 15_000L
+        private const val CHECK_INTERVAL_MS = 1_000L
     }
 }

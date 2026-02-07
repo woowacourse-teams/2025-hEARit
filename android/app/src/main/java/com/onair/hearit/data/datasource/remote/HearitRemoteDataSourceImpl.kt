@@ -4,6 +4,7 @@ import com.onair.hearit.data.api.HearitService
 import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
+import com.onair.hearit.data.datasource.handleApiCallUnit
 import com.onair.hearit.data.dto.ExploreHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.HearitsResponse
@@ -70,7 +71,7 @@ class HearitRemoteDataSourceImpl @Inject constructor(
         )
 
     override suspend fun postHearitView(hearitId: Long): NetworkResult<Unit> =
-        handleApiCall(
+        handleApiCallUnit(
             apiCall = { hearitService.postHearitView(hearitId) },
             errorHandler = errorResponseHandler,
         )

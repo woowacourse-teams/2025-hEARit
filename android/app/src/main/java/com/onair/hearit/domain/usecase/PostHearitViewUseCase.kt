@@ -6,8 +6,5 @@ import javax.inject.Inject
 class PostHearitViewUseCase @Inject constructor(
     private val hearitRepository: HearitRepository,
 ) {
-    suspend operator fun invoke(hearitId: Long): Result<Unit> =
-        runCatching {
-            hearitRepository.postHearitView(hearitId)
-        }
+    suspend operator fun invoke(hearitId: Long): Result<Unit> = hearitRepository.postHearitView(hearitId)
 }
