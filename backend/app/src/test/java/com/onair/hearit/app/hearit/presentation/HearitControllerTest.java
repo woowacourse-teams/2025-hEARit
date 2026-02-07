@@ -225,7 +225,8 @@ class HearitControllerTest extends ControllerTest {
                                 .description("""
                                         히어릿의 조회수를 1 증가시킵니다.
 
-                                        헤더의 `userUUID`와 `hearitId`로 중복 키를 생성해 10초 내에는 한 번의 조회수만 증가됩니다."""
+                                        회원의 경우 토큰에서 `uuid`를, 비회원의 경우 헤더의 `uuid`를 참고하여
+                                        `hearitId`와 함게 중복 키를 생성해 10초 내에는 한 번의 조회수만 증가됩니다."""
                                 )
                                 .pathParameters(
                                         parameterWithName("hearitId").description("조회수를 증가시킬 히어릿 ID")
