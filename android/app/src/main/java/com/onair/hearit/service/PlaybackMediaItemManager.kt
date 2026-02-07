@@ -34,7 +34,7 @@ class PlaybackMediaItemManager @Inject constructor(
         val requestMetadata =
             MediaItem.RequestMetadata
                 .Builder()
-                .setExtras(extras) // 여기에 extras 주입
+                .setExtras(extras)
                 .build()
 
         return MediaItem
