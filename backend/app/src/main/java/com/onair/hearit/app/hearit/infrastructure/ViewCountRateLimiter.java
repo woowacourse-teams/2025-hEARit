@@ -25,9 +25,11 @@ public class ViewCountRateLimiter {
                     List.of(key),
                     String.valueOf(TTL_SECONDS)
             );
-            return result == 1L;
+            return result != null && result == 1L;
         } catch (Exception e) {
-            // Redis 장애 시 fallback 없이 조회수 즉시 증가
+            /*
+                Redis 장애 시 조회수 즉시 증가 시켜 추가적인 RDB 부하를 제거
+             */
             return true;
         }
     }

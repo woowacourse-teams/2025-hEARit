@@ -58,10 +58,9 @@ public class ViewCountRateLimiterTest {
 
     @BeforeEach
     void setUp() {
-        redisTemplate.getConnectionFactory()
-                .getConnection()
-                .serverCommands()
-                .flushAll();
+        try (var connection = redisTemplate.getConnectionFactory().getConnection()) {
+            connection.serverCommands().flushAll();
+        }
 
         rateLimiter = new ViewCountRateLimiter(
                 redisTemplate,

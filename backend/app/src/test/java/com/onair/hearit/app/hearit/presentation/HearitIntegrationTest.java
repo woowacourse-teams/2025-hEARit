@@ -328,51 +328,51 @@ class HearitIntegrationTest extends IntegrationTest {
             Hearit updatedHearit = hearitRepository.findById(hearitId).get();
             assertThat(updatedHearit.getViewCount()).isEqualTo(1L);
         }
-    }
 
-    @Test
-    @Disabled("멀티 스레드 환경에서의 DB 동시성 검증 테스트입니다. CI 환경에서는 스레드 스케줄링 및 DB 상태에 따라 결과가 예측 불가능해 비활성화합니다.")
-    @DisplayName("서로 다른 사용자의 동시 요청은 요청 수 만큼 조회수가 증가한다.")
-    void increaseViewCount_concurrent_differentUsers() throws InterruptedException {
-        // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-        Long hearitId = hearit.getId();
+        @Test
+        @Disabled("멀티 스레드 환경에서의 DB 동시성 검증 테스트입니다. CI 환경에서는 스레드 스케줄링 및 DB 상태에 따라 결과가 예측 불가능해 비활성화합니다.")
+        @DisplayName("서로 다른 사용자의 동시 요청은 요청 수 만큼 조회수가 증가한다.")
+        void increaseViewCount_concurrent_differentUsers() throws InterruptedException {
+            // given
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+            Long hearitId = hearit.getId();
 
-        int threadCount = 50;
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        CountDownLatch latch = new CountDownLatch(threadCount);
+            int threadCount = 50;
+            ExecutorService executorService = Executors.newFixedThreadPool(10);
+            CountDownLatch latch = new CountDownLatch(threadCount);
 
-        List<String> tokens = IntStream.range(0, threadCount)
-                .mapToObj(i -> {
-                    Member member = dbHelper.insertMember(TestFixture.createFixedMember());
-                    return generateToken(member);
-                })
-                .toList();
+            List<String> tokens = IntStream.range(0, threadCount)
+                    .mapToObj(i -> {
+                        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+                        return generateToken(member);
+                    })
+                    .toList();
 
-        // when
-        for (int i = 0; i < threadCount; i++) {
-            final String token = tokens.get(i);
-            executorService.execute(() -> {
-                try {
-                    RestAssured.given(HearitIntegrationTest.this.spec)
-                            .header("Authorization", "Bearer " + token)
-                            .when()
-                            .post("/api/v1/hearits/{hearitId}/view", hearitId)
-                            .then()
-                            .statusCode(HttpStatus.NO_CONTENT.value());
-                } finally {
-                    latch.countDown();
-                }
-            });
+            // when
+            for (int i = 0; i < threadCount; i++) {
+                final String token = tokens.get(i);
+                executorService.execute(() -> {
+                    try {
+                        RestAssured.given(HearitIntegrationTest.this.spec)
+                                .header("Authorization", "Bearer " + token)
+                                .when()
+                                .post("/api/v1/hearits/{hearitId}/view", hearitId)
+                                .then()
+                                .statusCode(HttpStatus.NO_CONTENT.value());
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+
+            latch.await();
+            executorService.shutdown();
+
+            // then
+            Hearit updatedHearit = hearitRepository.findById(hearitId).get();
+            assertThat(updatedHearit.getViewCount()).isEqualTo(threadCount);
         }
-
-        latch.await();
-        executorService.shutdown();
-
-        // then
-        Hearit updatedHearit = hearitRepository.findById(hearitId).get();
-        assertThat(updatedHearit.getViewCount()).isEqualTo(threadCount);
     }
 
     private String generateToken(Member member) {

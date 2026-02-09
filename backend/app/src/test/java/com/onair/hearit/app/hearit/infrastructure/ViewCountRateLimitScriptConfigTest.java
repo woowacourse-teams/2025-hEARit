@@ -59,10 +59,9 @@ public class ViewCountRateLimitScriptConfigTest {
         /*
             Redis TTL 기반 동작에 대한 테스트 독립성 확보를 위해 각 테스트마다 초기화
          */
-        redisTemplate.getConnectionFactory()
-                .getConnection()
-                .serverCommands()
-                .flushAll();
+        try (var connection = redisTemplate.getConnectionFactory().getConnection()) {
+            connection.serverCommands().flushAll();
+        }
     }
 
     @AfterAll
