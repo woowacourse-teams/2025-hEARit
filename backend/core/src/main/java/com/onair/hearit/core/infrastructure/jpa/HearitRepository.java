@@ -74,6 +74,9 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
     @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id IN :hearitIds")
     List<Hearit> findAllByIdIn(List<Long> hearitIds);
 
+    @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.id IN :hearitIds")
+    Page<Hearit> findAllByIdIn(List<Long> hearitIds, Pageable pageable);
+
     @Query("""
             SELECT h AS hearit, ph.lastPlayTime AS lastPlayTime
             FROM Hearit h
