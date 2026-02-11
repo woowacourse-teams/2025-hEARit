@@ -1,0 +1,36 @@
+{
+  "properties": {
+    "title": {
+      "type": "text",
+      "analyzer": "korean_index_analyzer",
+      "search_analyzer": "korean_search_analyzer",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "summary": {
+      "type": "text",
+      "analyzer": "korean_index_analyzer",
+      "search_analyzer": "korean_search_analyzer"
+    },
+    "keywords": {
+      "type": "keyword",
+      "fields": {
+        "text": {
+          "type": "text",
+          "analyzer": "korean_index_analyzer",
+          "search_analyzer": "korean_search_analyzer"
+        }
+      }
+    },
+    "category": {
+      "type": "keyword"
+    },
+    "created_at": {
+      "type": "date"
+    }
+  }
+}
