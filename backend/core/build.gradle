@@ -38,6 +38,9 @@ dependencies {
     api "org.flywaydb:flyway-core"
     api "org.flywaydb:flyway-mysql"
 
+    // elastic search
+    api 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
