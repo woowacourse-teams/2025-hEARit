@@ -1,4 +1,4 @@
-package com.onair.hearit.app.hearit.dto;
+package com.onair.hearit.app.search.dto;
 
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;

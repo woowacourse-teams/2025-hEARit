@@ -1,4 +1,4 @@
-package com.onair.hearit.app.hearit.presentation;
+package com.onair.hearit.app.search.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.IntegrationTest;
-import com.onair.hearit.app.hearit.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.HearitSearchResponse;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;

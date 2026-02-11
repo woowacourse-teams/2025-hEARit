@@ -1,4 +1,4 @@
-package com.onair.hearit.app.hearit.presentation;
+package com.onair.hearit.app.search.presentation;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
@@ -13,9 +13,9 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.onair.hearit.app.auth.infrastructure.jwt.TokenStatus;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.ControllerTest;
-import com.onair.hearit.app.hearit.application.HearitSearchService;
-import com.onair.hearit.app.hearit.dto.HearitSearchResponse;
-import com.onair.hearit.app.hearit.dto.HearitSearchResponse.KeywordResponse;
+import com.onair.hearit.app.search.application.HearitSearchService;
+import com.onair.hearit.app.search.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.HearitSearchResponse.KeywordResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
