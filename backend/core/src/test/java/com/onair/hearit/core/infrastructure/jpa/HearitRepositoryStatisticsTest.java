@@ -35,7 +35,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class})
-public class HearitRepositoryStatisticsTest {
+class HearitRepositoryStatisticsTest {
 
     @Autowired
     private DbHelper dbHelper;
@@ -48,8 +48,10 @@ public class HearitRepositoryStatisticsTest {
     void findClusterStatistics() {
         // given: 통계값 산출을 위한 기초 데이터 준비
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        Member member1 = dbHelper.insertMember(Member.createLocalUser(java.util.UUID.randomUUID(), "u1", "n1", "p1", "i1"));
-        Member member2 = dbHelper.insertMember(Member.createLocalUser(java.util.UUID.randomUUID(), "u2", "n2", "p2", "i2"));
+        Member member1 = dbHelper.insertMember(
+                Member.createLocalUser(java.util.UUID.randomUUID(), "u1", "n1", "p1", "i1"));
+        Member member2 = dbHelper.insertMember(
+                Member.createLocalUser(java.util.UUID.randomUUID(), "u2", "n2", "p2", "i2"));
 
         // 입력 변수 설정
         int inputViewCount = 500;
