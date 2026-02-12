@@ -40,6 +40,7 @@ dependencies {
 
     // elastic search
     api 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'org.springframework.retry:spring-retry'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
