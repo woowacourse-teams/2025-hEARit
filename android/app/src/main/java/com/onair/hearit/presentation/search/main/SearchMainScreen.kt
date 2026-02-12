@@ -70,7 +70,7 @@ fun SearchMainScreen(
                 onCategoryClick = { category ->
                     onCategoryClick(category.id, category.name, category.colorCode)
                 },
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier.padding(paddingValues).padding(bottom = 24.dp),
             )
         }
     }
