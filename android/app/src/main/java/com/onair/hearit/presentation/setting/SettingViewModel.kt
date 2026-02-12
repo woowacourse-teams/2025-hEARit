@@ -98,12 +98,13 @@ class SettingViewModel @Inject constructor(
         val previousEnabled: Boolean = _isNotificationEnabled.value
 
         _isNotificationEnabled.value = targetEnabled
-        _snackbarMessage.tryEmit(successResId)
 
         viewModelScope.launch {
             notificationPreferenceRepository
                 .saveCommutePushEnabled(targetEnabled)
-                .onFailure { throwable ->
+                .onSuccess {
+                    _snackbarMessage.tryEmit(successResId)
+                }.onFailure { throwable ->
                     Timber.e(throwable)
                     _isNotificationEnabled.value = previousEnabled
                     _snackbarMessage.tryEmit(failureResId)
