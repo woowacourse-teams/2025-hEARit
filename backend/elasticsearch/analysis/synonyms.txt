@@ -1,0 +1,33 @@
+# 기술 약어 및 국영문 혼용
+인공지능, ai, artificialintelligence
+머신러닝, ml, machinelearning
+딥러닝, deeplearning
+거대언어모델, llm, largelanguagemodel
+안드로이드, android, 안드
+백엔드, backend, 백엔
+프론트엔드, frontend, front, 프론트
+자바, java
+자바스크립트, javascript, js
+타입스크립트, typescript, ts
+데이터베이스, database, db, 디비, 데이터
+네트워크, network, 네트워킹
+가상사설망, vpc, virtualprivatecloud
+트렌드, 트랜드, trend
+
+# 특정 기술/프레임워크 별칭
+스프링, spring, springboot, 스프링부트
+제트팩컴포즈, jetpackcompose, 컴포즈, compose
+코틀린, kotlin
+리액트, react, reactjs
+엘라스틱서치, elasticsearch, es
+쿠버네티스, kubernetes, k8s
+챗지피티, 지피티, 쳇지피티, gpt, chatgpt
+하이버네이트, hibernate
+
+# 개념적 동의어
+동시성, concurrency, 멀티스레드
+트랜잭션, transaction, acid
+객체지향, oop, objectoriented
+클린코드, cleancode, 리팩토링
+가상화, vm, virtualmachine, 도커, docker
+제이피에이, jpa, orm
