@@ -1,7 +1,9 @@
 package com.onair.hearit.data.datasource.local
 
+import kotlinx.coroutines.flow.Flow
+
 interface NotificationLocalDataSource {
-    suspend fun getCommutePushEnabled(): Result<Boolean>
+    fun observeCommutePushEnabled(): Flow<Boolean>
 
     suspend fun saveCommutePushEnabled(enabled: Boolean): Result<Unit>
 

@@ -5,16 +5,17 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import com.onair.hearit.di.UserPreferencesDataStore
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class NotificationLocalDataSourceImpl @Inject constructor(
     @UserPreferencesDataStore
     private val dataStore: DataStore<Preferences>,
 ) : NotificationLocalDataSource {
-    override suspend fun getCommutePushEnabled(): Result<Boolean> =
-        runCatching {
-            val preferences = dataStore.data.first()
+    override fun observeCommutePushEnabled(): Flow<Boolean> =
+        dataStore.data.map { preferences ->
             preferences[IS_COMMUTE_PUSH_ENABLED_KEY] ?: DEFAULT_COMMUTE_PUSH_ENABLED
         }
 

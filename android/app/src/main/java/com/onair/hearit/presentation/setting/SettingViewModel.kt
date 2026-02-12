@@ -44,7 +44,7 @@ class SettingViewModel @Inject constructor(
 
     init {
         loadUserInfo()
-        loadNotificationSetting()
+        observeNotificationSetting()
     }
 
     fun onPushNotificationToggleRequested(isEnabled: Boolean) {
@@ -116,14 +116,12 @@ class SettingViewModel @Inject constructor(
         fetchUserInfo()
     }
 
-    private fun loadNotificationSetting() {
+    private fun observeNotificationSetting() {
         viewModelScope.launch {
             notificationPreferenceRepository
-                .getCommutePushEnabled()
-                .onSuccess { isEnabled ->
+                .observeCommutePushEnabled()
+                .collect { isEnabled ->
                     _isNotificationEnabled.value = isEnabled
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
                 }
         }
     }

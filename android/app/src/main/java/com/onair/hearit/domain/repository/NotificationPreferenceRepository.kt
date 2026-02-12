@@ -1,9 +1,9 @@
 package com.onair.hearit.domain.repository
 
-interface NotificationPreferenceRepository {
-    fun getCachedCommutePushEnabled(): Boolean?
+import kotlinx.coroutines.flow.Flow
 
-    suspend fun getCommutePushEnabled(): Result<Boolean>
+interface NotificationPreferenceRepository {
+    fun observeCommutePushEnabled(): Flow<Boolean>
 
     suspend fun saveCommutePushEnabled(isEnabled: Boolean): Result<Unit>
 
