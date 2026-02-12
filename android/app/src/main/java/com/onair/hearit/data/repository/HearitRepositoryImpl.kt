@@ -3,7 +3,6 @@ package com.onair.hearit.data.repository
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.data.mapper.toRecentUploadHearit
-import com.onair.hearit.data.mapper.toSearchedCategoryHearit
 import com.onair.hearit.data.mapper.toSearchedHearit
 import com.onair.hearit.data.toDomainResult
 import com.onair.hearit.data.toDomainResultList
@@ -13,7 +12,6 @@ import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
-import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.repository.HearitRepository
 import javax.inject.Inject
@@ -48,10 +46,10 @@ class HearitRepositoryImpl @Inject constructor(
         categoryId: Long,
         page: Int?,
         size: Int?,
-    ): Result<PageResult<SearchedCategoryHearit>> =
+    ): Result<PageResult<SearchedHearit>> =
         hearitRemoteDataSource
             .getHearits(categoryId, page, size)
-            .toDomainResult { it.toSearchedCategoryHearit() }
+            .toDomainResult { it.toSearchedHearit() }
 
     override suspend fun getRecentUploadHearits(
         page: Int?,

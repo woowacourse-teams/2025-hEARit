@@ -27,7 +27,17 @@ class CategoryViewModel @Inject constructor(
 ) : ViewModel() {
     private val categoryArgs: SearchRoute.Category = savedStateHandle.toRoute()
 
-    private val _categoryUiState = MutableStateFlow(CategoryUiState())
+    private val _categoryUiState =
+        MutableStateFlow(
+            CategoryUiState(
+                category =
+                    Category(
+                        id = categoryArgs.id,
+                        name = categoryArgs.name,
+                        colorCode = categoryArgs.colorCode,
+                    ),
+            ),
+        )
     val categoryUiState: StateFlow<CategoryUiState> = _categoryUiState.asStateFlow()
 
     private val _snackbarMessage =
@@ -37,42 +47,31 @@ class CategoryViewModel @Inject constructor(
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
     init {
-        _categoryUiState.update {
-            it.copy(
-                category =
-                    Category(
-                        categoryArgs.id,
-                        categoryArgs.name,
-                        categoryArgs.colorCode,
-                    ),
-            )
-        }
+        fetchCategoryHearits()
     }
 
     fun fetchCategoryHearits() {
         val currentState = _categoryUiState.value
         val category = currentState.category ?: return
-        if (!currentState.pagingState.canLoadMore()) return
+        if (currentState.isLoading || currentState.isLastPage) return
 
         viewModelScope.launch {
-            _categoryUiState.update { it.copy(pagingState = it.pagingState.startLoading()) }
+            _categoryUiState.update { it.copy(isLoading = true) }
 
             hearitRepository
-                .getCategoryHearits(category.id, currentState.pagingState.currentPage)
+                .getCategoryHearits(category.id, currentState.currentPage)
                 .onSuccess { response ->
                     _categoryUiState.update { state ->
                         state.copy(
                             hearits = (state.hearits + response.items).toImmutableList(),
-                            pagingState =
-                                state.pagingState.finishLoading(
-                                    nextPage = response.paging.page + 1,
-                                    isLast = response.paging.isLast,
-                                ),
+                            isLoading = false,
+                            isLastPage = response.paging.isLast,
+                            currentPage = response.paging.page + 1,
                         )
                     }
                 }.onFailure {
-                    _categoryUiState.update { it.copy(pagingState = it.pagingState.failLoading()) }
-                    _snackbarMessage.tryEmit(R.string.category_toast_searched_hearits_load_fail)
+                    _categoryUiState.update { it.copy(isLoading = false) }
+                    _snackbarMessage.emit(R.string.category_toast_searched_hearits_load_fail)
                 }
         }
     }

@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.onair.hearit.presentation.calculateProgress
 import com.onair.hearit.presentation.theme.DarkGray
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitPurple1
@@ -40,6 +39,15 @@ fun HearitProgressBar(
                 .height(4.dp)
                 .padding(start = 20.dp, end = 8.dp),
     )
+}
+
+fun calculateProgress(
+    lastPlayTimeMillis: Long?,
+    totalPlayTimeSec: Int,
+): Float {
+    if (totalPlayTimeSec <= 0) return 0f
+    val lastPlayTimeSec = (lastPlayTimeMillis ?: 0L) / 1000f
+    return (lastPlayTimeSec / totalPlayTimeSec).coerceIn(0f, 1f)
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF000000)

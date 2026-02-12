@@ -24,7 +24,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.presentation.search.component.HearitItem
+import com.onair.hearit.presentation.search.component.SearchedHearitItem
+import com.onair.hearit.presentation.theme.Gray3
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitPurple1
@@ -109,13 +110,10 @@ fun SearchResultScreen(
                     items = hearits,
                     key = { it.id },
                 ) { hearit ->
-                    HearitItem(
-                        title = hearit.title,
-                        keywords = hearit.keywords,
-                        playTime = hearit.playTime,
-                        lastPlayTime = hearit.lastPlayTime,
-                        progressColor = HearitPurple1,
-                        onClick = { onHearitClick(hearit.id) },
+                    SearchedHearitItem(
+                        item = hearit,
+                        color = Gray3,
+                        onClick = onHearitClick,
                     )
                 }
             }

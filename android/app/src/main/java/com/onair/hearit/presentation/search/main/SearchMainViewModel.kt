@@ -46,7 +46,7 @@ class SearchMainViewModel @Inject constructor(
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _searchMainUiState.update { it.copy(isLoading = false) }
-                    _snackbarMessage.tryEmit(R.string.all_toast_categories_load_fail)
+                    _snackbarMessage.emit(R.string.all_toast_categories_load_fail)
                 }
         }
     }

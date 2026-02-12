@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,14 +25,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
-import com.onair.hearit.domain.model.SearchedCategoryHearit
-import com.onair.hearit.presentation.HearitSnackbarHost
-import com.onair.hearit.presentation.search.component.HearitItem
+import com.onair.hearit.domain.model.SearchedHearit
+import com.onair.hearit.presentation.search.component.SearchedHearitItem
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
@@ -44,7 +45,7 @@ import kotlinx.collections.immutable.persistentListOf
 fun CategoryScreen(
     categoryName: String,
     categoryColor: String,
-    hearits: ImmutableList<SearchedCategoryHearit>,
+    hearits: ImmutableList<SearchedHearit>,
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -64,9 +65,9 @@ fun CategoryScreen(
 
     Scaffold(
         snackbarHost = {
-            HearitSnackbarHost(
+            SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = 60.dp),
+                modifier = Modifier.padding(bottom = 48.dp),
             )
         },
         containerColor = Color.Transparent,
@@ -118,7 +119,7 @@ private fun CategoryTopBar(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_back),
-                contentDescription = "뒤로가기",
+                contentDescription = stringResource(id = R.string.category_back_content_description),
                 tint = Gray4,
             )
         }
@@ -134,7 +135,7 @@ private fun CategoryTopBar(
 
 @Composable
 private fun CategoryHearitList(
-    hearits: ImmutableList<SearchedCategoryHearit>,
+    hearits: ImmutableList<SearchedHearit>,
     color: Color,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -148,12 +149,9 @@ private fun CategoryHearitList(
             items = hearits,
             key = { it.id },
         ) { item ->
-            HearitItem(
-                title = item.title,
-                keywords = item.keywords,
-                playTime = item.playTime,
-                lastPlayTime = item.lastPlayTime,
-                progressColor = color,
+            SearchedHearitItem(
+                item = item,
+                color = color,
                 onClick = { onHearitClick(item.id) },
             )
         }
@@ -169,7 +167,7 @@ private fun CategoryScreenPreview() {
             categoryColor = "#73A01A",
             hearits =
                 persistentListOf(
-                    SearchedCategoryHearit(
+                    SearchedHearit(
                         id = 0,
                         title = "이건 첫 번째 레슨, 좋은 건 너만 알기",
                         playTime = 123,
@@ -178,7 +176,7 @@ private fun CategoryScreenPreview() {
                         keywords = persistentListOf(Keyword(1, "aa"), Keyword(2, "bb")),
                         category = Category(id = 0L, name = "카테고리이름", colorCode = "#123456"),
                     ),
-                    SearchedCategoryHearit(
+                    SearchedHearit(
                         id = 1,
                         title = "이제 두 번째 레슨, 슬픔도 너만 갖기",
                         playTime = 1234,
