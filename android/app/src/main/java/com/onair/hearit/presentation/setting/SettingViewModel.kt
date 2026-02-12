@@ -64,8 +64,11 @@ class SettingViewModel @Inject constructor(
         _shouldRequestNotification.value = false
 
         if (!isGranted) {
-            _isNotificationEnabled.value = false
-            _snackbarMessage.tryEmit(R.string.setting_notification_push_disabled)
+            applyToggleAndPersist(
+                targetEnabled = false,
+                successResId = R.string.setting_notification_push_disabled,
+                failureResId = R.string.setting_notification_push_save_failed,
+            )
             _toastMessage.value = R.string.all_toast_notification_permission_denied
             return
         }
