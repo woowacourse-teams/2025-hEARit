@@ -86,15 +86,20 @@ class SearchDetailViewModel @Inject constructor(
 
         val input = SearchInput.Keyword(normalized)
         val currentState = _uiState.value
+
         // 동일 검색어이고 결과가 있거나 로딩 중이면 스킵
-        if (currentState.searchInput == input && (currentState.searchedHearits.isNotEmpty() || currentState.isLoading)) return
+        if (
+            currentState.searchInput == input &&
+            (currentState.searchedHearits.isNotEmpty() || currentState.pagingState.isLoading)
+        ) {
+            return
+        }
 
         _uiState.update {
             it.copy(
                 searchInput = input,
                 searchedHearits = persistentListOf(),
-                currentPage = 0,
-                isLastPage = false,
+                pagingState = it.pagingState.reset(),
             )
         }
 
@@ -106,42 +111,44 @@ class SearchDetailViewModel @Inject constructor(
             it.copy(
                 searchInput = null,
                 searchedHearits = persistentListOf(),
-                currentPage = 0,
-                isLastPage = false,
-                isLoading = false,
+                pagingState = it.pagingState.reset(),
             )
         }
     }
 
     fun loadNextPage() {
         val currentState = _uiState.value
-        val hasTerm = currentState.searchInput is SearchInput.Keyword
-        if (!hasTerm || currentState.isLoading || currentState.isLastPage) return
+        if (!currentState.pagingState.canLoadMore()) return
         fetchSearchResults()
     }
 
     private fun fetchSearchResults() {
         if (fetchJob?.isActive == true) return
-        val term = (_uiState.value.searchInput as? SearchInput.Keyword)?.term ?: return
+
+        val state = _uiState.value
+        val term = (state.searchInput as? SearchInput.Keyword)?.term ?: return
+        val page = state.pagingState.currentPage
 
         fetchJob =
             viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = true) }
+                _uiState.update { it.copy(pagingState = it.pagingState.startLoading()) }
 
                 hearitRepository
-                    .getKeywordHearits(term, _uiState.value.currentPage)
+                    .getKeywordHearits(term, page)
                     .onSuccess { result ->
-                        _uiState.update { state ->
-                            state.copy(
-                                searchedHearits = (state.searchedHearits + result.items).toImmutableList(),
-                                currentPage = result.paging.page + 1,
-                                isLastPage = result.paging.isLast,
-                                isLoading = false,
+                        _uiState.update { current ->
+                            current.copy(
+                                searchedHearits = (current.searchedHearits + result.items).toImmutableList(),
+                                pagingState =
+                                    current.pagingState.finishLoading(
+                                        nextPage = result.paging.page + 1,
+                                        isLast = result.paging.isLast,
+                                    ),
                             )
                         }
                     }.onFailure { throwable ->
                         Timber.w(throwable)
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update { it.copy(pagingState = it.pagingState.failLoading()) }
                         _snackbarMessage.emit(R.string.search_toast_searched_hearits_load_fail)
                     }
             }

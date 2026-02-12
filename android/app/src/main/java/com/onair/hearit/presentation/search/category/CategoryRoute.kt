@@ -27,6 +27,10 @@ fun CategoryRoute(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchCategoryHearits()
+    }
+
     CategoryScreen(
         categoryName = categoryName,
         categoryColor = categoryColor,

@@ -8,7 +8,6 @@ import androidx.annotation.StringRes
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsLogger
@@ -17,7 +16,6 @@ import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.IntentKeys.CATEGORY_KEY
 import com.onair.hearit.presentation.IntentKeys.KEYWORD_KEY
 import com.onair.hearit.presentation.IntentKeys.TYPE_KEY
-import com.onair.hearit.presentation.main.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -39,6 +37,15 @@ fun Int.toTimeString(): String {
 
 fun Keyword.toHashtagName(): String = "#${this.name}"
 
+fun calculateProgress(
+    lastPlayTimeMillis: Long?,
+    totalPlayTimeSec: Int,
+): Float {
+    if (totalPlayTimeSec <= 0) return 0f
+    val lastPlayTimeSec = (lastPlayTimeMillis ?: 0L) / 1000f
+    return (lastPlayTimeSec / totalPlayTimeSec).coerceIn(0f, 1f)
+}
+
 fun Intent?.toDetailResult(): DetailResult? {
     if (this == null) return null
     return when (getStringExtra(TYPE_KEY)) {
@@ -56,33 +63,9 @@ fun Intent?.toDetailResult(): DetailResult? {
     }
 }
 
-fun DetailResult.navigate(
-    mainActivity: MainActivity,
-    analyticsLogger: AnalyticsLogger,
-) {
+fun DetailResult.navigate(analyticsLogger: AnalyticsLogger) {
     when (this) {
         is DetailResult.Category -> {
-//            val fragmentManager = mainActivity.supportFragmentManager
-//            val backStackTag = CategoryFragment::class.java.simpleName
-//
-//            // 기존 검색결과 Fragment가 있으면 popBackStack으로 지움
-//            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-//            fragmentManager
-//                .beginTransaction()
-//                .replace(
-//                    R.id.fragment_container_view,
-//                    CategoryFragment().apply {
-//                        arguments =
-//                            bundleOf(
-//                                CATEGORY_ID_KEY to categoryId,
-//                                CATEGORY_NAME_KEY to name,
-//                                CATEGORY_COLOR_KEY to colorCode,
-//                            )
-//                    },
-//                    backStackTag,
-//                ).addToBackStack(backStackTag)
-//                .commit()
-
             analyticsLogger.logEvent(
                 AnalyticsEventNames.SEARCH_CATEGORY_SELECTED,
                 mapOf(AnalyticsParamKeys.ITEM_NAME to name),
@@ -90,20 +73,6 @@ fun DetailResult.navigate(
         }
 
         is DetailResult.Keyword -> {
-//            mainActivity.selectTab(R.id.nav_search)
-//            val fragmentManager = mainActivity.supportFragmentManager
-//            val backStackTag = SearchRecentFragment::class.java.simpleName
-//
-//            fragmentManager.popBackStack(backStackTag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-//            fragmentManager
-//                .beginTransaction()
-//                .replace(
-//                    R.id.fragment_container_view,
-//                    SearchRecentFragment.newInstance(term),
-//                    backStackTag,
-//                ).addToBackStack(backStackTag)
-//                .commit()
-
             analyticsLogger.logEvent(
                 AnalyticsEventNames.SEARCH_KEYWORD_ENTERED,
                 mapOf(AnalyticsParamKeys.ITEM_NAME to term),

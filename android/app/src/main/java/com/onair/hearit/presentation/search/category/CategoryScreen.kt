@@ -17,7 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +31,8 @@ import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.presentation.search.component.SearchedHearitItem
+import com.onair.hearit.presentation.HearitSnackbarHost
+import com.onair.hearit.presentation.search.component.HearitItem
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
@@ -65,9 +65,9 @@ fun CategoryScreen(
 
     Scaffold(
         snackbarHost = {
-            SnackbarHost(
+            HearitSnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = 48.dp),
+                modifier = Modifier.padding(bottom = 60.dp),
             )
         },
         containerColor = Color.Transparent,
@@ -149,9 +149,12 @@ private fun CategoryHearitList(
             items = hearits,
             key = { it.id },
         ) { item ->
-            SearchedHearitItem(
-                item = item,
-                color = color,
+            HearitItem(
+                title = item.title,
+                keywords = item.keywords,
+                playTime = item.playTime,
+                lastPlayTime = item.lastPlayTime,
+                progressColor = color,
                 onClick = { onHearitClick(item.id) },
             )
         }

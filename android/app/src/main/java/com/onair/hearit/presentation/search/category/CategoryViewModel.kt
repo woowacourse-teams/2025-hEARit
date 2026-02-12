@@ -46,32 +46,30 @@ class CategoryViewModel @Inject constructor(
         )
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
-    init {
-        fetchCategoryHearits()
-    }
-
     fun fetchCategoryHearits() {
         val currentState = _categoryUiState.value
         val category = currentState.category ?: return
-        if (currentState.isLoading || currentState.isLastPage) return
+        if (!currentState.pagingState.canLoadMore()) return
 
         viewModelScope.launch {
-            _categoryUiState.update { it.copy(isLoading = true) }
+            _categoryUiState.update { it.copy(pagingState = it.pagingState.startLoading()) }
 
             hearitRepository
-                .getCategoryHearits(category.id, currentState.currentPage)
+                .getCategoryHearits(category.id, currentState.pagingState.currentPage)
                 .onSuccess { response ->
                     _categoryUiState.update { state ->
                         state.copy(
                             hearits = (state.hearits + response.items).toImmutableList(),
-                            isLoading = false,
-                            isLastPage = response.paging.isLast,
-                            currentPage = response.paging.page + 1,
+                            pagingState =
+                                state.pagingState.finishLoading(
+                                    nextPage = response.paging.page + 1,
+                                    isLast = response.paging.isLast,
+                                ),
                         )
                     }
                 }.onFailure {
-                    _categoryUiState.update { it.copy(isLoading = false) }
-                    _snackbarMessage.emit(R.string.category_toast_searched_hearits_load_fail)
+                    _categoryUiState.update { it.copy(pagingState = it.pagingState.failLoading()) }
+                    _snackbarMessage.tryEmit(R.string.category_toast_searched_hearits_load_fail)
                 }
         }
     }
