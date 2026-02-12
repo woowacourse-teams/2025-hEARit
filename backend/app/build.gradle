@@ -104,8 +104,42 @@ openapi3 {
     format = "yaml"
 }
 
-tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI).configureEach {
+tasks.register('injectSecurityScheme') {
     dependsOn 'openapi3'
+    doLast {
+        def yamlFile = file("${project.buildDir}/api-spec/openapi3.yaml")
+        if (!yamlFile.exists()) return
+
+        def content = yamlFile.getText('UTF-8')
+
+        // components: 아래에 securitySchemes 추가
+        def securitySchemes = '''\
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT 인증 토큰 (형식: Bearer {token})"'''
+
+        content = content.replaceFirst(
+                /(?m)^components:\n\s+schemas:/,
+                "components:\n${securitySchemes}\n  schemas:"
+        )
+
+        // 최상위에 글로벌 security 추가 (servers 블록 바로 뒤)
+        if (!content.contains('\nsecurity:')) {
+            content = content.replaceFirst(
+                    /(?m)^tags:/,
+                    "security:\n- BearerAuth: []\ntags:"
+            )
+        }
+
+        yamlFile.write(content, 'UTF-8')
+    }
+}
+
+tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI).configureEach {
+    dependsOn 'injectSecurityScheme'
 }
 
 
