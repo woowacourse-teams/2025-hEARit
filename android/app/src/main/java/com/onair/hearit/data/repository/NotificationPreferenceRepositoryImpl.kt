@@ -17,6 +17,7 @@ class NotificationPreferenceRepositoryImpl @Inject constructor(
             .distinctUntilChanged()
             .catch { throwable: Throwable ->
                 Timber.w(throwable, "❌ 푸시 알림 설정 observe 실패")
+                emit(false)
             }
 
     override suspend fun saveCommutePushEnabled(isEnabled: Boolean): Result<Unit> =
