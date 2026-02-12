@@ -1,6 +1,7 @@
 package com.onair.hearit.core.infrastructure.jpa;
 
 import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.infrastructure.projection.HearitClusterStatisticsProjection;
 import com.onair.hearit.core.infrastructure.projection.HearitWithPlayTimeProjection;
 import java.util.List;
 import java.util.Optional;
@@ -86,6 +87,29 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             @Param("userUuid") UUID userUuid,
             Pageable pageable
     );
+
+    @Query("""
+            SELECT
+                h.id AS hearitId,
+                h.viewCount AS viewCount,
+                COUNT(DISTINCT r.id) AS likeCount,
+                COUNT(DISTINCT b.id) AS bookmarkCount,
+                COALESCE(ph_stats.avgTime, 0) AS avgPlayTime,
+                COALESCE(ph_stats.compRate, 0) AS completionRate,
+                h.createdAt AS createdAt
+            FROM Hearit h
+            LEFT JOIN Reaction r ON r.hearit = h AND r.type = 'LIKE'
+            LEFT JOIN Bookmark b ON b.hearit = h
+            LEFT JOIN (
+                SELECT
+                    ph.hearitId AS hId,
+                    AVG(ph.lastPlayTime) AS avgTime,
+                    AVG(CASE WHEN ph.isFinished = true THEN 1.0 ELSE 0.0 END) AS compRate
+                FROM PlayingHistory ph
+                GROUP BY ph.hearitId
+            ) ph_stats ON ph_stats.hId = h.id
+            GROUP BY h.id, h.viewCount, h.createdAt, ph_stats.avgTime, ph_stats.compRate""")
+    Page<HearitClusterStatisticsProjection> findClusterStatistics(Pageable pageable);
 
     @Modifying
     @Query(value = """

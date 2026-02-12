@@ -10,6 +10,7 @@ import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
+import com.onair.hearit.core.domain.Reaction;
 import com.onair.hearit.core.domain.RecommendHearit;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -94,6 +95,12 @@ public class DbHelper {
         } finally {
             TestClock.unfreeze();
         }
+    }
+
+    public Reaction insertReaction(Reaction reaction) {
+        em.persist(reaction);
+        em.flush();
+        return reaction;
     }
 
     public Advertisement insertAdvertisement(Advertisement advertisement) {
