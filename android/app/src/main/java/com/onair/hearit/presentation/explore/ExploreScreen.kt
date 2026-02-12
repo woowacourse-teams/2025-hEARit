@@ -50,9 +50,13 @@ fun ExploreScreen(
             pageCount = { shortsHearit.size },
         )
 
-    LaunchedEffect(currentPageIndex) {
-        if (pagerState.currentPage != currentPageIndex) {
-            pagerState.animateScrollToPage(currentPageIndex)
+    LaunchedEffect(currentPageIndex, shortsHearit.size) {
+        val pageCount = shortsHearit.size
+        if (pageCount == 0) return@LaunchedEffect
+
+        val target = currentPageIndex.coerceIn(0, pageCount - 1)
+        if (pagerState.currentPage != target) {
+            pagerState.animateScrollToPage(target)
         }
     }
 

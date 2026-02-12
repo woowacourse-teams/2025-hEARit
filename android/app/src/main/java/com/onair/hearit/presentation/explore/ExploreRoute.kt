@@ -1,6 +1,8 @@
 package com.onair.hearit.presentation.explore
 
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -24,7 +26,7 @@ fun ExploreRoute(
     onBackClick: () -> Unit,
     onNavigateToDetail: (id: Long, position: Long) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ExploreViewModel = hiltViewModel(),
+    viewModel: ExploreViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -42,15 +44,14 @@ fun ExploreRoute(
             LifecycleEventObserver { _, event ->
                 when (event) {
                     Lifecycle.Event.ON_RESUME -> {
-                        // resumeIfScheduled() 대신 현재 페이지를 다시 트리거하여 재생 재개
-                        // ViewModel에 onPageChanged를 현재 인덱스로 다시 호출하거나
-                        // 별도의 resume 함수를 만들 수 있습니다.
-                        viewModel.onPageChanged(uiState.currentPageIndex)
+                        viewModel.resumeIfScheduled()
                     }
 
                     Lifecycle.Event.ON_PAUSE -> {
-                        // 화면을 나갈 때 현재 위치 저장 및 정지
-                        viewModel.onPause()
+                        val currentIndex = uiState.currentPageIndex
+                        viewModel.scheduleResume(
+                            resumeIndex = currentIndex,
+                        )
                     }
 
                     else -> {}
