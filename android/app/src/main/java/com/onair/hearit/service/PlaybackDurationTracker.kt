@@ -71,8 +71,9 @@ class PlaybackDurationTracker @Inject constructor(
                         state.accumulatedMs += CHECK_INTERVAL_MS
 
                         if (state.accumulatedMs >= TARGET_DURATION_MS) {
-                            sendViewHistory(state)
-                            stopTracking()
+                            sendViewHistory(state) {
+                                stopTracking()
+                            }
                         }
                     }
                 }
@@ -85,7 +86,10 @@ class PlaybackDurationTracker @Inject constructor(
     }
 
     @OptIn(UnstableApi::class)
-    private fun sendViewHistory(state: TrackingState) {
+    private fun sendViewHistory(
+        state: TrackingState,
+        onSuccess: () -> Unit,
+    ) {
         val hearitId =
             player
                 ?.currentMediaItem
@@ -94,13 +98,16 @@ class PlaybackDurationTracker @Inject constructor(
                 ?.getLong(EXTRA_HEARIT_ID, -1L)
                 ?.takeIf { it != -1L } ?: return
 
+        // 전송 시작 시 true로 설정하여 중복 전송 방지
         state.isHistorySent = true
 
         scope.launch {
             runCatching {
                 postHearitView(hearitId)
+            }.onSuccess {
+                onSuccess()
             }.onFailure { e ->
-                Timber.d("hearit 조회수 전송에 실패했습니다")
+                Timber.d("hearit 조회수 전송 실패: ${e.message}")
                 state.isHistorySent = false
             }
         }
