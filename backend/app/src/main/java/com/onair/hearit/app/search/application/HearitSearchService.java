@@ -3,6 +3,7 @@ package com.onair.hearit.app.search.application;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.search.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.SearchSortRequest;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
@@ -16,15 +17,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HearitSearchService {
@@ -78,16 +84,27 @@ public class HearitSearchService {
     }
 
     public PagedResponse<HearitSearchResponse> searchV2(String searchTerm,
+                                                        SearchSortRequest sortRequest,
                                                         PagingRequest pagingRequest,
                                                         UserInfo userInfo) {
-        List<Long> searchedHearitIds = hearitElasticSearchRepository.search(searchTerm.trim());
-        Page<Hearit> hearits = getHearits(pagingRequest, searchedHearitIds);
+        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
+        Page<Long> searchedHearitIds = hearitElasticSearchRepository.search(searchTerm, sortRequest.field(), pageable);
+        Page<Hearit> hearits = getSortedHearits(pageable, searchedHearitIds);
         UUID userUuid = userInfo.getUuid();
+        log.info("[SEARCH] keyword: '{}', results: {}, page: {}",
+                searchTerm, searchedHearitIds.getTotalElements(), pageable.getPageNumber());
         return PagedResponse.from(toHearitSearchResponse(hearits, userUuid));
     }
 
-    private Page<Hearit> getHearits(PagingRequest pagingRequest, List<Long> searchedHearitIds) {
-        Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size());
-        return hearitRepository.findAllByIdIn(searchedHearitIds, pageable);
+    private Page<Hearit> getSortedHearits(Pageable pageable, Page<Long> searchedHearitIds) {
+        List<Long> ids = searchedHearitIds.getContent();
+        List<Hearit> unorderedHearits = hearitRepository.findAllByIdIn(ids);
+        Map<Long, Hearit> hearitMap = unorderedHearits.stream()
+                .collect(Collectors.toMap(Hearit::getId, Function.identity()));
+        List<Hearit> sortedHearits = ids.stream()
+                .map(hearitMap::get)
+                .filter(Objects::nonNull)
+                .toList();
+        return new PageImpl<>(sortedHearits, pageable, searchedHearitIds.getTotalElements());
     }
 }

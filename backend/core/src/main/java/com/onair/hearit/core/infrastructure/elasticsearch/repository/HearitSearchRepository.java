@@ -1,7 +1,9 @@
 package com.onair.hearit.core.infrastructure.elasticsearch.repository;
 
-import java.util.List;
+import com.onair.hearit.core.infrastructure.elasticsearch.domain.HearitSearchSortField;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface HearitSearchRepository {
-    List<Long> search(String query);
+    Page<Long> search(String query, HearitSearchSortField sortField, Pageable pageable);
 }
