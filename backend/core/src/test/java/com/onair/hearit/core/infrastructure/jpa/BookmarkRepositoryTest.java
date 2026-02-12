@@ -13,6 +13,7 @@ import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.projection.BookmarkWithPlayingHistoryProjection;
 import com.onair.hearit.core.infrastructure.projection.CategoryBookmarkCount;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,9 +47,13 @@ class BookmarkRepositoryTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        Bookmark oldestBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
-        Bookmark mideumBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit2));
-        Bookmark newestBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit3));
+        LocalDateTime baseTime = LocalDateTime.of(2026, 1, 1, 0, 0);
+        Bookmark oldestBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit1),
+                baseTime);
+        Bookmark mideumBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit2),
+                baseTime.plusMinutes(1));
+        Bookmark newestBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit3),
+                baseTime.plusMinutes(2));
 
         Sort createdAt = Sort.by(Direction.DESC, "createdAt");
         // when
@@ -75,9 +80,13 @@ class BookmarkRepositoryTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        Bookmark oldestBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit1));
-        Bookmark mideumBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit2));
-        Bookmark newestBookmark = dbHelper.insertBookmark(TestFixture.createFixedBookmark(member, hearit3));
+        LocalDateTime baseTime = LocalDateTime.of(2026, 1, 1, 0, 0);
+        Bookmark oldestBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit1),
+                baseTime);
+        Bookmark mideumBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit2),
+                baseTime.plusMinutes(1));
+        Bookmark newestBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit3),
+                baseTime.plusMinutes(2));
 
         Sort createdAt = Sort.by(Direction.ASC, "createdAt");
         // when
