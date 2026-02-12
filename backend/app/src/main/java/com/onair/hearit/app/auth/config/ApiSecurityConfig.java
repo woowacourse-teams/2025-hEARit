@@ -43,6 +43,7 @@ public class ApiSecurityConfig {
             "/api/*/playing-histories/**",
             "/api/*/bookmarks",
             "/api/*/recommendations/**",
+            "/api/*/advertisements/**",
     };
 
     private final JsonLogger jsonLogger;

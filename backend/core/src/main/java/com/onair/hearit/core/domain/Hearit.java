@@ -43,6 +43,9 @@ public class Hearit {
     @Column(name = "play_time", nullable = false)
     private Integer playTime;
 
+    @Column(name = "view_count", nullable = false)
+    private long viewCount;
+
     @Embedded
     private FileUrls fileUrls;
 
@@ -70,6 +73,7 @@ public class Hearit {
         this.fileUrls = new FileUrls(originalAudioUrl, shortAudioUrl, scriptUrl);
         this.sources = sources;
         this.category = category;
+        this.viewCount = 0;
     }
 
     public Hearit(Long id, String title, String summary, Integer playTime, String originalAudioUrl,

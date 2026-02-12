@@ -11,4 +11,5 @@ TRUNCATE TABLE recommend_hearit;
 TRUNCATE TABLE hearit_source;
 TRUNCATE TABLE explore_score;
 TRUNCATE TABLE playing_history;
+TRUNCATE TABLE advertisement;
 SET FOREIGN_KEY_CHECKS = 1;

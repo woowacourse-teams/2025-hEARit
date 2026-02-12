@@ -31,6 +31,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.redisson:redisson-spring-boot-starter:3.52.0'
 
+    // Resilience4j (Circuit Breaker)
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
+
     // ShedLock (분산 스케줄러 락)
     implementation 'net.javacrumbs.shedlock:shedlock-spring:5.10.2'
     implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.10.2'
@@ -57,6 +60,9 @@ dependencies {
     // Testcontainers for Redis
     testImplementation 'org.testcontainers:testcontainers:1.19.3'
     testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+
+    // Awaitility for async testing
+    testImplementation 'org.awaitility:awaitility:4.2.0'
 
     // REST Docs & restdocs-api-spec
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
@@ -98,8 +104,42 @@ openapi3 {
     format = "yaml"
 }
 
-tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI).configureEach {
+tasks.register('injectSecurityScheme') {
     dependsOn 'openapi3'
+    doLast {
+        def yamlFile = file("${project.buildDir}/api-spec/openapi3.yaml")
+        if (!yamlFile.exists()) return
+
+        def content = yamlFile.getText('UTF-8')
+
+        // components: 아래에 securitySchemes 추가
+        def securitySchemes = '''\
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT 인증 토큰 (형식: Bearer {token})"'''
+
+        content = content.replaceFirst(
+                /(?m)^components:\n\s+schemas:/,
+                "components:\n${securitySchemes}\n  schemas:"
+        )
+
+        // 최상위에 글로벌 security 추가 (servers 블록 바로 뒤)
+        if (!content.contains('\nsecurity:')) {
+            content = content.replaceFirst(
+                    /(?m)^tags:/,
+                    "security:\n- BearerAuth: []\ntags:"
+            )
+        }
+
+        yamlFile.write(content, 'UTF-8')
+    }
+}
+
+tasks.withType(org.hidetake.gradle.swagger.generator.GenerateSwaggerUI).configureEach {
+    dependsOn 'injectSecurityScheme'
 }
 
 

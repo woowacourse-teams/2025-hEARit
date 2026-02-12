@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
+import com.onair.hearit.app.common.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
-import com.onair.hearit.app.explore.application.scorefactor.generator.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scoreprocessor.GuestExploreScoreProcessor;
 import com.onair.hearit.app.explore.application.scoreprocessor.MemberExploreScoreProcessor;
 import com.onair.hearit.app.explore.dto.CursorRequest;
