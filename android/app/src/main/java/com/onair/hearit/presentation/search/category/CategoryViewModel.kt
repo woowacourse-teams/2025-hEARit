@@ -40,22 +40,21 @@ class CategoryViewModel @Inject constructor(
         )
     val categoryUiState: StateFlow<CategoryUiState> = _categoryUiState.asStateFlow()
 
-    private val _snackbarMessage =
-        MutableSharedFlow<Int>(
-            extraBufferCapacity = 1,
-        )
+    private val _snackbarMessage = MutableSharedFlow<Int>(extraBufferCapacity = 1)
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
     fun fetchCategoryHearits() {
-        val currentState = _categoryUiState.value
-        val category = currentState.category ?: return
-        if (!currentState.pagingState.canLoadMore()) return
+        val state = _categoryUiState.value
+        val paging = state.pagingState
+
+        if (paging.isLoading) return
+        if (!paging.canLoadMore()) return
 
         viewModelScope.launch {
             _categoryUiState.update { it.copy(pagingState = it.pagingState.startLoading()) }
 
             hearitRepository
-                .getCategoryHearits(category.id, currentState.pagingState.currentPage)
+                .getCategoryHearits(state.category.id, state.pagingState.currentPage)
                 .onSuccess { response ->
                     _categoryUiState.update { state ->
                         state.copy(

@@ -20,12 +20,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
@@ -49,7 +51,7 @@ fun CategoryScreen(
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    snackbarHostState: SnackbarHostState = SnackbarHostState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     fadeStop: Float = 0.2f,
 ) {
     val safeColor =
@@ -64,6 +66,12 @@ fun CategoryScreen(
         )
 
     Scaffold(
+        topBar = {
+            CategoryTopBar(
+                categoryName = categoryName,
+                onBack = onBack,
+            )
+        },
         snackbarHost = {
             HearitSnackbarHost(
                 hostState = snackbarHostState,
@@ -81,11 +89,6 @@ fun CategoryScreen(
                     .padding(bottom = paddingValues.calculateBottomPadding()),
         ) {
             val gradientEndPadding = maxHeight * fadeStop
-
-            CategoryTopBar(
-                categoryName = categoryName,
-                onBack = onBack,
-            )
 
             CategoryHearitList(
                 hearits = hearits,

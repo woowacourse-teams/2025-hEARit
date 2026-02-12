@@ -9,7 +9,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
 data class CategoryUiState(
-    val category: Category? = null,
+    val category: Category,
     val hearits: ImmutableList<SearchedHearit> = persistentListOf(),
     val pagingState: PagingState = PagingState(),
 )

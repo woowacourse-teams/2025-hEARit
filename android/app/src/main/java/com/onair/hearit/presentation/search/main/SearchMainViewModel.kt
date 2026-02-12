@@ -31,6 +31,8 @@ class SearchMainViewModel @Inject constructor(
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
     fun fetchCategories() {
+        if (_searchMainUiState.value.isLoading) return
+
         viewModelScope.launch {
             _searchMainUiState.update { it.copy(isLoading = true) }
 
