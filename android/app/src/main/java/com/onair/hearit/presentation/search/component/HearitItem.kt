@@ -4,27 +4,35 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.presentation.theme.Gray1
+import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.Gray3
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitPurple1
+import com.onair.hearit.presentation.theme.HearitTypoGraphy
+import com.onair.hearit.presentation.toHashtagName
+import com.onair.hearit.presentation.toTimeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -76,6 +84,53 @@ fun HearitItem(
                     .size(36.dp)
                     .padding(end = 8.dp),
             tint = Gray4,
+        )
+    }
+}
+
+@Composable
+fun HearitTitle(
+    title: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = title,
+        modifier = modifier.padding(start = 20.dp, end = 8.dp),
+        color = Gray4,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 2,
+        style = HearitTypoGraphy.bodyLarge,
+    )
+}
+
+@Composable
+fun HearitMetaRow(
+    keywords: ImmutableList<Keyword>,
+    playTime: Int,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp, bottom = 8.dp, start = 20.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        keywords.forEach { keyword ->
+            Text(
+                text = keyword.toHashtagName(),
+                color = Gray2,
+                style = HearitTypoGraphy.labelMedium,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = playTime.toTimeString(),
+            color = Gray4,
+            style = HearitTypoGraphy.labelMedium,
         )
     }
 }
