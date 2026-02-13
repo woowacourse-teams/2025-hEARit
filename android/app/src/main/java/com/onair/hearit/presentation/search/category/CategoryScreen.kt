@@ -42,6 +42,8 @@ import com.onair.hearit.presentation.util.rememberTopFadeGradient
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
+private val BOTTOM_PADDING = 60.dp
+
 @Composable
 fun CategoryScreen(
     categoryName: String,
@@ -74,7 +76,7 @@ fun CategoryScreen(
         snackbarHost = {
             HearitSnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = 60.dp),
+                modifier = Modifier.padding(bottom = BOTTOM_PADDING),
             )
         },
         containerColor = Color.Transparent,
@@ -96,7 +98,7 @@ fun CategoryScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(top = gradientEndPadding, bottom = 60.dp),
+                        .padding(top = gradientEndPadding, bottom = BOTTOM_PADDING),
             )
         }
     }

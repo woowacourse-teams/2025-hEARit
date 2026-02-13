@@ -63,7 +63,7 @@ fun Intent?.toDetailResult(): DetailResult? {
     }
 }
 
-fun DetailResult.navigate(analyticsLogger: AnalyticsLogger) {
+fun DetailResult.logNavigationEvent(analyticsLogger: AnalyticsLogger) {
     when (this) {
         is DetailResult.Category -> {
             analyticsLogger.logEvent(

@@ -40,8 +40,8 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
+import com.onair.hearit.presentation.logNavigationEvent
 import com.onair.hearit.presentation.login.LoginActivity
-import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.splash.SplashActivity
 import com.onair.hearit.presentation.toDetailResult
@@ -120,7 +120,7 @@ class MainActivity :
                 if (result.resultCode == RESULT_OK) {
                     val detailResult =
                         result.data.toDetailResult() ?: return@registerForActivityResult
-                    detailResult.navigate(analyticsLogger)
+                    detailResult.logNavigationEvent(analyticsLogger)
                 }
                 mainViewModel.notifyCategoryUpdated()
                 mainViewModel.hearitUpdated.value = Unit

@@ -89,7 +89,7 @@ fun HearitItem(
 }
 
 @Composable
-fun HearitTitle(
+private fun HearitTitle(
     title: String,
     modifier: Modifier = Modifier,
 ) {
@@ -104,7 +104,7 @@ fun HearitTitle(
 }
 
 @Composable
-fun HearitMetaRow(
+private fun HearitMetaRow(
     keywords: ImmutableList<Keyword>,
     playTime: Int,
     modifier: Modifier = Modifier,

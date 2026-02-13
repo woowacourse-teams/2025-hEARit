@@ -33,8 +33,8 @@ import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
+import com.onair.hearit.presentation.logNavigationEvent
 import com.onair.hearit.presentation.login.LoginActivity
-import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.showToast
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
@@ -88,7 +88,7 @@ class ExploreFragment :
 
                 when (val detailResult = result.data.toDetailResult()) {
                     is DetailResult.Category, is DetailResult.Keyword -> {
-                        detailResult.navigate(analyticsLogger)
+                        detailResult.logNavigationEvent(analyticsLogger)
                     }
 
                     null -> {

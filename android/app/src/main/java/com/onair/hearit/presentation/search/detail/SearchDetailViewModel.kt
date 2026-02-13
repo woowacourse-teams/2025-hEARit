@@ -129,10 +129,10 @@ class SearchDetailViewModel @Inject constructor(
         val term = (state.searchInput as? SearchInput.Keyword)?.term ?: return
         val page = state.pagingState.currentPage
 
+        _uiState.update { it.copy(pagingState = it.pagingState.startLoading()) }
+
         fetchJob =
             viewModelScope.launch {
-                _uiState.update { it.copy(pagingState = it.pagingState.startLoading()) }
-
                 hearitRepository
                     .getKeywordHearits(term, page)
                     .onSuccess { result ->
