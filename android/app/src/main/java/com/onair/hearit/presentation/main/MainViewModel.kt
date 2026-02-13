@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.RecentHearit
-import com.onair.hearit.domain.usecase.GetRecentHearitUseCase
+import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.auth.LogoutUseCase
 import com.onair.hearit.domain.usecase.auth.WithdrawUseCase
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val getRecentHearitUseCase: GetRecentHearitUseCase,
+    private val recentHearitRepository: RecentHearitRepository,
     private val logoutUseCase: LogoutUseCase,
     private val withdrawUseCase: WithdrawUseCase,
 ) : ViewModel() {
@@ -93,7 +93,8 @@ class MainViewModel @Inject constructor(
 
     private fun fetchRecentHearit() {
         viewModelScope.launch {
-            getRecentHearitUseCase()
+            recentHearitRepository
+                .getRecentHearit()
                 .onSuccess { recent ->
                     _recentHearit.value = recent
                 }.onFailure { throwable ->
