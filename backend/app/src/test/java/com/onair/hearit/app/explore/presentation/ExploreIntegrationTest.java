@@ -7,6 +7,7 @@ import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.app.explore.dto.CursorResponseV1;
 import com.onair.hearit.app.explore.dto.CursorResponseV2;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.app.fixture.IntegrationTest;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -97,6 +98,42 @@ class ExploreIntegrationTest extends IntegrationTest {
         assertAll(() -> {
             assertThat(responses.content()).hasSize(3);
             assertThat(responses.cursorId()).isEqualTo(3L);
+            assertThat(responses.isEmpty()).isFalse();
+        });
+    }
+
+    @Test
+    @DisplayName("v3: 탐색 히어릿 조회 시, 200 OK 및 Base64 커서가 포함된 목록을 제공한다.")
+    void readExploredHearits_byMember_v3() {
+        // given
+        Category category = dbHelper.insertCategory(new Category("V3IntTest", "#AABBCC"));
+        Keyword keyword = dbHelper.insertKeyword(new Keyword("V3Keyword"));
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit1, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit2, keyword));
+        dbHelper.insertHearitKeyword(new HearitKeyword(hearit3, keyword));
+
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
+
+        // when - 초기 요청 (cursor 없음)
+        CursorResponseV2<ExploredHearitResponseV3> responses = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v3/hearits/explore")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(new TypeRef<>() {});
+
+        // then
+        assertAll(() -> {
+            assertThat(responses.content()).hasSize(3);
+            assertThat(responses.content()).allMatch(r -> r.cursor() != null && !r.cursor().isBlank());
             assertThat(responses.isEmpty()).isFalse();
         });
     }

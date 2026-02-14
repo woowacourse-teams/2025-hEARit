@@ -2,6 +2,7 @@ package com.onair.hearit.app.explore.application.scoreprocessor;
 
 import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;
@@ -11,6 +12,7 @@ import com.onair.hearit.core.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
+import com.onair.hearit.core.infrastructure.projection.ExploredHearitScoreProjection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -71,6 +73,29 @@ public class MemberExploreScoreProcessor extends AbstractExploreScoreProcessor {
         return bookmarkRepository
                 .findAllByHearitInAndMemberUuid(hearits, memberUuid).stream()
                 .collect(Collectors.toMap(bookmark -> bookmark.getHearit().getId(), bookmark -> bookmark));
+    }
+
+    @Override
+    protected List<ExploredHearitResponseV3> convertToExploredHearitResponsesV3(
+            List<ExploredHearitScoreProjection> projections,
+            UserInfo userInfo) {
+        List<Hearit> hearits = projections.stream()
+                .map(ExploredHearitScoreProjection::getHearit)
+                .toList();
+        Map<Hearit, List<Keyword>> keywordsMap = prepareKeywordsMap(hearits);
+        Map<Long, Bookmark> bookmarksMap = prepareBookmarksMap(hearits, userInfo);
+
+        return projections.stream()
+                .map(proj -> {
+                    Hearit hearit = proj.getHearit();
+                    List<Keyword> keywords = keywordsMap.getOrDefault(hearit, List.of());
+                    Bookmark bookmark = bookmarksMap.get(hearit.getId());
+                    if (bookmark == null) {
+                        return ExploredHearitResponseV3.from(hearit, keywords, proj.getScore());
+                    }
+                    return ExploredHearitResponseV3.fromWithBookmark(hearit, bookmark, keywords, proj.getScore());
+                })
+                .toList();
     }
 
     private ExploredHearitResponse assembleExploredHearitResponse(ExploredHearitProjection info, Bookmark bookmark,

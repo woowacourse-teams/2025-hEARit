@@ -15,6 +15,7 @@ import com.onair.hearit.app.explore.application.HearitExploreService;
 import com.onair.hearit.app.explore.dto.CursorResponseV2;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse.KeywordResponse;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.app.fixture.ControllerTest;
 import java.util.Arrays;
 import java.util.List;
@@ -136,6 +137,62 @@ class ExploreControllerTest extends ControllerTest {
                                                         fieldWithPath("content[].keywords[].id").description("키워드 ID"),
                                                         fieldWithPath("content[].keywords[].name").description("키워드 이름"),
                                                         fieldWithPath("content[].cursorId").description("커서 ID"),
+                                                }),
+                                                Arrays.stream(
+                                                        com.onair.hearit.fixture.ApiDocSnippets.getCustomCursorResponseFields())
+                                        ).toArray(FieldDescriptor[]::new)
+                                )
+                                .build())
+                ));
+    }
+
+    @Test
+    @DisplayName("탐색 히어릿 목록 조회 V3 - 200 OK")
+    void readExploredHearitsV3_OK() throws Exception {
+        // given
+        var responses = IntStream.range(1, 12).mapToObj(i -> new ExploredHearitResponseV3(
+                        (long) i,
+                        "Title " + i,
+                        "#FFFFFF",
+                        false,
+                        null,
+                        List.of(new ExploredHearitResponseV3.KeywordResponse((long) i, "keyword1")),
+                        "dGVzdEN1cnNvcg==")
+                )
+                .toList();
+        var pagedResponses = CursorResponseV2.from(responses);
+
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
+        given(hearitExploreService.getExploredHearitsV3(any(), any(), any(Integer.class))).willReturn(pagedResponses);
+
+        // when & then
+        mockMvc.perform(get("/api/v3/hearits/explore")
+                        .header("Authorization", "Bearer valid-token")
+                        .param("cursor", "dGVzdEN1cnNvcg==")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andDo(MockMvcRestDocumentationWrapper.document("v3-get-hearits-explore-ok",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Explore API")
+                                .summary("탐색 히어릿 목록 조회 V3")
+                                .description("score 기반 복합 커서로 탐색된 히어릿 목록을 조회합니다.")
+                                .queryParameters(
+                                        parameterWithName("cursor").description("Base64 인코딩된 복합 커서 (초기 요청 시 생략)").optional(),
+                                        parameterWithName("size").description("필요한 히어릿 항목 수").defaultValue("10")
+                                )
+                                .responseFields(Stream.concat(
+                                                Arrays.stream(new FieldDescriptor[]{
+                                                        fieldWithPath("content[].id").description("히어릿 ID"),
+                                                        fieldWithPath("content[].title").description("히어릿 제목"),
+                                                        fieldWithPath("content[].categoryColorCode").description("카테고리 색상"),
+                                                        fieldWithPath("content[].isBookmarked").description("북마크 여부"),
+                                                        fieldWithPath("content[].bookmarkId").description(
+                                                                "북마크 ID (북마크된 경우)").optional(),
+                                                        fieldWithPath("content[].keywords").description("히어릿에 포함된 키워드 목록"),
+                                                        fieldWithPath("content[].keywords[].id").description("키워드 ID"),
+                                                        fieldWithPath("content[].keywords[].name").description("키워드 이름"),
+                                                        fieldWithPath("content[].cursor").description("Base64 인코딩된 복합 커서"),
                                                 }),
                                                 Arrays.stream(
                                                         com.onair.hearit.fixture.ApiDocSnippets.getCustomCursorResponseFields())

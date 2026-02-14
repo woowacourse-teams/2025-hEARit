@@ -24,6 +24,12 @@ public class ExploreScoreInitializer {
         }
     }
 
+    @Transactional
+    public void refreshScoresV3(UUID userUuid, UserType userType) {
+        Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(userUuid, userType);
+        exploreScoreCommandRepository.insertScores(userUuid, scores);
+    }
+
     private boolean isInitialRequest(long cursorId) {
         return cursorId == 0L;
     }

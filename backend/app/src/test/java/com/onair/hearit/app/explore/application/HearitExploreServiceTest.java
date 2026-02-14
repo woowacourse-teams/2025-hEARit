@@ -12,7 +12,9 @@ import com.onair.hearit.app.explore.application.scoreprocessor.GuestExploreScore
 import com.onair.hearit.app.explore.application.scoreprocessor.MemberExploreScoreProcessor;
 import com.onair.hearit.app.explore.dto.CursorRequest;
 import com.onair.hearit.app.explore.dto.CursorResponseV2;
+import com.onair.hearit.app.explore.dto.ExploreCursor;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Bookmark;
@@ -184,6 +186,61 @@ class HearitExploreServiceTest {
                         tuple(hearit2.getId(), false), // 20.0점
                         tuple(hearit3.getId(), false)  // 19.0점
                 );
+    }
+
+    @DisplayName("v3: 회원이 처음 탐색 요청 시(cursor=null), score 내림차순으로 반환하고 각 아이템에 Base64 커서가 포함된다")
+    @Test
+    void getExploredHearitsV3ForMember_firstRequest() {
+        // given
+        given(randomNumberGenerator.getDouble()).willReturn(0.1d);
+
+        LocalDateTime now = LocalDateTime.now();
+        Category category1 = dbHelper.insertCategory(new Category("V3Java", "#112233"));
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        UserInfo memberInfo = TestFixture.createFixedMemberUserInfo(member);
+
+        Hearit hearit1 = dbHelper.insertHearitAt(createHearit(category1), now);
+        Hearit hearit2 = dbHelper.insertHearitAt(createHearit(category1), now.minusDays(2));
+        Hearit hearit3 = dbHelper.insertHearitAt(createHearit(category1), now.minusDays(4));
+
+        // when
+        CursorResponseV2<ExploredHearitResponseV3> response = hearitExploreService.getExploredHearitsV3(
+                memberInfo, null, 10);
+
+        // then
+        assertThat(response.content())
+                .hasSize(3)
+                .extracting("id")
+                .containsExactly(hearit1.getId(), hearit2.getId(), hearit3.getId());
+        assertThat(response.content()).allMatch(r -> r.cursor() != null && !r.cursor().isBlank());
+    }
+
+    @DisplayName("v3: 두 번째 요청 시 커서 이후의 데이터만 반환한다")
+    @Test
+    void getExploredHearitsV3_secondRequest() {
+        // given
+        given(randomNumberGenerator.getDouble()).willReturn(0.1d);
+
+        LocalDateTime now = LocalDateTime.now();
+        Category category1 = dbHelper.insertCategory(new Category("V3Java2", "#223344"));
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        UserInfo memberInfo = TestFixture.createFixedMemberUserInfo(member);
+
+        dbHelper.insertHearitAt(createHearit(category1), now);
+        dbHelper.insertHearitAt(createHearit(category1), now.minusDays(2));
+        dbHelper.insertHearitAt(createHearit(category1), now.minusDays(4));
+
+        // 첫 번째 요청으로 점수판 생성 및 첫 번째 아이템 가져오기
+        CursorResponseV2<ExploredHearitResponseV3> firstResponse = hearitExploreService.getExploredHearitsV3(
+                memberInfo, null, 1);
+        String nextCursor = firstResponse.content().getFirst().cursor();
+
+        // when - 커서 이후 데이터
+        CursorResponseV2<ExploredHearitResponseV3> secondResponse = hearitExploreService.getExploredHearitsV3(
+                memberInfo, nextCursor, 10);
+
+        // then
+        assertThat(secondResponse.content()).hasSize(2);
     }
 
     private Hearit createHearit(Category category) {

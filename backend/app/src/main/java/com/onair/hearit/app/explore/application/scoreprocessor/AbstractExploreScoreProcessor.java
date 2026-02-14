@@ -1,7 +1,9 @@
 package com.onair.hearit.app.explore.application.scoreprocessor;
 
 import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
+import com.onair.hearit.app.explore.dto.ExploreCursor;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
@@ -9,6 +11,7 @@ import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
+import com.onair.hearit.core.infrastructure.projection.ExploredHearitScoreProjection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -58,10 +61,40 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
                 ));
     }
 
+    @Override
+    public void refreshScoresV3(UserInfo userInfo) {
+        exploreScoreInitializer.refreshScoresV3(
+                getUserUuid(userInfo), userInfo.getUserType());
+    }
+
+    @Override
+    public List<ExploredHearitResponseV3> getExploreHearitsV3(UserInfo userInfo, String cursor, int size) {
+        UUID userUuid = getUserUuid(userInfo);
+        List<ExploredHearitScoreProjection> projections;
+        if (ExploreCursor.isInitialRequest(cursor)) {
+            projections = exploredHearitQueryRepository
+                    .findExploredHearitsByScore(userUuid, Pageable.ofSize(size));
+        } else {
+            ExploreCursor decoded = ExploreCursor.decode(cursor);
+            projections = exploredHearitQueryRepository
+                    .findExploredHearitsAfterScoreCursor(
+                            userUuid, decoded.score(), decoded.hearitId(), Pageable.ofSize(size));
+        }
+        if (projections.isEmpty()) {
+            return List.of();
+        }
+        return convertToExploredHearitResponsesV3(projections, userInfo);
+    }
+
     protected abstract UUID getUserUuid(UserInfo userInfo);
 
     protected abstract List<ExploredHearitResponse> convertToExploredHearitResponses(
             List<ExploredHearitProjection> infos,
+            UserInfo userInfo
+    );
+
+    protected abstract List<ExploredHearitResponseV3> convertToExploredHearitResponsesV3(
+            List<ExploredHearitScoreProjection> projections,
             UserInfo userInfo
     );
 }
