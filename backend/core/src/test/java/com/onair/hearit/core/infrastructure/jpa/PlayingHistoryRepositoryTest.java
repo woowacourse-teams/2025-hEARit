@@ -95,4 +95,42 @@ class PlayingHistoryRepositoryTest {
             });
         }
     }
+
+    @Nested
+    @DisplayName("임계치 시간 이후에 활동한 유저 UUID 추출")
+    class findUuidsByUpdatedAtAfter {
+
+        @Test
+        @DisplayName("지정한 시간(threshold) 이후에 재생 기록이 업데이트된 유저들을 중복 없이 조회한다.")
+        void findUuidsByUpdatedAtAfter_Success() {
+            // given
+            LocalDateTime threshold = LocalDateTime.of(2026, 2, 1, 0, 0);
+            Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+            Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+            UUID user1 = UUID.randomUUID();
+            UUID user2 = UUID.randomUUID();
+            UUID user3 = UUID.randomUUID();
+
+            // 1. 대상 포함: threshold 딱 정각 활동
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(user1, hearit, 10), threshold);
+            // 2. 대상 포함: threshold 이후 활동
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(user2, hearit, 15), threshold.plusMinutes(1));
+            // 3. 대상 포함: 한 유저가 여러 번 활동 (중복 제거 확인용)
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(user2, hearit, 20), threshold.plusHours(1));
+
+            // 4. 대상 제외: threshold 이전 활동
+            dbHelper.insertPlayingHistoryAt(new PlayingHistory(user3, hearit, 5), threshold.minusSeconds(1));
+
+            // when
+            List<UUID> result = playingHistoryRepository.findUuidsByUpdatedAtAfter(threshold);
+
+            // then
+            assertAll(
+                    () -> assertThat(result).hasSize(2),
+                    () -> assertThat(result).containsExactlyInAnyOrder(user1, user2),
+                    () -> assertThat(result).doesNotContain(user3)
+            );
+        }
+    }
 }
