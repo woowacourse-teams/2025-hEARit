@@ -8,12 +8,4 @@ interface ExploreDataStoreRepository {
     suspend fun clearExploreCount(): Result<Boolean>
 
     suspend fun shouldShowAnimation(): Result<Boolean>
-
-    suspend fun getLastPosition(): Result<Long>
-
-    suspend fun saveLastPosition(position: Long): Result<Boolean>
-
-    suspend fun saveLastCursorId(cursorId: Long): Result<Boolean>
-
-    suspend fun getLastCursorId(): Result<Long?>
 }

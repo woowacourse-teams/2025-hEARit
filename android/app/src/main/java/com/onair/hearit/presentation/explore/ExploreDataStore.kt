@@ -24,34 +24,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class ExploreDataStore @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    // 저장할 키값 정의
-    private val KEY_LAST_CURSOR_ID = longPreferencesKey("last_cursor_id")
-    private val KEY_LAST_POSITION = longPreferencesKey("last_position")
     private val EXPLORE_COUNT = intPreferencesKey("explore_count")
-
-    // 마지막으로 본 인덱스
-    val lastCursorId: Flow<Long?> =
-        context.dataStore.data
-            .catch { exception ->
-                if (exception is IOException) {
-                    Timber.e(exception, "Error reading explore_prefs")
-                } else {
-                    Timber.e(exception, "Unexpected error in explore_prefs")
-                }
-                emit(emptyPreferences())
-            }.map { it[KEY_LAST_CURSOR_ID] ?: 0 }
-
-    // 마지막 재생 위치
-    val lastPosition: Flow<Long> =
-        context.dataStore.data
-            .catch { exception ->
-                if (exception is IOException) {
-                    Timber.e(exception, "Error reading explore_prefs")
-                } else {
-                    Timber.e(exception, "Unexpected error in explore_prefs")
-                }
-                emit(emptyPreferences())
-            }.map { it[KEY_LAST_POSITION] ?: 0L }
 
     // 애니메이션 카운트
     val exploreCount: Flow<Int> =
@@ -64,14 +37,6 @@ class ExploreDataStore @Inject constructor(
                 }
                 emit(emptyPreferences())
             }.map { it[EXPLORE_COUNT] ?: 0 }
-
-    suspend fun saveLastCursorId(cursorId: Long) {
-        safeEdit { it[KEY_LAST_CURSOR_ID] = cursorId }
-    }
-
-    suspend fun saveLastPosition(position: Long) {
-        safeEdit { it[KEY_LAST_POSITION] = position }
-    }
 
     suspend fun updateExploreCount(count: Int) {
         safeEdit { it[EXPLORE_COUNT] = count }

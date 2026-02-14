@@ -93,20 +93,10 @@ class ExploreViewModel @Inject constructor(
 
     private fun loadInitialState() {
         viewModelScope.launch {
-            val savedCursorId = exploreDataStoreRepository.getLastCursorId().getOrDefault(null)
-            lastPosition = exploreDataStoreRepository.getLastPosition().getOrDefault(0L)
-
-            val fetchCursorId =
-                if (savedCursorId != null && savedCursorId > 0) {
-                    savedCursorId - 1
-                } else {
-                    0L
-                }
-            fetchData(fetchCursorId, isFirstFetch = true)
+            fetchData(0L, isFirstFetch = true)
         }
     }
 
-    // 탭 이탈 시 호출: 복귀 정보를 저장
     fun scheduleResume(resumeIndex: Int) {
         Timber.d("scheduleResume called")
 

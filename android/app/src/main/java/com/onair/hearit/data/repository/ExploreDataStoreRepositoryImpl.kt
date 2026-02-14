@@ -27,22 +27,6 @@ class ExploreDataStoreRepositoryImpl @Inject constructor(
             exploreDataStore.incrementCountIfUnder(MAX_ANIMATION_COUNT)
         }
 
-    override suspend fun getLastCursorId(): Result<Long?> = runCatching { exploreDataStore.lastCursorId.first() }
-
-    override suspend fun saveLastCursorId(cursorId: Long): Result<Boolean> =
-        runCatching {
-            exploreDataStore.saveLastCursorId(cursorId)
-            true
-        }
-
-    override suspend fun getLastPosition(): Result<Long> = runCatching { exploreDataStore.lastPosition.first() }
-
-    override suspend fun saveLastPosition(position: Long): Result<Boolean> =
-        runCatching {
-            exploreDataStore.saveLastPosition(position)
-            true
-        }
-
     companion object {
         private const val MAX_ANIMATION_COUNT = 2
     }
