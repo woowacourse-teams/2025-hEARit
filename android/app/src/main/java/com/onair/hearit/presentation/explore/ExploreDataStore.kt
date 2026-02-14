@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +23,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class ExploreDataStore @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    private val EXPLORE_COUNT = intPreferencesKey("explore_count")
+    private val exploreCountKey = intPreferencesKey("explore_count")
 
     // 애니메이션 카운트
     val exploreCount: Flow<Int> =
@@ -36,23 +35,23 @@ class ExploreDataStore @Inject constructor(
                     Timber.e(exception, "Unexpected error in explore_prefs")
                 }
                 emit(emptyPreferences())
-            }.map { it[EXPLORE_COUNT] ?: 0 }
+            }.map { it[exploreCountKey] ?: 0 }
 
     suspend fun updateExploreCount(count: Int) {
-        safeEdit { it[EXPLORE_COUNT] = count }
+        safeEdit { it[exploreCountKey] = count }
     }
 
     suspend fun clearExploreCount() {
-        safeEdit { it.remove(EXPLORE_COUNT) }
+        safeEdit { it.remove(exploreCountKey) }
     }
 
     // 애니메이션 로직 처리용
     suspend fun incrementCountIfUnder(max: Int): Boolean {
         var result = false
         safeEdit { prefs ->
-            val current = prefs[EXPLORE_COUNT] ?: 0
+            val current = prefs[exploreCountKey] ?: 0
             if (current < max) {
-                prefs[EXPLORE_COUNT] = current + 1
+                prefs[exploreCountKey] = current + 1
                 result = true
             } else {
                 result = false
