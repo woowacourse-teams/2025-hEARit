@@ -49,10 +49,10 @@ class PlayingHistoryScoreFactorTest {
     }
 
     @Test
-    @DisplayName("비회원은 재생기록 점수를 받지 않는다")
+    @DisplayName("비회원은 재생기록 점수를 받는다")
     void guestNotSupport() {
         // when and then
-        assertThat(playingHistoryScoreFactor.isSupported(UserType.GUEST)).isFalse();
+        assertThat(playingHistoryScoreFactor.isSupported(UserType.GUEST)).isTrue();
     }
 
     @Test
