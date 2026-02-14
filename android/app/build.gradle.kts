@@ -248,4 +248,6 @@ dependencies {
 
     // swipe Refresh Layout
     implementation(libs.androidx.swiperefreshlayout)
+
+    implementation(libs.lottie.compose)
 }
