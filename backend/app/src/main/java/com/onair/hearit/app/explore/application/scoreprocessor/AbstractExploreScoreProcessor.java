@@ -70,16 +70,10 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
     @Override
     public List<ExploredHearitResponseV3> getExploreHearitsV3(UserInfo userInfo, String cursor, int size) {
         UUID userUuid = getUserUuid(userInfo);
-        List<ExploredHearitScoreProjection> projections;
-        if (ExploreCursor.isInitialRequest(cursor)) {
-            projections = exploredHearitQueryRepository
-                    .findExploredHearitsByScore(userUuid, Pageable.ofSize(size));
-        } else {
-            ExploreCursor decoded = ExploreCursor.decode(cursor);
-            projections = exploredHearitQueryRepository
-                    .findExploredHearitsAfterScoreCursor(
-                            userUuid, decoded.score(), decoded.hearitId(), Pageable.ofSize(size));
-        }
+        ExploreCursor exploreCursor = ExploreCursor.from(cursor);
+        List<ExploredHearitScoreProjection> projections =
+                exploredHearitQueryRepository.findExploredHearitsByScoreCursor(
+                        userUuid, exploreCursor.score(), exploreCursor.hearitId(), Pageable.ofSize(size));
         if (projections.isEmpty()) {
             return List.of();
         }

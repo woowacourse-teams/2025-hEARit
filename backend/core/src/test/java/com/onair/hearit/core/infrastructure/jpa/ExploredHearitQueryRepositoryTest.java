@@ -59,15 +59,15 @@ class ExploredHearitQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("score 기반으로 히어릿을 내림차순 조회한다 (초기 요청)")
-    void findExploredHearitsByScore() {
+    @DisplayName("MAX_VALUE 커서로 조회하면 전체를 score 내림차순으로 반환한다 (초기 요청)")
+    void findExploredHearitsByScoreCursor_initial() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         List<ExploreScore> scores = insertTestExploreScoreByMemberIdAndCount(member.getUuid(), 5);
 
         // when
         List<ExploredHearitScoreProjection> result = exploredHearitQueryRepository
-                .findExploredHearitsByScore(member.getUuid(), Pageable.ofSize(3));
+                .findExploredHearitsByScoreCursor(member.getUuid(), Double.MAX_VALUE, Long.MAX_VALUE, Pageable.ofSize(3));
 
         // then
         assertAll(() -> {
@@ -80,7 +80,7 @@ class ExploredHearitQueryRepositoryTest {
 
     @Test
     @DisplayName("score 기반 커서 이후 히어릿을 조회한다")
-    void findExploredHearitsAfterScoreCursor() {
+    void findExploredHearitsByScoreCursor_afterCursor() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         List<ExploreScore> scores = insertTestExploreScoreByMemberIdAndCount(member.getUuid(), 5);
@@ -89,7 +89,7 @@ class ExploredHearitQueryRepositoryTest {
 
         // when - score=30.0, hearitId=cursorHearitId 이후의 데이터
         List<ExploredHearitScoreProjection> result = exploredHearitQueryRepository
-                .findExploredHearitsAfterScoreCursor(member.getUuid(), 30.0, cursorHearitId, Pageable.ofSize(10));
+                .findExploredHearitsByScoreCursor(member.getUuid(), 30.0, cursorHearitId, Pageable.ofSize(10));
 
         // then
         assertAll(() -> {

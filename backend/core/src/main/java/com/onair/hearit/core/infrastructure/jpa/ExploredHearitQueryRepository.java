@@ -33,22 +33,10 @@ public interface ExploredHearitQueryRepository extends JpaRepository<Hearit, Lon
             FROM ExploreScore es
             JOIN Hearit h ON es.hearitId = h.id
             WHERE es.userUuid = :userUuid
-            ORDER BY es.score DESC, h.id DESC
-            """)
-    List<ExploredHearitScoreProjection> findExploredHearitsByScore(@Param("userUuid") UUID userUuid,
-                                                                    Pageable pageable);
-
-    @Query("""
-            SELECT
-                h AS hearit,
-                es.score AS score
-            FROM ExploreScore es
-            JOIN Hearit h ON es.hearitId = h.id
-            WHERE es.userUuid = :userUuid
               AND (es.score < :score OR (es.score = :score AND h.id < :hearitId))
             ORDER BY es.score DESC, h.id DESC
             """)
-    List<ExploredHearitScoreProjection> findExploredHearitsAfterScoreCursor(
+    List<ExploredHearitScoreProjection> findExploredHearitsByScoreCursor(
             @Param("userUuid") UUID userUuid,
             @Param("score") double score,
             @Param("hearitId") long hearitId,

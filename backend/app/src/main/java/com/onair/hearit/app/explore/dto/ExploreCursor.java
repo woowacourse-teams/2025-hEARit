@@ -9,12 +9,27 @@ public record ExploreCursor(
 ) {
     private static final String DELIMITER = ":";
 
+    public static ExploreCursor initial() {
+        return new ExploreCursor(Double.MAX_VALUE, Long.MAX_VALUE);
+    }
+
+    public static ExploreCursor from(String cursor) {
+        if (cursor == null || cursor.isBlank()) {
+            return initial();
+        }
+        return decode(cursor);
+    }
+
+    public boolean isInitial() {
+        return score == Double.MAX_VALUE;
+    }
+
     public String encode() {
         String raw = score + DELIMITER + hearitId;
         return Base64.getEncoder().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static ExploreCursor decode(String encoded) {
+    private static ExploreCursor decode(String encoded) {
         byte[] decoded = Base64.getDecoder().decode(encoded);
         String raw = new String(decoded, StandardCharsets.UTF_8);
         String[] parts = raw.split(DELIMITER, 2);
@@ -25,9 +40,5 @@ public record ExploreCursor(
                 Double.parseDouble(parts[0]),
                 Long.parseLong(parts[1])
         );
-    }
-
-    public static boolean isInitialRequest(String cursor) {
-        return cursor == null || cursor.isBlank();
     }
 }
