@@ -1,10 +1,14 @@
 package com.onair.hearit.presentation.explore
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -12,14 +16,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.Keyword
@@ -29,6 +40,7 @@ import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.immutableListOf
+import kotlinx.coroutines.delay
 
 @Composable
 fun ExploreScreen(
@@ -43,12 +55,47 @@ fun ExploreScreen(
     onPositionChanged: (Long) -> Unit,
     isPlaying: Boolean,
     speed: Float,
+    showSwipeGuide: Boolean,
+    onGuideFinished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState =
         rememberPagerState(
             pageCount = { shortsHearit.size },
         )
+
+    val pagerOffsetY = remember { Animatable(0f) }
+
+    LaunchedEffect(showSwipeGuide) {
+        if (showSwipeGuide) {
+            delay(300)
+
+            repeat(2) {
+                pagerOffsetY.animateTo(
+                    targetValue = -200f,
+                    animationSpec =
+                        tween(
+                            durationMillis = 500,
+                            easing = FastOutSlowInEasing,
+                        ),
+                )
+
+                pagerOffsetY.animateTo(
+                    targetValue = 0f,
+                    animationSpec =
+                        tween(
+                            durationMillis = 500,
+                            easing = FastOutSlowInEasing,
+                        ),
+                )
+                delay(400)
+            }
+
+            onGuideFinished()
+        } else {
+            pagerOffsetY.snapTo(0f)
+        }
+    }
 
     LaunchedEffect(currentPageIndex, shortsHearit.size) {
         val pageCount = shortsHearit.size
@@ -77,7 +124,12 @@ fun ExploreScreen(
     ) {
         VerticalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize(),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        translationY = pagerOffsetY.value
+                    },
             key = { index -> shortsHearit[index].id },
         ) { page ->
             val item = shortsHearit[page]
@@ -109,7 +161,39 @@ fun ExploreScreen(
                     .padding(vertical = 12.dp, horizontal = 20.dp)
                     .fillMaxWidth(),
         )
+
+        if (showSwipeGuide) {
+            SwipeUpGuide(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                onFinished = onGuideFinished,
+            )
+        }
     }
+}
+
+@Composable
+private fun SwipeUpGuide(
+    modifier: Modifier = Modifier,
+    onFinished: () -> Unit,
+) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.swipe_up))
+    val repeatCount = 2
+
+    LaunchedEffect(composition) {
+        composition?.let { comp ->
+            val totalDuration = comp.duration * repeatCount
+            delay(totalDuration.toLong())
+            onFinished()
+        }
+    }
+
+    LottieAnimation(
+        composition = composition,
+        iterations = repeatCount,
+        modifier =
+            modifier
+                .size(200.dp),
+    )
 }
 
 @Preview
@@ -145,5 +229,7 @@ private fun PreviewExploreScreen() {
         onItemPlay = {},
         isPlaying = false,
         speed = 1.0f,
+        showSwipeGuide = true,
+        onGuideFinished = {},
     )
 }

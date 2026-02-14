@@ -26,7 +26,7 @@ data class ExploreUiState(
     val shortsHearits: List<ExploreHearit> = emptyList(),
     val isLoading: Boolean = true,
     val currentPageIndex: Int = 0,
-    val shouldPlayAnimation: Boolean = false,
+    val showGuideAnimation: Boolean = false,
     val showLoginDialog: Boolean = false,
 )
 
@@ -272,11 +272,15 @@ class ExploreViewModel @Inject constructor(
             exploreDataStoreRepository
                 .shouldShowAnimation()
                 .onSuccess { shouldShow ->
-                    _uiState.update { it.copy(shouldPlayAnimation = shouldShow) }
+                    _uiState.update { it.copy(showGuideAnimation = shouldShow) }
                 }.onFailure {
-                    _uiState.update { it.copy(shouldPlayAnimation = false) }
+                    _uiState.update { it.copy(showGuideAnimation = false) }
                 }
         }
+    }
+
+    fun dismissAnimation() {
+        _uiState.update { it.copy(showGuideAnimation = false) }
     }
 
     override fun onCleared() {
