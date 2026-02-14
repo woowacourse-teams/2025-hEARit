@@ -66,8 +66,7 @@ public abstract class RedisIntegrationTestSupport {
     @Container
     protected static final GenericContainer<?> REDIS_CONTAINER =
             new GenericContainer<>(DockerImageName.parse("redis:7.2-alpine"))
-                    .withExposedPorts(6379)
-                    .withReuse(true);
+                    .withExposedPorts(6379);
 
     protected static RedisTemplate<String, String> redisTemplate;
     protected static RedissonClient redissonClient;
