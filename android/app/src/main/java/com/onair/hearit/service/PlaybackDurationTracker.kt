@@ -74,6 +74,7 @@ class PlaybackDurationTracker @Inject constructor(
                             sendViewHistory(state) {
                                 stopTracking()
                             }
+                            return@launch
                         }
                     }
                 }
