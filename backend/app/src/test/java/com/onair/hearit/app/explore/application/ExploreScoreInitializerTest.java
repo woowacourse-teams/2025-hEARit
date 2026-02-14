@@ -3,8 +3,8 @@ package com.onair.hearit.app.explore.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.common.DefaultRandomNumberGenerator;
+import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
 import com.onair.hearit.app.fixture.DbHelper;
@@ -58,8 +58,8 @@ class ExploreScoreInitializerTest {
         exploreScoreInitializer = new ExploreScoreInitializer(exploreScoreCalculator, exploreScoreCommandRepository);
     }
 
-    @DisplayName("cursorId가 0이 아니면 갱신하지 않는다")
     @Test
+    @DisplayName("cursorId를 확인했을 때 0이 아니면 갱신하지 않는다")
     void skipRefreshingWhenCursorIsNotZero() {
         // given
         UUID userUuid = UUID.randomUUID();
@@ -75,8 +75,8 @@ class ExploreScoreInitializerTest {
         assertThat(findExploreScores(userUuid)).isEmpty();
     }
 
-    @DisplayName("cursorId가 0이면 점수를 갱신하고 커서 ID를 부여한다")
     @Test
+    @DisplayName("cursorId를 확인했을 때 0이면 점수를 갱신하고 커서 ID를 부여한다")
     void refreshScoresScoresWhenCursorIsZero() {
         // given
         UUID userUuid = UUID.randomUUID();
