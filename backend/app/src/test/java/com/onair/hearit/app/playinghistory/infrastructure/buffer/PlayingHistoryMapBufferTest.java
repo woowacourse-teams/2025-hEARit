@@ -6,54 +6,22 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
-import com.onair.hearit.app.fixture.DbHelper;
-import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
-import com.onair.hearit.core.config.DataSourceConfig;
+import com.onair.hearit.app.fixture.RedisIntegrationTestSupport;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
-import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
-import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 
-@DataJpaTest
-@Sql("/dbclean.sql")
-@ActiveProfiles("integration-test")
-@AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryCommandRepository.class})
-class PlayingHistoryMapBufferTest {
+class PlayingHistoryMapBufferTest extends RedisIntegrationTestSupport {
 
-    @Autowired
-    DbHelper dbHelper;
-
-    @Autowired
-    PlayingHistoryCommandRepository commandRepository;
-
-    @Autowired
-    HearitRepository hearitRepository;
-
-    @Autowired
-    PlayingHistoryRepository playingHistoryRepository;
-
-    PlayingHistoryMapBuffer buffer;
-    PlayingHistoryConverter converter;
+    private PlayingHistoryMapBuffer buffer;
 
     @BeforeEach
     void setup() {
-        converter = new PlayingHistoryConverter(hearitRepository);
         buffer = new PlayingHistoryMapBuffer(commandRepository, converter);
     }
 
@@ -117,7 +85,7 @@ class PlayingHistoryMapBufferTest {
         buffer.add(history2, 2_000L);
 
         // spy repository로 bulkInsert에서 예외 발생
-        PlayingHistoryCommandRepository spyRepo = spy(commandRepository);
+        var spyRepo = spy(commandRepository);
         doThrow(new RuntimeException("DB error")).when(spyRepo).bulkInsert(anyList());
         PlayingHistoryMapBuffer failingBuffer = new PlayingHistoryMapBuffer(spyRepo, converter);
 
