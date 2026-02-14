@@ -11,6 +11,7 @@ import com.onair.hearit.core.fixture.DbHelper;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
+import com.onair.hearit.core.infrastructure.projection.ExploredHearitScoreProjection;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -54,6 +55,48 @@ class ExploredHearitQueryRepositoryTest {
                     .contains(exploreScoreHearitIds.get(2), exploreScoreHearitIds.get(3), exploreScoreHearitIds.get(4));
             assertThat(result).extracting(ExploredHearitProjection::getCursorId)
                     .contains(3L, 4L, 5L);
+        });
+    }
+
+    @Test
+    @DisplayName("score 기반으로 히어릿을 내림차순 조회한다 (초기 요청)")
+    void findExploredHearitsByScore() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        List<ExploreScore> scores = insertTestExploreScoreByMemberIdAndCount(member.getUuid(), 5);
+
+        // when
+        List<ExploredHearitScoreProjection> result = exploredHearitQueryRepository
+                .findExploredHearitsByScore(member.getUuid(), Pageable.ofSize(3));
+
+        // then
+        assertAll(() -> {
+            assertThat(result).hasSize(3);
+            // score DESC 순서: 50.0, 40.0, 30.0
+            assertThat(result).extracting(ExploredHearitScoreProjection::getScore)
+                    .containsExactly(50.0, 40.0, 30.0);
+        });
+    }
+
+    @Test
+    @DisplayName("score 기반 커서 이후 히어릿을 조회한다")
+    void findExploredHearitsAfterScoreCursor() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        List<ExploreScore> scores = insertTestExploreScoreByMemberIdAndCount(member.getUuid(), 5);
+        // score=30.0 (3번째) 항목의 hearitId를 커서로 사용
+        Long cursorHearitId = scores.get(2).getHearitId();
+
+        // when - score=30.0, hearitId=cursorHearitId 이후의 데이터
+        List<ExploredHearitScoreProjection> result = exploredHearitQueryRepository
+                .findExploredHearitsAfterScoreCursor(member.getUuid(), 30.0, cursorHearitId, Pageable.ofSize(10));
+
+        // then
+        assertAll(() -> {
+            assertThat(result).hasSize(2);
+            // score DESC 순서: 20.0, 10.0
+            assertThat(result).extracting(ExploredHearitScoreProjection::getScore)
+                    .containsExactly(20.0, 10.0);
         });
     }
 
