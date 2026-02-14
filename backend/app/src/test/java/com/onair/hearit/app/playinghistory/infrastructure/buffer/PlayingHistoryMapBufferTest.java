@@ -33,7 +33,13 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryCommandRepository.class})
+@Import({
+        DbHelper.class,
+        TestJpaAuditingConfig.class,
+        DataSourceConfig.class,
+        PlayingHistoryCommandRepository.class,
+        PlayingHistoryConverter.class
+})
 class PlayingHistoryMapBufferTest {
 
     @Autowired
