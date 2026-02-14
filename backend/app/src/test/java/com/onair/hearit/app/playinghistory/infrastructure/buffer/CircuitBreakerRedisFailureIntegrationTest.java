@@ -38,7 +38,6 @@ import org.testcontainers.utility.DockerImageName;
 @SpringBootTest
 @ActiveProfiles("integration-test")
 @Sql("/dbclean.sql")
-@Disabled
 class CircuitBreakerRedisFailureIntegrationTest {
 
     static GenericContainer<?> redisContainer;
