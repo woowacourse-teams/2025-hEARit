@@ -111,6 +111,15 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             GROUP BY h.id, h.viewCount, h.createdAt, ph_stats.avgTime, ph_stats.compRate""")
     Page<HearitClusterStatisticsProjection> findClusterStatistics(Pageable pageable);
 
+    @Query(value = """
+            SELECT h.id
+            FROM Hearit h
+            WHERE h.id NOT IN :excludedIds
+            ORDER BY RAND()
+            LIMIT :size
+            """)
+    List<Long> findRandomIdsExcluding(@Param("excludedIds") List<Long> excludedIds, @Param("size") int size);
+
     @Modifying
     @Query(value = """
                 UPDATE hearit

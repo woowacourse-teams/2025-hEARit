@@ -166,6 +166,52 @@ class HearitRepositoryTest {
     }
 
     @Test
+    @DisplayName("제외 리스트에 포함된 ID를 제외하고 지정된 개수만큼 랜덤하게 조회한다.")
+    void findRandomIdsExcluding_Success() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        // 5개의 히어릿 저장
+        Hearit h1 = dbHelper.insertHearit(TestFixture.createHearitWith("H1", category));
+        Hearit h2 = dbHelper.insertHearit(TestFixture.createHearitWith("H2", category));
+        Hearit h3 = dbHelper.insertHearit(TestFixture.createHearitWith("H3", category));
+        Hearit h4 = dbHelper.insertHearit(TestFixture.createHearitWith("H4", category));
+        Hearit h5 = dbHelper.insertHearit(TestFixture.createHearitWith("H5", category));
+
+        List<Long> excludedIds = List.of(h1.getId(), h2.getId());
+        int limitSize = 2;
+
+        // when
+        List<Long> result = hearitRepository.findRandomIdsExcluding(excludedIds, limitSize);
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(limitSize),
+                () -> assertThat(result).doesNotContain(h1.getId(), h2.getId()),
+                () -> assertThat(result).allMatch(id -> List.of(h3.getId(), h4.getId(), h5.getId()).contains(id))
+        );
+    }
+
+    @Test
+    @DisplayName("제외 리스트가 비어있을 때(Empty List) 에러 없이 전체에서 랜덤하게 조회한다.")
+    void findRandomIdsExcluding_WhenExcludedIdsIsEmpty() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        dbHelper.insertHearit(TestFixture.createHearitWith("H1", category));
+        dbHelper.insertHearitCluster(TestFixture.createHearitClusterWithId(
+                dbHelper.insertHearit(TestFixture.createHearitWith("H2", category)), 1));
+
+        List<Long> emptyExcludedIds = List.of();
+        int limitSize = 2;
+
+        // when
+        List<Long> result = hearitRepository.findRandomIdsExcluding(emptyExcludedIds, limitSize);
+
+        // then
+        assertThat(result).hasSize(limitSize);
+    }
+
+    @Test
     @DisplayName("히어릿에 대한 조회수 증가 시 정상적으로 1을 반환한다.")
     void increaseViewCount_success() {
         // given
