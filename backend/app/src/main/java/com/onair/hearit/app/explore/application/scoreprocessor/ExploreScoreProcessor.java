@@ -13,11 +13,7 @@ public interface ExploreScoreProcessor {
 
     List<ExploredHearitResponse> getExploreHearits(UserInfo userInfo, long cursorId, int size);
 
-    default void refreshScoresV3(UserInfo userInfo) {
-        throw new UnsupportedOperationException();
-    }
+    void refreshScoresV3(UserInfo userInfo);
 
-    default List<ExploredHearitResponseV3> getExploreHearitsV3(UserInfo userInfo, String cursor, int size) {
-        throw new UnsupportedOperationException();
-    }
+    List<ExploredHearitResponseV3> getExploreHearitsV3(UserInfo userInfo, String cursor, int size);
 }
