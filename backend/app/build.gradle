@@ -59,7 +59,7 @@ dependencies {
 
     // Testcontainers for Redis
     testImplementation 'org.testcontainers:testcontainers:2.0.3'
-    testImplementation 'org.testcontainers:junit-jupiter:2.0.3'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.3'
 
     // Awaitility for async testing
     testImplementation 'org.awaitility:awaitility:4.2.0'
