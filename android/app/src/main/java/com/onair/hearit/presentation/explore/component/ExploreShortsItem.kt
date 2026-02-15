@@ -78,30 +78,28 @@ fun ExploreShortsItem(
                         detectTapGestures(
                             onTap = {
                                 onItemPlay()
+                                if (showPauseIcon) {
+                                    showPauseIcon = false
+                                }
                                 showPauseIcon = true
                             },
                             onLongPress = {
-                                // 꾹 누를 때: 배속 시작
                                 if (isPlaying) {
                                     onSpeedChanged()
                                     isPressingSpeed = true
                                 }
                             },
-                        )
-                    }
-                    // 손을 떼는 이벤트를 감지하기 위해 별도의 pointerInput 추가
-                    .pointerInput(isPressingSpeed) {
-                        awaitPointerEventScope {
-                            while (isPressingSpeed) {
-                                val event = awaitPointerEvent()
-                                // 모든 손가락이 화면에서 떨어졌는지 확인
-                                if (event.changes.all { !it.pressed }) {
-                                    // 손을 뗄 때: 배속 종료
-                                    onSpeedChanged()
-                                    isPressingSpeed = false
+                            onPress = {
+                                try {
+                                    awaitRelease()
+                                } finally {
+                                    if (isPressingSpeed) {
+                                        onSpeedChanged()
+                                        isPressingSpeed = false
+                                    }
                                 }
-                            }
-                        }
+                            },
+                        )
                     },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -136,7 +134,8 @@ fun ExploreShortsItem(
                         .background(color = Gray1, shape = RoundedCornerShape(8.dp))
                         .clickable {
                             onNavigateToDetail(item.id)
-                        }.padding(vertical = 20.dp, horizontal = 16.dp),
+                        }
+                        .padding(vertical = 20.dp, horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
@@ -189,7 +188,8 @@ fun ExploreShortsItem(
                                 horizontalBias = 0f,
                                 verticalBias = -0.5f,
                             ),
-                        ).size(width = 79.dp, height = 30.dp),
+                        )
+                        .size(width = 79.dp, height = 30.dp),
             )
         }
     }
