@@ -1,5 +1,6 @@
 package com.onair.hearit.app.explore.dto;
 
+import com.onair.hearit.app.exception.custom.InvalidInputException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -17,7 +18,11 @@ public record ExploreCursor(
         if (cursor == null || cursor.isBlank()) {
             return initial();
         }
-        return decode(cursor);
+        try {
+            return decode(cursor);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidInputException("잘못된 커서 형식입니다: " + cursor);
+        }
     }
 
     public boolean isInitial() {
