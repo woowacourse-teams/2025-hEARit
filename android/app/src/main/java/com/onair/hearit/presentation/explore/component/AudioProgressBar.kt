@@ -1,18 +1,23 @@
 package com.onair.hearit.presentation.explore.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.HearitPurple2
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * 오디오 재생 진행 상태를 표시하고 사용자가 탐색할 수 있는 프로그레스 바
@@ -26,17 +31,24 @@ import com.onair.hearit.presentation.theme.HearitPurple2
  */
 @Composable
 fun AudioProgressBar(
-    modifier: Modifier = Modifier,
     currentPositionMs: Long,
     durationMs: Long,
     onPositionChanged: (Long) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    var dragPositionMs by remember { mutableStateOf<Long?>(null) }
+
+    val displayPosition = dragPositionMs ?: currentPositionMs
     val progress =
-        when {
-            durationMs <= 0L -> 0f
-            currentPositionMs >= durationMs -> 1f
-            else -> (currentPositionMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
-        }
+        if (durationMs > 0) (displayPosition.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
+
+    fun calculateNewTime(
+        offsetX: Float,
+        width: Int,
+    ): Long {
+        val newPosition = (offsetX / width).coerceIn(0f, 1f)
+        return (newPosition * durationMs).toLong()
+    }
 
     Box(
         modifier =
@@ -44,25 +56,45 @@ fun AudioProgressBar(
                 .height(4.dp)
                 .fillMaxWidth()
                 .background(color = Gray2)
-                .pointerInput(Unit) {
-                    detectTapGestures { offset ->
-                        val newPosition = (offset.x / size.width).coerceIn(0f, 1f)
-                        val newTimeMs = (newPosition * durationMs).toLong()
-                        onPositionChanged(newTimeMs)
-                    }
-                }.pointerInput(Unit) {
-                    detectDragGestures { change, _ ->
-                        change.consume()
-                        val newPosition = (change.position.x / size.width).coerceIn(0f, 1f)
-                        val newTimeMs = (newPosition * durationMs).toLong()
-                        onPositionChanged(newTimeMs)
+                .pointerInput(durationMs) {
+                    coroutineScope {
+                        launch {
+                            detectTapGestures { offset ->
+                                onPositionChanged(calculateNewTime(offset.x, size.width))
+                            }
+                        }
+                        launch {
+                            detectHorizontalDragGestures(
+                                onDragStart = { offset ->
+                                    dragPositionMs = calculateNewTime(offset.x, size.width)
+                                },
+                                onDragEnd = {
+                                    dragPositionMs?.let { onPositionChanged(it) }
+                                    dragPositionMs = null
+                                },
+                                onDragCancel = {
+                                    dragPositionMs = null
+                                },
+                                onHorizontalDrag = { change, _ ->
+                                    change.consume()
+                                    dragPositionMs = calculateNewTime(change.position.x, size.width)
+                                },
+                            )
+                        }
                     }
                 },
     ) {
         Box(
             modifier =
                 Modifier
-                    .fillMaxHeight()
+                    .height(4.dp)
+                    .fillMaxWidth()
+                    .background(color = Gray2),
+        )
+        Box(
+            modifier =
+                Modifier
+                    .height(4.dp)
                     .fillMaxWidth(progress)
                     .background(color = HearitPurple2),
         )
