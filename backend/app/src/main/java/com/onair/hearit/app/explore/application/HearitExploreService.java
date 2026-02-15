@@ -18,6 +18,7 @@ public class HearitExploreService {
 
     private final List<ExploreScoreProcessor> exploreScoreProcessors;
 
+    //TODO v3 api 로 전환 후 제거
     @Transactional
     public CursorResponseV2<ExploredHearitResponse> getExploredHearits(UserInfo userInfo,
                                                                        CursorRequest cursorRequest) {
