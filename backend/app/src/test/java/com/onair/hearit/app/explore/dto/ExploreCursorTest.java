@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.app.exception.custom.InvalidInputException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -58,6 +59,6 @@ class ExploreCursorTest {
     @Test
     void fromInvalidBase64ThrowsException() {
         assertThatThrownBy(() -> ExploreCursor.from("not-valid-base64!!!"))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(InvalidInputException.class);
     }
 }
