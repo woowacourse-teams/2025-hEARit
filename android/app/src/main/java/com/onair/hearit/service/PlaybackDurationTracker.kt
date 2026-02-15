@@ -4,6 +4,7 @@ import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import com.onair.hearit.di.ElapsedRealtime
 import com.onair.hearit.di.ServiceCoroutineScope
 import com.onair.hearit.domain.usecase.PostHearitViewUseCase
 import com.onair.hearit.service.PlaybackMediaItemManager.Companion.EXTRA_HEARIT_ID
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @ServiceScoped
 class PlaybackDurationTracker @Inject constructor(
     private val postHearitView: PostHearitViewUseCase,
+    @ElapsedRealtime private val elapsedRealtime: () -> Long,
     @ServiceCoroutineScope private val scope: CoroutineScope,
 ) : Player.Listener {
     private var player: Player? = null
@@ -64,16 +66,22 @@ class PlaybackDurationTracker @Inject constructor(
 
         trackingJob =
             scope.launch {
+                var lastTickTime = elapsedRealtime()
+
                 while (isActive) {
                     delay(CHECK_INTERVAL_MS)
 
+                    val currentTickTime = elapsedRealtime()
+                    val actualDiff = currentTickTime - lastTickTime
+                    lastTickTime = currentTickTime
+
                     currentState?.let { state ->
-                        state.accumulatedMs += CHECK_INTERVAL_MS
+                        if (player?.isPlaying == true) {
+                            state.accumulatedMs += actualDiff
+                        }
 
                         if (state.accumulatedMs >= TARGET_DURATION_MS) {
-                            sendViewHistory(state) {
-                                stopTracking()
-                            }
+                            sendViewHistory(state) { stopTracking() }
                             return@launch
                         }
                     }
