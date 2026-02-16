@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -20,24 +21,22 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.RichTooltip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -45,7 +44,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedHearit
@@ -60,7 +62,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
 
 private enum class SortType { Accuracy, Latest, Oldest }
 
@@ -177,7 +178,6 @@ private fun ResultSearchHeader(
             color = Gray4,
         )
 
-        // ✅ 앵커 고정용 Box
         Box(
             contentAlignment = Alignment.TopEnd,
         ) {
@@ -218,51 +218,91 @@ private fun SortDropdownMenu(
     onDismiss: () -> Unit,
     onSortSelected: (SortType) -> Unit,
 ) {
+    var showTooltip by remember { mutableStateOf(false) }
+    var infoAnchorBounds by remember { mutableStateOf<Rect?>(null) }
+
     DropdownMenu(
         expanded = menuExpanded,
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            showTooltip = false
+            onDismiss()
+        },
         offset = DpOffset(x = 0.dp, y = 8.dp),
         containerColor = Color(0xB33B3F43),
-        border =
-            BorderStroke(
-                width = 1.dp,
-                color = Color(0xB3686F75),
-            ),
+        border = BorderStroke(1.dp, Color(0xB3686F75)),
     ) {
         DropdownMenuItem(
-            enabled = false,
-            colors =
-                MenuDefaults.itemColors(
-                    disabledTextColor = HearitPurple1,
-                    disabledTrailingIconColor = HearitPurple1,
-                ),
             text = {
-                HeaderWithClickableTooltip(
-                    title = "추천순",
-                    titleColor = HearitPurple1,
-                    tooltipBg = HearitPurple1,
-                    tooltipTextColor = Gray4,
-                    infoTint = HearitPurple1,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "추천순",
+                        color = HearitPurple1,
+                        style = HearitTypoGraphy.titleSmall,
+                    )
+
+                    Icon(
+                        painter = painterResource(R.drawable.ic_info),
+                        contentDescription = "정렬 기준 안내",
+                        tint = HearitPurple1,
+                        modifier =
+                            Modifier
+                                .padding(start = 20.dp)
+                                .size(18.dp)
+                                .onGloballyPositioned { coords ->
+                                    val pos = coords.positionInWindow()
+                                    val size = coords.size
+                                    infoAnchorBounds =
+                                        Rect(
+                                            left = pos.x,
+                                            top = pos.y,
+                                            right = pos.x + size.width,
+                                            bottom = pos.y + size.height,
+                                        )
+                                }.noRippleClickable(enabled = false) {
+                                    showTooltip = !showTooltip
+                                },
+                    )
+                }
             },
-            onClick = {},
+            onClick = { },
         )
 
-        SortMenuItem(
-            label = "최신순",
-            onDismiss = onDismiss,
-            onSortSelected = onSortSelected,
-        )
-        SortMenuItem(
-            label = "정확도순",
-            onDismiss = onDismiss,
-            onSortSelected = onSortSelected,
-        )
-        SortMenuItem(
-            label = "오래된순",
-            onDismiss = onDismiss,
-            onSortSelected = onSortSelected,
-        )
+        SortMenuItem("정확도순", onDismiss, onSortSelected)
+        SortMenuItem("최신순", onDismiss, onSortSelected)
+        SortMenuItem("오래된순", onDismiss, onSortSelected)
+    }
+
+    // DropdownMenu 밖에서 별도 Popup으로 툴팁 렌더링
+    if (showTooltip && infoAnchorBounds != null) {
+        val b = infoAnchorBounds!!
+
+        Popup(
+            alignment = Alignment.TopStart,
+            offset =
+                IntOffset(
+                    x = b.left.toInt(),
+                    y = b.top.toInt() - 120,
+                ),
+            properties = PopupProperties(focusable = false),
+            onDismissRequest = { showTooltip = false },
+        ) {
+            Surface(
+                color = HearitPurple1,
+                shape = RoundedCornerShape(8.dp),
+            ) {
+                Text(
+                    text = "추천순은 정확도, 조회수, 날짜 등을 기준으로 정렬됩니다.",
+                    modifier =
+                        Modifier
+                            .widthIn(max = 140.dp)
+                            .padding(12.dp),
+                    color = Gray4,
+                    style = HearitTypoGraphy.bodySmall,
+                )
+            }
+        }
     }
 }
 
@@ -289,68 +329,6 @@ private fun SortMenuItem(
         },
         colors = MenuDefaults.itemColors(textColor = Gray4),
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HeaderWithClickableTooltip(
-    title: String,
-    titleColor: Color,
-    tooltipBg: Color,
-    tooltipTextColor: Color,
-    infoTint: Color,
-) {
-    val scope = rememberCoroutineScope()
-    val tooltipState = rememberTooltipState(isPersistent = true)
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(title, color = titleColor)
-
-        TooltipBox(
-            positionProvider =
-                TooltipDefaults.rememberTooltipPositionProvider(
-                    positioning = TooltipAnchorPosition.Above,
-                    spacingBetweenTooltipAndAnchor = 4.dp,
-                ),
-            state = tooltipState,
-            tooltip = {
-                RichTooltip(
-                    caretShape = TooltipDefaults.richTooltipContainerShape,
-                    shape = RoundedCornerShape(12.dp),
-                    colors =
-                        TooltipDefaults.richTooltipColors(
-                            containerColor = tooltipBg,
-                            contentColor = tooltipTextColor,
-                        ),
-                    text = {
-                        Text("추천순은 정확도, 조회수,\n날짜 등을 기준으로\n정렬됩니다.")
-                    },
-                )
-            },
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_info),
-                contentDescription = "정렬 기준 안내",
-                tint = infoTint,
-                modifier =
-                    Modifier
-                        .size(20.dp)
-                        .noRippleClickable {
-                            scope.launch {
-                                if (tooltipState.isVisible) {
-                                    tooltipState.dismiss()
-                                } else {
-                                    tooltipState.show()
-                                }
-                            }
-                        },
-            )
-        }
-    }
 }
 
 @Preview(showBackground = true)
