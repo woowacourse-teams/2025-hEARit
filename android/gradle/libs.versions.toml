@@ -19,7 +19,8 @@ kotlinxCollectionsImmutable = "0.4.0"
 kotlinxCoroutinesTest = "1.7.1"
 androidx-lifecycle = "2.9.2"
 lottie = "6.6.7"
-material = "1.12.0"
+material = "1.13.0"
+material3 = "1.4.0"
 activity = "1.10.1"
 constraintlayout = "2.2.1"
 androidx-media3 = "1.7.1"
@@ -84,7 +85,7 @@ androidx-media3-common = { module = "androidx.media3:media3-common", version.ref
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 
 # Compose
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
