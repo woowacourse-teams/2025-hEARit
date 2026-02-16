@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation.search.detail
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -63,7 +65,14 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
-private enum class SortType { Accuracy, Latest, Oldest }
+enum class SortType(
+    @param:StringRes val labelRes: Int,
+) {
+    Recommend(R.string.search_result_sort_recommend),
+    Accuracy(R.string.search_result_sort_accuracy),
+    Latest(R.string.search_result_sort_latest),
+    Oldest(R.string.search_result_sort_oldest),
+}
 
 @Composable
 fun SearchResultScreen(
@@ -126,7 +135,7 @@ fun SearchResultScreen(
                 )
             }
         } else if (hearits.isNotEmpty()) {
-            ResultSearchHeader()
+            ResultSearchHeader(SortType.Recommend)
 
             LazyColumn(
                 state = listState,
@@ -158,8 +167,8 @@ fun SearchResultScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ResultSearchHeader(
+    sortType: SortType,
     modifier: Modifier = Modifier,
-    sortLabel: String = "추천순",
     onSortSelected: (SortType) -> Unit = {},
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
@@ -173,7 +182,7 @@ private fun ResultSearchHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "검색된 히어릿 목록",
+            text = stringResource(R.string.search_result_header_title),
             style = HearitTypoGraphy.titleMedium,
             color = Gray4,
         )
@@ -189,14 +198,14 @@ private fun ResultSearchHeader(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = sortLabel,
+                    text = stringResource(sortType.labelRes),
                     style = HearitTypoGraphy.titleSmall,
                     color = Gray4,
                 )
 
                 Icon(
                     painter = painterResource(R.drawable.ic_down),
-                    contentDescription = "검색 히어릿 정렬 아이콘",
+                    contentDescription = stringResource(R.string.search_result_sort_icon_desc),
                     modifier = Modifier.size(20.dp),
                     tint = Gray4,
                 )
@@ -244,7 +253,7 @@ private fun SortDropdownMenu(
 
                     Icon(
                         painter = painterResource(R.drawable.ic_info),
-                        contentDescription = "정렬 기준 안내",
+                        contentDescription = stringResource(R.string.search_result_sort_info_desc),
                         tint = HearitPurple1,
                         modifier =
                             Modifier
@@ -260,7 +269,7 @@ private fun SortDropdownMenu(
                                             right = pos.x + size.width,
                                             bottom = pos.y + size.height,
                                         )
-                                }.noRippleClickable(enabled = false) {
+                                }.noRippleClickable{
                                     showTooltip = !showTooltip
                                 },
                     )
@@ -269,9 +278,9 @@ private fun SortDropdownMenu(
             onClick = { },
         )
 
-        SortMenuItem("정확도순", onDismiss, onSortSelected)
-        SortMenuItem("최신순", onDismiss, onSortSelected)
-        SortMenuItem("오래된순", onDismiss, onSortSelected)
+        SortMenuItem(SortType.Accuracy, onDismiss, onSortSelected)
+        SortMenuItem(SortType.Latest, onDismiss, onSortSelected)
+        SortMenuItem(SortType.Oldest, onDismiss, onSortSelected)
     }
 
     // DropdownMenu 밖에서 별도 Popup으로 툴팁 렌더링
@@ -293,7 +302,7 @@ private fun SortDropdownMenu(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 Text(
-                    text = "추천순은 정확도, 조회수, 날짜 등을 기준으로 정렬됩니다.",
+                    text = stringResource(R.string.search_result_sort_info_text),
                     modifier =
                         Modifier
                             .widthIn(max = 140.dp)
@@ -309,20 +318,12 @@ private fun SortDropdownMenu(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SortMenuItem(
-    label: String,
+    type: SortType,
     onDismiss: () -> Unit,
     onSortSelected: (SortType) -> Unit,
 ) {
-    val type =
-        when (label) {
-            "정확도순" -> SortType.Accuracy
-            "최신순" -> SortType.Latest
-            "오래된순" -> SortType.Oldest
-            else -> return
-        }
-
     DropdownMenuItem(
-        text = { Text(text = label) },
+        text = { Text(text = stringResource(type.labelRes)) },
         onClick = {
             onDismiss()
             onSortSelected(type)

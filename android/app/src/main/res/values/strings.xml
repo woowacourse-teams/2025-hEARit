@@ -120,10 +120,18 @@
     <!-- SearchRecentFragment -->
     <string name="search_toast_min_length">검색어는 2글자 이상 입력해주세요</string>
 
-    <!-- SearchResultFragment-->
-    <string name="search_result_searched_hearit">검색된 히어릿 목록</string>
+    <!-- SearchResultScreen-->
+    <string name="search_result_header_title">검색된 히어릿 목록</string>
+    <string name="search_result_sort_icon_desc">검색 히어릿 정렬 아이콘</string>
+    <string name="search_result_sort_info_desc">정렬 기준 안내</string>
+    <string name="search_result_sort_info_text">추천순은 정확도, 조회수, 날짜 등을 기준으로 정렬됩니다.</string>
+    <string name="search_result_sort_recommend">추천순</string>
+    <string name="search_result_sort_accuracy">정확도순</string>
+    <string name="search_result_sort_latest">최신순</string>
+    <string name="search_result_sort_oldest">오래된순</string>
     <string name="search_toast_searched_hearits_load_fail">검색 히어릿 목록 조회에 실패했습니다</string>
     <string name="search_toast_recent_hearit_save_fail">최근 검색어 저장에 실패했습니다</string>
+
 
     <!-- SplashActivity-->
     <string name="splash_toast_access_token_load_fail">저장된 토큰 조회에 실패했습니다</string>
