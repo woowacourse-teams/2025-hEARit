@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.onair.hearit.app.auth.infrastructure.jwt.TokenStatus;
-import com.onair.hearit.app.exception.custom.ForbiddenException;
+import com.onair.hearit.app.exception.custom.UnauthorizedException;
 import com.onair.hearit.app.fixture.ControllerTest;
 import com.onair.hearit.app.reaction.application.ReactionService;
 import org.junit.jupiter.api.DisplayName;
@@ -51,17 +51,17 @@ class ReactionControllerTest extends ControllerTest {
     }
 
     @Test
-    @DisplayName("403 Forbidden - 좋아요 삭제 권한 없음")
-    void deleteLike_Forbidden() throws Exception {
+    @DisplayName("401 Unauthorized - 좋아요 삭제 권한 없음")
+    void deleteLike_Unauthorized() throws Exception {
         // given
         var hearitId = 1L;
 
-        willThrow(new ForbiddenException("비회원은 좋아요을 삭제할 권한이 없습니다."))
+        willThrow(new UnauthorizedException("비회원은 좋아요을 삭제할 권한이 없습니다."))
                 .given(reactionService).removeReaction(any(), any(), any());
 
         // when & then
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/hearits/{hearitId}/likes", hearitId))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isUnauthorized())
                 .andDo(document("v1-delete-like-forbidden",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Like API")
@@ -101,18 +101,18 @@ class ReactionControllerTest extends ControllerTest {
     }
 
     @Test
-    @DisplayName("403 Forbidden - 좋아요 추가 권한 없음")
-    void addLike_Forbidden() throws Exception {
+    @DisplayName("401 Unauthorized - 좋아요 추가 권한 없음")
+    void addLike_Unauthorized() throws Exception {
         // given
         var hearitId = 1L;
 
-        willThrow(new ForbiddenException("비회원은 좋아요을 추가할 권한이 없습니다."))
+        willThrow(new UnauthorizedException("비회원은 좋아요을 추가할 권한이 없습니다."))
                 .given(reactionService).addReaction(any(), any(), any());
 
         // when & then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/hearits/{hearitId}/likes", hearitId))
-                .andExpect(status().isForbidden())
-                .andDo(document("v1-post-like-forbidden",
+                .andExpect(status().isUnauthorized())
+                .andDo(document("v1-post-like-aunthorized",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Like API")
                                 .summary("좋아요 추가 V1")
