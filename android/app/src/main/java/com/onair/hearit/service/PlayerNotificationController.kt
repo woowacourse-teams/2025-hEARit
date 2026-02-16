@@ -1,8 +1,6 @@
 package com.onair.hearit.service
 
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import androidx.annotation.DrawableRes
 import androidx.annotation.OptIn
@@ -13,6 +11,7 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.ui.PlayerNotificationManager
 import com.onair.hearit.R
+import com.onair.hearit.notification.HearitNotificationChannels
 
 @OptIn(UnstableApi::class)
 class PlayerNotificationController(
@@ -105,18 +104,6 @@ class PlayerNotificationController(
     }
 
     private fun ensureChannel() {
-        val nm = service.getSystemService(NotificationManager::class.java)
-        if (nm.getNotificationChannel(channelId) == null) {
-            val channel =
-                NotificationChannel(
-                    channelId,
-                    service.getString(R.string.app_name),
-                    NotificationManager.IMPORTANCE_LOW,
-                ).apply {
-                    setShowBadge(false)
-                    description = "Playback controls"
-                }
-            nm.createNotificationChannel(channel)
-        }
+        HearitNotificationChannels.ensurePlaybackChannel(service)
     }
 }

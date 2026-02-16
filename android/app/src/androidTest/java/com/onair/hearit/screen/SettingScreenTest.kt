@@ -83,6 +83,7 @@ class SettingScreenTest {
                 viewModel = mockViewModel,
                 onBackClick = {},
                 onProfileClick = {},
+                onAlarmClick = {},
                 onLogin = {},
                 onLogout = {},
                 onWithdraw = {},
