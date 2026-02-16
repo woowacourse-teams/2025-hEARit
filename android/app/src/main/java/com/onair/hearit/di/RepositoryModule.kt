@@ -7,6 +7,7 @@ import com.onair.hearit.data.repository.ExploreDataStoreRepositoryImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
 import com.onair.hearit.data.repository.LikeRepositoryImpl
 import com.onair.hearit.data.repository.MediaFileRepositoryImpl
+import com.onair.hearit.data.repository.NotificationPreferenceRepositoryImpl
 import com.onair.hearit.data.repository.PlayingHistoryRepositoryImpl
 import com.onair.hearit.data.repository.RecentHearitRepositoryImpl
 import com.onair.hearit.data.repository.RecentKeywordRepositoryImpl
@@ -19,6 +20,7 @@ import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.LikeRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
+import com.onair.hearit.domain.repository.NotificationPreferenceRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
@@ -76,6 +78,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindRecommendationRepository(recommendationRepositoryImpl: RecommendationRepositoryImpl): RecommendationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationPreferenceRepository(
+        notificationPreferenceRepositoryImpl: NotificationPreferenceRepositoryImpl,
+    ): NotificationPreferenceRepository
 
     @Binds
     @Singleton
