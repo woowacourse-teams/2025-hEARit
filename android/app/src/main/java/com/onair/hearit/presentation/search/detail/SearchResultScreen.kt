@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +36,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 fun SearchResultScreen(
@@ -45,16 +48,18 @@ fun SearchResultScreen(
     loadMoreThreshold: Int = 3,
 ) {
     val listState = rememberLazyListState()
+    val latestSize by rememberUpdatedState(hearits.size)
+    val latestLoading by rememberUpdatedState(isLoading)
 
-    LaunchedEffect(listState, hearits) {
+    LaunchedEffect(listState) {
         snapshotFlow {
             listState.layoutInfo.visibleItemsInfo
                 .lastOrNull()
                 ?.index
-        }.filter { it != null }
+        }.filterNotNull()
             .distinctUntilChanged()
             .collect { lastVisibleIndex ->
-                if (lastVisibleIndex != null && lastVisibleIndex >= hearits.size - loadMoreThreshold) {
+                if (!latestLoading && lastVisibleIndex >= latestSize - loadMoreThreshold) {
                     onLoadNext()
                 }
             }

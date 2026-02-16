@@ -42,8 +42,11 @@ fun SearchDetailRoute(
     var searchText by rememberSaveable { mutableStateOf("") }
 
     fun performSearch(query: String) {
-        viewModel.search(query)
-        viewModel.saveKeyword(query)
+        val normalized = query.trim()
+        if (normalized.isEmpty()) return
+
+        viewModel.search(normalized)
+        viewModel.saveKeyword(normalized)
         focusManager.clearFocus()
         keyboardController?.hide()
     }
@@ -105,7 +108,7 @@ fun SearchDetailRoute(
                         hearits = uiState.searchedHearits,
                         onLoadNext = viewModel::loadNextPage,
                         onHearitClick = onHearitClick,
-                        isLoading = uiState.isLoading,
+                        isLoading = uiState.pagingState.isLoading,
                     )
                 }
             }
