@@ -67,7 +67,7 @@
     <string name="player_detail_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다</string>
     <string name="player_detail_invite_error_kakao">카카오톡으로 공유하는 중 오류가 발생했습니다</string>
     <string name="player_detail_invite_error_browser">웹 브라우저를 찾을 수 없어 공유할 수 없습니다</string>
-    <string name="player_detail_toast_add_like_fail">좋아요에 실패했어요. 잠시 후 다시 시도해주세요</string>
+    <string name="player_detail_toast_add_like_fail">좋아요에 실패했어요. 잠시 후 다시 시도해 주세요</string>
     <string name="player_detail_toast_delete_like_fail">좋아요 해제에 실패했어요. 잠시 후 다시 시도해 주세요</string>
     <string name="player_detail_toast_like_login_required">좋아요는 로그인 후 이용할 수 있어요</string>
 

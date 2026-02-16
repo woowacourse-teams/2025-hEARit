@@ -154,15 +154,15 @@ class PlayerDetailViewModel @Inject constructor(
                 .onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
+                            _isLiked.value = false
+                            _likeCount.value -= 1
                             _toastMessage.value = R.string.player_detail_toast_like_login_required
                         }
 
                         else -> {
                             Timber.w(throwable)
-
                             _isLiked.value = false
                             _likeCount.value -= 1
-
                             _toastMessage.value = R.string.player_detail_toast_add_like_fail
                         }
                     }
@@ -179,10 +179,8 @@ class PlayerDetailViewModel @Inject constructor(
                 .deleteLike(hearitId)
                 .onFailure { throwable ->
                     Timber.w(throwable)
-
                     _isLiked.value = true
                     _likeCount.value += 1
-
                     _toastMessage.value = R.string.player_detail_toast_delete_like_fail
                 }
         }
