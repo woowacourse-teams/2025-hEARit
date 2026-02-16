@@ -122,6 +122,7 @@ class PlayerDetailActivity :
         binding.viewModel = viewModel
 
         setupBaseControllerBookmark()
+        setupLikeButton()
         setupBackPressHandler()
         setupWindowInsets()
         setupRecyclerView()
@@ -255,6 +256,22 @@ class PlayerDetailActivity :
         viewModel.showLoginDialog.observe(this) {
             showLoginRequiredDialog()
         }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.isLiked.collect {
+                        binding.btnLike.root.isSelected = it
+                    }
+                }
+
+                launch {
+                    viewModel.likeCount.collect {
+                        binding.btnLike.tvLike.text = it.toString()
+                    }
+                }
+            }
+        }
     }
 
     private fun handlePlayback(hearit: Hearit) {
@@ -310,6 +327,12 @@ class PlayerDetailActivity :
     private fun setupBaseControllerBookmark() {
         binding.baseController.setOnBookmarkClickListener {
             viewModel.toggleBookmark()
+        }
+    }
+
+    private fun setupLikeButton() {
+        binding.btnLike.root.setOnClickListener {
+            viewModel.toggleLike()
         }
     }
 

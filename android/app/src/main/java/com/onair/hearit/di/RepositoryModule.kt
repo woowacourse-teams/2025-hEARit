@@ -5,6 +5,7 @@ import com.onair.hearit.data.repository.BookmarkRepositoryImpl
 import com.onair.hearit.data.repository.CategoryRepositoryImpl
 import com.onair.hearit.data.repository.ExploreDataStoreRepositoryImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
+import com.onair.hearit.data.repository.LikeRepositoryImpl
 import com.onair.hearit.data.repository.MediaFileRepositoryImpl
 import com.onair.hearit.data.repository.PlayingHistoryRepositoryImpl
 import com.onair.hearit.data.repository.RecentHearitRepositoryImpl
@@ -16,6 +17,7 @@ import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.CategoryRepository
 import com.onair.hearit.domain.repository.ExploreDataStoreRepository
 import com.onair.hearit.domain.repository.HearitRepository
+import com.onair.hearit.domain.repository.LikeRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
@@ -74,4 +76,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindRecommendationRepository(recommendationRepositoryImpl: RecommendationRepositoryImpl): RecommendationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLikeRepository(likeRepositoryImpl: LikeRepositoryImpl): LikeRepository
 }

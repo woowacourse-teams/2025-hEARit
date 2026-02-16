@@ -8,6 +8,7 @@ import com.onair.hearit.data.api.AuthService
 import com.onair.hearit.data.api.BookmarkService
 import com.onair.hearit.data.api.CategoryService
 import com.onair.hearit.data.api.HearitService
+import com.onair.hearit.data.api.LikeService
 import com.onair.hearit.data.api.MediaFileService
 import com.onair.hearit.data.api.MemberService
 import com.onair.hearit.data.api.PlayingHistoryService
@@ -173,4 +174,10 @@ object NetworkModule {
     fun provideRecommendationService(
         @Named("auth") retrofitWithAuth: Retrofit,
     ): RecommendationService = retrofitWithAuth.create()
+
+    @Provides
+    @Singleton
+    fun provideLikeService(
+        @Named("auth") retrofitWithAuth: Retrofit,
+    ): LikeService = retrofitWithAuth.create()
 }
