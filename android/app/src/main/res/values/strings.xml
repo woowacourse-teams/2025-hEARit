@@ -13,7 +13,8 @@
     <string name="all_toast_delete_bookmark_fail">북마크 삭제에 실패했습니다</string>
     <string name="all_toast_notification_permission_denied">푸시 알림을 허용하지 않습니다.</string>
     <string name="all_keyword_name"># %s</string>
-    <string name="all_login_dialog_message_body"><font color="#B677F3">북마크 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
+    <string name="all_login_required_bookmark"><font color="#B677F3">북마크 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
+    <string name="all_login_required_like"><font color="#B677F3">좋아요 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
     <string name="all_dialog_login_positive">로그인</string>
 
     <!-- HomeFragment-->

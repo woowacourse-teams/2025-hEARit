@@ -10,6 +10,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -44,6 +45,7 @@ import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_DETAIL
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.LoginReason
 import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.LAST_POSITION_KEY
@@ -253,8 +255,13 @@ class PlayerDetailActivity :
             Toast.makeText(this, getString(resId), Toast.LENGTH_SHORT).show()
         }
 
-        viewModel.showLoginDialog.observe(this) {
-            showLoginRequiredDialog()
+        viewModel.showLoginDialog.observe(this) { reason ->
+            val messageRes =
+                when (reason) {
+                    LoginReason.BOOKMARK -> R.string.all_login_required_bookmark
+                    LoginReason.LIKE -> R.string.all_login_required_like
+                }
+            showLoginRequiredDialog(messageRes)
         }
 
         lifecycleScope.launch {
@@ -449,9 +456,13 @@ class PlayerDetailActivity :
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
-    private fun showLoginRequiredDialog() {
-        LoginRequiredDialogFragment { navigateToLogin() }
-            .show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
+    private fun showLoginRequiredDialog(
+        @StringRes messageRes: Int,
+    ) {
+        LoginRequiredDialogFragment(
+            messageRes = messageRes,
+            onPositive = { navigateToLogin() },
+        ).show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {

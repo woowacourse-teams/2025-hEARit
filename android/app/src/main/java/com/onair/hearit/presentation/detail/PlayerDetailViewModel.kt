@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.LoginReason
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.LikeRepository
@@ -49,8 +50,8 @@ class PlayerDetailViewModel @Inject constructor(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private val _showLoginDialog = SingleLiveData<Unit>()
-    val showLoginDialog: LiveData<Unit> = _showLoginDialog
+    private val _showLoginDialog = SingleLiveData<LoginReason>()
+    val showLoginDialog: LiveData<LoginReason> = _showLoginDialog
 
     private val _highlightedId: MutableStateFlow<Long?> = MutableStateFlow(null)
     val highlightedId: StateFlow<Long?> = _highlightedId.asStateFlow()
@@ -118,7 +119,7 @@ class PlayerDetailViewModel @Inject constructor(
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
-                            _showLoginDialog.call()
+                            _showLoginDialog.value = LoginReason.BOOKMARK
                         }
 
                         else -> {
@@ -156,7 +157,7 @@ class PlayerDetailViewModel @Inject constructor(
                         is UserNotRegistered -> {
                             _isLiked.value = false
                             _likeCount.value -= 1
-                            _toastMessage.value = R.string.player_detail_toast_like_login_required
+                            _showLoginDialog.value = LoginReason.LIKE
                         }
 
                         else -> {
