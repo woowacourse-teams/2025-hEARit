@@ -47,6 +47,10 @@ dependencies {
 
     testRuntimeOnly 'com.mysql:mysql-connector-j'
     testRuntimeOnly 'com.h2database:h2'
+    testImplementation "org.springframework.boot:spring-boot-testcontainers"
+    testImplementation "org.testcontainers:testcontainers:2.0.2"
+    testImplementation "org.testcontainers:testcontainers-junit-jupiter:2.0.2"
+    testImplementation "org.testcontainers:testcontainers-elasticsearch:2.0.2"
 
     testFixturesImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
     testFixturesImplementation 'io.rest-assured:rest-assured:5.4.0'
