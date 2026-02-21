@@ -29,24 +29,30 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
 
         NativeQueryBuilder nativeQueryBuilder = NativeQuery.builder()
                 .withQuery(b -> b.bool(bool -> {
-                    bool.should(s -> s.multiMatch(mm -> mm
-                            .query(q)
-                            .fields("title^10")
-                            .type(TextQueryType.PhrasePrefix)
-                    ));
 
+                    // 가중치 기반 매칭 (정렬용)
+                    // 제목 완전 일치: 15
                     bool.should(s -> s.match(m -> m
                             .field("title.keyword")
                             .query(q)
                             .boost(15.0f)
                     ));
 
+                    // 제목 포함: 10
+                    bool.should(s -> s.multiMatch(mm -> mm
+                            .query(q)
+                            .fields("title^10")
+                            .type(TextQueryType.PhrasePrefix)
+                    ));
+
+                    // 카테고리나 키워드 포함: 5
                     bool.should(s -> s.multiMatch(mm -> mm
                             .query(q)
                             .fields("keywords.text^5", "category^5")
                             .type(TextQueryType.BestFields)
                     ));
 
+                    // 요약 포함: 2.5
                     bool.should(s -> s.multiMatch(mm -> mm
                             .query(q)
                             .fields("summary^2.5")
@@ -54,19 +60,22 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
                             .operator(Operator.And)
                     ));
 
+                    // 검색어 길이에 따른 필수 필터링
+                    // 짧은 검색어: 전방 일치(Prefix) 검색으로 "AI" -> "AI 기술" 등 매칭
                     if (q.length() <= 2) {
                         bool.must(m -> m.multiMatch(mm -> mm
                                 .query(q)
-                                .fields("title", "summary", "keywords.text")
+                                .fields("title", "summary", "keywords.text", "category.text")
                                 .type(TextQueryType.PhrasePrefix)
                                 .operator(Operator.And)
                         ));
                         return bool;
                     }
 
+                    // 긴 검색어: 오타 허용(Fuzzy) 및 75% 이상 일치 검색
                     bool.must(m -> m.multiMatch(mm -> mm
                             .query(q)
-                            .fields("title", "summary", "keywords.text")
+                            .fields("title", "summary", "keywords.text", "category.text")
                             .type(TextQueryType.BestFields)
                             .fuzziness("AUTO")
                             .minimumShouldMatch("75%")
@@ -75,6 +84,7 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
                 }))
                 .withPageable(pageable);
 
+        // 정렬 적용 및 실행
         NativeQuery nativeQuery = applySort(nativeQueryBuilder, sortField);
         SearchHits<HearitDocument> searchResults = operations.search(nativeQuery, HearitDocument.class);
         List<Long> ids = searchResults.getSearchHits().stream()
