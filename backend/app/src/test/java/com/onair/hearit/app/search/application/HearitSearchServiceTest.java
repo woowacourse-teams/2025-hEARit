@@ -2,11 +2,17 @@ package com.onair.hearit.app.search.application;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.search.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.SearchSortRequest;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -17,16 +23,23 @@ import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
+import com.onair.hearit.core.infrastructure.elasticsearch.domain.HearitSearchSortField;
+import com.onair.hearit.core.infrastructure.elasticsearch.repository.HearitElasticSearchRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.transaction.TestTransaction;
 
@@ -46,6 +59,9 @@ class HearitSearchServiceTest {
 
     @Autowired
     private HearitSearchService hearitSearchService;
+
+    @MockitoBean
+    private HearitElasticSearchRepository hearitElasticSearchRepository;
 
     @Test
     @DisplayName("검색 시 제목에 검색어가 포함된 히어릿을 반환한다.")
@@ -157,8 +173,8 @@ class HearitSearchServiceTest {
         // then
         assertAll(
                 () -> assertThat(result.content()).hasSize(1),
-                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit.getId()),
-                () -> assertThat(result.content().get(0).keywords()).hasSize(1));
+                () -> assertThat(result.content().getFirst().id()).isEqualTo(hearit.getId()),
+                () -> assertThat(result.content().getFirst().keywords()).hasSize(1));
     }
 
     @Test
@@ -209,8 +225,76 @@ class HearitSearchServiceTest {
         // then
         assertAll(
                 () -> assertThat(result.content()).hasSize(1),
-                () -> assertThat(result.content().get(0).id()).isEqualTo(hearit1.getId())
+                () -> assertThat(result.content().getFirst().id()).isEqualTo(hearit1.getId())
         );
+    }
+
+    @Test
+    @DisplayName("V2 검색은 ElasticSearch가 반환한 ID 순서를 그대로 유지해서 히어릿을 반환한다.")
+    void searchHearitsV2_keepsOrderFromElasticSearch() {
+        // given
+        PagingRequest request = new PagingRequest(0, 10);
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+
+        Hearit h1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));
+        Hearit h2 = saveHearitWithTitleAndKeyword("spring2", saveKeyword("keyword"));
+        Hearit h3 = saveHearitWithTitleAndKeyword("spring3", saveKeyword("keyword"));
+
+        // ElasticSearch가 최신/추천 등 정렬을 수행했다고 가정하고, 특정 순서로 ID를 내려준다.
+        Pageable pageable = PageRequest.of(request.page(), request.size());
+        when(hearitElasticSearchRepository.search(eq("spring"),
+                eq(HearitSearchSortField.RECOMMENDED),
+                eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(h3.getId(), h1.getId(), h2.getId()), pageable, 3));
+
+        SearchSortRequest sortRequest = Mockito.mock(SearchSortRequest.class);
+        when(sortRequest.field()).thenReturn(HearitSearchSortField.RECOMMENDED);
+
+        // when
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        PagedResponse<HearitSearchResponse> result = hearitSearchService.searchV2(
+                "spring", sortRequest, request, TestFixture.createFixedMemberUserInfo(member));
+
+        // then
+        assertAll(
+                () -> assertThat(result.content()).hasSize(3),
+                () -> assertThat(result.content()).extracting(HearitSearchResponse::id)
+                        .containsExactly(h3.getId(), h1.getId(), h2.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("V2 검색은 정렬 필드 값을 ElasticSearch 검색에 전달한다.")
+    void searchHearitsV2_passesSortFieldToElasticSearch() {
+        // given
+        PagingRequest request = new PagingRequest(0, 10);
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        Hearit h1 = saveHearitWithTitleAndKeyword("spring1", saveKeyword("keyword"));
+
+        Pageable pageable = PageRequest.of(request.page(), request.size());
+        when(hearitElasticSearchRepository.search(anyString(),
+                any(HearitSearchSortField.class),
+                any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(h1.getId()), pageable, 1));
+
+        SearchSortRequest sortRequest = Mockito.mock(SearchSortRequest.class);
+        when(sortRequest.field()).thenReturn(HearitSearchSortField.LATEST);
+
+        // when
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        hearitSearchService.searchV2(
+                "spring", sortRequest, request, TestFixture.createFixedMemberUserInfo(member));
+
+        // then
+        verify(hearitElasticSearchRepository).search(eq("spring"),
+                eq(HearitSearchSortField.LATEST),
+                eq(pageable));
     }
 
     @DisplayName("검색 시 시청기록 정보(마지막 재생시간, 끝까지 시청했는지 여부)도 함께 제공한다.")
@@ -233,7 +317,7 @@ class HearitSearchServiceTest {
                 "spring", pagingRequest, TestFixture.createFixedMemberUserInfo(member));
 
         // then
-        HearitSearchResponse hearitSearchResponse = result.content().get(0);
+        HearitSearchResponse hearitSearchResponse = result.content().getFirst();
         assertAll(
                 () -> assertThat(hearitSearchResponse.id()).isEqualTo(hearit.getId()),
                 () -> assertThat(hearitSearchResponse.lastPlayTime()).isEqualTo(playingHistory.getLastPlayTime()),
