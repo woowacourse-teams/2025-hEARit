@@ -27,7 +27,13 @@
       }
     },
     "category": {
-      "type": "keyword"
+      "type": "keyword",
+      "fields": {
+        "text": {
+          "type": "text",
+          "analyzer": "standard"
+        }
+      }
     },
     "created_at": {
       "type": "date"
