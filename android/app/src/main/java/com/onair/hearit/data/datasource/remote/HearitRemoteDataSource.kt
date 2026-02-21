@@ -31,4 +31,6 @@ interface HearitRemoteDataSource {
     ): NetworkResult<HearitsResponse>
 
     suspend fun getRecommendationCategoryHearits(): NetworkResult<List<RecommendationCategoriesResponse>>
+
+    suspend fun postHearitView(hearitId: Long): NetworkResult<Unit>
 }

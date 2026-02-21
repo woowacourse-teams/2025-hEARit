@@ -8,6 +8,7 @@ import com.onair.hearit.data.dto.RecommendationCategoriesResponse
 import com.onair.hearit.data.dto.SearchHearitsResponse
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -43,4 +44,9 @@ interface HearitService {
     suspend fun getHearit(
         @Path("hearitId") hearitId: Long,
     ): Response<HearitResponse>
+
+    @POST("api/v1/hearits/{hearitId}/view")
+    suspend fun postHearitView(
+        @Path("hearitId") hearitId: Long,
+    ): Response<Unit>
 }
