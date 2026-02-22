@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -33,8 +32,17 @@ fun ColumnScope.ScriptContent(
     modifier: Modifier = Modifier,
 ) {
     val currentScriptIndex =
-        remember(currentPosition, scripts) {
-            scripts.indexOfLast { it.start <= currentPosition }.coerceAtLeast(0)
+        remember(currentPosition) {
+            val index = scripts.binarySearch { it.start.compareTo(currentPosition) }
+            if (index < 0) (-(index + 1) - 1).coerceAtLeast(0) else index
+        }
+    val displayRange =
+        remember(currentScriptIndex, scripts.size) {
+            if (scripts.isEmpty()) return@remember IntRange.EMPTY
+            val start = (currentScriptIndex - 1).coerceAtLeast(0)
+            val end = (start + 2).coerceAtMost(scripts.lastIndex)
+            val finalStart = (end - 2).coerceAtLeast(0)
+            finalStart..end
         }
 
     Box(
@@ -50,31 +58,41 @@ fun ColumnScope.ScriptContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             userScrollEnabled = false,
         ) {
-            val start = (currentScriptIndex - 1).coerceAtLeast(0)
-            val end = (start + 2).coerceAtMost(scripts.lastIndex)
-
-            val finalStart = (end - 2).coerceAtLeast(0)
-            val displayIndices = finalStart..end
-
             items(
-                items = displayIndices.toList(),
-                key = { it },
+                count = if (displayRange.isEmpty()) 0 else (displayRange.last - displayRange.first + 1),
+                key = { index ->
+                    // 3. Key 안정성 확보: 단순히 index가 아닌 데이터의 고유값(start 시간 등)을 키로 사용
+                    scripts[displayRange.first + index].start
+                },
             ) { index ->
-                val isCurrent = index == currentScriptIndex
-                val scriptLine = scripts[index]
+                val actualIndex = displayRange.first + index
+                val scriptLine = scripts[actualIndex]
+                val isCurrent = actualIndex == currentScriptIndex
 
-                Text(
+                ScriptItem(
                     text = scriptLine.text,
-                    color = if (isCurrent) Gray4 else Gray2,
-                    style = if (isCurrent) HearitTypoGraphy.bodyLarge else HearitTypoGraphy.titleSmall,
-                    textAlign = TextAlign.Center,
-                    modifier =
-                        Modifier
-                            .padding(vertical = 14.dp)
-                            .fillMaxWidth()
-                            .animateItem(),
+                    isCurrent = isCurrent,
+                    modifier = Modifier.animateItem(),
                 )
             }
         }
     }
+}
+
+@Composable
+private fun ScriptItem(
+    text: String,
+    isCurrent: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text,
+        color = if (isCurrent) Gray4 else Gray2,
+        style = if (isCurrent) HearitTypoGraphy.bodyLarge else HearitTypoGraphy.titleSmall,
+        textAlign = TextAlign.Center,
+        modifier =
+            modifier
+                .padding(vertical = 14.dp)
+                .fillMaxWidth(),
+    )
 }

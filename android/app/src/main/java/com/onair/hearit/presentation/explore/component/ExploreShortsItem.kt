@@ -38,6 +38,7 @@ import com.onair.hearit.presentation.theme.Gray1
 import com.onair.hearit.presentation.theme.Gray2
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import com.onair.hearit.presentation.theme.White
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 
@@ -54,7 +55,10 @@ fun ExploreShortsItem(
     onPositionChanged: (position: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val scripts = item.script ?: emptyList()
+    val scripts =
+        remember(item.script) {
+            item.script?.toImmutableList() ?: persistentListOf()
+        }
 
     var showPauseIcon by remember { mutableStateOf(false) }
     var isPressingSpeed by remember { mutableStateOf(false) }
@@ -122,7 +126,7 @@ fun ExploreShortsItem(
             RotatingLp(item = item, isPlaying = isPlaying, modifier = Modifier.fillMaxWidth())
 
             ScriptContent(
-                scripts = scripts.toImmutableList(),
+                scripts = scripts,
                 currentPosition = currentPosition,
             )
 
@@ -134,8 +138,7 @@ fun ExploreShortsItem(
                         .background(color = Gray1, shape = RoundedCornerShape(8.dp))
                         .clickable {
                             onNavigateToDetail(item.id)
-                        }
-                        .padding(vertical = 20.dp, horizontal = 16.dp),
+                        }.padding(vertical = 20.dp, horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
@@ -188,8 +191,7 @@ fun ExploreShortsItem(
                                 horizontalBias = 0f,
                                 verticalBias = -0.5f,
                             ),
-                        )
-                        .size(width = 79.dp, height = 30.dp),
+                        ).size(width = 79.dp, height = 30.dp),
             )
         }
     }

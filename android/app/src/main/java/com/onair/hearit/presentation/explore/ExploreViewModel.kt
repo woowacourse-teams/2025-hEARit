@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
-import com.onair.hearit.domain.repository.ExploreDataStoreRepository
+import com.onair.hearit.domain.repository.ExploreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetExploreHearitUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,7 +46,7 @@ sealed interface ExploreSideEffect {
 @HiltViewModel
 class ExploreViewModel @Inject constructor(
     private val playerManager: ExplorePlayerManager,
-    private val exploreDataStoreRepository: ExploreDataStoreRepository,
+    private val exploreRepository: ExploreRepository,
     private val getExploreHearit: GetExploreHearitUseCase,
     private val hearitRepository: HearitRepository,
 ) : ViewModel() {
@@ -259,7 +259,7 @@ class ExploreViewModel @Inject constructor(
 
     fun loadAnimation() {
         viewModelScope.launch {
-            exploreDataStoreRepository
+            exploreRepository
                 .shouldShowAnimation()
                 .onSuccess { shouldShow ->
                     _uiState.update { it.copy(showGuideAnimation = shouldShow) }
