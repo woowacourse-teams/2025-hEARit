@@ -98,24 +98,17 @@ class ExploreViewModel @Inject constructor(
     }
 
     fun scheduleResume(resumeIndex: Int) {
-        Timber.d("scheduleResume called")
-
         _uiState.value.shortsHearits.getOrNull(resumeIndex)?.let { item ->
             resumeItem = item
         }
         resumePositionMs = lastPosition
 
-        Timber.d("resumeScheduled1 $resumeScheduled")
-
         resumeScheduled = true
-        Timber.d("resumeScheduled2 $resumeScheduled")
         playerManager.pause()
     }
 
     // 다시 돌아왔을 때 호출
     fun resumeIfScheduled() {
-        Timber.d("resumeIfScheduled called")
-        Timber.d("resumeScheduled $resumeScheduled")
         if (!resumeScheduled) return
         resumeScheduled = false
 
@@ -123,7 +116,6 @@ class ExploreViewModel @Inject constructor(
         isLoadingPage = false
 
         val startCursor = resumeItem?.cursorId ?: 0L
-        Timber.d("startCursor $startCursor")
         fetchData(startCursor, isFirstFetch = true)
     }
 
@@ -146,7 +138,6 @@ class ExploreViewModel @Inject constructor(
                             return@launch
                         }
 
-                        // UseCase를 이용해 상세 데이터 빌드 (buildShortsHearit 로직 반영)
                         val newItems = buildShortsItems(cursorResult)
 
                         _uiState.update { state ->
