@@ -119,9 +119,7 @@ class PlayingHistoryBufferFacadeTest {
         // Redisson 설정
         Config redissonConfig = new Config();
         redissonConfig.useSingleServer()
-                .setAddress("redis://" + redisContainer.getHost() + ":" + redisContainer.getFirstMappedPort())
-                .setConnectionMinimumIdleSize(1)
-                .setConnectionPoolSize(2);
+                .setAddress("redis://" + redisContainer.getHost() + ":" + redisContainer.getFirstMappedPort());
         redissonClient = Redisson.create(redissonConfig);
     }
 

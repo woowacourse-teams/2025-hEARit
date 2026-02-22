@@ -19,12 +19,9 @@ public class DailyExploreRankingScheduler {
     private final ExploreRankingBatchService exploreRankingBatchService;
 
     /**
-     * 매일 새벽 4시에 전체 배치 프로세스 실행
-     * 1. 콘텐츠 군집화 (Clustering)
-     * 2. 유저별 랭킹 산정 (Ranking)
+     * 매일 새벽 4시에 전체 배치 프로세스 실행 1. 콘텐츠 군집화 (Clustering) 2. 유저별 랭킹 산정 (Ranking)
      */
-//    @Scheduled(cron = "0 0 4 * * *")
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 4 * * *")
     public void runExploreRankingJob() {
         try {
             hearitClusterBatchService.runClustering();
