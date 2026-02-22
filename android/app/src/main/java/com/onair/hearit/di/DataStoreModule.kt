@@ -14,27 +14,40 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DataStoreModule {
-    private const val AUTH_PREFERENCES_NAME: String = "auth_prefs"
-    private const val USER_PREFERENCES_NAME: String = "user_prefs"
+abstract class DataStoreModule {
+    companion object {
+        private const val AUTH_PREFERENCES_NAME: String = "auth_prefs"
+        private const val USER_PREFERENCES_NAME: String = "user_prefs"
+        private const val EXPLORE_PREFERENCES_NAME: String = "explore_prefs"
 
-    @AuthPreferencesDataStore
-    @Provides
-    @Singleton
-    fun provideAuthPreferencesDataStore(
-        @ApplicationContext context: Context,
-    ): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create {
-            context.preferencesDataStoreFile(AUTH_PREFERENCES_NAME)
-        }
+        @AuthPreferencesDataStore
+        @Provides
+        @Singleton
+        fun provideAuthPreferencesDataStore(
+            @ApplicationContext context: Context,
+        ): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create {
+                context.preferencesDataStoreFile(AUTH_PREFERENCES_NAME)
+            }
 
-    @UserPreferencesDataStore
-    @Provides
-    @Singleton
-    fun provideUserPreferencesDataStore(
-        @ApplicationContext context: Context,
-    ): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create {
-            context.preferencesDataStoreFile(USER_PREFERENCES_NAME)
-        }
+        @UserPreferencesDataStore
+        @Provides
+        @Singleton
+        fun provideUserPreferencesDataStore(
+            @ApplicationContext context: Context,
+        ): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create {
+                context.preferencesDataStoreFile(USER_PREFERENCES_NAME)
+            }
+
+        @ExplorePreferencesDataStore
+        @Provides
+        @Singleton
+        fun provideExplorePreferencesDataStore(
+            @ApplicationContext context: Context,
+        ): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create {
+                context.preferencesDataStoreFile(EXPLORE_PREFERENCES_NAME)
+            }
+    }
 }
