@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="hearit"
+            type="com.onair.hearit.domain.model.Hearit" />
+    </data>
+
+    <TextView
+        android:id="@+id/tv_like"
+        android:layout_width="wrap_content"
+        android:layout_height="24dp"
+        android:background="@drawable/bg_like_selector"
+        android:drawablePadding="6dp"
+        android:gravity="center"
+        android:paddingHorizontal="12dp"
+        android:selected="@{hearit.like.isLiked}"
+        android:text="@{String.valueOf(hearit.like.count)}"
+        android:textColor="@color/like_text_selector"
+        android:textSize="12sp"
+        app:drawableStartCompat="@drawable/ic_heart"
+        app:drawableTint="@color/like_heart_tint_selector"
+        tools:text="123" />
+
+</layout>

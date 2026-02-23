@@ -112,6 +112,17 @@
                     app:layout_constraintStart_toStartOf="@id/layout_thumbnail"
                     tools:text="2025.07.28" />
 
+                <include
+                    android:id="@+id/btn_like"
+                    layout="@layout/item_like"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="24dp"
+                    app:hearit="@{hearit}"
+                    app:layout_constraintStart_toStartOf="@id/cv_script"
+                    app:layout_constraintTop_toBottomOf="@id/layout_thumbnail" />
+
                 <androidx.compose.ui.platform.ComposeView
                     android:id="@+id/cv_script"
                     android:layout_width="match_parent"
@@ -121,7 +132,7 @@
                     android:paddingVertical="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layout_thumbnail"
+                    app:layout_constraintTop_toBottomOf="@id/btn_like"
                     tools:ignore="MissingConstraints" />
 
                 <androidx.media3.ui.PlayerView

@@ -13,7 +13,8 @@
     <string name="all_toast_delete_bookmark_fail">북마크 삭제에 실패했습니다</string>
     <string name="all_toast_notification_permission_denied">푸시 알림을 허용하지 않습니다.</string>
     <string name="all_keyword_name"># %s</string>
-    <string name="all_login_dialog_message_body"><font color="#B677F3">북마크 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
+    <string name="all_login_required_bookmark"><font color="#B677F3">북마크 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
+    <string name="all_login_required_like"><font color="#B677F3">좋아요 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
     <string name="all_dialog_login_positive">로그인</string>
 
     <!-- HomeFragment-->
@@ -67,6 +68,9 @@
     <string name="player_detail_toast_recent_save_fail">최근 들은 히어릿 저장에 실패했습니다</string>
     <string name="player_detail_invite_error_kakao">카카오톡으로 공유하는 중 오류가 발생했습니다</string>
     <string name="player_detail_invite_error_browser">웹 브라우저를 찾을 수 없어 공유할 수 없습니다</string>
+    <string name="player_detail_toast_add_like_fail">좋아요에 실패했어요. 잠시 후 다시 시도해 주세요</string>
+    <string name="player_detail_toast_delete_like_fail">좋아요 해제에 실패했어요. 잠시 후 다시 시도해 주세요</string>
+    <string name="player_detail_toast_like_login_required">좋아요는 로그인 후 이용할 수 있어요</string>
 
     <!-- ExploreFragment-->
     <string name="explore_hearit_guide"><font color="#B677F3">1분 미리듣기</font> 로 원하는 히어릿을 찾아보세요!</string>

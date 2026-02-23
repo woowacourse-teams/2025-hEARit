@@ -17,6 +17,8 @@ import com.onair.hearit.data.datasource.remote.CategoryRemoteDataSource
 import com.onair.hearit.data.datasource.remote.CategoryRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSourceImpl
+import com.onair.hearit.data.datasource.remote.LikeRemoteDataSource
+import com.onair.hearit.data.datasource.remote.LikeRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSource
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.PlayingHistoryRemoteDataSource
@@ -66,6 +68,10 @@ abstract class DataSourceModule {
     @Binds
     @Singleton
     abstract fun bindRecommendationRemoteDataSource(impl: RecommendationRemoteDataSourceImpl): RecommendationRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindLikeRemoteDataSource(impl: LikeRemoteDataSourceImpl): LikeRemoteDataSource
 
     @Binds
     @Singleton
