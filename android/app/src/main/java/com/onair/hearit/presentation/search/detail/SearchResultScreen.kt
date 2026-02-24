@@ -177,7 +177,7 @@ private fun ResultSearchHeader(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 4.dp),
+                .padding(horizontal = 20.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -194,7 +194,7 @@ private fun ResultSearchHeader(
                 modifier =
                     Modifier
                         .noRippleClickable { menuExpanded = true },
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
@@ -242,13 +242,10 @@ private fun SortDropdownMenu(
     ) {
         DropdownMenuItem(
             text = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                Row(modifier = Modifier.padding(start = 4.dp)) {
                     Text(
                         text = "추천순",
                         color = HearitPurple1,
-                        style = HearitTypoGraphy.titleSmall,
                     )
 
                     Icon(
@@ -257,7 +254,7 @@ private fun SortDropdownMenu(
                         tint = HearitPurple1,
                         modifier =
                             Modifier
-                                .padding(start = 20.dp)
+                                .padding(start = 24.dp)
                                 .size(18.dp)
                                 .onGloballyPositioned { coords ->
                                     val pos = coords.positionInWindow()
@@ -269,7 +266,7 @@ private fun SortDropdownMenu(
                                             right = pos.x + size.width,
                                             bottom = pos.y + size.height,
                                         )
-                                }.noRippleClickable{
+                                }.noRippleClickable {
                                     showTooltip = !showTooltip
                                 },
                     )
@@ -285,14 +282,14 @@ private fun SortDropdownMenu(
 
     // DropdownMenu 밖에서 별도 Popup으로 툴팁 렌더링
     if (showTooltip && infoAnchorBounds != null) {
-        val b = infoAnchorBounds!!
+        val bound = infoAnchorBounds!!
 
         Popup(
             alignment = Alignment.TopStart,
             offset =
                 IntOffset(
-                    x = b.left.toInt(),
-                    y = b.top.toInt() - 120,
+                    x = bound.left.toInt(),
+                    y = bound.top.toInt() - 120,
                 ),
             properties = PopupProperties(focusable = false),
             onDismissRequest = { showTooltip = false },
@@ -328,6 +325,7 @@ private fun SortMenuItem(
             onDismiss()
             onSortSelected(type)
         },
+        modifier = Modifier.padding(start = 4.dp),
         colors = MenuDefaults.itemColors(textColor = Gray4),
     )
 }
@@ -377,6 +375,18 @@ fun SearchResultEmptyPreview() {
             hearits = persistentListOf(),
             onHearitClick = {},
             onLoadNext = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SortDropdownMenuPreview() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        SortDropdownMenu(
+            menuExpanded = true,
+            onDismiss = {},
+            onSortSelected = {},
         )
     }
 }
