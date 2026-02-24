@@ -201,6 +201,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics.ndk)
+    implementation(libs.firebase.messaging.ktx)
 
     // kakao SDK
     implementation(libs.v2.user)

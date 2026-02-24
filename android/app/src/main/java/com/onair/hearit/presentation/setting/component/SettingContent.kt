@@ -27,6 +27,7 @@ import com.onair.hearit.presentation.util.noRippleClickable
 fun SettingContent(
     userInfo: UserInfo?,
     onProfileClick: () -> Unit,
+    onAlarmClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
     onTermsClick: () -> Unit,
     onOpenSourceClick: () -> Unit,
@@ -44,6 +45,11 @@ fun SettingContent(
         SettingItem(
             text = stringResource(R.string.setting_profile),
             onClick = onProfileClick,
+        )
+
+        SettingItem(
+            text = stringResource(R.string.setting_notification),
+            onClick = onAlarmClick,
         )
 
         SettingItem(
@@ -118,6 +124,7 @@ private fun RegisteredSettingScreenPreview() {
         SettingContent(
             userInfo = UserInfo.default(),
             onProfileClick = {},
+            onAlarmClick = {},
             onPrivacyPolicyClick = {},
             onTermsClick = {},
             onOpenSourceClick = {},
@@ -135,6 +142,7 @@ private fun NotRegisteredSettingScreenPreview() {
         SettingContent(
             userInfo = UserInfo(id = 0L, nickname = "hEARit", profileImage = null),
             onProfileClick = {},
+            onAlarmClick = {},
             onPrivacyPolicyClick = {},
             onTermsClick = {},
             onOpenSourceClick = {},

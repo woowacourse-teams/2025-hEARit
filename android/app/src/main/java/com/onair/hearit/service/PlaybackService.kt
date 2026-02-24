@@ -151,7 +151,7 @@ class PlaybackService : MediaSessionService() {
     companion object {
         private const val NOTIFICATION_ID = 1001
         private const val SESSION_ID = "hearit_session"
-        private const val CHANNEL_ID = "hearit_channel"
+        private const val CHANNEL_ID = "hearit_playback_channel"
 
         const val ACTION_STOP_SERVICE = "hearit.ACTION_STOP_SERVICE"
 
