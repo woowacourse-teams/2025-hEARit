@@ -26,13 +26,14 @@ public class HearitClusterCommandRepository {
                     INSERT INTO hearit_cluster
                     (hearit_id, view_count, like_count, bookmark_count, avg_play_time, completion_rate, created_at, cluster_id, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    AS new_data
                     ON DUPLICATE KEY UPDATE
-                    view_count = VALUES(view_count),
-                    like_count = VALUES(like_count),
-                    bookmark_count = VALUES(bookmark_count),
-                    avg_play_time = VALUES(avg_play_time),
-                    completion_rate = VALUES(completion_rate),
-                    updated_at = VALUES(updated_at)
+                    view_count = new_data.view_count,
+                    like_count = new_data.like_count,
+                    bookmark_count = new_data.bookmark_count,
+                    avg_play_time = new_data.avg_play_time,
+                    completion_rate = new_data.completion_rate,
+                    updated_at = new_data.updated_at
                 """;
         LocalDateTime now = LocalDateTime.now();
 
@@ -44,7 +45,7 @@ public class HearitClusterCommandRepository {
             ps.setDouble(5, argument.getAvgPlayTime());
             ps.setDouble(6, argument.getCompletionRate());
             ps.setTimestamp(7, Timestamp.valueOf(argument.getCreatedAt()));
-            ps.setInt(8, 0); // cluster_id = 0
+            ps.setInt(8, 0); // cluster_id = 0 초기값
             ps.setTimestamp(9, Timestamp.valueOf(now));
         });
     }
