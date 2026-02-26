@@ -14,10 +14,14 @@ public class HearitClusterFeatureNormalizer {
     private static final double RECENCY_LAMBDA = 0.05;
 
     public List<NormalizedHearitClusterFeature> normalizeFromEntities(List<HearitCluster> entities) {
-        double maxView = Math.max(entities.stream().mapToLong(HearitCluster::getViewCount).max().orElse(0L), MIN_NORMALIZATION_THRESHOLD);
-        double maxLike = Math.max(entities.stream().mapToLong(HearitCluster::getLikeCount).max().orElse(0L), MIN_NORMALIZATION_THRESHOLD);
-        double maxBookmark = Math.max(entities.stream().mapToLong(HearitCluster::getBookmarkCount).max().orElse(0L), MIN_NORMALIZATION_THRESHOLD);
-        double maxPlayTime = Math.max(entities.stream().mapToDouble(HearitCluster::getAvgPlayTime).max().orElse(0.0), MIN_NORMALIZATION_THRESHOLD);
+        double maxView = Math.max(entities.stream().mapToLong(HearitCluster::getViewCount).max().orElse(0L),
+                MIN_NORMALIZATION_THRESHOLD);
+        double maxLike = Math.max(entities.stream().mapToLong(HearitCluster::getLikeCount).max().orElse(0L),
+                MIN_NORMALIZATION_THRESHOLD);
+        double maxBookmark = Math.max(entities.stream().mapToLong(HearitCluster::getBookmarkCount).max().orElse(0L),
+                MIN_NORMALIZATION_THRESHOLD);
+        double maxPlayTime = Math.max(entities.stream().mapToDouble(HearitCluster::getAvgPlayTime).max().orElse(0.0),
+                MIN_NORMALIZATION_THRESHOLD);
 
         return entities.stream()
                 .map(e -> new NormalizedHearitClusterFeature(
@@ -32,7 +36,7 @@ public class HearitClusterFeatureNormalizer {
     }
 
     private double calculateRecency(LocalDateTime createdAt) {
-        long days = Duration.between(createdAt, LocalDateTime.now()).toDays();
+        long days = Math.max(0, Duration.between(createdAt, LocalDateTime.now()).toDays());
         return Math.exp(-RECENCY_LAMBDA * days);
     }
 }
