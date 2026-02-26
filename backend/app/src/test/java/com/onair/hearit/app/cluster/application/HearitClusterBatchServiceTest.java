@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.onair.hearit.core.infrastructure.jdbc.HearitClusterCommandRepository;
 import com.onair.hearit.core.log.logger.JsonLogger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,9 @@ class HearitClusterBatchServiceTest {
     private JsonLogger jsonLogger;
 
     @Mock
+    private HearitClusterCommandRepository hearitClusterCommandRepository;
+
+    @Mock
     private HearitClusterFeatureLoader hearitClusterFeatureLoader;
 
     @Mock
@@ -43,7 +47,7 @@ class HearitClusterBatchServiceTest {
         verify(hearitClusterCalculator, times(1)).calculateClusters(5); // K_SIZE
 
         // 시작, 진행(2회), 완료 로그가 찍혔는지 확인
-        verify(jsonLogger, times(4)).info(any());
+        verify(jsonLogger, times(5)).info(any());
     }
 
     @Test

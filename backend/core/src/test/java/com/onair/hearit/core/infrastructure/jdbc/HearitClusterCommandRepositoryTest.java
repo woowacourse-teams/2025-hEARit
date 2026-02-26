@@ -160,6 +160,41 @@ class HearitClusterCommandRepositoryTest {
         );
     }
 
+    @Test
+    @DisplayName("원본 hearit 테이블에 존재하지 않는 고아 레코드들을 hearit_cluster 테이블에서 삭제한다.")
+    void deleteOrphanClusters() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+        Hearit h1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit h2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Long orphanHearitId = h2.getId();
+
+        hearitClusterCommandRepository.upsertStatistics(List.of(
+                new StubStatProjection(h1.getId(), 100, 10, 5, 200.0, 0.8, LocalDateTime.now()),
+                new StubStatProjection(orphanHearitId, 50, 2, 1, 100.0, 0.3, LocalDateTime.now())
+        ));
+
+        // 원본 테이블에서 h2를 제거하여 h2의 통계 데이터를 고아(Orphan)로 만듦
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
+        jdbcTemplate.update("DELETE FROM hearit WHERE id = ?", orphanHearitId);
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+
+        // when
+        hearitClusterCommandRepository.deleteOrphanClusters();
+
+        // then
+        Integer totalCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM hearit_cluster", Integer.class);
+        List<Long> remainingIds = jdbcTemplate.queryForList(
+                "SELECT hearit_id FROM hearit_cluster", Long.class);
+
+        assertAll(
+                () -> assertThat(totalCount).isEqualTo(1), // 고아 레코드 1개 삭제됨
+                () -> assertThat(remainingIds).containsExactly(h1.getId()), // 정상 데이터만 생존
+                () -> assertThat(remainingIds).doesNotContain(orphanHearitId) // 고아 데이터 삭제 확인
+        );
+    }
+
     private record StubStatProjection(
             Long hearitId, long viewCount, long likeCount, long bookmarkCount,
             double avgPlayTime, double completionRate, LocalDateTime createdAt

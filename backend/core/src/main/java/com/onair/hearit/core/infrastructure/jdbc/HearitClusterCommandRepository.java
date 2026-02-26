@@ -64,4 +64,16 @@ public class HearitClusterCommandRepository {
             ps.setLong(3, id);
         });
     }
+
+    /**
+     * 원본 hearit 테이블에 존재하지 않는(삭제된) 데이터를 hearit_cluster 테이블에서 제거합니다.
+     */
+    public void deleteOrphanClusters() {
+        String sql = """
+                    DELETE hc FROM hearit_cluster hc
+                    LEFT JOIN hearit h ON hc.hearit_id = h.id
+                    WHERE h.id IS NULL
+                """;
+        jdbcTemplate.update(sql);
+    }
 }

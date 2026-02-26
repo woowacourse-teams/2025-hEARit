@@ -1,5 +1,6 @@
 package com.onair.hearit.app.cluster.application;
 
+import com.onair.hearit.core.infrastructure.jdbc.HearitClusterCommandRepository;
 import com.onair.hearit.core.log.logger.JsonLogger;
 import com.onair.hearit.core.log.property.scheduler.BatchErrorLogProperty;
 import com.onair.hearit.core.log.property.scheduler.BatchProgressLogProperty;
@@ -17,6 +18,7 @@ public class HearitClusterBatchService {
     private static final int CLUSTER_K_SIZE = 5;
 
     private final JsonLogger jsonLogger;
+    private final HearitClusterCommandRepository hearitClusterCommandRepository;
     private final HearitClusterFeatureLoader hearitClusterFeatureLoader;
     private final HearitClusterCalculator hearitClusterCalculator;
 
@@ -25,6 +27,9 @@ public class HearitClusterBatchService {
         long startTime = System.currentTimeMillis();
 
         try {
+            jsonLogger.info(BatchProgressLogProperty.of(JOB_NAME, "Step 0: Cleaning up Orphan Records"));
+            hearitClusterCommandRepository.deleteOrphanClusters();
+
             jsonLogger.info(BatchProgressLogProperty.of(JOB_NAME, "Step 1: Loading Statistics Features"));
             hearitClusterFeatureLoader.loadStatisticsFeature(STATISTICS_CHUNK_SIZE);
 
