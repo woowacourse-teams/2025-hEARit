@@ -9,12 +9,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import smile.clustering.CentroidClustering;
 import smile.clustering.Clustering;
 import smile.clustering.KMeans;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HearitClusterCalculator {
@@ -29,25 +31,35 @@ public class HearitClusterCalculator {
     @Transactional
     public void calculateClusters(int k) {
         List<HearitCluster> rowFeatures = clusteredHearitRepository.findAll();
-        if (!rowFeatures.isEmpty()) {
-            List<NormalizedHearitClusterFeature> normalizedFeatures = hearitClusterFeatureNormalizer
-                    .normalizeFromEntities(rowFeatures);
-            double[][] data = normalizedFeatures.stream()
-                    .map(NormalizedHearitClusterFeature::vector)
-                    .toArray(double[][]::new);
 
-            // controller = null : Smile KMeans 내부적으로 EuclideanDistance를 기본 사용
-            Clustering.Options options = new Clustering.Options(k, MAX_KMEANS_ITERATION, TOLERANCE, null);
+        if (rowFeatures.isEmpty()) {
+            return;
+        }
+
+        List<NormalizedHearitClusterFeature> normalizedFeatures = hearitClusterFeatureNormalizer
+                .normalizeFromEntities(rowFeatures);
+        double[][] data = normalizedFeatures.stream()
+                .map(NormalizedHearitClusterFeature::vector)
+                .toArray(double[][]::new);
+        try {
+            int actualK = Math.min(rowFeatures.size(), k); // 데이터 개수(n)가 설정된 k보다 적으면 n을 k로 사용
+            Clustering.Options options = new Clustering.Options(actualK, MAX_KMEANS_ITERATION, TOLERANCE, null);
             CentroidClustering<double[], double[]> clustering = KMeans.fit(data, options);
-            int[] labels = clustering.group(); // = cluster_id
+            int[] labels = clustering.group();
 
-            Map<Long, Integer> clusterResults = IntStream.range(0, normalizedFeatures.size())
-                    .boxed()
+            Map<Long, Integer> clusterResults = IntStream.range(0, normalizedFeatures.size()).boxed()
                     .collect(Collectors.toMap(
                             i -> normalizedFeatures.get(i).hearitId(),
                             i -> labels[i]
                     ));
             hearitClusterCommandRepository.updateClusterIds(clusterResults);
+
+        } catch (RuntimeException e) {
+            log.error("Clustering process failed: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error during clustering", e);
+            throw new RuntimeException(e);
         }
     }
 }
