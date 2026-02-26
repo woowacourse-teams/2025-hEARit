@@ -10,13 +10,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class HearitClusterFeatureNormalizer {
 
+    private static final double MIN_NORMALIZATION_THRESHOLD = 1.0;
     private static final double RECENCY_LAMBDA = 0.05;
 
     public List<NormalizedHearitClusterFeature> normalizeFromEntities(List<HearitCluster> entities) {
-        double maxView = entities.stream().mapToLong(HearitCluster::getViewCount).max().orElse(1L);
-        double maxLike = entities.stream().mapToLong(HearitCluster::getLikeCount).max().orElse(1L);
-        double maxBookmark = entities.stream().mapToLong(HearitCluster::getBookmarkCount).max().orElse(1L);
-        double maxPlayTime = entities.stream().mapToDouble(HearitCluster::getAvgPlayTime).max().orElse(1.0);
+        double maxView = Math.max(entities.stream().mapToLong(HearitCluster::getViewCount).max().orElse(0L), MIN_NORMALIZATION_THRESHOLD);
+        double maxLike = Math.max(entities.stream().mapToLong(HearitCluster::getLikeCount).max().orElse(0L), MIN_NORMALIZATION_THRESHOLD);
+        double maxBookmark = Math.max(entities.stream().mapToLong(HearitCluster::getBookmarkCount).max().orElse(0L), MIN_NORMALIZATION_THRESHOLD);
+        double maxPlayTime = Math.max(entities.stream().mapToDouble(HearitCluster::getAvgPlayTime).max().orElse(0.0), MIN_NORMALIZATION_THRESHOLD);
 
         return entities.stream()
                 .map(e -> new NormalizedHearitClusterFeature(
