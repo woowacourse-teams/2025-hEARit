@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
 import com.onair.hearit.app.fixture.DbHelper;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.config.CircuitBreakerConfig;
 import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
@@ -33,7 +34,16 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql("/dbclean.sql")
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, PlayingHistoryCommandRepository.class})
+@Import({
+        DbHelper.class,
+        TestJpaAuditingConfig.class,
+        DataSourceConfig.class,
+        PlayingHistoryCommandRepository.class,
+        PlayingHistoryConverter.class,
+        PlayingHistoryMapBuffer.class,
+        TestCircuitBreakerConfig.class,
+        CircuitBreakerConfig.class
+})
 class PlayingHistoryMapBufferTest {
 
     @Autowired

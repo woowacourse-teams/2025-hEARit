@@ -65,6 +65,7 @@ import org.testcontainers.utility.DockerImageName;
 class PlayingHistoryBufferFacadeTest {
 
     static GenericContainer<?> redisContainer;
+    static LettuceConnectionFactory connectionFactory;
     static RedisTemplate<String, String> redisTemplate;
     static RedissonClient redissonClient;
 
@@ -105,7 +106,7 @@ class PlayingHistoryBufferFacadeTest {
         config.setHostName(redisContainer.getHost());
         config.setPort(redisContainer.getFirstMappedPort());
 
-        LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory(config);
+        connectionFactory = new LettuceConnectionFactory(config);
         connectionFactory.afterPropertiesSet();
 
         redisTemplate = new RedisTemplate<>();
@@ -130,6 +131,9 @@ class PlayingHistoryBufferFacadeTest {
         }
         if (redisTemplate != null) {
             redisTemplate.getConnectionFactory().getConnection().close();
+        }
+        if (connectionFactory != null) {
+            connectionFactory.destroy();
         }
         if (redisContainer != null) {
             redisContainer.stop();

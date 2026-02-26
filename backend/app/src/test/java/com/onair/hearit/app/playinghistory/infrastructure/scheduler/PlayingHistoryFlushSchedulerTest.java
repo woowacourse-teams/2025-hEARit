@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.playinghistory.infrastructure.buffer.PlayingHistoryMapBuffer;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.TestCircuitBreakerConfig;
+import com.onair.hearit.app.playinghistory.infrastructure.buffer.config.CircuitBreakerConfig;
 import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
@@ -36,7 +38,10 @@ import org.springframework.test.context.jdbc.Sql;
         TestJpaAuditingConfig.class,
         DataSourceConfig.class,
         PlayingHistoryCommandRepository.class,
-        PlayingHistoryConverter.class
+        PlayingHistoryConverter.class,
+        PlayingHistoryMapBuffer.class,
+        TestCircuitBreakerConfig.class,
+        CircuitBreakerConfig.class
 })
 class PlayingHistoryFlushSchedulerTest {
 
