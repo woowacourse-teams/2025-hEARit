@@ -11,6 +11,8 @@ import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import smile.clustering.CentroidClustering;
+import smile.clustering.Clustering;
 import smile.clustering.KMeans;
 
 @Service
@@ -34,8 +36,10 @@ public class HearitClusterCalculator {
                     .map(NormalizedHearitClusterFeature::vector)
                     .toArray(double[][]::new);
 
-            KMeans kmeans = KMeans.fit(data, k, MAX_KMEANS_ITERATION, TOLERANCE);
-            int[] labels = kmeans.y; // = cluster_id
+            // controller = null : Smile KMeans 내부적으로 EuclideanDistance를 기본 사용
+            Clustering.Options options = new Clustering.Options(k, MAX_KMEANS_ITERATION, TOLERANCE, null);
+            CentroidClustering<double[], double[]> clustering = KMeans.fit(data, options);
+            int[] labels = clustering.group(); // = cluster_id
 
             Map<Long, Integer> clusterResults = IntStream.range(0, normalizedFeatures.size())
                     .boxed()
