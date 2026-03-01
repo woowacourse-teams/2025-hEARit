@@ -6,4 +6,5 @@ enum class HomeLoadKey {
     RECENT_UPLOAD,
     PLAYING_BOOKMARKS,
     RECOMMENDATION_CATEGORIES,
+    AD_BANNER,
 }
