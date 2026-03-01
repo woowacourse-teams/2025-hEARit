@@ -6,10 +6,9 @@ import com.onair.hearit.data.datasource.NetworkResult
 import com.onair.hearit.data.datasource.handleApiCall
 import com.onair.hearit.data.dto.AdvertisementResponse
 import javax.inject.Inject
-import javax.inject.Named
 
 class AdvertisementRemoteDataSourceImpl @Inject constructor(
-    @param:Named("noAuth") private val advertisementService: AdvertisementService,
+    private val advertisementService: AdvertisementService,
     private val errorResponseHandler: ErrorResponseHandler,
 ) : AdvertisementRemoteDataSource {
     override suspend fun getAdvertisement(): NetworkResult<AdvertisementResponse> =
