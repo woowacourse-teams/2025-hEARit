@@ -4,6 +4,7 @@ import com.onair.hearit.data.dto.CategoryResponse
 import com.onair.hearit.data.dto.ExploreHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.KeywordResponse
+import com.onair.hearit.data.dto.LikeResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.SearchHearitsResponse
 import com.onair.hearit.data.dto.SourceResponse
@@ -28,6 +29,7 @@ object HearitFixtures {
                 listOf(
                     KeywordResponse(id = 1, name = "Activity"),
                 ),
+            like = LikeResponse(count = 1, isLiked = true),
         )
 
     fun createFakeRecommendHearit(): RecommendHearitResponse =

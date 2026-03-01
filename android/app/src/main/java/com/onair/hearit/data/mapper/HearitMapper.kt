@@ -5,6 +5,7 @@ import com.onair.hearit.data.dto.ExploreHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.KeywordResponse
+import com.onair.hearit.data.dto.LikeResponse
 import com.onair.hearit.data.dto.PlayingHistoryResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
@@ -17,6 +18,7 @@ import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.Keyword
+import com.onair.hearit.domain.model.Like
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.PlayingHistoryHearit
@@ -118,6 +120,7 @@ fun HearitResponse.toDomain(): Hearit =
         keywords = this.keywords.map { it.toDomain() },
         audioUrl = null,
         script = null,
+        like = this.like.toDomain(),
     )
 
 fun UserInfoResponse.toDomain(): UserInfo =
@@ -137,6 +140,12 @@ fun KeywordResponse.toDomain(): Keyword =
     Keyword(
         id = this.id,
         name = this.name,
+    )
+
+fun LikeResponse.toDomain(): Like =
+    Like(
+        count = this.count,
+        isLiked = this.isLiked,
     )
 
 fun SearchHearitsResponse.toSearchedHearit(): PageResult<SearchedHearit> =

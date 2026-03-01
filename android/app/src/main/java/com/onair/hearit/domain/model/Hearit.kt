@@ -14,4 +14,5 @@ data class Hearit(
     val bookmarkId: Long?,
     val category: Category,
     val keywords: List<Keyword>,
+    val like: Like,
 )
