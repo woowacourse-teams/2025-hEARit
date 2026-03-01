@@ -14,7 +14,7 @@ import javax.inject.Named
 
 class TokenAuthenticator @Inject constructor(
     private val authLocalDataSource: AuthLocalDataSource,
-    @Named("noAuth") private val authService: AuthService,
+    @param:Named("noAuth") private val authService: AuthService,
     private val authHeaderProvider: AuthHeaderProvider,
 ) : Authenticator {
     private val json =
