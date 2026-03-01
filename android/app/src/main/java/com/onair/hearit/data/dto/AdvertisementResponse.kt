@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AdvertisementResponse(
     @SerialName("id")
-    val id: Int,
+    val id: Long,
     @SerialName("imageUrl")
     val imageUrl: String,
     @SerialName("linkUrl")
