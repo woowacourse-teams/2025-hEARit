@@ -185,7 +185,8 @@
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast">
+                    app:layout_constraintTop_toBottomOf="@id/tv_home_shortcast"
+                    app:linkUrl="@{ad.linkUrl}">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"

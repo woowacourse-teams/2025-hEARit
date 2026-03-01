@@ -217,6 +217,7 @@ class HomeFragment :
         updateRecentUploadSection(state.recentUploadHearits, state.showRecentUpload)
         updateBookmarkSection(state.playingBookmarkHearits, state.showBookmark)
         updateCategoriesSection(state.recommendationCategories, state.showCategories)
+        binding.ad = state.advertisement
     }
 
     private fun updateLoadingState(isLoading: Boolean) {
