@@ -5,6 +5,7 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,7 @@ public class ViewCountRateLimiter {
         try {
             Boolean success = redisTemplate.opsForValue().setIfAbsent(key, "1", Duration.ofSeconds(ttlSeconds));
             return Boolean.TRUE.equals(success);
-        } catch (RedisConnectionFailureException e) {
+        } catch (RedisConnectionFailureException | RedisSystemException e) {
             // Redis 장애 시 조회 수로 인한 에러를 방지하기 위해 RDB로 Fallback 수행
             log.error("[Redis] connection error (fallback) - key: {}", key, e);
             return true;
