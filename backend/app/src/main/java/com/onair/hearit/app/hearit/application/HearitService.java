@@ -142,7 +142,6 @@ public class HearitService {
         });
     }
 
-    @Transactional
     public void increaseViewCount(Long hearitId, UserInfo userInfo) {
         if (!viewCountRateLimiter.tryAcquireViewKey(userInfo.getUuid(), hearitId)) {
             return;
