@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
@@ -23,20 +24,16 @@ public class ViewCountRateLimiter {
         validateNull(uuid, hearitId);
         String key = KEY_PREFIX + uuid + ":" + hearitId;
         try {
-            Long result = redisTemplate.execute(
-                    viewCountLimitScript,
-                    List.of(key),
-                    String.valueOf(TTL_SECONDS)
-            );
+            Long result = redisTemplate.execute(viewCountLimitScript, List.of(key), String.valueOf(TTL_SECONDS));
             return result != null && result == 1L;
-        } catch (Exception e) {
-            /*
-                Redis 장애 시:
-                - 중복 키 검증은 포기
-                - 조회수는 즉시 증가시켜 서비스 흐름 유지
-             */
-            log.warn("[Redis] 조회수 중복 키 처리를 위한 Redis 연결 실패 - fallback으로 조회수 증가 처리합니다. key={}", key, e);
+        } catch (RedisConnectionFailureException e) {
+            // Redis 장애 시 조회 수로 인한 에러를 방지하기 위해 RDB로 Fallback 수행
+            log.error("[Redis] connection error (fallback) - key: {}", key, e);
             return true;
+        } catch (Exception e) {
+            // NPE, 구문 문법 등 예상치 못한 오류는 로그를 남기고 디버깅을 위해 예외 발생
+            log.error("[Redis] unexpected logic error - key: {}", key, e);
+            throw e;
         }
     }
 
