@@ -1,31 +1,34 @@
 package com.onair.hearit.app.hearit.infrastructure;
 
-import java.util.List;
+import java.time.Duration;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class ViewCountRateLimiter {
 
     private static final String KEY_PREFIX = "view:"; // 조회수 전용 Redis Key
-    private static final long TTL_SECONDS = 10;
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final DefaultRedisScript<Long> viewCountLimitScript;
+    private final long ttlSeconds;
+
+    public ViewCountRateLimiter(RedisTemplate<String, String> redisTemplate,
+                                @Value("${view-count.limit.ttl-seconds}") long ttlSeconds) {
+        this.redisTemplate = redisTemplate;
+        this.ttlSeconds = ttlSeconds;
+    }
 
     public boolean tryAcquireViewKey(UUID uuid, Long hearitId) {
         validateNull(uuid, hearitId);
         String key = KEY_PREFIX + uuid + ":" + hearitId;
         try {
-            Long result = redisTemplate.execute(viewCountLimitScript, List.of(key), String.valueOf(TTL_SECONDS));
-            return result != null && result == 1L;
+            Boolean success = redisTemplate.opsForValue().setIfAbsent(key, "1", Duration.ofSeconds(ttlSeconds));
+            return Boolean.TRUE.equals(success);
         } catch (RedisConnectionFailureException e) {
             // Redis 장애 시 조회 수로 인한 에러를 방지하기 위해 RDB로 Fallback 수행
             log.error("[Redis] connection error (fallback) - key: {}", key, e);

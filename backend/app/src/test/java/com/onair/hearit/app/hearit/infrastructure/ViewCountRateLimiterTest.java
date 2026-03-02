@@ -9,27 +9,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = ViewCountRateLimitScriptConfig.class)
 public class ViewCountRateLimiterTest {
 
     static GenericContainer<?> redisContainer;
     static RedisTemplate<String, String> redisTemplate;
 
     ViewCountRateLimiter rateLimiter;
-
-    @Autowired
-    DefaultRedisScript<Long> viewCountLimitScript;
 
     @BeforeAll
     static void startRedis() {
@@ -62,10 +55,7 @@ public class ViewCountRateLimiterTest {
             connection.serverCommands().flushAll();
         }
 
-        rateLimiter = new ViewCountRateLimiter(
-                redisTemplate,
-                viewCountLimitScript
-        );
+        rateLimiter = new ViewCountRateLimiter(redisTemplate, 10L);
     }
 
     @AfterAll
