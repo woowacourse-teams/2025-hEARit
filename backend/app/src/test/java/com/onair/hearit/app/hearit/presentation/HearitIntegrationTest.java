@@ -301,6 +301,8 @@ class HearitIntegrationTest extends IntegrationTest {
             Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
             Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
             Long hearitId = hearit.getId();
+            Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+            String token = generateToken(member);
 
             int threadCount = 50;
             ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -311,6 +313,7 @@ class HearitIntegrationTest extends IntegrationTest {
                 executorService.execute(() -> {
                     try {
                         RestAssured.given(HearitIntegrationTest.this.spec)
+                                .header("Authorization", "Bearer " + token) // 동일 토큰 주입
                                 .when()
                                 .post("/api/v1/hearits/{hearitId}/view", hearitId)
                                 .then()
