@@ -43,5 +43,3 @@ out/
 .env
 
 afterMigrate.sql
-/*.md
-.claude/settings.local.json

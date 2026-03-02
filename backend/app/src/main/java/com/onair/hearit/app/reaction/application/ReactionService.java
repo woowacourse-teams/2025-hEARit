@@ -1,7 +1,7 @@
 package com.onair.hearit.app.reaction.application;
 
-import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.exception.custom.NotFoundException;
+import com.onair.hearit.app.exception.custom.UnauthorizedException;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Reaction;
 import com.onair.hearit.core.domain.ReactionType;
@@ -25,7 +25,7 @@ public class ReactionService {
     @Transactional
     public void addReaction(UserInfo userInfo, Long hearitId, ReactionType type) {
         if (userInfo == null || userInfo.isGuest()) {
-            throw new ForbiddenException("비회원은 좋아요를 추가할 권한이 없습니다.");
+            throw new UnauthorizedException("비회원은 좋아요를 추가할 권한이 없습니다.");
         }
 
         Hearit hearit = getHearitById(hearitId);
@@ -51,7 +51,7 @@ public class ReactionService {
     @Transactional
     public void removeReaction(UserInfo userInfo, Long hearitId, ReactionType type) {
         if (userInfo == null || userInfo.isGuest()) {
-            throw new ForbiddenException("비회원은 좋아요를 삭제할 권한이 없습니다.");
+            throw new UnauthorizedException("비회원은 좋아요를 삭제할 권한이 없습니다.");
         }
         Hearit hearit = getHearitById(hearitId);
         reactionRepository
