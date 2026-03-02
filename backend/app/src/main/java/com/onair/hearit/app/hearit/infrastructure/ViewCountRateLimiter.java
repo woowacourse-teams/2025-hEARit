@@ -20,8 +20,16 @@ public class ViewCountRateLimiter {
 
     public ViewCountRateLimiter(RedisTemplate<String, String> redisTemplate,
                                 @Value("${view-count.limit.ttl-seconds}") long ttlSeconds) {
+
+        validateTTLValue(ttlSeconds);
         this.redisTemplate = redisTemplate;
         this.ttlSeconds = ttlSeconds;
+    }
+
+    private void validateTTLValue(long ttlSeconds) {
+        if (ttlSeconds <= 0) {
+            throw new IllegalArgumentException("TTL 값은 1 이상이어야 합니다.");
+        }
     }
 
     public boolean tryAcquireViewKey(UUID uuid, Long hearitId) {
