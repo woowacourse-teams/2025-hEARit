@@ -27,10 +27,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 
-    // Redis & Redisson
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.redisson:redisson-spring-boot-starter:3.52.0'
-
     // Resilience4j (Circuit Breaker)
     implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
 
@@ -58,8 +54,8 @@ dependencies {
     testRuntimeOnly 'com.h2database:h2'
 
     // Testcontainers for Redis
-    testImplementation 'org.testcontainers:testcontainers:1.19.3'
-    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+    testImplementation 'org.testcontainers:testcontainers:2.0.3'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.3'
 
     // Awaitility for async testing
     testImplementation 'org.awaitility:awaitility:4.2.0'

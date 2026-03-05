@@ -38,6 +38,10 @@ dependencies {
     api "org.flywaydb:flyway-core"
     api "org.flywaydb:flyway-mysql"
 
+    // Redis & Redisson
+    api 'org.springframework.boot:spring-boot-starter-data-redis'
+    api 'org.redisson:redisson-spring-boot-starter:3.52.0'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 

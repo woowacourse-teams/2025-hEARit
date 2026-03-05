@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.onair.hearit.app.auth.domain.RequestUser;
-import com.onair.hearit.app.exception.custom.ForbiddenException;
 import com.onair.hearit.app.exception.custom.NotFoundException;
+import com.onair.hearit.app.exception.custom.UnauthorizedException;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -74,7 +74,7 @@ class ReactionServiceTest {
     }
 
     @Test
-    @DisplayName("좋아요 추가 시, 비회원인 경우 ForbiddenException을 던진다.")
+    @DisplayName("좋아요 추가 시, 비회원인 경우 UnauthorizedException을 던진다.")
     void addReaction_GuestTest() {
         // given
         RequestUser guest = RequestUser.guest("00000000-0000-0000-0000-000000000000");
@@ -84,7 +84,7 @@ class ReactionServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reactionService.addReaction(guest.getUserInfo(), hearitId, ReactionType.LIKE))
-                .isInstanceOf(ForbiddenException.class)
+                .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("비회원은 좋아요를 추가할 권한이 없습니다.");
     }
 
@@ -146,7 +146,7 @@ class ReactionServiceTest {
     }
 
     @Test
-    @DisplayName("좋아요 삭제 시, 비회원인 경우 ForbiddenException을 던진다.")
+    @DisplayName("좋아요 삭제 시, 비회원인 경우 UnauthorizedException을 던진다.")
     void removeReaction_GuestTest() {
         // given
         RequestUser guest = RequestUser.guest("00000000-0000-0000-0000-000000000000");
@@ -156,7 +156,7 @@ class ReactionServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reactionService.removeReaction(guest.getUserInfo(), hearitId, ReactionType.LIKE))
-                .isInstanceOf(ForbiddenException.class)
+                .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("비회원은 좋아요를 삭제할 권한이 없습니다.");
     }
 

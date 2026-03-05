@@ -4,6 +4,7 @@ import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.docume
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -210,14 +211,23 @@ class HearitControllerTest extends ControllerTest {
         // given
         Long hearitId = 1L;
 
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
+
         // when & then
-        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", hearitId))
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", hearitId)
+                        .header("Authorization", "Bearer valid-token"))
                 .andExpect(status().isNoContent())
                 .andDo(document("v1-increase-hearit-view-no-content",
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Hearit API")
                                 .summary("히어릿 조회수 증가 V1")
-                                .description("히어릿 상세 조회 시 조회수를 1 증가시킵니다.")
+                                .description("""
+                                        히어릿의 조회수를 1 증가시킵니다.
+
+                                        회원의 경우 토큰에서 `uuid`를, 비회원의 경우 헤더의 `uuid`를 참고하여
+                                        `hearitId`와 함께 중복 키를 생성해 10초 내에는 한 번의 조회수만 증가됩니다."""
+                                )
                                 .pathParameters(
                                         parameterWithName("hearitId").description("조회수를 증가시킬 히어릿 ID")
                                 )
@@ -232,12 +242,16 @@ class HearitControllerTest extends ControllerTest {
         // given
         Long notFoundHearitId = 9999L;
 
+        given(jwtTokenProvider.getTokenStatus("valid-token")).willReturn(TokenStatus.VALID);
+        given(jwtTokenProvider.getMemberUuid("valid-token")).willReturn(UUID.randomUUID());
+
         willThrow(new NotFoundException("hearitId", notFoundHearitId.toString()))
                 .given(hearitService)
-                .increaseViewCount(notFoundHearitId);
+                .increaseViewCount(eq(notFoundHearitId), any());
 
         // when & then
-        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", notFoundHearitId))
+        mockMvc.perform(post("/api/v1/hearits/{hearitId}/view", notFoundHearitId)
+                        .header("Authorization", "Bearer valid-token"))
                 .andExpect(status().isNotFound())
                 .andDo(document("v1-increase-hearit-view-not-found",
                         resource(ResourceSnippetParameters.builder()
