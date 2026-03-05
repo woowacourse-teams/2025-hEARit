@@ -3,7 +3,6 @@ package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.fixture.RedisIntegrationTestSupport;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.Test;
 
 class PlayingHistoryRedisBufferTest extends RedisIntegrationTestSupport {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private PlayingHistoryRedisBuffer storage;
 
     @BeforeEach

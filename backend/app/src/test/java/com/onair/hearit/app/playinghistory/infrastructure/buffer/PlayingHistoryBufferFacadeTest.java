@@ -54,17 +54,6 @@ class PlayingHistoryBufferFacadeTest extends RedisIntegrationTestSupport {
         mapBuffer.clear();
     }
 
-    private void waitForRedis() throws InterruptedException {
-        for (int i = 0; i < 10; i++) {
-            try {
-                redisTemplate.getConnectionFactory().getConnection().ping();
-                break;
-            } catch (Exception e) {
-                Thread.sleep(300);
-            }
-        }
-    }
-
     @Nested
     @DisplayName("정상 상태 동작 (CLOSED)")
     class NormalOperation {
