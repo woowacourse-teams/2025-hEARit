@@ -47,8 +47,10 @@ public class HearitController {
     }
 
     @PostMapping("/api/v1/hearits/{hearitId}/view")
-    public ResponseEntity<Void> updateViewCount(@PathVariable Long hearitId) {
-        hearitService.increaseViewCount(hearitId);
+    public ResponseEntity<Void> updateViewCount(
+            @PathVariable Long hearitId,
+            @AuthenticationPrincipal RequestUser requestUser) {
+        hearitService.increaseViewCount(hearitId, requestUser.getUserInfo());
         return ResponseEntity.noContent().build();
     }
 }
