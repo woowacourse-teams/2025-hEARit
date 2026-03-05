@@ -70,6 +70,7 @@ public abstract class RedisIntegrationTestSupport {
 
     protected static RedisTemplate<String, String> redisTemplate;
     protected static RedissonClient redissonClient;
+    private static LettuceConnectionFactory connectionFactory;
 
     /**
      * Redis 객체 초기화
@@ -83,7 +84,7 @@ public abstract class RedisIntegrationTestSupport {
         config.setHostName(REDIS_CONTAINER.getHost());
         config.setPort(REDIS_CONTAINER.getFirstMappedPort());
 
-        LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory(config);
+        connectionFactory = new LettuceConnectionFactory(config);
         connectionFactory.afterPropertiesSet();
 
         redisTemplate = new RedisTemplate<>();
@@ -116,6 +117,9 @@ public abstract class RedisIntegrationTestSupport {
     static void cleanupRedis() {
         if (redissonClient != null && !redissonClient.isShutdown()) {
             redissonClient.shutdown();
+        }
+        if (connectionFactory != null) {
+            connectionFactory.destroy();
         }
     }
 
