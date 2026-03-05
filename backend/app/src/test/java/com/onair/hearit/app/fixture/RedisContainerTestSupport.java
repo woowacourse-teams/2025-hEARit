@@ -61,7 +61,7 @@ import org.testcontainers.utility.DockerImageName;
         TestCircuitBreakerConfig.class,
         CircuitBreakerConfig.class
 })
-public abstract class RedisIntegrationTestSupport {
+public abstract class RedisContainerTestSupport {
 
     @Container
     protected static final GenericContainer<?> REDIS_CONTAINER =

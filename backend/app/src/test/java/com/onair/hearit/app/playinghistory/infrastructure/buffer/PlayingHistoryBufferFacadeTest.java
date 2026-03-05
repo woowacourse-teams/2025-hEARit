@@ -9,7 +9,7 @@ import static org.mockito.Mockito.spy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onair.hearit.app.exception.custom.RedisBufferException;
-import com.onair.hearit.app.fixture.RedisIntegrationTestSupport;
+import com.onair.hearit.app.fixture.RedisContainerTestSupport;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class PlayingHistoryBufferFacadeTest extends RedisIntegrationTestSupport {
+class PlayingHistoryBufferFacadeTest extends RedisContainerTestSupport {
 
     private PlayingHistoryRedisBuffer redisBuffer;
     private PlayingHistoryRedisBufferWithCircuitBreaker circuitWrappedRedisBuffer;

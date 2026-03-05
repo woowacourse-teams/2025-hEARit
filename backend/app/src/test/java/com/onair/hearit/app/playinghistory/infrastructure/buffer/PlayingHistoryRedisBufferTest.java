@@ -3,7 +3,7 @@ package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.onair.hearit.app.fixture.RedisIntegrationTestSupport;
+import com.onair.hearit.app.fixture.RedisContainerTestSupport;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class PlayingHistoryRedisBufferTest extends RedisIntegrationTestSupport {
+class PlayingHistoryRedisBufferTest extends RedisContainerTestSupport {
 
     private PlayingHistoryRedisBuffer storage;
 
