@@ -50,7 +50,7 @@ class BookmarkRepositoryTest {
         LocalDateTime baseTime = LocalDateTime.of(2026, 1, 1, 0, 0);
         Bookmark oldestBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit1),
                 baseTime);
-        Bookmark mideumBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit2),
+        Bookmark mediumBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit2),
                 baseTime.plusMinutes(1));
         Bookmark newestBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit3),
                 baseTime.plusMinutes(2));
@@ -65,7 +65,7 @@ class BookmarkRepositoryTest {
         // then
         assertAll(() -> {
             assertThat(bookmarks.getContent().get(0).getBookmark().getId()).isEqualTo(newestBookmark.getId());
-            assertThat(bookmarks.getContent().get(1).getBookmark().getId()).isEqualTo(mideumBookmark.getId());
+            assertThat(bookmarks.getContent().get(1).getBookmark().getId()).isEqualTo(mediumBookmark.getId());
             assertThat(bookmarks.getContent().get(2).getBookmark().getId()).isEqualTo(oldestBookmark.getId());
         });
     }
@@ -83,7 +83,7 @@ class BookmarkRepositoryTest {
         LocalDateTime baseTime = LocalDateTime.of(2026, 1, 1, 0, 0);
         Bookmark oldestBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit1),
                 baseTime);
-        Bookmark mideumBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit2),
+        Bookmark mediumBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit2),
                 baseTime.plusMinutes(1));
         Bookmark newestBookmark = dbHelper.insertBookmarkAt(TestFixture.createFixedBookmark(member, hearit3),
                 baseTime.plusMinutes(2));
@@ -98,7 +98,7 @@ class BookmarkRepositoryTest {
         // then
         assertAll(() -> {
             assertThat(bookmarks.getContent().get(2).getBookmark().getId()).isEqualTo(newestBookmark.getId());
-            assertThat(bookmarks.getContent().get(1).getBookmark().getId()).isEqualTo(mideumBookmark.getId());
+            assertThat(bookmarks.getContent().get(1).getBookmark().getId()).isEqualTo(mediumBookmark.getId());
             assertThat(bookmarks.getContent().get(0).getBookmark().getId()).isEqualTo(oldestBookmark.getId());
         });
     }
