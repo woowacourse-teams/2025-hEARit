@@ -24,6 +24,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT m FROM Member m WHERE m.uuid = :uuid AND m.deletedAt IS NULL")
     Optional<Member> findByUuid(UUID uuid);
 
-    @Query("SELECT m FROM Member m WHERE m.uuid IN :uuids")
+    @Query("SELECT m FROM Member m WHERE m.uuid IN :uuids AND m.deletedAt IS NULL")
     List<Member> findAllByUuidIn(@Param("uuids") Set<UUID> uuids);
 }
