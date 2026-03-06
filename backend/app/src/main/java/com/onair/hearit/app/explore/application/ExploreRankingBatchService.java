@@ -35,7 +35,7 @@ public class ExploreRankingBatchService {
 
         try {
             jsonLogger.info(BatchProgressLogProperty.of(JOB_NAME, "Step 1: Fetch target UUIDs about active users"));
-            Set<UUID> targetUuids = fetchTargetUuids();
+            Set<UUID> targetUuids = fetchActiveUserUuids();
             int targetSize = targetUuids.size();
 
             jsonLogger.info(BatchProgressLogProperty.of(JOB_NAME, "Step 2: Initialize " + targetSize + " users"));
@@ -53,13 +53,13 @@ public class ExploreRankingBatchService {
         }
     }
 
-    private Set<UUID> fetchTargetUuids() {
-        Set<UUID> targetUuids = new HashSet<>();
+    private Set<UUID> fetchActiveUserUuids() {
+        Set<UUID> activeUserUuids = new HashSet<>();
         LocalDateTime now = LocalDateTime.now();
 
-        targetUuids.addAll(refreshTokenRepository.findActiveMemberUuids(now));
-        targetUuids.addAll(playingHistoryRepository.findUuidsByUpdatedAtAfter(now.minusDays(MAX_ACTIVE_GUEST_DAYS)));
-        return targetUuids;
+        activeUserUuids.addAll(refreshTokenRepository.findActiveMemberUuids(now));
+        activeUserUuids.addAll(playingHistoryRepository.findUuidsByUpdatedAtAfter(now.minusDays(MAX_ACTIVE_GUEST_DAYS)));
+        return activeUserUuids;
     }
 
     private UserType determineUserType(UUID uuid) {
