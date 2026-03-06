@@ -8,6 +8,7 @@ import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.common.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.application.scoreprocessor.ExploreHearitSelector;
 import com.onair.hearit.app.explore.application.scoreprocessor.GuestExploreScoreProcessor;
 import com.onair.hearit.app.explore.application.scoreprocessor.MemberExploreScoreProcessor;
 import com.onair.hearit.app.explore.dto.CursorRequest;
@@ -44,7 +45,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, RandomScoreFactor.class,
         RecencyScoreFactor.class, BookmarkScoreFactor.class, ExploreScoreCalculator.class,
         ExploreScoreCommandRepository.class, ExploreScoreInitializer.class, GuestExploreScoreProcessor.class,
-        MemberExploreScoreProcessor.class, ScoreFactorWeightConfig.class})
+        MemberExploreScoreProcessor.class, ScoreFactorWeightConfig.class, ExploreHearitSelector.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class HearitExploreServiceTest {

@@ -5,6 +5,7 @@ import com.onair.hearit.core.infrastructure.projection.HearitClusterStatisticsPr
 import com.onair.hearit.core.infrastructure.projection.HearitWithPlayTimeProjection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -111,14 +112,15 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
             GROUP BY h.id, h.viewCount, h.createdAt, ph_stats.avgTime, ph_stats.compRate""")
     Page<HearitClusterStatisticsProjection> findClusterStatistics(Pageable pageable);
 
-    @Query(value = """
+    @Query("""
             SELECT h.id
             FROM Hearit h
-            WHERE h.id NOT IN :excludedIds
+            WHERE (COALESCE(:ids, NULL) IS NULL OR h.id NOT IN :ids)
             ORDER BY RAND()
-            LIMIT :size
+            LIMIT :limit
             """)
-    List<Long> findRandomIdsExcluding(@Param("excludedIds") List<Long> excludedIds, @Param("size") int size);
+    List<Long> findRandomIdsExcludingIds(@Param("ids") Set<Long> ids,
+                                         @Param("limit") int limit);
 
     @Modifying
     @Query(value = """

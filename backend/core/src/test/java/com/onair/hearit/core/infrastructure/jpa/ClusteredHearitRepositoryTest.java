@@ -66,69 +66,70 @@ class ClusteredHearitRepositoryTest {
     }
 
     @Test
-    @DisplayName("제외 리스트에 포함되지 않은 클러스터 ID들을 랜덤하게 가져온다.")
-    void findRandomClusterIdsExcluding_Success() {
+    @DisplayName("특정 클러스터들에서 랜덤 히어릿 ID를 조회한다.")
+    void findRandomHearitIdsByClusters_Success() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
         Hearit h1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit h2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit h3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit h4 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        dbHelper.insertHearitCluster(createCluster(h1.getId(), 100));
-        dbHelper.insertHearitCluster(createCluster(h2.getId(), 200));
-        dbHelper.insertHearitCluster(createCluster(h3.getId(), 300));
+        // cluster 10
+        dbHelper.insertHearitCluster(createCluster(h1.getId(), 10));
+        dbHelper.insertHearitCluster(createCluster(h2.getId(), 10));
 
-        List<Integer> excludedIds = List.of(100);
+        // cluster 20
+        dbHelper.insertHearitCluster(createCluster(h3.getId(), 20));
+
+        // cluster 30
+        dbHelper.insertHearitCluster(createCluster(h4.getId(), 30));
+
+        List<Integer> targetClusters = List.of(10, 20);
 
         // when
-        List<Integer> result = clusteredHearitRepository.findRandomClusterIdsExcluding(excludedIds, 2);
+        List<Long> result = clusteredHearitRepository
+                .findRandomHearitIdsByClusters(targetClusters, 10);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).doesNotContain(100),
-                () -> assertThat(result).containsAnyOf(200, 300)
+                () -> assertThat(result).contains(h1.getId(), h2.getId(), h3.getId()),
+                () -> assertThat(result).doesNotContain(h4.getId())
         );
     }
 
     @Test
-    @DisplayName("제외 리스트가 비어있어도(첫 이용 유저) 랜덤 클러스터 ID를 가져와야 한다.")
-    void findRandomClusterIdsExcluding_EmptyList() {
+    @DisplayName("특정 클러스터를 제외한 랜덤 히어릿 ID를 조회한다.")
+    void findRandomHearitIdsExcludingClusters_Success() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
-        dbHelper.insertHearitCluster(
-                createCluster(dbHelper.insertHearit(TestFixture.createFixedHearitWith(category)).getId(), 100));
-        dbHelper.insertHearitCluster(
-                createCluster(dbHelper.insertHearit(TestFixture.createFixedHearitWith(category)).getId(), 200));
 
-        List<Integer> excludedIds = List.of();
-
-        // when
-        List<Integer> result = clusteredHearitRepository.findRandomClusterIdsExcluding(excludedIds, 2);
-
-        // then
-        assertThat(result).hasSize(2);
-        assertThat(result).containsExactlyInAnyOrder(100, 200);
-    }
-
-    @Test
-    @DisplayName("특정 클러스터에 속한 히어릿 ID들을 지정된 개수만큼 랜덤하게 반환한다.")
-    void findRandomHearitIdsByCluster_Success() {
-        // given
-        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit h1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
         Hearit h2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit h3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit h4 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
-        dbHelper.insertHearitCluster(createCluster(h1.getId(), 777));
-        dbHelper.insertHearitCluster(createCluster(h2.getId(), 777));
+        // cluster 10
+        dbHelper.insertHearitCluster(createCluster(h1.getId(), 10));
+        dbHelper.insertHearitCluster(createCluster(h2.getId(), 10));
+
+        // cluster 20
+        dbHelper.insertHearitCluster(createCluster(h3.getId(), 20));
+
+        // cluster 30
+        dbHelper.insertHearitCluster(createCluster(h4.getId(), 30));
+
+        List<Integer> excludedClusters = List.of(10);
 
         // when
-        List<Long> result = clusteredHearitRepository.findRandomHearitIdsByCluster(777, 1);
+        List<Long> result = clusteredHearitRepository
+                .findRandomHearitIdsExcludingClusters(excludedClusters, 10);
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(1),
-                () -> assertThat(result.get(0)).isIn(h1.getId(), h2.getId())
+                () -> assertThat(result).contains(h3.getId(), h4.getId()),
+                () -> assertThat(result).doesNotContain(h1.getId(), h2.getId())
         );
     }
 
