@@ -1,7 +1,6 @@
 package com.onair.hearit.app.explore.presentation;
 
-import com.onair.hearit.app.cluster.application.HearitClusterBatchService;
-import com.onair.hearit.app.explore.application.ExploreRankingBatchService;
+import com.onair.hearit.app.explore.application.ExploreRankingFacade;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -19,22 +18,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/internal/batch")
 public class ExploreRankingBatchController {
 
-    private final HearitClusterBatchService hearitClusterBatchService;
-    private final ExploreRankingBatchService exploreRankingBatchService;
+    private final ExploreRankingFacade exploreRankingFacade;
 
     @PostMapping("/explore-ranking")
-    public ResponseEntity<Void> runBatch(HttpServletRequest request) {
-        try {
-            InetAddress address = InetAddress.getByName(request.getRemoteAddr());
-            if (!address.isLoopbackAddress()) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (UnknownHostException e) {
+    public ResponseEntity<String> runBatch(HttpServletRequest request) {
+        if (!isLoopbackRequest(request)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        log.info("Manual batch triggered. remoteIp={}", request.getRemoteAddr());
-        hearitClusterBatchService.runClustering();
-        exploreRankingBatchService.runRankingForExplore();
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+
+        boolean executed = exploreRankingFacade.runWithLock();
+        if (!executed) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Batch job is already in progress by another instance or scheduler.");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body("Batch job executed successfully.");
+    }
+
+    private boolean isLoopbackRequest(HttpServletRequest request) {
+        try {
+            InetAddress address = InetAddress.getByName(request.getRemoteAddr());
+            return address.isLoopbackAddress();
+        } catch (UnknownHostException e) {
+            return false;
+        }
     }
 }

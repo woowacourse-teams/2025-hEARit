@@ -109,7 +109,8 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
                 FROM PlayingHistory ph
                 GROUP BY ph.hearitId
             ) ph_stats ON ph_stats.hId = h.id
-            GROUP BY h.id, h.viewCount, h.createdAt, ph_stats.avgTime, ph_stats.compRate""")
+            GROUP BY h.id, h.viewCount, h.createdAt, ph_stats.avgTime, ph_stats.compRate
+            ORDER BY h.id""")
     Page<HearitClusterStatisticsProjection> findClusterStatistics(Pageable pageable);
 
     @Query("""
