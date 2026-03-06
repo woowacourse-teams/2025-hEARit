@@ -61,11 +61,15 @@ public class ExploreRankingBatchService {
         LocalDateTime now = LocalDateTime.now();
 
         activeUserUuids.addAll(refreshTokenRepository.findActiveMemberUuids(now));
-        activeUserUuids.addAll(playingHistoryRepository.findUuidsByUpdatedAtAfter(now.minusDays(MAX_ACTIVE_GUEST_DAYS)));
+        activeUserUuids.addAll(
+                playingHistoryRepository.findUuidsByUpdatedAtAfter(now.minusDays(MAX_ACTIVE_GUEST_DAYS)));
         return activeUserUuids;
     }
 
     private Set<UUID> fetchMemberUuids(Set<UUID> uuids) {
+        if (uuids.isEmpty()) {
+            return Set.of();
+        }
         return memberRepository.findAllByUuidIn(uuids)
                 .stream()
                 .map(Member::getUuid)
