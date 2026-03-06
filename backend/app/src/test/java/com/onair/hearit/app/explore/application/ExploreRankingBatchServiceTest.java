@@ -17,6 +17,7 @@ import com.onair.hearit.core.infrastructure.jpa.RefreshTokenRepository;
 import com.onair.hearit.core.log.logger.JsonLogger;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,8 +58,8 @@ class ExploreRankingBatchServiceTest {
         doReturn(List.of(memberUuid)).when(refreshTokenRepository).findActiveMemberUuids(any());
         doReturn(List.of(guestUuid)).when(playingHistoryRepository).findUuidsByUpdatedAtAfter(any());
 
-        doReturn(Optional.of(mockMember)).when(memberRepository).findByUuid(memberUuid);
-        doReturn(Optional.empty()).when(memberRepository).findByUuid(guestUuid);
+        doReturn(memberUuid).when(mockMember).getUuid();
+        doReturn(List.of(mockMember)).when(memberRepository).findAllByUuidIn(any());
 
         // when
         batchService.runRankingForExplore();
@@ -95,7 +96,8 @@ class ExploreRankingBatchServiceTest {
         UUID uuid = UUID.randomUUID();
         doReturn(List.of(uuid)).when(refreshTokenRepository).findActiveMemberUuids(any());
         doReturn(List.of()).when(playingHistoryRepository).findUuidsByUpdatedAtAfter(any());
-        doReturn(Optional.empty()).when(memberRepository).findByUuid(uuid);
+
+        doReturn(List.of()).when(memberRepository).findAllByUuidIn(any());
 
         doThrow(new RuntimeException("Calculation Error"))
                 .when(exploreScoreInitializer).initializeScores(any(), any());
@@ -119,7 +121,7 @@ class ExploreRankingBatchServiceTest {
         UUID duplicateUuid = UUID.randomUUID();
         doReturn(List.of(duplicateUuid)).when(refreshTokenRepository).findActiveMemberUuids(any());
         doReturn(List.of(duplicateUuid)).when(playingHistoryRepository).findUuidsByUpdatedAtAfter(any());
-        doReturn(Optional.empty()).when(memberRepository).findByUuid(duplicateUuid);
+        doReturn(List.of()).when(memberRepository).findAllByUuidIn(any());
 
         // when
         batchService.runRankingForExplore();

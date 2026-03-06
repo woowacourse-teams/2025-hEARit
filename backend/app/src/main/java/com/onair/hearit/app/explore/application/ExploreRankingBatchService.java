@@ -1,5 +1,6 @@
 package com.onair.hearit.app.explore.application;
 
+import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.UserType;
 import com.onair.hearit.core.infrastructure.jpa.MemberRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,12 +37,13 @@ public class ExploreRankingBatchService {
 
         try {
             jsonLogger.info(BatchProgressLogProperty.of(JOB_NAME, "Step 1: Fetch target UUIDs about active users"));
-            Set<UUID> targetUuids = fetchActiveUserUuids();
-            int targetSize = targetUuids.size();
+            Set<UUID> activeUserUuids = fetchActiveUserUuids();
+            Set<UUID> memberUuids = fetchMemberUuids(activeUserUuids);
 
-            jsonLogger.info(BatchProgressLogProperty.of(JOB_NAME, "Step 2: Initialize " + targetSize + " users"));
-            for (UUID uuid : targetUuids) {
-                UserType userType = determineUserType(uuid);
+            jsonLogger.info(
+                    BatchProgressLogProperty.of(JOB_NAME, "Step 2: Initialize " + activeUserUuids.size() + " users"));
+            for (UUID uuid : activeUserUuids) {
+                UserType userType = memberUuids.contains(uuid) ? UserType.MEMBER : UserType.GUEST;
                 exploreScoreInitializer.initializeScores(uuid, userType);
             }
 
@@ -62,10 +65,10 @@ public class ExploreRankingBatchService {
         return activeUserUuids;
     }
 
-    private UserType determineUserType(UUID uuid) {
-        if (memberRepository.findByUuid(uuid).isPresent()) {
-            return UserType.MEMBER;
-        }
-        return UserType.GUEST;
+    private Set<UUID> fetchMemberUuids(Set<UUID> uuids) {
+        return memberRepository.findAllByUuidIn(uuids)
+                .stream()
+                .map(Member::getUuid)
+                .collect(Collectors.toSet());
     }
 }
