@@ -9,14 +9,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import smile.clustering.CentroidClustering;
 import smile.clustering.Clustering;
 import smile.clustering.KMeans;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HearitClusterCalculator {
@@ -41,25 +39,17 @@ public class HearitClusterCalculator {
         double[][] data = normalizedFeatures.stream()
                 .map(NormalizedHearitClusterFeature::vector)
                 .toArray(double[][]::new);
-        try {
-            int actualK = Math.min(rowFeatures.size(), k); // 데이터 개수(n)가 설정된 k보다 적으면 n을 k로 사용
-            Clustering.Options options = new Clustering.Options(actualK, MAX_KMEANS_ITERATION, TOLERANCE, null);
-            CentroidClustering<double[], double[]> clustering = KMeans.fit(data, options);
-            int[] labels = clustering.group();
 
-            Map<Long, Integer> clusterResults = IntStream.range(0, normalizedFeatures.size()).boxed()
-                    .collect(Collectors.toMap(
-                            i -> normalizedFeatures.get(i).hearitId(),
-                            i -> labels[i]
-                    ));
-            hearitClusterCommandRepository.updateClusterIds(clusterResults);
+        int actualK = Math.min(rowFeatures.size(), k); // 데이터 개수(n)가 설정된 k보다 적으면 n을 k로 사용
+        Clustering.Options options = new Clustering.Options(actualK, MAX_KMEANS_ITERATION, TOLERANCE, null);
+        CentroidClustering<double[], double[]> clustering = KMeans.fit(data, options);
+        int[] labels = clustering.group();
 
-        } catch (RuntimeException e) {
-            log.error("Clustering process failed: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("Unexpected error during clustering", e);
-            throw new RuntimeException(e);
-        }
+        Map<Long, Integer> clusterResults = IntStream.range(0, normalizedFeatures.size()).boxed()
+                .collect(Collectors.toMap(
+                        i -> normalizedFeatures.get(i).hearitId(),
+                        i -> labels[i]
+                ));
+        hearitClusterCommandRepository.updateClusterIds(clusterResults);
     }
 }
