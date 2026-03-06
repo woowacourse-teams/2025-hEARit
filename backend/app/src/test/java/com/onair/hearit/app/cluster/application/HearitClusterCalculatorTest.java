@@ -72,7 +72,8 @@ class HearitClusterCalculatorTest {
         Map<Integer, List<HearitCluster>> groups = results.stream()
                 .collect(Collectors.groupingBy(HearitCluster::getClusterId));
 
-        printClusterAnalysis(groups); // analyze clustering result
+        // analyze clustering result
+//        printClusterAnalysis(groups);
 
         assertAll(
                 () -> assertThat(results).hasSize(dataSize),
