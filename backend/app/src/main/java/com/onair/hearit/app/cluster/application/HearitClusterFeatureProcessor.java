@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-class FeatureProcessor {
+class HearitClusterFeatureProcessor {
 
     private final HearitRepository hearitRepository;
     private final HearitClusterCommandRepository hearitClusterCommandRepository;

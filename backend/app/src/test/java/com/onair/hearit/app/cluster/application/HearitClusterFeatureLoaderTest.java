@@ -25,7 +25,7 @@ import org.springframework.test.context.jdbc.Sql;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import({
         HearitClusterFeatureLoader.class,
-        FeatureProcessor.class,
+        HearitClusterFeatureProcessor.class,
         HearitClusterCommandRepository.class,
         DbHelper.class,
         TestJpaAuditingConfig.class,

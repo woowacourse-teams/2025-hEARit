@@ -36,7 +36,7 @@ import org.springframework.test.context.jdbc.Sql;
         TestJpaAuditingConfig.class,
         DataSourceConfig.class
 })
-class FeatureProcessorTest {
+class HearitClusterFeatureProcessorTest {
 
     @Autowired
     private HearitRepository hearitRepository;
@@ -50,13 +50,13 @@ class FeatureProcessorTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private FeatureProcessor featureProcessor;
+    private HearitClusterFeatureProcessor hearitClusterFeatureProcessor;
     private HearitClusterCommandRepository spyCommandRepository;
 
     @BeforeEach
     void setUp() {
         spyCommandRepository = spy(hearitClusterCommandRepository);
-        featureProcessor = new FeatureProcessor(hearitRepository, spyCommandRepository);
+        hearitClusterFeatureProcessor = new HearitClusterFeatureProcessor(hearitRepository, spyCommandRepository);
     }
 
     @Test
@@ -68,7 +68,7 @@ class FeatureProcessorTest {
         dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
-        boolean hasNext = featureProcessor.processPage(0, 2);
+        boolean hasNext = hearitClusterFeatureProcessor.processPage(0, 2);
 
         // then
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM hearit_cluster", Integer.class);
@@ -89,7 +89,7 @@ class FeatureProcessorTest {
         doThrow(new RuntimeException("DB 장애")).when(spyCommandRepository).upsertStatistics(anyList());
 
         // when & then
-        assertThatThrownBy(() -> featureProcessor.processPage(0, 10))
+        assertThatThrownBy(() -> hearitClusterFeatureProcessor.processPage(0, 10))
                 .isInstanceOf(RuntimeException.class);
 
         // then: 트랜잭션 전파 덕분에 직접 생성한 객체라도 롤백

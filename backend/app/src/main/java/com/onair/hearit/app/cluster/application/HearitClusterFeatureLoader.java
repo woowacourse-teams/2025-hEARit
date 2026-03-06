@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class HearitClusterFeatureLoader {
 
-    private final FeatureProcessor featureProcessor;
+    private final HearitClusterFeatureProcessor hearitClusterFeatureProcessor;
 
     /**
      * 히어릿 통계 데이터를 페이지 단위로 로드하여 Feature 테이블에 적재합니다.
@@ -22,7 +22,7 @@ public class HearitClusterFeatureLoader {
         boolean hasNext;
 
         do {
-            hasNext = featureProcessor.processPage(pageNumber, pageSize);
+            hasNext = hearitClusterFeatureProcessor.processPage(pageNumber, pageSize);
             pageNumber++;
         } while (hasNext);
     }
