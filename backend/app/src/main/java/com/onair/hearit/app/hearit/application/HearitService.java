@@ -7,6 +7,7 @@ import com.onair.hearit.app.hearit.dto.HearitDetailResponse;
 import com.onair.hearit.app.hearit.dto.HearitDetailResponse.LikeResponse;
 import com.onair.hearit.app.hearit.dto.HearitOverviewResponse;
 import com.onair.hearit.app.hearit.dto.HearitSortRequest;
+import com.onair.hearit.app.hearit.infrastructure.ViewCountRateLimiter;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -44,6 +45,7 @@ public class HearitService {
     private final HearitKeywordRepository hearitKeywordRepository;
     private final PlayingHistoryRepository playingHistoryRepository;
     private final ReactionRepository reactionRepository;
+    private final ViewCountRateLimiter viewCountRateLimiter;
 
     @Transactional(readOnly = true)
     public HearitDetailResponse getHearitDetail(Long hearitId, UserInfo userInfo) {
@@ -140,8 +142,11 @@ public class HearitService {
         });
     }
 
-    @Transactional
-    public void increaseViewCount(Long hearitId) {
+    public void increaseViewCount(Long hearitId, UserInfo userInfo) {
+        if (!viewCountRateLimiter.tryAcquireViewKey(userInfo.getUuid(), hearitId)) {
+            return;
+        }
+
         int affectedRowCount = hearitRepository.increaseViewCount(hearitId);
         if (affectedRowCount == 0) {
             throw new NotFoundException("hearitId", hearitId.toString());

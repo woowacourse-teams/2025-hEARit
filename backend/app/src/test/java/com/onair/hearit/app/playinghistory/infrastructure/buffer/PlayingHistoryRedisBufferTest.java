@@ -3,129 +3,22 @@ package com.onair.hearit.app.playinghistory.infrastructure.buffer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onair.hearit.app.fixture.DbHelper;
-import com.onair.hearit.app.playinghistory.infrastructure.buffer.config.CircuitBreakerConfig;
-import com.onair.hearit.app.playinghistory.infrastructure.converter.PlayingHistoryConverter;
-import com.onair.hearit.core.config.DataSourceConfig;
+import com.onair.hearit.app.fixture.RedisContainerTestSupport;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.fixture.TestFixture;
-import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
-import com.onair.hearit.core.infrastructure.jdbc.PlayingHistoryCommandRepository;
-import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
-import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.redisson.Redisson;
-import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.utility.DockerImageName;
 
-@DataJpaTest
-@Sql("/dbclean.sql")
-@ActiveProfiles("integration-test")
-@AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({
-        DbHelper.class,
-        TestJpaAuditingConfig.class,
-        DataSourceConfig.class,
-        PlayingHistoryCommandRepository.class,
-        PlayingHistoryConverter.class,
-        PlayingHistoryMapBuffer.class,
-        TestCircuitBreakerConfig.class,
-        CircuitBreakerConfig.class
-})
-class PlayingHistoryRedisBufferTest {
+class PlayingHistoryRedisBufferTest extends RedisContainerTestSupport {
 
-    static GenericContainer<?> redisContainer;
-    static LettuceConnectionFactory connectionFactory;
-    static RedisTemplate<String, String> redisTemplate;
-    static RedissonClient redissonClient;
-
-    @Autowired
-    DbHelper dbHelper;
-
-    @Autowired
-    HearitRepository hearitRepository;
-
-    @Autowired
-    PlayingHistoryCommandRepository commandRepository;
-
-    @Autowired
-    PlayingHistoryRepository playingHistoryRepository;
-
-    @Autowired
-    PlayingHistoryConverter converter;
-
-    ObjectMapper objectMapper = new ObjectMapper();
-    PlayingHistoryRedisBuffer storage;
-
-    @BeforeAll
-    static void startRedis() {
-        redisContainer = new GenericContainer<>(DockerImageName.parse("redis:7.2-alpine"))
-                .withExposedPorts(6379);
-        redisContainer.start();
-
-        // RedisTemplate 설정
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(redisContainer.getHost());
-        config.setPort(redisContainer.getFirstMappedPort());
-
-        connectionFactory = new LettuceConnectionFactory(config);
-        connectionFactory.afterPropertiesSet();
-
-        redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(connectionFactory);
-        StringRedisSerializer serializer = new StringRedisSerializer();
-        redisTemplate.setKeySerializer(serializer);
-        redisTemplate.setValueSerializer(serializer);
-        redisTemplate.setHashKeySerializer(serializer);
-        redisTemplate.setHashValueSerializer(serializer);
-        redisTemplate.afterPropertiesSet();
-
-        // Redisson 설정
-        Config redissonConfig = new Config();
-        redissonConfig.useSingleServer()
-                .setAddress("redis://" + redisContainer.getHost() + ":" + redisContainer.getFirstMappedPort());
-        redissonClient = Redisson.create(redissonConfig);
-    }
-
-    @AfterAll
-    static void stopRedis() {
-        if (redissonClient != null) {
-            redissonClient.shutdown();
-        }
-        if (connectionFactory != null) {
-            connectionFactory.destroy();
-        }
-        if (redisContainer != null) {
-            redisContainer.stop();
-        }
-    }
+    private PlayingHistoryRedisBuffer storage;
 
     @BeforeEach
     void setup() {
-        // Redis 데이터 초기화
-        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
-
         storage = new PlayingHistoryRedisBuffer(
                 redisTemplate,
                 redissonClient,

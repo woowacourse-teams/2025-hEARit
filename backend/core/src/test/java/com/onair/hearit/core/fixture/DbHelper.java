@@ -59,6 +59,15 @@ public class DbHelper {
         return bookmark;
     }
 
+    public Bookmark insertBookmarkAt(Bookmark bookmark, LocalDateTime creationTime) {
+        try {
+            TestClock.freezeAt(creationTime);
+            return insertBookmark(bookmark);
+        } finally {
+            TestClock.unfreeze();
+        }
+    }
+
     public Keyword insertKeyword(Keyword keyword) {
         em.persist(keyword);
         em.flush();
