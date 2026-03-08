@@ -34,6 +34,8 @@ dependencies {
     implementation 'net.javacrumbs.shedlock:shedlock-spring:5.10.2'
     implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.10.2'
 
+    // Smile (Statistical Machine Intelligence and Learning Engine)
+    implementation 'com.github.haifengl:smile-core:4.3.0'
     // Jwt
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'

@@ -21,6 +21,12 @@ public enum LogEvent {
     /* db log event */
     DB_SLOW_QUERY("DB_SlowQuery"),
     DB_ERROR("DB_Error"),
+
+    /* batch log event */
+    BATCH_START("Batch_Start"),
+    BATCH_PROGRESS("Batch_Progress"),
+    BATCH_SUCCESS("Batch_Success"),
+    BATCH_ERROR("Batch_Error"),
     ;
 
     private final String eventName;

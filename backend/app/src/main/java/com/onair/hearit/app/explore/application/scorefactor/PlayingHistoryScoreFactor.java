@@ -22,7 +22,7 @@ public class PlayingHistoryScoreFactor implements ScoreFactor {
 
     @Override
     public boolean isSupported(UserType userType) {
-        return userType == UserType.MEMBER;
+        return userType == UserType.GUEST || userType == UserType.MEMBER;
     }
 
     @Override
