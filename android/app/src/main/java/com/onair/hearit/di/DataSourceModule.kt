@@ -7,6 +7,8 @@ import com.onair.hearit.data.datasource.local.ExploreLocalDataStore
 import com.onair.hearit.data.datasource.local.ExploreLocalDataStoreImpl
 import com.onair.hearit.data.datasource.local.HearitLocalDataSource
 import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
+import com.onair.hearit.data.datasource.local.NotificationLocalDataSource
+import com.onair.hearit.data.datasource.local.NotificationLocalDataSourceImpl
 import com.onair.hearit.data.datasource.local.UserLocalDataSource
 import com.onair.hearit.data.datasource.local.UserLocalDataSourceImpl
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSource
@@ -17,6 +19,8 @@ import com.onair.hearit.data.datasource.remote.CategoryRemoteDataSource
 import com.onair.hearit.data.datasource.remote.CategoryRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.datasource.remote.HearitRemoteDataSourceImpl
+import com.onair.hearit.data.datasource.remote.LikeRemoteDataSource
+import com.onair.hearit.data.datasource.remote.LikeRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSource
 import com.onair.hearit.data.datasource.remote.MediaFileRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.PlayingHistoryRemoteDataSource
@@ -69,6 +73,10 @@ abstract class DataSourceModule {
 
     @Binds
     @Singleton
+    abstract fun bindLikeRemoteDataSource(impl: LikeRemoteDataSourceImpl): LikeRemoteDataSource
+
+    @Binds
+    @Singleton
     abstract fun bindHearitLocalDataSource(impl: HearitLocalDataSourceImpl): HearitLocalDataSource
 
     @Binds
@@ -78,6 +86,10 @@ abstract class DataSourceModule {
     @Binds
     @Singleton
     abstract fun bindUserLocalDataSource(impl: UserLocalDataSourceImpl): UserLocalDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationLocalDataSource(impl: NotificationLocalDataSourceImpl): NotificationLocalDataSource
 
     @Binds
     @Singleton

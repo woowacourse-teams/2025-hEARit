@@ -25,6 +25,7 @@ fun SettingScreen(
     viewModel: SettingViewModel,
     onBackClick: () -> Unit,
     onProfileClick: () -> Unit,
+    onAlarmClick: () -> Unit,
     onLogin: () -> Unit,
     onLogout: () -> Unit,
     onWithdraw: () -> Unit,
@@ -46,6 +47,7 @@ fun SettingScreen(
         SettingContent(
             userInfo = userInfo,
             onProfileClick = onProfileClick,
+            onAlarmClick = onAlarmClick,
             onPrivacyPolicyClick = { openUrl(privacyPolicyUrl, context) },
             onTermsClick = { openUrl(termsUrl, context) },
             onOpenSourceClick = { navigateToLicense(context) },

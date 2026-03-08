@@ -5,6 +5,7 @@ import com.onair.hearit.data.dto.ExploreHearitResponse
 import com.onair.hearit.data.dto.HearitResponse
 import com.onair.hearit.data.dto.HearitsResponse
 import com.onair.hearit.data.dto.KeywordResponse
+import com.onair.hearit.data.dto.LikeResponse
 import com.onair.hearit.data.dto.PlayingHistoryResponse
 import com.onair.hearit.data.dto.RecommendHearitResponse
 import com.onair.hearit.data.dto.RecommendationCategoriesResponse
@@ -17,6 +18,7 @@ import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.Hearit
 import com.onair.hearit.domain.model.Keyword
+import com.onair.hearit.domain.model.Like
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.Paging
 import com.onair.hearit.domain.model.PlayingHistoryHearit
@@ -24,7 +26,6 @@ import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
 import com.onair.hearit.domain.model.RecommendationCategories
-import com.onair.hearit.domain.model.SearchedCategoryHearit
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.domain.model.Source
 import com.onair.hearit.domain.model.UserInfo
@@ -42,11 +43,11 @@ private fun SearchHearitsResponse.Content.toSearchedHearit(): SearchedHearit =
         title = this.title,
         playTime = this.playTime,
         lastPlayTime = this.lastPlayTime,
-        keywords = this.keywords.map { it.toDomain() },
+        keywords = this.keywords.map { it.toDomain() }.toImmutableList(),
     )
 
-private fun HearitsResponse.Content.toSearchedCategoryHearit(): SearchedCategoryHearit =
-    SearchedCategoryHearit(
+private fun HearitsResponse.Content.toSearchedHearit(): SearchedHearit =
+    SearchedHearit(
         id = this.id,
         title = this.title,
         playTime = this.playTime,
@@ -119,6 +120,7 @@ fun HearitResponse.toDomain(): Hearit =
         keywords = this.keywords.map { it.toDomain() },
         audioUrl = null,
         script = null,
+        like = this.like.toDomain(),
     )
 
 fun UserInfoResponse.toDomain(): UserInfo =
@@ -140,6 +142,12 @@ fun KeywordResponse.toDomain(): Keyword =
         name = this.name,
     )
 
+fun LikeResponse.toDomain(): Like =
+    Like(
+        count = this.count,
+        isLiked = this.isLiked,
+    )
+
 fun SearchHearitsResponse.toSearchedHearit(): PageResult<SearchedHearit> =
     PageResult(
         items = content.map { it.toSearchedHearit() },
@@ -154,9 +162,9 @@ fun SearchHearitsResponse.toSearchedHearit(): PageResult<SearchedHearit> =
             ),
     )
 
-fun HearitsResponse.toSearchedCategoryHearit(): PageResult<SearchedCategoryHearit> =
+fun HearitsResponse.toSearchedHearit(): PageResult<SearchedHearit> =
     PageResult(
-        items = content.map { it.toSearchedCategoryHearit() },
+        items = content.map { it.toSearchedHearit() },
         paging =
             Paging(
                 page = page,

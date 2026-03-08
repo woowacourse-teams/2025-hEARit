@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.onair.hearit.analytics.AnalyticsLogger
+import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
@@ -39,8 +40,13 @@ class SearchFragment : Fragment() {
                         startArgs = arguments.toSearchStartArgs(),
                         onExitSearch = { parentFragmentManager.popBackStack() },
                         onHearitClick = { hearitId ->
-                            // Hearit 클릭 처리 (기존 방식 유지 또는 Navigation으로 전환)
-                            // 예: 기존 Fragment로 이동하거나 Compose 화면으로 이동
+                            val intent =
+                                PlayerDetailActivity.newIntent(
+                                    context = requireContext(),
+                                    hearitId = hearitId,
+                                    source = "search",
+                                )
+                            startActivity(intent)
                         },
                     )
                 }

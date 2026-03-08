@@ -25,15 +25,24 @@ class PlaybackMediaItemManager @Inject constructor(
     ): MediaItem {
         val extras =
             createExtras(
+                hearitId = info.hearitId,
                 bookmarkId = bookmarkId,
                 playbackMode = playbackMode,
                 lastPosition = info.lastPosition,
             )
+
+        val requestMetadata =
+            MediaItem.RequestMetadata
+                .Builder()
+                .setExtras(extras)
+                .build()
+
         return MediaItem
             .Builder()
             .setUri(info.audioUrl.toUri())
             .setMediaId(info.hearitId.toString())
             .setMediaMetadata(createMediaMetadata(info, extras))
+            .setRequestMetadata(requestMetadata)
             .setTag(playbackMode)
             .build()
     }
@@ -83,11 +92,13 @@ class PlaybackMediaItemManager @Inject constructor(
     }
 
     private fun createExtras(
+        hearitId: Long?,
         bookmarkId: Long?,
         playbackMode: String?,
         lastPosition: Long?,
     ): Bundle =
         Bundle().apply {
+            hearitId?.let { putLong(EXTRA_HEARIT_ID, it) }
             bookmarkId?.let { putLong(EXTRA_BOOKMARK_ID, it) }
             playbackMode?.let { putString(EXTRA_PLAYBACK_MODE, it) }
             lastPosition?.let { putLong(EXTRA_LAST_POSITION_MS, it) }
@@ -105,6 +116,7 @@ class PlaybackMediaItemManager @Inject constructor(
             .build()
 
     companion object {
+        const val EXTRA_HEARIT_ID = "HEARIT_ID"
         const val EXTRA_PLAYBACK_MODE = "PLAYBACK_MODE"
         const val EXTRA_BOOKMARK_ID = "BOOKMARK_ID"
         const val EXTRA_LAST_POSITION_MS = "LAST_POSITION_MS"

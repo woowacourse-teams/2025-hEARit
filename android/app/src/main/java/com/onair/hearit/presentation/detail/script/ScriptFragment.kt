@@ -219,9 +219,10 @@ class ScriptFragment : Fragment() {
     }
 
     private fun showLoginRequiredDialog() {
-        LoginRequiredDialogFragment {
-            navigateToLogin()
-        }.show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
+        LoginRequiredDialogFragment(
+            messageRes = R.string.all_login_required_bookmark,
+            onPositive = { navigateToLogin() },
+        ).show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {

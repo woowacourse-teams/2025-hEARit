@@ -10,6 +10,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -41,10 +42,10 @@ import com.onair.hearit.R
 import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.analytics.AnalyticsParamKeys.KEYWORD_NAME
 import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_DETAIL
 import com.onair.hearit.databinding.ActivityPlayerDetailBinding
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.LoginReason
 import com.onair.hearit.presentation.IntentKeys.BOOKMARK_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.IntentKeys.LAST_POSITION_KEY
@@ -76,7 +77,7 @@ class PlayerDetailActivity :
     PlayerDetailClickListener {
     private lateinit var binding: ActivityPlayerDetailBinding
 
-    private val keywordAdapter by lazy { PlayerDetailKeywordAdapter(this) }
+    private val keywordAdapter by lazy { PlayerDetailKeywordAdapter() }
     private val sourceAdapter by lazy { PlayerDetailSourceAdapter(this) }
 
     @Inject
@@ -123,6 +124,7 @@ class PlayerDetailActivity :
         binding.viewModel = viewModel
 
         setupBaseControllerBookmark()
+        setupLikeButton()
         setupBackPressHandler()
         setupWindowInsets()
         setupRecyclerView()
@@ -253,8 +255,29 @@ class PlayerDetailActivity :
             Toast.makeText(this, getString(resId), Toast.LENGTH_SHORT).show()
         }
 
-        viewModel.showLoginDialog.observe(this) {
-            showLoginRequiredDialog()
+        viewModel.showLoginDialog.observe(this) { reason ->
+            val messageRes =
+                when (reason) {
+                    LoginReason.BOOKMARK -> R.string.all_login_required_bookmark
+                    LoginReason.LIKE -> R.string.all_login_required_like
+                }
+            showLoginRequiredDialog(messageRes)
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.isLiked.collect {
+                        binding.btnLike.root.isSelected = it
+                    }
+                }
+
+                launch {
+                    viewModel.likeCount.collect {
+                        binding.btnLike.tvLike.text = it.toString()
+                    }
+                }
+            }
         }
     }
 
@@ -311,6 +334,12 @@ class PlayerDetailActivity :
     private fun setupBaseControllerBookmark() {
         binding.baseController.setOnBookmarkClickListener {
             viewModel.toggleBookmark()
+        }
+    }
+
+    private fun setupLikeButton() {
+        binding.btnLike.root.setOnClickListener {
+            viewModel.toggleLike()
         }
     }
 
@@ -427,9 +456,13 @@ class PlayerDetailActivity :
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
-    private fun showLoginRequiredDialog() {
-        LoginRequiredDialogFragment { navigateToLogin() }
-            .show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
+    private fun showLoginRequiredDialog(
+        @StringRes messageRes: Int,
+    ) {
+        LoginRequiredDialogFragment(
+            messageRes = messageRes,
+            onPositive = { navigateToLogin() },
+        ).show(supportFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {
@@ -507,17 +540,6 @@ class PlayerDetailActivity :
         }
     }
 
-    override fun onClickCategory(
-        id: Long,
-        name: String,
-        colorCode: String,
-    ) {
-        analyticsLogger.logEvent(
-            AnalyticsEventNames.DETAIL_CATEGORY_SELECTED,
-            mapOf(AnalyticsParamKeys.CATEGORY_NAME to name),
-        )
-    }
-
     override fun onClickSource(
         name: String,
         url: String,
@@ -539,20 +561,6 @@ class PlayerDetailActivity :
             Timber.w(e)
             showToast(ERROR_INVALID_LINK_MESSAGE)
         }
-    }
-
-    override fun onClickKeyword(term: String) {
-        analyticsLogger.logEvent(
-            AnalyticsEventNames.DETAIL_KEYWORD_SELECTED,
-            mapOf(KEYWORD_NAME to term),
-        )
-//        val input = SearchInput.Keyword(term)
-//        val resultIntent =
-//            Intent().apply {
-//                putExtras(input.toBundle())
-//            }]
-//        setResult(RESULT_OK, resultIntent)
-//        finish()
     }
 
     override fun onDestroy() {

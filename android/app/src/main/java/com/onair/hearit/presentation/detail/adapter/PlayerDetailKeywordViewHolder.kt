@@ -5,25 +5,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.onair.hearit.databinding.ItemKeywordBinding
 import com.onair.hearit.domain.model.Keyword
-import com.onair.hearit.presentation.detail.PlayerDetailClickListener
 
 class PlayerDetailKeywordViewHolder private constructor(
     private val binding: ItemKeywordBinding,
-    private val clickListener: PlayerDetailClickListener,
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(keyword: Keyword) {
         binding.keyword = keyword
-        binding.clickListener = clickListener
     }
 
     companion object {
-        fun create(
-            parent: ViewGroup,
-            clickListener: PlayerDetailClickListener,
-        ): PlayerDetailKeywordViewHolder {
+        fun create(parent: ViewGroup): PlayerDetailKeywordViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val binding = ItemKeywordBinding.inflate(inflater, parent, false)
-            return PlayerDetailKeywordViewHolder(binding, clickListener)
+            return PlayerDetailKeywordViewHolder(binding)
         }
     }
 }

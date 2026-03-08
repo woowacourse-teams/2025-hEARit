@@ -12,10 +12,12 @@ import io.mockk.mockk
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -72,13 +74,16 @@ class SearchMainViewModelTest {
             viewModel.fetchCategories()
 
             // Then
-            assertEquals(mockCategories.toImmutableList(), viewModel.searchMainUiState.value.categories)
+            assertEquals(
+                mockCategories.toImmutableList(),
+                viewModel.searchMainUiState.value.categories,
+            )
             assertEquals(false, viewModel.searchMainUiState.value.isLoading)
             coVerify(exactly = 1) { categoryRepository.getCategories(page = 0) }
         }
 
     @Test
-    fun `fetchCategories 실패 시 toast 메시지가 발생한다`() =
+    fun `fetchCategories 실패 시 snackbarMessage emit 여부 확인`() =
         runTest {
             // Given
             val exception = Exception("Network Error")
@@ -86,13 +91,24 @@ class SearchMainViewModelTest {
                 categoryRepository.getCategories(page = 0)
             } returns Result.failure(exception)
 
+            val emittedMessages = mutableListOf<Int>()
+
+            // backgroundScope를 사용하여 수집 (viewModelScope와 같은 디스패처 사용)
+            val job =
+                backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                    viewModel.snackbarMessage.collect { message ->
+                        emittedMessages.add(message)
+                    }
+                }
+
             // When
             viewModel.fetchCategories()
+            testScheduler.advanceUntilIdle()
 
             // Then
-            assertEquals(
-                R.string.all_toast_categories_load_fail,
-                viewModel.toastMessage.getOrAwaitValue(),
-            )
+            assertThat(emittedMessages).containsExactly(R.string.all_toast_categories_load_fail)
+            coVerify(exactly = 1) { categoryRepository.getCategories(page = 0) }
+
+            job.cancel()
         }
 }

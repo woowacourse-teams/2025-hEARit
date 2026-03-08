@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.presentation.search.main.component.CategoryGridList
 import com.onair.hearit.presentation.search.main.component.SearchMainTopBar
@@ -25,9 +28,10 @@ import kotlinx.collections.immutable.persistentListOf
 fun SearchMainScreen(
     categories: ImmutableList<Category>,
     isLoading: Boolean,
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
     onSearchBarClick: () -> Unit,
     onCategoryClick: (Long, String, String) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -40,6 +44,12 @@ fun SearchMainScreen(
             SearchMainTopBar(
                 scrollBehavior = scrollBehavior,
                 onSearchBarClick = onSearchBarClick,
+            )
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 48.dp),
             )
         },
         containerColor = HearitBlack,
@@ -77,6 +87,7 @@ private fun SearchMainScreenPreview() {
                 Category(3L, "Database", "#FF5722"),
             ),
         isLoading = false,
+        snackbarHostState = SnackbarHostState(),
         onSearchBarClick = {},
         onCategoryClick = { _, _, _ -> },
     )
@@ -88,6 +99,7 @@ private fun SearchMainScreenLoadingPreview() {
     SearchMainScreen(
         categories = persistentListOf(),
         isLoading = true,
+        snackbarHostState = SnackbarHostState(),
         onSearchBarClick = {},
         onCategoryClick = { _, _, _ -> },
     )

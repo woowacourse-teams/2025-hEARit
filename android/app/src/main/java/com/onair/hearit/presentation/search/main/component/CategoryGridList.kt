@@ -42,7 +42,7 @@ fun CategoryGridList(
                 .fillMaxSize()
                 .background(HearitBlack)
                 .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(
