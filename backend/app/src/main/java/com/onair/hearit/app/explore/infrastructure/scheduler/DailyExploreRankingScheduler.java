@@ -21,8 +21,7 @@ public class DailyExploreRankingScheduler {
     /**
      * 매일 새벽 4시에 전체 배치 프로세스 실행
      */
-//    @Scheduled(cron = "0 0 4 * * *")
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 4 * * *")
     public void runExploreRankingJob() {
         try {
             boolean executed = exploreRankingFacade.runWithLock();
