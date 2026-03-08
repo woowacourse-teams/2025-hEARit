@@ -90,8 +90,6 @@ fun ExploreScreen(
                 )
                 delay(400)
             }
-
-            onGuideFinished()
         } else {
             pagerOffsetY.snapTo(0f)
         }

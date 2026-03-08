@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.presentation.DetailResult
@@ -29,6 +30,7 @@ class ExploreFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View =
         ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 ExploreRoute(
                     onBackClick = {
@@ -54,10 +56,13 @@ class ExploreFragment : Fragment() {
                 hidePlayerControlView()
 
                 when (val detailResult = result.data.toDetailResult()) {
-                    is DetailResult.Category, is DetailResult.Keyword ->
+                    is DetailResult.Category, is DetailResult.Keyword -> {
                         detailResult.navigate(requireActivity() as MainActivity, analyticsLogger)
+                    }
 
-                    null -> Timber.w("Invalid detail result")
+                    null -> {
+                        Timber.w("Invalid detail result")
+                    }
                 }
             }
         }

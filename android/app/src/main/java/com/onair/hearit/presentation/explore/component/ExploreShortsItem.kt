@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,9 +62,10 @@ fun ExploreShortsItem(
         }
 
     var showPauseIcon by remember { mutableStateOf(false) }
+    var tapCount by remember { mutableIntStateOf(0) }
     var isPressingSpeed by remember { mutableStateOf(false) }
 
-    LaunchedEffect(showPauseIcon) {
+    LaunchedEffect(showPauseIcon, tapCount) {
         if (showPauseIcon) {
             delay(5000L)
             showPauseIcon = false
@@ -76,16 +78,14 @@ fun ExploreShortsItem(
     ) {
         Column(
             modifier =
-                modifier
+                Modifier
                     .fillMaxSize()
                     .pointerInput(isPlaying) {
                         detectTapGestures(
                             onTap = {
                                 onItemPlay()
-                                if (showPauseIcon) {
-                                    showPauseIcon = false
-                                }
                                 showPauseIcon = true
+                                tapCount++
                             },
                             onLongPress = {
                                 if (isPlaying) {
