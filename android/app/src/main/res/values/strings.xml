@@ -16,6 +16,7 @@
     <string name="all_login_required_bookmark"><font color="#B677F3">북마크 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
     <string name="all_login_required_like"><font color="#B677F3">좋아요 기능</font>은\n <font color="#B677F3">로그인</font>을 하셔야 이용할 수 있어요!</string>
     <string name="all_dialog_login_positive">로그인</string>
+    <string name="all_view_count">조회수 %d</string>
 
     <!-- HomeFragment-->
     <string name="home_logo_description">IT를 쉽게 들을 수 있는 팟캐스트, 히어릿</string>
