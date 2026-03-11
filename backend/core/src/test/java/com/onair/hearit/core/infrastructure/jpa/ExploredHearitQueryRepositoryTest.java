@@ -14,6 +14,7 @@ import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitScoreProjection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,7 @@ class ExploredHearitQueryRepositoryTest {
         });
     }
 
-    private List<ExploreScore> insertTestExploreScoreByMemberIdAndCount(java.util.UUID userUuid, int count) {
+    private List<ExploreScore> insertTestExploreScoreByMemberIdAndCount(UUID userUuid, int count) {
         List<ExploreScore> exploreScores = new ArrayList<>();
 
         Category category = dbHelper.insertCategory(new Category("Test", "#000000"));
