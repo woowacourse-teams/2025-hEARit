@@ -43,7 +43,7 @@ public record ExploredHearitResponseV3(
 
     private static List<KeywordResponse> getKeywordResponses(List<Keyword> keywords) {
         return keywords.stream()
-                .map(k -> new KeywordResponse(k.getId(), k.getName()))
+                .map(KeywordResponse::from)
                 .toList();
     }
 
@@ -51,5 +51,8 @@ public record ExploredHearitResponseV3(
             Long id,
             String name
     ) {
+        public static KeywordResponse from(Keyword keyword) {
+            return new KeywordResponse(keyword.getId(), keyword.getName());
+        }
     }
 }
