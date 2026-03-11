@@ -10,6 +10,7 @@ import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.common.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.dto.ExploreCursor;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.app.fixture.DbHelper;
@@ -130,7 +131,7 @@ class GuestExploreScoreProcessorTest {
         dbHelper.insertExploreScore(new ExploreScore(uuid, hearit2.getId(), 40.0, null));
 
         // when
-        List<ExploredHearitResponseV3> responses = guestExploreScoreProcessor.getExploreHearitsV3(guestInfo, null, 3);
+        List<ExploredHearitResponseV3> responses = guestExploreScoreProcessor.getExploreHearitsV3(guestInfo, ExploreCursor.initial(), 3);
 
         // then
         assertAll(

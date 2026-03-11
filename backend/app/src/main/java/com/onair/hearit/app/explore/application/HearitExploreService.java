@@ -34,10 +34,11 @@ public class HearitExploreService {
                                                                             String cursor,
                                                                             int size) {
         ExploreScoreProcessor processor = getExploreScoreProcessor(userInfo);
-        if (ExploreCursor.from(cursor).isInitial()) {
+        ExploreCursor exploreCursor = ExploreCursor.from(cursor);
+        if (exploreCursor.isInitial()) {
             processor.refreshScoresV3(userInfo);
         }
-        List<ExploredHearitResponseV3> responses = processor.getExploreHearitsV3(userInfo, cursor, size);
+        List<ExploredHearitResponseV3> responses = processor.getExploreHearitsV3(userInfo, exploreCursor, size);
         return CursorResponseV2.from(responses);
     }
 

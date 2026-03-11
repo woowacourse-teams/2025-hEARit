@@ -1,5 +1,6 @@
 package com.onair.hearit.app.explore.application.scoreprocessor;
 
+import com.onair.hearit.app.explore.dto.ExploreCursor;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.core.domain.UserInfo;
@@ -15,5 +16,5 @@ public interface ExploreScoreProcessor {
 
     void refreshScoresV3(UserInfo userInfo);
 
-    List<ExploredHearitResponseV3> getExploreHearitsV3(UserInfo userInfo, String cursor, int size);
+    List<ExploredHearitResponseV3> getExploreHearitsV3(UserInfo userInfo, ExploreCursor cursor, int size);
 }
