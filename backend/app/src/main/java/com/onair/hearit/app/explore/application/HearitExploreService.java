@@ -30,9 +30,7 @@ public class HearitExploreService {
     }
 
     @Transactional
-    public CursorResponseV2<ExploredHearitResponseV3> getExploredHearitsV3(UserInfo userInfo,
-                                                                            String cursor,
-                                                                            int size) {
+    public CursorResponseV2<ExploredHearitResponseV3> getExploredHearitsV3(UserInfo userInfo, String cursor, int size) {
         ExploreScoreProcessor processor = getExploreScoreProcessor(userInfo);
         ExploreCursor exploreCursor = ExploreCursorCodec.decode(cursor);
         if (exploreCursor.isInitial()) {
