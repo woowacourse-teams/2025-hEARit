@@ -9,8 +9,8 @@
 자바, java
 자바스크립트, javascript, js
 타입스크립트, typescript, ts
-데이터베이스, database, db, 디비, 데이터
-네트워크, network, 네트워킹
+데이터베이스, database, db, 디비
+네트워크, network
 가상사설망, vpc, virtualprivatecloud
 트렌드, 트랜드, trend
 

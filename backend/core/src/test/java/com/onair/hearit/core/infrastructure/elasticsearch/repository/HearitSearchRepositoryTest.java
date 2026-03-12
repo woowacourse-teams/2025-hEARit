@@ -39,12 +39,6 @@ class HearitSearchRepositoryTest extends ElasticSearchTestContainer {
         List<HearitDocument> testDocuments = createTestDocuments();
         operations.save(testDocuments);
 
-        try {
-            Thread.sleep(1000); // Elasticsearch가 인덱싱 완료할 시간 필요
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
         operations.indexOps(HearitDocument.class).refresh();
     }
 
