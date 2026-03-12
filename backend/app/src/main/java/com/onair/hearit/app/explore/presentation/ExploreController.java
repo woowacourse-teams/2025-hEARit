@@ -20,6 +20,7 @@ public class ExploreController {
 
     private final HearitExploreService hearitExploreService;
 
+    // V1: cursorId(auto-increment) 기반 페이지네이션, CursorResponseV1 래핑 (하위 호환용)
     @GetMapping("/api/v1/hearits/explore")
     public ResponseEntity<CursorResponseV1<ExploredHearitResponse>> readExploredHearitsV1(
             @AuthenticationPrincipal RequestUser requestUser,
@@ -32,6 +33,7 @@ public class ExploreController {
         return ResponseEntity.ok(responsesV1);
     }
 
+    // V2: cursorId(auto-increment) 기반 페이지네이션, CursorResponseV2 포맷 (hasNext 포함)
     @GetMapping("/api/v2/hearits/explore")
     public ResponseEntity<CursorResponseV2<ExploredHearitResponse>> readExploredHearitsV2(
             @AuthenticationPrincipal RequestUser requestUser,
@@ -43,6 +45,9 @@ public class ExploreController {
         return ResponseEntity.ok(responses);
     }
 
+    // V3: score+hearitId 복합 커서 기반 페이지네이션
+    // 변경점: cursorId(Long) → cursor(String, Base64 인코딩된 "score:hearitId")
+    // 응답 필드: id, title, categoryColorCode, isBookmarked, bookmarkId, keywords, cursor
     @GetMapping("/api/v3/hearits/explore")
     public ResponseEntity<CursorResponseV2<ExploredHearitResponseV3>> readExploredHearitsV3(
             @AuthenticationPrincipal RequestUser requestUser,
