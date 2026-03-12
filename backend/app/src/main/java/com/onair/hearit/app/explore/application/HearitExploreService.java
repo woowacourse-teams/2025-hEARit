@@ -34,7 +34,7 @@ public class HearitExploreService {
                                                                             String cursor,
                                                                             int size) {
         ExploreScoreProcessor processor = getExploreScoreProcessor(userInfo);
-        ExploreCursor exploreCursor = ExploreCursor.from(cursor);
+        ExploreCursor exploreCursor = ExploreCursorCodec.decode(cursor);
         if (exploreCursor.isInitial()) {
             processor.refreshScoresV3(userInfo);
         }

@@ -1,5 +1,6 @@
 package com.onair.hearit.app.explore.dto;
 
+import com.onair.hearit.app.explore.application.ExploreCursorCodec;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;
@@ -23,7 +24,7 @@ public record ExploredHearitResponseV3(
                 false,
                 null,
                 getKeywordResponses(keywords),
-                exploreCursor.encode()
+                ExploreCursorCodec.encode(exploreCursor)
         );
     }
 
@@ -37,7 +38,7 @@ public record ExploredHearitResponseV3(
                 true,
                 bookmark.getId(),
                 getKeywordResponses(keywords),
-                exploreCursor.encode()
+                ExploreCursorCodec.encode(exploreCursor)
         );
     }
 
