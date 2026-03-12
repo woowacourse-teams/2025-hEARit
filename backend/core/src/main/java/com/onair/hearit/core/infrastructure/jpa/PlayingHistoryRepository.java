@@ -2,6 +2,7 @@ package com.onair.hearit.core.infrastructure.jpa;
 
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.infrastructure.projection.CategoryPlayingHistoryCount;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,4 +34,11 @@ public interface PlayingHistoryRepository extends JpaRepository<PlayingHistory, 
     List<CategoryPlayingHistoryCount> countPlayingHistoriesByCategory(@Param("userUuid") UUID userUuid);
 
     List<PlayingHistory> findByUserUuidAndHearitIdIn(UUID userUuid, List<Long> hearitIds);
+
+    @Query("""
+            SELECT DISTINCT ph.userUuid
+            FROM PlayingHistory ph
+            WHERE ph.updatedAt >= :threshold
+            """)
+    List<UUID> findUuidsByUpdatedAtAfter(@Param("threshold") LocalDateTime threshold);
 }

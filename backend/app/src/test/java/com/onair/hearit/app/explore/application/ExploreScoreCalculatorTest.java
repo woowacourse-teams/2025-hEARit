@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 
 import com.onair.hearit.app.explore.application.scorefactor.ScoreFactor;
+import com.onair.hearit.app.explore.application.scoreprocessor.ExploreHearitSelector;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
@@ -31,9 +32,9 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @Sql("/dbclean.sql")
-@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+@Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class})
 class ExploreScoreCalculatorTest {
 
     @Mock
@@ -54,12 +55,18 @@ class ExploreScoreCalculatorTest {
     @Mock
     private ScoreFactorWeightConfig scoreFactorWeightConfig;
 
+    @Mock
+    private ExploreHearitSelector exploreHearitSelector;
+
     private ExploreScoreCalculator exploreScoreCalculator;
 
     @BeforeEach
     void setUp() {
-        exploreScoreCalculator = new ExploreScoreCalculator(hearitRepository,
-                List.of(scoreFactor1, scoreFactor2, scoreFactor3), scoreFactorWeightConfig);
+        exploreScoreCalculator = new ExploreScoreCalculator(
+                exploreHearitSelector,
+                List.of(scoreFactor1, scoreFactor2, scoreFactor3),
+                scoreFactorWeightConfig
+        );
     }
 
     @Test
@@ -71,15 +78,18 @@ class ExploreScoreCalculatorTest {
         Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         given(scoreFactor1.isSupported(any())).willReturn(true);
-        given(scoreFactor1.calculate(any(), anyList())).willReturn(Map.of(hearit1.getId(), 0.1, hearit2.getId(), 0.1));
+        given(scoreFactor1.calculate(any(), anyList())).willReturn(
+                Map.of(hearit1.getId(), 0.1, hearit2.getId(), 0.1));
 
         given(scoreFactor2.isSupported(any())).willReturn(true);
-        given(scoreFactor2.calculate(any(), anyList())).willReturn(Map.of(hearit1.getId(), 0.3, hearit2.getId(), 0.0));
+        given(scoreFactor2.calculate(any(), anyList())).willReturn(
+                Map.of(hearit1.getId(), 0.3, hearit2.getId(), 0.0));
 
         given(scoreFactor3.isSupported(any())).willReturn(false);
         given(scoreFactorWeightConfig.getWeight(any())).willReturn(1.0);
-      
-        Map<Long, Double> memberScores = exploreScoreCalculator.calculateTotalScores(java.util.UUID.randomUUID(), UserType.MEMBER);
+
+        Map<Long, Double> memberScores = exploreScoreCalculator.calculateTotalScores(java.util.UUID.randomUUID(),
+                UserType.MEMBER);
 
         // then
         assertAll(

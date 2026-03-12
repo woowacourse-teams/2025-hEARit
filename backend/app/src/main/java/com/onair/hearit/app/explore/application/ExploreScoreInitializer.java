@@ -18,10 +18,19 @@ public class ExploreScoreInitializer {
     @Transactional
     public void refreshScores(long cursorId, UUID userUuid, UserType userType) {
         if (isInitialRequest(cursorId)) {
-            Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(userUuid, userType);
-            exploreScoreCommandRepository.insertScores(userUuid, scores);
-            exploreScoreCommandRepository.updateCursorIds(userUuid);
+            upsertScores(userUuid, userType);
         }
+    }
+
+    @Transactional
+    public void initializeScores(UUID userUuid, UserType userType) {
+        upsertScores(userUuid, userType);
+    }
+
+    private void upsertScores(UUID userUuid, UserType userType) {
+        Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(userUuid, userType);
+        exploreScoreCommandRepository.insertScores(userUuid, scores);
+        exploreScoreCommandRepository.updateCursorIds(userUuid);
     }
 
     @Transactional

@@ -16,6 +16,7 @@ import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.assertj.core.api.SoftAssertions;
@@ -48,9 +49,11 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
             String token = generateToken(member);
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
 
+            LocalDateTime baseTime = LocalDateTime.of(2026, 1, 1, 0, 0);
             for (int i = 0; i < 12; i++) {
                 Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-                dbHelper.insertPlayingHistory(new PlayingHistory(member.getUuid(), hearit, 10L * i));
+                dbHelper.insertPlayingHistoryAt(new PlayingHistory(member.getUuid(), hearit, 10L * i),
+                        baseTime.plusMinutes(i));
             }
 
             // when & then
@@ -83,9 +86,11 @@ class PlayingHistoryIntegrationTest extends IntegrationTest {
             String guestUuid = UUID.randomUUID().toString();
             Category category = dbHelper.insertCategory(new Category("name", "#000000"));
 
+            LocalDateTime baseTime = LocalDateTime.of(2026, 1, 1, 0, 0);
             for (int i = 0; i < 12; i++) {
                 Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
-                dbHelper.insertPlayingHistory(new PlayingHistory(UUID.fromString(guestUuid), hearit, 10L * i));
+                dbHelper.insertPlayingHistoryAt(new PlayingHistory(UUID.fromString(guestUuid), hearit, 10L * i),
+                        baseTime.plusMinutes(i));
             }
 
             // when & then

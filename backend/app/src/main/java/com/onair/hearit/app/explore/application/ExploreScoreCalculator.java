@@ -1,30 +1,30 @@
 package com.onair.hearit.app.explore.application;
 
 import com.onair.hearit.app.explore.application.scorefactor.ScoreFactor;
+import com.onair.hearit.app.explore.application.scoreprocessor.ExploreHearitSelector;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.UserType;
-import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class ExploreScoreCalculator {
 
-    private final HearitRepository hearitRepository;
+    private final ExploreHearitSelector exploreHearitSelector;
     private final List<ScoreFactor> scoreFactors;
     private final ScoreFactorWeightConfig scoreFactorWeight;
 
     public Map<Long, Double> calculateTotalScores(UUID uuid, UserType userType) {
+        List<Hearit> hearits = exploreHearitSelector.select(uuid);
         List<ScoreFactor> supportedScoreFactors = getSupportedScoreFactors(userType);
-        List<Hearit> hearits = hearitRepository.findAll(Pageable.ofSize(100)).getContent();
         Map<Long, Double> totalExploreScores = initTotalExploreScores(hearits);
+
         for (ScoreFactor scoreFactor : supportedScoreFactors) {
             double weight = scoreFactorWeight.getWeight(scoreFactor.getClass());
             Map<Long, Double> scores = scoreFactor.calculate(uuid, hearits);

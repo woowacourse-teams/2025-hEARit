@@ -6,6 +6,7 @@ import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.ExploreScore;
 import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.HearitCluster;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
@@ -58,6 +59,15 @@ public class DbHelper {
         return bookmark;
     }
 
+    public Bookmark insertBookmarkAt(Bookmark bookmark, LocalDateTime creationTime) {
+        try {
+            TestClock.freezeAt(creationTime);
+            return insertBookmark(bookmark);
+        } finally {
+            TestClock.unfreeze();
+        }
+    }
+
     public Keyword insertKeyword(Keyword keyword) {
         em.persist(keyword);
         em.flush();
@@ -107,5 +117,11 @@ public class DbHelper {
         em.persist(advertisement);
         em.flush();
         return advertisement;
+    }
+
+    public HearitCluster insertHearitCluster(HearitCluster hearitCluster) {
+        em.persist(hearitCluster);
+        em.flush();
+        return hearitCluster;
     }
 }
