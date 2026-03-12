@@ -1,6 +1,5 @@
 package com.onair.hearit.core.infrastructure.elasticsearch.repository;
 
-import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import com.onair.hearit.core.infrastructure.elasticsearch.domain.HearitDocument;
@@ -87,27 +86,15 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
                 }))
                 .withPageable(pageable);
 
-        NativeQuery nativeQuery = applySort(nativeQueryBuilder, sortField);
+        sortField.applySort(nativeQueryBuilder);
+        NativeQuery nativeQuery = nativeQueryBuilder.build();
         SearchHits<HearitDocument> searchResults = operations.search(nativeQuery, HearitDocument.class);
         List<Long> ids = searchResults.getSearchHits().stream()
                 .map(hit -> hit.getContent().getId())
                 .toList();
         return new PageImpl<>(ids, pageable, searchResults.getTotalHits());
     }
-
-    private NativeQuery applySort(NativeQueryBuilder builder, HearitSearchSortField sortField) {
-        switch (sortField) {
-            case LATEST -> builder.withSort(s -> s.field(f -> f.field("created_at").order(SortOrder.Desc)));
-            case OLDEST -> builder.withSort(s -> s.field(f -> f.field("created_at").order(SortOrder.Asc)));
-            case ACCURACY, RECOMMENDED -> {
-                // TODO: Recommend 조회수, 좋아요 등 추가 반영 필요
-                builder.withSort(s -> s.score(sc -> sc.order(SortOrder.Desc)));
-                builder.withSort(s -> s.field(f -> f.field("created_at").order(SortOrder.Desc)));
-            }
-        }
-        return builder.build();
-    }
-
+    
     public List<Long> findAllIds() {
         NativeQuery query = NativeQuery.builder()
                 .withSourceFilter(new FetchSourceFilter(true, new String[]{"id"}, null))
