@@ -71,8 +71,8 @@ class HearitExploreServiceTest {
                 List.of(guestExploreScoreProcessor, memberExploreScoreProcessor));
     }
 
-    @DisplayName("회원이 처음 탐색 요청 시(cursorId=0), 최신, 랜덤, 북마크 점수 순으로 정렬하여 반환한다")
     @Test
+    @DisplayName("회원이 처음 탐색 요청 시(cursorId=0), 최신, 랜덤, 북마크 점수 순으로 정렬하여 반환한다")
     void getExploredHearitsForMember_firstRequest() {
         // given
         // 랜덤 점수를 1.0점으로 고정
@@ -125,8 +125,8 @@ class HearitExploreServiceTest {
                 );
     }
 
-    @DisplayName("회원이 두 번째 이후 탐색 요청 시(cursorId!=0), 점수판을 갱신하지 않는다")
     @Test
+    @DisplayName("회원이 두 번째 이후 탐색 요청 시(cursorId!=0), 점수판을 갱신하지 않는다")
     void reusePersonalScoreOnSecondRequest() {
         // given
         given(randomNumberGenerator.getDouble()).willReturn(0.1d);
@@ -155,8 +155,8 @@ class HearitExploreServiceTest {
                 .doesNotContain(newHearit.getId()).isEmpty();
     }
 
-    @DisplayName("게스트가 탐색 요청 시, 최신, 랜덤 순으로 정렬하여 반환한다")
     @Test
+    @DisplayName("게스트가 탐색 요청 시, 최신, 랜덤 순으로 정렬하여 반환한다")
     void getExploredHearitsForGuest() {
         // given
         given(randomNumberGenerator.getDouble()).willReturn(0.1d);
@@ -188,8 +188,8 @@ class HearitExploreServiceTest {
                 );
     }
 
-    @DisplayName("v3: 회원이 처음 탐색 요청 시(cursor=null), score 내림차순으로 반환하고 각 아이템에 Base64 커서가 포함된다")
     @Test
+    @DisplayName("v3: 회원이 처음 탐색 요청 시(cursor=null), score 내림차순으로 반환하고 각 아이템에 Base64 커서가 포함된다")
     void getExploredHearitsV3ForMember_firstRequest() {
         // given
         given(randomNumberGenerator.getDouble()).willReturn(0.1d);
@@ -215,8 +215,8 @@ class HearitExploreServiceTest {
         assertThat(response.content()).allMatch(r -> r.cursor() != null && !r.cursor().isBlank());
     }
 
-    @DisplayName("v3: 두 번째 요청 시 커서 이후의 데이터만 반환한다")
     @Test
+    @DisplayName("v3: 두 번째 요청 시 커서 이후의 데이터만 반환한다")
     void getExploredHearitsV3_secondRequest() {
         // given
         given(randomNumberGenerator.getDouble()).willReturn(0.1d);

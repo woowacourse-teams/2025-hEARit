@@ -72,15 +72,15 @@ class GuestExploreScoreProcessorTest {
                 hearitKeywordRepository);
     }
 
-    @DisplayName("게스트 사용자를 지원한다")
     @Test
+    @DisplayName("게스트 사용자를 지원한다")
     void isSupportedForGuest() {
         UserInfo guestInfo = new UserInfo(UUID.randomUUID(), UserType.GUEST);
         assertThat(guestExploreScoreProcessor.isSupported(guestInfo)).isTrue();
     }
 
-    @DisplayName("게스트가 아니면 지원하지 않는다")
     @Test
+    @DisplayName("게스트가 아니면 지원하지 않는다")
     void isSupportedForNonGuest() {
         UserInfo memberInfo = new UserInfo(UUID.randomUUID(), UserType.MEMBER);
         assertAll(
@@ -89,8 +89,8 @@ class GuestExploreScoreProcessorTest {
         );
     }
 
-    @DisplayName("탐색 점수를 조회하면 DB의 score 데이터를 DTO로 변환하여 반환한다")
     @Test
+    @DisplayName("탐색 점수를 조회하면 DB의 score 데이터를 DTO로 변환하여 반환한다")
     void getExploreHearitsReturnsResponses() {
         // given
         UUID uuid = UUID.randomUUID();
@@ -117,9 +117,9 @@ class GuestExploreScoreProcessorTest {
         );
     }
 
-    @DisplayName("v3: 탐색 점수를 조회하면 score 기반 커서가 포함된 V3 DTO로 반환한다")
     @Test
-    void getExploreHearitsReturnsResponses() {
+    @DisplayName("v3: 탐색 점수를 조회하면 score 기반 커서가 포함된 V3 DTO로 반환한다")
+    void getExploreHearitsReturnsResponsesV3() {
         // given
         UUID uuid = UUID.randomUUID();
         UserInfo guestInfo = new UserInfo(uuid, UserType.GUEST);

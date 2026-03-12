@@ -62,8 +62,8 @@ class ExploreScoreCalculatorTest {
                 List.of(scoreFactor1, scoreFactor2, scoreFactor3), scoreFactorWeightConfig);
     }
 
-    @DisplayName("지원되는 모든 ScoreFactor 들의 점수를 합산하여 Map 으로 반환한다")
     @Test
+    @DisplayName("지원되는 모든 ScoreFactor 들의 점수를 합산하여 Map 으로 반환한다")
     void calculateTotalScores_sumsScoresFromMockedFactors() {
         // given
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());

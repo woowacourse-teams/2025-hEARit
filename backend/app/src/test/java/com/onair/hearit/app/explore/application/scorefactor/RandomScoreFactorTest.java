@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 
 class RandomScoreFactorTest {
 
-    @DisplayName("랜덤 점수는 0 이상 1 이하의 범위를 만족한다.")
     @Test
+    @DisplayName("랜덤 점수는 0 이상 1 이하의 범위를 만족한다.")
     void calculateRandomScores() {
         // given
         DefaultRandomNumberGenerator randomNumberGenerator = new DefaultRandomNumberGenerator();
@@ -41,8 +41,8 @@ class RandomScoreFactorTest {
         );
     }
 
-    @DisplayName("랜덤 생성기가 0.1 이하 반환 시, 점수는 1.0이 된다.")
     @Test
+    @DisplayName("랜덤 생성기가 0.1 이하 반환 시, 점수는 1.0이 된다.")
     void calculateRandomScores_withFixedGenerator() {
         // given
         RandomNumberGenerator fixedGenerator = () -> 0.1d;

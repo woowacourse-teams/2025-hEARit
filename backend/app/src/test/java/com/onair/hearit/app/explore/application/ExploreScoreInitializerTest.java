@@ -58,8 +58,8 @@ class ExploreScoreInitializerTest {
         exploreScoreInitializer = new ExploreScoreInitializer(exploreScoreCalculator, exploreScoreCommandRepository);
     }
 
-    @DisplayName("cursorId가 0이 아니면 갱신하지 않는다")
     @Test
+    @DisplayName("cursorId가 0이 아니면 갱신하지 않는다")
     void skipRefreshingWhenCursorIsNotZero() {
         // given
         UUID userUuid = UUID.randomUUID();
@@ -75,8 +75,8 @@ class ExploreScoreInitializerTest {
         assertThat(findExploreScores(userUuid)).isEmpty();
     }
 
-    @DisplayName("cursorId가 0이면 점수를 갱신하고 커서 ID를 부여한다")
     @Test
+    @DisplayName("cursorId가 0이면 점수를 갱신하고 커서 ID를 부여한다")
     void refreshScoresScoresWhenCursorIsZero() {
         // given
         UUID userUuid = UUID.randomUUID();
@@ -97,8 +97,8 @@ class ExploreScoreInitializerTest {
         );
     }
 
-    @DisplayName("refreshScores는 점수를 삽입하되 cursor_id를 갱신하지 않는다")
     @Test
+    @DisplayName("refreshScores는 점수를 삽입하되 cursor_id를 갱신하지 않는다")
     void refreshScoresWithoutCursorId() {
         // given
         UUID userUuid = UUID.randomUUID();

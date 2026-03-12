@@ -83,16 +83,16 @@ class MemberExploreScoreProcessorTest {
                 bookmarkRepository);
     }
 
-    @DisplayName("회원 사용자를 지원한다")
     @Test
+    @DisplayName("회원 사용자를 지원한다")
     void isSupportedForMember() {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = new UserInfo(member.getUuid(), UserType.MEMBER);
         assertThat(memberExploreScoreProcessor.isSupported(memberInfo)).isTrue();
     }
 
-    @DisplayName("회원이 아니면 지원하지 않는다")
     @Test
+    @DisplayName("회원이 아니면 지원하지 않는다")
     void isSupportedForNonMember() {
         UserInfo guestInfo = new UserInfo(UUID.randomUUID(), UserType.GUEST);
         UserInfo nonExistingMember = new UserInfo(UUID.randomUUID(), UserType.GUEST);
@@ -103,8 +103,8 @@ class MemberExploreScoreProcessorTest {
         );
     }
 
-    @DisplayName("탐색 점수를 조회하면 DB의 score 데이터를 DTO로 변환하여 반환한다")
     @Test
+    @DisplayName("탐색 점수를 조회하면 DB의 score 데이터를 DTO로 변환하여 반환한다")
     void getExploreHearitsReturnsResponses() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -131,9 +131,9 @@ class MemberExploreScoreProcessorTest {
         );
     }
 
-    @DisplayName("v3: 탐색 점수를 조회하면 score 기반 커서가 포함된 V3 DTO로 반환한다")
     @Test
-    void getExploreHearitsReturnsResponses() {
+    @DisplayName("v3: 탐색 점수를 조회하면 score 기반 커서가 포함된 V3 DTO로 반환한다")
+    void getExploreHearitsByScoreReturnsResponses() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = new UserInfo(member.getUuid(), UserType.MEMBER);
