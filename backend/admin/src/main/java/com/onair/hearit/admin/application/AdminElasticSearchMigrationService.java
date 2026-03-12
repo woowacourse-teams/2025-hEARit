@@ -1,16 +1,16 @@
 package com.onair.hearit.admin.application;
 
 import com.onair.hearit.admin.dto.response.AdminElasticSearchMigrationResponse;
-import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.infrastructure.elasticsearch.domain.HearitDocument;
 import com.onair.hearit.core.infrastructure.elasticsearch.repository.HearitElasticSearchRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,26 +38,34 @@ public class AdminElasticSearchMigrationService {
     }
 
     private List<Long> getMissingMigrationIds() {
-        Set<Long> existElasticIds = StreamSupport
-                .stream(hearitElasticSearchRepository.findAll().spliterator(), false)
-                .map(HearitDocument::getId)
-                .collect(Collectors.toSet());
-
-        return hearitRepository.findAll().stream()
-                .map(Hearit::getId)
+        List<Long> existElasticIds = hearitElasticSearchRepository.findAllIds();
+        return hearitRepository.findAllIds().stream()
                 .filter(id -> !existElasticIds.contains(id))
                 .toList();
     }
 
     private List<HearitDocument> getHearitDocuments(List<Long> notMigrationIds) {
+        Map<Long, List<Keyword>> keywordsMap = getKeywordsMap(notMigrationIds);
         return hearitRepository.findAllByIdIn(notMigrationIds).stream()
                 .map(hearit -> {
-                    List<String> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearit.getId()).stream()
-                            .map(Keyword::getName).toList();
-                    return new HearitDocument(hearit.getId(), hearit.getTitle(), hearit.getSummary(), keywords,
-                            hearit.getCategory().getName(), hearit.getCreatedAt().toLocalDate());
-
+                    List<Keyword> keywords = keywordsMap.getOrDefault(hearit.getId(), Collections.emptyList());
+                    return HearitDocument.of(hearit, hearit.getCategory(), keywords);
                 })
                 .toList();
+    }
+
+    private Map<Long, List<Keyword>> getKeywordsMap(List<Long> hearitIds) {
+        List<HearitKeyword> hearitKeywords = hearitKeywordRepository.findByHearitIdIn(hearitIds);
+        return hearitKeywords.stream()
+                .collect(Collectors.groupingBy(
+                        hk -> hk.getHearit().getId(),
+                        Collectors.mapping(HearitKeyword::getKeyword, Collectors.toList())
+                ))
+                .entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .toList()
+                ));
     }
 }

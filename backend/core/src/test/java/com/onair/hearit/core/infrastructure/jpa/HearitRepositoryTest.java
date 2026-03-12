@@ -197,4 +197,24 @@ class HearitRepositoryTest {
         // then
         assertThat(updated).isEqualTo(0);
     }
+
+    @Test
+    @DisplayName("전체 히어릿 ID만 반환한다.")
+    void findAllIds() {
+        // given
+        Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
+
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit3 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        // when
+        List<Long> result = hearitRepository.findAllIds();
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(3),
+                () -> assertThat(result).containsExactlyInAnyOrder(hearit1.getId(), hearit2.getId(), hearit3.getId())
+        );
+    }
 }

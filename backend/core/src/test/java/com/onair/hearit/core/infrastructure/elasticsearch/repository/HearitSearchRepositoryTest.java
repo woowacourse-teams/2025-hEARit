@@ -653,4 +653,14 @@ class HearitSearchRepositoryTest extends ElasticSearchTestContainer {
             assertThat(result.getContent()).contains(6L, 7L);
         }
     }
+
+    @Test
+    @DisplayName("전체 List의 Id만 조회한다.")
+    void findAllIds() {
+        // when
+        List<Long> ids = repository.findAllIds();
+
+        // then
+        assertThat(ids).hasSize(10);
+    }
 }

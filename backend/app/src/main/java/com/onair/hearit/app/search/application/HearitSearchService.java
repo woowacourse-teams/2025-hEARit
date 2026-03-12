@@ -83,6 +83,7 @@ public class HearitSearchService {
                         Collectors.mapping(HearitKeyword::getKeyword, Collectors.toList())));
     }
 
+    @Transactional(readOnly = true)
     public PagedResponse<HearitSearchResponse> searchV2(String searchTerm,
                                                         SearchSortRequest sortRequest,
                                                         PagingRequest pagingRequest,

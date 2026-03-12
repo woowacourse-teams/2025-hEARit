@@ -13,7 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 
 @RequiredArgsConstructor
 public class HearitSearchRepositoryImpl implements HearitSearchRepository {
@@ -84,7 +86,6 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
                 }))
                 .withPageable(pageable);
 
-        // 정렬 적용 및 실행
         NativeQuery nativeQuery = applySort(nativeQueryBuilder, sortField);
         SearchHits<HearitDocument> searchResults = operations.search(nativeQuery, HearitDocument.class);
         List<Long> ids = searchResults.getSearchHits().stream()
@@ -104,5 +105,17 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
             }
         }
         return builder.build();
+    }
+
+    public List<Long> findAllIds() {
+        NativeQuery query = NativeQuery.builder()
+                .withSourceFilter(new FetchSourceFilter(true, new String[]{"id"}, null)) // id 필드만 추출
+                .build();
+
+        return operations.search(query, HearitDocument.class)
+                .stream()
+                .map(SearchHit::getContent)
+                .map(HearitDocument::getId)
+                .toList();
     }
 }
