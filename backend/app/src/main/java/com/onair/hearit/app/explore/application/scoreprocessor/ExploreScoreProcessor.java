@@ -14,7 +14,7 @@ public interface ExploreScoreProcessor {
 
     List<ExploredHearitResponse> getExploreHearits(UserInfo userInfo, long cursorId, int size);
 
-    void refreshScoresV3(UserInfo userInfo);
+    void refreshScores(UserInfo userInfo);
 
-    List<ExploredHearitResponseV3> getExploreHearitsV3(UserInfo userInfo, ExploreCursor cursor, int size);
+    List<ExploredHearitResponseV3> getExploreHearits(UserInfo userInfo, ExploreCursor cursor, int size);
 }

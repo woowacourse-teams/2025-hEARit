@@ -133,7 +133,7 @@ class MemberExploreScoreProcessorTest {
 
     @DisplayName("v3: 탐색 점수를 조회하면 score 기반 커서가 포함된 V3 DTO로 반환한다")
     @Test
-    void getExploreHearitsV3ReturnsResponses() {
+    void getExploreHearitsReturnsResponses() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         UserInfo memberInfo = new UserInfo(member.getUuid(), UserType.MEMBER);
@@ -145,7 +145,7 @@ class MemberExploreScoreProcessorTest {
         dbHelper.insertExploreScore(new ExploreScore(member.getUuid(), hearit2.getId(), 40.0, null));
 
         // when
-        List<ExploredHearitResponseV3> responses = memberExploreScoreProcessor.getExploreHearitsV3(memberInfo, ExploreCursor.initial(), 3);
+        List<ExploredHearitResponseV3> responses = memberExploreScoreProcessor.getExploreHearits(memberInfo, ExploreCursor.initial(), 3);
 
         // then
         assertAll(

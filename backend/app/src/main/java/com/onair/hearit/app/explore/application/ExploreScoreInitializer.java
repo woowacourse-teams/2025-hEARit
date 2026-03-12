@@ -25,7 +25,7 @@ public class ExploreScoreInitializer {
     }
 
     @Transactional
-    public void refreshScoresV3(UUID userUuid, UserType userType) {
+    public void refreshScores(UUID userUuid, UserType userType) {
         Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(userUuid, userType);
         exploreScoreCommandRepository.insertScores(userUuid, scores);
     }

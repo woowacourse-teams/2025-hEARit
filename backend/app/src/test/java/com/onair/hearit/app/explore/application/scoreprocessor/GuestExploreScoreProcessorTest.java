@@ -119,7 +119,7 @@ class GuestExploreScoreProcessorTest {
 
     @DisplayName("v3: 탐색 점수를 조회하면 score 기반 커서가 포함된 V3 DTO로 반환한다")
     @Test
-    void getExploreHearitsV3ReturnsResponses() {
+    void getExploreHearitsReturnsResponses() {
         // given
         UUID uuid = UUID.randomUUID();
         UserInfo guestInfo = new UserInfo(uuid, UserType.GUEST);
@@ -131,7 +131,7 @@ class GuestExploreScoreProcessorTest {
         dbHelper.insertExploreScore(new ExploreScore(uuid, hearit2.getId(), 40.0, null));
 
         // when
-        List<ExploredHearitResponseV3> responses = guestExploreScoreProcessor.getExploreHearitsV3(guestInfo, ExploreCursor.initial(), 3);
+        List<ExploredHearitResponseV3> responses = guestExploreScoreProcessor.getExploreHearits(guestInfo, ExploreCursor.initial(), 3);
 
         // then
         assertAll(

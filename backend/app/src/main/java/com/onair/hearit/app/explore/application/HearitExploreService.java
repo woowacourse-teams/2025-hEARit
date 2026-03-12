@@ -36,9 +36,9 @@ public class HearitExploreService {
         ExploreScoreProcessor processor = getExploreScoreProcessor(userInfo);
         ExploreCursor exploreCursor = ExploreCursorCodec.decode(cursor);
         if (exploreCursor.isInitial()) {
-            processor.refreshScoresV3(userInfo);
+            processor.refreshScores(userInfo);
         }
-        List<ExploredHearitResponseV3> responses = processor.getExploreHearitsV3(userInfo, exploreCursor, size);
+        List<ExploredHearitResponseV3> responses = processor.getExploreHearits(userInfo, exploreCursor, size);
         return CursorResponseV2.from(responses);
     }
 

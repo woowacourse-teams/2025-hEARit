@@ -97,16 +97,16 @@ class ExploreScoreInitializerTest {
         );
     }
 
-    @DisplayName("refreshScoresV3는 점수를 삽입하되 cursor_id를 갱신하지 않는다")
+    @DisplayName("refreshScores는 점수를 삽입하되 cursor_id를 갱신하지 않는다")
     @Test
-    void refreshScoresV3() {
+    void refreshScoresWithoutCursorId() {
         // given
         UUID userUuid = UUID.randomUUID();
         Category category = dbHelper.insertCategory(new Category("Test2", "#999999"));
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
 
         // when
-        exploreScoreInitializer.refreshScoresV3(userUuid, UserType.GUEST);
+        exploreScoreInitializer.refreshScores(userUuid, UserType.GUEST);
 
         // then
         List<ExploreScoreRow> rows = findExploreScores(userUuid);
