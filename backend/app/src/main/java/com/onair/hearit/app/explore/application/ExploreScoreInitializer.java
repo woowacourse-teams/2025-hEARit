@@ -27,14 +27,17 @@ public class ExploreScoreInitializer {
         upsertScores(userUuid, userType);
     }
 
+    @Transactional
+    public void refreshScores(UUID userUuid, UserType userType) {
+        calculateAndInsertScores(userUuid, userType);
+    }
+
     private void upsertScores(UUID userUuid, UserType userType) {
-        Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(userUuid, userType);
-        exploreScoreCommandRepository.insertScores(userUuid, scores);
+        calculateAndInsertScores(userUuid, userType);
         exploreScoreCommandRepository.updateCursorIds(userUuid);
     }
 
-    @Transactional
-    public void refreshScores(UUID userUuid, UserType userType) {
+    private void calculateAndInsertScores(UUID userUuid, UserType userType) {
         Map<Long, Double> scores = exploreScoreCalculator.calculateTotalScores(userUuid, userType);
         exploreScoreCommandRepository.insertScores(userUuid, scores);
     }
