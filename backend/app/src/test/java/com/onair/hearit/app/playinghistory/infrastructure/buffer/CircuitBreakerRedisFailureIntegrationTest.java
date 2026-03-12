@@ -66,7 +66,7 @@ class CircuitBreakerRedisFailureIntegrationTest {
     RedisTemplate<String, String> redisTemplate;
 
     @MockitoBean
-    HearitElasticSearchRepository hearitSearchService;
+    HearitElasticSearchRepository hearitElasticSearchRepository;
 
     @Autowired
     RedissonClient redissonClient;

@@ -7,6 +7,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -15,8 +16,10 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 public class HearitSearchEventListener {
+
     private final ElasticsearchOperations operations;
 
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(retryFor = {Exception.class}, backoff = @Backoff(delay = 2000))
     public void handleHearitCreated(HearitUpsertEvent event) {
@@ -27,6 +30,6 @@ public class HearitSearchEventListener {
 
     @Recover
     public void recover(Exception e, HearitUpsertEvent event) {
-        log.error("[ES_SYNC_FATAL_ERROR] 3회 재시도 모두 실패. Hearit ID: {} - 사유: {}", event.id(), e.getMessage());
+        log.error("[ES_SYNC_FATAL_ERROR] 3회 시도 모두 실패. Hearit ID: {} - 사유: {}", event.id(), e.getMessage());
     }
 }
