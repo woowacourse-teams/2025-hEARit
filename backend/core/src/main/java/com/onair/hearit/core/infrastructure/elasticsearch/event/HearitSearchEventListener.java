@@ -19,14 +19,14 @@ public class HearitSearchEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(retryFor = {Exception.class}, backoff = @Backoff(delay = 2000))
-    public void handleHearitCreated(HearitCreatedEvent event) {
+    public void handleHearitCreated(HearitUpsertEvent event) {
         HearitDocument document = new HearitDocument(
                 event.id(), event.title(), event.summary(), event.keywords(), event.category(), event.createdAt());
         operations.save(document);
     }
 
     @Recover
-    public void recover(Exception e, HearitCreatedEvent event) {
+    public void recover(Exception e, HearitUpsertEvent event) {
         log.error("[ES_SYNC_FATAL_ERROR] 3회 재시도 모두 실패. Hearit ID: {} - 사유: {}", event.id(), e.getMessage());
     }
 }

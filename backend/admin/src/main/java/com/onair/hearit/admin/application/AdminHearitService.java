@@ -16,7 +16,7 @@ import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Source;
-import com.onair.hearit.core.infrastructure.elasticsearch.event.HearitCreatedEvent;
+import com.onair.hearit.core.infrastructure.elasticsearch.event.HearitUpsertEvent;
 import com.onair.hearit.core.infrastructure.jpa.CategoryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
@@ -91,7 +91,7 @@ public class AdminHearitService {
                     category);
             Hearit savedHearit = hearitRepository.save(hearit);
             List<Keyword> keywords = saveHearitKeywords(request.keywordIds(), savedHearit);
-            eventPublisher.publishEvent(HearitCreatedEvent.of(savedHearit, category, keywords));
+            eventPublisher.publishEvent(HearitUpsertEvent.of(savedHearit, category, keywords));
         } catch (RuntimeException e) {
             deleteFile(FileType.ORIGINAL, request.originalAudioKey());
             deleteFile(FileType.SHORT, request.shortAudioKey());
@@ -147,7 +147,7 @@ public class AdminHearitService {
         Hearit hearit = getHearitById(hearitId);
         hearit.updateMetaData(request.title(), request.summary(), request.playTime(), sources, category);
         List<Keyword> keywords = hearitKeywordRepository.findKeywordsByHearitId(hearitId);
-        eventPublisher.publishEvent(HearitCreatedEvent.of(hearit, category, keywords));
+        eventPublisher.publishEvent(HearitUpsertEvent.of(hearit, category, keywords));
     }
 
     private List<Source> mapSourceUpdateRequestToSource(List<SourceUpdateRequest> sources) {

@@ -6,7 +6,7 @@ import com.onair.hearit.core.domain.Keyword;
 import java.time.LocalDate;
 import java.util.List;
 
-public record HearitCreatedEvent(
+public record HearitUpsertEvent(
         Long id,
         String title,
         String summary,
@@ -15,12 +15,12 @@ public record HearitCreatedEvent(
         LocalDate createdAt
 ) {
 
-    public static HearitCreatedEvent of(Hearit hearit, Category category, List<Keyword> keywords) {
+    public static HearitUpsertEvent of(Hearit hearit, Category category, List<Keyword> keywords) {
         List<String> keywordNames = keywords.stream()
                 .map(Keyword::getName)
                 .toList();
 
-        return new HearitCreatedEvent(
+        return new HearitUpsertEvent(
                 hearit.getId(),
                 hearit.getTitle(),
                 hearit.getSummary(),
