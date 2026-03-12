@@ -661,6 +661,6 @@ class HearitSearchRepositoryTest extends ElasticSearchTestContainer {
         List<Long> ids = repository.findAllIds();
 
         // then
-        assertThat(ids).hasSize(10);
+        assertThat(ids).hasSize(12);
     }
 }

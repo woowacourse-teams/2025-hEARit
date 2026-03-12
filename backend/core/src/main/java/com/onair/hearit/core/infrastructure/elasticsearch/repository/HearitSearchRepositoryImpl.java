@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -109,7 +110,8 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
 
     public List<Long> findAllIds() {
         NativeQuery query = NativeQuery.builder()
-                .withSourceFilter(new FetchSourceFilter(true, new String[]{"id"}, null)) // id 필드만 추출
+                .withSourceFilter(new FetchSourceFilter(true, new String[]{"id"}, null))
+                .withPageable(PageRequest.of(0, 10000))
                 .build();
 
         return operations.search(query, HearitDocument.class)
