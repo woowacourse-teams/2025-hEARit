@@ -233,7 +233,10 @@ fun setLinkUrl(
     view: View,
     url: String?,
 ) {
-    if (url.isNullOrBlank()) {
+    val uri = url?.toUri()
+    val isAllowedScheme = uri?.scheme in setOf("http", "https")
+
+    if (!isAllowedScheme) {
         view.setOnClickListener(null)
         view.isClickable = false
         return
@@ -243,8 +246,13 @@ fun setLinkUrl(
 
     view.setOnClickListener {
         runCatching {
-            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-            view.context.startActivity(intent)
+            val intent =
+                Intent(Intent.ACTION_VIEW, uri).apply {
+                    addCategory(Intent.CATEGORY_BROWSABLE)
+                }
+            if (intent.resolveActivity(view.context.packageManager) != null) {
+                view.context.startActivity(intent)
+            }
         }
     }
 }
