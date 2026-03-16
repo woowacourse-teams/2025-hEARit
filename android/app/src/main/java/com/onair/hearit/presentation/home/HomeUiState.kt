@@ -24,33 +24,27 @@ data class HomeUiState(
     val isLoggedIn: Boolean
         get() = userInfo.isLoggedIn()
 
-    // 섹션별 로딩
-    val isRecommendLoading: Boolean get() = loadingKeys.contains(HomeLoadKey.RECOMMEND)
-    val isRecentUploadLoading: Boolean get() = loadingKeys.contains(HomeLoadKey.RECENT_UPLOAD)
-    val isPlayingHistoryLoading: Boolean get() = loadingKeys.contains(HomeLoadKey.PLAYING_HISTORY)
-    val isBookmarkLoading: Boolean get() = loadingKeys.contains(HomeLoadKey.PLAYING_BOOKMARKS)
-    val isCategoriesLoading: Boolean get() = loadingKeys.contains(HomeLoadKey.RECOMMENDATION_CATEGORIES)
-    val isAdLoading: Boolean get() = loadingKeys.contains(HomeLoadKey.AD_BANNER)
-
-    // 전역 로딩(인디케이터용)
+    // 전역 로딩 (인디케이터용)
     val isLoading: Boolean
         get() = loadingKeys.isNotEmpty()
 
     val showRecommendHearits: Boolean
-        get() = !isRecommendLoading && recommendHearits.isNotEmpty()
+        get() = canShow(recommendHearits, HomeLoadKey.RECOMMEND)
 
     val showRecentUpload: Boolean
-        get() = !isRecentUploadLoading && recentUploadHearits.isNotEmpty()
+        get() = canShow(recentUploadHearits, HomeLoadKey.RECENT_UPLOAD)
 
     val showPlayingHistory: Boolean
-        get() = !isPlayingHistoryLoading && playingHistoryHearits.isNotEmpty()
+        get() = canShow(playingHistoryHearits, HomeLoadKey.PLAYING_HISTORY)
 
     val showBookmark: Boolean
-        get() = !isBookmarkLoading && playingBookmarkHearits.isNotEmpty()
+        get() = canShow(playingBookmarkHearits, HomeLoadKey.PLAYING_BOOKMARKS)
 
     val showCategories: Boolean
-        get() = !isCategoriesLoading && recommendationCategories.isNotEmpty()
+        get() = canShow(recommendHearits, HomeLoadKey.RECOMMENDATION_CATEGORIES)
 
-    val showAdBanner: Boolean
-        get() = !isAdLoading && advertisement != null
+    private fun <T> canShow(
+        list: List<T>,
+        loadingKey: HomeLoadKey,
+    ) = !loadingKeys.contains(loadingKey) && list.isNotEmpty()
 }
