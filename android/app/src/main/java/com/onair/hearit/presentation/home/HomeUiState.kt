@@ -41,7 +41,7 @@ data class HomeUiState(
         get() = canShow(playingBookmarkHearits, HomeLoadKey.PLAYING_BOOKMARKS)
 
     val showCategories: Boolean
-        get() = canShow(recommendHearits, HomeLoadKey.RECOMMENDATION_CATEGORIES)
+        get() = canShow(recommendationCategories, HomeLoadKey.RECOMMENDATION_CATEGORIES)
 
     private fun <T> canShow(
         list: List<T>,
