@@ -4,6 +4,7 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.onair.hearit.BuildConfig
 import com.onair.hearit.data.TokenAuthenticator
 import com.onair.hearit.data.TokenInterceptor
+import com.onair.hearit.data.api.AdvertisementService
 import com.onair.hearit.data.api.AuthService
 import com.onair.hearit.data.api.BookmarkService
 import com.onair.hearit.data.api.CategoryService
@@ -119,6 +120,13 @@ object NetworkModule {
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
     }
+
+    @Provides
+    @Singleton
+    @Named("noAuth")
+    fun provideAdvertisementServiceWithoutAuth(
+        @Named("noAuth") retrofitWithoutAuth: Retrofit,
+    ): AdvertisementService = retrofitWithoutAuth.create()
 
     @Provides
     @Singleton
