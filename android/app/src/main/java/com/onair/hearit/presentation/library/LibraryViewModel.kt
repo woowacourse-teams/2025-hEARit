@@ -52,18 +52,24 @@ class LibraryViewModel @Inject constructor(
 
     fun refreshBookmarks() {
         nextPage = 0
-        _bookmarks.value = emptyList()
+        val previousBookmarks = _bookmarks.value.orEmpty()
         val currentUserInfo = userInfo.value
-        if (currentUserInfo != DEFAULT_USER_INFO) {
-            fetchData(page = 0)
-        }
+
+        if (currentUserInfo == DEFAULT_USER_INFO) return
+
+        fetchDataWithRestore(page = 0, previousBookmarks = previousBookmarks)
     }
 
     fun loadNextPage() {
-        nextPage?.let { fetchData(it) }
+        val page: Int = nextPage ?: return
+        val previousBookmarks: List<Bookmark> = _bookmarks.value.orEmpty()
+        fetchDataWithRestore(page = page, previousBookmarks = previousBookmarks)
     }
 
-    private fun fetchData(page: Int) {
+    private fun fetchDataWithRestore(
+        page: Int,
+        previousBookmarks: List<Bookmark>,
+    ) {
         if (isLoading.value == true || nextPage == null) return
 
         _isLoading.value = true
@@ -71,8 +77,14 @@ class LibraryViewModel @Inject constructor(
             bookmarkRepository
                 .getBookmarks(page = page, size = null, filter = "all")
                 .onSuccess { pageResult ->
-                    val currentList = _bookmarks.value.orEmpty()
-                    _bookmarks.value = currentList + pageResult.items
+                    val newList: List<Bookmark> =
+                        if (page == 0) {
+                            pageResult.items
+                        } else {
+                            val currentList: List<Bookmark> = _bookmarks.value.orEmpty()
+                            currentList + pageResult.items
+                        }
+                    _bookmarks.value = newList
                     _totalCount.value = pageResult.paging.totalElements
                     _uiState.value = if (_bookmarks.value.isNullOrEmpty()) NoBookmarks else LoggedIn
 
@@ -84,7 +96,9 @@ class LibraryViewModel @Inject constructor(
                         }
                 }.onFailure { throwable ->
                     Timber.w(throwable)
+                    _bookmarks.value = previousBookmarks
                     _toastMessage.value = R.string.library_toast_bookmark_load_fail
+                    _uiState.value = if (previousBookmarks.isEmpty()) NoBookmarks else LoggedIn
                 }
             _isLoading.value = false
         }

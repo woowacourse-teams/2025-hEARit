@@ -8,8 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.LoginReason
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.BookmarkRepository
+import com.onair.hearit.domain.repository.LikeRepository
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
@@ -28,6 +30,7 @@ class PlayerDetailViewModel @Inject constructor(
     private val recentHearitRepository: RecentHearitRepository,
     private val getHearitUseCase: GetHearitUseCase,
     private val bookmarkRepository: BookmarkRepository,
+    private val likeRepository: LikeRepository,
 ) : ViewModel() {
     private var hearitId: Long =
         savedStateHandle.get<Long>(HEARIT_ID_KEY) ?: -1L
@@ -38,11 +41,17 @@ class PlayerDetailViewModel @Inject constructor(
     private val _bookmarkId: MutableLiveData<Long?> = MutableLiveData()
     val bookmarkId: LiveData<Long?> = _bookmarkId
 
+    private val _isLiked = MutableStateFlow(false)
+    val isLiked: StateFlow<Boolean> = _isLiked.asStateFlow()
+
+    private val _likeCount = MutableStateFlow(0)
+    val likeCount: StateFlow<Int> = _likeCount.asStateFlow()
+
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private val _showLoginDialog = SingleLiveData<Unit>()
-    val showLoginDialog: LiveData<Unit> = _showLoginDialog
+    private val _showLoginDialog = SingleLiveData<LoginReason>()
+    val showLoginDialog: LiveData<LoginReason> = _showLoginDialog
 
     private val _highlightedId: MutableStateFlow<Long?> = MutableStateFlow(null)
     val highlightedId: StateFlow<Long?> = _highlightedId.asStateFlow()
@@ -64,6 +73,14 @@ class PlayerDetailViewModel @Inject constructor(
         }
     }
 
+    fun toggleLike() {
+        if (_isLiked.value) {
+            deleteLike()
+        } else {
+            addLike()
+        }
+    }
+
     fun refreshData(newHearitId: Long) {
         if (hearitId == newHearitId) return
         _bookmarkId.value = null
@@ -77,26 +94,14 @@ class PlayerDetailViewModel @Inject constructor(
         _highlightedId.value = scriptId
     }
 
-    private fun deleteBookmark() {
-        val id = _bookmarkId.value ?: return
-        viewModelScope.launch {
-            bookmarkRepository
-                .deleteBookmark(id)
-                .onSuccess {
-                    _bookmarkId.value = null
-                }.onFailure { throwable ->
-                    Timber.w(throwable)
-                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
-                }
-        }
-    }
-
     private fun fetchData() {
         viewModelScope.launch {
             getHearitUseCase(hearitId)
                 .onSuccess {
                     _hearit.value = it
                     _bookmarkId.value = it.bookmarkId
+                    _isLiked.value = it.like.isLiked
+                    _likeCount.value = it.like.count
                     saveRecentHearit()
                 }.onFailure { throwable ->
                     Timber.w(throwable)
@@ -114,7 +119,7 @@ class PlayerDetailViewModel @Inject constructor(
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
-                            _showLoginDialog.call()
+                            _showLoginDialog.value = LoginReason.BOOKMARK
                         }
 
                         else -> {
@@ -122,6 +127,62 @@ class PlayerDetailViewModel @Inject constructor(
                             _toastMessage.value = R.string.all_toast_add_bookmark_fail
                         }
                     }
+                }
+        }
+    }
+
+    private fun deleteBookmark() {
+        val id = _bookmarkId.value ?: return
+        viewModelScope.launch {
+            bookmarkRepository
+                .deleteBookmark(id)
+                .onSuccess {
+                    _bookmarkId.value = null
+                }.onFailure { throwable ->
+                    Timber.w(throwable)
+                    _toastMessage.value = R.string.all_toast_delete_bookmark_fail
+                }
+        }
+    }
+
+    private fun addLike() {
+        viewModelScope.launch {
+            _isLiked.value = true
+            _likeCount.value += 1
+
+            likeRepository
+                .addLike(hearitId)
+                .onFailure { throwable ->
+                    when (throwable) {
+                        is UserNotRegistered -> {
+                            _isLiked.value = false
+                            _likeCount.value -= 1
+                            _showLoginDialog.value = LoginReason.LIKE
+                        }
+
+                        else -> {
+                            Timber.w(throwable)
+                            _isLiked.value = false
+                            _likeCount.value -= 1
+                            _toastMessage.value = R.string.player_detail_toast_add_like_fail
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun deleteLike() {
+        viewModelScope.launch {
+            _isLiked.value = false
+            _likeCount.value -= 1
+
+            likeRepository
+                .deleteLike(hearitId)
+                .onFailure { throwable ->
+                    Timber.w(throwable)
+                    _isLiked.value = true
+                    _likeCount.value += 1
+                    _toastMessage.value = R.string.player_detail_toast_delete_like_fail
                 }
         }
     }

@@ -27,4 +27,6 @@ data class HearitResponse(
     val category: CategoryResponse.Content,
     @SerialName("keywords")
     val keywords: List<KeywordResponse>,
+    @SerialName("like")
+    val like: LikeResponse,
 )

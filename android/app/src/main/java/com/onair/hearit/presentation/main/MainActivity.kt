@@ -33,7 +33,9 @@ import com.onair.hearit.analytics.AnalyticsLogger
 import com.onair.hearit.analytics.AnalyticsParamKeys
 import com.onair.hearit.data.AuthEventManager
 import com.onair.hearit.databinding.ActivityMainBinding
+import com.onair.hearit.notification.canNotify
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
+import com.onair.hearit.presentation.NotificationSuggestionDialogFragment
 import com.onair.hearit.presentation.PlaybackStarter
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
@@ -65,6 +67,7 @@ class MainActivity :
     private var mediaController: MediaController? = null
     private var currentSelectedItemId: Int = R.id.nav_home
     private var hasSentPreload = false
+    private var isNotificationSuggestionDialogShowing = false
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
 
     private val mainViewModel: MainViewModel by viewModels()
@@ -104,6 +107,11 @@ class MainActivity :
         if (!AuthEventManager.isValidSession()) {
             handleForceLogout()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mainViewModel.checkNotificationSuggestion(isSystemNotificationEnabled = applicationContext.canNotify())
     }
 
     fun launchDetailActivity(intent: Intent) {
@@ -244,6 +252,10 @@ class MainActivity :
         mainViewModel.navigateToDetail.observe(this) { hearitId ->
             navigateToDetail(hearitId)
         }
+
+        mainViewModel.showNotificationSuggestion.observe(this) {
+            showNotificationSuggestionDialog()
+        }
     }
 
     private fun setupBottomControllerClick() {
@@ -357,6 +369,35 @@ class MainActivity :
                     Toast.LENGTH_LONG,
                 ).show()
         }
+    }
+
+    private fun showNotificationSuggestionDialog() {
+        if (isNotificationSuggestionDialogShowing) return
+        isNotificationSuggestionDialogShowing = true
+
+        mainViewModel.onNotificationSuggestionShown()
+
+        NotificationSuggestionDialogFragment()
+            .apply {
+                onConfirm = {
+                    mainViewModel.onNotificationAgreed()
+                    openSystemNotificationSetting()
+                    isNotificationSuggestionDialogShowing = false
+                }
+                onDismiss = { isNotificationSuggestionDialogShowing = false }
+            }.show(
+                supportFragmentManager,
+                "NotificationSuggestionDialog",
+            )
+    }
+
+    private fun openSystemNotificationSetting() {
+        val intent =
+            Intent().apply {
+                action = android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+            }
+        startActivity(intent)
     }
 
     override fun showPlayerControlView() {

@@ -31,9 +31,6 @@ class ExploreViewModel @Inject constructor(
     private val _toastMessage = SingleLiveData<Int>()
     val toastMessage: LiveData<Int> = _toastMessage
 
-    private val _showLoginDialog = SingleLiveData<Unit>()
-    val showLoginDialog: LiveData<Unit> = _showLoginDialog
-
     private val _shouldPlayAnimation = MutableLiveData<Boolean>()
     val shouldPlayAnimation: LiveData<Boolean> = _shouldPlayAnimation
 

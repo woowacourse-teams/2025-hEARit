@@ -29,7 +29,6 @@ import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.presentation.DetailResult
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
-import com.onair.hearit.presentation.LoginRequiredDialogFragment
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.detail.PlayerDetailActivity.Companion.LOGIN_REQUIRED_DIALOG_TAG
@@ -229,10 +228,6 @@ class ExploreFragment :
             showToast(resId)
         }
 
-        viewModel.showLoginDialog.observe(viewLifecycleOwner) {
-            showLoginRequiredDialog()
-        }
-
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             if (!isViewValid) return@observe
             binding.frExploreSkeleton.apply {
@@ -353,11 +348,6 @@ class ExploreFragment :
                 putExtra(PREVIOUS_SCREEN_KEY, EXPLORE_VALUE)
             }
         playerDetailLauncher.launch(intent)
-    }
-
-    private fun showLoginRequiredDialog() {
-        LoginRequiredDialogFragment { navigateToLogin() }
-            .show(parentFragmentManager, LOGIN_REQUIRED_DIALOG_TAG)
     }
 
     private fun navigateToLogin() {
