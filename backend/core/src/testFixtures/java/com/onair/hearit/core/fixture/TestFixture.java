@@ -3,14 +3,16 @@ package com.onair.hearit.core.fixture;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.HearitCluster;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
+import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Reaction;
 import com.onair.hearit.core.domain.ReactionType;
-import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Source;
 import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.domain.UserType;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -95,5 +97,11 @@ public class TestFixture {
 
     public static Reaction createFixedReaction(Member member, Hearit hearit, ReactionType type) {
         return new Reaction(member.getUuid(), hearit, type);
+    }
+
+    public static HearitCluster createHearitClusterWithId(Hearit hearit, int clusterId) {
+        return new HearitCluster(
+                hearit.getId(), 100L, 10L, 5L, 120.5, 0.8,
+                hearit.getCreatedAt(), clusterId, LocalDateTime.now());
     }
 }

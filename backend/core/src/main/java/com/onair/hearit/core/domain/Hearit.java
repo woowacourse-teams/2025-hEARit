@@ -76,6 +76,12 @@ public class Hearit {
         this.viewCount = 0;
     }
 
+    public Hearit(String title, String summary, Integer playTime, String originalAudioUrl,
+                  String shortAudioUrl, String scriptUrl, List<Source> sources, Category category, long viewCount) {
+        this(title, summary, playTime, originalAudioUrl, shortAudioUrl, scriptUrl, sources, category);
+        this.viewCount = viewCount;
+    }
+
     public Hearit(Long id, String title, String summary, Integer playTime, String originalAudioUrl,
                   String shortAudioUrl, String scriptUrl, List<Source> sources, Category category,
                   LocalDateTime createdAt) {

@@ -6,10 +6,12 @@ import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.ExploreScore;
 import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.HearitCluster;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
+import com.onair.hearit.core.domain.Reaction;
 import com.onair.hearit.core.domain.RecommendHearit;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -57,6 +59,15 @@ public class DbHelper {
         return bookmark;
     }
 
+    public Bookmark insertBookmarkAt(Bookmark bookmark, LocalDateTime creationTime) {
+        try {
+            TestClock.freezeAt(creationTime);
+            return insertBookmark(bookmark);
+        } finally {
+            TestClock.unfreeze();
+        }
+    }
+
     public Keyword insertKeyword(Keyword keyword) {
         em.persist(keyword);
         em.flush();
@@ -96,9 +107,21 @@ public class DbHelper {
         }
     }
 
+    public Reaction insertReaction(Reaction reaction) {
+        em.persist(reaction);
+        em.flush();
+        return reaction;
+    }
+
     public Advertisement insertAdvertisement(Advertisement advertisement) {
         em.persist(advertisement);
         em.flush();
         return advertisement;
+    }
+
+    public HearitCluster insertHearitCluster(HearitCluster hearitCluster) {
+        em.persist(hearitCluster);
+        em.flush();
+        return hearitCluster;
     }
 }

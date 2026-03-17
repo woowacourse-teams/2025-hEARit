@@ -57,7 +57,7 @@ class LikeIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("비회원 좋아요 추가 - 403Forbidden")
+    @DisplayName("비회원 좋아요 추가 - 401Unauthorized")
     void createLike_403Forbidden() {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
@@ -67,11 +67,11 @@ class LikeIntegrationTest extends IntegrationTest {
                 .when()
                 .post("/api/v1/hearits/{hearitId}/likes", hearit.getId())
                 .then()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
     }
 
     @Test
-    @DisplayName("비회원 좋아요 삭제 - 403Forbidden")
+    @DisplayName("비회원 좋아요 삭제 - 401Unauthorized")
     void deleteLike_401Unauthorized() {
         Category category = dbHelper.insertCategory(TestFixture.createFixedCategory());
         Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
@@ -81,7 +81,7 @@ class LikeIntegrationTest extends IntegrationTest {
                 .when()
                 .delete("/api/v1/hearits/{hearitId}/likes", hearit.getId())
                 .then()
-                .statusCode(HttpStatus.FORBIDDEN.value());
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
 
     }
 

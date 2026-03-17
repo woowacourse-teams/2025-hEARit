@@ -3,11 +3,11 @@ package com.onair.hearit.app.explore.application.scoreprocessor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.onair.hearit.app.common.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.ExploreScoreCalculator;
 import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
 import com.onair.hearit.app.explore.application.ScoreFactorWeightConfig;
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
-import com.onair.hearit.app.common.RandomNumberGenerator;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
@@ -43,7 +43,7 @@ import org.springframework.test.context.jdbc.Sql;
 @DataJpaTest
 @Sql("/dbclean.sql")
 @Import({DbHelper.class, TestJpaAuditingConfig.class, DataSourceConfig.class, RandomScoreFactor.class,
-        RecencyScoreFactor.class, BookmarkScoreFactor.class, ExploreScoreCalculator.class,
+        RecencyScoreFactor.class, BookmarkScoreFactor.class, ExploreScoreCalculator.class, ExploreHearitSelector.class,
         ExploreScoreCommandRepository.class, ExploreScoreInitializer.class, ScoreFactorWeightConfig.class,})
 @ActiveProfiles("integration-test")
 @AutoConfigureTestDatabase(replace = Replace.NONE)

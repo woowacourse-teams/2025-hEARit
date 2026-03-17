@@ -16,9 +16,12 @@ public class RandomScoreFactor implements ScoreFactor {
 
     private final RandomNumberGenerator randomNumberGenerator;
 
+    /*
+     * 실시간 랜덤성 반영으로 Explore Ranking 과정에서 제거
+     */
     @Override
     public boolean isSupported(UserType userType) {
-        return userType == UserType.GUEST || userType == UserType.MEMBER;
+        return false;
     }
 
     @Override
