@@ -16,7 +16,7 @@
 
 # 특정 기술/프레임워크 별칭
 스프링, spring, springboot, 스프링부트
-제트팩컴포즈, jetpackcompose, 컴포즈, compose
+제트팩컴포즈, jetpackcompose
 코틀린, kotlin
 리액트, react, reactjs
 엘라스틱서치, elasticsearch, es
@@ -25,7 +25,8 @@
 하이버네이트, hibernate
 
 # 개념적 동의어
-동시성, concurrency, 멀티스레드
+동시성, concurrency
+스레드, thread
 트랜잭션, transaction, acid
 객체지향, oop, objectoriented
 클린코드, cleancode, 리팩토링
