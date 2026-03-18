@@ -99,6 +99,27 @@ class ExploreScoreInitializerTest {
         );
     }
 
+    @Test
+    @DisplayName("refreshScores는 점수를 삽입하되 cursor_id를 갱신하지 않는다")
+    void refreshScoresWithoutCursorId() {
+        // given
+        UUID userUuid = UUID.randomUUID();
+        Category category = dbHelper.insertCategory(new Category("Test2", "#999999"));
+        Hearit hearit = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        // when
+        exploreScoreInitializer.refreshScores(userUuid, UserType.GUEST);
+
+        // then
+        List<ExploreScoreRow> rows = findExploreScores(userUuid);
+        assertAll(
+                () -> assertThat(rows).hasSize(1),
+                () -> assertThat(rows.get(0).hearitId()).isEqualTo(hearit.getId()),
+                () -> assertThat(rows.get(0).score()).isNotZero(),
+                () -> assertThat(rows.get(0).cursorId()).isNull()  // cursor_id는 갱신하지 않음
+        );
+    }
+
     private List<ExploreScoreRow> findExploreScores(UUID userUuid) {
         return jdbcTemplate.query(
                 """

@@ -1,7 +1,9 @@
 package com.onair.hearit.app.explore.application.scoreprocessor;
 
 import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
+import com.onair.hearit.app.explore.dto.ExploreCursor;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
 import com.onair.hearit.core.domain.Keyword;
@@ -9,6 +11,7 @@ import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
+import com.onair.hearit.core.infrastructure.projection.ExploredHearitScoreProjection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -58,10 +61,33 @@ public abstract class AbstractExploreScoreProcessor implements ExploreScoreProce
                 ));
     }
 
+    @Override
+    public void refreshScores(UserInfo userInfo) {
+        exploreScoreInitializer.refreshScores(
+                getUserUuid(userInfo), userInfo.getUserType());
+    }
+
+    @Override
+    public List<ExploredHearitResponseV3> getExploreHearits(UserInfo userInfo, ExploreCursor cursor, int size) {
+        UUID userUuid = getUserUuid(userInfo);
+        List<ExploredHearitScoreProjection> projections =
+                exploredHearitQueryRepository.findExploredHearitsByScoreCursor(
+                        userUuid, cursor.score(), cursor.hearitId(), Pageable.ofSize(size));
+        if (projections.isEmpty()) {
+            return List.of();
+        }
+        return convertToExploredHearitResponsesV3(projections, userInfo);
+    }
+
     protected abstract UUID getUserUuid(UserInfo userInfo);
 
     protected abstract List<ExploredHearitResponse> convertToExploredHearitResponses(
             List<ExploredHearitProjection> infos,
+            UserInfo userInfo
+    );
+
+    protected abstract List<ExploredHearitResponseV3> convertToExploredHearitResponsesV3(
+            List<ExploredHearitScoreProjection> projections,
             UserInfo userInfo
     );
 }

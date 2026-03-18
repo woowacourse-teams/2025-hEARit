@@ -3,7 +3,9 @@ package com.onair.hearit.app.explore.application;
 import com.onair.hearit.app.explore.application.scoreprocessor.ExploreScoreProcessor;
 import com.onair.hearit.app.explore.dto.CursorRequest;
 import com.onair.hearit.app.explore.dto.CursorResponseV2;
+import com.onair.hearit.app.explore.dto.ExploreCursor;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.core.domain.UserInfo;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ public class HearitExploreService {
 
     private final List<ExploreScoreProcessor> exploreScoreProcessors;
 
+    //TODO v3 api 로 전환 후 제거
     @Transactional
     public CursorResponseV2<ExploredHearitResponse> getExploredHearits(UserInfo userInfo,
                                                                        CursorRequest cursorRequest) {
@@ -24,6 +27,17 @@ public class HearitExploreService {
         List<ExploredHearitResponse> exploreHearitsResponses = exploreScoreProcessor.getExploreHearits(
                 userInfo, cursorRequest.cursorId(), cursorRequest.size());
         return CursorResponseV2.from(exploreHearitsResponses);
+    }
+
+    @Transactional
+    public CursorResponseV2<ExploredHearitResponseV3> getExploredHearitsV3(UserInfo userInfo, String cursor, int size) {
+        ExploreScoreProcessor processor = getExploreScoreProcessor(userInfo);
+        ExploreCursor exploreCursor = ExploreCursorCodec.decode(cursor);
+        if (exploreCursor.isInitial()) {
+            processor.refreshScores(userInfo);
+        }
+        List<ExploredHearitResponseV3> responses = processor.getExploreHearits(userInfo, exploreCursor, size);
+        return CursorResponseV2.from(responses);
     }
 
     private ExploreScoreProcessor getExploreScoreProcessor(UserInfo userInfo) {

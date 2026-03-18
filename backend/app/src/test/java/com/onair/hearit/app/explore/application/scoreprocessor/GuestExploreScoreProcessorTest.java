@@ -10,7 +10,9 @@ import com.onair.hearit.app.explore.application.ScoreFactorWeightConfig;
 import com.onair.hearit.app.explore.application.scorefactor.BookmarkScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RandomScoreFactor;
 import com.onair.hearit.app.explore.application.scorefactor.RecencyScoreFactor;
+import com.onair.hearit.app.explore.dto.ExploreCursor;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
@@ -70,15 +72,15 @@ class GuestExploreScoreProcessorTest {
                 hearitKeywordRepository);
     }
 
-    @DisplayName("게스트 사용자를 지원한다")
     @Test
+    @DisplayName("게스트 사용자를 지원한다")
     void isSupportedForGuest() {
         UserInfo guestInfo = new UserInfo(UUID.randomUUID(), UserType.GUEST);
         assertThat(guestExploreScoreProcessor.isSupported(guestInfo)).isTrue();
     }
 
-    @DisplayName("게스트가 아니면 지원하지 않는다")
     @Test
+    @DisplayName("게스트가 아니면 지원하지 않는다")
     void isSupportedForNonGuest() {
         UserInfo memberInfo = new UserInfo(UUID.randomUUID(), UserType.MEMBER);
         assertAll(
@@ -87,8 +89,8 @@ class GuestExploreScoreProcessorTest {
         );
     }
 
-    @DisplayName("탐색 점수를 조회하면 DB의 score 데이터를 DTO로 변환하여 반환한다")
     @Test
+    @DisplayName("탐색 점수를 조회하면 DB의 score 데이터를 DTO로 변환하여 반환한다")
     void getExploreHearitsReturnsResponses() {
         // given
         UUID uuid = UUID.randomUUID();
@@ -112,6 +114,32 @@ class GuestExploreScoreProcessorTest {
                 () -> assertThat(response1.cursorId()).isEqualTo(1L),
                 () -> assertThat(response2.id()).isEqualTo(hearit2.getId()),
                 () -> assertThat(response2.cursorId()).isEqualTo(2L)
+        );
+    }
+
+    @Test
+    @DisplayName("v3: 탐색 점수를 조회하면 score 기반 커서가 포함된 V3 DTO로 반환한다")
+    void getExploreHearitsReturnsResponsesV3() {
+        // given
+        UUID uuid = UUID.randomUUID();
+        UserInfo guestInfo = new UserInfo(uuid, UserType.GUEST);
+        Category category = dbHelper.insertCategory(new Category("V3Test", "#AABB00"));
+        Hearit hearit1 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+        Hearit hearit2 = dbHelper.insertHearit(TestFixture.createFixedHearitWith(category));
+
+        dbHelper.insertExploreScore(new ExploreScore(uuid, hearit1.getId(), 50.0, null));
+        dbHelper.insertExploreScore(new ExploreScore(uuid, hearit2.getId(), 40.0, null));
+
+        // when
+        List<ExploredHearitResponseV3> responses = guestExploreScoreProcessor.getExploreHearits(guestInfo, ExploreCursor.initial(), 3);
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).id()).isEqualTo(hearit1.getId()),
+                () -> assertThat(responses.get(0).cursor()).isNotNull(),
+                () -> assertThat(responses.get(1).id()).isEqualTo(hearit2.getId()),
+                () -> assertThat(responses.get(1).cursor()).isNotNull()
         );
     }
 }

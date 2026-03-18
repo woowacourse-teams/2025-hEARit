@@ -2,12 +2,14 @@ package com.onair.hearit.app.explore.application.scoreprocessor;
 
 import com.onair.hearit.app.explore.application.ExploreScoreInitializer;
 import com.onair.hearit.app.explore.dto.ExploredHearitResponse;
+import com.onair.hearit.app.explore.dto.ExploredHearitResponseV3;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.UserInfo;
 import com.onair.hearit.core.infrastructure.jpa.ExploredHearitQueryRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.projection.ExploredHearitProjection;
+import com.onair.hearit.core.infrastructure.projection.ExploredHearitScoreProjection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -45,6 +47,23 @@ public class GuestExploreScoreProcessor extends AbstractExploreScoreProcessor {
                 .map(info -> {
                     List<Keyword> keywords = keywordsMap.getOrDefault(info.getHearit(), List.of());
                     return ExploredHearitResponse.from(info.getHearit(), keywords, info.getCursorId());
+                })
+                .toList();
+    }
+
+    @Override
+    protected List<ExploredHearitResponseV3> convertToExploredHearitResponsesV3(
+            List<ExploredHearitScoreProjection> projections,
+            UserInfo userInfo) {
+        List<Hearit> hearits = projections.stream()
+                .map(ExploredHearitScoreProjection::getHearit)
+                .toList();
+        Map<Hearit, List<Keyword>> keywordsMap = prepareKeywordsMap(hearits);
+
+        return projections.stream()
+                .map(proj -> {
+                    List<Keyword> keywords = keywordsMap.getOrDefault(proj.getHearit(), List.of());
+                    return ExploredHearitResponseV3.from(proj.getHearit(), keywords, proj.getScore());
                 })
                 .toList();
     }
