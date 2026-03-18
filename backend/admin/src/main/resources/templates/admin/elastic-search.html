@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Elastic Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css">
+    <style>
+        html, body {
+            font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto,
+            'Helvetica Neue', Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji',
+            'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+
+        .page-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .page-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .page-card .card-header {
+            background: #f8f9fa;
+            color: #212529;
+            border-bottom: none;
+            padding: 0.9rem 1rem;
+        }
+
+        .result-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 110px;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 1rem 0;
+        }
+    </style>
+
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+<div th:insert="~{admin/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="mb-0">Elastic Search</h1>
+        <span class="text-muted">데이터 마이그레이션</span>
+    </div>
+
+    <div class="card page-card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div>
+                <i class="bi bi-database-check me-2"></i>
+                <strong>Data Migration</strong>
+                <div class="text-muted small mt-1">DB → Elasticsearch 인덱싱</div>
+            </div>
+            <button class="btn btn-dark" id="migrate-btn" onclick="runMigration()">
+                <i class="bi bi-arrow-repeat me-1"></i>
+                Data Migration 호출
+            </button>
+        </div>
+
+        <div class="card-body">
+            <div class="loading-spinner" id="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">로딩중...</span>
+                </div>
+                <div class="text-muted mt-2">마이그레이션 실행 중...</div>
+            </div>
+
+            <div id="result-alert" class="alert d-none mb-3" role="alert"></div>
+
+            <h6 class="text-muted mb-2"><i class="bi bi-terminal me-1"></i>응답</h6>
+            <div class="result-box" id="result-box">버튼을 눌러 마이그레이션을 실행하세요.</div>
+
+            <div class="text-muted small mt-3">
+                <i class="bi bi-info-circle me-1"></i>
+                성공 예시: <code>성공 : nn건 마이그레이션 성공</code> / 실패 예시: <code>실패 : ~~한 이유로 실패하였습니다.</code>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const MIGRATION_API_URL = '/api/v1/admin/elasticsearch/migration';
+
+    function setLoading(isLoading) {
+        const spinner = document.getElementById('loading-spinner');
+        const btn = document.getElementById('migrate-btn');
+        spinner.style.display = isLoading ? 'block' : 'none';
+        btn.disabled = isLoading;
+    }
+
+    function showAlert(type, message) {
+        const alertEl = document.getElementById('result-alert');
+        alertEl.className = `alert alert-${type} mb-3`;
+        alertEl.textContent = message;
+        alertEl.classList.remove('d-none');
+    }
+
+    function setResultText(text) {
+        document.getElementById('result-box').textContent = text;
+    }
+
+    async function runMigration() {
+        setLoading(true);
+        document.getElementById('result-alert').classList.add('d-none');
+        setResultText('요청 중...');
+
+        try {
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+            const headers = {'Content-Type': 'application/json'};
+            if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+
+            const response = await fetch(MIGRATION_API_URL, {
+                method: 'POST',
+                headers
+            });
+
+            const contentType = response.headers.get('content-type') || '';
+            const body = contentType.includes('application/json')
+                ? await response.json()
+                : await response.text();
+
+            if (response.ok) {
+                // 기대하는 응답 형태 예시:
+                // 1) text: "성공 : 12건 마이그레이션 성공"
+                // 2) json: { "count": 12 } 또는 { "message": "..." }
+                const message = (typeof body === 'string')
+                    ? body
+                    : (body.message ?? (body.count != null ? `성공 : ${body.count}건 마이그레이션 성공` : '성공'));
+
+                showAlert('success', '요청 성공');
+                setResultText(message);
+            } else {
+                const reason = (typeof body === 'string')
+                    ? body
+                    : (body.message ?? body.detail ?? JSON.stringify(body));
+
+                showAlert('danger', '요청 실패');
+                setResultText(`실패 : ${reason}`);
+            }
+        } catch (e) {
+            console.error(e);
+            showAlert('danger', '요청 실패');
+            setResultText(`실패 : ${e?.message || '알 수 없는 오류로 실패하였습니다.'}`);
+        } finally {
+            setLoading(false);
+        }
+    }
+</script>
+</body>
+</html>

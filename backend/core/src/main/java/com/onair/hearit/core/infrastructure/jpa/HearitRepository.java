@@ -132,4 +132,7 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
                 WHERE id = :hearitId
             """, nativeQuery = true)
     int increaseViewCount(@Param("hearitId") Long hearitId);
+
+    @Query("SELECT h.id FROM Hearit h")
+    List<Long> findAllIds();
 }

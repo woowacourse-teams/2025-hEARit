@@ -43,8 +43,8 @@ public class AdminViewController {
         return "admin/recommend-hearit";
     }
 
-    @GetMapping("/trace")
+    @GetMapping("/elastic-search")
     public String tracePage() {
-        return "admin/trace";
+        return "admin/elastic-search";
     }
 }

@@ -13,6 +13,7 @@ import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.fixture.TestFixture;
+import com.onair.hearit.core.infrastructure.elasticsearch.repository.HearitElasticSearchRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -31,6 +32,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -62,6 +64,9 @@ class CircuitBreakerRedisFailureIntegrationTest {
 
     @Autowired
     RedisTemplate<String, String> redisTemplate;
+
+    @MockitoBean
+    HearitElasticSearchRepository hearitElasticSearchRepository;
 
     @Autowired
     RedissonClient redissonClient;

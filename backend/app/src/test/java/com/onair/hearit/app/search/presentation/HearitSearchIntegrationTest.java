@@ -1,12 +1,14 @@
-package com.onair.hearit.app.hearit.presentation;
+package com.onair.hearit.app.search.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.IntegrationTest;
-import com.onair.hearit.app.hearit.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.HearitSearchResponse;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -19,7 +21,9 @@ import io.restassured.common.mapper.TypeRef;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 
 public class HearitSearchIntegrationTest extends IntegrationTest {
@@ -28,7 +32,7 @@ public class HearitSearchIntegrationTest extends IntegrationTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Test
-    @DisplayName("히어릿 검색 요청 시 200 OK 및 제목 또는 키워드에 검색어가 포함된 히어릿을 최신순으로 반환한다.")
+    @DisplayName("v1 히어릿 검색 요청 시 200 OK 및 제목 또는 키워드에 검색어가 포함된 히어릿을 최신순으로 반환한다.")
     void readHearitsByCategoryWithPagination() {
         // given
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
@@ -69,7 +73,7 @@ public class HearitSearchIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")
+    @DisplayName("v1 검색 파라미터가 유효하지 않을 때 400 에러를 반환한다. ")
     void readHearitsByCategoryWithInvalidParams() {
         Member member = dbHelper.insertMember(TestFixture.createFixedMember());
         String token = generateToken(member);
@@ -91,6 +95,95 @@ public class HearitSearchIntegrationTest extends IntegrationTest {
                 .queryParam("size", -1)
                 .when()
                 .get("/api/v1/hearits/search")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @DisplayName("v2 히어릿 검색 요청 시 200 OK 및 제목 또는 키워드에 검색어가 포함된 히어릿을 반환한다.")
+    void readHearitsByCategoryWithPaginationV2() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
+        Keyword keyword = dbHelper.insertKeyword(new Keyword("Spring"));
+        Keyword keyword1 = dbHelper.insertKeyword(new Keyword("noKeyword"));
+
+        Hearit hearit = saveHearitWithTitleAndKeyword("examplespring1", keyword);
+        Hearit hearit1 = saveHearitWithTitleAndKeyword("SPRING1example", keyword1);
+        Hearit hearit2 = saveHearitWithTitleAndKeyword("notitle", keyword);
+        saveHearitWithTitleAndKeyword("notitle", keyword1);
+
+        Mockito.when(hearitElasticSearchRepository.search(anyString(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(hearit.getId(), hearit1.getId(), hearit2.getId())));
+
+        // when
+        PagedResponse<HearitSearchResponse> pagedResponse = RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .queryParam("searchTerm", "spring")
+                .queryParam("sort", "recommend")
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v2/hearits/search")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(new TypeRef<>() {
+                });
+
+        List<HearitSearchResponse> responses = pagedResponse.content();
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(3),
+                () -> assertThat(responses).extracting(HearitSearchResponse::id)
+                        .containsExactlyInAnyOrder(
+                                hearit.getId(),
+                                hearit1.getId(),
+                                hearit2.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("v2 검색 파라미터가 유효하지 않을 때 400 에러를 반환한다.")
+    void readHearitsByCategoryWithInvalidParamsV2() {
+        // given
+        Member member = dbHelper.insertMember(TestFixture.createFixedMember());
+        String token = generateToken(member);
+
+        // when & then (invalid sort)
+        RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .queryParam("searchTerm", "spring")
+                .queryParam("sort", "invalid")
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v2/hearits/search")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // when & then (invalid page)
+        RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .queryParam("searchTerm", "spring")
+                .queryParam("sort", "recommend")
+                .queryParam("page", -1)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/v2/hearits/search")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // when & then (invalid size)
+        RestAssured.given(this.spec)
+                .header("Authorization", "Bearer " + token)
+                .queryParam("searchTerm", "spring")
+                .queryParam("sort", "recommend")
+                .queryParam("page", 0)
+                .queryParam("size", -1)
+                .when()
+                .get("/api/v2/hearits/search")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }

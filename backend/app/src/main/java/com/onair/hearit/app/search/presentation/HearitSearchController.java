@@ -1,10 +1,11 @@
-package com.onair.hearit.app.hearit.presentation;
+package com.onair.hearit.app.search.presentation;
 
 import com.onair.hearit.app.auth.domain.RequestUser;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
-import com.onair.hearit.app.hearit.application.HearitSearchService;
-import com.onair.hearit.app.hearit.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.application.HearitSearchService;
+import com.onair.hearit.app.search.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.SearchSortRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,6 +28,19 @@ public class HearitSearchController {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<HearitSearchResponse> response =
                 hearitSearchService.search(searchTerm, pagingRequest, requestUser.getUserInfo());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/v2/hearits/search")
+    public ResponseEntity<PagedResponse<HearitSearchResponse>> readSearchedHearitsV2(
+            @RequestParam(name = "searchTerm") String searchTerm,
+            @RequestParam(name = "sort", defaultValue = "recommend") SearchSortRequest sortRequest,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @AuthenticationPrincipal RequestUser requestUser) {
+        PagingRequest pagingRequest = new PagingRequest(page, size);
+        PagedResponse<HearitSearchResponse> response =
+                hearitSearchService.searchV2(searchTerm, sortRequest, pagingRequest, requestUser.getUserInfo());
         return ResponseEntity.ok(response);
     }
 }

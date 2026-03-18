@@ -29,6 +29,7 @@ services:
     volumes:
       - mysql-test-data:/var/lib/mysql
     restart: unless-stopped
+
   hearit-redis:
     image: redis:alpine
     container_name: hearit-redis
@@ -44,7 +45,58 @@ services:
       - redis-data:/data
     restart: always
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.10
+    container_name: es-project
+    environment:
+      - node.name=es-node01
+      - cluster.name=es-docker-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=true
+      - xpack.security.enrollment.enabled=true
+      - xpack.security.http.ssl.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+      - ./elasticsearch/analysis:/usr/share/elasticsearch/config/analysis
+    command: >
+      bash -c "
+        if ! bin/elasticsearch-plugin list | grep -q analysis-nori; then
+          bin/elasticsearch-plugin install analysis-nori;
+        fi &&
+        exec /usr/local/bin/docker-entrypoint.sh
+      "
+    ports:
+      - "9200:9200"
+    networks:
+      - hearit-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.10
+    container_name: kibana-project
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+    networks:
+      - hearit-network
+    depends_on:
+      - elasticsearch
+
+networks:
+  hearit-network:
+    driver: bridge
+
 volumes:
   mysql-prod-data:
   mysql-test-data:
   redis-data:
+  es_data:
+    driver: local
