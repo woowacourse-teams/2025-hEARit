@@ -1,6 +1,6 @@
-package com.onair.hearit.domain.repository
+package com.onair.hearit.data.datasource.local
 
-interface ExploreDataStoreRepository {
+interface ExploreLocalDataStore {
     suspend fun getExploreCount(): Result<Int>
 
     suspend fun updateExploreCount(count: Int): Result<Boolean>

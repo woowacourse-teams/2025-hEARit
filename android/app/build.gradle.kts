@@ -137,6 +137,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -246,4 +249,6 @@ dependencies {
 
     // swipe Refresh Layout
     implementation(libs.androidx.swiperefreshlayout)
+
+    implementation(libs.lottie.compose)
 }

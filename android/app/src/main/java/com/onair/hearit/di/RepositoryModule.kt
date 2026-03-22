@@ -4,7 +4,7 @@ import com.onair.hearit.data.repository.AdvertisementRepositoryImpl
 import com.onair.hearit.data.repository.AuthRepositoryImpl
 import com.onair.hearit.data.repository.BookmarkRepositoryImpl
 import com.onair.hearit.data.repository.CategoryRepositoryImpl
-import com.onair.hearit.data.repository.ExploreDataStoreRepositoryImpl
+import com.onair.hearit.data.repository.ExploreRepositoryImpl
 import com.onair.hearit.data.repository.HearitRepositoryImpl
 import com.onair.hearit.data.repository.LikeRepositoryImpl
 import com.onair.hearit.data.repository.MediaFileRepositoryImpl
@@ -18,7 +18,7 @@ import com.onair.hearit.domain.repository.AdvertisementRepository
 import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.CategoryRepository
-import com.onair.hearit.domain.repository.ExploreDataStoreRepository
+import com.onair.hearit.domain.repository.ExploreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.LikeRepository
 import com.onair.hearit.domain.repository.MediaFileRepository
@@ -55,7 +55,7 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindExploreDataStoreRepository(exploreDataStoreRepositoryImpl: ExploreDataStoreRepositoryImpl): ExploreDataStoreRepository
+    abstract fun bindExploreRepository(exploreRepositoryImpl: ExploreRepositoryImpl): ExploreRepository
 
     @Binds
     @Singleton

@@ -3,6 +3,8 @@ package com.onair.hearit.di
 import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.local.AuthLocalDataSource
 import com.onair.hearit.data.datasource.local.AuthLocalDataSourceImpl
+import com.onair.hearit.data.datasource.local.ExploreLocalDataStore
+import com.onair.hearit.data.datasource.local.ExploreLocalDataStoreImpl
 import com.onair.hearit.data.datasource.local.HearitLocalDataSource
 import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
 import com.onair.hearit.data.datasource.local.NotificationLocalDataSource
@@ -94,6 +96,10 @@ abstract class DataSourceModule {
     @Binds
     @Singleton
     abstract fun bindNotificationLocalDataSource(impl: NotificationLocalDataSourceImpl): NotificationLocalDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindExploreLocalDataSource(impl: ExploreLocalDataStoreImpl): ExploreLocalDataStore
 
     companion object {
         @Provides

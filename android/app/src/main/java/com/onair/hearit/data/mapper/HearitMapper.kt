@@ -121,6 +121,7 @@ fun HearitResponse.toDomain(): Hearit =
         audioUrl = null,
         script = null,
         like = this.like.toDomain(),
+        viewCount = this.viewCount,
     )
 
 fun UserInfoResponse.toDomain(): UserInfo =

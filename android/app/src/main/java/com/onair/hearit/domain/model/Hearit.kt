@@ -15,4 +15,5 @@ data class Hearit(
     val category: Category,
     val keywords: List<Keyword>,
     val like: Like,
+    val viewCount: Int,
 )
