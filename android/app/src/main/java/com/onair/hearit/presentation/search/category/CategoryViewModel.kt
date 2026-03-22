@@ -40,38 +40,35 @@ class CategoryViewModel @Inject constructor(
         )
     val categoryUiState: StateFlow<CategoryUiState> = _categoryUiState.asStateFlow()
 
-    private val _snackbarMessage =
-        MutableSharedFlow<Int>(
-            extraBufferCapacity = 1,
-        )
+    private val _snackbarMessage = MutableSharedFlow<Int>(extraBufferCapacity = 1)
     val snackbarMessage: SharedFlow<Int> = _snackbarMessage.asSharedFlow()
 
-    init {
-        fetchCategoryHearits()
-    }
-
     fun fetchCategoryHearits() {
-        val currentState = _categoryUiState.value
-        val category = currentState.category ?: return
-        if (currentState.isLoading || currentState.isLastPage) return
+        val state = _categoryUiState.value
+        val paging = state.pagingState
+
+        if (paging.isLoading) return
+        if (!paging.canLoadMore()) return
 
         viewModelScope.launch {
-            _categoryUiState.update { it.copy(isLoading = true) }
+            _categoryUiState.update { it.copy(pagingState = it.pagingState.startLoading()) }
 
             hearitRepository
-                .getCategoryHearits(category.id, currentState.currentPage)
+                .getCategoryHearits(state.category.id, state.pagingState.currentPage)
                 .onSuccess { response ->
                     _categoryUiState.update { state ->
                         state.copy(
                             hearits = (state.hearits + response.items).toImmutableList(),
-                            isLoading = false,
-                            isLastPage = response.paging.isLast,
-                            currentPage = response.paging.page + 1,
+                            pagingState =
+                                state.pagingState.finishLoading(
+                                    nextPage = response.paging.page + 1,
+                                    isLast = response.paging.isLast,
+                                ),
                         )
                     }
                 }.onFailure {
-                    _categoryUiState.update { it.copy(isLoading = false) }
-                    _snackbarMessage.emit(R.string.category_toast_searched_hearits_load_fail)
+                    _categoryUiState.update { it.copy(pagingState = it.pagingState.failLoading()) }
+                    _snackbarMessage.tryEmit(R.string.category_toast_searched_hearits_load_fail)
                 }
         }
     }

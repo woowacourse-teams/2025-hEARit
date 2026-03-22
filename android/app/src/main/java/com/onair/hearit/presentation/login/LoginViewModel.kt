@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.data.AuthEventManager
-import com.onair.hearit.domain.usecase.auth.KakaoLoginUseCase
+import com.onair.hearit.domain.repository.AuthRepository
 import com.onair.hearit.domain.usecase.auth.SaveTokenUseCase
 import com.onair.hearit.presentation.SingleLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val kakaoLoginUseCase: KakaoLoginUseCase,
+    private val authRepository: AuthRepository,
     private val saveTokenUseCase: SaveTokenUseCase,
 ) : ViewModel() {
     private val _loginState = MutableLiveData<Boolean>()
@@ -27,7 +27,8 @@ class LoginViewModel @Inject constructor(
 
     fun kakaoLogin(accessToken: String) {
         viewModelScope.launch {
-            kakaoLoginUseCase(accessToken)
+            authRepository
+                .kakaoLogin(accessToken)
                 .onSuccess { appToken ->
                     saveToken(appToken.accessToken, appToken.refreshToken)
                 }.onFailure { throwable ->

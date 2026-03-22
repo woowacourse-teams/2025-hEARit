@@ -31,7 +31,5 @@ class WithdrawUseCase @Inject constructor(
 
             authRepository.clearAuthData().getOrThrow()
             userRepository.clearUserData().getOrThrow()
-
-            Unit
         }
 }

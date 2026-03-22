@@ -111,9 +111,10 @@ fun ExploreShortsItem(
 
             Text(
                 text = item.title,
-                style = HearitTypoGraphy.titleMedium,
+                modifier = Modifier.padding(horizontal = 16.dp),
                 color = Color.White,
                 textAlign = TextAlign.Center,
+                style = HearitTypoGraphy.titleMedium,
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
@@ -128,6 +129,7 @@ fun ExploreShortsItem(
             ScriptContent(
                 scripts = scripts,
                 currentPosition = currentPosition,
+                modifier = Modifier.weight(1f),
             )
 
             Row(
@@ -207,7 +209,7 @@ private fun PreviewExploreShortsItem() {
         item =
             ExploreHearit(
                 id = 1,
-                title = "Activity를 쪼개며 배운 구조 설계",
+                title = "Activity를 쪼개며 배운 구조 설계sakdlsakjdkajlkdasa",
                 categoryColorCode = "#000000",
                 isBookmarked = false,
                 bookmarkId = null,

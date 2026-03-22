@@ -16,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -43,8 +42,8 @@ import com.onair.hearit.presentation.detail.PlayerDetailActivity
 import com.onair.hearit.presentation.explore.ExploreFragment
 import com.onair.hearit.presentation.home.HomeFragment
 import com.onair.hearit.presentation.library.LibraryFragment
+import com.onair.hearit.presentation.logNavigationEvent
 import com.onair.hearit.presentation.login.LoginActivity
-import com.onair.hearit.presentation.navigate
 import com.onair.hearit.presentation.search.SearchFragment
 import com.onair.hearit.presentation.splash.SplashActivity
 import com.onair.hearit.presentation.toDetailResult
@@ -129,7 +128,7 @@ class MainActivity :
                 if (result.resultCode == RESULT_OK) {
                     val detailResult =
                         result.data.toDetailResult() ?: return@registerForActivityResult
-                    detailResult.navigate(this, analyticsLogger)
+                    detailResult.logNavigationEvent(analyticsLogger)
                 }
                 mainViewModel.notifyCategoryUpdated()
                 mainViewModel.hearitUpdated.value = Unit
@@ -156,7 +155,6 @@ class MainActivity :
 
     private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, 0, 0, 0)
             insets
         }

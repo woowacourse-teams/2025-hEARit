@@ -105,7 +105,7 @@ fun SearchDetailRoute(
                         hearits = uiState.searchedHearits,
                         onLoadNext = viewModel::loadNextPage,
                         onHearitClick = onHearitClick,
-                        isLoading = uiState.isLoading,
+                        isLoading = uiState.pagingState.isLoading,
                     )
                 }
             }

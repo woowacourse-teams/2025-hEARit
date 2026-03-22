@@ -17,10 +17,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +32,8 @@ import com.onair.hearit.R
 import com.onair.hearit.domain.model.Category
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.presentation.search.component.SearchedHearitItem
+import com.onair.hearit.presentation.HearitSnackbarHost
+import com.onair.hearit.presentation.search.component.HearitItem
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
@@ -40,6 +41,8 @@ import com.onair.hearit.presentation.util.rememberSafeColor
 import com.onair.hearit.presentation.util.rememberTopFadeGradient
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+
+private val BOTTOM_PADDING = 60.dp
 
 @Composable
 fun CategoryScreen(
@@ -49,7 +52,7 @@ fun CategoryScreen(
     onBack: () -> Unit,
     onHearitClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    snackbarHostState: SnackbarHostState = SnackbarHostState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     fadeStop: Float = 0.2f,
 ) {
     val safeColor =
@@ -64,10 +67,16 @@ fun CategoryScreen(
         )
 
     Scaffold(
+        topBar = {
+            CategoryTopBar(
+                categoryName = categoryName,
+                onBack = onBack,
+            )
+        },
         snackbarHost = {
-            SnackbarHost(
+            HearitSnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = 48.dp),
+                modifier = Modifier.padding(bottom = BOTTOM_PADDING),
             )
         },
         containerColor = Color.Transparent,
@@ -82,11 +91,6 @@ fun CategoryScreen(
         ) {
             val gradientEndPadding = maxHeight * fadeStop
 
-            CategoryTopBar(
-                categoryName = categoryName,
-                onBack = onBack,
-            )
-
             CategoryHearitList(
                 hearits = hearits,
                 color = safeColor,
@@ -94,7 +98,7 @@ fun CategoryScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(top = gradientEndPadding, bottom = 60.dp),
+                        .padding(top = gradientEndPadding, bottom = BOTTOM_PADDING),
             )
         }
     }
@@ -149,9 +153,12 @@ private fun CategoryHearitList(
             items = hearits,
             key = { it.id },
         ) { item ->
-            SearchedHearitItem(
-                item = item,
-                color = color,
+            HearitItem(
+                title = item.title,
+                keywords = item.keywords,
+                playTime = item.playTime,
+                lastPlayTime = item.lastPlayTime,
+                progressColor = color,
                 onClick = { onHearitClick(item.id) },
             )
         }
