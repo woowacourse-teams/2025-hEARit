@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
+import '../../core/network/api_client.dart';
 import 'auth_repository.dart';
+import 'models/auth_event.dart';
+import 'models/auth_tokens.dart';
 import 'models/kakao_user.dart';
 import 'services/auth_storage_service.dart';
 
@@ -16,11 +21,26 @@ class AuthViewModel extends ChangeNotifier {
   AuthViewModel({
     AuthRepository? repository,
     AuthStorageService? storageService,
-  }) : _repository = repository ?? AuthRepository(),
-       _storageService = storageService ?? AuthStorageService();
+  }) : _storageService = storageService ?? AuthStorageService() {
+    _authEventController = StreamController<AuthEvent>.broadcast();
+    _repository = repository ??
+        AuthRepository(
+          apiClient: ApiClient(
+            storageService: _storageService,
+            authEventController: _authEventController,
+          ),
+        );
+    _authEventSubscription = _authEventController.stream.listen((event) {
+      if (event == AuthEvent.tokenRefreshFailed) {
+        clearAuthStatus();
+      }
+    });
+  }
 
-  final AuthRepository _repository;
+  late final AuthRepository _repository;
   final AuthStorageService _storageService;
+  late final StreamController<AuthEvent> _authEventController;
+  late final StreamSubscription<AuthEvent> _authEventSubscription;
 
   AuthStatus _status = AuthStatus.initial;
   bool _isLoading = false;
@@ -59,9 +79,28 @@ class AuthViewModel extends ChangeNotifier {
           debugPrint('사용자 정보 조회 실패: $e');
         }
       } else {
-        // 토큰 만료 등 -> 로그인 필요
-        await _storageService.clearTokens();
-        _status = AuthStatus.unauthenticated;
+        // accessToken 만료 -> refreshToken으로 갱신 시도
+        try {
+          final newAccessToken =
+              await _repository.refreshAccessToken(tokens.refreshToken);
+          await _storageService.saveTokens(
+            AuthTokens(
+              accessToken: newAccessToken,
+              refreshToken: tokens.refreshToken,
+            ),
+          );
+          _status = AuthStatus.authenticated;
+          try {
+            _user = await _repository.getKakaoUserInfo();
+          } catch (e) {
+            debugPrint('사용자 정보 조회 실패: $e');
+          }
+        } catch (e) {
+          // refreshToken도 만료 -> 로그아웃
+          debugPrint('토큰 갱신 실패, 로그아웃 처리: $e');
+          await _storageService.clearTokens();
+          _status = AuthStatus.unauthenticated;
+        }
       }
     } catch (error) {
       debugPrint('인증 체크 오류: $error');
@@ -143,5 +182,12 @@ class AuthViewModel extends ChangeNotifier {
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authEventSubscription.cancel();
+    _authEventController.close();
+    super.dispose();
   }
 }

@@ -1,0 +1,3 @@
+enum AuthEvent {
+  tokenRefreshFailed,
+}
