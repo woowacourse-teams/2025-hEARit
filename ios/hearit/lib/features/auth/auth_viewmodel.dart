@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../core/network/api_client.dart';
 import 'auth_repository.dart';
@@ -24,6 +23,8 @@ class AuthViewModel extends ChangeNotifier {
     AuthStorageService? storageService,
     StreamController<AuthEvent>? authEventController,
   }) : _storageService = storageService ?? AuthStorageService() {
+    // 외부에서 주입된 controller는 소유하지 않음 → dispose 시 close 하지 않음
+    _ownsEventController = authEventController == null;
     _authEventController =
         authEventController ?? StreamController<AuthEvent>.broadcast();
     _repository = repository ??
@@ -44,6 +45,7 @@ class AuthViewModel extends ChangeNotifier {
   final AuthStorageService _storageService;
   late final StreamController<AuthEvent> _authEventController;
   late final StreamSubscription<AuthEvent> _authEventSubscription;
+  late final bool _ownsEventController;
 
   AuthStatus _status = AuthStatus.initial;
   bool _isLoading = false;
@@ -190,7 +192,8 @@ class AuthViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _authEventSubscription.cancel();
-    _authEventController.close();
+    // 외부에서 주입된 controller는 소유자(main.dart)가 관리하므로 close 하지 않음
+    if (_ownsEventController) _authEventController.close();
     super.dispose();
   }
 }

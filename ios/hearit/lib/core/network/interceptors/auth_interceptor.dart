@@ -26,7 +26,13 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode != 401 || _isRefreshing) {
+    // refresh 엔드포인트 자체가 401을 반환할 경우 재진입 방지
+    const refreshPath = '/api/v1/auth/token/refresh';
+    final requestPath = err.requestOptions.path;
+    final isRefreshRequest =
+        requestPath == refreshPath || requestPath.endsWith(refreshPath);
+
+    if (err.response?.statusCode != 401 || _isRefreshing || isRefreshRequest) {
       return handler.next(err);
     }
 

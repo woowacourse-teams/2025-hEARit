@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 import '../../core/network/api_client.dart';
+import '../../core/network/api_exception.dart';
 import 'models/auth_tokens.dart';
 import 'models/kakao_user.dart';
 
@@ -79,16 +80,21 @@ class AuthRepository {
   }
 
   /// 백엔드 인증 상태 체크 (/api/v1/auth/check)
+  /// - 200 OK → true
+  /// - 401 → false (토큰 만료, refresh 시도 대상)
+  /// - 네트워크 오류 / 타임아웃 / 5xx → rethrow (refresh 시도 없이 처리)
   Future<bool> checkAuthStatus(String accessToken) async {
     try {
       await _apiClient.get<void>(
         '/api/v1/auth/check',
         headers: {'Authorization': 'Bearer $accessToken'},
       );
-      return true; // 200 OK
-    } catch (error) {
-      debugPrint('인증 체크 실패: $error');
-      return false; // 401 또는 기타 에러
+      return true;
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        return false;
+      }
+      rethrow;
     }
   }
 
@@ -99,7 +105,11 @@ class AuthRepository {
       body: {'refreshToken': refreshToken},
       parser: (data) => data as Map<String, dynamic>,
     );
-    return response['accessToken'] as String;
+    final accessToken = response['accessToken'];
+    if (accessToken is! String || accessToken.isEmpty) {
+      throw ApiException.unexpected('응답에 유효한 accessToken이 없습니다.');
+    }
+    return accessToken;
   }
 
   /// 카카오 로그아웃
