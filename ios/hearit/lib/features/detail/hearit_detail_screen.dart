@@ -6,6 +6,8 @@ import '../../core/analytics/analytics_param_keys.dart';
 import '../../core/analytics/analytics_provider.dart';
 
 import '../../core/audio/hearit_player_controller.dart';
+import '../../core/network/api_client.dart';
+import 'detail_repository.dart';
 import '../../core/presentation/widgets/script_view.dart';
 import '../../core/theme/app_colors.dart';
 import 'hearit_detail.dart';
@@ -42,7 +44,8 @@ class _HearitDetailScreenState extends State<HearitDetailScreen> {
     _viewModel = HearitDetailViewModel(
       detail: widget.detail,
       playerController: context.read<HearitPlayerController>(),
-      fromPlaylist: widget.fromPlaylist, // 재생목록 진입 여부 전달
+      fromPlaylist: widget.fromPlaylist,
+      repository: DetailRepository(apiClient: context.read<ApiClient>()),
     )..addListener(_onViewModelUpdated);
     _viewModel.loadAll();
     WidgetsBinding.instance.addPostFrameCallback((_) => _logScreenView());

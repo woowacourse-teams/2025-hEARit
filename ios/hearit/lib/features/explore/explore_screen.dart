@@ -9,6 +9,8 @@ import '../../core/analytics/analytics_param_keys.dart';
 import '../../core/analytics/analytics_provider.dart';
 
 import '../../core/audio/hearit_player_controller.dart';
+import '../../core/network/api_client.dart';
+import 'explore_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../detail/hearit_detail.dart';
 import '../detail/hearit_detail_screen.dart';
@@ -40,6 +42,7 @@ class ExploreScreenState extends State<ExploreScreen> {
     _titleNotifier = ValueNotifier<String?>(null);
     _viewModel = ExploreViewModel(
       controller: context.read<HearitPlayerController>(),
+      repository: ExploreRepository(apiClient: context.read<ApiClient>()),
     )..addListener(_onViewModelUpdated);
     _viewModel.setOnCompleted(_handleCompleted);
     _viewModel.loadInitial();

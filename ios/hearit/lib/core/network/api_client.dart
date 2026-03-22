@@ -1,10 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../features/auth/models/auth_event.dart';
+import '../../features/auth/services/auth_storage_service.dart';
 import 'api_config.dart';
 import 'api_exception.dart';
+import 'interceptors/auth_interceptor.dart';
 import 'interceptors/debug_logging_interceptor.dart';
 import 'interceptors/device_uuid_interceptor.dart';
 
@@ -15,6 +19,8 @@ class ApiClient {
     Duration sendTimeout = const Duration(seconds: 10),
     Duration receiveTimeout = const Duration(seconds: 15),
     Dio? dio,
+    AuthStorageService? storageService,
+    StreamController<AuthEvent>? authEventController,
   }) : _config = config,
        _dio =
            dio ??
@@ -28,6 +34,14 @@ class ApiClient {
                responseType: ResponseType.json,
              ),
            ) {
+    if (storageService != null && authEventController != null) {
+      _dio.interceptors.add(
+        AuthInterceptor(
+          storageService: storageService,
+          eventController: authEventController,
+        ),
+      );
+    }
     _dio.interceptors.add(DeviceUUIDInterceptor());
     if (!kReleaseMode) {
       _dio.interceptors.add(DebugLoggingInterceptor());

@@ -1,2 +1,4 @@
 # AI Agent Configuration
 AGENTS.md
+.gstack/
+.claude/settings.local.json
