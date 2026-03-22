@@ -40,16 +40,14 @@
         <activity
             android:name=".presentation.login.LoginActivity"
             android:exported="false" />
-
         <activity
             android:name=".presentation.splash.SplashActivity"
             android:exported="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -61,16 +59,13 @@
                     android:scheme="kakao${kakaoNativeKey}" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".presentation.detail.PlayerDetailActivity"
             android:exported="false" />
-
         <activity
             android:name=".presentation.main.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
-
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
@@ -86,4 +81,5 @@
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

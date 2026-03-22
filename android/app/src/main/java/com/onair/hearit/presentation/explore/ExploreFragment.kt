@@ -1,82 +1,52 @@
 package com.onair.hearit.presentation.explore
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
 import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.doOnNextLayout
-import androidx.core.view.isNotEmpty
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.onair.hearit.analytics.AnalyticsEventNames
 import com.onair.hearit.analytics.AnalyticsLogger
-import com.onair.hearit.analytics.AnalyticsParamKeys
-import com.onair.hearit.analytics.AnalyticsParamKeys.SCREEN_NAME_EXPLORE
-import com.onair.hearit.databinding.FragmentExploreBinding
-import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.presentation.DetailResult
 import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.login.LoginActivity
 import com.onair.hearit.presentation.main.MainActivity
 import com.onair.hearit.presentation.navigate
-import com.onair.hearit.presentation.showToast
 import com.onair.hearit.presentation.toDetailResult
-import com.onair.hearit.service.PlaybackService
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ExploreFragment :
-    Fragment(),
-    ShortsClickListener {
-    @Suppress("ktlint:standard:backing-property-naming")
-    private var _binding: FragmentExploreBinding? = null
-    private val binding get() = _binding!!
-
-    private val isViewValid: Boolean
-        get() = _binding != null
-
-    private val viewModel: ExploreViewModel by activityViewModels()
+class ExploreFragment : Fragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View =
+        ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                ExploreRoute(
+                    onBackClick = {
+                        parentFragmentManager.popBackStack()
+                    },
+                    onNavigateToDetail = { id, position ->
+                        navigateToDetail(id, position)
+                    },
+                )
+            }
+        }
 
     @Inject
     lateinit var analyticsLogger: AnalyticsLogger
 
-    private val playerManager by lazy {
-        ExplorePlayerManager(
-            context = requireContext().applicationContext,
-            lifecycleScope = viewLifecycleOwner.lifecycleScope,
-            onPlaybackEnded = {
-                if (isViewValid) scrollToNextItem()
-            },
-            onPositionUpdated = { position ->
-                if (isViewValid) highlightScript(position)
-            },
-        )
-    }
-    private val player get() = playerManager.player
-
-    private val adapter by lazy { ShortsAdapter(player, this) }
-    private val snapHelper = PagerSnapHelper()
-
-    private var animator: ObjectAnimator? = null
-    private var lastPlayingIndex: Int = RecyclerView.NO_POSITION
-
+    // 상세 페이지에서 돌아왔을 때의 결과를 처리하기 위한 런처
     private val playerDetailLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
@@ -86,254 +56,15 @@ class ExploreFragment :
                 hidePlayerControlView()
 
                 when (val detailResult = result.data.toDetailResult()) {
-                    is DetailResult.Category, is DetailResult.Keyword ->
+                    is DetailResult.Category, is DetailResult.Keyword -> {
                         detailResult.navigate(requireActivity() as MainActivity, analyticsLogger)
+                    }
 
-                    null -> Timber.w("Invalid detail result")
-                }
-            }
-        }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        _binding = FragmentExploreBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?,
-    ) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.lifecycleOwner = viewLifecycleOwner
-        binding.viewModel = viewModel
-        setupWindowInsets()
-
-        setupRecyclerView()
-        observeViewModel()
-
-        (activity as? PlayerControllerView)?.pause()
-
-        viewModel.resumeIfScheduled()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (lastPlayingIndex != RecyclerView.NO_POSITION) {
-            player.playWhenReady = true
-        }
-
-        analyticsLogger.logEvent(
-            FirebaseAnalytics.Event.SCREEN_VIEW,
-            mapOf(
-                FirebaseAnalytics.Param.SCREEN_NAME to SCREEN_NAME_EXPLORE,
-                FirebaseAnalytics.Param.SCREEN_CLASS to this::class.simpleName.orEmpty(),
-            ),
-        )
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        if (lastPlayingIndex != RecyclerView.NO_POSITION) {
-            player.playWhenReady = false
-
-            if (isViewValid) {
-                val index = currentIndex()
-                viewModel.scheduleResume(
-                    resumeIndex = index,
-                    playerPositionMs = playerManager.getCurrentPosition(),
-                )
-            }
-        }
-    }
-
-    override fun onDestroyView() {
-        animator?.removeAllListeners()
-        animator?.cancel()
-        animator?.setTarget(null)
-        animator = null
-
-        binding.rvExplore.clearOnScrollListeners()
-        snapHelper.attachToRecyclerView(null)
-        binding.rvExplore.adapter = null
-
-        playerManager.stop()
-        lastPlayingIndex = RecyclerView.NO_POSITION
-
-        super.onDestroyView()
-        _binding = null
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        playerManager.release()
-    }
-
-    private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, systemBars.top, 0, 0)
-            insets
-        }
-    }
-
-    private fun setupRecyclerView() {
-        binding.rvExplore.adapter = adapter
-        snapHelper.attachToRecyclerView(binding.rvExplore)
-
-        binding.rvExplore.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(
-                    recyclerView: RecyclerView,
-                    newState: Int,
-                ) {
-                    if (!isViewValid) return
-
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        val index = currentIndex()
-                        if (index != RecyclerView.NO_POSITION && index != lastPlayingIndex) {
-                            switchTo(index)
-                            player.play()
-                        }
-
-                        viewModel.maybeLoadMore(index, adapter.itemCount)
-                        analyticsLogger.logEvent(AnalyticsEventNames.EXPLORE_SWIPE)
+                    null -> {
+                        Timber.w("Invalid detail result")
                     }
                 }
-            },
-        )
-    }
-
-    private fun observeViewModel() {
-        viewModel.shortsHearits.observe(viewLifecycleOwner) { shortsHearits ->
-            handleShortsHearitsUpdate(shortsHearits)
-        }
-
-        viewModel.shouldPlayAnimation.observe(viewLifecycleOwner) { isEnabled ->
-            if (!isViewValid) return@observe
-
-            if (isEnabled && binding.rvExplore.isNotEmpty()) {
-                startSwipeAnimation()
             }
-        }
-
-        viewModel.toastMessage.observe(viewLifecycleOwner) { resId ->
-            showToast(resId)
-        }
-
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            if (!isViewValid) return@observe
-            binding.frExploreSkeleton.apply {
-                if (isLoading) startShimmer() else stopShimmer()
-            }
-        }
-    }
-
-    // 피드 목록이 갱신 되었을 때
-    private fun handleShortsHearitsUpdate(shortsHearits: List<ExploreHearit>) {
-        if (!isViewValid) return
-        adapter.submitList(shortsHearits) {
-            if (!isViewValid || shortsHearits.isEmpty()) return@submitList
-
-            binding.rvExplore.doOnNextLayout {
-                if (!isViewValid) return@doOnNextLayout
-                startPlaybackAndAnimation()
-            }
-        }
-    }
-
-    // 현재 인덱스의 아이템을 재생하고, 추가적으로 애니메이션 트리거
-    private fun startPlaybackAndAnimation() {
-        val index = currentIndex().takeIf { it != RecyclerView.NO_POSITION } ?: 0
-        switchTo(index)
-        viewModel.maybeLoadMore(index, adapter.itemCount)
-        viewModel.loadAnimation()
-    }
-
-    private fun currentIndex(): Int {
-        if (!isViewValid) return RecyclerView.NO_POSITION
-
-        val layoutManager =
-            binding.rvExplore.layoutManager as? LinearLayoutManager
-                ?: return RecyclerView.NO_POSITION
-        val snapView = snapHelper.findSnapView(layoutManager) ?: return RecyclerView.NO_POSITION
-        return layoutManager.getPosition(snapView)
-    }
-
-    private fun highlightScript(positionMs: Long) {
-        if (!isViewValid) return
-
-        val index = currentIndex()
-        if (index == RecyclerView.NO_POSITION) return
-        val holder =
-            binding.rvExplore.findViewHolderForAdapterPosition(index) as? ShortsViewHolder
-        holder?.highlightScriptLine(positionMs)
-    }
-
-    private fun playAudioAtIndex(
-        index: Int,
-        startPosition: Long = 0L,
-    ) {
-        val list = adapter.currentList
-        if (index !in list.indices) return
-
-        val item = list[index]
-        val url =
-            item.audioUrl?.takeIf { it.isNotBlank() } ?: run {
-                return
-            }
-
-        playerManager.playAudio(url, startPosition)
-    }
-
-    private fun switchTo(newPosition: Int) {
-        if (newPosition == RecyclerView.NO_POSITION || newPosition == lastPlayingIndex) return
-        val startPos = viewModel.consumeResumePositionMs()
-        playAudioAtIndex(newPosition, startPos)
-        lastPlayingIndex = newPosition
-        player.playWhenReady = true
-    }
-
-    private fun scrollToNextItem() {
-        if (!isViewValid) return
-
-        val currentPosition = currentIndex()
-        val nextPosition = currentPosition + 1
-        if (nextPosition < adapter.itemCount) {
-            binding.rvExplore.smoothScrollToPosition(nextPosition)
-        }
-    }
-
-    private fun startSwipeAnimation() {
-        if (!isViewValid) return
-
-        binding.lavExploreSwipeUp.visibility = View.VISIBLE
-
-        animator?.removeAllListeners()
-        animator?.cancel()
-        animator?.setTarget(null)
-
-        animator = createSwipeAnimator()
-    }
-
-    private fun createSwipeAnimator() =
-        ObjectAnimator.ofFloat(binding.rvExplore, "translationY", 0f, -100f, 0f).apply {
-            duration = 1300
-            repeatCount = 1
-            repeatMode = ObjectAnimator.RESTART
-            addListener(
-                object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        if (!isViewValid) return
-                        _binding?.lavExploreSwipeUp?.visibility = View.INVISIBLE
-                    }
-                },
-            )
-            start()
         }
 
     private fun navigateToDetail(
@@ -345,34 +76,5 @@ class ExploreFragment :
                 putExtra(PREVIOUS_SCREEN_KEY, EXPLORE_VALUE)
             }
         playerDetailLauncher.launch(intent)
-    }
-
-    private fun navigateToLogin() {
-        analyticsLogger.logEvent(
-            AnalyticsEventNames.LOGIN_EVENT,
-            mapOf(AnalyticsParamKeys.SOURCE_NAME to "explore_login"),
-        )
-
-        val intent = LoginActivity.newIntent(requireContext())
-        startActivity(intent)
-
-        requireContext().stopService(PlaybackService.stopIntent(requireContext()))
-
-        parentFragmentManager.beginTransaction().remove(this).commit()
-    }
-
-    override fun onClickHearitInfo(
-        hearitId: Long,
-        title: String,
-    ) {
-        val lastPosition = playerManager.getCurrentPosition()
-        analyticsLogger.logEvent(
-            AnalyticsEventNames.EXPLORE_TO_DETAIL,
-            mapOf(
-                AnalyticsParamKeys.ITEM_NAME to title,
-                AnalyticsParamKeys.ITEM_INDEX to currentIndex().toString(),
-            ),
-        )
-        navigateToDetail(hearitId, lastPosition)
     }
 }

@@ -176,4 +176,5 @@
     <!-- PlaylistBottomSheet-->
     <string name="playlist_bottom_sheet_playlist_title">재생목록</string>
     <string name="playlist_bottom_sheet_playlist_body">내가 북마크한 히어릿</string>
+    <string name="title_activity_explore_screen">ExploreScreen</string>
 </resources>
