@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="hearit"
+            type="com.onair.hearit.domain.model.Hearit" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv_view_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_view_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:gravity="center"
+            android:text="@{@string/all_view_count(hearit.viewCount)}"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@id/iv_view_icon"
+            app:layout_constraintStart_toEndOf="@id/iv_view_icon"
+            app:layout_constraintTop_toTopOf="@id/iv_view_icon"
+            tools:text="조회수 141" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
