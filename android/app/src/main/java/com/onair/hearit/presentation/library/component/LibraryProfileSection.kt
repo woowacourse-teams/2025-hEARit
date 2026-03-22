@@ -19,8 +19,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,9 +26,9 @@ import coil.compose.SubcomposeAsyncImage
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.presentation.setting.component.shimmer
-
-private val PretendardBold = FontFamily(Font(R.font.pretendardbold, FontWeight.Bold))
-private val HearitGray4 = Color(0xFFEFF1F2)
+import com.onair.hearit.presentation.theme.BackgroundDark
+import com.onair.hearit.presentation.theme.Gray4
+import com.onair.hearit.presentation.theme.PretendardFontFamily
 
 @Composable
 fun LibraryProfileSection(
@@ -42,10 +40,8 @@ fun LibraryProfileSection(
         modifier =
             modifier
                 .padding(start = 20.dp, top = 20.dp, end = 12.dp),
-        // XML margin 기준
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Profile Image (48dp x 48dp)
         SubcomposeAsyncImage(
             model = userInfo.profileImage,
             contentDescription = null,
@@ -60,7 +56,7 @@ fun LibraryProfileSection(
                         Modifier
                             .fillMaxSize()
                             .shimmer()
-                            .background(Color(0xFF1A1A1A)),
+                            .background(BackgroundDark),
                 )
             },
             error = {
@@ -72,24 +68,25 @@ fun LibraryProfileSection(
             },
         )
 
-        Spacer(modifier = Modifier.width(16.dp)) // XML marginStart="16dp"
+        Spacer(modifier = Modifier.width(16.dp))
 
         Text(
             text = userInfo.nickname,
-            fontFamily = PretendardBold,
-            fontSize = 24.sp, // @style/pretendard_nickname
-            color = HearitGray4,
+            fontFamily = PretendardFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp,
+            color = Gray4,
             modifier = Modifier.weight(1f),
         )
 
         IconButton(
             onClick = onSettingClick,
-            modifier = Modifier.size(48.dp), // XML size="48dp"
+            modifier = Modifier.size(48.dp),
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_setting),
                 contentDescription = "Setting",
-                tint = Color.Unspecified, // 아이콘 본연의 색상 유지
+                tint = Color.Unspecified,
             )
         }
     }

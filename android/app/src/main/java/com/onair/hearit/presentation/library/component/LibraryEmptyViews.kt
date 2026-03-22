@@ -17,10 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.onair.hearit.R
-import com.onair.hearit.presentation.theme.HearitTypoGraphy
+import com.onair.hearit.presentation.theme.Gray4
+import com.onair.hearit.presentation.theme.PretendardFontFamily
+import com.onair.hearit.presentation.theme.PrimaryPurple
+import com.onair.hearit.presentation.theme.SurfaceBlack
 
 @Composable
 fun LibraryLoginRequiredView(
@@ -31,8 +36,7 @@ fun LibraryLoginRequiredView(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(Color(0xFF121212)),
-        // hearit_black1
+                .background(SurfaceBlack),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -41,8 +45,10 @@ fun LibraryLoginRequiredView(
         ) {
             Text(
                 text = stringResource(id = R.string.library_guide_when_no_login),
-                style = HearitTypoGraphy.headlineSmall,
-                color = Color.White,
+                fontFamily = PretendardFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = Gray4,
                 textAlign = TextAlign.Center,
             )
 
@@ -54,13 +60,15 @@ fun LibraryLoginRequiredView(
                         .fillMaxWidth()
                         .height(56.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFBB86FC)) // Primary Purple (bg_purple3_radius_8dp 참고)
+                        .background(PrimaryPurple)
                         .clickable { onLoginClick() },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = stringResource(id = R.string.all_login),
-                    style = HearitTypoGraphy.headlineSmall,
+                    fontFamily = PretendardFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
                     color = Color.White,
                 )
             }
@@ -76,14 +84,15 @@ fun LibraryEmptyBookmarkView(modifier: Modifier = Modifier) {
         modifier =
             modifier
                 .fillMaxSize()
-                .background(Color(0xFF121212)),
-        // hearit_black1
+                .background(SurfaceBlack),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = stringResource(id = R.string.library_guide_when_no_bookmark),
-            style = HearitTypoGraphy.headlineSmall,
-            color = Color.White,
+            fontFamily = PretendardFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            color = Gray4,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 64.dp),
         )
