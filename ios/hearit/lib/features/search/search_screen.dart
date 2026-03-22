@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hearit/core/analytics/analytics_event_names.dart';
+import 'package:provider/provider.dart';
+
+import '../../core/network/api_client.dart';
+import 'search_repository.dart';
 import 'package:hearit/core/analytics/analytics_param_keys.dart';
 import 'package:hearit/core/analytics/analytics_provider.dart';
 import 'package:hearit/core/theme/app_colors.dart';
@@ -27,7 +31,9 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    _viewModel = SearchViewModel()..addListener(_onViewModelUpdated);
+    _viewModel = SearchViewModel(
+      repository: SearchRepository(apiClient: context.read<ApiClient>()),
+    )..addListener(_onViewModelUpdated);
     WidgetsBinding.instance.addPostFrameCallback((_) => _logScreenView());
   }
 

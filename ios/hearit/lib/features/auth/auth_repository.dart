@@ -94,16 +94,12 @@ class AuthRepository {
 
   /// refreshToken으로 새 accessToken 발급
   Future<String> refreshAccessToken(String refreshToken) async {
-    try {
-      final response = await _apiClient.post<Map<String, dynamic>>(
-        '/api/v1/auth/token/refresh',
-        body: {'refreshToken': refreshToken},
-        parser: (data) => data as Map<String, dynamic>,
-      );
-      return response['accessToken'] as String;
-    } catch (error) {
-      throw Exception('토큰 갱신 실패: $error');
-    }
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      '/api/v1/auth/token/refresh',
+      body: {'refreshToken': refreshToken},
+      parser: (data) => data as Map<String, dynamic>,
+    );
+    return response['accessToken'] as String;
   }
 
   /// 카카오 로그아웃

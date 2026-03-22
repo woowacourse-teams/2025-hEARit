@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../core/network/api_client.dart';
 import 'auth_repository.dart';
@@ -21,8 +22,10 @@ class AuthViewModel extends ChangeNotifier {
   AuthViewModel({
     AuthRepository? repository,
     AuthStorageService? storageService,
+    StreamController<AuthEvent>? authEventController,
   }) : _storageService = storageService ?? AuthStorageService() {
-    _authEventController = StreamController<AuthEvent>.broadcast();
+    _authEventController =
+        authEventController ?? StreamController<AuthEvent>.broadcast();
     _repository = repository ??
         AuthRepository(
           apiClient: ApiClient(
@@ -32,7 +35,7 @@ class AuthViewModel extends ChangeNotifier {
         );
     _authEventSubscription = _authEventController.stream.listen((event) {
       if (event == AuthEvent.tokenRefreshFailed) {
-        clearAuthStatus();
+        unawaited(clearAuthStatus());
       }
     });
   }

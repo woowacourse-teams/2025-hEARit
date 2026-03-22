@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,7 +13,12 @@ import 'core/analytics/analytics_provider.dart';
 import 'core/audio/audio_handler.dart';
 import 'core/audio/hearit_player_controller.dart';
 import 'core/device/device_uuid_service.dart';
+import 'core/network/api_client.dart';
+import 'features/auth/auth_repository.dart';
+import 'features/auth/models/auth_event.dart';
+import 'features/auth/services/auth_storage_service.dart';
 import 'features/library/library_repository.dart';
+import 'features/setting/setting_repository.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_colors.dart';
 import 'features/auth/auth_viewmodel.dart';
@@ -52,21 +59,45 @@ Future<void> main() async {
       androidNotificationOngoing: true,
     ),
   );
+
+  // 앱 전역에서 공유되는 인증 인프라 인스턴스
+  // AuthInterceptor가 401 갱신 실패 이벤트를 Stream으로 push하고,
+  // AuthViewModel이 구독하여 로그아웃 처리함 (순환 참조 없음)
+  final authStorageService = AuthStorageService();
+  final authEventController = StreamController<AuthEvent>.broadcast();
+  final sharedApiClient = ApiClient(
+    storageService: authStorageService,
+    authEventController: authEventController,
+  );
+
   runApp(
     MultiProvider(
       providers: [
+        Provider<ApiClient>(create: (_) => sharedApiClient),
         ChangeNotifierProvider(
           create: (_) => HearitPlayerController(
             audioHandler: audioHandler,
-            libraryRepository: LibraryRepository(),
+            libraryRepository: LibraryRepository(apiClient: sharedApiClient),
           ),
         ),
-        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(
+          create: (_) => AuthViewModel(
+            storageService: authStorageService,
+            authEventController: authEventController,
+            repository: AuthRepository(apiClient: sharedApiClient),
+          ),
+        ),
         ChangeNotifierProxyProvider<AuthViewModel, SettingViewModel>(
-          create: (context) =>
-              SettingViewModel(authViewModel: context.read<AuthViewModel>()),
+          create: (context) => SettingViewModel(
+            authViewModel: context.read<AuthViewModel>(),
+            repository: SettingRepository(apiClient: sharedApiClient),
+          ),
           update: (context, authViewModel, previous) =>
-              previous ?? SettingViewModel(authViewModel: authViewModel),
+              previous ??
+              SettingViewModel(
+                authViewModel: authViewModel,
+                repository: SettingRepository(apiClient: sharedApiClient),
+              ),
         ),
       ],
       child: const MyApp(),

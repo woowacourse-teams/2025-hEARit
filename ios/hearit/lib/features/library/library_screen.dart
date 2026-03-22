@@ -3,6 +3,9 @@ import 'package:hearit/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/analytics/analytics_event_names.dart';
+import '../../core/network/api_client.dart';
+import '../setting/setting_repository.dart';
+import 'library_repository.dart';
 import '../../core/analytics/analytics_param_keys.dart';
 import '../../core/analytics/analytics_provider.dart';
 import '../../core/audio/hearit_player_controller.dart';
@@ -33,7 +36,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
   @override
   void initState() {
     super.initState();
-    _viewModel = LibraryViewModel()..addListener(_onViewModelChanged);
+    final apiClient = context.read<ApiClient>();
+    _viewModel = LibraryViewModel(
+      libraryRepository: LibraryRepository(apiClient: apiClient),
+      settingRepository: SettingRepository(apiClient: apiClient),
+    )..addListener(_onViewModelChanged);
     _viewModel.loadInitialData();
     _scrollController.addListener(_onScroll);
 

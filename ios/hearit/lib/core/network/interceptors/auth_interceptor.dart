@@ -18,6 +18,12 @@ class AuthInterceptor extends Interceptor {
   final StreamController<AuthEvent> _eventController;
   bool _isRefreshing = false;
 
+  void _emitRefreshFailed() {
+    if (!_eventController.isClosed) {
+      _eventController.add(AuthEvent.tokenRefreshFailed);
+    }
+  }
+
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode != 401 || _isRefreshing) {
@@ -28,14 +34,24 @@ class AuthInterceptor extends Interceptor {
     try {
       final tokens = await _storageService.getTokens();
       if (tokens == null) {
-        _eventController.add(AuthEvent.tokenRefreshFailed);
+        _emitRefreshFailed();
         return handler.next(err);
       }
 
-      // 별도 Dio 인스턴스로 refresh 호출 (인터셉터 루프 방지)
-      final refreshDio = Dio();
+      // refresh 요청: 별도 Dio 인스턴스로 인터셉터 루프 방지
+      // baseUrl은 원래 요청의 baseUrl을 따라 환경(스테이징/프로덕션)을 존중
+      final baseUrl = err.requestOptions.baseUrl.isNotEmpty
+          ? err.requestOptions.baseUrl
+          : ApiConfig.defaultBaseUrl;
+      final refreshDio = Dio(
+        BaseOptions(
+          connectTimeout: err.requestOptions.connectTimeout,
+          receiveTimeout: err.requestOptions.receiveTimeout,
+          sendTimeout: err.requestOptions.sendTimeout,
+        ),
+      );
       final response = await refreshDio.post(
-        '${ApiConfig.defaultBaseUrl}/api/v1/auth/token/refresh',
+        '${baseUrl}api/v1/auth/token/refresh',
         data: {'refreshToken': tokens.refreshToken},
       );
       final newAccessToken = response.data['accessToken'] as String;
@@ -51,10 +67,24 @@ class AuthInterceptor extends Interceptor {
       // 원래 요청을 새 accessToken으로 재시도
       final retryOptions = err.requestOptions;
       retryOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-      final retryResponse = await Dio().fetch(retryOptions);
+      final retryDio = Dio(
+        BaseOptions(
+          baseUrl: retryOptions.baseUrl,
+          connectTimeout: retryOptions.connectTimeout,
+          receiveTimeout: retryOptions.receiveTimeout,
+          sendTimeout: retryOptions.sendTimeout,
+          responseType: retryOptions.responseType,
+          contentType: retryOptions.contentType,
+          followRedirects: retryOptions.followRedirects,
+          validateStatus: retryOptions.validateStatus,
+          receiveDataWhenStatusError: retryOptions.receiveDataWhenStatusError,
+          headers: retryOptions.headers,
+        ),
+      );
+      final retryResponse = await retryDio.fetch(retryOptions);
       return handler.resolve(retryResponse);
     } catch (e) {
-      _eventController.add(AuthEvent.tokenRefreshFailed);
+      _emitRefreshFailed();
       return handler.next(err);
     } finally {
       _isRefreshing = false;

@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Skill(browse)",
-      "Bash(flutter analyze:*)"
-    ]
-  }
-}

@@ -5,8 +5,10 @@ import 'package:hearit/core/analytics/analytics_provider.dart';
 import 'package:hearit/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/network/api_client.dart';
 import '../auth/auth_viewmodel.dart';
 import '../auth/login_screen.dart';
+import 'home_repository.dart';
 import '../detail/hearit_detail.dart';
 import '../detail/hearit_detail_screen.dart';
 import 'home_models.dart';
@@ -40,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final authViewModel = context.read<AuthViewModel>();
     _viewModel = HomeViewModel(
       authViewModel: authViewModel,
+      repository: HomeRepository(apiClient: context.read<ApiClient>()),
       onUnauthorized: _handleUnauthorized,
     )..addListener(_onViewModelUpdated);
     _viewModel.loadHome();
