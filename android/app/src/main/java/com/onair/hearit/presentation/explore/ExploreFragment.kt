@@ -15,8 +15,7 @@ import com.onair.hearit.presentation.IntentKeys.PREVIOUS_SCREEN_KEY
 import com.onair.hearit.presentation.IntentValues.EXPLORE_VALUE
 import com.onair.hearit.presentation.PlayerControllerView
 import com.onair.hearit.presentation.detail.PlayerDetailActivity
-import com.onair.hearit.presentation.main.MainActivity
-import com.onair.hearit.presentation.navigate
+import com.onair.hearit.presentation.logNavigationEvent
 import com.onair.hearit.presentation.toDetailResult
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
@@ -57,7 +56,7 @@ class ExploreFragment : Fragment() {
 
                 when (val detailResult = result.data.toDetailResult()) {
                     is DetailResult.Category, is DetailResult.Keyword -> {
-                        detailResult.navigate(requireActivity() as MainActivity, analyticsLogger)
+                        detailResult.logNavigationEvent(analyticsLogger)
                     }
 
                     null -> {

@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.RecentHearit
 import com.onair.hearit.domain.repository.NotificationPreferenceRepository
-import com.onair.hearit.domain.usecase.GetRecentHearitUseCase
 import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.auth.LogoutUseCase
 import com.onair.hearit.domain.usecase.auth.WithdrawUseCase
