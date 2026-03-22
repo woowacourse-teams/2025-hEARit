@@ -21,12 +21,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Bookmark
-import com.onair.hearit.presentation.theme.HearitTypoGraphy
+
+// XML 리소스 기반 색상 정의
+private val HearitBlack1 = Color(0xFF272C32)
+private val HearitGray4 = Color(0xFFEFF1F2)
+private val HearitGray2 = Color(0xFFB2B4B6)
+private val HearitPurple3 = Color(0xFF9533F5)
+
+// 폰트 정의
+private val PretendardBold = FontFamily(Font(R.font.pretendardbold, FontWeight.Bold))
+private val PretendardMedium = FontFamily(Font(R.font.pretendardmedium, FontWeight.Medium))
 
 @Composable
 fun BookmarkItem(
@@ -39,11 +51,17 @@ fun BookmarkItem(
         modifier =
             modifier
                 .fillMaxWidth()
+                .padding(
+                    start = 8.dp,
+                    bottom = 20.dp,
+                ) // XML: marginStart="8dp", marginBottom="20dp"
+                .background(HearitBlack1)
                 .clickable { onItemClick(bookmark.hearitId) }
-                .padding(vertical = 10.dp, horizontal = 8.dp),
+                .padding(vertical = 0.dp),
+        // 내부 패팅은 XML 구조에 따라 조정
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Category Initial Box
+        // Category Initial Box (60dp x 60dp)
         Box(
             modifier =
                 Modifier
@@ -54,8 +72,9 @@ fun BookmarkItem(
         ) {
             Text(
                 text = bookmark.category.name.take(1),
-                style = HearitTypoGraphy.headlineSmall,
-                color = Color.White,
+                fontFamily = PretendardBold,
+                fontSize = 20.sp,
+                color = HearitGray4,
             )
         }
 
@@ -65,12 +84,14 @@ fun BookmarkItem(
             modifier = Modifier.weight(1f),
         ) {
             Row(
+                modifier = Modifier.padding(top = 12.dp), // XML: marginTop="12dp"
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = bookmark.title,
-                    style = HearitTypoGraphy.titleMedium,
-                    color = Color(0xFFE0E0E0), // hearit_gray4
+                    fontFamily = PretendardBold,
+                    fontSize = 14.sp,
+                    color = HearitGray4,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
@@ -82,6 +103,7 @@ fun BookmarkItem(
                         painter = painterResource(id = R.drawable.ic_hearit_finished),
                         contentDescription = null,
                         tint = Color.Unspecified,
+                        modifier = Modifier.padding(end = 20.dp), // XML: marginEnd="20dp"
                     )
                 }
 
@@ -89,15 +111,16 @@ fun BookmarkItem(
 
                 Text(
                     text = formatPlayTime(bookmark.playTime),
-                    style = HearitTypoGraphy.bodySmall,
-                    color = Color(0xFF9E9E9E), // hearit_gray2
+                    fontFamily = PretendardMedium,
                     fontSize = 12.sp,
+                    color = HearitGray2,
+                    modifier = Modifier.padding(end = 12.dp), // XML: marginEnd="12dp"
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp)) // XML: marginTop="8dp"
 
-            // Progress Bar
+            // Progress Bar (height="4dp", marginBottom="12dp")
             val progress =
                 if (bookmark.playTime > 0L) {
                     (bookmark.lastPlayTime ?: 0L).toFloat() / bookmark.playTime.toFloat()
@@ -110,14 +133,15 @@ fun BookmarkItem(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .padding(end = 12.dp)
                         .height(4.dp)
                         .clip(RoundedCornerShape(2.dp)),
-                color = Color(0xFFBB86FC), // Primary Purple
-                trackColor = Color(0xFF373737), // Background Gray
+                color = HearitPurple3,
+                trackColor = Color(0xFF3B3F43),
             )
-        }
 
-        Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+        }
 
         // Option Button
         Icon(

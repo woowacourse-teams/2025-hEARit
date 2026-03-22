@@ -19,12 +19,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.presentation.setting.component.shimmer
-import com.onair.hearit.presentation.theme.HearitTypoGraphy
+
+private val PretendardBold = FontFamily(Font(R.font.pretendardbold, FontWeight.Bold))
+private val HearitGray4 = Color(0xFFEFF1F2)
 
 @Composable
 fun LibraryProfileSection(
@@ -35,10 +41,11 @@ fun LibraryProfileSection(
     Row(
         modifier =
             modifier
-                .padding(horizontal = 20.dp, vertical = 20.dp),
+                .padding(start = 20.dp, top = 20.dp, end = 12.dp),
+        // XML margin 기준
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Profile Image with Shimmer
+        // Profile Image (48dp x 48dp)
         SubcomposeAsyncImage(
             model = userInfo.profileImage,
             contentDescription = null,
@@ -65,21 +72,24 @@ fun LibraryProfileSection(
             },
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(16.dp)) // XML marginStart="16dp"
 
         Text(
             text = userInfo.nickname,
-            style = HearitTypoGraphy.headlineSmall,
-            color = Color.White,
+            fontFamily = PretendardBold,
+            fontSize = 24.sp, // @style/pretendard_nickname
+            color = HearitGray4,
             modifier = Modifier.weight(1f),
         )
 
-        IconButton(onClick = onSettingClick) {
+        IconButton(
+            onClick = onSettingClick,
+            modifier = Modifier.size(48.dp), // XML size="48dp"
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_setting),
                 contentDescription = "Setting",
-                tint = Color.White,
-                modifier = Modifier.size(48.dp),
+                tint = Color.Unspecified, // 아이콘 본연의 색상 유지
             )
         }
     }

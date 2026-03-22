@@ -22,6 +22,10 @@ import com.onair.hearit.domain.model.Bookmark
 import com.onair.hearit.domain.model.UserInfo
 import com.onair.hearit.presentation.library.BookmarkUiState
 
+// XML 리소스 기반 색상 정의
+private val HearitPurple3 = Color(0xFF9533F5)
+private val HearitBlack1 = Color(0xFF272C32)
+
 @Composable
 fun LibraryScreen(
     uiState: BookmarkUiState,
@@ -36,17 +40,13 @@ fun LibraryScreen(
     onItemClick: (Long) -> Unit,
     onOptionClick: (Long) -> Unit,
     onLoadMore: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
-
-    // Infinite Scroll Logic
+    
     val shouldLoadMore by remember {
         derivedStateOf {
-            val lastVisibleItemIndex =
-                listState.layoutInfo.visibleItemsInfo
-                    .lastOrNull()
-                    ?.index ?: 0
+            val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
             val totalItemsCount = listState.layoutInfo.totalItemsCount
             !isLoading && totalItemsCount > 0 && lastVisibleItemIndex >= totalItemsCount - 3
         }
@@ -59,62 +59,61 @@ fun LibraryScreen(
     }
 
     Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(
-                    brush =
-                        Brush.verticalGradient(
-                            colors =
-                                listOf(
-                                    Color(0xFF1A1A1A), // bg_gradient_vertical 시작 색상 유추
-                                    Color(0xFF000000),
-                                ),
-                        ),
-                ),
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    0.0f to HearitPurple3,
+                    0.2f to HearitBlack1, // XML: centerY="0.2"
+                    1.0f to HearitBlack1
+                )
+            )
     ) {
+        // Profile Section
         LibraryProfileSection(
             userInfo = userInfo,
-            onSettingClick = onSettingClick,
+            onSettingClick = onSettingClick
         )
+
+        // Header Section Margin (60dp from Profile)
+        // XML에서는 Profile(iv_library_profile) 하단으로부터 60dp이나, 
+        // ProfileSection 내부에 텍스트 높이 등이 포함되어 있으므로 적절히 조정 필요.
+        // XML: tv_bookmarked_hearit_title(marginTop="60dp") app:layout_constraintTop_toBottomOf="@id/tv_library_nickname"
+        Spacer(modifier = Modifier.height(60.dp))
 
         LibraryHeaderSection(
             totalCount = totalCount,
             isPlaying = isPlaying,
-            onPlayAllClick = onPlayAllClick,
+            onPlayAllClick = onPlayAllClick
         )
 
+        // RecyclerView Margin (12dp from Total Count)
+        // XML: fl_login_state(marginTop="12dp")
         Spacer(modifier = Modifier.height(12.dp))
 
         when (uiState) {
             is BookmarkUiState.NotLoggedIn -> {
                 LibraryLoginRequiredView(onLoginClick = onLoginClick)
             }
-
             is BookmarkUiState.NoBookmarks -> {
                 LibraryEmptyBookmarkView()
             }
-
             is BookmarkUiState.LoggedIn -> {
                 LazyColumn(
                     state = listState,
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 12.dp),
-                    contentPadding =
-                        androidx.compose.foundation.layout
-                            .PaddingValues(bottom = 84.dp),
-                    // Bottom navigation height etc
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 12.dp), // RecyclerView Padding
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 20.dp, bottom = 84.dp) // XML: RecyclerView(marginTop="20dp")
                 ) {
                     items(
                         items = bookmarks,
-                        key = { it.bookmarkId },
+                        key = { it.bookmarkId }
                     ) { bookmark ->
                         BookmarkItem(
                             bookmark = bookmark,
                             onItemClick = onItemClick,
-                            onOptionClick = onOptionClick,
+                            onOptionClick = onOptionClick
                         )
                     }
                 }
