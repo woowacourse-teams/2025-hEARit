@@ -57,7 +57,7 @@ class AuthInterceptor extends Interceptor {
         ),
       );
       final response = await refreshDio.post(
-        '${baseUrl}api/v1/auth/token/refresh',
+        '$baseUrl/api/v1/auth/token/refresh',
         data: {'refreshToken': tokens.refreshToken},
       );
       final newAccessToken = response.data['accessToken'] as String;
@@ -85,6 +85,8 @@ class AuthInterceptor extends Interceptor {
           validateStatus: retryOptions.validateStatus,
           receiveDataWhenStatusError: retryOptions.receiveDataWhenStatusError,
           headers: retryOptions.headers,
+          extra: retryOptions.extra,
+          method: retryOptions.method,
         ),
       );
       final retryResponse = await retryDio.fetch(retryOptions);
