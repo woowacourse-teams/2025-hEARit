@@ -106,6 +106,8 @@ fun SearchDetailRoute(
                 else -> {
                     SearchResultScreen(
                         hearits = uiState.searchedHearits,
+                        sort = uiState.sort,
+                        onSortSelected = viewModel::updateSort,
                         onLoadNext = viewModel::loadNextPage,
                         onHearitClick = onHearitClick,
                         isLoading = uiState.pagingState.isLoading,

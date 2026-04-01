@@ -250,5 +250,4 @@ dependencies {
 
     // swipe Refresh Layout
     implementation(libs.androidx.swiperefreshlayout)
-
 }

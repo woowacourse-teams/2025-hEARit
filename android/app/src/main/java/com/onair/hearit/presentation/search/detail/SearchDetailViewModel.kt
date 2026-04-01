@@ -3,6 +3,7 @@ package com.onair.hearit.presentation.search.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
+import com.onair.hearit.domain.model.HearitsSort
 import com.onair.hearit.domain.model.SearchInput
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.RecentKeywordRepository
@@ -110,8 +111,27 @@ class SearchDetailViewModel @Inject constructor(
             it.copy(
                 searchInput = null,
                 searchedHearits = persistentListOf(),
+                sort = HearitsSort.RECOMMEND,
                 pagingState = it.pagingState.reset(),
             )
+        }
+    }
+
+    fun updateSort(sort: HearitsSort) {
+        val current = _uiState.value
+        if (current.sort == sort) return
+
+        fetchJob?.cancel()
+        _uiState.update {
+            it.copy(
+                sort = sort,
+                searchedHearits = persistentListOf(),
+                pagingState = it.pagingState.reset(),
+            )
+        }
+
+        if (_uiState.value.searchInput is SearchInput.Keyword) {
+            fetchSearchResults()
         }
     }
 
@@ -134,8 +154,11 @@ class SearchDetailViewModel @Inject constructor(
                 _uiState.update { it.copy(pagingState = it.pagingState.startLoading()) }
 
                 hearitRepository
-                    .getKeywordHearits(searchTerm = term, page = state.pagingState.currentPage)
-                    .onSuccess { result ->
+                    .getKeywordHearits(
+                        searchTerm = term,
+                        sort = state.sort,
+                        page = state.pagingState.currentPage,
+                    ).onSuccess { result ->
                         _uiState.update { current ->
                             current.copy(
                                 searchedHearits = (current.searchedHearits + result.items).toImmutableList(),

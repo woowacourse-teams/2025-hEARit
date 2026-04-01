@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.onair.hearit.R
+import com.onair.hearit.domain.model.HearitsSort
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedHearit
 import com.onair.hearit.presentation.search.component.HearitItem
@@ -64,23 +65,25 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
-enum class SortType(
-    @param:StringRes val labelRes: Int,
-) {
-    Recommend(R.string.search_result_sort_recommend),
-    Accuracy(R.string.search_result_sort_accuracy),
-    Latest(R.string.search_result_sort_latest),
-    Oldest(R.string.search_result_sort_oldest),
-}
+private val HearitsSort.labelRes: Int
+    @StringRes get() =
+        when (this) {
+            HearitsSort.RECOMMEND -> R.string.search_result_sort_recommend
+            HearitsSort.ACCURACY -> R.string.search_result_sort_accuracy
+            HearitsSort.LATEST -> R.string.search_result_sort_latest
+            HearitsSort.OLDEST -> R.string.search_result_sort_oldest
+        }
 
 @Composable
 fun SearchResultScreen(
     hearits: ImmutableList<SearchedHearit>,
+    sort: HearitsSort,
     onHearitClick: (Long) -> Unit,
     onLoadNext: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
     loadMoreThreshold: Int = 3,
+    onSortSelected: (HearitsSort) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     val latestSize by rememberUpdatedState(hearits.size)
@@ -134,7 +137,10 @@ fun SearchResultScreen(
                 )
             }
         } else if (hearits.isNotEmpty()) {
-            ResultSearchHeader(SortType.Recommend)
+            ResultSearchHeader(
+                sortType = sort,
+                onSortSelected = onSortSelected,
+            )
 
             LazyColumn(
                 state = listState,
@@ -169,9 +175,9 @@ fun SearchResultScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ResultSearchHeader(
-    sortType: SortType,
+    sortType: HearitsSort,
     modifier: Modifier = Modifier,
-    onSortSelected: (SortType) -> Unit = {},
+    onSortSelected: (HearitsSort) -> Unit = {},
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -227,7 +233,7 @@ private fun ResultSearchHeader(
 private fun SortDropdownMenu(
     menuExpanded: Boolean,
     onDismiss: () -> Unit,
-    onSortSelected: (SortType) -> Unit,
+    onSortSelected: (HearitsSort) -> Unit,
 ) {
     var showTooltip by remember { mutableStateOf(false) }
     var infoAnchorBounds by remember { mutableStateOf<Rect?>(null) }
@@ -277,9 +283,9 @@ private fun SortDropdownMenu(
             onClick = { },
         )
 
-        SortMenuItem(SortType.Accuracy, onDismiss, onSortSelected)
-        SortMenuItem(SortType.Latest, onDismiss, onSortSelected)
-        SortMenuItem(SortType.Oldest, onDismiss, onSortSelected)
+        SortMenuItem(HearitsSort.ACCURACY, onDismiss, onSortSelected)
+        SortMenuItem(HearitsSort.LATEST, onDismiss, onSortSelected)
+        SortMenuItem(HearitsSort.OLDEST, onDismiss, onSortSelected)
     }
 
     // DropdownMenu 밖에서 별도 Popup으로 툴팁 렌더링
@@ -317,9 +323,9 @@ private fun SortDropdownMenu(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SortMenuItem(
-    type: SortType,
+    type: HearitsSort,
     onDismiss: () -> Unit,
-    onSortSelected: (SortType) -> Unit,
+    onSortSelected: (HearitsSort) -> Unit,
 ) {
     DropdownMenuItem(
         text = { Text(text = stringResource(type.labelRes)) },
@@ -363,6 +369,7 @@ fun SearchResultScreenPreview() {
     Box(modifier = Modifier.fillMaxSize()) {
         SearchResultScreen(
             hearits = dummyHearits,
+            sort = HearitsSort.RECOMMEND,
             onHearitClick = {},
             onLoadNext = {},
         )
@@ -375,6 +382,7 @@ fun SearchResultEmptyPreview() {
     Box(modifier = Modifier.fillMaxSize()) {
         SearchResultScreen(
             hearits = persistentListOf(),
+            sort = HearitsSort.RECOMMEND,
             onHearitClick = {},
             onLoadNext = {},
         )

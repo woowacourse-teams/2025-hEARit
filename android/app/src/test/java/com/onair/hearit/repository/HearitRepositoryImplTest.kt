@@ -9,6 +9,7 @@ import com.onair.hearit.data.datasource.remote.HearitRemoteDataSource
 import com.onair.hearit.data.mapper.toDomain
 import com.onair.hearit.data.mapper.toSearchedHearit
 import com.onair.hearit.data.repository.HearitRepositoryImpl
+import com.onair.hearit.domain.model.HearitsSort
 import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
@@ -147,11 +148,11 @@ class HearitRepositoryImplTest {
             val mockPageResultDto = createSearchHearit()
             val expectedDomainResult = mockPageResultDto.toSearchedHearit()
             coEvery {
-                mockHearitRemoteDataSource.getSearchHearits("test", 1, 10)
+                mockHearitRemoteDataSource.getSearchHearits("test", HearitsSort.RECOMMEND.name, 1, 10)
             } returns NetworkResult.Success(mockPageResultDto)
 
             // When
-            val result = hearitRepository.getKeywordHearits("test", 1, 10)
+            val result = hearitRepository.getKeywordHearits("test", HearitsSort.RECOMMEND, 1, 10)
 
             // Then
             assertThat(result.isSuccess).isTrue()
@@ -164,11 +165,11 @@ class HearitRepositoryImplTest {
             // Given
             val networkFailure = NetworkResult.Failure.Unknown
             coEvery {
-                mockHearitRemoteDataSource.getSearchHearits("test", 1, 10)
+                mockHearitRemoteDataSource.getSearchHearits("test", HearitsSort.RECOMMEND.name, 1, 10)
             } returns networkFailure
 
             // When
-            val result = hearitRepository.getKeywordHearits("test", 1, 10)
+            val result = hearitRepository.getKeywordHearits("test", HearitsSort.RECOMMEND, 1, 10)
 
             // Then
             assertThat(result.isFailure).isTrue()
