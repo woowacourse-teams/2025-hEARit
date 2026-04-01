@@ -9,6 +9,7 @@ import com.onair.hearit.data.toDomainResultList
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.HearitsSort
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
@@ -35,12 +36,17 @@ class HearitRepositoryImpl @Inject constructor(
 
     override suspend fun getKeywordHearits(
         searchTerm: String,
-        page: Int?,
-        size: Int?,
+        sort: HearitsSort,
+        page: Int,
+        size: Int,
     ): Result<PageResult<SearchedHearit>> =
         hearitRemoteDataSource
-            .getSearchHearits(searchTerm, page, size)
-            .toDomainResult { it.toSearchedHearit() }
+            .getSearchHearits(
+                searchTerm = searchTerm,
+                sort = sort.name,
+                page = page,
+                size = size,
+            ).toDomainResult { it.toSearchedHearit() }
 
     override suspend fun getCategoryHearits(
         categoryId: Long,

@@ -20,8 +20,9 @@ interface HearitRemoteDataSource {
 
     suspend fun getSearchHearits(
         searchTerm: String,
-        page: Int?,
-        size: Int?,
+        sort: String,
+        page: Int,
+        size: Int,
     ): NetworkResult<SearchHearitsResponse>
 
     suspend fun getHearits(

@@ -40,11 +40,19 @@ class HearitRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun getSearchHearits(
         searchTerm: String,
-        page: Int?,
-        size: Int?,
+        sort: String,
+        page: Int,
+        size: Int,
     ): NetworkResult<SearchHearitsResponse> =
         handleApiCall(
-            apiCall = { hearitService.getSearchHearits(searchTerm, page, size) },
+            apiCall = {
+                hearitService.getSearchHearits(
+                    searchTerm = searchTerm,
+                    sort = sort,
+                    page = page,
+                    size = size,
+                )
+            },
             errorHandler = errorResponseHandler,
         )
 

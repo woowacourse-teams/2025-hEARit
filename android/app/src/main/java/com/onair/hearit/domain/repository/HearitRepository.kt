@@ -3,6 +3,7 @@ package com.onair.hearit.domain.repository
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
 import com.onair.hearit.domain.model.Hearit
+import com.onair.hearit.domain.model.HearitsSort
 import com.onair.hearit.domain.model.PageResult
 import com.onair.hearit.domain.model.RecentUploadHearit
 import com.onair.hearit.domain.model.RecommendHearit
@@ -20,8 +21,9 @@ interface HearitRepository {
 
     suspend fun getKeywordHearits(
         searchTerm: String,
-        page: Int? = null,
-        size: Int? = null,
+        sort: HearitsSort = HearitsSort.RECOMMEND,
+        page: Int = 0,
+        size: Int = 20,
     ): Result<PageResult<SearchedHearit>>
 
     suspend fun getCategoryHearits(

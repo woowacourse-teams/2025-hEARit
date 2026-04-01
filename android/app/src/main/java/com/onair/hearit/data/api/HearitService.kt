@@ -33,11 +33,12 @@ interface HearitService {
         @Query("size") size: Int?,
     ): Response<ExploreHearitResponse>
 
-    @GET("api/v1/hearits/search")
+    @GET("api/v2/hearits/search")
     suspend fun getSearchHearits(
         @Query("searchTerm") searchTerm: String,
-        @Query("page") page: Int?,
-        @Query("size") size: Int?,
+        @Query("sort") sort: String,
+        @Query("page") page: Int,
+        @Query("size") size: Int,
     ): Response<SearchHearitsResponse>
 
     @GET("api/v1/hearits/{hearitId}")
