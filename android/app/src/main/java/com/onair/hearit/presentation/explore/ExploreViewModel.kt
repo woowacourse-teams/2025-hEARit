@@ -1,172 +1,271 @@
 package com.onair.hearit.presentation.explore
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.CursorResult
 import com.onair.hearit.domain.model.ExploreHearit
-import com.onair.hearit.domain.repository.ExploreDataStoreRepository
+import com.onair.hearit.domain.repository.ExploreRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.usecase.GetExploreHearitUseCase
-import com.onair.hearit.presentation.SingleLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+data class ExploreUiState(
+    val shortsHearits: List<ExploreHearit> = emptyList(),
+    val isLoading: Boolean = true,
+    val currentPageIndex: Int = 0,
+    val showGuideAnimation: Boolean = false,
+    val showLoginDialog: Boolean = false,
+)
+
+sealed interface ExploreSideEffect {
+    data class ShowToast(
+        val messageResId: Int,
+    ) : ExploreSideEffect
+
+    data object NavigateToBack : ExploreSideEffect
+
+    data class NavigateToDetail(
+        val hearitId: Long,
+        val lastPosition: Long,
+    ) : ExploreSideEffect
+}
+
 @HiltViewModel
 class ExploreViewModel @Inject constructor(
+    private val playerManager: ExplorePlayerManager,
+    private val exploreRepository: ExploreRepository,
+    private val getExploreHearit: GetExploreHearitUseCase,
     private val hearitRepository: HearitRepository,
-    private val exploreDataStoreRepository: ExploreDataStoreRepository,
-    private val getExploreHearitUseCase: GetExploreHearitUseCase,
 ) : ViewModel() {
-    private val _shortsHearits = MutableLiveData<List<ExploreHearit>>()
-    val shortsHearits: LiveData<List<ExploreHearit>> = _shortsHearits
+    private val _uiState = MutableStateFlow(ExploreUiState())
+    val uiState: StateFlow<ExploreUiState> = _uiState.asStateFlow()
 
-    private val _toastMessage = SingleLiveData<Int>()
-    val toastMessage: LiveData<Int> = _toastMessage
+    private val _sideEffect = MutableSharedFlow<ExploreSideEffect>()
+    val sideEffect = _sideEffect.asSharedFlow()
 
-    private val _shouldPlayAnimation = MutableLiveData<Boolean>()
-    val shouldPlayAnimation: LiveData<Boolean> = _shouldPlayAnimation
+    val currentPosition = playerManager.currentPosition
+    val isPlaying = playerManager.isPlaying
+    val speed = playerManager.speed
+    val duration = playerManager.duration
+    val isPlaybackEnded = playerManager.isPlaybackEnded
 
-    private val _isLoading = MutableLiveData(true)
-    val isLoading: LiveData<Boolean> = _isLoading
+    private var isLoadingPage: Boolean = false
+    private var isEndOfFeed: Boolean = false
+    private var nextCursorId: Long? = -1L
 
-    private var isLoadingPage: Boolean = false // 서버 페이지 로딩 중 여부
-    private var isEndOfFeed: Boolean = false // 더 이상 페이지가 없는지
-    private var nextCursorId: Long? = -1L // 다음 페이지 시작 커서
+    private var lastPosition: Long = 0L
 
-    private var resumeItem: ExploreHearit? = null // 복귀 시 표시할 아이템
-    private var resumePositionMs: Long = 0L // 복귀 시 플레이어 시작 위치(ms)
-    private var resumeScheduled: Boolean = false // 다음 attach 때 재개 예정인지
+    // 복귀(Resume) 관련 변수
+    private var resumeItem: ExploreHearit? = null
+    private var resumePositionMs: Long = 0L
+    private var resumeScheduled: Boolean = false
 
     init {
-        _isLoading.value = true
-        fetchData(0L)
+        loadInitialState()
+        observePlaybackEnded()
     }
 
-    // 다음 페이지 요청
-    fun loadNextPage() {
-        if (isLoadingPage || isEndOfFeed) return
-        fetchData(nextCursorId ?: 0L)
+    private fun observePlaybackEnded() {
+        viewModelScope.launch {
+            isPlaybackEnded.collect { isEnded ->
+                if (isEnded) {
+                    val currentIndex = _uiState.value.currentPageIndex
+                    if (currentIndex < _uiState.value.shortsHearits.size - 1) {
+                        onPageChanged(currentIndex + 1)
+                    }
+                }
+            }
+        }
     }
 
-    // 탭 이탈 시점: 복귀를 위한 아이템/플레이어 위치를 저장하고 재개 예약
-    fun scheduleResume(
-        resumeIndex: Int,
-        playerPositionMs: Long,
-    ) {
-        _shortsHearits.value?.getOrNull(resumeIndex)?.let { item ->
+    private fun loadInitialState() {
+        viewModelScope.launch {
+            fetchData(0L, isFirstFetch = true)
+        }
+    }
+
+    fun scheduleResume(resumeIndex: Int) {
+        _uiState.value.shortsHearits.getOrNull(resumeIndex)?.let { item ->
             resumeItem = item
         }
-        resumePositionMs = playerPositionMs
+        resumePositionMs = lastPosition
+
         resumeScheduled = true
+        playerManager.pause()
     }
 
-    // attach 시점: 예약돼 있으면 리스트를 재로딩하고 즉시 프리패치 트리거
+    // 다시 돌아왔을 때 호출
     fun resumeIfScheduled() {
         if (!resumeScheduled) return
         resumeScheduled = false
 
-        _shortsHearits.value = emptyList()
-        _isLoading.value = true
+        _uiState.update { it.copy(shortsHearits = emptyList(), isLoading = true) }
         isLoadingPage = false
 
         val startCursor = resumeItem?.cursorId ?: 0L
-        fetchData(startCursor)
-
-        // 마지막 하나만 먼저 들어오는 순간 비어 보이는 느낌을 줄이기 위해 즉시 프리패치
-        maybeLoadMore(currentIndex = 0, totalCount = 1)
+        fetchData(startCursor, isFirstFetch = true)
     }
 
-    // 1회성 복원 위치(ms) 소비 후 0으로 리셋
-    fun consumeResumePositionMs(): Long {
-        val pos = resumePositionMs
-        resumePositionMs = 0L
-        return pos
+    private fun fetchData(
+        cursorId: Long,
+        isFirstFetch: Boolean = false,
+    ) {
+        if (isLoadingPage) return
+        isLoadingPage = true
+        _uiState.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            try {
+                hearitRepository
+                    .getExploreHearits(cursorId)
+                    .onSuccess { cursorResult ->
+                        if (cursorResult.items.isEmpty() && isFirstFetch && cursorId != 0L) {
+                            isLoadingPage = false
+                            fetchData(0L, isFirstFetch = true)
+                            return@launch
+                        }
+
+                        val newItems = buildShortsItems(cursorResult)
+
+                        _uiState.update { state ->
+                            val updatedList =
+                                if (resumeItem != null) {
+                                    (listOf(resumeItem!!) + newItems.filter { it.id != resumeItem?.id })
+                                } else if (isFirstFetch) {
+                                    newItems
+                                } else {
+                                    (state.shortsHearits + newItems)
+                                }.distinctBy { it.id }
+
+                            state.copy(shortsHearits = updatedList)
+                        }
+
+                        isEndOfFeed = cursorResult.items.isEmpty()
+                        nextCursorId = cursorResult.items.lastOrNull()?.cursorId
+                        resumeItem = null // 처리 완료 후 초기화
+
+                        if (isFirstFetch && _uiState.value.shortsHearits.isNotEmpty()) {
+                            onPageChanged(0, isRestoring = true)
+                        }
+                    }.onFailure {
+                        _sideEffect.emit(ExploreSideEffect.ShowToast(R.string.explore_toast_random_hearits_load_fail))
+                    }
+            } catch (e: Exception) {
+                Timber.e(e)
+                _sideEffect.emit(ExploreSideEffect.ShowToast(R.string.explore_toast_shorts_hearits_load_fail))
+            } finally {
+                isLoadingPage = false
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
     }
 
-    // 프리패치 정책: 끝에서 N개(=3) 이내면 다음 페이지, 끝났으면 0부터 다시 로드
-    fun maybeLoadMore(
+    private suspend fun buildShortsItems(cursorResult: CursorResult<ExploreHearit>): List<ExploreHearit> =
+        coroutineScope {
+            cursorResult.items
+                .map { item -> async { getExploreHearit(item).getOrNull() } }
+                .awaitAll()
+                .mapNotNull { it }
+        }
+
+    fun onPageChanged(
+        pageIndex: Int,
+        isRestoring: Boolean = false,
+    ) {
+        val items = _uiState.value.shortsHearits
+        val item = items.getOrNull(pageIndex) ?: return
+
+        _uiState.update { it.copy(currentPageIndex = pageIndex) }
+
+        // 복원 중일 때는 저장된 resumePositionMs 사용 후 0으로 리셋
+        val startPos =
+            if (isRestoring) {
+                val pos = if (resumePositionMs > 0) resumePositionMs else lastPosition
+                resumePositionMs = 0L
+                pos
+            } else {
+                0L
+            }
+        lastPosition = startPos
+
+        item.audioUrl?.let { url ->
+            playerManager.play(url, startPos)
+        }
+
+        maybeLoadMore(currentIndex = pageIndex, totalCount = items.size)
+    }
+
+    fun onPositionChanged(position: Long) {
+        playerManager.seekTo(position)
+        lastPosition = position
+    }
+
+    fun onPlayerStateChanged() {
+        if (playerManager.isPlaying.value) playerManager.pause() else playerManager.resume()
+    }
+
+    fun onSetPlayerSpeed() {
+        if (!playerManager.isPlaying.value) return
+        val newSpeed = if (playerManager.speed.value == 1.0f) 2.0f else 1.0f
+        playerManager.setPlaybackSpeed(newSpeed)
+    }
+
+    fun onHearitSelected(id: Long) {
+        val currentPos = playerManager.currentPosition.value
+        viewModelScope.launch {
+            _sideEffect.emit(ExploreSideEffect.NavigateToDetail(id, currentPos))
+        }
+    }
+
+    private fun maybeLoadMore(
         currentIndex: Int,
         totalCount: Int,
     ) {
         if (isLoadingPage || totalCount <= 0) return
 
-        // currentIndex가 totalCount-3 이상이면 nearEnd
         val nearEnd = currentIndex >= maxOf(0, totalCount - 3)
         if (!nearEnd) return
 
-        // 피드의 마지막이면 -> 서버에서 넘어온 데이터가 isEmpty이면.
         if (isEndOfFeed) {
             isEndOfFeed = false
             nextCursorId = -1L
             fetchData(0L)
         } else {
-            loadNextPage()
+            fetchData(nextCursorId ?: 0L)
         }
     }
 
-    // 스와이프 가이드 애니메이션 노출 여부 로드
     fun loadAnimation() {
         viewModelScope.launch {
-            exploreDataStoreRepository
+            exploreRepository
                 .shouldShowAnimation()
-                .onSuccess { _shouldPlayAnimation.value = it }
-                .onFailure { _shouldPlayAnimation.value = false }
+                .onSuccess { shouldShow ->
+                    _uiState.update { it.copy(showGuideAnimation = shouldShow) }
+                }.onFailure {
+                    _uiState.update { it.copy(showGuideAnimation = false) }
+                }
         }
     }
 
-    private fun fetchData(cursorId: Long) {
-        if (isLoadingPage) return
-        isLoadingPage = true
-
-        viewModelScope.launch {
-            try {
-                val result = hearitRepository.getExploreHearits(cursorId)
-                result
-                    .onSuccess { randomItems ->
-                        isEndOfFeed = randomItems.isEmpty
-                        nextCursorId = randomItems.items.lastOrNull()?.cursorId
-
-                        val shortsList = buildShortsHearit(randomItems)
-                        updateShortsHearit(shortsList)
-                        _isLoading.value = false
-                    }.onFailure { throwable ->
-                        Timber.w(throwable)
-                        _toastMessage.value = R.string.explore_toast_random_hearits_load_fail
-                    }
-            } catch (e: Exception) {
-                Timber.w(e)
-                _toastMessage.value = R.string.explore_toast_shorts_hearits_load_fail
-            } finally {
-                isLoadingPage = false
-            }
-        }
+    fun dismissAnimation() {
+        _uiState.update { it.copy(showGuideAnimation = false) }
     }
 
-    private suspend fun buildShortsHearit(cursorItems: CursorResult<ExploreHearit>): List<ExploreHearit> =
-        coroutineScope {
-            cursorItems.items
-                .map { item -> async { getExploreHearitUseCase(item).getOrNull() } }
-                .awaitAll()
-                .mapNotNull { it }
-        }
-
-    private fun updateShortsHearit(newItems: List<ExploreHearit>) {
-        val combined =
-            if (resumeItem != null) {
-                val uniqueNew = newItems.filter { it.id != resumeItem?.id }
-                (listOf(resumeItem!!) + uniqueNew)
-            } else {
-                _shortsHearits.value.orEmpty() + newItems
-            }
-        _shortsHearits.value = combined.distinctBy { it.id }
-        resumeItem = null
+    override fun onCleared() {
+        super.onCleared()
+        playerManager.stop()
     }
 }

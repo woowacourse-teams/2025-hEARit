@@ -1,5 +1,6 @@
 package com.onair.hearit.presentation
 
+import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
@@ -10,6 +11,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.toColorInt
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import coil.imageLoader
@@ -224,4 +226,33 @@ fun setProgressBarRatio(
     val ratio = lastPlayTimeSec / totalPlayTime.toFloat()
     val percent = (ratio.coerceIn(0f, 1f) * 100).toInt()
     progressBar.progress = percent
+}
+
+@BindingAdapter("linkUrl")
+fun setLinkUrl(
+    view: View,
+    url: String?,
+) {
+    val uri = url?.toUri()
+    val isAllowedScheme = uri?.scheme in setOf("http", "https")
+
+    if (!isAllowedScheme) {
+        view.setOnClickListener(null)
+        view.isClickable = false
+        return
+    }
+
+    view.isClickable = true
+
+    view.setOnClickListener {
+        runCatching {
+            val intent =
+                Intent(Intent.ACTION_VIEW, uri).apply {
+                    addCategory(Intent.CATEGORY_BROWSABLE)
+                }
+            if (intent.resolveActivity(view.context.packageManager) != null) {
+                view.context.startActivity(intent)
+            }
+        }
+    }
 }

@@ -18,13 +18,17 @@ fun CategoryRoute(
     val uiState by viewModel.categoryUiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val categoryName = uiState.category?.name.orEmpty()
-    val categoryColor = uiState.category?.colorCode.orEmpty()
+    val categoryName = uiState.category.name
+    val categoryColor = uiState.category.colorCode
 
     LaunchedEffect(Unit) {
         viewModel.snackbarMessage.collect { stringResId ->
             snackbarHostState.showSnackbar(context.getString(stringResId))
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchCategoryHearits()
     }
 
     CategoryScreen(

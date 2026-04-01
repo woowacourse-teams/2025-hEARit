@@ -29,4 +29,6 @@ data class HearitResponse(
     val keywords: List<KeywordResponse>,
     @SerialName("like")
     val like: LikeResponse,
+    @SerialName("viewCount")
+    val viewCount: Int,
 )

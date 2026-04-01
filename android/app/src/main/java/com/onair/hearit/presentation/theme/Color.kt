@@ -16,6 +16,7 @@ val Gray2 = Color(0xFFB2B4B6)
 val Gray3 = Color(0xFFD6DADB)
 val Gray4 = Color(0xFFEFF1F2)
 val HearitPurple1 = Color(0xFFB677F3)
+val HearitPurple2 = Color(0xFFAC5FF7)
 
 object HearitTopAppBarDefaults {
     @OptIn(ExperimentalMaterial3Api::class)

@@ -3,12 +3,16 @@ package com.onair.hearit.di
 import com.onair.hearit.data.datasource.ErrorResponseHandler
 import com.onair.hearit.data.datasource.local.AuthLocalDataSource
 import com.onair.hearit.data.datasource.local.AuthLocalDataSourceImpl
+import com.onair.hearit.data.datasource.local.ExploreLocalDataStore
+import com.onair.hearit.data.datasource.local.ExploreLocalDataStoreImpl
 import com.onair.hearit.data.datasource.local.HearitLocalDataSource
 import com.onair.hearit.data.datasource.local.HearitLocalDataSourceImpl
 import com.onair.hearit.data.datasource.local.NotificationLocalDataSource
 import com.onair.hearit.data.datasource.local.NotificationLocalDataSourceImpl
 import com.onair.hearit.data.datasource.local.UserLocalDataSource
 import com.onair.hearit.data.datasource.local.UserLocalDataSourceImpl
+import com.onair.hearit.data.datasource.remote.AdvertisementRemoteDataSource
+import com.onair.hearit.data.datasource.remote.AdvertisementRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSource
 import com.onair.hearit.data.datasource.remote.AuthRemoteDataSourceImpl
 import com.onair.hearit.data.datasource.remote.BookmarkRemoteDataSource
@@ -37,6 +41,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataSourceModule {
+    @Binds
+    @Singleton
+    abstract fun bindAdvertisementRemoteDataSource(impl: AdvertisementRemoteDataSourceImpl): AdvertisementRemoteDataSource
+
     @Binds
     @Singleton
     abstract fun bindAuthRemoteDataSource(impl: AuthRemoteDataSourceImpl): AuthRemoteDataSource
@@ -88,6 +96,10 @@ abstract class DataSourceModule {
     @Binds
     @Singleton
     abstract fun bindNotificationLocalDataSource(impl: NotificationLocalDataSourceImpl): NotificationLocalDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindExploreLocalDataSource(impl: ExploreLocalDataStoreImpl): ExploreLocalDataStore
 
     companion object {
         @Provides

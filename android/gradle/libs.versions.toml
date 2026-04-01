@@ -19,6 +19,7 @@ kotlinxCollectionsImmutable = "0.4.0"
 kotlinxCoroutinesTest = "1.7.1"
 androidx-lifecycle = "2.9.2"
 lottie = "6.6.7"
+lottieCompose = "6.7.1"
 material = "1.13.0"
 material3 = "1.4.0"
 activity = "1.10.1"
@@ -45,6 +46,8 @@ androidx-test-ext = "1.1.5"
 espressoCore = "3.5.0"
 androidx-test = "1.5.0"
 swiperefreshlayout = "1.2.0"
+lifecycleRuntimeKtx = "2.10.0"
+composeBom = "2024.09.00"
 foundation = "1.9.0"
 
 [libraries]
@@ -61,6 +64,7 @@ androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefre
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 
 # AndroidX Fragment
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentTesting" }
@@ -90,6 +94,9 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 
 # Hilt
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
@@ -124,6 +131,7 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 # UI
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
 

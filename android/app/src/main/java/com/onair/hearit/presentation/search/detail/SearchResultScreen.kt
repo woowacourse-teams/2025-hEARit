@@ -53,8 +53,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.onair.hearit.R
 import com.onair.hearit.domain.model.Keyword
 import com.onair.hearit.domain.model.SearchedHearit
-import com.onair.hearit.presentation.search.component.SearchedHearitItem
-import com.onair.hearit.presentation.theme.Gray3
+import com.onair.hearit.presentation.search.component.HearitItem
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitBlack
 import com.onair.hearit.presentation.theme.HearitPurple1
@@ -153,10 +152,13 @@ fun SearchResultScreen(
                     items = hearits,
                     key = { it.id },
                 ) { hearit ->
-                    SearchedHearitItem(
-                        item = hearit,
-                        color = Gray3,
-                        onClick = onHearitClick,
+                    HearitItem(
+                        title = hearit.title,
+                        keywords = hearit.keywords,
+                        playTime = hearit.playTime,
+                        lastPlayTime = hearit.lastPlayTime,
+                        progressColor = HearitPurple1,
+                        onClick = { onHearitClick(hearit.id) },
                     )
                 }
             }

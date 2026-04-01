@@ -26,8 +26,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 35
-        versionCode = 10403
-        versionName = "1.4.3"
+        versionCode = 10500
+        versionName = "1.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner = "com.onair.hearit.HearitTestRunner"
 
@@ -137,6 +137,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -193,6 +196,7 @@ dependencies {
 
     // lottie
     implementation(libs.lottie)
+    implementation(libs.lottie.compose)
 
     // flexbox
     implementation(libs.flexbox)
@@ -246,4 +250,5 @@ dependencies {
 
     // swipe Refresh Layout
     implementation(libs.androidx.swiperefreshlayout)
+
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
 import com.onair.hearit.domain.exception.DomainException.UserNotRegistered
 import com.onair.hearit.domain.model.UserInfo
+import com.onair.hearit.domain.repository.AdvertisementRepository
 import com.onair.hearit.domain.repository.BookmarkRepository
 import com.onair.hearit.domain.repository.HearitRepository
 import com.onair.hearit.domain.repository.PlayingHistoryRepository
@@ -28,6 +29,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val advertisementRepository: AdvertisementRepository,
     private val bookmarkRepository: BookmarkRepository,
     private val hearitRepository: HearitRepository,
     private val userRepository: UserRepository,
@@ -76,6 +78,7 @@ class HomeViewModel @Inject constructor(
         fetchRecentUpload()
         fetchBookmarks()
         fetchCategories()
+        fetchAd()
     }
 
     private fun startLoading(jobKey: HomeLoadKey) {
@@ -189,6 +192,23 @@ class HomeViewModel @Inject constructor(
                         _toastMessage.value = R.string.all_toast_user_info_load_fail
                     }
                 }
+        }
+    }
+
+    private fun fetchAd() {
+        viewModelScope.launch {
+            safeLoad(HomeLoadKey.AD_BANNER) {
+                advertisementRepository
+                    .getAdvertisement()
+                    .onSuccess { ad ->
+                        _uiState.update {
+                            it.copy(advertisement = ad)
+                        }
+                    }.onFailure { throwable ->
+                        Timber.w(throwable)
+                        _toastMessage.value = R.string.home_toast_advertisement_load_fail
+                    }
+            }
         }
     }
 

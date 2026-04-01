@@ -30,6 +30,7 @@ object HearitFixtures {
                     KeywordResponse(id = 1, name = "Activity"),
                 ),
             like = LikeResponse(count = 1, isLiked = true),
+            viewCount = 10,
         )
 
     fun createFakeRecommendHearit(): RecommendHearitResponse =
