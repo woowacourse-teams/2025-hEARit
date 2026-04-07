@@ -1,4 +1,14 @@
 {
+  "index": {
+    "similarity": {
+      "default": {
+        "type": "BM25",
+        "b": 0.75,
+        "k1": 1.2,
+        "discount_overlaps": false
+      }
+    }
+  },
   "analysis": {
     "tokenizer": {
       "nori_mixed_tokenizer": {
@@ -56,6 +66,15 @@
         "filter": [
           "lowercase",
           "ko_synonym",
+          "nori_pos_filter",
+          "ko_stop"
+        ]
+      },
+      "korean_autocomplete_analyzer": {
+        "type": "custom",
+        "tokenizer": "nori_mixed_tokenizer",
+        "filter": [
+          "lowercase",
           "nori_pos_filter",
           "ko_stop"
         ]
