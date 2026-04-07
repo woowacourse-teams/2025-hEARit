@@ -5,7 +5,10 @@ import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.search.application.HearitSearchService;
 import com.onair.hearit.app.search.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.SearchAutocompleteRequest;
+import com.onair.hearit.app.search.dto.SearchAutocompleteResponse;
 import com.onair.hearit.app.search.dto.SearchSortRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,6 +44,13 @@ public class HearitSearchController {
         PagingRequest pagingRequest = new PagingRequest(page, size);
         PagedResponse<HearitSearchResponse> response =
                 hearitSearchService.searchV2(searchTerm, sortRequest, pagingRequest, requestUser.getUserInfo());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/v1/hearits/search/autocomplete")
+    public ResponseEntity<SearchAutocompleteResponse> readSearchedAutocomplete(
+            @Valid SearchAutocompleteRequest request) {
+        SearchAutocompleteResponse response = hearitSearchService.getAutocomplete(request.searchTerm(), request.size());
         return ResponseEntity.ok(response);
     }
 }

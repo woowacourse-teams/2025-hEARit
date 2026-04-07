@@ -3,24 +3,13 @@ package com.onair.hearit.app.search.application;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.search.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.SearchAutocompleteResponse;
 import com.onair.hearit.app.search.dto.SearchSortRequest;
-import com.onair.hearit.core.domain.Hearit;
-import com.onair.hearit.core.domain.HearitKeyword;
-import com.onair.hearit.core.domain.Keyword;
-import com.onair.hearit.core.domain.PlayingHistory;
-import com.onair.hearit.core.domain.UserInfo;
+import com.onair.hearit.core.domain.*;
 import com.onair.hearit.core.infrastructure.elasticsearch.repository.HearitElasticSearchRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitKeywordRepository;
 import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
 import com.onair.hearit.core.infrastructure.jpa.PlayingHistoryRepository;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,6 +18,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -107,5 +100,11 @@ public class HearitSearchService {
                 .filter(Objects::nonNull)
                 .toList();
         return new PageImpl<>(sortedHearits, pageable, searchedHearitIds.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public SearchAutocompleteResponse getAutocomplete(String searchTerm, int size) {
+        List<String> autocompletes = hearitElasticSearchRepository.autocomplete(searchTerm, size);
+        return new SearchAutocompleteResponse(autocompletes);
     }
 }
