@@ -74,7 +74,7 @@ fun LibraryProfileSection(
             text = userInfo.nickname,
             fontFamily = PretendardFontFamily,
             fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
+            fontSize = 20.sp,
             color = Gray4,
             modifier = Modifier.weight(1f),
         )

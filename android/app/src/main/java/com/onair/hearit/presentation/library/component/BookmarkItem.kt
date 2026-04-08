@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,28 +75,35 @@ fun BookmarkItem(
             modifier = Modifier.weight(1f),
         ) {
             Row(
-                modifier = Modifier.padding(top = 12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = bookmark.title,
-                    fontFamily = PretendardFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = Gray4,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
-
-                if (bookmark.isFinished == true) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_hearit_finished),
-                        contentDescription = null,
-                        tint = Color.Unspecified,
-                        modifier = Modifier.padding(end = 20.dp),
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = bookmark.title,
+                        fontFamily = PretendardFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = Gray4,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
                     )
+
+                    if (bookmark.isFinished == true) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_hearit_finished),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -112,9 +120,10 @@ fun BookmarkItem(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val lastPlayTimeSec = (bookmark.lastPlayTime ?: 0L) / 1000f
             val progress =
-                if (bookmark.playTime > 0L) {
-                    (bookmark.lastPlayTime ?: 0L).toFloat() / bookmark.playTime.toFloat()
+                if (bookmark.playTime > 0) {
+                    lastPlayTimeSec / bookmark.playTime.toFloat()
                 } else {
                     0f
                 }
@@ -129,6 +138,9 @@ fun BookmarkItem(
                         .clip(RoundedCornerShape(2.dp)),
                 color = HearitPurple3,
                 trackColor = Gray1,
+                strokeCap = StrokeCap.Butt,
+                gapSize = 0.dp,
+                drawStopIndicator = {},
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -147,7 +159,7 @@ fun BookmarkItem(
 }
 
 private fun formatPlayTime(playTime: Int): String {
-    val minutes = (playTime / 60)
-    val seconds = (playTime % 60)
+    val minutes = playTime / 60
+    val seconds = playTime % 60
     return "%02d:%02d".format(minutes, seconds)
 }
