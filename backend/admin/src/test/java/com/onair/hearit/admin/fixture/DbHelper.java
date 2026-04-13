@@ -3,6 +3,7 @@ package com.onair.hearit.admin.fixture;
 import com.onair.hearit.admin.domain.Admin;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.Series;
 import com.onair.hearit.core.domain.ExploreScore;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -38,6 +39,12 @@ public class DbHelper {
         em.persist(hearit);
         em.flush();
         return hearit;
+    }
+
+    public Series insertSeries(Series series) {
+        em.persist(series);
+        em.flush();
+        return series;
     }
 
     public Category insertCategory(Category category) {
