@@ -135,4 +135,7 @@ public interface HearitRepository extends JpaRepository<Hearit, Long> {
 
     @Query("SELECT h.id FROM Hearit h")
     List<Long> findAllIds();
+
+    @Query("SELECT h FROM Hearit h JOIN FETCH h.category WHERE h.series.id = :seriesId ORDER BY h.createdAt DESC")
+    List<Hearit> findBySeriesOrderByCreatedAtDesc(@Param("seriesId") Long seriesId);
 }

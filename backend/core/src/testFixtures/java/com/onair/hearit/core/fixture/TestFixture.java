@@ -3,6 +3,7 @@ package com.onair.hearit.core.fixture;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
+import com.onair.hearit.core.domain.Series;
 import com.onair.hearit.core.domain.HearitCluster;
 import com.onair.hearit.core.domain.Keyword;
 import com.onair.hearit.core.domain.Member;
@@ -41,6 +42,10 @@ public class TestFixture {
 
     public static Keyword createFixedKeyword() {
         return new Keyword("AI");
+    }
+
+    public static Series createFixedSeries() {
+        return new Series("테스트 시리즈", "테스트 시리즈 설명", "/series/image/test.jpg");
     }
 
     public static Category createFixedCategory() {
