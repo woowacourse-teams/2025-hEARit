@@ -16,10 +16,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
-import org.springframework.data.elasticsearch.core.query.HighlightQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
-import org.springframework.data.elasticsearch.core.query.highlight.Highlight;
-import org.springframework.data.elasticsearch.core.query.highlight.HighlightField;
 
 import java.util.List;
 import java.util.Objects;
@@ -123,7 +120,7 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
         return operations.search(buildAutocompleteQuery(searchTerm, size), HearitDocument.class)
                 .getSearchHits()
                 .stream()
-                .flatMap(hit -> extractMatches(hit, lowerSearchTerm))
+                .flatMap(hit -> extractMatches(hit.getContent(), lowerSearchTerm))
                 .distinct()
                 .limit(size)
                 .toList();
@@ -149,17 +146,15 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
                         )
                 )
                 .withSourceFilter(new FetchSourceFilter(true, new String[]{"title", "keywords", "category"}, new String[]{}))
-                .withHighlightQuery(new HighlightQuery(new Highlight(List.of(new HighlightField("title"))), HearitDocument.class))
                 .withMaxResults(size)
                 .build();
     }
 
-    private Stream<String> extractMatches(SearchHit<HearitDocument> hit, String lowerSearchTerm) {
-        HearitDocument doc = hit.getContent();
+    private Stream<String> extractMatches(HearitDocument doc, String lowerSearchTerm) {
         return Stream.of(
                 matchCategory(doc, lowerSearchTerm),
-                matchTitle(hit, doc, lowerSearchTerm),
-                matchKeyword(doc, lowerSearchTerm)
+                matchKeyword(doc, lowerSearchTerm),
+                matchTitle(doc, lowerSearchTerm)
         ).filter(Objects::nonNull);
     }
 
@@ -167,15 +162,8 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
         return doc.getCategory().toLowerCase().startsWith(lowerSearchTerm) ? doc.getCategory() : null;
     }
 
-    private String matchTitle(SearchHit<HearitDocument> hit, HearitDocument doc, String lowerSearchTerm) {
-        String titleSource = hit.getHighlightField("title").stream().findFirst().orElse(doc.getTitle());
-        String[] words = titleSource.split(" ");
-        for (int i = 0; i < words.length; i++) {
-            if (words[i].toLowerCase().contains(lowerSearchTerm)) {
-                return i + 1 < words.length ? words[i] + " " + words[i + 1] : words[i];
-            }
-        }
-        return null;
+    private String matchTitle(HearitDocument doc, String lowerSearchTerm) {
+        return doc.getTitle().toLowerCase().contains(lowerSearchTerm) ? doc.getTitle() : null;
     }
 
     private String matchKeyword(HearitDocument doc, String lowerSearchTerm) {

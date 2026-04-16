@@ -3,6 +3,7 @@ package com.onair.hearit.app.search.application;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -12,6 +13,7 @@ import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.DbHelper;
 import com.onair.hearit.app.search.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.SearchAutocompleteResponse;
 import com.onair.hearit.app.search.dto.SearchSortRequest;
 import com.onair.hearit.core.config.DataSourceConfig;
 import com.onair.hearit.core.domain.Category;
@@ -323,6 +325,34 @@ class HearitSearchServiceTest {
                 () -> assertThat(hearitSearchResponse.lastPlayTime()).isEqualTo(playingHistory.getLastPlayTime()),
                 () -> assertThat(hearitSearchResponse.isFinished()).isEqualTo(playingHistory.isFinished())
         );
+    }
+
+    @Test
+    @DisplayName("자동완성 조회 시 ElasticSearch가 반환한 결과를 그대로 반환한다.")
+    void getAutocomplete_returnsResultFromElasticSearch() {
+        // given
+        when(hearitElasticSearchRepository.autocomplete("spring", 5))
+                .thenReturn(List.of("Spring", "Spring Boot"));
+
+        // when
+        SearchAutocompleteResponse result = hearitSearchService.getAutocomplete("spring", 5);
+
+        // then
+        assertThat(result.autocompletes()).containsExactly("Spring", "Spring Boot");
+    }
+
+    @Test
+    @DisplayName("자동완성 조회 시 검색어와 size를 ElasticSearch에 그대로 전달한다.")
+    void getAutocomplete_passesSearchTermAndSizeToRepository() {
+        // given
+        when(hearitElasticSearchRepository.autocomplete(anyString(), anyInt()))
+                .thenReturn(List.of());
+
+        // when
+        hearitSearchService.getAutocomplete("spring", 3);
+
+        // then
+        verify(hearitElasticSearchRepository).autocomplete("spring", 3);
     }
 
     private Hearit saveHearitWithTitleAndKeyword(String title, Keyword keyword) {

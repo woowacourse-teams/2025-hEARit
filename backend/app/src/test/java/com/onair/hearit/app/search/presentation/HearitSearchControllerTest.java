@@ -4,6 +4,7 @@ import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.docume
 import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,6 +17,7 @@ import com.onair.hearit.app.fixture.ControllerTest;
 import com.onair.hearit.app.search.application.HearitSearchService;
 import com.onair.hearit.app.search.dto.HearitSearchResponse;
 import com.onair.hearit.app.search.dto.HearitSearchResponse.KeywordResponse;
+import com.onair.hearit.app.search.dto.SearchAutocompleteResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -173,6 +175,56 @@ public class HearitSearchControllerTest extends ControllerTest {
                                         ).toArray(FieldDescriptor[]::new)
                                 )
                                 .build())));
+    }
+
+    @Test
+    @DisplayName("자동완성 검색 - 200 OK")
+    void readSearchedAutocomplete_OK() throws Exception {
+        // given
+        given(hearitSearchService.getAutocomplete(any(), anyInt()))
+                .willReturn(new SearchAutocompleteResponse(List.of("Spring", "Spring Boot")));
+
+        // when & then
+        mockMvc.perform(get("/api/v1/hearits/search/autocomplete")
+                        .param("searchTerm", "spring")
+                        .param("size", "2"))
+                .andExpect(status().isOk())
+                .andDo(document("v1-get-hearits-search-autocomplete-ok",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Search API")
+                                .summary("자동완성 검색")
+                                .description("검색어에 대한 자동완성 결과를 반환합니다.")
+                                .queryParameters(
+                                        parameterWithName("searchTerm").description("검색어"),
+                                        parameterWithName("size").description("자동완성 결과 수 (1~30, 기본 5)").defaultValue("5")
+                                )
+                                .responseFields(
+                                        fieldWithPath("autocompletes").description("자동완성 결과 목록")
+                                )
+                                .build())));
+    }
+
+    @Test
+    @DisplayName("자동완성 검색 - 400 Bad Request")
+    void readSearchedAutocomplete_BadRequest() throws Exception {
+        // size below min (1)
+        mockMvc.perform(get("/api/v1/hearits/search/autocomplete")
+                        .param("searchTerm", "spring")
+                        .param("size", "0"))
+                .andExpect(status().isBadRequest())
+                .andDo(document("v1-get-hearits-search-autocomplete-bad-request",
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("Search API")
+                                .summary("자동완성 검색")
+                                .responseFields(
+                                        com.onair.hearit.fixture.ApiDocSnippets.getProblemDetailResponseFields())
+                                .build())));
+
+        // size above max (30)
+        mockMvc.perform(get("/api/v1/hearits/search/autocomplete")
+                        .param("searchTerm", "spring")
+                        .param("size", "31"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
