@@ -11,7 +11,7 @@
         },
         "autocomplete": {
           "type": "search_as_you_type",
-          "analyzer": "korean_index_analyzer",
+          "analyzer": "korean_autocomplete_analyzer",
           "search_analyzer": "korean_autocomplete_analyzer"
         }
       }
@@ -31,7 +31,7 @@
         },
         "autocomplete": {
           "type": "search_as_you_type",
-          "analyzer": "korean_index_analyzer",
+          "analyzer": "korean_autocomplete_analyzer",
           "search_analyzer": "korean_autocomplete_analyzer"
         }
       }

@@ -15,6 +15,11 @@
         "type": "nori_tokenizer",
         "decompound_mode": "mixed",
         "user_dictionary": "analysis/userdict_ko.txt"
+      },
+      "nori_autocomplete_tokenizer": {
+        "type": "nori_tokenizer",
+        "decompound_mode": "discard",
+        "user_dictionary": "analysis/userdict_ko.txt"
       }
     },
     "filter": {
@@ -72,10 +77,9 @@
       },
       "korean_autocomplete_analyzer": {
         "type": "custom",
-        "tokenizer": "nori_mixed_tokenizer",
+        "tokenizer": "nori_autocomplete_tokenizer",
         "filter": [
           "lowercase",
-          "nori_pos_filter",
           "ko_stop"
         ]
       }
