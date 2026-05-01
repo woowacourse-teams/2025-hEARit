@@ -13,6 +13,7 @@ import com.onair.hearit.app.series.dto.SeriesOverviewResponse;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Series;
+import com.onair.hearit.core.infrastructure.jpa.HearitSeriesRepository;
 import com.onair.hearit.core.fixture.TestFixture;
 import com.onair.hearit.core.fixture.TestJpaAuditingConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,11 +39,11 @@ class SeriesServiceTest {
     private com.onair.hearit.core.infrastructure.jpa.SeriesRepository seriesRepository;
 
     @Autowired
-    private com.onair.hearit.core.infrastructure.jpa.HearitRepository hearitRepository;
+    private HearitSeriesRepository hearitSeriesRepository;
 
     @BeforeEach
     void setUp() {
-        seriesService = new SeriesService(seriesRepository, hearitRepository);
+        seriesService = new SeriesService(seriesRepository, hearitSeriesRepository);
     }
 
     @Nested

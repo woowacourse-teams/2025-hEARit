@@ -64,14 +64,6 @@ public class Hearit {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "series_id")
-    private Series series;
-
-    public void assignToSeries(Series series) {
-        this.series = series;
-    }
-
     public Hearit(String title, String summary, Integer playTime, String originalAudioUrl,
                   String shortAudioUrl, String scriptUrl, List<Source> sources, Category category) {
         validateMetaData(title, summary, playTime, sources, category);

@@ -7,7 +7,7 @@ import com.onair.hearit.app.series.dto.SeriesDetailResponse;
 import com.onair.hearit.app.series.dto.SeriesOverviewResponse;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.Series;
-import com.onair.hearit.core.infrastructure.jpa.HearitRepository;
+import com.onair.hearit.core.infrastructure.jpa.HearitSeriesRepository;
 import com.onair.hearit.core.infrastructure.jpa.SeriesRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SeriesService {
 
     private final SeriesRepository seriesRepository;
-    private final HearitRepository hearitRepository;
+    private final HearitSeriesRepository hearitSeriesRepository;
 
     @Transactional(readOnly = true)
     public PagedResponse<SeriesOverviewResponse> getSeries(PagingRequest pagingRequest) {
@@ -38,7 +38,7 @@ public class SeriesService {
     public SeriesDetailResponse getSeriesDetail(Long seriesId) {
         Series series = seriesRepository.findById(seriesId)
                 .orElseThrow(() -> new NotFoundException("seriesId", seriesId.toString()));
-        List<Hearit> hearits = hearitRepository.findBySeriesOrderByCreatedAtDesc(seriesId);
+        List<Hearit> hearits = hearitSeriesRepository.findHearitsBySeriesIdOrderByCreatedAtDesc(seriesId);
         return SeriesDetailResponse.from(series, hearits);
     }
 }

@@ -4,6 +4,7 @@ import com.onair.hearit.common.TestClock;
 import com.onair.hearit.core.domain.Advertisement;
 import com.onair.hearit.core.domain.Bookmark;
 import com.onair.hearit.core.domain.Category;
+import com.onair.hearit.core.domain.HearitSeries;
 import com.onair.hearit.core.domain.Series;
 import com.onair.hearit.core.domain.ExploreScore;
 import com.onair.hearit.core.domain.Hearit;
@@ -54,11 +55,9 @@ public class DbHelper {
         return series;
     }
 
-    public Hearit assignHearitToSeries(Hearit hearit, Series series) {
-        Hearit managed = em.contains(hearit) ? hearit : em.merge(hearit);
-        managed.assignToSeries(series);
+    public void assignHearitToSeries(Hearit hearit, Series series) {
+        em.persist(HearitSeries.of(hearit, series));
         em.flush();
-        return managed;
     }
 
     public Category insertCategory(Category category) {

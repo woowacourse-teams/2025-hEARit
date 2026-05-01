@@ -13,6 +13,7 @@ import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Reaction;
 import com.onair.hearit.core.domain.RecommendHearit;
+import com.onair.hearit.core.domain.HearitSeries;
 import com.onair.hearit.core.domain.Series;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -132,10 +133,8 @@ public class DbHelper {
         return series;
     }
 
-    public Hearit assignHearitToSeries(Hearit hearit, Series series) {
-        Hearit managed = em.contains(hearit) ? hearit : em.merge(hearit);
-        managed.assignToSeries(series);
+    public void assignHearitToSeries(Hearit hearit, Series series) {
+        em.persist(HearitSeries.of(hearit, series));
         em.flush();
-        return managed;
     }
 }
