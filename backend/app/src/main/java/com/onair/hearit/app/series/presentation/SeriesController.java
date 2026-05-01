@@ -21,7 +21,7 @@ public class SeriesController {
     private final SeriesService seriesService;
 
     @GetMapping
-    public ResponseEntity<PagedResponse<SeriesOverviewResponse>> readSeries(
+    public ResponseEntity<PagedResponse<SeriesOverviewResponse>> readSeriesList(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
         PagingRequest pagingRequest = new PagingRequest(page, size);

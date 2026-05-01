@@ -21,7 +21,7 @@ class SeriesIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("시리즈 목록 조회 시 200 OK 및 페이지네이션이 적용된 시리즈 목록을 반환한다.")
-    void readSeries() {
+    void readSeriesList() {
         // given
         for (int i = 0; i < 5; i++) {
             dbHelper.insertSeries(TestFixture.createFixedSeries());
@@ -48,7 +48,7 @@ class SeriesIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("시리즈 목록 조회 시 유효하지 않은 페이지 번호를 보내면 400 BAD_REQUEST를 반환한다.")
-    void readSeriesWithInvalidPage() {
+    void readSeriesListWithInvalidPage() {
         RestAssured.given(this.spec)
                 .param("page", -1)
                 .param("size", 10)

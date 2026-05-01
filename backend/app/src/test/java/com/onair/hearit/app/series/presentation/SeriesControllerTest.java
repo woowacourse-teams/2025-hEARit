@@ -39,7 +39,7 @@ class SeriesControllerTest extends ControllerTest {
 
     @Test
     @DisplayName("시리즈 목록 조회 V1 - 200 OK")
-    void readSeries_OK() throws Exception {
+    void readSeriesList_OK() throws Exception {
         // given
         var responses = IntStream.range(1, 4)
                 .mapToObj(i -> new SeriesOverviewResponse(
@@ -85,7 +85,7 @@ class SeriesControllerTest extends ControllerTest {
 
     @Test
     @DisplayName("시리즈 목록 조회 V1 - 400 Bad Request")
-    void readSeries_BadRequest() throws Exception {
+    void readSeriesList_BadRequest() throws Exception {
         // when & then
         mockMvc.perform(get("/api/v1/series")
                         .param("page", "-1")
