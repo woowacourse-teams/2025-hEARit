@@ -29,7 +29,7 @@ public class AdminSeriesController {
 
     @PostMapping
     public ResponseEntity<Void> createSeries(@RequestBody @Valid SeriesCreateRequest request) {
-        adminSeriesService.addSeries(request);
+        adminSeriesService.addSeriesMetadata(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

@@ -35,7 +35,7 @@ public class AdminSeriesService {
     }
 
     @Transactional
-    public void addSeries(SeriesCreateRequest request) {
+    public void addSeriesMetadata(SeriesCreateRequest request) {
         Series series = new Series(request.title(), request.description(), request.imageKey());
         seriesRepository.save(series);
     }
