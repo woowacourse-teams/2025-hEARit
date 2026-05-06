@@ -5,7 +5,6 @@ import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import com.onair.hearit.core.infrastructure.elasticsearch.domain.HearitDocument;
 import com.onair.hearit.core.infrastructure.elasticsearch.domain.HearitSearchSortField;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +21,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-@Slf4j
 @RequiredArgsConstructor
 public class HearitSearchRepositoryImpl implements HearitSearchRepository {
 

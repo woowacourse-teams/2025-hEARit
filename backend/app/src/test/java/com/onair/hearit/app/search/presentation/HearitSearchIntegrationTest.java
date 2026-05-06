@@ -234,6 +234,46 @@ public class HearitSearchIntegrationTest extends IntegrationTest {
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
+    @Test
+    @DisplayName("자동완성 searchTerm 파라미터가 유효하지 않을 때 400 에러를 반환한다.")
+    void readAutocompleteWithInvalidSearchTerm() {
+        // searchTerm 누락
+        RestAssured.given(this.spec)
+                .queryParam("size", 5)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // searchTerm 빈 문자열
+        RestAssured.given(this.spec)
+                .queryParam("searchTerm", "")
+                .queryParam("size", 5)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // searchTerm 공백만 포함
+        RestAssured.given(this.spec)
+                .queryParam("searchTerm", "   ")
+                .queryParam("size", 5)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // searchTerm 길이 초과 (51자)
+        String tooLong = "a".repeat(51);
+        RestAssured.given(this.spec)
+                .queryParam("searchTerm", tooLong)
+                .queryParam("size", 5)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
     private String generateToken(Member member) {
         return jwtTokenProvider.createAccessToken(member.getUuid());
     }
