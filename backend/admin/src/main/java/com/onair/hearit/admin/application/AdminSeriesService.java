@@ -14,6 +14,7 @@ import com.onair.hearit.core.infrastructure.jpa.SeriesRepository;
 import java.net.URL;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminSeriesService {
 
-    private static final String SERIES_IMAGE_PATH = "/series/image/";
+    @Value("${series.image.prefix}")
+    private String seriesImagePrefix;
+
+    @Value("${series.image.extension}")
+    private String seriesImageExtension;
 
     private final SeriesRepository seriesRepository;
     private final HearitRepository hearitRepository;
@@ -29,15 +34,26 @@ public class AdminSeriesService {
     private final FileStorage fileStorage;
 
     public UploadUrlResponse getSeriesImageUploadUrl() {
-        String key = SERIES_IMAGE_PATH + UUID.randomUUID() + ".jpg";
+        String key = seriesImagePrefix + UUID.randomUUID() + seriesImageExtension;
         URL uploadUrl = fileStorage.createPutUrl(key);
         return new UploadUrlResponse(key, uploadUrl);
     }
 
     @Transactional
     public void addSeriesMetadata(SeriesCreateRequest request) {
+        validateImageKey(request.imageKey());
         Series series = new Series(request.title(), request.description(), request.imageKey());
         seriesRepository.save(series);
+    }
+
+    private void validateImageKey(String imageKey) {
+        if (imageKey == null) {
+            return;
+        }
+        if (!imageKey.startsWith(seriesImagePrefix) || !imageKey.endsWith(seriesImageExtension)) {
+            throw new AdminInvalidInputException(
+                    "시리즈 이미지 키는 '" + seriesImagePrefix + "'로 시작하고 '" + seriesImageExtension + "' 확장자여야 합니다.");
+        }
     }
 
     @Transactional

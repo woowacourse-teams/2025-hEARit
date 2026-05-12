@@ -25,8 +25,6 @@ public class Series {
 
     public static final int TITLE_MAX_LENGTH = 50;
     public static final int DESCRIPTION_MAX_LENGTH = 500;
-    private static final String IMAGE_KEY_PREFIX = "/series/image/";
-    private static final String IMAGE_KEY_EXTENSION = ".jpg";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,7 +46,6 @@ public class Series {
     public Series(String title, String description, String imageUrl) {
         validateTitle(title);
         validateDescription(description);
-        validateImageKey(imageUrl);
         this.title = title;
         this.description = description;
         this.imageUrl = imageUrl;
@@ -63,16 +60,6 @@ public class Series {
     private void validateDescription(String description) {
         if (description != null && description.length() > DESCRIPTION_MAX_LENGTH) {
             throw new SeriesDomainException("시리즈 설명은 " + DESCRIPTION_MAX_LENGTH + "자 이하의 문자열이어야합니다.");
-        }
-    }
-
-    private void validateImageKey(String imageUrl) {
-        if (imageUrl == null) {
-            return;
-        }
-        if (!imageUrl.startsWith(IMAGE_KEY_PREFIX) || !imageUrl.endsWith(IMAGE_KEY_EXTENSION)) {
-            throw new SeriesDomainException(
-                    "시리즈 이미지 키는 '" + IMAGE_KEY_PREFIX + "'로 시작하고 '" + IMAGE_KEY_EXTENSION + "' 확장자여야 합니다.");
         }
     }
 
