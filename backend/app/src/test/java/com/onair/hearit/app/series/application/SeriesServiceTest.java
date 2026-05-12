@@ -84,8 +84,8 @@ class SeriesServiceTest {
         }
 
         @Test
-        @DisplayName("시리즈 목록은 id 내림차순으로 정렬된다.")
-        void getSeries_orderedByIdDesc() {
+        @DisplayName("시리즈 목록은 id 오름차순으로 정렬된다.")
+        void getSeries_orderedByIdAsc() {
             // given
             Series series1 = dbHelper.insertSeries(TestFixture.createFixedSeries());
             Series series2 = dbHelper.insertSeries(TestFixture.createFixedSeries());
@@ -97,7 +97,7 @@ class SeriesServiceTest {
             // then
             assertThat(result.content())
                     .extracting(SeriesOverviewResponse::id)
-                    .containsExactly(series3.getId(), series2.getId(), series1.getId());
+                    .containsExactly(series1.getId(), series2.getId(), series3.getId());
         }
     }
 

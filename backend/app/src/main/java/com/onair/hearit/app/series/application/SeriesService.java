@@ -28,7 +28,7 @@ public class SeriesService {
     @Transactional(readOnly = true)
     public PagedResponse<SeriesOverviewResponse> getSeries(PagingRequest pagingRequest) {
         Pageable pageable = PageRequest.of(pagingRequest.page(), pagingRequest.size(),
-                Sort.by(Sort.Order.desc("id")));
+                Sort.by(Sort.Order.asc("id")));
         Page<Series> seriesPage = seriesRepository.findAll(pageable);
         Page<SeriesOverviewResponse> dtoPage = seriesPage.map(SeriesOverviewResponse::from);
         return PagedResponse.from(dtoPage);

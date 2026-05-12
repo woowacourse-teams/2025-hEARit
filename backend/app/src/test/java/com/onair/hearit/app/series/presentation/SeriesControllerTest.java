@@ -64,7 +64,7 @@ class SeriesControllerTest extends ControllerTest {
                         resource(ResourceSnippetParameters.builder()
                                 .tag("Series API")
                                 .summary("시리즈 목록 조회 V1")
-                                .description("전체 시리즈 목록을 최신 등록 순으로 페이지 단위 조회합니다.")
+                                .description("전체 시리즈 목록을 등록 순으로 페이지 단위 조회합니다.")
                                 .queryParameters(
                                         parameterWithName("page").description("페이지 번호 (start 0)").defaultValue("0"),
                                         parameterWithName("size").description("페이지 당 항목 수").defaultValue("20")
