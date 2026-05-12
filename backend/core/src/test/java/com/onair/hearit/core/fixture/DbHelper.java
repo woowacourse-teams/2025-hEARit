@@ -13,6 +13,8 @@ import com.onair.hearit.core.domain.Member;
 import com.onair.hearit.core.domain.PlayingHistory;
 import com.onair.hearit.core.domain.Reaction;
 import com.onair.hearit.core.domain.RecommendHearit;
+import com.onair.hearit.core.domain.HearitSeries;
+import com.onair.hearit.core.domain.Series;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDateTime;
@@ -123,5 +125,16 @@ public class DbHelper {
         em.persist(hearitCluster);
         em.flush();
         return hearitCluster;
+    }
+
+    public Series insertSeries(Series series) {
+        em.persist(series);
+        em.flush();
+        return series;
+    }
+
+    public void assignHearitToSeries(Hearit hearit, Series series) {
+        em.persist(HearitSeries.of(hearit, series));
+        em.flush();
     }
 }
