@@ -50,7 +50,7 @@ public class HearitSearchController {
     @GetMapping("/api/v1/hearits/search/autocomplete")
     public ResponseEntity<SearchAutocompleteResponse> readSearchedAutocomplete(
             @Valid SearchAutocompleteRequest request) {
-        SearchAutocompleteResponse response = hearitSearchService.getAutocomplete(request.searchTerm(), request.size());
+        SearchAutocompleteResponse response = hearitSearchService.getAutocomplete(request.searchTerm().trim(), request.size());
         return ResponseEntity.ok(response);
     }
 }
