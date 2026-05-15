@@ -8,6 +8,11 @@
         "keyword": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "autocomplete": {
+          "type": "search_as_you_type",
+          "analyzer": "korean_autocomplete_analyzer",
+          "search_analyzer": "korean_autocomplete_analyzer"
         }
       }
     },
@@ -23,6 +28,11 @@
           "type": "text",
           "analyzer": "korean_index_analyzer",
           "search_analyzer": "korean_search_analyzer"
+        },
+        "autocomplete": {
+          "type": "search_as_you_type",
+          "analyzer": "korean_autocomplete_analyzer",
+          "search_analyzer": "korean_autocomplete_analyzer"
         }
       }
     },
@@ -31,6 +41,10 @@
       "fields": {
         "text": {
           "type": "text",
+          "analyzer": "standard"
+        },
+        "autocomplete": {
+          "type": "search_as_you_type",
           "analyzer": "standard"
         }
       }

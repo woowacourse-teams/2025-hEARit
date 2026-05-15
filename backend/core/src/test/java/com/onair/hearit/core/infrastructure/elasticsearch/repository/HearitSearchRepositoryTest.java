@@ -648,6 +648,65 @@ class HearitSearchRepositoryTest extends ElasticSearchTestContainer {
         }
     }
 
+    @Nested
+    @DisplayName("자동완성 테스트")
+    class AutocompleteTest {
+
+        @Test
+        @DisplayName("검색어로 시작하는 키워드가 자동완성 결과에 포함된다")
+        void autocomplete_matchesKeyword() {
+            // "스프링" 키워드를 가진 문서(1, 2)에서 "스프"로 시작하는 키워드 반환
+            List<String> result = repository.autocomplete("스프", 10);
+
+            assertThat(result).contains("스프링");
+        }
+
+        @Test
+        @DisplayName("검색어로 시작하는 카테고리가 자동완성 결과에 포함된다")
+        void autocomplete_matchesCategory() {
+            // "개발" 카테고리를 가진 문서(1, 2, 10)에서 "개"로 시작하는 카테고리 반환
+            List<String> result = repository.autocomplete("개", 10);
+
+            assertThat(result).contains("개발");
+        }
+
+        @Test
+        @DisplayName("검색어를 포함하는 제목 단어가 자동완성 결과에 포함된다")
+        void autocomplete_matchesTitle() {
+            // "자바 스프링 입문 가이드"(doc 2) 제목에서 "자바" 단어 매칭
+            List<String> result = repository.autocomplete("자바", 10);
+
+            assertThat(result).isNotEmpty();
+        }
+
+        @Test
+        @DisplayName("동일한 자동완성 결과는 중복 없이 한 번만 반환된다")
+        void autocomplete_returnsDistinctResults() {
+            // "스프링" 키워드를 가진 문서(1, 2)가 여러 개이지만 "스프링"은 한 번만 등장
+            List<String> result = repository.autocomplete("스프", 10);
+
+            long count = result.stream().filter("스프링"::equals).count();
+            assertThat(count).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("size 파라미터 이하의 자동완성 결과를 반환한다")
+        void autocomplete_respectsSizeLimit() {
+            // "스프" 검색 시 여러 결과가 매칭되지만 size=1이면 최대 1개만 반환
+            List<String> result = repository.autocomplete("스프", 1);
+
+            assertThat(result).hasSizeLessThanOrEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("매칭되는 문서가 없으면 빈 리스트를 반환한다")
+        void autocomplete_returnsEmptyListWhenNoMatch() {
+            List<String> result = repository.autocomplete("존재하지않는검색어12345", 10);
+
+            assertThat(result).isEmpty();
+        }
+    }
+
     @Test
     @DisplayName("전체 List의 Id만 조회한다.")
     void findAllIds() {

@@ -4,7 +4,6 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import com.onair.hearit.core.infrastructure.elasticsearch.domain.HearitDocument;
 import com.onair.hearit.core.infrastructure.elasticsearch.domain.HearitSearchSortField;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,6 +15,11 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+import org.springframework.data.elasticsearch.core.query.Query;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class HearitSearchRepositoryImpl implements HearitSearchRepository {
@@ -94,7 +98,7 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
                 .toList();
         return new PageImpl<>(ids, pageable, searchResults.getTotalHits());
     }
-    
+
     public List<Long> findAllIds() {
         NativeQuery query = NativeQuery.builder()
                 .withSourceFilter(new FetchSourceFilter(true, new String[]{"id"}, null))
@@ -106,5 +110,64 @@ public class HearitSearchRepositoryImpl implements HearitSearchRepository {
                 .map(SearchHit::getContent)
                 .map(HearitDocument::getId)
                 .toList();
+    }
+
+    @Override
+    public List<String> autocomplete(String searchTerm, int size) {
+        String lowerSearchTerm = searchTerm.toLowerCase();
+        return operations.search(buildAutocompleteQuery(searchTerm, size), HearitDocument.class)
+                .getSearchHits()
+                .stream()
+                .flatMap(hit -> extractMatches(hit.getContent(), lowerSearchTerm))
+                .distinct()
+                .limit(size)
+                .toList();
+    }
+
+    private Query buildAutocompleteQuery(String searchTerm, int size) {
+        return NativeQuery.builder()
+                .withQuery(q -> q
+                        .multiMatch(m -> m
+                                .query(searchTerm)
+                                .type(TextQueryType.BoolPrefix)
+                                .fields(
+                                        "title.autocomplete",
+                                        "title.autocomplete._2gram",
+                                        "title.autocomplete._3gram",
+                                        "keywords.autocomplete",
+                                        "keywords.autocomplete._2gram",
+                                        "keywords.autocomplete._3gram",
+                                        "category.autocomplete",
+                                        "category.autocomplete._2gram",
+                                        "category.autocomplete._3gram"
+                                )
+                        )
+                )
+                .withSourceFilter(new FetchSourceFilter(true, new String[]{"title", "keywords", "category"}, new String[]{}))
+                .withMaxResults(size)
+                .build();
+    }
+
+    private Stream<String> extractMatches(HearitDocument doc, String lowerSearchTerm) {
+        return Stream.of(
+                matchCategory(doc, lowerSearchTerm),
+                matchKeyword(doc, lowerSearchTerm),
+                matchTitle(doc, lowerSearchTerm)
+        ).filter(Objects::nonNull);
+    }
+
+    private String matchCategory(HearitDocument doc, String lowerSearchTerm) {
+        return doc.getCategory().toLowerCase().startsWith(lowerSearchTerm) ? doc.getCategory() : null;
+    }
+
+    private String matchTitle(HearitDocument doc, String lowerSearchTerm) {
+        return doc.getTitle().toLowerCase().contains(lowerSearchTerm) ? doc.getTitle() : null;
+    }
+
+    private String matchKeyword(HearitDocument doc, String lowerSearchTerm) {
+        return doc.getKeywords().stream()
+                .filter(k -> k.toLowerCase().startsWith(lowerSearchTerm))
+                .findFirst()
+                .orElse(null);
     }
 }

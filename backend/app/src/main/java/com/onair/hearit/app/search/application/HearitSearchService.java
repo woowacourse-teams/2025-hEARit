@@ -3,6 +3,7 @@ package com.onair.hearit.app.search.application;
 import com.onair.hearit.app.common.dto.request.PagingRequest;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.search.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.SearchAutocompleteResponse;
 import com.onair.hearit.app.search.dto.SearchSortRequest;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -107,5 +108,10 @@ public class HearitSearchService {
                 .filter(Objects::nonNull)
                 .toList();
         return new PageImpl<>(sortedHearits, pageable, searchedHearitIds.getTotalElements());
+    }
+
+    public SearchAutocompleteResponse getAutocomplete(String searchTerm, int size) {
+        List<String> autocompletes = hearitElasticSearchRepository.autocomplete(searchTerm, size);
+        return new SearchAutocompleteResponse(autocompletes);
     }
 }

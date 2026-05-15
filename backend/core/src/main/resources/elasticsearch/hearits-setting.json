@@ -1,9 +1,24 @@
 {
+  "index": {
+    "similarity": {
+      "default": {
+        "type": "BM25",
+        "b": 0.75,
+        "k1": 1.2,
+        "discount_overlaps": false
+      }
+    }
+  },
   "analysis": {
     "tokenizer": {
       "nori_mixed_tokenizer": {
         "type": "nori_tokenizer",
         "decompound_mode": "mixed",
+        "user_dictionary": "analysis/userdict_ko.txt"
+      },
+      "nori_autocomplete_tokenizer": {
+        "type": "nori_tokenizer",
+        "decompound_mode": "discard",
         "user_dictionary": "analysis/userdict_ko.txt"
       }
     },
@@ -57,6 +72,14 @@
           "lowercase",
           "ko_synonym",
           "nori_pos_filter",
+          "ko_stop"
+        ]
+      },
+      "korean_autocomplete_analyzer": {
+        "type": "custom",
+        "tokenizer": "nori_autocomplete_tokenizer",
+        "filter": [
+          "lowercase",
           "ko_stop"
         ]
       }

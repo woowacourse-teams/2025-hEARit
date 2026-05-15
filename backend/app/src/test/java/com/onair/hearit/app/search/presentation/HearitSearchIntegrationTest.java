@@ -3,12 +3,14 @@ package com.onair.hearit.app.search.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import com.onair.hearit.app.auth.infrastructure.jwt.JwtTokenProvider;
 import com.onair.hearit.app.common.dto.response.PagedResponse;
 import com.onair.hearit.app.fixture.IntegrationTest;
 import com.onair.hearit.app.search.dto.HearitSearchResponse;
+import com.onair.hearit.app.search.dto.SearchAutocompleteResponse;
 import com.onair.hearit.core.domain.Category;
 import com.onair.hearit.core.domain.Hearit;
 import com.onair.hearit.core.domain.HearitKeyword;
@@ -184,6 +186,90 @@ public class HearitSearchIntegrationTest extends IntegrationTest {
                 .queryParam("size", -1)
                 .when()
                 .get("/api/v2/hearits/search")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @DisplayName("자동완성 요청 시 200 OK 및 자동완성 결과를 반환한다.")
+    void readAutocomplete() {
+        // given
+        Mockito.when(hearitElasticSearchRepository.autocomplete(anyString(), anyInt()))
+                .thenReturn(List.of("Spring", "Spring Boot"));
+
+        // when
+        SearchAutocompleteResponse response = RestAssured.given(this.spec)
+                .queryParam("searchTerm", "spring")
+                .queryParam("size", 2)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(SearchAutocompleteResponse.class);
+
+        // then
+        assertThat(response.autocompletes()).containsExactly("Spring", "Spring Boot");
+    }
+
+    @Test
+    @DisplayName("자동완성 size 파라미터가 유효하지 않을 때 400 에러를 반환한다.")
+    void readAutocompleteWithInvalidParams() {
+        // size below min (1)
+        RestAssured.given(this.spec)
+                .queryParam("searchTerm", "spring")
+                .queryParam("size", 0)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // size above max (30)
+        RestAssured.given(this.spec)
+                .queryParam("searchTerm", "spring")
+                .queryParam("size", 31)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @DisplayName("자동완성 searchTerm 파라미터가 유효하지 않을 때 400 에러를 반환한다.")
+    void readAutocompleteWithInvalidSearchTerm() {
+        // searchTerm 누락
+        RestAssured.given(this.spec)
+                .queryParam("size", 5)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // searchTerm 빈 문자열
+        RestAssured.given(this.spec)
+                .queryParam("searchTerm", "")
+                .queryParam("size", 5)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // searchTerm 공백만 포함
+        RestAssured.given(this.spec)
+                .queryParam("searchTerm", "   ")
+                .queryParam("size", 5)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value());
+
+        // searchTerm 길이 초과 (51자)
+        String tooLong = "a".repeat(51);
+        RestAssured.given(this.spec)
+                .queryParam("searchTerm", tooLong)
+                .queryParam("size", 5)
+                .when()
+                .get("/api/v1/hearits/search/autocomplete")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
