@@ -14,6 +14,7 @@ import com.onair.hearit.presentation.SingleLiveData
 import com.onair.hearit.presentation.library.BookmarkUiState.LoggedIn
 import com.onair.hearit.presentation.library.BookmarkUiState.NoBookmarks
 import com.onair.hearit.presentation.library.BookmarkUiState.NotLoggedIn
+import com.onair.hearit.widget.BookmarkWidgetUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +26,7 @@ import javax.inject.Inject
 class LibraryViewModel @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val userRepository: UserRepository,
+    private val bookmarkWidgetUpdater: BookmarkWidgetUpdater,
 ) : ViewModel() {
     private val _bookmarks = MutableLiveData<List<Bookmark>>()
     val bookmarks: LiveData<List<Bookmark>> = _bookmarks
@@ -119,6 +121,7 @@ class LibraryViewModel @Inject constructor(
                     if (updatedList.isEmpty()) {
                         _uiState.value = NoBookmarks
                     }
+                    bookmarkWidgetUpdater.refresh()
                 }.onFailure {
                     _toastMessage.value = R.string.all_toast_delete_bookmark_fail
                 }

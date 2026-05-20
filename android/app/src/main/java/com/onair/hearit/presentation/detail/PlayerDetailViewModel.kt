@@ -16,6 +16,7 @@ import com.onair.hearit.domain.repository.RecentHearitRepository
 import com.onair.hearit.domain.usecase.GetHearitUseCase
 import com.onair.hearit.presentation.IntentKeys.HEARIT_ID_KEY
 import com.onair.hearit.presentation.SingleLiveData
+import com.onair.hearit.widget.BookmarkWidgetUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +32,7 @@ class PlayerDetailViewModel @Inject constructor(
     private val getHearitUseCase: GetHearitUseCase,
     private val bookmarkRepository: BookmarkRepository,
     private val likeRepository: LikeRepository,
+    private val bookmarkWidgetUpdater: BookmarkWidgetUpdater,
 ) : ViewModel() {
     private var hearitId: Long =
         savedStateHandle.get<Long>(HEARIT_ID_KEY) ?: -1L
@@ -116,6 +118,7 @@ class PlayerDetailViewModel @Inject constructor(
                 .addBookmark(hearitId)
                 .onSuccess { bookmarkId ->
                     _bookmarkId.value = bookmarkId
+                    bookmarkWidgetUpdater.refresh()
                 }.onFailure { throwable ->
                     when (throwable) {
                         is UserNotRegistered -> {
@@ -138,6 +141,7 @@ class PlayerDetailViewModel @Inject constructor(
                 .deleteBookmark(id)
                 .onSuccess {
                     _bookmarkId.value = null
+                    bookmarkWidgetUpdater.refresh()
                 }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.all_toast_delete_bookmark_fail
@@ -193,7 +197,9 @@ class PlayerDetailViewModel @Inject constructor(
             recentHearitRepository
                 .saveRecentHearit(
                     RecentHearit(hearit.id, hearit.title),
-                ).onFailure { throwable ->
+                ).onSuccess {
+                    bookmarkWidgetUpdater.refresh()
+                }.onFailure { throwable ->
                     Timber.w(throwable)
                     _toastMessage.value = R.string.player_detail_toast_recent_save_fail
                 }

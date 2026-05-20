@@ -50,6 +50,7 @@ import com.onair.hearit.presentation.splash.SplashActivity
 import com.onair.hearit.presentation.toDetailResult
 import com.onair.hearit.service.PlaybackService
 import com.onair.hearit.service.PlaybackSessionCallback
+import com.onair.hearit.widget.BookmarkWidgetUpdater
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -75,6 +76,9 @@ class MainActivity :
 
     @Inject
     lateinit var analyticsLogger: AnalyticsLogger
+
+    @Inject
+    lateinit var bookmarkWidgetUpdater: BookmarkWidgetUpdater
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,6 +117,9 @@ class MainActivity :
     override fun onStart() {
         super.onStart()
         mainViewModel.checkNotificationSuggestion(isSystemNotificationEnabled = applicationContext.canNotify())
+        lifecycleScope.launch {
+            bookmarkWidgetUpdater.refresh()
+        }
     }
 
     fun launchDetailActivity(intent: Intent) {
