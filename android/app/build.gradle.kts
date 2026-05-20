@@ -251,4 +251,8 @@ dependencies {
     implementation(libs.androidx.swiperefreshlayout)
 
     implementation(libs.lottie.compose)
+
+    // widget
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
 }
