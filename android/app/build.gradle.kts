@@ -20,12 +20,12 @@ plugins {
 
 android {
     namespace = "com.onair.hearit"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.onair.hearit"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 10500
         versionName = "1.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -89,7 +89,7 @@ android {
             resValue("string", "app_name", "hEARit (Dev)")
 
             val devBaseUrl =
-                gradleLocalProperties(rootDir, providers).getProperty("DEV_BASE_URL") ?: ""
+                gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
             buildConfigField("String", "BASE_URL", "\"$devBaseUrl\"")
 
             configure<CrashlyticsExtension> {

@@ -39,7 +39,7 @@ import com.onair.hearit.presentation.theme.Gray1
 import com.onair.hearit.presentation.theme.Gray4
 import com.onair.hearit.presentation.theme.HearitTypoGraphy
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.immutableListOf
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 
 @Composable
@@ -199,7 +199,7 @@ private fun SwipeUpGuide(
 private fun PreviewExploreScreen() {
     ExploreScreen(
         shortsHearit =
-            immutableListOf(
+            persistentListOf(
                 ExploreHearit(
                     id = 1,
                     title = "Activity를 쪼개며 배운 구조 설계",
