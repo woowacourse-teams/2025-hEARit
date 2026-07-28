@@ -89,7 +89,7 @@ android {
             resValue("string", "app_name", "hEARit (Dev)")
 
             val devBaseUrl =
-                gradleLocalProperties(rootDir, providers).getProperty("BASE_URL") ?: ""
+                gradleLocalProperties(rootDir, providers).getProperty("DEV_BASE_URL") ?: ""
             buildConfigField("String", "BASE_URL", "\"$devBaseUrl\"")
 
             configure<CrashlyticsExtension> {
