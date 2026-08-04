@@ -1,7 +1,5 @@
 package com.onair.hearit.presentation.library
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onair.hearit.R
@@ -16,6 +14,7 @@ import com.onair.hearit.presentation.library.BookmarkUiState.NoBookmarks
 import com.onair.hearit.presentation.library.BookmarkUiState.NotLoggedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -26,23 +25,23 @@ class LibraryViewModel @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
-    private val _bookmarks = MutableLiveData<List<Bookmark>>()
-    val bookmarks: LiveData<List<Bookmark>> = _bookmarks
+    private val _bookmarks = MutableStateFlow<List<Bookmark>>(emptyList())
+    val bookmarks: StateFlow<List<Bookmark>> = _bookmarks.asStateFlow()
 
-    private val _totalCount = MutableLiveData(0)
-    val totalCount: LiveData<Int> = _totalCount
+    private val _totalCount = MutableStateFlow(0)
+    val totalCount: StateFlow<Int> = _totalCount.asStateFlow()
 
-    private val _uiState = MutableLiveData<BookmarkUiState>()
-    val uiState: LiveData<BookmarkUiState> = _uiState
+    private val _uiState = MutableStateFlow<BookmarkUiState>(NotLoggedIn)
+    val uiState: StateFlow<BookmarkUiState> = _uiState.asStateFlow()
 
     private val _userInfo = MutableStateFlow(DEFAULT_USER_INFO)
-    val userInfo = _userInfo.asStateFlow()
+    val userInfo: StateFlow<UserInfo> = _userInfo.asStateFlow()
 
     private val _toastMessage = SingleLiveData<Int>()
-    val toastMessage: LiveData<Int> = _toastMessage
+    val toastMessage: SingleLiveData<Int> = _toastMessage
 
-    private val _isLoading = MutableLiveData(false)
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private var nextPage: Int? = 0
 
@@ -52,7 +51,7 @@ class LibraryViewModel @Inject constructor(
 
     fun refreshBookmarks() {
         nextPage = 0
-        val previousBookmarks = _bookmarks.value.orEmpty()
+        val previousBookmarks = _bookmarks.value
         val currentUserInfo = userInfo.value
 
         if (currentUserInfo == DEFAULT_USER_INFO) return
@@ -62,7 +61,7 @@ class LibraryViewModel @Inject constructor(
 
     fun loadNextPage() {
         val page: Int = nextPage ?: return
-        val previousBookmarks: List<Bookmark> = _bookmarks.value.orEmpty()
+        val previousBookmarks: List<Bookmark> = _bookmarks.value
         fetchDataWithRestore(page = page, previousBookmarks = previousBookmarks)
     }
 
@@ -70,7 +69,7 @@ class LibraryViewModel @Inject constructor(
         page: Int,
         previousBookmarks: List<Bookmark>,
     ) {
-        if (isLoading.value == true || nextPage == null) return
+        if (isLoading.value || nextPage == null) return
 
         _isLoading.value = true
         viewModelScope.launch {
@@ -81,12 +80,12 @@ class LibraryViewModel @Inject constructor(
                         if (page == 0) {
                             pageResult.items
                         } else {
-                            val currentList: List<Bookmark> = _bookmarks.value.orEmpty()
+                            val currentList: List<Bookmark> = _bookmarks.value
                             currentList + pageResult.items
                         }
                     _bookmarks.value = newList
                     _totalCount.value = pageResult.paging.totalElements
-                    _uiState.value = if (_bookmarks.value.isNullOrEmpty()) NoBookmarks else LoggedIn
+                    _uiState.value = if (_bookmarks.value.isEmpty()) NoBookmarks else LoggedIn
 
                     nextPage =
                         if (!pageResult.paging.isLast) {
@@ -110,10 +109,10 @@ class LibraryViewModel @Inject constructor(
                 .deleteBookmark(bookmarkId)
                 .onSuccess {
                     val updatedList =
-                        _bookmarks.value?.filterNot { it.bookmarkId == bookmarkId }.orEmpty()
+                        _bookmarks.value.filterNot { it.bookmarkId == bookmarkId }
                     _bookmarks.value = updatedList
 
-                    val newCount = (_totalCount.value ?: 0) - 1
+                    val newCount = _totalCount.value - 1
                     _totalCount.value = newCount.coerceAtLeast(0)
 
                     if (updatedList.isEmpty()) {

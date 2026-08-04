@@ -5,8 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.onair.hearit.databinding.BottomSheetBookmarkOptionBinding
+import kotlinx.coroutines.launch
 
 class BookmarkOptionBottomSheet : BottomSheetDialogFragment() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -37,10 +41,14 @@ class BookmarkOptionBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.bookmarks.observe(viewLifecycleOwner) { bookmarkList ->
-            val targetBookmark = bookmarkList.find { it.bookmarkId == bookmarkId }
-            if (targetBookmark != null) {
-                binding.bookmark = targetBookmark
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.bookmarks.collect { bookmarkList ->
+                    val targetBookmark = bookmarkList.find { it.bookmarkId == bookmarkId }
+                    if (targetBookmark != null) {
+                        binding.bookmark = targetBookmark
+                    }
+                }
             }
         }
         binding.tvBookmarkOptionDeleteBookmark.setOnClickListener {
