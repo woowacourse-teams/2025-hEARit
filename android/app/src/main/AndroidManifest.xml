@@ -18,6 +18,7 @@
         android:roundIcon="@mipmap/ic_app_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HEARit"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
         <service
             android:name=".service.PlaybackService"
