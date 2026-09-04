@@ -26,8 +26,8 @@ android {
         applicationId = "com.onair.hearit"
         minSdk = 29
         targetSdk = 36
-        versionCode = 10500
-        versionName = "1.5.0"
+        versionCode = 10502
+        versionName = "1.5.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner = "com.onair.hearit.HearitTestRunner"
 
